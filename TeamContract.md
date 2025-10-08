@@ -57,9 +57,15 @@ Asking peers/TA/office hours when help is needed
 By signing below, we acknowledge that we have read, discussed, and agreed to these terms. We understand that this contract is binding for the duration of the course and may be revised with the agreement of all team members.
 
 Team Member Signatures:
+
 Jane Felicia Jonatan
+
 Jennifer Du
+
 Mei Walters
+
 Xiaotong Zhu
+
 Hannah Tan
-(type names here)
+
+Anna Castro 
