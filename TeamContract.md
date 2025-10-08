@@ -76,4 +76,4 @@ By signing below, we acknowledge that we have read, discussed, and agreed to the
 
 Team Member Signatures: 
 
-Sujoy Das, Aaliyah Pirani, Langlang Lian, Thomas Sarrazin, Zimo Huang
+Sujoy Das, Aaliyah Pirani, Langlang Lian, Thomas Sarrazin, Zimo Huang, James Jonathan Papadakos
