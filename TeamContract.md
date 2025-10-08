@@ -45,7 +45,7 @@ Each Pull Request will be reviewed by at least two team members.
 
 If conflict arises:
 
-The team will first attempt to resolve the issue privately through open discussion.
+The team will first attempt to resolve the issue privately through open discussion via instagram or in person meetings.
 
 If the issue persists, the team will involve a member of the course teaching team as mediator.
 
@@ -65,3 +65,4 @@ By signing below, we acknowledge that we have read, discussed, and agreed to the
 Team Member Signatures:
 
 William Song
+Alexander Saiki
