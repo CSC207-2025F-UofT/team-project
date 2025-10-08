@@ -66,3 +66,4 @@ Team Member Signatures:
 
 William Song
 Alexander Saiki
+Carey Lin
