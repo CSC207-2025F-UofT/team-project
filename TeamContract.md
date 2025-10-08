@@ -42,7 +42,11 @@ This contract sets out shared expectations and commitments for how our team will
 ---
 ## Conflict resolution
 
-* How will your team resolve conflicts? (Example: by listening to each other's side of the issue and attempting to reach a compromise. By consulting a TA or instructor as a team, if a resolution has not yet been reached.)
+* Our team agrees to resolve conflicts of ideas and/or proposals as follows: Supposing we have ideas A and B in conflict,
+  1) Everyone who supports idea A must be able to sufficiently articulate idea B so that those who support B agree that A supporters understand idea B. The same will be done for idea A, so that both sides know that everyone sufficiently understands each idea.
+  2) If the issue cannot be resolved by discussion following step (i), we agree to seek a TA or Instructor for advice.
+  3) Ultimately, conflicts will be resolved with recourse to the "Decision Making" section outlined above.
+* Out team agrees that conflicts not pertaining to ideas and/or proposals for the project will ideally be resolved through open and honest discussion, as best as can be carried out.
 
 ---
 
