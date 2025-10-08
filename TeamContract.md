@@ -20,7 +20,7 @@ This contract sets out shared expectations and commitments for how our team will
 
 * Our agreed point of communication is Discord. Specifically, we will communicate in the group chat we have made with all team members. 
 
-* Each teammate agrees to respond to messages within 12 hours, barring unforseen circumstances such as medical or familial incidents. 
+* Each teammate agrees to respond to messages within 12 hours, barring unforeseen circumstances such as medical or familial incidents. 
 
 * Each teammate agrees to notify the team if they are unable to attend lecture or tutorial, unable to meet a deadline for their portion of the projects, or if there are any emergencies that impact their work or response time.
 
