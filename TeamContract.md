@@ -24,16 +24,16 @@ This contract sets out shared expectations and commitments for how our team will
   * **Active listening**
   * **Equal opportunities for contribution**
   * **Constructive feedback**
-    * "I think you could fix this part" ✔
-    * "I see an issue with this function's efficiency" ✔
+    * "I think you could fix this part" ✓
+    * "I see an issue with this function's efficiency" ✓
     * "You coded this incorrectly" ✗
     * "This is wrong" ✗
 
 ---
 
-## Decision Making
+## Decision-Making
 
-* Team project decisions will be made by reaching a consensus, but if one cannot be reached, majority vote will be the determining factor.
+* Team project decisions will be made by reaching a consensus, but if one cannot be reached, a majority vote will be the determining factor.
 
 ---
 ## Conflict resolution
