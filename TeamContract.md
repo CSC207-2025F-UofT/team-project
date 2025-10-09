@@ -16,46 +16,61 @@ This contract sets out shared expectations and commitments for how our team will
 ---
 ## Team Norms and Expectations
 
+### Preparation
+
+* Each team member commits to reading assigned materials and completing individual readiness work before class.
+
+* Members who come unprepared agree to accept reasonable consequences determined by the team (e.g., lower peer evaluation scores).
+
 ### Communication
 
-* Which platform will you use for communication outside of class, when required for work on your course project? (Examples: Text message, Discord, WeChat, etc.)
+* We will continue using Instagram as our primary method of communication. 
 
-* Each teammate agrees to respond to messages in at most how long? 1 day? 2 days? Some other amount of time? 
+* Each teammate agrees to try to respond to messages as soon as they can. When possible, this should be within 24 hours (i.e. holidays are an exception).
 
-* What things should a teammate notify you about? (Examples: if they think they won't be able to meet a deadline, if they have to miss lecture, etc.)
+* Members are also expected to let groupmates know if they're stuck or need an extra opinion relating to their portion of the group project. They understand that failing to complete expected contributions on time may lead to reduced peer evaluation scores.
 
-* Respectful and inclusive behaviour are necessary for smooth and productive communication. What are some respectful and inclusive behaviours you expect when communicating with each other during lectures, labs, or outside of class? (Examples: Actively listening to each team members ideas, giving everyone a chance to meaningfully contribute, etc.)
+### Participation
 
----
+* Members will attend all scheduled classes and team meetings unless illness or emergencies occur. Notice of at least an hour is expected when possible. 
 
-### [Other Categories of norms and expectations go here]
+* Teammates are expected to listen actively to ideas and allow everyone the chance to contribute to discussions.
 
-* Based on your previous teamwork experiences, what other behaviours do you agree upon as a team?
-    - some examples of possible additional team norms and expectations are included in the sample team contract in case your team needs some help getting ideas for what else you want to include.
+* Members should provide constructive feedback when requested by a teammate (i.e. ensure the person wants to receive feedback, and that feedback is worded in a way that doesn't degrade the person).
 
----
+### Decision Making
 
-## Decision Making
+* Decisions will be made by consensus when possible.
 
-* How will decisions about your team project be made? (Examples: By majority vote, by unanimous vote, etc.)
+* If consensus cannot be reached, a vote will be taken; majority rules.
+
+### Work Quality
+
+* All deliverables should be completed on time, tested, and meet the agreed quality standard.
+
+* Members agree to review each other’s work constructively before submission.
+
+* At least two team members will review each Pull Request.
 
 ---
 ## Conflict resolution
 
-* How will your team resolve conflicts? (Example: by listening to each other's side of the issue and attempting to reach a compromise. By consulting a TA or instructor as a team, if a resolution has not yet been reached.)
+If conflict arises:
+
+1. The team will first attempt to resolve the issue privately through open discussion.
+
+2. If the issue persists, the team will involve a member of the course teaching team as a mediator.
 
 ---
-
 ## Accountability
 
-* Reliability and accountability are also important aspects of teamwork. What are the responsibilities of each team member? (Example: completing their share of the work in a timely manner, seeking assistance from teammates/TAs/instructors when required, etc.)
+* Persistent non-participation or failure to meet expectations may result in lower peer evaluation scores.
+
+* All members agree to provide honest and fair peer evaluations.
 
 ---
-
----
-
 By signing below, we acknowledge that we have read, discussed, and agreed to these terms. We understand that this contract is binding for the duration of the course and may be revised with the agreement of all team members.
 
 Team Member Signatures:
 
-(type names here)
+Aiden Chettleburgh
