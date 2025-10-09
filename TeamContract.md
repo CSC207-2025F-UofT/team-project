@@ -79,3 +79,4 @@ Team Member Signatures:
 
 Moyosoreoluwa Daniel Okedele
 Cotaroy Cheung
+Nathan Fermin
