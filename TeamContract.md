@@ -15,6 +15,8 @@ This contract sets out shared expectations and commitments for how our team will
 
 ---
 ## Team Norms and Expectations
+#### 1. Preparation
+* Each team member is committed to doing the necessary pre-lecture materials in preparation for the iRATs and tRATs
 
 ### Communication
 
