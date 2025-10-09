@@ -25,6 +25,13 @@ This contract sets out shared expectations and commitments for how our team will
 * If there are delays in meeting deadlines, they should communicate this to the rest of the team
 * We should be respectful, open to constructive criticism, and actively listen to our team members thoughts/opinions
 
+### Work Quality
+* All deliverables should be completed on time and up to the agreed quality standard 
+* If a team member knows their work does not meet the standard agreed upon (due to limited time or errors) , they should communicate this to the rest of the team
+* All pull requests should be reviewed by at least 2 team members
+
+
+
 ---
 
 ### [Other Categories of norms and expectations go here]
