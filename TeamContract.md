@@ -30,7 +30,9 @@ This contract sets out shared expectations and commitments for how our team will
 * If a team member knows their work does not meet the standard agreed upon (due to limited time or errors) , they should communicate this to the rest of the team
 * All pull requests should be reviewed by at least 2 team members
 
-
+### Decision Making
+* Every team member should voice their opinion, even if it is neutral
+* If a consensus cannot be reached, we will do a majority vote
 
 ---
 
