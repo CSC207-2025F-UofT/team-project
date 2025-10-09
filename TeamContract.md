@@ -67,7 +67,7 @@ Conflicts in teams should be resolved internally within the team. If no compromi
 
 - Reliability and accountability are also important aspects of teamwork. What are the responsibilities of each team member? (Example: completing their share of the work in a timely manner, seeking assistance from teammates/TAs/instructors when required, etc.)
 
-All team member must complete their work in the due date that was agreed upon.
+All team members must complete their work by the due date that was agreed upon.
 
 ---
 
@@ -81,4 +81,4 @@ By signing below, we acknowledge that we have read, discussed, and agreed to the
 
 Team Member Signatures:
 
-Hyde Yoo, Mark Peng, Ryan Yang
+Hyde Yoo, Mark Peng, Ryan Yang, Boyan Litchev
