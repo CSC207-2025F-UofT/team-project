@@ -29,20 +29,25 @@ We agree to respond to messages within 5-6 hours on weekdays to accommodate for 
 
 We will hold each other accountable for our tasks. Whatever we are responsible for will be completed within the time frame we've agreed upon.
 
-Respectful and inclusive behaviour are necessary for smooth and productive communication. What are some respectful and inclusive behaviours you expect when communicating with each other during lectures, labs, or outside of class? (Examples: Actively listening to each team members ideas, giving everyone a chance to meaningfully contribute, etc.)
+We will actively listen and contribute to team discussions. 
+We will not interrupt or put down any ideas or difference in perspectives given by other member.
+We will keep an open mind to feedback and constructive criticism.
+Be respectful and inclusive towards each other.
 
 ---
 
 ### [Other Categories of norms and expectations go here]
 
-* Based on your previous teamwork experiences, what other behaviours do you agree upon as a team?
-    - some examples of possible additional team norms and expectations are included in the sample team contract in case your team needs some help getting ideas for what else you want to include.
+Finish work on time.
+Don't make excuses.
+Ask for help if needed.
+Don't overestimate yourself. 
 
 ---
 
 ## Decision Making
 
-* How will decisions about your team project be made? (Examples: By majority vote, by unanimous vote, etc.)
+We will try to aim for a unanimous vote if possible, otherwise we will go with supermajority (majority is at least 2x minority).
 
 ---
 ## Conflict resolution
