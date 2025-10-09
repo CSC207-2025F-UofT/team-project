@@ -55,5 +55,4 @@ By signing below, we acknowledge that we have read, discussed, and agreed to the
 
 Team Member Signatures:
 
-Olivier Denis
-Zhanxian Cheng
+Olivier Denis; Qi Li; Kentaro Taniguchi; Zhanxian Cheng
