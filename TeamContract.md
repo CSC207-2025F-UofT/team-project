@@ -33,7 +33,7 @@ This contract sets out shared expectations and commitments for how our team will
 
 ## Decision Making
 
-* Team project decisions will be made by majority vote.
+* Team project decisions will be made by reaching a consensus, but if one cannot be reached, majority vote will be the determining factor.
 
 ---
 ## Conflict resolution
