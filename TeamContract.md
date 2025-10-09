@@ -43,24 +43,26 @@ This contract sets out shared expectations and commitments for how our team will
 ## Decision Making
 
 * How will decisions about your team project be made? (Examples: By majority vote, by unanimous vote, etc.)
+  --- By majority vote
 
 ---
 ## Conflict resolution
 
 * How will your team resolve conflicts? (Example: by listening to each other's side of the issue and attempting to reach a compromise. By consulting a TA or instructor as a team, if a resolution has not yet been reached.)
 
----
+--- We will vote on decisions as a group
+--- We will respond to conflict through open discussion, if this fails we will seek a course instructor
 
 ## Accountability
 
 * Reliability and accountability are also important aspects of teamwork. What are the responsibilities of each team member? (Example: completing their share of the work in a timely manner, seeking assistance from teammates/TAs/instructors when required, etc.)
 
----
+--- Honest and fair peer evaluations
 
----
+--- Completing work by deadlines communicated
 
 By signing below, we acknowledge that we have read, discussed, and agreed to these terms. We understand that this contract is binding for the duration of the course and may be revised with the agreement of all team members.
 
 Team Member Signatures:
 
-(type names here)
+(Kosisochi Okaro)
