@@ -50,7 +50,12 @@ This contract sets out shared expectations and commitments for how our team will
 
 * How will your team resolve conflicts? (Example: by listening to each other's side of the issue and attempting to reach a compromise. By consulting a TA or instructor as a team, if a resolution has not yet been reached.)
 
+---If a conflict arises between team members, we will first attempt to resolve it through respectful, direct communication.
+
+---If the conflict persists, it will be brought to the entire team during a lab session or a dedicated meeting. The team will listen to all sides and work together to find a compromise.
+
 --- We will vote on decisions as a group
+
 --- We will respond to conflict through open discussion, if this fails we will seek a course instructor
 
 ## Accountability
@@ -61,8 +66,15 @@ This contract sets out shared expectations and commitments for how our team will
 
 --- Completing work by deadlines communicated
 
+--- Reviewing teammates' PRs thoroughly and providing helpful feedback.
+
+--- Contributing actively to team discussions and decision-making processes.
+
+---Seeking help from teammates, TAs, or the instructor when stuck.
+
 By signing below, we acknowledge that we have read, discussed, and agreed to these terms. We understand that this contract is binding for the duration of the course and may be revised with the agreement of all team members.
 
 Team Member Signatures:
 
 (Kosisochi Okaro)
+(Shimeng Wang)
