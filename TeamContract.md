@@ -1,6 +1,6 @@
 # Team Contract
 
-**Your team is free to revise this contract as your team wishes; we have scaffolded it with a recommended structure similar to the provided sample on Quercus.**
+**You team is free to revise this contract as your team wishes; we have scaffolded it with a recommended structure similar to the provided sample on Quercus.**
 
 After you reflect on past teamwork experiences and brainstorm a list of actions required for a positive teamwork experience, answer these questions. 
 
@@ -18,14 +18,13 @@ This contract sets out shared expectations and commitments for how our team will
 
 ### Communication
 
-* Which platform will you use for communication outside of class, when required for work on your course project? (Examples: Text message, Discord, WeChat, etc.)
+* We will be using Instagram as our primary source of contact.
 
-* Each teammate agrees to respond to messages in at most how long? 1 day? 2 days? Some other amount of time? 
+* Each teammate should respond to a message within 24 hours on both weekends and weekdays.
 
-* What things should a teammate notify you about? (Examples: if they think they won't be able to meet a deadline, if they have to miss lecture, etc.)
+* Teammates should notify the other members if they are unable to attend a lab or lecture, if they are unable to complete their assigned tasks on time and if they are unable to meet for the group check-in session.
 
-* Respectful and inclusive behaviour are necessary for smooth and productive communication. What are some respectful and inclusive behaviours you expect when communicating with each other during lectures, labs, or outside of class? (Examples: Actively listening to each team members ideas, giving everyone a chance to meaningfully contribute, etc.)
-
+* All communication should remain respectful, professional, and constructive. Teammates should not be disparaged for making errors.
 ---
 
 ### [Other Categories of norms and expectations go here]
@@ -37,7 +36,11 @@ This contract sets out shared expectations and commitments for how our team will
 
 ## Decision Making
 
-* How will decisions about your team project be made? (Examples: By majority vote, by unanimous vote, etc.)
+* When possible decisions will be made when all the members are in agreement.
+
+* If the team is not all in agreement, those in majority will discuss with the other member(s) and try to design and approach puts their appeal in consideration.
+
+* If such an approach cannot be designed the team will proceed with majority rules.
 
 ---
 ## Conflict resolution
@@ -58,4 +61,9 @@ By signing below, we acknowledge that we have read, discussed, and agreed to the
 
 Team Member Signatures:
 
-(type names here)
+Shimon John Augustine
+Rebecca
+Rick Sun
+Ethan Yang
+Henry Zhang
+Raphael Ramesar
