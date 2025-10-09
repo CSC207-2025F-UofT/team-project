@@ -54,6 +54,28 @@ When reviewing Pull Request, you read the code, address changes and provide comm
 
 Awknowledge seem comments adding reply or reacting.
 
+Always rebase before merging when possible. 
+```
+git checkout main
+git pull
+git checkout feature_branch
+git rebase main
+```
+You may get merge conflicts when rebasing. This will appear in the terminal. You will need to resolve conflicts, 
+then add your changes. Then run the following command.
+```
+git rebase --continue
+```
+If you want to abort.
+```
+git rebase --abort
+```
+Sometimes you will make a change that will result in an empty commit, so you need to skip the conflict:
+```
+git rebase --skip
+```
+
+
 ---
  ## Conflict Resolution
    If conflict arises:
@@ -78,3 +100,4 @@ By signing below, we acknowledge that we have read, discussed, and agreed to the
 Team Member Signatures:
 
 Zaynah Ahmer
+Cayden Wong
