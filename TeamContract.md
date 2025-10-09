@@ -53,4 +53,5 @@ Team Member Signatures:
 
 Rein McKelway, Pavle Adzovic
 Zhuo Xuan Guan (Stanley)
+Ethan Lee
 
