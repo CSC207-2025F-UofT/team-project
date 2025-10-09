@@ -11,14 +11,14 @@ This readme include information such as:
 
 ### **contact information**
 
-| Team member | Contact Information                                                                         |
-|-------------|---------------------------------------------------------------------------------------------|
-| Deniz Coban | Outlook: d.coban@mail.utoronto.ca  <br/>Instagram: @007deno <br/>discord:                   |
-| James Fan   | outlook: jl.fan@mail.utoronto.ca  <br/>Instagram: @nondescript_name <br/>Discord: pearlman. |
-| Deep Garg   | outlook: <br/>Instagram: <br/>discord:                                                      |
-| Wentao Lin  | outlook:wentao.lin@mail.utoronto.ca <br/>Instagram:@wentao1530 <br/>discord:                |
-| Meixuan Lou | outlook:meixuan.lou@mail.utoronto.ca <br/>Instagram: @meixuan_louol <br/>discord:           |
-| Isabel Melo | outlook: isabel.melo@mail.utoronto.ca <br/>Instagram: @mi1ce <br/>discord:  someoneuknow302 |
+| Team member | Contact Information                                                                            |
+|-------------|------------------------------------------------------------------------------------------------|
+| Deniz Coban | Outlook: d.coban@mail.utoronto.ca  <br/>Instagram: @007deno <br/>discord:                      |
+| James Fan   | outlook: jl.fan@mail.utoronto.ca  <br/>Instagram: @nondescript_name <br/>Discord: pearlman.    |
+| Deep Garg   | outlook: <br/>Instagram: <br/>discord:                                                         |
+| Wentao Lin  | outlook:wentao.lin@mail.utoronto.ca <br/>Instagram:@wentao1530 <br/>discord:                   |
+| Meixuan Lou | outlook:meixuan.lou@mail.utoronto.ca <br/>Instagram: @meixuan_louol <br/>discord: hikono_louol |
+| Isabel Melo | outlook: isabel.melo@mail.utoronto.ca <br/>Instagram: @mi1ce <br/>discord:  someoneuknow302    |
 
 ### **Course Info:**
 
