@@ -27,7 +27,7 @@ We agree to respond to messages within 5-6 hours on weekdays to accommodate for 
  - We do not fully understand what certain parts of the code means.
  - We want to take on more after finishing our part, or are abke to help others.
 
-We will hold each other accountable for our tasks. Whatever we are responsible for will be completed within the time frame we've agreed upon
+We will hold each other accountable for our tasks. Whatever we are responsible for will be completed within the time frame we've agreed upon.
 
 Respectful and inclusive behaviour are necessary for smooth and productive communication. What are some respectful and inclusive behaviours you expect when communicating with each other during lectures, labs, or outside of class? (Examples: Actively listening to each team members ideas, giving everyone a chance to meaningfully contribute, etc.)
 
