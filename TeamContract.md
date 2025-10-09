@@ -43,8 +43,9 @@ This contract sets out shared expectations and commitments for how our team will
 ---
 
 ## Accountability
-
-* Reliability and accountability are also important aspects of teamwork. What are the responsibilities of each team member? (Example: completing their share of the work in a timely manner, seeking assistance from teammates/TAs/instructors when required, etc.)
+* Consistently not participating in lecture activities or tutorial activities may result in lower peer evaluation scores
+* Complete work on time and communicate as soon as possible if you know you cannot meet a deadline
+* Seek assistance from instructors in office hours or from TAs during tutorial when needed
 
 ---
 
@@ -54,4 +55,3 @@ By signing below, we acknowledge that we have read, discussed, and agreed to the
 
 Team Member Signatures:
 
-(type names here)
