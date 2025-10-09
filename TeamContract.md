@@ -79,3 +79,6 @@ Team Member Signatures:
 
 Moyosoreoluwa Daniel Okedele
 Cotaroy Cheung
+Huaijin Hu
+Nathan Fermin
+Yuan Lu
