@@ -49,3 +49,4 @@ Team Member Signatures:
 * Michelle Zhang 
 * Jiaman Li
 * Kangcheng Wang
+* Christina He
