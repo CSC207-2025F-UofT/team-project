@@ -29,19 +29,19 @@ We agree to respond to messages within 5-6 hours on weekdays to accommodate for 
 
 We will hold each other accountable for our tasks. Whatever we are responsible for will be completed within the time frame we've agreed upon.
 
-We will actively listen and contribute to team discussions. 
-We will not interrupt or put down any ideas or difference in perspectives given by other member.
-We will keep an open mind to feedback and constructive criticism.
-Be respectful and inclusive towards each other.
+- We will actively listen and contribute to team discussions. 
+- We will not interrupt or put down any ideas or difference in perspectives given by other member.
+- We will keep an open mind to feedback and constructive criticism.
+- Be respectful and inclusive towards each other.
 
 ---
 
 ### [Other Categories of norms and expectations go here]
 
-Finish work on time.
-Don't make excuses.
-Ask for help if needed.
-Don't overestimate yourself. 
+- Finish work on time.
+- Don't make excuses.
+- Ask for help if needed.
+- Don't overestimate yourself. 
 
 ---
 
