@@ -31,7 +31,7 @@ This contract sets out shared expectations and commitments for how our team will
 
 ---
 
-## Decision-Making
+## Decision-making
 
 * Team project decisions will be made by reaching a consensus, but if one cannot be reached, a majority vote will be the determining factor.
 
