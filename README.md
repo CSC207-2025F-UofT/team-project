@@ -18,7 +18,7 @@ This readme include information such as:
 | Deep Garg   | outlook: <br/>Instagram: <br/>discord:                                                         |
 | Wentao Lin  | outlook:wentao.lin@mail.utoronto.ca <br/>Instagram:@wentao1530 <br/>discord:                   |
 | Meixuan Lou | outlook:meixuan.lou@mail.utoronto.ca <br/>Instagram: @meixuan_louol <br/>discord: hikono_louol |
-| Isabel Melo | outlook: isabel.melo@mail.utoronto.ca <br/>Instagram: @mi1ce <br/>discord:  someoneuknow302    |
+| Isabel Melo | outlook: isabel.melo@mail.utoronto.ca <br/>Instagram: @mi1ce <br/>discord:                     |
 
 ### **Course Info:**
 
