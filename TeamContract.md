@@ -21,7 +21,7 @@ This contract sets out shared expectations and commitments for how our team will
 * Which platform will you use for communication outside of class, when required for work on your course project? (Examples: Text message, Discord, WeChat, etc.)
   * Instagram and Discord
 * Each teammate agrees to respond to messages in at most how long? 1 day? 2 days? Some other amount of time?
-  * 1 day
+  * Maximum 1 day unless previously notified
 * What things should a teammate notify you about? (Examples: if they think they won't be able to meet a deadline, if they have to miss lecture, etc.)
     * Missing a lab
     * Having to delay a deadline for a feature they're repsonsible for
