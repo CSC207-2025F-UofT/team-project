@@ -34,4 +34,8 @@ https://q.utoronto.ca/courses/394773/pages/api-resources?module_item_id=6907902
 Api:
 https://q.utoronto.ca/courses/394773/pages/api-advice?module_item_id=6907901
 
-# Project Domain - Thu Oct. 9
+# Project Domain - Fri Oct. 10
+As a group, we have chosen the Adventure Game project domain!!
+Inside the Adventure Game, we will have several functionalities such as: Quizzes, navigation on the map, and inventory
+(tbc). 
+Within the game, the user will be able to complete quizzes based on what they have learned in order to facilitate their learning. For each correct answer, they will earn one point, and their score will be tracked by Total Score. 
