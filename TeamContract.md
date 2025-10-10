@@ -60,4 +60,5 @@ Team Member Signatures:
 
 * Raha Jalalian
 * Jumana Kabli
+* Avery Thompson
 
