@@ -19,7 +19,6 @@ This contract sets out shared expectations and commitments for how our team will
 * If a deadline won’t be met, the team should additionally be notified through the instagram group at least 24 hours before the deadline.
 * Update the Shared document (the final project one) about the following:
 * PR: when you are making the pull request, you should write down what you did in that PR, and just copy that into our shared document.
-* Progress: 
 * Meeting: We could hold some meetings(in-person/Zoom), just take some notes about the meeting.
 * Ideas: Because we will separate the project, please write down any ideas about your part inu the document and write the comment in your code to let others know what the method and classes are for.
 
