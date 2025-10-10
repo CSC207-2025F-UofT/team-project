@@ -28,7 +28,7 @@ This contract sets out shared expectations and commitments for how our team will
 
 * During team activities, all team members are expected to engage and contribute ideas in the discussion.
 
-* They must not make constant excuses and delay deadlines for no apparent reason. They must work with passion and commitment to the project, ensuring their best possible work goes out.
+* Members must not make constant excuses and delay deadlines for no clear reason. They must work with passion and commitment to the project, ensuring their best possible work goes out.
 ---
 
 ## Decision Making
@@ -39,7 +39,7 @@ This contract sets out shared expectations and commitments for how our team will
 ---
 ## Conflict resolution
 
-* If a conflict occurs, one (or more) team member(s) may become the mediator.
+* If a conflict occurs, one (or more) team member(s) becomes the mediator-
   - The mediator(s) will listen to both parties' issues with an open mind and attempt to reach a compromise (providing appropriate reasoning).
   - If no resolution has yet been reached, the entire team is required to consult either a TA or an instructor regarding the conflict.
 
