@@ -19,10 +19,12 @@ music reviews app:
 - filter songs by genre
 - sort/rank by reviews for songs, albums, and artists
 - commenting on songs, albums, and artists
-- recommend by user reviews not by number of listens, so you can rate your favotite songs to get more like it
+- recommend by user reviews not by number of listens, so you can rate your favorite songs to get more like it
 - check current user reviews and songs
 - see other user reviews and ratings
 - delete your review
 - song info: album, artist
-- album, song, and artist rating and reviews are all seperate
+- album, song, and artist rating and reviews are all separate
+- view a user's a13verage rating
+- a review is for the while song 
 - 
