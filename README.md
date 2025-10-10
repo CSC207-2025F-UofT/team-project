@@ -17,6 +17,12 @@ music reviews app:
 - search for songs, albums, and artists
 - search for users (TBD)
 - filter songs by genre
-- sort by reviews for songs, albums, and artists
-- commenting on songs
-- recommned by user reviews not by number of listens, so you can rate your favotite songs to get more like it
+- sort/rank by reviews for songs, albums, and artists
+- commenting on songs, albums, and artists
+- recommend by user reviews not by number of listens, so you can rate your favotite songs to get more like it
+- check current user reviews and songs
+- see other user reviews and ratings
+- delete your review
+- song info: album, artist
+- album, song, and artist rating and reviews are all seperate
+- 
