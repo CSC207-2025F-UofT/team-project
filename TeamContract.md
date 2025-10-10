@@ -61,4 +61,5 @@ Team Member Signatures:
 
 Aryan Aggarwal, 
 Minh Nguyen, 
-Anton Cassidy
+Anton Cassidy,
+Fred He
