@@ -60,3 +60,5 @@ Team Member Signatures:
 Darren Chailand
 
 Nathan Allen
+
+Joey Lai
