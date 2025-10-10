@@ -69,4 +69,5 @@ Aryan Aggarwal,
 Minh Nguyen, 
 Anton Cassidy,
 Fred He,
-Shaurya Sareen
+Shaurya Sareen,
+Irin Jin
