@@ -62,4 +62,4 @@ Team Member Signatures:
 * Jumana Kabli
 * Avery Thompson
 * Connie Guo
-
+* Anxuan Chen
