@@ -32,11 +32,7 @@ This contract sets out shared expectations and commitments for how our team will
 
 
 
----
 
-### Work Ethic
-
-* Each team member agrees to start their work in a timley manner to allow for extra time fixing issues.
 ---
 
 ## Decision Making
@@ -46,13 +42,14 @@ This contract sets out shared expectations and commitments for how our team will
 ---
 ## Conflict resolution
 
-* How will your team resolve conflicts? (Example: by listening to each other's side of the issue and attempting to reach a compromise. By consulting a TA or instructor as a team, if a resolution has not yet been reached.)
+* By listening to each other's side of the issue and attempting to reach a compromise. Then, by consulting a TA or instructor as a team, if a resolution has not yet been reached.
 
 ---
 
 ## Accountability
 
-* Reliability and accountability are also important aspects of teamwork. What are the responsibilities of each team member? (Example: completing their share of the work in a timely manner, seeking assistance from teammates/TAs/instructors when required, etc.)
+*  Each team member agrees to start their work in a timley manner to allow for extra time fixing issues.
+*  Lack of contributiion will reflect on the person's peer review.
 
 ---
 
