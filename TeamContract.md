@@ -1,6 +1,6 @@
 # Team Contract
 
-**You team is free to revise this contract as your team wishes; we have scaffolded it with a recommended structure similar to the provided sample on Quercus.**
+**Your team is free to revise this contract as your team wishes; we have scaffolded it with a recommended structure similar to the provided sample on Quercus.**
 
 After you reflect on past teamwork experiences and brainstorm a list of actions required for a positive teamwork experience, answer these questions. 
 
@@ -20,40 +20,68 @@ This contract sets out shared expectations and commitments for how our team will
 
 * We will be using Instagram as our primary source of contact.
 
-* Each teammate should respond to a message within 24 hours on both weekends and weekdays.
+* Each teammate will respond to a message within 24 hours on both weekends and weekdays.
 
-* Teammates should notify the other members if they are unable to attend a lab or lecture, if they are unable to complete their assigned tasks on time and if they are unable to meet for the group check-in session.
+* Teammates will notify the other members if they are unable to attend a lab or lecture, if they are unable to complete their assigned tasks on time and if they are unable to meet for the group check-in session.
 
-* All communication should remain respectful, professional, and constructive. Teammates should not be disparaged for making errors.
+* All communication will remain respectful, professional, and constructive. Teammates will not be disparaged for making errors.
 ---
 
-### [Other Categories of norms and expectations go here]
+### Preparation
 
-* Based on your previous teamwork experiences, what other behaviours do you agree upon as a team?
-    - some examples of possible additional team norms and expectations are included in the sample team contract in case your team needs some help getting ideas for what else you want to include.
+* Each team member commits to reading assigned materials and completing individual readiness work before class.
+
+* Each team member commits to reading the lab activity before meeting so the team can have more time for discussion and collaboration.
+
+* Each team member will be prepared to discuss their latest developments at the team check-in sessions.
+
+___
+
+### Attendance and Preparation 
+
+* Members will attend all scheduled classes and team meetings unless illness or emergencies occur.
+
+* If unable to attend, a member must notify the team in advance and provide input asynchronously if they are able.
+
+* During team activities, every member will contribute ideas and engage in the discussion.
+
 
 ---
 
-## Decision Making
+### Decision Making
 
 * When possible decisions will be made when all the members are in agreement.
 
-* If the team is not all in agreement, those in majority will discuss with the other member(s) and try to design and approach puts their appeal in consideration.
+* If the team is not all in agreement, those in majority will discuss with the other member(s) and try to design and approach that puts their appeal in consideration.
 
 * If such an approach cannot be designed the team will proceed with majority rules.
 
 ---
 ## Conflict resolution
 
-* How will your team resolve conflicts? (Example: by listening to each other's side of the issue and attempting to reach a compromise. By consulting a TA or instructor as a team, if a resolution has not yet been reached.)
+* If a conflict arises, the team will first attempt to resolve the issue amongst ourselves.
+
+* If the issue persists, the team will involve a member of the course teaching team, like an instructor or TA as a mediator.
+
+* After the conflict is resolved the team will reflect on the experience and discuss how to prevent similar conflicts from occurring in the future.
 
 ---
 
 ## Accountability
 
-* Reliability and accountability are also important aspects of teamwork. What are the responsibilities of each team member? (Example: completing their share of the work in a timely manner, seeking assistance from teammates/TAs/instructors when required, etc.)
+* Team members are responsible for completing their assigned tasks in a timely manner and will notify the team of any reasons restricting them from doing so.
 
----
+* Team members are responsible for seeking assistance from teammates or TA's when required.
+
+* Team members are responsible for regularly checking Instagram for messages and announcements.
+
+* Team members will remain attentive and quiet in lectures so that the entire team, and by extension, the entire class can have a peaceful learning environment.
+
+* Team members are responsible for submitting material on the agreed quality standard and any substandard material will be reviewed by the member responsible.
+
+* Failure to meet expectations may result in lower peer evaluation scores.
+
+* All members agree to provide honest and fair peer evaluations.
 
 ---
 
@@ -61,9 +89,9 @@ By signing below, we acknowledge that we have read, discussed, and agreed to the
 
 Team Member Signatures:
 
-Shimon John Augustine
-Rebecca
-Rick Sun
-Ethan Yang
-Henry Zhang
+Shimon John Augustine, 
+Rebecca,
+Rick Sun,
+Ethan Yang,
+Henry Zhang,
 Raphael Ramesar
