@@ -14,7 +14,7 @@ This readme include information such as:
 | Team member | Contact Information                                                                            |
 |-------------|------------------------------------------------------------------------------------------------|
 | Deniz Coban | Outlook: d.coban@mail.utoronto.ca  <br/>Instagram: @007deno <br/>discord:                      |
-| James Fan   | outlook: jl.fan@mail.utoronto.ca  <br/>Instagram: @nondescript_name <br/>Discord: pearlman.    |
+| James Fan   | outlook: jl.fan@mail.utoronto.ca  <br/>Instagram: @nondescript_name <br/>Discord:              |
 | Deep Garg   | outlook: <br/>Instagram: <br/>discord:                                                         |
 | Wentao Lin  | outlook:wentao.lin@mail.utoronto.ca <br/>Instagram:@wentao1530 <br/>discord:                   |
 | Meixuan Lou | outlook:meixuan.lou@mail.utoronto.ca <br/>Instagram: @meixuan_louol <br/>discord: hikono_louol |
