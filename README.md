@@ -11,3 +11,11 @@ The readme should include information such as:
 By keeping this README up-to-date,
 your team will find it easier to prepare for the final presentation
 at the end of the term.
+
+music reviews app:
+- rate and review songs, albums, and artists
+- search for songs, albums, and artists
+- search for users (TBD)
+- filter songs by genre
+- sort by reviews for songs, albums, and artists
+- 
