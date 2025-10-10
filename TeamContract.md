@@ -60,5 +60,5 @@ By signing below, we acknowledge that we have read, discussed, and agreed to the
 Team Member Signatures:
 
 Aryan Aggarwal, 
-Minh Nguyen
+Minh Nguyen, 
 Anton Cassidy
