@@ -31,8 +31,6 @@ This contract sets out shared expectations and commitments for how our team will
 * Each team member agrees to listen and respect everyone and their ideas, and give them a chance to contribute in the project.
 
 
-
-
 ---
 
 ## Decision Making
@@ -50,6 +48,7 @@ This contract sets out shared expectations and commitments for how our team will
 
 *  Each team member agrees to start their work in a timley manner to allow for extra time fixing issues.
 *  Lack of contributiion will reflect on the person's peer review.
+*  A meeting will be held bi-weekly, failure to show up or inform the others will reflect negatively on the person's peer review.
 
 ---
 
