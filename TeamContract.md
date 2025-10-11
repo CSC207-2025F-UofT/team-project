@@ -81,3 +81,4 @@ Team Member Signatures:
 
 Kwan Yin
 Ian Lee
+Griffin Wang
