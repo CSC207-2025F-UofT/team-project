@@ -52,13 +52,16 @@ We will try to aim for a unanimous vote if possible, otherwise we will go with s
 ---
 ## Conflict resolution
 
-* How will your team resolve conflicts? (Example: by listening to each other's side of the issue and attempting to reach a compromise. By consulting a TA or instructor as a team, if a resolution has not yet been reached.)
+Should there be conflicts within the team, we will do our best to remain open minded and listening to each party's perspectives and views. We then will try to reach a conclusion accepted by vote (see decision making), and should there be further issues or strong feelings, we will consult those we believe to be appropriate, ie. TAs, instructors, stakeholders.
 
 ---
 
 ## Accountability
 
-* Reliability and accountability are also important aspects of teamwork. What are the responsibilities of each team member? (Example: completing their share of the work in a timely manner, seeking assistance from teammates/TAs/instructors when required, etc.)
+- We will finish the tasks we've taken on / that are assigned to us.
+- We will notify our team at least X hours in advance should we be unable to fulfill our responsibilities.
+- We will seek assistance whenever necessary to finish things in a timely manner, if possible.
+- We will not make excuses should we fail to do any of the above and take full responsibility of the consequences.
 
 ---
 
@@ -67,5 +70,8 @@ We will try to aim for a unanimous vote if possible, otherwise we will go with s
 By signing below, we acknowledge that we have read, discussed, and agreed to these terms. We understand that this contract is binding for the duration of the course and may be revised with the agreement of all team members.
 
 Team Member Signatures:
+
+Shawn Jin
+
 
 (type names here)
