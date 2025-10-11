@@ -59,7 +59,7 @@ Should there be conflicts within the team, we will do our best to remain open mi
 ## Accountability
 
 - We will finish the tasks we've taken on / that are assigned to us.
-- We will notify our team at least X hours in advance should we be unable to fulfill our responsibilities.
+- We will notify our team at least 24 hours in advance should we be unable to fulfill our responsibilities.
 - We will seek assistance whenever necessary to finish things in a timely manner, if possible.
 - We will not make excuses should we fail to do any of the above and take full responsibility of the consequences.
 
@@ -72,6 +72,6 @@ By signing below, we acknowledge that we have read, discussed, and agreed to the
 Team Member Signatures:
 
 Shawn Jin
-
+Mihir Pullakhandam
 
 (type names here)
