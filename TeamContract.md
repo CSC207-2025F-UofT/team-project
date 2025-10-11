@@ -40,6 +40,8 @@ Only open pull requests from completed features; complete tasks by deadline; at 
 Preferably document why each decision is made
 
 All code that you submit you must understand fully
+Commit frequently and in separate branches; almost never work on main branch
+If you submit code but you know that it can be optimised, just work on it after commit (optional)
 
 ## Group Meetings
 2-3 group meetings during the project to be held in-person (one at the start, one at the end before submission and one in between)
@@ -58,7 +60,9 @@ Everyone is focussed on solving the issue at hand
 ---
 ## Conflict resolution
 
+
 * How will your team resolve conflicts? (Example: by listening to each other's side of the issue and attempting to reach a compromise. By consulting a TA or instructor as a team, if a resolution has not yet been reached.)
+* If there is a conflict, first try resolve it by speaking in-person and understnding situation; if failure to resolve, then bring up to team and then team analyses situation and determines the correct resolution; if still fail to resolve, talk to TA
 
 ---
 
@@ -66,6 +70,7 @@ Everyone is focussed on solving the issue at hand
 
 * Reliability and accountability are also important aspects of teamwork. What are the responsibilities of each team member? (Example: completing their share of the work in a timely manner, seeking assistance from teammates/TAs/instructors when required, etc.)
 
+Have a really good reason to meet deadline; if a function is broken or buggy and you were in charge, then you are in charge of fixing it. You are fine to ask for help on advice or writing one or two of lines of code, beyond that, the credit for the function goes equally to the person working on it.
 ---
 
 ---
@@ -74,4 +79,4 @@ By signing below, we acknowledge that we have read, discussed, and agreed to the
 
 Team Member Signatures:
 
-(type names here)
+Kwan Yin
