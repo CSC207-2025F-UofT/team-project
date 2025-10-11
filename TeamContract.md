@@ -41,6 +41,7 @@ Preferably document why each decision is made
 
 All code that you submit you must understand fully
 Commit frequently and in separate branches; almost never work on main branch
+If you submit code but you know that it can be optimised, just work on it after commit (optional)
 
 ## Group Meetings
 2-3 group meetings during the project to be held in-person (one at the start, one at the end before submission and one in between)
