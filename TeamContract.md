@@ -36,7 +36,7 @@ We will hold each other accountable for our tasks. Whatever we are responsible f
 
 ---
 
-### [Other Categories of norms and expectations go here]
+### __Other Expectations__
 
 - Finish work on time.
 - Don't make excuses.
