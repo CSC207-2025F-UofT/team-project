@@ -19,30 +19,48 @@ This contract sets out shared expectations and commitments for how our team will
 ### Communication
 
 * Which platform will you use for communication outside of class, when required for work on your course project? (Examples: Text message, Discord, WeChat, etc.)
+* Discord
 
-* Each teammate agrees to respond to messages in at most how long? 1 day? 2 days? Some other amount of time? 
+* Each teammate agrees to respond to messages in at most how long? 1 day? 2 days? Some other amount of time?
+* Respond by the next weekday — unless extenuating circumstances. For more urgent situations, call using phone number directly.
 
 * What things should a teammate notify you about? (Examples: if they think they won't be able to meet a deadline, if they have to miss lecture, etc.)
+* If you do not understand an instruction or task assigned, ask about it immediately. If an explicit task and deadline is assigned, and you cannot meet the said deadline, then inform group members at least 2 days in advance; if we schedule a meeting, then you are expected to show up and if you cannot show up, inform ASAP
 
 * Respectful and inclusive behaviour are necessary for smooth and productive communication. What are some respectful and inclusive behaviours you expect when communicating with each other during lectures, labs, or outside of class? (Examples: Actively listening to each team members ideas, giving everyone a chance to meaningfully contribute, etc.)
+* Don't argue over disagreements; let everyone voice their opinion on decision made on behalf of the group; try be respectful and positive
 
 ---
 
 ### [Other Categories of norms and expectations go here]
 
-* Based on your previous teamwork experiences, what other behaviours do you agree upon as a team?
-    - some examples of possible additional team norms and expectations are included in the sample team contract in case your team needs some help getting ideas for what else you want to include.
+## Code Quality
+Only open pull requests from completed features; complete tasks by deadline; at least two members review each PR; all code should meet codebase standards (naming your variables well, documentation and commenting);
+
+Preferably document why each decision is made
+
+All code that you submit you must understand fully
+
+## Group Meetings
+2-3 group meetings during the project to be held in-person (one at the start, one at the end before submission and one in between)
+Everyone should show up to group meetings (inform 2 days ahead for rescheduling of group meeting)
+Everyone is focussed on solving the issue at hand
+
+##
 
 ---
 
 ## Decision Making
 
 * How will decisions about your team project be made? (Examples: By majority vote, by unanimous vote, etc.)
+* 4/5 to agree; if conflicted between two or more decisions, analyse together and do anonymous vote together
 
 ---
 ## Conflict resolution
 
+
 * How will your team resolve conflicts? (Example: by listening to each other's side of the issue and attempting to reach a compromise. By consulting a TA or instructor as a team, if a resolution has not yet been reached.)
+* If there is a conflict, first try resolve it by speaking in-person and understnding situation; if failure to resolve, then bring up to team and then team analyses situation and determines the correct resolution; if still fail to resolve, talk to TA
 
 ---
 
