@@ -75,4 +75,6 @@ Shawn Jin
 
 Mihir Pullakhandam
 
+Sammuel Aldrich Karya
+
 (type names here)
