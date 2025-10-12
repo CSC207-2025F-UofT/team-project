@@ -1,13 +1,5 @@
 # Team Contract
 
-**Your team is free to revise this contract as your team wishes; we have scaffolded it with a recommended structure similar to the provided sample on Quercus.**
-
-After you reflect on past teamwork experiences and brainstorm a list of actions required for a positive teamwork experience, answer these questions. 
-
-Once you have all agreed on the contents of the team contract, make a PR to merge your team contract into the main branch of your team's repo on GitHub.
-
-**Please remember to remove any of the initial instruction text when your team finalizes your team contract; it should resemble the provided sample once complete, but with details specific to the expectations and norms agreed to by your entire team.**
-
 ---
 ## Purpose of this Contract
 
@@ -18,37 +10,50 @@ This contract sets out shared expectations and commitments for how our team will
 
 ### Communication
 
-* Which platform will you use for communication outside of class, when required for work on your course project? (Examples: Text message, Discord, WeChat, etc.)
+* Communication will be done on Instagram.
+* Max response time should be one day.
+* Things to be notified about: Deadlines, Work progress, Lecture/Tutorial attendance.
+* Basic conversation etiquette includes: Listening to others, building on other people's ideas (don't ignore what people say), not sharing for too long (try to be as concise as possible), and giving everyone a chance to contribute.
 
-* Each teammate agrees to respond to messages in at most how long? 1 day? 2 days? Some other amount of time? 
+### Lecture Preparation
+* Each team member commits to reading assigned materials and completing individual readiness work before class.
+* Proof of practice quiz completion will be checked.
+* Members who come unprepared will have that reflected on their peer evaluation scores.
 
-* What things should a teammate notify you about? (Examples: if they think they won't be able to meet a deadline, if they have to miss lecture, etc.)
-
-* Respectful and inclusive behaviour are necessary for smooth and productive communication. What are some respectful and inclusive behaviours you expect when communicating with each other during lectures, labs, or outside of class? (Examples: Actively listening to each team members ideas, giving everyone a chance to meaningfully contribute, etc.)
-
----
-
-### [Other Categories of norms and expectations go here]
-
-* Based on your previous teamwork experiences, what other behaviours do you agree upon as a team?
-    - some examples of possible additional team norms and expectations are included in the sample team contract in case your team needs some help getting ideas for what else you want to include.
+### Attendance
+* If you are unable to attend a lecture/tutorial due to an emergency or illness, then this should be communicated to teammates on Instagram 12 hours before or when possible for threatening emergencies.
+* Members who are frequently skipping will raise suspicion, and that will be reflected in their peer evaluation scores.
 
 ---
 
 ## Decision Making
-
-* How will decisions about your team project be made? (Examples: By majority vote, by unanimous vote, etc.)
+* Will be decided by a vote. The best case is a unanimous vote. But many times that won't happen. In that case, refer to the ***conflict resolution*** section.
+* Will be done as a group, meaning no one gets excluded from decision-making. If someone isn't physically present, then reach out to them online and give them a day to respond before carrying out the decision. (Note that reaching out to people online will waste time, which is why lecture and tutorial attendance are important.)
 
 ---
 ## Conflict resolution
 
-* How will your team resolve conflicts? (Example: by listening to each other's side of the issue and attempting to reach a compromise. By consulting a TA or instructor as a team, if a resolution has not yet been reached.)
+* First, try to reach a compromise.
+* If you think your idea is the right one, then prove it (and let's avoid proof by contradiction since that involves putting down other teammates).
+* If no one can quickly prove why their idea is right, then ask the TA or Prof.
+* If there is no TA or Prof and a conflict needs to be quickly resolved, then call on the internet and confirm again with a TA or Prof at a later time.
 
 ---
 
 ## Accountability
 
-* Reliability and accountability are also important aspects of teamwork. What are the responsibilities of each team member? (Example: completing their share of the work in a timely manner, seeking assistance from teammates/TAs/instructors when required, etc.)
+* Teammates should use this contract to keep each other accountable. 
+* Stay on top of deadlines and have constant progress on the project. Progress will be evaluated by relaying information to teammates, branch commit history, and pull requests.
+* Pull requests will be reviewed by the whole team. Merging to the main branch will require everyone's approval. 
+* To make sure the work is legit, explaining your code is also important. This can be done in tutorials.
+* To make sure the code works, demo to teammates once you have finished coding a feature. This can also be done in tutorials. 
+
+---
+
+## Reliability
+
+* To engage the team and also as an extra way to keep people accountable, asking for help from teammates is encouraged. Just make sure not to ask them to do too much. Think of 25% of the task as the suggested max portion of work you can expect.
+* If everyone is busy, then TAs are available. Just make sure to get others to help when you are stuck. (Remember that asking AI to do work is not good.)
 
 ---
 
