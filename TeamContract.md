@@ -62,3 +62,4 @@ Team Member Signatures:
 
 - Jace Mu
 - Iain Campbell
+- Peiyu Yu
