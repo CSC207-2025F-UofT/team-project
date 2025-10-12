@@ -34,7 +34,7 @@ This contract sets out shared expectations and commitments for how our team will
 ## Conflict resolution
 
 * First, try to reach a compromise.
-* If you think your idea is the right one, then prove it (and let's avoid proof by contradiction since that involves putting down other teammates).
+* If you think your idea is the right one, then prove it (and let's avoid proof by showing why other ideas are wrong, since that involves putting down other teammates).
 * If no one can quickly prove why their idea is right, then ask the TA or Prof.
 * If there is no TA or Prof and a conflict needs to be quickly resolved, then call on the internet and confirm again with a TA or Prof at a later time.
 
@@ -43,8 +43,8 @@ This contract sets out shared expectations and commitments for how our team will
 ## Accountability
 
 * Teammates should use this contract to keep each other accountable. 
-* Stay on top of deadlines and have constant progress on the project. Progress will be evaluated by relaying information to teammates, branch commit history, and pull requests.
-* Pull requests will be reviewed by the whole team. Merging to the main branch will require everyone's approval. 
+* Stay on top of deadlines and have constant progress on the project. Progress will be evaluated by consistency in relaying information to teammates, branch commit history, and pull requests. This will be reflected in peer evaluation scores.
+* Pull requests will be reviewed by the whole team. Merging to the `main` branch will require everyone's approval. 
 * To make sure the work is legit, explaining your code is also important. This can be done in tutorials.
 * To make sure the code works, demo to teammates once you have finished coding a feature. This can also be done in tutorials. 
 
@@ -53,7 +53,7 @@ This contract sets out shared expectations and commitments for how our team will
 ## Reliability
 
 * To engage the team and also as an extra way to keep people accountable, asking for help from teammates is encouraged. Just make sure not to ask them to do too much. Think of 25% of the task as the suggested max portion of work you can expect.
-* If everyone is busy, then TAs are available. Just make sure to get others to help when you are stuck. (Remember that asking AI to do work is not good.)
+* If everyone is busy, then TAs are available. Just make sure to get other **humans** to help when you are stuck. (Remember that asking AI to do work is not good.)
 
 ---
 
