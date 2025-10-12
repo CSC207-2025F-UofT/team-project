@@ -67,3 +67,5 @@ Team Member Signatures:
 Aiden Chettleburgh
 
 Jiazheng (Indy) Ou
+
+Wuqingyi Wang
