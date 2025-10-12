@@ -92,7 +92,7 @@ If the issue persists, the team will involve a member of the course teaching tea
 * All members agree to provide honest and fair peer evaluations.
 
 ---
-If appending this team contract must sumbit a Pull Request that EVERYBODY approves. 
+If appending this team contract must submit a Pull Request that EVERYBODY approves. 
 ---
 
 By signing below, we acknowledge that we have read, discussed, and agreed to these terms. We understand that this contract is binding for the duration of the course and may be revised with the agreement of all team members.
