@@ -69,3 +69,5 @@ Aiden Chettleburgh
 Jiazheng (Indy) Ou
 
 Wuqingyi Wang
+
+Xihang Zhou
