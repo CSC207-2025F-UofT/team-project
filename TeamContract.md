@@ -77,6 +77,6 @@ Mihir Pullakhandam
 
 Sammuel Aldrich Karya
 
-Jinxi
+Jinxi Li
 
 (type names here)
