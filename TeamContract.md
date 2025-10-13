@@ -1,13 +1,4 @@
 # Team Contract
-
-**Your team is free to revise this contract as your team wishes; we have scaffolded it with a recommended structure similar to the provided sample on Quercus.**
-
-After you reflect on past teamwork experiences and brainstorm a list of actions required for a positive teamwork experience, answer these questions. 
-
-Once you have all agreed on the contents of the team contract, make a PR to merge your team contract into the main branch of your team's repo on GitHub.
-
-**Please remember to remove any of the initial instruction text when your team finalizes your team contract; it should resemble the provided sample once complete, but with details specific to the expectations and norms agreed to by your entire team.**
-
 ---
 ## Purpose of this Contract
 
@@ -18,37 +9,73 @@ This contract sets out shared expectations and commitments for how our team will
 
 ### Communication
 
-* Which platform will you use for communication outside of class, when required for work on your course project? (Examples: Text message, Discord, WeChat, etc.)
+* We will use Instagram and Discord as our primary communication channels, with Discord having a more scaffolded setup to allow for structured communication
 
-* Each teammate agrees to respond to messages in at most how long? 1 day? 2 days? Some other amount of time? 
+* Teammates agree to respond to messages within 1 weekday
 
-* What things should a teammate notify you about? (Examples: if they think they won't be able to meet a deadline, if they have to miss lecture, etc.)
+* If something comes up that prevents a teammate from doing work/attending tutorial or lecture (ie. very busy, fallen ill, etc.) they should communicate it so work can be redistributed
 
-* Respectful and inclusive behaviour are necessary for smooth and productive communication. What are some respectful and inclusive behaviours you expect when communicating with each other during lectures, labs, or outside of class? (Examples: Actively listening to each team members ideas, giving everyone a chance to meaningfully contribute, etc.)
+* All behaviour and communiciation will be respectful and inclusive, and every teammate will strive to create a positive and welcoming environment
 
----
 
-### [Other Categories of norms and expectations go here]
+### Attendance and Participation
 
-* Based on your previous teamwork experiences, what other behaviours do you agree upon as a team?
-    - some examples of possible additional team norms and expectations are included in the sample team contract in case your team needs some help getting ideas for what else you want to include.
+* Before lecture, tutorials, or scheduled group meetups, members will come prepared with readings or completed work
+
+* Members will attend all lectures, tutorials, and scheduled group meetups unless they have given a reason otherwise
+
+* If unable to attend, members will decide a way to ensure they can still contribute asynchronously
+
+* During group activities, every member will try to actively participate to ensure activities are completed together
+
+
+### Work Distribution and Quality
+
+* All members will distribute work as fairly as possible, with each person having a say on proposed work distribution
+
+* Once work is distributed, all members are responsible to finish their part, or to tell the team that they need help/extensions
+
+* Members will look over each other's deliverables and provide constructive edits/criticism to improve the overall project
+
+* Pull requests must be looked over by at least two members thoroughly, and all pull requests created should be detailed and thorough
+
+
+### Workflow
+
+* One person will be assigned to create a repo and control pull requests
+
+* Core issues should be established, and both issues and subissues should be created to organize work distribution
+
+* Before working on an issue, create a new branch with a clear title (ie. database-creation) to work on
+
+* Once you finish an issue, thoroughly review code, then create a pull request, which after review by two members, can be merged
 
 ---
 
 ## Decision Making
 
-* How will decisions about your team project be made? (Examples: By majority vote, by unanimous vote, etc.)
+* Decisions will be made by consensus, with each person having a chance to share opinions and reasoning
+
+* If we struggle to come to a decision, we will choose by the majority
 
 ---
 ## Conflict resolution
 
-* How will your team resolve conflicts? (Example: by listening to each other's side of the issue and attempting to reach a compromise. By consulting a TA or instructor as a team, if a resolution has not yet been reached.)
+* All members agree to be kind and listen to each other's opinions and feelings before sharing their thoughts
 
+* Conflict should be resolved in private through open discussion involving the impacted members
+
+* If the conflict cannot be resolved and is impacting the rest of the team, a mediator (a member of the teaching team) will be involved
+  
 ---
 
 ## Accountability
 
-* Reliability and accountability are also important aspects of teamwork. What are the responsibilities of each team member? (Example: completing their share of the work in a timely manner, seeking assistance from teammates/TAs/instructors when required, etc.)
+* All members agree to follow the outlined points above and try their best to bring a positive and determined attitude during each meeting
+
+* Failure to meet expectations or consistent absences may result in lower peer evaluation scores
+
+* All members agree to give fair and honest peer feedback
 
 ---
 
@@ -58,4 +85,4 @@ By signing below, we acknowledge that we have read, discussed, and agreed to the
 
 Team Member Signatures:
 
-(type names here)  Sida Luo
+Alden Arciaga
