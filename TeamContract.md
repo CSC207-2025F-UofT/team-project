@@ -11,6 +11,8 @@ This contract sets out shared expectations and commitments for how our team will
 
 * Each teammate agrees to check and respond to messages in at least 1 day. (2 days at most.) 
 
+* Team members must try to be present for all lectures and labs to stay on the same page as the rest of the team.
+
 * As a teammate, you are responsible for notifying others in cases of planned absences, emergencies, missed lectures, or scheduling conflicts.
 
 * Respectful and inclusive behaviour are necessary for smooth and productive communication. Be actively involved in the discussion and listen to each team members ideas, and don't be shy to share your own.
@@ -37,11 +39,14 @@ This contract sets out shared expectations and commitments for how our team will
 
 * All Pull Requests should be reviewed by at least 2 members. (But every team member must make an attempt to review all Pull Requests! This will help you be familiar with the code at all times.)
 
-* In the PR stage, members must provide constructive feedback on how the code can be improved/meet high standards.
+* In the PR stage, members must provide constructive feedback (if applicable) on how the code can be improved/meet high standards.
 
 * If any teammate is finding any particular task too difficult, they must reach out to the team as soon as possible.
 
+* The team must keep divisions of work fair, and all members must contribute a reasonably similar amount to the project.
+
 * Keep updating README.md (goals/progress/project overview) as needed.
+
 
 ---
 
@@ -51,12 +56,17 @@ This contract sets out shared expectations and commitments for how our team will
 
 * If consensus cannot be reached, a vote will be taken. (The majority vote will decide the next step)
 
+* In the case of a tie, the team can work towards a compromise.
+
 ---
 ## Conflict resolution
 
 * If any conflicts arise, the team will first attempt to resolve the issue through discussion (All sides must be understanding of the others).
 
+* The team should try to work out what exactly is causing the conflict in order to best resolve it.
+
 * If the issue persists, the team will involve a member of the course staff as the mediator.
+
 ---
 
 
