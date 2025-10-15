@@ -26,17 +26,16 @@ This contract sets out shared expectations and commitments for how our team will
 ---
 
 ## Decision Making
-
+* This team would follow the form of voting when making decisions, since there is 5 people there would always be a exact outcome. However, if the vote is very close such as 2:3, it is possible that further discussion may happen such that one group would
+* try to convince the other such that we can avoid conflict.
 
 ## Conflict resolution
 
-* How will your team resolve conflicts? (Example: by listening to each other's side of the issue and attempting to reach a compromise. By consulting a TA or instructor as a team, if a resolution has not yet been reached.)
+* when conflicts occur, we would  try our best to work it out, listen to what others have to say, be patient. If conflicts cannot be resolved, we would seek help of others such as TA or professor 
 
----
 
 ## Accountability
 
-* Reliability and accountability are also important aspects of teamwork. What are the responsibilities of each team member? (Example: completing their share of the work in a timely manner, seeking assistance from teammates/TAs/instructors when required, etc.)awdawd
 * this team would be expected to show up in tutorials, if not, there should be a valid reason such as: overwelming loads of work, test, or other problems. If team member decides not to show up, they would have to inform all the group members by instagram, and would have to make
 * up by doing the assigned group work discussed by group members present to the tutorial. This is same for lectures where there is iRat, team members are expected to show up on days where we have to collaborate as a team.
 
