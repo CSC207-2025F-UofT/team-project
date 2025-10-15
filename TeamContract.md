@@ -67,3 +67,5 @@ Team Member Signatures:
 William Song
 Alexander Saiki
 Carey Lin
+Itamar Miller
+Danial Qureishi
