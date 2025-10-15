@@ -27,9 +27,7 @@ This contract sets out shared expectations and commitments for how our team will
 
 ## Decision Making
 
-* How will decisions about your team project be made? (Examples: By majority vote, by unanimous vote, etc.)
 
----
 ## Conflict resolution
 
 * How will your team resolve conflicts? (Example: by listening to each other's side of the issue and attempting to reach a compromise. By consulting a TA or instructor as a team, if a resolution has not yet been reached.)
@@ -38,7 +36,10 @@ This contract sets out shared expectations and commitments for how our team will
 
 ## Accountability
 
-* Reliability and accountability are also important aspects of teamwork. What are the responsibilities of each team member? (Example: completing their share of the work in a timely manner, seeking assistance from teammates/TAs/instructors when required, etc.)
+* Reliability and accountability are also important aspects of teamwork. What are the responsibilities of each team member? (Example: completing their share of the work in a timely manner, seeking assistance from teammates/TAs/instructors when required, etc.)awdawd
+* this team would be expected to show up in tutorials, if not, there should be a valid reason such as: overwelming loads of work, test, or other problems. If team member decides not to show up, they would have to inform all the group members by instagram, and would have to make
+* up by doing the assigned group work discussed by group members present to the tutorial. This is same for lectures where there is iRat, team members are expected to show up on days where we have to collaborate as a team.
+
 
 ---
 
@@ -48,4 +49,4 @@ By signing below, we acknowledge that we have read, discussed, and agreed to the
 
 Team Member Signatures:
 
-Tim Wu
+Tim Wu, Raymond zhang
