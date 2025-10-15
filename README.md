@@ -4,6 +4,7 @@ Please keep this up-to-date with information about your project throughout the t
 
 # Project Overview: 
 Gacha Pets.
+
 The project is a tradable card game where players can get random pets from blind boxes and keep the pets in their collection. Players can interact with their pets. And between players, pet cards are tradable.
  (Add a summary of what we are trying to make)
 # User Stories:
@@ -20,8 +21,11 @@ The project is a tradable card game where players can get random pets from blind
 (Add some user stories here... this should highlight what features wer are aiming to implement)
 # APIs: 
 https://thecatapi.com/
+
 https://thedogapi.com/
+
 We are using the CAT API and DOG API for breed and visuals for the pets.
+
 (Add what API we will use for the project)
 # Visuals:
 
