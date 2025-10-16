@@ -29,16 +29,25 @@ Actively listening to each team members ideas, giving everyone a chance to meani
 
 * How will decisions about your team project be made? (Examples: By majority vote, by unanimous vote, etc.)
 
+By majority voting.
+
 ---
 ## Conflict resolution
 
-* How will your team resolve conflicts? (Example: by listening to each other's side of the issue and attempting to reach a compromise. By consulting a TA or instructor as a team, if a resolution has not yet been reached.)
+* How will your team resolve conflicts?
+
+By listening to each other's side of the issue and attempting to reach a compromise. By consulting a TA or instructor as a team, if a resolution has not yet been reached.
+
+
 
 ---
 
 ## Accountability
 
-* Reliability and accountability are also important aspects of teamwork. What are the responsibilities of each team member? (Example: completing their share of the work in a timely manner, seeking assistance from teammates/TAs/instructors when required, etc.)
+* Reliability and accountability are also important aspects of teamwork. What are the responsibilities of each team member?
+
+Completing their share of the work in a timely manner, seeking assistance from teammates/TAs/instructors when required.
+Help each other out when needed. 
 
 ---
 
