@@ -32,7 +32,9 @@ This contract sets out shared expectations and commitments for how our team will
 ## Conflict resolution
 
 * when conflicts occur, we would  try our best to work it out, listen to what others have to say, be patient. If conflicts cannot be resolved, we would seek help of others such as TA or professor 
-
+* Members agree to push their code only to their own branch and always open a pr before merge.
+* When coding conflict occur, 4 out of 5 people need to look at the code and decide which version should we keep or further modifications are needed.
+* Members agree to follow the above procedure. The responsibility for code conflicts is evenly distributed between two individuals who will need to work together to meet the team's schedule
 
 ## Accountability
 
