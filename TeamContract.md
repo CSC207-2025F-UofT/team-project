@@ -1,66 +1,82 @@
-# Team Contract
+# CSC207 Team Contract
 
-**Your team is free to revise this contract as your team wishes; we have scaffolded it with a recommended structure similar to the provided sample on Quercus.**
-
-After you reflect on past teamwork experiences and brainstorm a list of actions required for a positive teamwork experience, answer these questions. 
-
-Once you have all agreed on the contents of the team contract, make a PR to merge your team contract into the main branch of your team's repo on GitHub.
-
-**Please remember to remove any of the initial instruction text when your team finalizes your team contract; it should resemble the provided sample once complete, but with details specific to the expectations and norms agreed to by your entire team.**
+## Purpose
+We set shared expectations for how we will collaborate throughout CSC207. This promotes accountability, professionalism, and mutual support across prep work, RATs, in-class activities, and our course project.
 
 ---
-## Purpose of this Contract
 
-This contract sets out shared expectations and commitments for how our team will collaborate during the course. It is designed to promote accountability, professionalism, and mutual support as we complete individual preparation, readiness assurance tests, in-class activities, and our course project.
-
----
-## Team Norms and Expectations
+## Team Norms & Expectations
 
 ### Communication
+- **Primary platform:** Instagram
+- **Urgent backup:** Text or email if Discord is unavailable.
+- **Response time:** Within **24 hours** (weekdays); within **36 hours** on weekends/holidays if not time-critical.
+- **Notify the team if:**
+    - You will miss a meeting/lab/lecture.
+    - You may miss a milestone/deadline.
+    - You are blocked or facing personal/technical issues.
+- **Respect & inclusion:**
+    - Actively listen; avoid interruptions; invite quieter voices.
+    - Keep language professional and kind; assume good intent.
+    - Give/receive feedback specifically and respectfully.
+    - Summarize decisions in writing (Discord) after discussions.
 
-* Which platform will you use for communication outside of class, when required for work on your course project? (Examples: Text message, Discord, WeChat, etc.)
+### Work Quality & Collaboration
+- Contribute **reliably and proportionally** to scope.
+- Follow team code standards (naming, comments, tests, formatting).
+- Use feature branches; open **PRs** early; keep PRs reasonably scoped.
+- Every PR requires **at least one review** and passing tests before merge.
+- If unsure, **ask early** (teammates/TA) rather than blocking progress.
 
-* Each teammate agrees to respond to messages in at most how long? 1 day? 2 days? Some other amount of time? 
-
-* What things should a teammate notify you about? (Examples: if they think they won't be able to meet a deadline, if they have to miss lecture, etc.)
-
-* Respectful and inclusive behaviour are necessary for smooth and productive communication. What are some respectful and inclusive behaviours you expect when communicating with each other during lectures, labs, or outside of class? (Examples: Actively listening to each team members ideas, giving everyone a chance to meaningfully contribute, etc.)
-
----
-
-### [Other Categories of norms and expectations go here]
-
-* Based on your previous teamwork experiences, what other behaviours do you agree upon as a team?
-    - some examples of possible additional team norms and expectations are included in the sample team contract in case your team needs some help getting ideas for what else you want to include.
+### Meetings
+- **Cadence:** At least once per week during active milestones.
+- **Preparation:** Come with updates, blockers, and next steps.
+- **Notes:** Record decisions, action items, and owners in Discord.
 
 ---
 
 ## Decision Making
-
-* How will decisions about your team project be made? (Examples: By majority vote, by unanimous vote, etc.)
+- Discuss options, trade-offs, and constraints openly.
+- **Default rule:** **Majority vote** after everyone is heard.
+- **High-impact decisions** (architecture, scope changes): strive for **consensus**; if not feasible, document rationale and proceed by majority.
 
 ---
-## Conflict resolution
 
-* How will your team resolve conflicts? (Example: by listening to each other's side of the issue and attempting to reach a compromise. By consulting a TA or instructor as a team, if a resolution has not yet been reached.)
+## Conflict Resolution
+1. Address concerns **promptly and privately** with those involved; listen to understand.
+2. If unresolved, bring to the **team** to explore options and compromises.
+3. Persisting issues: **consult TA/instructor** together for mediation.
+4. Maintain a constructive tone; focus on behaviours/outcomes, not people.
 
 ---
 
 ## Accountability
+- **Each member will:**
+    - Deliver assigned tasks **on time** and to an agreed standard.
+    - Write tests where appropriate; keep docs/readmes updated.
+    - Commit/push regularly with meaningful messages.
+    - Proactively flag risks and request help when blocked.
+- **If a deadline is missed without communication:**
+    - Reassign or pair on the task; adjust scope if needed.
+    - Document impact and mitigation; escalate to TA if recurring.
 
-* Reliability and accountability are also important aspects of teamwork. What are the responsibilities of each team member? (Example: completing their share of the work in a timely manner, seeking assistance from teammates/TAs/instructors when required, etc.)
+### Academic Integrity
+- Follow course policies and U of T academic integrity guidelines.
+- Cite all external sources and libraries per assignment rules.
 
 ---
 
+## Revision Clause
+This contract may be updated by **unanimous agreement** if team needs evolve. Changes must be recorded in this file and noted in Discord.
+
 ---
 
-By signing below, we acknowledge that we have read, discussed, and agreed to these terms. We understand that this contract is binding for the duration of the course and may be revised with the agreement of all team members.
+## Signatures
+By signing, we acknowledge we have read, discussed, and agree to these terms for the duration of the course.
 
-Team Member Signatures:
-
-Mitchell Whitten
-Parker Duthie
-Elizabeth Han
-Ellen Ge
-Chengcheng LI
-Carl Gergi
+- Mitchell Whitten 
+- Parker Duthie 
+- Elizabeth Han
+- Ellen Ge 
+- Chengcheng Li 
+- Carl Gergi 
