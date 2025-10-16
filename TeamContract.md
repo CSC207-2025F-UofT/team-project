@@ -71,6 +71,12 @@ If conflict arises:
 * All members agree to provide honest and fair peer evaluations.
 ---
 
+## AI Usage
+
+* Any code written by AI should be thoroughly tested.
+* If you are planning on pushing AI written code, notify the rest of the team and only push if at least three other members agree to it.
+* It should be made known to the other members of the team, if code has been written or edited by AI.
+
 ---
 
 By signing below, we acknowledge that we have read, discussed, and agreed to these terms. We understand that this contract is binding for the duration of the course and may be revised with the agreement of all team members.
