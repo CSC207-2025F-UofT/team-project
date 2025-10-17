@@ -1,4 +1,5 @@
 # Team Contract
+
 ---
 ## Purpose of this Contract
 
