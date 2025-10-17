@@ -62,3 +62,4 @@ Team Member Signatures:
 
 Wayne Wu
 Saladin Shaurov
+Hongcheng Huo
