@@ -63,4 +63,4 @@ By signing below, we acknowledge that we have read, discussed, and agreed to the
 
 Team Member Signatures:
 
-wangxurui, Qianlang, Yuan Lin, Tina Ly, Miles Zhu
+wangxurui, Qianlang, Yuan Lin, Tina Ly, Miles Zhu, Hayato Kukihara
