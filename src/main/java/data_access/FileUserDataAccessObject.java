@@ -24,7 +24,15 @@ public class FileUserDataAccessObject implements SignupUserDataAccessInterface,
     private final Map<String, Integer> headers = new LinkedHashMap<>();
     private final Map<String, User> accounts = new HashMap<>();
 
-    public FileUserDataAccessObject(String csvPath, UserFactory userFactory) throws IOException {
+    private String currentUsername;
+
+    /**
+     * Construct this DAO for saving to and reading from a local file.
+     * @param csvPath the path of the file to save to
+     * @param userFactory factory for creating user objects
+     * @throws RuntimeException if there is an IOException when accessing the file
+     */
+    public FileUserDataAccessObject(String csvPath, UserFactory userFactory) {
 
         csvFile = new File(csvPath);
         headers.put("username", 0);
@@ -50,6 +58,9 @@ public class FileUserDataAccessObject implements SignupUserDataAccessInterface,
                     final User user = userFactory.create(username, password);
                     accounts.put(username, user);
                 }
+            }
+            catch (IOException ex) {
+                throw new RuntimeException(ex);
             }
         }
     }
@@ -85,6 +96,16 @@ public class FileUserDataAccessObject implements SignupUserDataAccessInterface,
     @Override
     public User get(String username) {
         return accounts.get(username);
+    }
+
+    @Override
+    public void setCurrentUsername(String name) {
+        currentUsername = name;
+    }
+
+    @Override
+    public String getCurrentUsername() {
+        return currentUsername;
     }
 
     @Override

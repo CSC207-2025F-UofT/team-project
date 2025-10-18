@@ -1,10 +1,10 @@
 package app;
 
-import data_access.DBUserDataAccessObject;
+import data_access.FileUserDataAccessObject;
 import entity.UserFactory;
 import interface_adapter.ViewManagerModel;
 import interface_adapter.logged_in.ChangePasswordController;
-import interface_adapter.logged_in.LoggedInPresenter;
+import interface_adapter.logged_in.ChangePasswordPresenter;
 import interface_adapter.logged_in.LoggedInViewModel;
 import interface_adapter.login.LoginController;
 import interface_adapter.login.LoginPresenter;
@@ -38,7 +38,12 @@ public class AppBuilder {
 
     // set which data access implementation to use, can be any
     // of the classes from the data_access package
-    final DBUserDataAccessObject userDataAccessObject = new DBUserDataAccessObject(userFactory);
+
+    // DAO version using local file storage
+    final FileUserDataAccessObject userDataAccessObject = new FileUserDataAccessObject("users.csv", userFactory);
+
+    // DAO version using a shared external database
+    // final DBUserDataAccessObject userDataAccessObject = new DBUserDataAccessObject(userFactory);
 
     private SignupView signupView;
     private SignupViewModel signupViewModel;
@@ -95,7 +100,7 @@ public class AppBuilder {
     }
 
     public AppBuilder addChangePasswordUseCase() {
-        final ChangePasswordOutputBoundary changePasswordOutputBoundary = new LoggedInPresenter(viewManagerModel,
+        final ChangePasswordOutputBoundary changePasswordOutputBoundary = new ChangePasswordPresenter(viewManagerModel,
                 loggedInViewModel);
 
         final ChangePasswordInputBoundary changePasswordInteractor =

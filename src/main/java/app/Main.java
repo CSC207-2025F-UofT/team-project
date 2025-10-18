@@ -15,6 +15,7 @@ public class Main {
                 .build();
 
         application.pack();
+        application.setLocationRelativeTo(null);
         application.setVisible(true);
     }
 }
