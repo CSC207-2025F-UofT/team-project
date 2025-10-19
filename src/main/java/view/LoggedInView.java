@@ -3,6 +3,7 @@ package view;
 import interface_adapter.logged_in.ChangePasswordController;
 import interface_adapter.logged_in.LoggedInState;
 import interface_adapter.logged_in.LoggedInViewModel;
+import interface_adapter.logout.LogoutController;
 
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
@@ -22,6 +23,7 @@ public class LoggedInView extends JPanel implements ActionListener, PropertyChan
     private final LoggedInViewModel loggedInViewModel;
     private final JLabel passwordErrorField = new JLabel();
     private ChangePasswordController changePasswordController = null;
+    private LogoutController logoutController;
 
     private final JLabel username;
 
@@ -134,5 +136,9 @@ public class LoggedInView extends JPanel implements ActionListener, PropertyChan
 
     public void setChangePasswordController(ChangePasswordController changePasswordController) {
         this.changePasswordController = changePasswordController;
+    }
+
+    public void setLogoutController(LogoutController logoutController) {
+        // TODO: save the logout controller in the instance variable.
     }
 }
