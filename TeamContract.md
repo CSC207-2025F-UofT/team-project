@@ -8,7 +8,7 @@ This contract sets out shared expectations and commitments for how our team will
 ### Communication
 
 * We will use Instagram as our primary communication channel.
-* Team members will respond to messages within **48** hours on weekdays. Messages sent on weekends should be responded **no later than the end of Monday**.
+* Team members will respond to messages within **24** hours on weekdays. Messages sent on weekends should be responded **no later than the end of Monday**.
 * Each team member should provide **at least one progress update per week** regarding their share of the work for the group project, even if no progress has been made, or if they have encountered some difficulties.
 * Teammates should notify the group if they have to miss a lab, or encounter any obstacles that may affect their responsibilities.
 * Actively listen to each team member’s ideas.
