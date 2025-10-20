@@ -55,6 +55,10 @@ Let's take a tour of the login use case code:
 - **Step through the code to trace the execution of the login use case.**
   Importantly, pay extra close attention to what the Presenter does to ensure that the LoggedInView gets displayed after the user successfully gets logged into the application.
 
+The code is designed based on our CA Engine that was introduced in the reading this week. For reference, here is our CA Engine diagram:
+
+![The Clean Architecture Engine diagram](images/CA-Engine.png)
+
 > Pay attention to the classes involved and the flow of execution. When your team implements the logout use case next, your code will need to have a very similar structure.
 
 To better understand how the view gets updated, your team may find it useful to review the [Extra Advice about the Presenters, Views, and ViewModels](#extra-advice-about-the-presenters-views-and-viewmodels) section at the end of this README.
