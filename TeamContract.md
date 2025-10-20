@@ -51,4 +51,6 @@ Team Member Signatures:
 Jialun Wei\
 Jinfeng Wu\
 Saladin\
-Hongcheng Huo
+Hongcheng Huo\
+Simon Shen\
+Wayne Wu
