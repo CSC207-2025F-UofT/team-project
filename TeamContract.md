@@ -78,7 +78,7 @@ By signing below, we acknowledge that we have read, discussed, and agreed to the
 
 Team Member Signatures:
 
-Ruhan Nadeem Kiani, Bowen Zhao, Arthur Jiang, Vignesh Khajuria, Mertali Muhsin Tercan
+Ruhan Nadeem Kiani
 
 ---
 **Date:** October 17, 2025
