@@ -1,4 +1,4 @@
-package User;
+package Battle_System.User;
 
 public class User {
     //1. As a user I want to have an initial ATK and HP value when the game starts.

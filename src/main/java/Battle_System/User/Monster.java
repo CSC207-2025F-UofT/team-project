@@ -1,4 +1,4 @@
-package User;
+package Battle_System.User;
 
 public class Monster {
     //1. As a user I want those monsters I’ve defeated to be recorded, and to be able to view their status information.
