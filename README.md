@@ -36,6 +36,6 @@ https://q.utoronto.ca/courses/394773/pages/api-advice?module_item_id=6907901
 
 # Project Domain - Fri Oct. 10
 As a group, we have chosen the Adventure Game project domain!!
-Inside the Adventure Game, we will have several functionalities such as: Quizzes, navigation on the map, and inventory
-(tbc). 
+Inside the Adventure Game, we will have three important system: quiz system, battle system, and adventure game system
 Within the game, the user will be able to complete quizzes based on what they have learned in order to facilitate their learning. For each correct answer, they will earn one point, and their score will be tracked by Total Score. 
+While walking through the map, user can pick up items in the current place and they might encountered the monsters. User can choose flee to avoid the fight or choose attack to fight with the monsters. Since our game aims to teach user about java, so in order to perform every action, user must answer the java quiz correctly.
