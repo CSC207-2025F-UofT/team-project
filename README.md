@@ -1,7 +1,7 @@
 # Team Project
 
 Please keep this up-to-date with information about your project throughout the term.
-
+Names:Kosi, Erik, Keishi, Simone, Eileen
 The readme should include information such as:
 - a summary of what your application is all about
 - a list of the user stories, along with who is responsible for each one
