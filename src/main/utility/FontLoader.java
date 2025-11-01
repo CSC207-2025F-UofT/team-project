@@ -1,4 +1,4 @@
-package main.view;
+package main.utility;
 
 import java.awt.*;
 import java.io.File;

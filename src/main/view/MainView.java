@@ -1,5 +1,7 @@
 // src/main/UI/MainView.java
 package main.view;
+import main.utility.FontLoader;
+
 import javax.swing.*;
 import java.awt.*;
 
