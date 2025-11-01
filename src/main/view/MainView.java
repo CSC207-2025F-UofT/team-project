@@ -1,19 +1,11 @@
 // src/main/UI/MainView.java
-package main.UI;
+package main.view;
 import javax.swing.*;
 import java.awt.*;
-import java.io.File;
-import java.io.IOException;
 
 public class MainView {
     public static void main(String[] args) {
-        try {
-            Font Helvetica = Font.createFont(Font.TRUETYPE_FONT, new File("font/Helvetica.ttf"));
-            GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
-            ge.registerFont(Helvetica);
-        } catch (IOException | FontFormatException e) {
-            e.printStackTrace();
-        }
+        FontLoader.registerFonts();
 
         SwingUtilities.invokeLater(() -> {
             JFrame frame = new JFrame("Main Screen");
