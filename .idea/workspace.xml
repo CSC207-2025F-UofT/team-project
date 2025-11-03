@@ -4,10 +4,10 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="f986c473-7fad-4faf-8a6b-961b6ed5db29" name="Changes" comment="Merge pull request #1 from 404Haze/team-contract&#10;&#10;Update Team Contract with detailed norms and expectations">
-      <change afterPath="$PROJECT_DIR$/src/main/view/ViewTest.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/view/BrowseStudySetView.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/view/BrowseStudySetView.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/view/MainView.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/view/MainView.java" afterDir="false" />
+    <list default="true" id="f986c473-7fad-4faf-8a6b-961b6ed5db29" name="Changes" comment="since i cant do anything without entity, IA, UC finished, i created viewtest file to test if the view is working properly">
+      <change afterPath="$PROJECT_DIR$/src/main/view/MainViewTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/view/ViewTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/view/ViewTest.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -61,6 +61,8 @@
   "keyToString": {
     "Application.MainScreen.executor": "Run",
     "Application.MainView.executor": "Run",
+    "Application.MainViewTest.executor": "Run",
+    "Application.ViewTest.executor": "Run",
     "ModuleVcsDetector.initialDetectionPerformed": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.git.unshallow": "true",
@@ -85,6 +87,9 @@
       <recent name="C:\Users\alber\Desktop\University\Second Year - 2025 2026\CSC207 - Software Design\CourseClash\font" />
       <recent name="C:\Users\alber\Desktop\University\Second Year - 2025 2026\CSC207 - Software Design\CourseClash\images" />
       <recent name="C:\Users\alber\Desktop\University\Second Year - 2025 2026\CSC207 - Software Design\CourseClash" />
+    </key>
+    <key name="CopyClassDialog.RECENTS_KEY">
+      <recent name="main.view" />
     </key>
   </component>
   <component name="RunManager">
@@ -231,7 +236,8 @@
       <workItem from="1761201431941" duration="1308000" />
       <workItem from="1761953210249" duration="1602000" />
       <workItem from="1761954851679" duration="5267000" />
-      <workItem from="1761960167918" duration="703000" />
+      <workItem from="1761960167918" duration="1183000" />
+      <workItem from="1762201073824" duration="856000" />
     </task>
     <task id="LOCAL-00001" summary="adding fonts, image, creating title screen">
       <option name="closed" value="true" />
@@ -273,7 +279,15 @@
       <option name="project" value="LOCAL" />
       <updated>1761960272452</updated>
     </task>
-    <option name="localTasksCounter" value="6" />
+    <task id="LOCAL-00006" summary="since i cant do anything without entity, IA, UC finished, i created viewtest file to test if the view is working properly">
+      <option name="closed" value="true" />
+      <created>1761960928041</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1761960928041</updated>
+    </task>
+    <option name="localTasksCounter" value="7" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -295,6 +309,7 @@
     <MESSAGE value="changing file structure, based on clean architecture" />
     <MESSAGE value="last change before merge" />
     <MESSAGE value="Merge pull request #1 from 404Haze/team-contract&#10;&#10;Update Team Contract with detailed norms and expectations" />
-    <option name="LAST_COMMIT_MESSAGE" value="Merge pull request #1 from 404Haze/team-contract&#10;&#10;Update Team Contract with detailed norms and expectations" />
+    <MESSAGE value="since i cant do anything without entity, IA, UC finished, i created viewtest file to test if the view is working properly" />
+    <option name="LAST_COMMIT_MESSAGE" value="since i cant do anything without entity, IA, UC finished, i created viewtest file to test if the view is working properly" />
   </component>
 </project>
