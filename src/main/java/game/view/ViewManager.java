@@ -1,4 +1,4 @@
-package view;
+package game.view;
 
 public class ViewManager {
     
