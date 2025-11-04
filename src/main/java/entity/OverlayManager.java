@@ -59,8 +59,8 @@ public class OverlayManager {
     private void drawTileToOverlay(BoundingBox bBox, Tile tile){
         //Draw given tile onto the overlay based on the viewport bounding box.
 
-        //convert tile location to SimpleVector for convenience.
-        SimpleVector tileCoord = new SimpleVector(tile.getX(),tile.getY());
+        //convert tile location to Vector for convenience.
+        Vector tileCoord = new Vector(tile.getX(),tile.getY());
 
         //lat lon as bounding box, convert lat lon to 0-1.
         double bBoxLX = convertLatitude(bBox.getTopLeft().getLatitude());
@@ -68,8 +68,8 @@ public class OverlayManager {
         double bBoxLY = convertLongitude(bBox.getTopLeft().getLongitude());
         double bBoxRY = convertLongitude(bBox.getBottomRight().getLongitude());
 
-        SimpleVector topLeft = new SimpleVector(bBoxLX, bBoxLY);
-        SimpleVector botRight = new SimpleVector(bBoxRX, bBoxRY);
+        Vector topLeft = new Vector(bBoxLX, bBoxLY);
+        Vector botRight = new Vector(bBoxRX, bBoxRY);
 
         //convert bounding box vecs to tile grid coords based on zoom (0-6, dimension are 2^z)
         topLeft.scale(Math.pow(2, tile.getZoom()));
@@ -121,31 +121,3 @@ class LayerNotFoundException extends Exception {
         super("Layer " + layer + " not found!");
     }
 }
-
-
-// implmentation of a vector with basic vector operations.
-class SimpleVector{
-    public double x;
-    public double y;
-
-    public SimpleVector(double x, double y){
-        this.x = x;
-        this.y = y;
-    }
-
-    public void add(SimpleVector vec){
-        this.x += vec.x;
-        this.y += vec.y;
-    }
-
-    public void sub(SimpleVector vec){
-        this.x -= vec.x;
-        this.y -= vec.y;
-    }
-
-    public void scale(double s){
-        this.x *= s;
-        this.y *= s;
-    }
-}
-
