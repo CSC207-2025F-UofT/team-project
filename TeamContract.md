@@ -18,38 +18,58 @@ This contract sets out shared expectations and commitments for how our team will
 
 ### Communication
 
-* Which platform will you use for communication outside of class, when required for work on your course project? (Examples: Text message, Discord, WeChat, etc.)
-
-* Each teammate agrees to respond to messages in at most how long? 1 day? 2 days? Some other amount of time? 
-
-* What things should a teammate notify you about? (Examples: if they think they won't be able to meet a deadline, if they have to miss lecture, etc.)
-
-* Respectful and inclusive behaviour are necessary for smooth and productive communication. What are some respectful and inclusive behaviours you expect when communicating with each other during lectures, labs, or outside of class? (Examples: Actively listening to each team members ideas, giving everyone a chance to meaningfully contribute, etc.)
+* We will use Discord to communicate - all communications should be put into the correct channel and mention the right person
+* Each teammate agrees to respond to messages by the next weekday — unless extenuating circumstances. For more urgent situations, call using phone number directly.
+* If you do not understand an instruction or task assigned, ask about it immediately
+* If an explicit task and deadline is assigned, and you cannot meet the said deadline, then inform group members at least 2 days in advance
+* If we schedule a meeting, then you are expected to show up and if you cannot show up, inform at least 2 days in advance
+* Don't argue over disagreements and try resolve them amicably
+* Let everyone voice their opinion on decision made on behalf of the group
+* Try be respectful and positive
 
 ---
 
 ### [Other Categories of norms and expectations go here]
 
-* Based on your previous teamwork experiences, what other behaviours do you agree upon as a team?
-    - some examples of possible additional team norms and expectations are included in the sample team contract in case your team needs some help getting ideas for what else you want to include.
+## Code Quality
+* Only open pull requests from completed features
+* Complete tasks by the internal deadlines
+* At least two members review each PR before merging it into the main branch
+* All code should meet codebase standards (matching agreed name conventions, documented well with comments, follow CLEAN architecture)
+* Preferably document why each decision is made
+* All code that you submit you must understand fully and be able to explain why and how it works
+* Commit frequently and in separate branches; work on the main branch in rare circumstances
+* If you submit code but you know that it can be optimised, just work on it after commit (optional)
+
+## Group Meetings
+* We will have 2-3 group meetings during the project to be held in-person (one at the start of the project, one at the end before submission and one in between)
+* Everyone should show up to group meetings (inform 2 days ahead for rescheduling of group meeting)
+* While at the meeting, everyone should be focussed on solving the issue at hand and not working on other course work
+
+##
 
 ---
 
 ## Decision Making
 
-* How will decisions about your team project be made? (Examples: By majority vote, by unanimous vote, etc.)
+* Preliminary stage of decision making will be a vote: preliminary decision will only proceed as final if 4/5 group members agree
+* If the group is conflicted between two or more decisions, we will get together to analyse and express opinions. After analysis, we will do an anonymous vote together and majority will proceed.
 
 ---
 ## Conflict resolution
-
-* How will your team resolve conflicts? (Example: by listening to each other's side of the issue and attempting to reach a compromise. By consulting a TA or instructor as a team, if a resolution has not yet been reached.)
-
+* If there is a conflict, first try resolve it by speaking in-person and understnding situation
+* Upon failure to resolve, then bring up the issue to the team and then the team will analyse the situation and determines the correct resolution
+* Upon further failure to resolve after being brought up to team, the two members should talk directly with a TA or instructor
+  
 ---
 
 ## Accountability
 
-* Reliability and accountability are also important aspects of teamwork. What are the responsibilities of each team member? (Example: completing their share of the work in a timely manner, seeking assistance from teammates/TAs/instructors when required, etc.)
-
+* Meet the deadline and unless you have a really good reason to miss it (otherwise, contributions will be deducted on peer evaluation)
+* If a function is broken or buggy and you were in charge, then you are in charge of fixing it (does not count if a function that you depend on does not work as intended)
+* You are fine to ask for help on advice or writing one or two of lines of code, beyond that, the credit for the function goes equally to the person working on it
+* All work will be equally shared first; after the deadline, then if you have not completed the work, others can help you for credit; before the deadline of the project, everyone agrees to help everyone on each other's task
+* Before the deadline, do not modify other people's code and let them have a chance to contribute
 ---
 
 ---
@@ -58,4 +78,8 @@ By signing below, we acknowledge that we have read, discussed, and agreed to the
 
 Team Member Signatures:
 
-(type names here)
+Kwan Yin
+Ian Lee
+Griffin Wang
+Igor Tatarov
+junxi Huang
