@@ -10,6 +10,11 @@ public class Vector{
         this.y = y;
     }
 
+    public Vector(Vector vec){
+        this.x = vec.x;
+        this.y = vec.y;
+    }
+
     public void add(Vector vec){
         this.x += vec.x;
         this.y += vec.y;
