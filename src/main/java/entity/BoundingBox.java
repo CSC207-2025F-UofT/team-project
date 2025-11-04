@@ -14,4 +14,8 @@ public class BoundingBox {
                 && location.getLongitude() <= bottomRight.getLongitude();
         return latitudeValid && longitudeValid;
     }
+
+    public Location getTopLeft(){return this.topLeft;}
+
+    public Location getBottomRight() {return bottomRight;}
 }

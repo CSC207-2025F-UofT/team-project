@@ -7,7 +7,8 @@ public class OverlayManager {
     private final ArrayList<Overlay> overlays; //
     private final HashMap<String, Integer> typeToIndex;
     private String selected;
-
+    //TODO getoverlay, change overlay size using observers? (when user rescales application, map pane will change size)
+    // implement updateOverlay, using viewport and dataaccess things to get all visible tile pngs.
     public OverlayManager(){
         this.overlays = new ArrayList<Overlay>();
         this.typeToIndex = new HashMap<>();
@@ -28,7 +29,6 @@ public class OverlayManager {
     }
 
     public double getSelectedOpacity(){
-        // Return the selected layer's opacity
         return this.overlays.get(this.typeToIndex.get(this.selected)).getOpactiy();
     }
 
