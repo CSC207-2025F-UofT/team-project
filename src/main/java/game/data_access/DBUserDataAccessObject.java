@@ -1,4 +1,4 @@
-package data_access;
+package game.data_access;
 
 /**
  * The DAO for user data.

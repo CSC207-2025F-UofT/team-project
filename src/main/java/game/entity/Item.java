@@ -1,4 +1,4 @@
-package entity;
+package game.entity;
 
 public class Item {
     
