@@ -50,30 +50,20 @@ public class OverlayManager {
     }
 
     //TODO implement updateOverlayUseCase
-    public void updateOverlay(BoundingBox bBox, ArrayList<Tile> tileList){
+    public void updateOverlay(Vector tl, Vector br, ArrayList<Tile> tileList){
         for (Tile tile: tileList){
-            drawTileToOverlay(bBox, tile);
+            drawTileToOverlay(tl, br, tile);
         }
     }
 
-    private void drawTileToOverlay(BoundingBox bBox, Tile tile){
-        //Draw given tile onto the overlay based on the viewport bounding box.
+    private void drawTileToOverlay(Vector tl, Vector br, Tile tile){
+        //Draw given tile onto the overlay based on the viewport bounding box, represented as 2 vectors,
+        // in tile coordinates.
 
         //convert tile location to Vector for convenience.
         Vector tileCoord = new Vector(tile.getX(),tile.getY());
-
-        //lat lon as bounding box, convert lat lon to 0-1.
-        double bBoxLX = convertLatitude(bBox.getTopLeft().getLatitude());
-        double bBoxRX = convertLatitude(bBox.getBottomRight().getLatitude());
-        double bBoxLY = convertLongitude(bBox.getTopLeft().getLongitude());
-        double bBoxRY = convertLongitude(bBox.getBottomRight().getLongitude());
-
-        Vector topLeft = new Vector(bBoxLX, bBoxLY);
-        Vector botRight = new Vector(bBoxRX, bBoxRY);
-
-        //convert bounding box vecs to tile grid coords based on zoom (0-6, dimension are 2^z)
-        topLeft.scale(Math.pow(2, tile.getZoom()));
-        botRight.scale(Math.pow(2, tile.getZoom()));
+        Vector topLeft = new Vector(tl);
+        Vector botRight = new Vector(br);
 
         //based on the bBox vecs' width and height, figure out where the tile should go.
         //1. move viewport and tile to top left of tile grid. i.e. subtract br, tilec by tl
@@ -105,15 +95,7 @@ public class OverlayManager {
 
     }
 
-    // convert both lat and lon to a value between 0-1, 0 being -180 or 90, 1 being 180 or -90.
-    // for lon, the direction is reversed as in image processing the Y axis goes from top to bottom.
-    private double convertLatitude(double lat){
-        return (lat + 180) / 360;
-    }
 
-    private double convertLongitude(double lon){
-        return (-1 * lon + 90) / 180;
-    }
 }
 
 class LayerNotFoundException extends Exception {
