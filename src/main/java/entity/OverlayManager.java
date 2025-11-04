@@ -8,12 +8,17 @@ public class OverlayManager {
     private final ArrayList<String> types;
     private final ArrayList<Float> opacity;
     private String selected;
-    private final BufferedImage overlay;
+    private BufferedImage overlay;
 
     public OverlayManager(int x, int y){
         this.types = new ArrayList<String>();
         this.opacity = new ArrayList<Float>();
         this.selected = null;
+        this.overlay = new BufferedImage(x, y, BufferedImage.TYPE_INT_ARGB);
+    }
+
+    //TODO use observers to automatically update this when the viewport changes size
+    public void changeSize(int x, int y){
         this.overlay = new BufferedImage(x, y, BufferedImage.TYPE_INT_ARGB);
     }
 
@@ -44,6 +49,7 @@ public class OverlayManager {
         return overlay;
     }
 
+    //TODO implement updateOverlayUseCase
     public void updateOverlay(BoundingBox bBox, ArrayList<Tile> tileList){
         for (Tile tile: tileList){
             drawTileToOverlay(bBox, tile);
