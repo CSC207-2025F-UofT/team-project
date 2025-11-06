@@ -10,9 +10,20 @@ import java.io.InputStream;
 import entity.WeatherTile;
 import javax.imageio.ImageIO;
 
+/**
+ * This WeatherTile fetcher makes a direct call to the API using OkHttps and
+ * returns the image data with no caching
+ */
 public class OkHttpsWeatherTileApiFetcher implements WeatherTileApiFetcher {
     private final OkHttpClient client = new OkHttpClient();
 
+    /** Make an API call to <a href="https://weathermaps.weatherapi.com">WeatherMaps</a> API to request
+     * image data, and return the image data.
+     *
+     * @param tile the tile for which image data is to be collected for
+     * @return image data associated with <code>tile</code>
+     * @throws TileNotFoundException If image data for <code>tile</code> could not be parsed, or if the tile given is invalid
+     */
     public BufferedImage getWeatherTileImageData(WeatherTile tile) throws TileNotFoundException {
         String url = "https://weathermaps.weatherapi.com/";
         final Request request = new Request.Builder()
