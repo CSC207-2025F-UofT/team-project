@@ -14,10 +14,10 @@ public class CachedTileRepository implements TileRepository {
 
 
     private HashMap<String, CacheEntry> tileHash;
-    private LinkedList<CacheEntry> cacheEntryList; // linked list used for efficient removal and adding.
+    private CacheEntryList cacheEntryList; // linked list used for efficient removal and adding.
     private int tileCacheSize; // max size for the given cache
 
-    protected static class CacheEntry {
+    private static class CacheEntry {
         private BufferedImage imageData;
         private CachedTileRepository.CacheEntry next;
         private CachedTileRepository.CacheEntry prev;
@@ -27,6 +27,27 @@ public class CachedTileRepository implements TileRepository {
          */
         protected CacheEntry(BufferedImage imageData) {
             this.imageData = imageData;
+        }
+    }
+
+    private static class CacheEntryList {
+        private CacheEntry head;
+        private CacheEntry tail;
+
+        public CacheEntryList(CacheEntry firstNode) {
+            return;
+        }
+
+        public void addCacheEntry(CacheEntry entry) {
+            if (this.head == null) {
+                this.head = entry;
+                this.tail = entry;
+                this.tail.next = this.head;
+            }
+            else{
+                this.tail.next = entry;
+                entry.next = this.tail;
+            }
         }
 
     }
