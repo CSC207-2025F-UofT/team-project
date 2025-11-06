@@ -1,8 +1,24 @@
 package app;
 
-public class Main {
+import javax.swing.*;
 
+public class Main {
     public static void main(String[] args) {
-        // app.Main entry point of the program.
+        // The AppBuilder holds all the state and wiring logic.
+        AppBuilder appBuilder = new AppBuilder();
+
+        // Chain the building methods to construct the application piece by piece.
+        JFrame application = appBuilder
+                .addDemoView()
+                .addWriteTestView()
+                .addEvaluateTestView()
+                .addLoadingView()
+                .addMockTestGenerationUseCase()
+                .addEvaluateTestUseCase()
+                .build();
+
+        application.pack();
+        application.setLocationRelativeTo(null); // Center the window
+        application.setVisible(true);
     }
 }
