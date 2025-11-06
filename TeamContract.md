@@ -29,6 +29,17 @@ This contract sets out shared expectations and commitments for how our team will
 
 * Respectful and inclusive behaviour are necessary for smooth and productive communication. What are some respectful and inclusive behaviours you expect when communicating with each other during lectures, labs, or outside of class?
   actively listening to each team members ideas, giving everyone a chance to meaningfully contribute,
+* Which platform will you use for communication outside of class, when required for work on your course project? 
+discord
+
+* Each teammate agrees to respond to messages in at most how long? 1 day? 2 days? Some other amount of time? 
+1 day
+
+* What things should a teammate notify you about? 
+not being able to meet, not being able to get to lecture or lab, if they need help
+
+* Respectful and inclusive behaviour are necessary for smooth and productive communication. What are some respectful and inclusive behaviours you expect when communicating with each other during lectures, labs, or outside of class? 
+actively listening to each team members ideas, giving everyone a chance to meaningfully contribute, 
 
 ---
 
@@ -45,12 +56,16 @@ This contract sets out shared expectations and commitments for how our team will
 
 * How will decisions about your team project be made?
   by majority vote and through thoughtful discussion
+* How will decisions about your team project be made? 
+by majority vote and through thoughtful discussion
 
 ---
 ## Conflict resolution
 
 * How will your team resolve conflicts?
   by properly communicating and involving the TA if necessary
+* How will your team resolve conflicts? 
+by properly communicating and involving the TA if necessary
 
 ---
 
@@ -58,6 +73,8 @@ This contract sets out shared expectations and commitments for how our team will
 
 * Reliability and accountability are also important aspects of teamwork. What are the responsibilities of each team member?
   completing their share of the work in a timely manner, seeking assistance from teammates/TAs/instructors when required, coming to lecture and labs as much as possible
+* Reliability and accountability are also important aspects of teamwork. What are the responsibilities of each team member? 
+completing their share of the work in a timely manner, seeking assistance from teammates/TAs/instructors when required, coming to lecture and labs as much as possible
 
 ---
 
@@ -67,11 +84,7 @@ By signing below, we acknowledge that we have read, discussed, and agreed to the
 
 Team Member Signatures:
 
-<<<<<<< HEAD
-Alice Peng
-=======
-
 Yuanzhe Li
 Avery Ng
 Tian Liu
->>>>>>> d3d29035d35455c0e5785a10590fd822003749f5
+Alice Peng
