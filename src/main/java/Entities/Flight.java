@@ -1,4 +1,7 @@
+package Entities;
+
 public class Flight {
+
     private final String flightNumber;
     private final String departureAirport;
     private final String arrivalAirport;
