@@ -1,18 +1,25 @@
 package dataaccessobjects;
 
 import dataaccessinterface.WeatherTileApiFetcher;
-
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import entity.WeatherTile;
+import entity.WeatherType;
+import okhttp3.OkHttpClient;
 
 public class OkHttpsWeatherTileApiFetcher implements WeatherTileApiFetcher {
     private final OkHttpClient client = new OkHttpClient();
 
-    public List<BufferedImage> getSubBreeds(String breed) throws BreedNotFoundException {
-        ArrayList<String> subbreedList = new ArrayList<>();
+    public BufferedImage getWeatherTileImageData(WeatherTile tile) throws TileNotFoundException {
+        String url = "https://weathermaps.weatherapi.com/";
         final Request request = new Request.Builder()
-                .url(String.format("%s/%s/list", "https://dog.ceo/api/breed", breed))
+                .url(String.format("%s/tiles/%s/%s/%s/%s/%s.png",
+                        url,
+                        tile.getWeatherType().name().toLowerCase(),
+                        tile.getTimestamp(),
+                        tile.getTimestamp(),
+                        tile.getCoordinates().getX(),
+                        tile.getCoordinates().getY(),
+                        tile.getCoordinates().getZoom()))
                 .addHeader("Content-Type", "application/json")
                 .build();
 
