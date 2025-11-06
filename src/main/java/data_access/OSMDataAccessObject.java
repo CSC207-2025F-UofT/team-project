@@ -4,6 +4,8 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
+
 import org.json.JSONArray;
 import org.json.JSONObject;
 import entity.Location;
@@ -14,7 +16,7 @@ public class OSMDataAccessObject implements SearchDataAccessInterface {
     @Override
     public boolean existsByName(String locationName) throws Exception {
         String url = "https://nominatim.openstreetmap.org/search?q="
-                + java.net.URLEncoder.encode(locationName, "UTF-8")
+                + java.net.URLEncoder.encode(locationName, StandardCharsets.UTF_8)
                 + "&format=json&limit=1";
 
         HttpClient client = HttpClient.newHttpClient();
@@ -37,7 +39,7 @@ public class OSMDataAccessObject implements SearchDataAccessInterface {
     @Override
     public Location get(String locationName) throws IOException, InterruptedException {
         String url = "https://nominatim.openstreetmap.org/search?q="
-                + java.net.URLEncoder.encode(locationName, "UTF-8")
+                + java.net.URLEncoder.encode(locationName, StandardCharsets.UTF_8)
                 + "&format=json&limit=1";
 
         HttpClient client = HttpClient.newHttpClient();

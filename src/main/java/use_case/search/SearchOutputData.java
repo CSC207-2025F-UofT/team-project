@@ -4,9 +4,9 @@ package use_case.search;
  * Output Data for the Login Use Case.
  */
 public class SearchOutputData {
-    private String locationName;
-    private double latitude;
-    private double longitude;
+    private final String locationName;
+    private final double latitude;
+    private final double longitude;
 
     public SearchOutputData(String locationName, double lat, double lon) {
         this.locationName = locationName;
