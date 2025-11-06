@@ -1,5 +1,7 @@
 package entity;
 
+import org.openstreetmap.gui.jmapviewer.OsmMercator;
+
 public class Location {
     private final double latitude;
     private final double longitude;
@@ -18,10 +20,11 @@ public class Location {
     }
 
     public TileCoords getTileCoords(int zoom) {
-        double n = 1 << zoom;
-        double latRad = Math.toRadians(latitude);
-        int x = (int) Math.floor((longitude + 180.0) / 360.0 * n);
-        int y = (int) Math.floor((1 - Math.log(Math.tan(latRad) + 1 / Math.cos(latRad)) / Math.PI) / 2 * n);
-        return new TileCoords(x, y, zoom);
+        OsmMercator merc = new OsmMercator(256);
+        double px = merc.lonToX(longitude, zoom);
+        double py = merc.latToY(latitude,  zoom);
+        int xtile = (int) Math.floor(px / 256.0);
+        int ytile = (int) Math.floor(py / 256.0);
+        return new TileCoords(xtile, ytile, zoom);
     }
  }
