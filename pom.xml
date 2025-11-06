@@ -15,7 +15,6 @@
     </properties>
 
     <dependencies>
-    <dependencies>
         <!-- OkHttp for HTTP requests -->
         <dependency>
             <groupId>com.squareup.okhttp3</groupId>
