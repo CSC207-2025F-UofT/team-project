@@ -1,13 +1,13 @@
 package dataaccessobjects;
 
+import okhttp3.Request;
+import okhttp3.Response;
+import okhttp3.OkHttpClient;
 import dataaccessinterface.WeatherTileApiFetcher;
-
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.io.InputStream;
 import entity.WeatherTile;
-import entity.WeatherType;
-import okhttp3.OkHttpClient;
-
 import javax.imageio.ImageIO;
 
 public class OkHttpsWeatherTileApiFetcher implements WeatherTileApiFetcher {
@@ -19,33 +19,38 @@ public class OkHttpsWeatherTileApiFetcher implements WeatherTileApiFetcher {
                 .url(String.format("%s/%s/tiles/%s/%s/%s/%s/%s.png",
                         url,
                         tile.getWeatherType().name().toLowerCase(),
-                        tile.getTimestamp(),
-                        tile.getTimestamp(),
+                        tile.getUtcDateAsString(),
+                        tile.getUtcHourAsString(),
                         tile.getCoordinates().x,
                         tile.getCoordinates().y,
                         tile.getCoordinates().zoom))
-                .addHeader("Content-Type", "application/json")
                 .build();
 
-        try {
-            final Response response = client.newCall(request).execute();
+        try (Response response = client.newCall(request).execute()){
             if (response.code() == 404) {
-                throws new IOException();
+                throw new TileNotFoundException(tile);
             }
-            try {
-                InputStream in = response.body().byteStream();
-                BufferedImage image = ImageIO.read(in);
-                if (image == null){
-                    throws new IOException();
-                }
-                return image;
-            }
-            catch (IOException){
-                throws new IOException();
-            }
+            return extractImageData(response);
+
         } catch (IOException e) {
-            throw new BreedFetcher.BreedNotFoundException("Subbreeds could not be found for " + breed);
+            throw new TileNotFoundException("Failed to read tile image data.");
         }
-        return subbreedList;
+
+    }
+
+    private BufferedImage extractImageData(Response response) throws IOException {
+        try {
+            assert response.body() != null;
+            InputStream in = response.body().byteStream();
+            BufferedImage image = ImageIO.read(in);
+            if (image == null){
+                throw new IOException();
+            }
+            return image;
+        }
+        catch (IOException e){
+            throw new IOException();
+        }
     }
 }
+
