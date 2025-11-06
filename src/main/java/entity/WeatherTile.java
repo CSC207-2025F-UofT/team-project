@@ -1,15 +1,15 @@
 package entity;
 
 public class WeatherTile {
-    private TileCoords coordinates;
-    private java.time.Instant timestamp;
+    private final TileCoords coordinates;
+    private final java.time.Instant timestamp;
 
     public WeatherTile(TileCoords coordinates, java.time.Instant timestamp) {
         this.coordinates = coordinates;
         this.timestamp = timestamp;
     }
 
-    public double getZoom() { return zoom; }
+    public java.time.Instant getTimestamp() { return timestamp; }
 
     public TileCoords getCoordinates() {
         return coordinates;
