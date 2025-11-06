@@ -1,10 +1,10 @@
 public class Flight {
-    private String flightNumber;
-    private String departureAirport;
-    private String arrivalAirport;
-    private String status;
-    private String departureTime;
-    private String arrivalTime;
+    private final String flightNumber;
+    private final String departureAirport;
+    private final String arrivalAirport;
+    private final String status;
+    private final String departureTime;
+    private final String arrivalTime;
 
     public Flight(String flightNumber, String departureAirport, String arrivalAirport,
                   String status, String departureTime, String arrivalTime) {
@@ -14,5 +14,29 @@ public class Flight {
         this.status = status;
         this.departureTime = departureTime;
         this.arrivalTime = arrivalTime;
+    }
+
+    public String getFlightNumber() {
+        return flightNumber;
+    }
+
+    public String getDepartureAirport() {
+        return departureAirport;
+    }
+
+    public String getArrivalAirport() {
+        return arrivalAirport;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public String getDepartureTime() {
+        return departureTime;
+    }
+
+    public String getArrivalTime() {
+        return arrivalTime;
     }
 }
