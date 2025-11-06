@@ -38,6 +38,7 @@ public class Viewport {
         Location bottomRight = new Location(bottomRightLat, bottomRightLon);
         return new BoundingBox(topLeft, bottomRight);
     }
+
     public Location getCentre() {
         return centre;
     }
