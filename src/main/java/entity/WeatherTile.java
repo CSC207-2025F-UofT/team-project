@@ -1,13 +1,12 @@
 package entity;
 
 public class WeatherTile {
-    private double zoom;
     private TileCoords coordinates;
     private java.time.Instant timestamp;
 
-    public WeatherTile(double zoom, TileCoords coordinates){
-        this.zoom = zoom;
+    public WeatherTile(TileCoords coordinates, java.time.Instant timestamp) {
         this.coordinates = coordinates;
+        this.timestamp = timestamp;
     }
 
     public double getZoom() { return zoom; }
