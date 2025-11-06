@@ -1,9 +1,11 @@
 package dataaccessinterface;
 import entity.Tile;
+import entity.WeatherTile;
+
 import java.awt.image.BufferedImage;
 
 public interface TileRepository {
-    public BufferedImage getTileImageData(int x, int y, double zoom);
-    public BufferedImage getTileImageData(Tile tile);
-    public void addTile(Tile tile, BufferedImage imageData);
+    public BufferedImage getTileImageData(int x, int y, double zoom, java.time.Instant timestamp);
+    public BufferedImage getTileImageData(WeatherTile tile);
+    public void addTileToCache(WeatherTile tile);
 }
