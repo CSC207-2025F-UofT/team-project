@@ -12,7 +12,6 @@ import java.util.HashMap;
  */
 public class CachedTileRepository implements TileRepository {
 
-
     private HashMap<String, CacheEntry> tileHash;
     private CacheEntryList cacheEntryList; // linked list used for efficient removal and adding.
     private int tileCacheSize; // max size for the given cache
@@ -71,7 +70,7 @@ public class CachedTileRepository implements TileRepository {
      *         if the params refer to an invalid tile
      */
     public BufferedImage getTileImageData(int x, int y, double zoom, java.time.Instant timestamp){
-        return getTileImageDataFromStringKey(coordinates.x+","+coordinates.y+","+zoom+","+timestamp);
+        return getTileImageDataFromStringKey(x+","+y+","+zoom+","+timestamp);
     }
 
     /** Return the tile image data associated with the Tile object
@@ -81,13 +80,13 @@ public class CachedTileRepository implements TileRepository {
      *         if the params refer to an invalid tile
      */
     public BufferedImage getTileImageData(WeatherTile tile){
-        String tileKey = WeatherTile.generateKey(tile);
+        String tileKey = tile.generateKey();
         return getTileImageDataFromStringKey(tileKey);
     }
 
     private BufferedImage getTileImageDataFromStringKey(String tileKey){
         if (tileHash.containsKey(tileKey)){
-            return tileHash.get(tileKey);
+            return tileHash.get(tileKey).imageData;
         }
         else {
             return getTileImageFromAPI(tile);
