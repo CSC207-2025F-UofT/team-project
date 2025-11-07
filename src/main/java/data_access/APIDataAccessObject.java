@@ -1,0 +1,36 @@
+package data_access;
+
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
+
+import java.io.IOException;
+
+public class APIDataAccessObject {
+    private static final String API_URL = "https://fantasy.premierleague.com/api/bootstrap-static/";
+    private final OkHttpClient client;
+
+    public APIDataAccessObject() {
+        this.client = new OkHttpClient();
+    }
+
+    public String getBootstrapData() throws IOException {
+        final OkHttpClient client = new OkHttpClient().newBuilder()
+                .build();
+        Request request = new Request.Builder()
+                .url(API_URL)
+                .method("GET", null)
+                .build();
+
+        try {
+            final Response response = client.newCall(request).execute();
+            if (!response.isSuccessful()) {
+                throw new IOException("Unexpected code " + response);
+            }
+            return response.body().string();
+        }
+        catch (IOException e) {
+            throw e;
+        }
+    }
+}
