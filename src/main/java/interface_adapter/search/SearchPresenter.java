@@ -21,6 +21,7 @@ public class SearchPresenter implements SearchOutputBoundary {
         searchState.setLocationName(response.getLocationName());
         searchState.setLatitude(response.getLatitude());
         searchState.setLongitude(response.getLongitude());
+        searchState.setSearchError(null);
         this.searchViewModel.firePropertyChange();
     }
 

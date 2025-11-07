@@ -8,11 +8,12 @@ import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import java.awt.*;
+import java.awt.event.AWTEventListener;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.io.IOException;
 
 /**
  * The View for when the user is browsing map and search for location.
@@ -27,8 +28,6 @@ public class SearchView extends JPanel implements ActionListener, PropertyChange
     private final JTextField searchInputField = new JTextField(15);
     /* The search button */
     private final JButton search =  new JButton("Search");
-    /* JLabel of search error */
-    private final JLabel searchErrorField = new JLabel();
     /* Controller of search view */
     private transient SearchController searchController = null;
     /* initialize a default mapPanel view */
@@ -89,7 +88,6 @@ public class SearchView extends JPanel implements ActionListener, PropertyChange
         searchContainer.add(searchLocationPanel, BorderLayout.CENTER);
         this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
         this.add(searchContainer);
-        this.add(searchErrorField);
         this.add(mapPanel);
     }
 
@@ -105,8 +103,26 @@ public class SearchView extends JPanel implements ActionListener, PropertyChange
     public void propertyChange(PropertyChangeEvent evt) {
         final SearchState state = (SearchState) evt.getNewValue();
         setFields(state);
-        searchErrorField.setText(state.getSearchError());
-        mapPanel.setCenter(state.getLatitude(), state.getLongitude());
+        if (state.getSearchError() != null) {
+            JLabel label = new JLabel(state.getSearchError());
+            label.setOpaque(true);
+            label.setBackground(new Color(255, 255, 150));
+            Window window = SwingUtilities.getWindowAncestor(this);
+            Popup popup = PopupFactory.getSharedInstance()
+                    .getPopup(window, label, 700, 400);
+            popup.show();
+            Toolkit.getDefaultToolkit().addAWTEventListener(new AWTEventListener() {
+                @Override
+                public void eventDispatched(AWTEvent event) {
+                    if (event instanceof MouseEvent me && me.getID() == MouseEvent.MOUSE_PRESSED) {
+                        popup.hide();
+                        Toolkit.getDefaultToolkit().removeAWTEventListener(this);
+                    }
+                }
+            }, AWTEvent.MOUSE_EVENT_MASK);
+        } else {
+            mapPanel.setCenter(state.getLatitude(), state.getLongitude());
+        }
     }
 
     private void setFields(SearchState state) {
