@@ -18,7 +18,7 @@ public class SearchController {
      * Executes the Search Use Case.
      * @param locationName the locationName of the location search
      */
-    public void execute(String locationName) throws Exception {
+    public void execute(String locationName) {
         final SearchInputData searchInputData = new SearchInputData(
                 locationName);
 
