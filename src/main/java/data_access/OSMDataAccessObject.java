@@ -24,7 +24,7 @@ public class OSMDataAccessObject implements SearchDataAccessInterface {
 
     /* Check the existence of Location */
     @Override
-    public boolean existsByName(String locationName) throws Exception {
+    public boolean existsByName(String locationName) throws IOException, InterruptedException {
         JSONArray array = getNominatimInfoHelper(locationName);
         return !array.isEmpty();
     }
