@@ -1,7 +1,7 @@
 package use_case.search;
 
 /**
- * Input Boundary for actions which are related to logging in.
+ * Input Boundary for actions which are related to search and display on map.
  */
 public interface SearchInputBoundary {
 

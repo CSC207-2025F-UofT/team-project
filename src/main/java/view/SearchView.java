@@ -14,32 +14,35 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
 /**
- * The View for when the user is logging into the program.
+ * The View for when the user is browsing map and search for location.
  */
 public class SearchView extends JPanel implements ActionListener, PropertyChangeListener {
 
+    /* Name of the card*/
     private final String viewName;
-
+    /* Search Panel for textField and buton*/
+    final JPanel searchLocationPanel = new JPanel(new BorderLayout());
+    /* search input JTextField */
     private final JTextField searchInputField = new JTextField(15);
-    private final JLabel searchErrorField = new JLabel();
-
+    /* The search button */
     private final JButton search =  new JButton("Search");
-    private SearchController searchController;
-
+    /* JLabel of search error */
+    private final JLabel searchErrorField = new JLabel();
+    /* Controller of search view */
+    private transient SearchController searchController = null;
+    /* initialize a default mapPanel view */
     private final MapPanel mapPanel = new MapPanel();
 
+    /**
+     * Construct the SearchView JPanel from its SearchViewModel (contain states of the search view)
+     */
     public SearchView(SearchViewModel searchViewModel) {
-
+        /* Get view name from Model */
         this.viewName = searchViewModel.getViewName();
+        /* Add implemented evt logic to ViewModel so it react to fires */
         searchViewModel.addPropertyChangeListener(this);
 
-        final JPanel searchLocationPanel = new JPanel(new BorderLayout());
-        searchLocationPanel.add(searchInputField, BorderLayout.CENTER);
-        searchLocationPanel.add(search, BorderLayout.EAST);
-        JPanel searchContainer = new JPanel(new BorderLayout());
-        searchContainer.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20)); // 上10, 左右20, 下10像素边距
-        searchContainer.add(searchLocationPanel, BorderLayout.CENTER);
-
+        /* Add listener to search button */
         search.addActionListener(
                 evt -> {
                     if (evt.getSource().equals(search)) {
@@ -50,12 +53,14 @@ public class SearchView extends JPanel implements ActionListener, PropertyChange
                                     currentState.getLocationName()
                             );
                         } catch (Exception e) {
+                            // Todo throw a search error
                             throw new RuntimeException(e);
                         }
                     }
                 }
         );
 
+        /* Change LocationName in search state when typing to search field */
         searchInputField.getDocument().addDocumentListener(new DocumentListener() {
 
             private void documentListenerHelper() {
@@ -80,6 +85,12 @@ public class SearchView extends JPanel implements ActionListener, PropertyChange
             }
         });
 
+        /* Deal with UI appearance */
+        searchLocationPanel.add(searchInputField, BorderLayout.CENTER);
+        searchLocationPanel.add(search, BorderLayout.EAST);
+        JPanel searchContainer = new JPanel(new BorderLayout());
+        searchContainer.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20)); // 上10, 左右20, 下10像素边距
+        searchContainer.add(searchLocationPanel, BorderLayout.CENTER);
         this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
         this.add(searchContainer);
         this.add(searchErrorField);

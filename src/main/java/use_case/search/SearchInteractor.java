@@ -3,7 +3,7 @@ package use_case.search;
 import entity.Location;
 
 /**
- * The Login Interactor.
+ * The Search Interactor.
  */
 public class SearchInteractor implements SearchInputBoundary {
     private final SearchDataAccessInterface searchDataAccessObj;
@@ -22,7 +22,7 @@ public class SearchInteractor implements SearchInputBoundary {
             searchPresenter.prepareFailView(locationName + ": Location does not exist.");
         }
         else {
-//            get location data from OSM
+            // get location data from OSM
             final Location location = searchDataAccessObj.get(searchInputData.getLocationName());
 
             final SearchOutputData searchOutputData = new SearchOutputData(location.getName(),

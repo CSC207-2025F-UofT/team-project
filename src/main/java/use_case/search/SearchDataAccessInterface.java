@@ -5,7 +5,7 @@ import entity.Location;
 import java.io.IOException;
 
 /**
- * DAO interface for the Login Use Case.
+ * DAO interface for the Search Use Case.
  */
 public interface SearchDataAccessInterface {
 
@@ -17,8 +17,8 @@ public interface SearchDataAccessInterface {
     boolean existsByName(String locationName) throws Exception;
 
     /**
-     * Saves the user.
-     * @param location the user to save
+     * Saves the Location.
+     * @param location the location to save
      */
     void save(Location location);
 
