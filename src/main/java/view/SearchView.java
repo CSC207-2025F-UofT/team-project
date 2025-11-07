@@ -12,6 +12,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.io.IOException;
 
 /**
  * The View for when the user is browsing map and search for location.
@@ -48,14 +49,9 @@ public class SearchView extends JPanel implements ActionListener, PropertyChange
                     if (evt.getSource().equals(search)) {
                         final SearchState currentState = searchViewModel.getState();
 
-                        try {
-                            searchController.execute(
-                                    currentState.getLocationName()
+                        searchController.execute(
+                                currentState.getLocationName()
                             );
-                        } catch (Exception e) {
-                            // Todo throw a search error
-                            throw new RuntimeException(e);
-                        }
                     }
                 }
         );
