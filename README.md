@@ -16,8 +16,13 @@ Use Case Assignments
 Each of the Use Cases from our team’s minimal set has been assigned to one team member.
 
 Parker – Get current weather data (User Story #1)
+
 Carl – Provide clothing recommendations (User Story #2)
+
 Elizabeth – Save favourite location (User Story #3)
+
 Ellen – View multi-day forecast (merged with UC1) (User Story #4)
+
 Chengcheng – Save and view outfit preferences (User Story #5)
+
 Mitchell – Manage saved outfits and locations (User Story #6)
