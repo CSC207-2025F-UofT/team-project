@@ -14,7 +14,7 @@ public interface SearchDataAccessInterface {
      * @param locationName the locationName to look for
      * @return true if a user with the given locationName exists; false otherwise
      */
-    boolean existsByName(String locationName) throws Exception;
+    boolean existsByName(String locationName) throws IOException, InterruptedException;
 
     /**
      * Saves the Location.
