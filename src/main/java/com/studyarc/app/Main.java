@@ -1,4 +1,4 @@
-package app;
+package com.studyarc.app;
 
 import javax.swing.*;
 
