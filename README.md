@@ -35,3 +35,5 @@ music reviews app ideas:
 - sort ny most popular for artists and genres 
 - have a top 10 list
 - make a json array for songs to make the song rankings
+
+Checking for the commit information for Contributor graph. (Aaron)
