@@ -16,6 +16,7 @@ public class Main {
         JFrame application = appBuilder
                 .addWriteTestView()
                 .addEvaluateTestView()
+                .addLectureNotesView()
                 .addLoadingView()
                 .addCourseDashboardView()
                 .addCourseWorkspaceView()
@@ -24,6 +25,7 @@ public class Main {
                 .addCourseUseCases()
                 .addMockTestGenerationUseCase()
                 .addEvaluateTestUseCase()
+                .addLectureNotesUseCase()
                 .build();
 
         application.pack();
