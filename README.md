@@ -9,5 +9,7 @@ The readme should include information such as:
 - screenshots or animations demonstrating current functionality
 
 By keeping this README up-to-date,
-your team will find it easier to prepare for the final presentation
+your team will find it easy to prepare for the final presentation
 at the end of the term.
+
+# Team Contract
