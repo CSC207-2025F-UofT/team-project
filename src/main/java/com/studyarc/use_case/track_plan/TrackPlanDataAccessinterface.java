@@ -1,6 +1,4 @@
-package use_case.track_plan;
-
-import use_case.TempUser;
+package com.studyarc.use_case.track_plan;
 
 public interface TrackPlanDataAccessinterface {
     //after the entity “user” is impelemented， may add some parameter to getPlans call.

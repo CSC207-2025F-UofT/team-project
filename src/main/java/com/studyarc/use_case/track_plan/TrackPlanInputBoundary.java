@@ -1,4 +1,4 @@
-package use_case.track_plan;
+package com.studyarc.use_case.track_plan;
 //since there is not userinput data when executes, no parameter needede.
 
 public interface TrackPlanInputBoundary {

@@ -1,4 +1,4 @@
-package use_case.track_plan;
+package com.studyarc.use_case.track_plan;
 
 
 public class TrackPlanInputData {

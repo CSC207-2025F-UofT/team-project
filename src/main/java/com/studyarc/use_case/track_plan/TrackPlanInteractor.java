@@ -1,10 +1,8 @@
-package use_case.track_plan;
+package com.studyarc.use_case.track_plan;
 //
 //use case Interactor for tracking a plan
 //1. access all plans from the user in database
 //2. display all the plan in w.e the view is called
-
-import use_case.TempUser;
 
 public class TrackPlanInteractor implements TrackPlanInputBoundary {
     final TrackPlanOutputBoundary presenter;

@@ -1,4 +1,4 @@
-package use_case;
+package com.studyarc.use_case.track_plan;
 
 public class TempUser {
     private String username;
