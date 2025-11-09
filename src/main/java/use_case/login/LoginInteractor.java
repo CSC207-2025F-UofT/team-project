@@ -24,6 +24,10 @@ public class LoginInteractor implements LoginInputBoundary {
             loginPresenter.prepareFailView("Please enter a username");
         }
 
+        if ("".equals(password)) {
+            loginPresenter.prepareFailView("Please enter a password");
+        }
+
         else if (!userDataAccessObject.existsByName(username)) {
             loginPresenter.prepareFailView("No account found for: " +  username);
         }
