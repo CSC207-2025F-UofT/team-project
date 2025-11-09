@@ -152,13 +152,10 @@ public class PokemonLookupInteractor implements PokemonLookupInputBoundary {
 
 
                 final PokemonLookupOutputData pokemonLookupOutputData =
-                        new PokemonLookupOutputData();
+                        new PokemonLookupOutputData(Pokemon);
                 userPresenter.prepareSuccessView(pokemonLookupOutputData);
 
             }
-
-            final PokemonLookupOutputData pokemonLookupOutputData = new PokemonLookupOutputData();
-            userPresenter.prepareSuccessView(pokemonLookupOutputData);
         }
     }
 
