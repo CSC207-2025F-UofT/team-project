@@ -12,26 +12,33 @@ By keeping this README up-to-date,
 your team will find it easier to prepare for the final presentation
 at the end of the term.
 
+## Schedule / plan 
 
-UML / project layout: 
-- main gameplay loop 
-- gallery 
-    - new window + download 
-- settings
+- Nov 10-14 - PRs + something to show (one PR each member, runnable code, be able to make API calls)
+    - plan is to look at each UseCase and decide how to implement each
+- Nov 17-21 - one unit test per Interactor + close-to-complete prototype of program to get final feedback
+- Nov 24-25 - tests achieving 100% code coverage
+- Dec 1 - Presentation 
 
-## usecases 
+
+
+## Zac: Main menu + gameplay 
 - gameplayUseCase
-
-- deleteGameUseCase
 - recordGameUseCase 
-- saveImageToUserUseCase
-- editSettingsUseCase
 - retrieveSettingsUseCase
 - randomPromptUseCase(Difficulty difficulty, UserSettingsDataBase??? idk)
 
+- APICaller 
+    - String APIToken
+    + call(APIToken apiToken, ???) (returns the json / structured data from the call) 
 
+    - HuggingFaceAPICaller
+        - String APIToken
 
-## entities 
+        + call()
+
+## Ziyi: Advanced drawing features
+
 - GameRecord
     - String imagePath (where the image is stored in our database)
     - DateTime date (i think this type exists)
@@ -49,34 +56,39 @@ UML / project layout:
     + getDifficulty()
     + getPrompt()
 
-- Difficulty
-    - String difficultyName
-    - String[] prompts
+## David: gallery window 
+- retrieveGamesUseCase
 
-## apis 
 - DataBase
     - GameDataBase
     - UserSettingsDataBase
 
 
-- APICaller 
-    - String APIToken
-    + call(APIToken apiToken, ???) (returns the json / structured data from the call) 
+## OG: Settings
+- editSettingsUseCase
+
+- Difficulty
+    - String difficultyName
+    - String[] prompts
+
+## Laney: Saving pictures + new picture window
+- deleteGameUseCase
+- saveImageToUserUseCase
 
 
-    - HuggingFaceAPICaller
-        - String APIToken
-
-        + call()
-    
+UML / project layout: 
+- main gameplay loop 
+- gallery 
+    - new window + download 
+- settings
 
 
 
 ## guis
-- Application 
-- Game
-- MainMenu 
-- Gallery
-- PictureWindow
-- Settings 
+- Application (implement last)
+- Game (Zac + Ziyi)
+- MainMenu (Zac)
+- Gallery (David)
+- PictureWindow (Laney)
+- Settings (OG)
 
