@@ -9,6 +9,7 @@ import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import java.awt.*;
+import java.awt.event.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
@@ -21,35 +22,69 @@ public class LoggedInView extends JPanel implements ActionListener, PropertyChan
 
     private final String viewName = "logged in";
     private final LoggedInViewModel loggedInViewModel;
-    private final JLabel passwordErrorField = new JLabel();
     private ChangePasswordController changePasswordController = null;
     private LogoutController logoutController;
-
-    private final JLabel usernameInfo;
+//  TODO: IMPLEMENT the controllers, then uncomment this code
+//  private FindFlightController findFlightController;
+//  private SeeHistoryController seeHistoryController;
+//  private SeeSavedFlightsController seeSavedFlightsController;
+//  private LogHistoryController logHistoryController;
     private final JButton logOut;
 
-    private final JTextField passwordInputField = new JTextField(15);
-    private final JButton changePassword;
+    private JLabel usernameInfo = new JLabel();
+
+    private final JTextField fromInputField = new JTextField(15);
+    private final JTextField toInputField = new JTextField(15);
+
+    private final JTextField dayInputField = new JTextField(15);
+    String[] month_options = {"January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"};
+    private final JComboBox<String> monthInputField = new JComboBox<>(month_options);
+    String[] year_options = {"2025", "2026"};
+    private final JComboBox<String> yearInputField = new JComboBox<>(year_options);
+
+    private final JButton findFlight;
+    private final JButton seeHistory;
+    private final JButton seeSavedFlights;
 
     public LoggedInView(LoggedInViewModel loggedInViewModel) {
         this.loggedInViewModel = loggedInViewModel;
         this.loggedInViewModel.addPropertyChangeListener(this);
 
-        final JLabel title = new JLabel("Logged In Screen");
+        this.usernameInfo.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        final JLabel title = new JLabel("Where are we going?");
         title.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-        final LabelTextPanel passwordInfo = new LabelTextPanel(
-                new JLabel("Password"), passwordInputField);
+        final LabelTextPanel fromInfo = new LabelTextPanel(
+                new JLabel("From:"), fromInputField);
 
-        usernameInfo = new JLabel("Currently logged in: ");
-        usernameInfo.setAlignmentX(Component.CENTER_ALIGNMENT);
+        final LabelTextPanel toInfo = new LabelTextPanel(
+                new JLabel("To:"), toInputField);
+
+        final LabelTextPanel dayInfo = new LabelTextPanel(
+                new JLabel("Day of Arrival:"), dayInputField);
+
+        final JPanel monthInfo = new JPanel();
+        monthInfo.add(new  JLabel("Month of Arrival:"));
+        monthInfo.add(monthInputField);
+
+        final JPanel yearInfo = new JPanel();
+        yearInfo.add(new  JLabel("Year of Arrival:"));
+        yearInfo.add(yearInputField);
 
         final JPanel buttons = new JPanel();
+
+        findFlight = new JButton("Find my Flight!");
+        buttons.add(findFlight);
+
+        seeHistory = new JButton("See History");
+        buttons.add(seeHistory);
+
+        seeSavedFlights = new JButton("Saved Flights");
+        buttons.add(seeSavedFlights);
+
         logOut = new JButton("Log Out");
         buttons.add(logOut);
-
-        changePassword = new JButton("Change Password");
-        buttons.add(changePassword);
 
         logOut.addActionListener(// This creates an anonymous subclass of ActionListener and instantiates it.
                 evt -> {
@@ -60,11 +95,11 @@ public class LoggedInView extends JPanel implements ActionListener, PropertyChan
 
         this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 
-        passwordInputField.getDocument().addDocumentListener(new DocumentListener() {
+        fromInputField.getDocument().addDocumentListener(new DocumentListener() {
 
             private void documentListenerHelper() {
                 final LoggedInState currentState = loggedInViewModel.getState();
-                currentState.setPassword(passwordInputField.getText());
+                currentState.setFrom(fromInputField.getText());
                 loggedInViewModel.setState(currentState);
             }
 
@@ -84,24 +119,129 @@ public class LoggedInView extends JPanel implements ActionListener, PropertyChan
             }
         });
 
-        changePassword.addActionListener(
+        toInputField.getDocument().addDocumentListener(new DocumentListener() {
+
+            private void documentListenerHelper() {
+                final LoggedInState currentState = loggedInViewModel.getState();
+                currentState.setTo(toInputField.getText());
+                loggedInViewModel.setState(currentState);
+            }
+
+            @Override
+            public void insertUpdate(DocumentEvent e) {
+                documentListenerHelper();
+            }
+
+            @Override
+            public void removeUpdate(DocumentEvent e) {
+                documentListenerHelper();
+            }
+
+            @Override
+            public void changedUpdate(DocumentEvent e) {
+                documentListenerHelper();
+            }
+        });
+
+        dayInputField.getDocument().addDocumentListener(new DocumentListener() {
+
+            private void documentListenerHelper() {
+                final LoggedInState currentState = loggedInViewModel.getState();
+                currentState.setDay(dayInputField.getText());
+                loggedInViewModel.setState(currentState);
+            }
+
+            @Override
+            public void insertUpdate(DocumentEvent e) {
+                documentListenerHelper();
+            }
+
+            @Override
+            public void removeUpdate(DocumentEvent e) {
+                documentListenerHelper();
+            }
+
+            @Override
+            public void changedUpdate(DocumentEvent e) {
+                documentListenerHelper();
+            }
+        });
+
+        monthInputField.addItemListener(e -> {
+
+            if (e.getStateChange() == ItemEvent.SELECTED) {
+                String month = monthInputField.getSelectedItem().toString();
+                final LoggedInState currentState = loggedInViewModel.getState();
+                currentState.setMonth(month);
+                loggedInViewModel.setState(currentState);
+            }
+        });
+
+        yearInputField.addItemListener(e -> {
+
+            if (e.getStateChange() == ItemEvent.SELECTED) {
+                String year = yearInputField.getSelectedItem().toString();
+                final LoggedInState currentState = loggedInViewModel.getState();
+                currentState.setYear(year);
+                loggedInViewModel.setState(currentState);
+            }
+        });
+
+        findFlight.addActionListener(
                 // This creates an anonymous subclass of ActionListener and instantiates it.
                 evt -> {
-                    if (evt.getSource().equals(changePassword)) {
+                    if (evt.getSource().equals(findFlight)) {
                         final LoggedInState currentState = loggedInViewModel.getState();
+                        // TODO: Implement findFlightController
 
-                        this.changePasswordController.execute(
-                                currentState.getUsername(),
-                                currentState.getPassword()
-                        );
+//                          this.logHistoryController.execute(
+//                                  currentState.getFrom(),
+//                                  currentState.getTo(),
+//                                  currentState.getDay(),
+//                                  currentState.getMonth(),
+//                                  currentState.getYear()
+//                          );
+//                        this.findFlightController.execute(
+//                                currentState.getFrom(),
+//                                currentState.getTo(),
+//                                currentState.getDay(),
+//                                currentState.getMonth(),
+//                                currentState.getYear()
+//                        );
+
+                    }
+                }
+        );
+
+        seeHistory.addActionListener(
+                // This creates an anonymous subclass of ActionListener and instantiates it.
+                evt -> {
+                    if (evt.getSource().equals(seeHistory)) {
+                        final LoggedInState currentState = loggedInViewModel.getState();
+                        // TODO: Implement seeHistoryController
+//                        this.seeHistoryController.execute();
+                    }
+                }
+        );
+
+        seeSavedFlights.addActionListener(
+                // This creates an anonymous subclass of ActionListener and instantiates it.
+                evt -> {
+                    if (evt.getSource().equals(seeSavedFlights)) {
+                        final LoggedInState currentState = loggedInViewModel.getState();
+                        // TODO: Implement seeSavedFlightsController
+//                        this.seeSavedController.execute();
                     }
                 }
         );
 
         this.add(title);
-        this.add(usernameInfo);
-        this.add(passwordInfo);
-        this.add(passwordErrorField);
+        this.add(this.usernameInfo);
+        this.add(fromInfo);
+        this.add(toInfo);
+        this.add(dayInfo);
+        this.add(monthInfo);
+        this.add(yearInfo);
         this.add(buttons);
     }
 
@@ -110,7 +250,6 @@ public class LoggedInView extends JPanel implements ActionListener, PropertyChan
      * @param evt the ActionEvent to react to
      */
     public void actionPerformed(ActionEvent evt) {
-        // TODO: execute the logout use case through the Controller
         System.out.println("Click " + evt.getActionCommand());
     }
 
@@ -119,19 +258,7 @@ public class LoggedInView extends JPanel implements ActionListener, PropertyChan
         if (evt.getPropertyName().equals("state")) {
             final LoggedInState state = (LoggedInState) evt.getNewValue();
             this.usernameInfo.setText("Currently logged in as: " + state.getUsername());
-            passwordInputField.setText(state.getPassword());
         }
-        else if (evt.getPropertyName().equals("password")) {
-            final LoggedInState state = (LoggedInState) evt.getNewValue();
-            if (state.getPasswordError() == null) {
-                JOptionPane.showMessageDialog(this, "password updated for " + state.getUsername());
-                passwordInputField.setText("");
-            }
-            else {
-                JOptionPane.showMessageDialog(this, state.getPasswordError());
-            }
-        }
-
     }
 
     public String getViewName() {
@@ -143,7 +270,23 @@ public class LoggedInView extends JPanel implements ActionListener, PropertyChan
     }
 
     public void setLogoutController(LogoutController logoutController) {
-        // TODO: save the logout controller in the instance variable.
         this.logoutController = logoutController;
     }
+//    TODO: Implement the controllers, then uncomment this code
+//    public void setFindFlightController(FindFlightController findFlightController) {
+//        this.findFlightController = findFlightController;
+//    }
+//
+//    public void setseeHistoryController(SeeHistoryController seeHistoryController) {
+//        this.seeHistoryController = seeHistoryController;
+//    }
+//
+//    public void setseeSavedFlightsController(SeeSavedFlightsController seeSavedFlightsController) {
+//        this.seeSavedFlightsController = seeSavedFlightsController;
+//    }
+
+//    public void setlogHistoryController(LogHistoryController logHistoryController) {
+//        this.logHistoryController = logHistoryController;
+//    }
 }
+
