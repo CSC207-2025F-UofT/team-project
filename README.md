@@ -63,3 +63,13 @@ System looks up the characteristic in the API
 **Alternate flows**
 * Input is a game that does not exist -> Prompts the use to type a different game
 
+
+# Proposed API for the project:
+# API Name: PokeApi (https://pokeapi.co/)
+**Main Service Provided**
+* Contains data on every single Pokemon, moves, abilities and so on
+* Can search by Pokemon, Moves, Egg Groups, etc
+* Returns JSON output containing how the searched characteristic relates to the other characteristics
+* Output for a Pokemon contains: Basic Info, Learnable Moves, Generation, Egg Group, etc
+Status: Not yet tested
+
