@@ -1,25 +1,24 @@
 package interface_adapter.game;
 
-import use_case.click_button.ClickButtonInputBoundary;
-import use_case.click_button.ClickButtonInputData;
+import entity.ClickableObject;
+import use_case.game.GameInputBoundary;
+import use_case.game.GameInputData;
 
 /**
  * Controller for the Game View.
  */
 public class GameController {
 
-    private final ClickButtonInputBoundary clickButtonInteractor;
+    private final GameInputBoundary clickButtonInteractor;
 
-    public GameController(ClickButtonInputBoundary clickButtonInteractor) {
+    public GameController(GameInputBoundary clickButtonInteractor) {
         this.clickButtonInteractor = clickButtonInteractor;
     }
 
     /**
-     * Executes the click button use case.
-     * @param buttonNumber the button number that was clicked
+     * Click a clickable object
      */
-    public void clickButton(int buttonNumber) {
-        final ClickButtonInputData inputData = new ClickButtonInputData(buttonNumber);
-        clickButtonInteractor.execute(inputData);
+    public void click(ClickableObject clickableObject) {
+        clickButtonInteractor.execute(new GameInputData(clickableObject));
     }
 }

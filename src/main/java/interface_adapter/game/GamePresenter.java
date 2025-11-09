@@ -1,12 +1,12 @@
 package interface_adapter.game;
 
-import use_case.click_button.ClickButtonOutputBoundary;
-import use_case.click_button.ClickButtonOutputData;
+import use_case.game.GameOutputBoundary;
+import use_case.game.GameOutputData;
 
 /**
  * The Presenter for the Game View.
  */
-public class GamePresenter implements ClickButtonOutputBoundary {
+public class GamePresenter implements GameOutputBoundary {
 
     private final GameViewModel gameViewModel;
 
@@ -15,9 +15,11 @@ public class GamePresenter implements ClickButtonOutputBoundary {
     }
 
     @Override
-    public void prepareView(ClickButtonOutputData outputData) {
-        final GameState state = gameViewModel.getState();
-        state.setMessage(outputData.getMessage());
+    public void prepareView(GameOutputData outputData) {
+        final GameState state = new GameState();
+        state.setBackgroundImage(outputData.getBackgroundImage());
+        state.setClickableObjects(outputData.getClickableObjects());
+        gameViewModel.setState(state);
         gameViewModel.firePropertyChange();
     }
 }

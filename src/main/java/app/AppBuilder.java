@@ -9,9 +9,9 @@ import interface_adapter.game.GameViewModel;
 import interface_adapter.main_menu.MainMenuController;
 import interface_adapter.main_menu.MainMenuPresenter;
 import interface_adapter.main_menu.MainMenuViewModel;
-import use_case.click_button.ClickButtonInputBoundary;
-import use_case.click_button.ClickButtonInteractor;
-import use_case.click_button.ClickButtonOutputBoundary;
+import use_case.game.GameInputBoundary;
+import use_case.game.GameInteractor;
+import use_case.game.GameOutputBoundary;
 import use_case.switch_to_game.SwitchToGameViewInputBoundary;
 import use_case.switch_to_game.SwitchToGameViewInteractor;
 import use_case.switch_to_game.SwitchToGameViewOutputBoundary;
@@ -21,7 +21,6 @@ import view.ViewManager;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.ArrayList;
 
 public class AppBuilder {
     private final JPanel cardPanel = new JPanel();
@@ -32,10 +31,7 @@ public class AppBuilder {
     // Create initial game data
     final SceneFactory sceneFactory = new SceneFactory();
     final PlayerFactory playerFactory = new PlayerFactory();
-    final Scene initialScene = sceneFactory.create("Initial Scene", new ArrayList<>(), "default.png");
-    final Player player = playerFactory.create();
-    final InMemoryGameDataAccessObject gameDataAccessObject =
-            new InMemoryGameDataAccessObject(initialScene, player);
+    final InMemoryGameDataAccessObject gameDataAccessObject = new InMemoryGameDataAccessObject();
 
     private MainMenuView mainMenuView;
     private MainMenuViewModel mainMenuViewModel;
@@ -72,10 +68,10 @@ public class AppBuilder {
     }
 
     public AppBuilder addClickButtonUseCase() {
-        final ClickButtonOutputBoundary clickButtonOutputBoundary =
+        final GameOutputBoundary gameOutputBoundary =
                 new GamePresenter(gameViewModel);
-        final ClickButtonInputBoundary clickButtonInteractor =
-                new ClickButtonInteractor(clickButtonOutputBoundary);
+        final GameInputBoundary clickButtonInteractor =
+                new GameInteractor(gameDataAccessObject, gameOutputBoundary);
 
         GameController gameController = new GameController(clickButtonInteractor);
         gameView.setGameController(gameController);

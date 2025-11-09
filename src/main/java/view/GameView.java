@@ -1,15 +1,22 @@
 package view;
 
+import entity.ClickableObject;
 import interface_adapter.game.GameController;
 import interface_adapter.game.GameState;
 import interface_adapter.game.GameViewModel;
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.io.File;
+import java.io.IOException;
+import java.util.Objects;
 
 /**
  * The View for the Game.
@@ -20,50 +27,11 @@ public class GameView extends JPanel implements ActionListener, PropertyChangeLi
     private final GameViewModel gameViewModel;
     private GameController gameController;
 
-    private final JButton button1;
-    private final JButton button2;
-    private final JLabel messageLabel;
 
     public GameView(GameViewModel gameViewModel) {
         this.gameViewModel = gameViewModel;
         this.gameViewModel.addPropertyChangeListener(this);
-
-        final JLabel title = new JLabel(GameViewModel.TITLE_LABEL);
-        title.setAlignmentX(Component.CENTER_ALIGNMENT);
-
-        messageLabel = new JLabel("");
-        messageLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-
-        final JPanel buttons = new JPanel();
-        button1 = new JButton(GameViewModel.BUTTON1_LABEL);
-        button2 = new JButton(GameViewModel.BUTTON2_LABEL);
-        buttons.add(button1);
-        buttons.add(button2);
-
-        button1.addActionListener(
-                new ActionListener() {
-                    public void actionPerformed(ActionEvent evt) {
-                        if (evt.getSource().equals(button1)) {
-                            gameController.clickButton(1);
-                        }
-                    }
-                }
-        );
-
-        button2.addActionListener(
-                new ActionListener() {
-                    public void actionPerformed(ActionEvent evt) {
-                        if (evt.getSource().equals(button2)) {
-                            gameController.clickButton(2);
-                        }
-                    }
-                }
-        );
-
-        this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
-        this.add(title);
-        this.add(messageLabel);
-        this.add(buttons);
+        this.setLayout(null);
     }
 
     @Override
@@ -74,7 +42,40 @@ public class GameView extends JPanel implements ActionListener, PropertyChangeLi
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
         final GameState state = (GameState) evt.getNewValue();
-        messageLabel.setText(state.getMessage());
+
+        // remove all children
+        this.removeAll();
+
+        try {
+            // add clickable objects
+            for (ClickableObject clickableObject : state.getClickableObjects()) {
+                ImageIcon imageIcon = new ImageIcon();
+                imageIcon.setImage(ImageIO.read(new File("src/main/resources", clickableObject.getImage())));
+                JLabel label = new JLabel(imageIcon);
+                label.setBounds(clickableObject.getCoordinateX(), clickableObject.getCoordinateY(), imageIcon.getIconWidth(), imageIcon.getIconHeight());
+                add(label);
+
+                label.addMouseListener(new MouseAdapter() {
+                    @Override
+                    public void mouseClicked(MouseEvent e) {
+                        gameController.click(clickableObject);
+                    }
+                });
+            }
+
+            // add background image
+            ImageIcon background = new ImageIcon();
+            background.setImage(ImageIO.read(new File("src/main/resources", state.getBackgroundImage())));
+            JLabel backgroundLabel = new JLabel(background);
+            backgroundLabel.setBounds(0, 0, background.getIconWidth(), background.getIconHeight());
+            add(backgroundLabel);
+
+
+            // force update ui
+            repaint();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public String getViewName() {

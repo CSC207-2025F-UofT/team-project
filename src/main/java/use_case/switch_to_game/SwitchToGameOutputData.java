@@ -1,13 +1,14 @@
-package interface_adapter.game;
+package use_case.switch_to_game;
 
 import entity.ClickableObject;
 
 import java.util.List;
 
 /**
- * The state for the Game View Model.
+ * Output data for the Click Button use case.
  */
-public class GameState {
+public class SwitchToGameOutputData {
+
     private String backgroundImage;
     private List<ClickableObject> clickableObjects;
 

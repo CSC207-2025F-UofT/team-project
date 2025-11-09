@@ -8,5 +8,5 @@ public interface SwitchToGameViewOutputBoundary {
     /**
      * Prepares the view to switch to the game view.
      */
-    void switchToGameView();
+    void switchToGameView(SwitchToGameOutputData outputData);
 }

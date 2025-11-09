@@ -1,13 +1,13 @@
-package use_case.click_button;
+package use_case.game;
 
 /**
  * Output boundary for the Click Button use case.
  */
-public interface ClickButtonOutputBoundary {
+public interface GameOutputBoundary {
 
     /**
      * Prepares the view with the button click result.
      * @param outputData the output data containing the message to display
      */
-    void prepareView(ClickButtonOutputData outputData);
+    void prepareView(GameOutputData outputData);
 }
