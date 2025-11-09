@@ -30,12 +30,7 @@ public class PokemonLookupInteractor implements PokemonLookupInputBoundary {
             return;
         }
         else {
-            if ((name.split("-").length > 1)) {
-                name = name.split("-")[0];
-            }
-            if ((name.split(" ").length > 1)) {
-                name = name.split(" ")[0];
-            }
+            name = name.replace(" ", "-");
 
             OkHttpClient client = new OkHttpClient();
 
