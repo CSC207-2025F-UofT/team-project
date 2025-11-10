@@ -3,10 +3,10 @@ package entity;
 public class Player {
 
     private final String userName;
-    private final int level;
-    private final int experiencePoints;
-    private final int questionsAnswered;
-    private final int questionsCorrect;
+    private int level;
+    private int experiencePoints;
+    private int questionsAnswered;
+    private int questionsCorrect;
 
     /**
      * Creates a new Player with the given attributes.
@@ -24,11 +24,23 @@ public class Player {
     }
 
     public String getUserName() { return userName; }
+
     public int getLevel() { return level; }
+    public void setLevel(int level) { this.level = level; }
+
     public int getExperiencePoints() { return experiencePoints; }
+    public void setExperiencePoints(int experiencePoints) { this.experiencePoints = experiencePoints; }
+
     public int getQuestionsAnswered() { return questionsAnswered; }
+    public void setQuestionsAnswered(int questionsAnswered) { this.questionsAnswered = questionsAnswered; }
+
     public int getQuestionsCorrect() { return questionsCorrect; }
-    public int getQuestionsIncorrect() { return questionsAnswered - questionsCorrect; }
+    public void setQuestionsCorrect(int questionsCorrect) { this.questionsCorrect = questionsCorrect; }
+
+    public int getQuestionsIncorrect() {
+        return questionsAnswered - questionsCorrect;
+    }
+
     public double getAccuracy() {
         if (questionsAnswered == 0) {
             return 0.0;
