@@ -1,5 +1,6 @@
 package use_case.grade_team;
 
+import data_access.InMemoryUserDataAccessObject;
 import entity.GradingStrategy;
 import entity.Pokemon;
 import entity.Team;
@@ -14,6 +15,8 @@ class GradeTeamInteractorTest {
         Team team = new Team("emptyTeam");
         GradingStrategy strategy = new TestStrategy();
         GradeTeamInputData inputData = new GradeTeamInputData("emptyTeam", strategy);
+        InMemoryUserDataAccessObject dataAccessObject = new InMemoryUserDataAccessObject();
+        dataAccessObject.saveTeam(team);
 
         GradeTeamOutputBoundary successPresenter = new GradeTeamOutputBoundary(){
             @Override
@@ -27,7 +30,7 @@ class GradeTeamInteractorTest {
             }
         };
 
-        GradeTeamInputBoundary interactor = new GradeTeamInteractor(inputData, successPresenter);
+        GradeTeamInputBoundary interactor = new GradeTeamInteractor(dataAccessObject, successPresenter);
         interactor.execute(inputData);
     }
 
@@ -38,7 +41,9 @@ class GradeTeamInteractorTest {
             team.setPokemon(new Pokemon(), i);
         }
         GradingStrategy strategy = new TestStrategy();
-        GradeTeamInputData inputData = new GradeTeamInputData(team, strategy);
+        GradeTeamInputData inputData = new GradeTeamInputData("fullTeam", strategy);
+        InMemoryUserDataAccessObject dataAccessObject = new InMemoryUserDataAccessObject();
+        dataAccessObject.saveTeam(team);
 
         GradeTeamOutputBoundary successPresenter = new GradeTeamOutputBoundary(){
             @Override
@@ -52,18 +57,20 @@ class GradeTeamInteractorTest {
             }
         };
 
-        GradeTeamInputBoundary interactor = new GradeTeamInteractor(inputData, successPresenter);
+        GradeTeamInputBoundary interactor = new GradeTeamInteractor(dataAccessObject, successPresenter);
         interactor.execute(inputData);
     }
 
     @Test
     void firstHalfTeamTest(){
-        Team team = new Team("fullTeam");
+        Team team = new Team("halfFullTeam");
         for(int i = 0; i < 3; i++){
             team.setPokemon(new Pokemon(), i);
         }
         GradingStrategy strategy = new TestStrategy();
-        GradeTeamInputData inputData = new GradeTeamInputData(team, strategy);
+        GradeTeamInputData inputData = new GradeTeamInputData("halfFullTeam", strategy);
+        InMemoryUserDataAccessObject dataAccessObject = new InMemoryUserDataAccessObject();
+        dataAccessObject.saveTeam(team);
 
         GradeTeamOutputBoundary successPresenter = new GradeTeamOutputBoundary(){
             @Override
@@ -77,7 +84,7 @@ class GradeTeamInteractorTest {
             }
         };
 
-        GradeTeamInputBoundary interactor = new GradeTeamInteractor(inputData, successPresenter);
+        GradeTeamInputBoundary interactor = new GradeTeamInteractor(dataAccessObject, successPresenter);
         interactor.execute(inputData);
     }
 }
