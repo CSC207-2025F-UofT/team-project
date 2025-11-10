@@ -11,7 +11,7 @@ public class User {
     private final List<Note> privateNotes;
     // Missing createdAt, visitedLandmarks, privateNotes
 
-    public User(String username, String password,  Instant createdAt, List<Visit> visitedLandmarks, List<Note> privateNotes) {
+    public User(String username, String password, List<Visit> visitedLandmarks, List<Note> privateNotes) {
         if ("".equals(username)) {
             throw new IllegalArgumentException("Username cannot be empty");
         }
@@ -20,7 +20,7 @@ public class User {
         }
         this.username = username;
         this.password = password;
-        this.createdAt = createdAt;
+        this.createdAt = Instant.now();
         this.visitedLandmarks = visitedLandmarks;
         this.privateNotes = privateNotes;
     }
