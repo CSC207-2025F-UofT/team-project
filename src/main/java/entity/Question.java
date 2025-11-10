@@ -1,8 +1,8 @@
 package entity;
 
 public abstract class Question {
-    public final String questionText;
-    public final int difficultyLevel;
+    private final String questionText;
+    private final int difficultyLevel;
 
     public Question(String questionText, int difficultyLevel) {
         this.questionText = questionText;
