@@ -17,6 +17,4 @@
 //else if (the upvotes of this reply < upvotes of the one reply below) {
 //    swap the position of the two replies
 //        }
-
-
-//        }
+//     }
