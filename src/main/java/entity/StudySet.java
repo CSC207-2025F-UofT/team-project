@@ -39,30 +39,11 @@ public class StudySet {
     public void setCourseCode(String courseCode) { this.courseCode = courseCode; }
     public void setTitle(String title) { this.title = title; }
 
-    public void addQuestion(Question q) {
-        questions.add(q);
-    }
-
-    public void removeQuestion(int index) {
-        if (index >= 0 && index < questions.size()) {
-            questions.remove(index);
-        }
-    }
-
     public Question getQuestion(int index) {
         return questions.get(index);
     }
 
     public int size() {
         return questions.size();
-    }
-
-    public void shuffle() {
-        Collections.shuffle(questions);
-    }
-
-    @Override
-    public String toString() {
-        return String.format("[%s] %s (%d questions, %s)", courseCode, title, questions.size());
     }
 }
