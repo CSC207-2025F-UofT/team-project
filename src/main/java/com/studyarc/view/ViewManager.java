@@ -5,6 +5,8 @@ import java.awt.*;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
+import com.studyarc.interface_adapter.ViewManagerModel;
+
 /**
  * The View Manager for the program. It listens for property change events
  * in the ViewManagerModel and updates which View should be visible.
@@ -23,9 +25,5 @@ public class ViewManager implements PropertyChangeListener {
 
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
-        if (evt.getPropertyName().equals("state")) {
-            final String viewModelName = (String) evt.getNewValue();
-            cardLayout.show(views, viewModelName);
-        }
     }
 }
