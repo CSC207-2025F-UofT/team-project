@@ -1,6 +1,7 @@
 package use_case.grade_team;
 
 import entity.Team;
+import entity.GradingStrategy;
 
 public class GradeTeamInputData {
 

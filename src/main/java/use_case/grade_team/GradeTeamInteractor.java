@@ -13,7 +13,7 @@ public class GradeTeamInteractor implements GradeTeamInputBoundary {
     @Override
     public void execute(GradeTeamInputData gradeTeamInputData) {
         try{
-            float teamScore = gradeTeamInputData.getStrategy().gradeTeam(gradeTeamInputData.getTeam());
+            float teamScore = gradeTeamInputData.getStrategy().execute(gradeTeamInputData.getTeam());
             GradeTeamOutputData gradeTeamOutputData = new GradeTeamOutputData(teamScore);
             userPresenter.prepareSuccessView(gradeTeamOutputData);
         }catch(Exception e){
