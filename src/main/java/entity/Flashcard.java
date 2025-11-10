@@ -6,12 +6,12 @@ import java.util.List;
 public class Flashcard {
     private String sourceWord;
     private String targetWord;
-    private String sourceLang;
-    private String targetLang;
+    private Language sourceLang;
+    private Language targetLang;
     private boolean known;
     private List<String> deckIds;
 
-    public Flashcard(String sourceWord, String targetWord, String sourceLang, String targetLang) {
+    public Flashcard(String sourceWord, String targetWord, Language sourceLang, Language targetLang) {
         this.sourceWord = sourceWord;
         this.targetWord = targetWord;
         this.sourceLang = sourceLang;
@@ -49,10 +49,10 @@ public class Flashcard {
     public List<String> getDeckIds() {
         return deckIds;
     }
-    public String getSourceLang() {
+    public Language getSourceLang() {
         return sourceLang;
     }
-    public String getTargetLang() {
+    public Language getTargetLang() {
         return targetLang;
     }
 }
