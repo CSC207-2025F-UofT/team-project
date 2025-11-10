@@ -1,4 +1,4 @@
-package entities;
+package entity;
 import java.time.YearMonth;
 import java.util.List;
 import java.util.ArrayList;
