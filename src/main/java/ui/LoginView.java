@@ -37,6 +37,7 @@ public class LoginView extends JFrame {
             JOptionPane.showMessageDialog(this, output.getMessage());
             if (output.isSuccess()) {
                 // insert code for dashboard here
+                //showDashboardView.run()
                 System.out.println("Login success — navigate to dashboard!");
             }
         });

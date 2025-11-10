@@ -64,4 +64,16 @@ public class Main {
         currentFrame = signUpView;
         signUpView.setVisible(true);
     }
+
+    private static void showDashboardView() {
+        if (currentFrame != null) currentFrame.dispose();
+
+        DashboardView dashboardView = new DashboardView(
+                dashboardController,
+                Main::showLoginView // callback to login screen
+        );
+
+        currentFrame = dashboardView;
+        dashboardView.setVisible(True);
+    }
 }
