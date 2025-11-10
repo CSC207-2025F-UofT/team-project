@@ -2,10 +2,10 @@ package use_case.grade_team;
 
 public class GradeTeamInteractor implements GradeTeamInputBoundary {
 
-    private final GradeTeamInputData userDataAccessObject;
+    private final GradeTeamUserDataAccessInterface userDataAccessObject;
     private final GradeTeamOutputBoundary userPresenter;
 
-    public GradeTeamInteractor(GradeTeamInputData userDataAccessObject, GradeTeamOutputBoundary userPresenter) {
+    public GradeTeamInteractor(GradeTeamUserDataAccessInterface userDataAccessObject, GradeTeamOutputBoundary userPresenter) {
         this.userDataAccessObject = userDataAccessObject;
         this.userPresenter = userPresenter;
     }
@@ -13,7 +13,7 @@ public class GradeTeamInteractor implements GradeTeamInputBoundary {
     @Override
     public void execute(GradeTeamInputData gradeTeamInputData) {
         try{
-            float teamScore = gradeTeamInputData.getStrategy().execute(gradeTeamInputData.getTeam());
+            float teamScore = gradeTeamInputData.getStrategy().execute(userDataAccessObject.getTeam(gradeTeamInputData.getTeamName()));
             GradeTeamOutputData gradeTeamOutputData = new GradeTeamOutputData(teamScore);
             userPresenter.prepareSuccessView(gradeTeamOutputData);
         }catch(Exception e){

@@ -13,7 +13,7 @@ class GradeTeamInteractorTest {
     void emptyTeamTest(){
         Team team = new Team("emptyTeam");
         GradingStrategy strategy = new TestStrategy();
-        GradeTeamInputData inputData = new GradeTeamInputData(team, strategy);
+        GradeTeamInputData inputData = new GradeTeamInputData("emptyTeam", strategy);
 
         GradeTeamOutputBoundary successPresenter = new GradeTeamOutputBoundary(){
             @Override

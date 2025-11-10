@@ -5,15 +5,15 @@ import entity.GradingStrategy;
 
 public class GradeTeamInputData {
 
-    private final Team team;
+    private final String teamName;
     private final GradingStrategy strategy;
 
-    public GradeTeamInputData(Team team, GradingStrategy strategy) {
-        this.team = team;
+    public GradeTeamInputData(String teamName, GradingStrategy strategy) {
+        this.teamName = teamName;
         this.strategy = strategy;
     }
 
-    public Team getTeam() {return team;}
+    public String getTeamName() {return teamName;}
 
     public GradingStrategy getStrategy() {
         return strategy;
