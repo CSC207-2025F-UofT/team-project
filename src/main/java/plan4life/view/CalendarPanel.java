@@ -1,5 +1,7 @@
 package plan4life.view;
 
+import plan4life.entities.Schedule;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
