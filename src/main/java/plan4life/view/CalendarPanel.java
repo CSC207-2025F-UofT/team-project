@@ -135,4 +135,7 @@ public class CalendarPanel extends JPanel {
             }
         }
     }
+
+    public void updateSchedule(Schedule schedule) {
+    }
 }
