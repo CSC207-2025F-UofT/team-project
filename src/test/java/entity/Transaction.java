@@ -1,7 +1,5 @@
 package entity;
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-
 
 public class Transaction {
     private final LocalDate date;
@@ -15,7 +13,7 @@ public class Transaction {
         this.date = date;
         this.source = source;
         this.amount =  amount;
-        this.category = source;
+        this.category = category;
 
 
     }
