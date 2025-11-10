@@ -4,13 +4,13 @@ import java.time.YearMonth;
 public class GoalTree {
     private String status;
     private Goal goal;
-    private int x_coordinate;
-    private int y_coordinate;
+    private int xCoordinate;
+    private int yCoordinate;
 
     public GoalTree(Goal goal, int x, int y) {
         this.goal = goal;
-        this.x_coordinate = x;
-        this.y_coordinate = y;
+        this.xCoordinate = x;
+        this.yCoordinate = y;
         this.status = "sapling";
     }
 
@@ -27,20 +27,29 @@ public class GoalTree {
     // we don't want to change goal so it will not have a setter
 
 
-    public int getX_coordinate() {
-        return x_coordinate;
+    public int getXCoordinate() {
+        return xCoordinate;
     }
 
-    public int getY_coordinate() {
-        return y_coordinate;
+    public int getYCoordinate() {
+        return yCoordinate;
     }
 
-    public void set_coordinates(int x_coordinate, int  y_coordinate) {
-        this.x_coordinate = x_coordinate;
-        this.y_coordinate = y_coordinate;
+    public void setCoordinates(int xCoordinate, int  yCoordinate) {
+        this.xCoordinate = xCoordinate;
+        this.yCoordinate = yCoordinate;
     }
+    
+    public void setXCoordinate(int xCoordinate) {
+        this.xCoordinate = xCoordinate;
+    }
+    
+    public void setYCoordinate(int yCoordinate) {
+        this.yCoordinate = yCoordinate;
+    }
+    
 
-    public void update_status(){
+    public void updateStatus(){
 
         YearMonth currentMonth = YearMonth.now();
         YearMonth goalMonth = goal.getMonth();
@@ -50,7 +59,7 @@ public class GoalTree {
             spent += 0;
         }
         // this loop will be updated based on later implementations
-
+        // TODO: Implement loop
 
         if (currentMonth.equals(goalMonth)) {
             status = "sapling";
