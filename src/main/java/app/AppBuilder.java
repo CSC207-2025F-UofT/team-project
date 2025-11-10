@@ -1,19 +1,30 @@
 package app;
 
-import data_access.GeminiApiDataAccess;
-import entities.Course;
-import entities.PDFFile;
-import interface_adapters.LoadingViewModel;
+//import data_access.GeminiApiDataAccess;
+//import entities.Course;
+//import entities.PDFFile;
+//import interface_adapters.LoadingViewModel;
 import interface_adapters.ViewManagerModel;
-import interface_adapters.evaluate_test.*;
-import interface_adapters.mock_test.*;
-import usecases.evaluate_test.EvaluateTestInteractor;
-import usecases.mock_test_generation.MockTestGenerationInteractor;
+//import interface_adapters.evaluate_test.*;
+//import interface_adapters.mock_test.*;
+//import usecases.evaluate_test.EvaluateTestInteractor;
+//import usecases.mock_test_generation.MockTestGenerationInteractor;
 import views.*;
 
 import javax.swing.*;
 import java.awt.*;
 import java.nio.file.Paths;
+
+// === SHIRLEY: Course dashboard / workspace imports ===
+import interface_adapters.dashboard.*;
+import interface_adapters.workspace.*;
+import views.*;
+import usecases.*;
+import usecases.dashboard.*;
+import usecases.workspace.*;
+import usecases.workspace.CourseWorkspaceOutputBoundary.*;
+import entities.*;
+import data_access.*;
 
 public class AppBuilder {
     // --- Shared Components held by the Builder ---
@@ -25,76 +36,168 @@ public class AppBuilder {
     // --- Data Access Objects ---
     // TODO: Add proper Course management data access implementation (file-based)
     private Object courseDAO = null;
-    private final GeminiApiDataAccess geminiDAO = new GeminiApiDataAccess();
+//    private final GeminiApiDataAccess geminiDAO = new GeminiApiDataAccess();
+//
+//    // --- ViewModels and Views (stored for wiring) ---
+//    private MockTestViewModel mockTestViewModel;
+//    private EvaluateTestViewModel evaluateTestViewModel;
+//    private LoadingViewModel loadingViewModel;
+//    private WriteTestView writeTestView;
+//    private EvaluateTestView evaluateTestView;
 
-    // --- ViewModels and Views (stored for wiring) ---
-    private MockTestViewModel mockTestViewModel;
-    private EvaluateTestViewModel evaluateTestViewModel;
-    private LoadingViewModel loadingViewModel;
-    private WriteTestView writeTestView;
-    private EvaluateTestView evaluateTestView;
+    // === SHIRLEY: Course dashboard/workspace view models & views ===
+    private CourseDashboardViewModel courseDashboardViewModel;
+    private CourseDashboardView courseDashboardView;
+
+    private CourseWorkspaceViewModel courseWorkspaceViewModel;
+    private CourseWorkspaceView courseWorkspaceView;
+
+    private CourseCreateViewModel courseCreateViewModel;
+    private CourseCreateView courseCreateView;
+
+    private CourseEditViewModel courseEditViewModel;
+    private CourseEditView courseEditView;
 
     public AppBuilder() {
     }
 
 
-    public AppBuilder addWriteTestView() {
-        writeTestView = new WriteTestView(mockTestViewModel); // The view for taking the test
-        cardPanel.add(writeTestView, mockTestViewModel.getViewName());
+//    public AppBuilder addWriteTestView() {
+//        writeTestView = new WriteTestView(mockTestViewModel); // The view for taking the test
+//        cardPanel.add(writeTestView, mockTestViewModel.getViewName());
+//        return this;
+//    }
+//
+//    public AppBuilder addEvaluateTestView() {
+//        evaluateTestViewModel = new EvaluateTestViewModel();
+//        evaluateTestView = new EvaluateTestView(evaluateTestViewModel);
+//        cardPanel.add(evaluateTestView, evaluateTestViewModel.getViewName());
+//        return this;
+//    }
+//
+//    public AppBuilder addLoadingView() {
+//        loadingViewModel = new LoadingViewModel();
+//        LoadingView loadingView = new LoadingView(loadingViewModel);
+//        cardPanel.add(loadingView, loadingViewModel.getViewName());
+//        return this;
+//    }
+//
+//    public AppBuilder addMockTestGenerationUseCase() {
+//        MockTestPresenter presenter = new MockTestPresenter(mockTestViewModel, viewManagerModel, loadingViewModel);
+//        MockTestGenerationInteractor interactor = new MockTestGenerationInteractor(courseDAO, geminiDAO, presenter);
+//        MockTestController controller = new MockTestController(interactor);
+//        return this;
+//    }
+//
+//    public AppBuilder addEvaluateTestUseCase() {
+//        // The Presenter for the evaluation results view
+//        EvaluateTestPresenter evalPresenter = new EvaluateTestPresenter(evaluateTestViewModel, loadingViewModel, viewManagerModel);
+//
+//        // The Interactor for the evaluation use case. It correctly uses the DAOs.
+//        EvaluateTestInteractor evalInteractor = new EvaluateTestInteractor(courseDAO, geminiDAO, evalPresenter);
+//
+//        // The Controller that the WriteTestView will use to trigger the evaluation.
+//        EvaluateTestController evalController = new EvaluateTestController(evalInteractor);
+//
+//        // The Presenter for the WriteTestView's navigation (next/prev question).
+//        MockTestPresenter mockTestPresenter = new MockTestPresenter(mockTestViewModel, viewManagerModel, loadingViewModel);
+//
+//        // Inject both the controller (for submitting) and the presenter (for navigation) into the WriteTestView.
+//        writeTestView.setController(evalController);
+//        writeTestView.setPresenter(mockTestPresenter);
+//
+//        // Inject the presenter into the EvaluateTestView
+//        evaluateTestView.setPresenter(evalPresenter);
+//
+//        return this;
+//    }
+
+    // === SHIRLEY: Course dashboard / workspace methods ===
+
+    public AppBuilder addCourseDashboardView() {
+        this.courseDashboardViewModel = new CourseDashboardViewModel();
+        this.courseDashboardView = new CourseDashboardView(courseDashboardViewModel);
+        cardPanel.add(courseDashboardView, courseDashboardView.getViewName());
         return this;
     }
 
-    public AppBuilder addEvaluateTestView() {
-        evaluateTestViewModel = new EvaluateTestViewModel();
-        evaluateTestView = new EvaluateTestView(evaluateTestViewModel);
-        cardPanel.add(evaluateTestView, evaluateTestViewModel.getViewName());
+    public AppBuilder addCourseWorkspaceView() {
+        this.courseWorkspaceViewModel = new CourseWorkspaceViewModel();
+        this.courseWorkspaceView = new CourseWorkspaceView(courseWorkspaceViewModel);
+        cardPanel.add(courseWorkspaceView, courseWorkspaceView.getViewName());
         return this;
     }
 
-    public AppBuilder addLoadingView() {
-        loadingViewModel = new LoadingViewModel();
-        LoadingView loadingView = new LoadingView(loadingViewModel);
-        cardPanel.add(loadingView, loadingViewModel.getViewName());
+    public AppBuilder addCourseCreateView() {
+        this.courseCreateViewModel = new CourseCreateViewModel();
+        this.courseCreateView = new CourseCreateView(courseCreateViewModel);
+        cardPanel.add(courseCreateView, courseCreateView.getViewName());
         return this;
     }
 
-    public AppBuilder addMockTestGenerationUseCase() {
-        MockTestPresenter presenter = new MockTestPresenter(mockTestViewModel, viewManagerModel, loadingViewModel);
-        MockTestGenerationInteractor interactor = new MockTestGenerationInteractor(courseDAO, geminiDAO, presenter);
-        MockTestController controller = new MockTestController(interactor);
+    public AppBuilder addCourseEditView() {
+        this.courseEditViewModel = new CourseEditViewModel();
+        this.courseEditView = new CourseEditView(courseEditViewModel);
+        cardPanel.add(courseEditView, courseEditView.getViewName());
         return this;
     }
 
-    public AppBuilder addEvaluateTestUseCase() {
-        // The Presenter for the evaluation results view
-        EvaluateTestPresenter evalPresenter = new EvaluateTestPresenter(evaluateTestViewModel, loadingViewModel, viewManagerModel);
+    public AppBuilder addCourseUseCases() {
+        // presenter for dashboard + navigation
+        CourseDashboardOutputBoundary courseDashboardPresenter =
+                new CourseDashboardPresenter(
+                        viewManagerModel,
+                        courseDashboardViewModel,
+                        courseWorkspaceViewModel,
+                        courseCreateViewModel
+                );
 
-        // The Interactor for the evaluation use case. It correctly uses the DAOs.
-        EvaluateTestInteractor evalInteractor = new EvaluateTestInteractor(courseDAO, geminiDAO, evalPresenter);
+        // local course repository for your use cases
+        ICourseRepository courseRepository = new LocalCourseRepository();
 
-        // The Controller that the WriteTestView will use to trigger the evaluation.
-        EvaluateTestController evalController = new EvaluateTestController(evalInteractor);
+        CourseDashboardInputBoundary courseDashboardInteractor =
+                new CourseDashboardInteractor(courseRepository, courseDashboardPresenter);
+        CourseDashboardController courseDashboardController =
+                new CourseDashboardController(courseDashboardInteractor);
 
-        // The Presenter for the WriteTestView's navigation (next/prev question).
-        MockTestPresenter mockTestPresenter = new MockTestPresenter(mockTestViewModel, viewManagerModel, loadingViewModel);
+        // presenter for workspace / edit views
+        CourseWorkspaceOutputBoundary coursePresenter =
+                new CoursePresenter(
+                        viewManagerModel,
+                        courseDashboardViewModel,
+                        courseWorkspaceViewModel,
+                        courseEditViewModel
+                );
 
-        // Inject both the controller (for submitting) and the presenter (for navigation) into the WriteTestView.
-        writeTestView.setController(evalController);
-        writeTestView.setPresenter(mockTestPresenter);
+        CourseWorkspaceInputBoundary courseWorkspaceInteractor =
+                new CourseWorkspaceInteractor(courseRepository, coursePresenter, courseDashboardPresenter);
+        CourseController courseController = new CourseController(courseWorkspaceInteractor);
 
-        // Inject the presenter into the EvaluateTestView
-        evaluateTestView.setPresenter(evalPresenter);
+        // hook controllers into your views
+        this.courseDashboardView.setCourseDashboardController(courseDashboardController);
+        this.courseDashboardView.setCourseWorkspaceController(courseController);
+
+        this.courseWorkspaceView.setCourseDashboardController(courseDashboardController);
+        this.courseWorkspaceView.setCourseWorkspaceController(courseController);
+
+        this.courseCreateView.setCourseDashboardController(courseDashboardController);
+        this.courseCreateView.setCourseWorkspaceController(courseController);
+
+        this.courseEditView.setCourseWorkspaceController(courseController);
 
         return this;
     }
+
 
     public JFrame build() {
         JFrame application = new JFrame("StudyFlow AI Assistant");
         application.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         application.add(cardPanel);
+        this.courseDashboardView.renderDashboard();
+
 
         // Set the initial view
-        viewManagerModel.setState("demo view");
+        viewManagerModel.setState(this.courseDashboardView.getViewName());
         viewManagerModel.firePropertyChange();
 
         return application;
