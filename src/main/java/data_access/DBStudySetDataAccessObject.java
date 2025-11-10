@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import entity.StudyDeck;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -32,35 +33,58 @@ public class DBStudySetDataAccessObject implements StudySetDataAccessInterface {
     private static final String API_URL = "https://207.dbestserv.com";
     private static final String API_KEY = "?key=abc123";
 
-
-
-    @Override
-    public String testAPIConnection() throws DataAccessException {
-        final String method = "/test-api";
+    /**
+     * Helper method for making GET requests to the API.
+     * Automatically handles HTTP errors, JSON parsing, and exceptions.
+     *
+     * @param method The endpoint path (e.g. "/test-api")
+     * @return JSONObject parsed from the response body
+     * @throws DataAccessException if the response code indicates an error or the request fails
+     */
+    private JSONObject makeApiRequest(String method) throws DataAccessException {
         final Request request = new Request.Builder()
                 .url(API_URL + method + API_KEY)
                 .build();
 
         try (Response response = client.newCall(request).execute()) {
-            final JSONObject responseJSON = new JSONObject(response.body().string());
+            String responseBody = response.body().string();
+            final JSONObject responseJSON = new JSONObject(responseBody);
             int statusCode = response.code();
+
             if (statusCode == SUCCESS_CODE) {
-                return "Successfully connected to API Server!";
+                return responseJSON;
             } else if (statusCode == API_KEY_ERROR) {
-                throw new DataAccessException("Key Error: " + responseJSON.getString(ERROR_MESSAGE));
+                throw new DataAccessException("Key Error: " + responseJSON.optString(ERROR_MESSAGE, "Unknown key error"));
             } else {
-                throw new DataAccessException("API error: " + responseJSON.getString(ERROR_MESSAGE));
+                throw new DataAccessException("API error: " + responseJSON.optString(ERROR_MESSAGE, "Unknown API error"));
             }
-        } catch (IOException | JSONException exception) {
-            throw new DataAccessException(exception.getMessage());
+        } catch (IOException | JSONException E) {
+            throw new DataAccessException("Request failed: " + E.getMessage());
         }
     }
 
+
     @Override
-    public ArrayList<HashMap<String, Integer>> getAllSetNameAndID() throws DataAccessException {
-        return null;
+    public String testAPIConnection() throws DataAccessException {
+        JSONObject responseJSON = makeApiRequest("/test-api");
+        return "Successfully connected to API Server! Message: " + responseJSON.getString("message");
     }
 
+    @Override
+    public HashMap<String, Integer> getAllSetNameAndID() throws DataAccessException {
+        final String method = "/api/get-all-study-set-name-and-id";
+        JSONObject responseJSON = makeApiRequest(method);
+        HashMap<String, Integer> deck = new HashMap<>();
+        JSONArray titles = responseJSON.getJSONArray("titles");
+        for (int i = 0; i < titles.length(); i++) {
+            JSONObject pair = titles.getJSONObject(i);
+            String title = pair.keys().next();
+            int id = pair.getInt(title);
+            deck.put(title, id);
+        }
+        return deck;
+    }
+    // TODO: Update convention: StudySet -> Deck, Question -> card, name -> title
     @Override
     public StudyDeck getSetByName(String setName) throws DataAccessException {
         return null;

@@ -16,7 +16,7 @@ public interface StudySetDataAccessInterface {
     // A simple connection test to API
     String testAPIConnection() throws DataAccessException;
 
-    ArrayList<HashMap<String, Integer>> getAllSetNameAndID() throws DataAccessException;
+    HashMap<String, Integer> getAllSetNameAndID() throws DataAccessException;
 
     StudyDeck getSetByName(String setName) throws DataAccessException;
 
