@@ -1,3 +1,5 @@
+//Entity for multiple choice questions
+//Mahir
 package entity;
 
 import java.util.List;
