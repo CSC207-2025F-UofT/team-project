@@ -8,7 +8,6 @@ import com.studyarc.use_case.job_postings.JobPostingsDataAccessInterface;
 import com.studyarc.use_case.login.LoginDataAccessInterface;
 import com.studyarc.use_case.milestone_tasks.MilestoneTasksDataAccessInterface;
 import com.studyarc.use_case.reflection_log.ReflectionLogDataAccessInterface;
-import com.studyarc.use_case.track_plan.TempUser;
 import com.studyarc.use_case.track_plan.TrackPlanDataAccessinterface;
 
 import java.util.ArrayList;
@@ -37,9 +36,7 @@ public class DatabaseAccess implements JobPostingsDataAccessInterface, LoginData
     }
 
     @Override
-    public void getPlans(TempUser user) {
-
-    }
+    public ArrayList<StudyPlan> getPlans(String username) {return null;}
 
     @Override
     public boolean registerUser(User u) {
