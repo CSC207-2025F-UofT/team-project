@@ -2,7 +2,7 @@
 
 **Your team is free to revise this contract as your team wishes; we have scaffolded it with a recommended structure similar to the provided sample on Quercus.**
 
-After you reflect on past teamwork experiences and brainstorm a list of actions required for a positive teamwork experience, answer these questions. 
+After you reflect on past teamwork experiences and brainstorm a list of actions required for a positive teamwork experience, answer these questions.
 
 Once you have all agreed on the contents of the team contract, make a PR to merge your team contract into the main branch of your team's repo on GitHub.
 
@@ -18,37 +18,36 @@ This contract sets out shared expectations and commitments for how our team will
 
 ### Communication
 
-* Which platform will you use for communication outside of class, when required for work on your course project? (Examples: Text message, Discord, WeChat, etc.)
+* We will use Instagram DMs as our primary means of communications.
 
-* Each teammate agrees to respond to messages in at most how long? 1 day? 2 days? Some other amount of time? 
+* Each teammate agrees to respond to messages in at most 1 day.
 
-* What things should a teammate notify you about? (Examples: if they think they won't be able to meet a deadline, if they have to miss lecture, etc.)
+* A teammate should notify the group if f they think they won't be able to meet a deadline, if they have to miss lecture/tutorials, or if they need help.
 
-* Respectful and inclusive behaviour are necessary for smooth and productive communication. What are some respectful and inclusive behaviours you expect when communicating with each other during lectures, labs, or outside of class? (Examples: Actively listening to each team members ideas, giving everyone a chance to meaningfully contribute, etc.)
+* Talk to each other with respect and kindness. Actively listen to each other's opinions in discussion.
 
 ---
 
 ### [Other Categories of norms and expectations go here]
 
-* Based on your previous teamwork experiences, what other behaviours do you agree upon as a team?
-    - some examples of possible additional team norms and expectations are included in the sample team contract in case your team needs some help getting ideas for what else you want to include.
+* We will also meet outside of tutorials.
 
 ---
 
 ## Decision Making
 
-* How will decisions about your team project be made? (Examples: By majority vote, by unanimous vote, etc.)
+* Decisions will be made by majority vote (make sure it's doable too).
 
 ---
 ## Conflict resolution
 
-* How will your team resolve conflicts? (Example: by listening to each other's side of the issue and attempting to reach a compromise. By consulting a TA or instructor as a team, if a resolution has not yet been reached.)
+* By listening to each other's side of the issue and attempting to reach a compromise.
 
 ---
 
 ## Accountability
 
-* Reliability and accountability are also important aspects of teamwork. What are the responsibilities of each team member? (Example: completing their share of the work in a timely manner, seeking assistance from teammates/TAs/instructors when required, etc.)
+* Completing their share of the work in a timely manner, seeking assistance from teammates/TAs/instructors when required.
 
 ---
 
@@ -58,4 +57,9 @@ By signing below, we acknowledge that we have read, discussed, and agreed to the
 
 Team Member Signatures:
 
-(type names here)
+Naila
+Jesslyn
+Olivia
+Anika
+Ghina
+Raenah
