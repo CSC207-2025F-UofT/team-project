@@ -1,3 +1,4 @@
+// HUZAIFA - Entity for Single Player
 package entity;
 
 import java.time.LocalDateTime;
@@ -14,7 +15,7 @@ public class SinglePlayerGame {
     private double averageResponseTime;
     private LocalDateTime startTime;
     private LocalDateTime endTime;
-    private final int timePerQuestion; // seconds
+    private final int timerPerQuestion; // seconds
     private final boolean shuffleEnabled;
     private final int fixedTimePerQuestion;
 
@@ -24,14 +25,14 @@ public class SinglePlayerGame {
         this.studySet = studySet;
         this.questions = studySet.getQuestions();
         // this will come from StudySet file
-        this.timePerQuestion = timerPerQuestion;
+        this.timerPerQuestion = timerPerQuestion;
         this.shuffleEnabled = shuffleEnabled;
         this.totalQuestions = questions.size();
         this.score = 0;
         this.correctAnswers = 0;
-        this.fixedTimePerQuestion = 10;
+        this.fixedTimePerQuestion = 10; //10 seconds per question? not decided
         if (shuffleEnabled) {
-            Collections.shuffle(this.questions);
+               Collections.shuffle(this.questions);
         }
     }
 
