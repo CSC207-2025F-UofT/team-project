@@ -2,12 +2,19 @@ package usecase.deck;
 
 import entity.FlashcardDeck;
 
+import java.util.List;
+
 public interface DeckDataAccessInterface {
-    void saveDeck(FlashcardDeck deck);
+        boolean existsByTitleForUser(int userId, String title);
 
-    boolean existsByTitleForUser(int userId, String title);
+        int nextDeckId();
 
-    java.util.List<FlashcardDeck> getDecksForUser(int userId);
+        void save(FlashcardDeck deck);
 
-    FlashcardDeck getDeckById(int deckId);
-}
+        List<FlashcardDeck> findByUser(int userId);
+
+        FlashcardDeck findById(int deckId);
+
+        int findOrCreateDontKnowDeckId(int userId);
+
+    }
