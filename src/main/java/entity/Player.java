@@ -1,3 +1,6 @@
+// Represents a player in the quiz game application.
+// Albert
+
 package entity;
 
 public class Player {
