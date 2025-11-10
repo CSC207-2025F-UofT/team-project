@@ -2,70 +2,61 @@ package use_case.game;
 
 import entity.ClickableObject;
 import entity.Scene;
-import use_case.switch_to_game.SwitchToGameOutputData;
-import use_case.switch_to_game.SwitchToGameViewDataAccessInterface;
 
-import javax.swing.*;
+import javax.swing.*; // for optional popup
+import java.util.Objects;
 
-/**
- * The Click Button Interactor.
- */
 public class GameInteractor implements GameInputBoundary {
     private final GameOutputBoundary presenter;
     private final GameDataAccessInterface gameDataAccessInterface;
+    private final GameManager gameManager;
 
-    public GameInteractor(GameDataAccessInterface gameDataAccessInterface, GameOutputBoundary gameOutputBoundary) {
-        this.presenter = gameOutputBoundary;
-        this.gameDataAccessInterface = gameDataAccessInterface;
+    public GameInteractor(GameDataAccessInterface gameDataAccessInterface,
+                          GameOutputBoundary gameOutputBoundary,
+                          GameManager gameManager) {
+        this.presenter = Objects.requireNonNull(gameOutputBoundary);
+        this.gameDataAccessInterface = Objects.requireNonNull(gameDataAccessInterface);
+        this.gameManager = Objects.requireNonNull(gameManager);
     }
 
     @Override
     public void execute(GameInputData gameInputData) {
-        // the clickable object
+        // 1) Get clicked & rule
         ClickableObject clicked = gameInputData.getClickableObject();
+        ClickRule rule = gameManager.ruleFor(clicked);
 
-        // game logic
+        // 2) Start from current scene
+        Scene cur = gameDataAccessInterface.getCurrentScene();
 
-        if (clicked.getName().equals("Object1")) {
-            gameDataAccessInterface.setCurrentScene(gameDataAccessInterface.getScenes().get("Scene1"));
-        } else if (clicked.getName().equals("Object2")) {
-            gameDataAccessInterface.setCurrentScene(gameDataAccessInterface.getScenes().get("Scene2"));
-        } else if (clicked.getName().equals("Object3")) {
-            // 1) Decide which scene we’re updating (here: the current scene)
-            Scene cur = gameDataAccessInterface.getCurrentScene();
+        // 3) Apply collection/removal to current scene (immutably)
+        Scene updatedCur = gameManager.applyToCurrentScene(rule, cur, clicked);
+        gameDataAccessInterface.getScenes().put(updatedCur.getName(), updatedCur);
+        gameDataAccessInterface.setCurrentScene(updatedCur);
 
-            // 2) Make a mutable copy of the objects and remove Object3
-            java.util.List<entity.ClickableObject> updatedObjects = new java.util.ArrayList<>(cur.getObjects());
-            updatedObjects.removeIf(o -> "Object3".equals(o.getName()));
-
-            // 3) Build a new Scene (Scene is immutable in your model)
-            entity.Scene updatedScene = new entity.Scene(
-                    cur.getName(),
-                    updatedObjects,
-                    cur.getImage()
-            );
-
-            // 4) Put the updated scene back into the DAO and set it current
-            gameDataAccessInterface.getScenes().put(updatedScene.getName(), updatedScene);
-            gameDataAccessInterface.setCurrentScene(updatedScene);
-            javax.swing.SwingUtilities.invokeLater(() ->
-                    javax.swing.JOptionPane.showMessageDialog(
-                            null,                       // parent; null centers on screen
-                            "You collected Object 3!",  // message
-                            "Item Collected",           // title
-                            javax.swing.JOptionPane.INFORMATION_MESSAGE
-                    )
-            );
-            // (Optional) If collecting should also switch scenes, do it before step 3/4 instead.
+        // 4) Handle scene change if the rule asks for it
+        if (rule.getType() == ClickActionType.CHANGE_SCENE
+                || rule.getType() == ClickActionType.COLLECT_AND_CHANGE_SCENE) {
+            rule.getTargetScene().ifPresent(sceneName -> {
+                Scene target = gameDataAccessInterface.getScenes().get(sceneName);
+                if (target != null) {
+                    gameDataAccessInterface.setCurrentScene(target);
+                }
+            });
         }
 
+        // 5) Optional: show a popup/message if provided
+        rule.getMessage().ifPresent(msg ->
+                SwingUtilities.invokeLater(() ->
+                        JOptionPane.showMessageDialog(
+                                null, msg, "Info", JOptionPane.INFORMATION_MESSAGE
+                        )));
 
-        // update game ui
+        // 6) Refresh UI via presenter (unchanged from your flow)
         Scene currentScene = gameDataAccessInterface.getCurrentScene();
-        GameOutputData gameOutputData = new GameOutputData();
-        gameOutputData.setBackgroundImage(currentScene.getImage());
-        gameOutputData.setClickableObjects(currentScene.getObjects());
-        presenter.prepareView(gameOutputData);
-
+        GameOutputData out = new GameOutputData();
+        out.setBackgroundImage(currentScene.getImage());
+        out.setClickableObjects(currentScene.getObjects());
+        presenter.prepareView(out);
     }
 }
+
