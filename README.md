@@ -24,6 +24,7 @@ Key goals:
 | S05 | **Vote & Winner:** participants submit ranked ballots; host computes and displays winner.                                          | Yousef | ☐ |       |
 | S06 | **Suggest Movie:** once a movie is selected and/or marked as watched, it will recommend sequels or other movies of similar genres. | TBA    | ☐ |       |
 | S07 | **Content Filters (Host):** apply content filters (e.g., exclude adult content, set minimum rating, language)                      | TBA    | ☐ |       |
+| S08 | **Manage Participants (Host):** host can check on participants and remove participants.                                            | TBA    | ☐ |       |
 
 ---
 
