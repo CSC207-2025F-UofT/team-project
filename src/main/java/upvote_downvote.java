@@ -1,11 +1,11 @@
-// import Post.java
+// package use_case.upvoting_downvoting
 
 // upvote() and downvote() for Post class
-//public void upvote(Object post){
+//public void upvote(Post post){
 //    post.votes[0] += 1;
 //}
 //
-//public void downvote(Object post){
+//public void downvote(Post post){
 //    post.votes[1] += 1;
 //}
 
