@@ -4,7 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="f986c473-7fad-4faf-8a6b-961b6ed5db29" name="Changes" comment="added basic entities" />
+    <list default="true" id="f986c473-7fad-4faf-8a6b-961b6ed5db29" name="Changes" comment="added clean architecture skeleton structure">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -81,10 +83,11 @@
 }]]></component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/src/test" />
+      <recent name="$PROJECT_DIR$/src/main" />
       <recent name="C:\Users\alber\Desktop\University\Second Year - 2025 2026\CSC207 - Software Design\CourseClash\src\main\java" />
       <recent name="C:\Users\alber\Desktop\University\Second Year - 2025 2026\CSC207 - Software Design\CourseClash\font" />
       <recent name="C:\Users\alber\Desktop\University\Second Year - 2025 2026\CSC207 - Software Design\CourseClash\images" />
-      <recent name="C:\Users\alber\Desktop\University\Second Year - 2025 2026\CSC207 - Software Design\CourseClash" />
     </key>
     <key name="CopyClassDialog.RECENTS_KEY">
       <recent name="main.view" />
@@ -302,7 +305,15 @@
       <option name="project" value="LOCAL" />
       <updated>1762805787244</updated>
     </task>
-    <option name="localTasksCounter" value="9" />
+    <task id="LOCAL-00009" summary="added clean architecture skeleton structure">
+      <option name="closed" value="true" />
+      <created>1762807084800</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1762807084800</updated>
+    </task>
+    <option name="localTasksCounter" value="10" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -327,6 +338,7 @@
     <MESSAGE value="since i cant do anything without entity, IA, UC finished, i created viewtest file to test if the view is working properly" />
     <MESSAGE value="added test classes" />
     <MESSAGE value="added basic entities" />
-    <option name="LAST_COMMIT_MESSAGE" value="added basic entities" />
+    <MESSAGE value="added clean architecture skeleton structure" />
+    <option name="LAST_COMMIT_MESSAGE" value="added clean architecture skeleton structure" />
   </component>
 </project>
