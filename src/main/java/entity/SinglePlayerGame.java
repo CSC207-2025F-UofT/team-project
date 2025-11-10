@@ -1,3 +1,4 @@
+// HUZAIFA - Entity for Single Player
 package entity;
 
 import java.time.LocalDateTime;
@@ -14,7 +15,7 @@ public class SinglePlayerGame {
     private double averageResponseTime;
     private LocalDateTime startTime;
     private LocalDateTime endTime;
-    private final int timePerQuestion; // seconds
+    private final int timerPerQuestion; // seconds
     private final boolean shuffleEnabled;
     private final int fixedTimePerQuestion;
 
@@ -24,14 +25,14 @@ public class SinglePlayerGame {
         this.studySet = studySet;
         this.questions = studySet.getQuestions();
         // this will come from StudySet file
-        this.timePerQuestion = timerPerQuestion;
+        this.timerPerQuestion = timerPerQuestion;
         this.shuffleEnabled = shuffleEnabled;
         this.totalQuestions = questions.size();
         this.score = 0;
         this.correctAnswers = 0;
-        this.fixedTimePerQuestion = 10;
+        this.fixedTimePerQuestion = 10; //10 seconds per question? not decided
         if (shuffleEnabled) {
-            Collections.shuffle(this.questions);
+               Collections.shuffle(this.questions);
         }
     }
 
@@ -41,5 +42,17 @@ public class SinglePlayerGame {
     public double getAverageResponseTime() { return averageResponseTime; }
     public StudyDeck getStudySet() { return studySet; }
     public Player getPlayer() { return player; }
+
+    // Optional  setters
+    public void setScore(int score) {
+        if (score >= 0) this.score = score;}
+    public void setCorrectAnswers(int correctAnswers) {
+        if (correctAnswers >= 0 && correctAnswers <= totalQuestions)
+            this.correctAnswers = correctAnswers;}
+    public void setAverageResponseTime(double averageResponseTime) {
+        if (averageResponseTime >= 0) this.averageResponseTime = averageResponseTime;}
+    public void setEndTime(LocalDateTime endTime) {
+        this.endTime = endTime;
+    }
 
 }
