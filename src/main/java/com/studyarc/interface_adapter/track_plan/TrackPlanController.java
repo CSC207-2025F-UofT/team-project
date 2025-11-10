@@ -1,4 +1,6 @@
-package com.studyarc.use_case.track_plan;
+package com.studyarc.interface_adapter.track_plan;
+
+import com.studyarc.use_case.track_plan.TrackPlanInputBoundary;
 
 public class TrackPlanController {
     final TrackPlanInputBoundary trackplaninteractor;
