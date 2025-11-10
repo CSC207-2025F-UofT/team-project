@@ -30,27 +30,30 @@ public class LoggedInView extends JPanel implements ActionListener, PropertyChan
     private final JButton logOut;
 
     private final JTextField passwordInputField = new JTextField(15);
-    private final JButton changePassword;
+//    private final JButton changePassword;
 
     public LoggedInView(LoggedInViewModel loggedInViewModel) {
         this.loggedInViewModel = loggedInViewModel;
         this.loggedInViewModel.addPropertyChangeListener(this);
 
-        final JLabel title = new JLabel("Logged In Screen");
+        final JLabel title = new JLabel("Username");
         title.setAlignmentX(Component.CENTER_ALIGNMENT);
 
         final LabelTextPanel passwordInfo = new LabelTextPanel(
                 new JLabel("Password"), passwordInputField);
 
-        final JLabel usernameInfo = new JLabel("Currently logged in: ");
+        final JLabel usernameInfo = new JLabel("");
         username = new JLabel();
 
+        final JLabel recentInfo = new JLabel("Recent Chats");
+        JLabel recent = new JLabel();
+
         final JPanel buttons = new JPanel();
-        logOut = new JButton("Log Out");
+        logOut = new JButton("User 1");
         buttons.add(logOut);
 
-        changePassword = new JButton("Change Password");
-        buttons.add(changePassword);
+        // changePassword = new JButton("Change Password");
+        // buttons.add(changePassword);
 
         logOut.addActionListener(this);
 
@@ -80,26 +83,27 @@ public class LoggedInView extends JPanel implements ActionListener, PropertyChan
             }
         });
 
-        changePassword.addActionListener(
-                // This creates an anonymous subclass of ActionListener and instantiates it.
-                evt -> {
-                    if (evt.getSource().equals(changePassword)) {
-                        final LoggedInState currentState = loggedInViewModel.getState();
-
-                        this.changePasswordController.execute(
-                                currentState.getUsername(),
-                                currentState.getPassword()
-                        );
-                    }
-                }
-        );
+//        changePassword.addActionListener(
+//                // This creates an anonymous subclass of ActionListener and instantiates it.
+//                evt -> {
+//                    if (evt.getSource().equals(changePassword)) {
+//                        final LoggedInState currentState = loggedInViewModel.getState();
+//
+//                        this.changePasswordController.execute(
+//                                currentState.getUsername(),
+//                                currentState.getPassword()
+//                        );
+//                    }
+//                }
+//        );
 
         this.add(title);
         this.add(usernameInfo);
-        this.add(username);
+        //this.add(username);
+        this.add(recentInfo);
 
-        this.add(passwordInfo);
-        this.add(passwordErrorField);
+        //this.add(passwordInfo);
+        //this.add(passwordErrorField);
         this.add(buttons);
     }
 
