@@ -1,15 +1,18 @@
 package entity;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class Flashcard {
     private String sourceWord;
     private String targetWord;
     private boolean known;
-    private int deckId;
+    private List<String> deckIds;
 
-    public Flashcard(String sourceWord, String targetWord, int deckId) {
+    public Flashcard(String sourceWord, String targetWord) {
         this.sourceWord = sourceWord;
         this.targetWord = targetWord;
-        this.deckId = deckId;
+        this.deckIds = new ArrayList<>();
         this.known = false;
     }
 
@@ -29,7 +32,13 @@ public class Flashcard {
         return this.known;
     }
 
-    public int getDeckId() {
-        return deckId;
+    public void addDeck(String deckId) {
+        if (!deckIds.contains(deckId)) {
+            deckIds.add(deckId);
+        }
+    }
+
+    public void removeDeck(String deckId) {
+        deckIds.remove(deckId);
     }
 }
