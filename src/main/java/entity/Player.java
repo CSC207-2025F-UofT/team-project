@@ -40,6 +40,9 @@ public class Player {
     public int getQuestionsIncorrect() {
         return questionsAnswered - questionsCorrect;
     }
+    public void setQuestionsIncorrect(int questionsIncorrect) {
+        this.questionsAnswered = this.questionsCorrect + questionsIncorrect;
+    }
 
     public double getAccuracy() {
         if (questionsAnswered == 0) {
