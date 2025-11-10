@@ -1,4 +1,4 @@
-package main.utility;
+package utility;
 
 import javax.swing.*;
 import java.awt.*;

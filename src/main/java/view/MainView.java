@@ -1,6 +1,6 @@
-package main.view;
+package view;
 
-import main.utility.FontLoader;
+import utility.FontLoader;
 
 import javax.swing.*;
 import java.awt.*;
