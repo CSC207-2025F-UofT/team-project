@@ -1,5 +1,6 @@
 package app;
 
+import data_access.DemoCourseAccess;
 import data_access.GeminiApiDataAccess;
 import entities.Course;
 import entities.PDFFile;
@@ -23,8 +24,7 @@ public class AppBuilder {
     private final ViewManager viewManager = new ViewManager(cardPanel, cardLayout, viewManagerModel);
 
     // --- Data Access Objects ---
-    // TODO: Add proper Course management data access implementation (file-based)
-    private Object courseDAO = null;
+    private DemoCourseAccess courseDAO = new DemoCourseAccess();
     private final GeminiApiDataAccess geminiDAO = new GeminiApiDataAccess();
 
     // --- ViewModels and Views (stored for wiring) ---
@@ -33,8 +33,22 @@ public class AppBuilder {
     private LoadingViewModel loadingViewModel;
     private WriteTestView writeTestView;
     private EvaluateTestView evaluateTestView;
+    private DemoView demoView;
 
     public AppBuilder() {
+        PDFFile dummyPdf = new PDFFile("test.pdf");
+        Course dummyCourse = new Course("CS207");
+        dummyCourse.addFile(dummyPdf);
+        courseDAO.save(dummyCourse);
+        System.out.println("Dummy course 'Software Design' created with ID: " + dummyCourse.getCourseId());
+    }
+
+    public AppBuilder addDemoView() {
+        // The DemoView doesn't have its own ViewModel but needs the MockTestViewModel for the Presenter to target
+        mockTestViewModel = new MockTestViewModel();
+        demoView = new DemoView(); // Assumes a simple constructor
+        cardPanel.add(demoView, "demo view");
+        return this;
     }
 
 
@@ -62,6 +76,7 @@ public class AppBuilder {
         MockTestPresenter presenter = new MockTestPresenter(mockTestViewModel, viewManagerModel, loadingViewModel);
         MockTestGenerationInteractor interactor = new MockTestGenerationInteractor(courseDAO, geminiDAO, presenter);
         MockTestController controller = new MockTestController(interactor);
+        demoView.setMockTestController(controller);
         return this;
     }
 
