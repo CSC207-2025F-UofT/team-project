@@ -4,12 +4,12 @@ import java.util.List;
 import java.util.ArrayList;
 
 public class BankStatement {
-    private YearMonth date;
+    private YearMonth yearMonth;
     private List<Transaction> transactions;
     private boolean isCategorized;
 
-    public BankStatement(YearMonth date) {
-        this.date = date;
+    public BankStatement(YearMonth yearMonth) {
+        this.yearMonth = yearMonth;
         this.transactions = new ArrayList<Transaction>();
         this.isCategorized = false;
     }
@@ -60,8 +60,8 @@ public class BankStatement {
         return transactions;
     }
 
-    public YearMonth getDate() {
-        return date;
+    public YearMonth getYearMonth() {
+        return yearMonth;
     }
 
 
