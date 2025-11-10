@@ -6,20 +6,13 @@ import java.awt.GridLayout;
 import java.awt.BorderLayout;
 
 public class AddRecipeForm {
-    private JFrame frame;
-    private JTextField recipeNameField, ingredientsField, cuisineField, cookingTimeField,
-            mealTypeField, tagsField, servingSizeField;
-    private JLabel recipeNameLabel, ingredientsLabel, instructionsLabel, cuisineLabel,
-            cookingTimeLabel, mealTypeLabel, tagsLabel, servingSizeLabel;
-    private JTextArea ingredientsArea, instructionsArea;
-    private JTable ingredientsTable;
-    private DefaultTableModel ingredientsModel;
+    private JLabel instructionsLabel;
 
     private int recipeID; // automatically generated
 
 
     public void AddRecipePopUp() {
-        frame = new JFrame("Add New Recipe");
+        JFrame frame = new JFrame("Add New Recipe");
         frame.setSize(480, 600);
         frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
@@ -31,40 +24,40 @@ public class AddRecipeForm {
         //--------------- top panel ----------------
 
         JPanel recipeInfoPanel = new JPanel(new GridLayout(7, 2, 10, 10));
-        recipeNameLabel = new JLabel("Recipe Name:");
-        recipeNameField = new JTextField();
+        JLabel recipeNameLabel = new JLabel("Recipe Name:");
+        JTextField recipeNameField = new JTextField();
 
         recipeInfoPanel.add(recipeNameLabel);
         recipeInfoPanel.add(recipeNameField);
 
-        servingSizeLabel = new JLabel("Serving Size:");
-        servingSizeField = new JTextField();
+        JLabel servingSizeLabel = new JLabel("Serving Size:");
+        JTextField servingSizeField = new JTextField();
 
         recipeInfoPanel.add(servingSizeLabel);
         recipeInfoPanel.add(servingSizeField);
 
-        cuisineLabel = new JLabel("Cuisine:");
-        cuisineField = new JTextField();
+        JLabel cuisineLabel = new JLabel("Cuisine:");
+        JTextField cuisineField = new JTextField();
 
         recipeInfoPanel.add(cuisineLabel);
         recipeInfoPanel.add(cuisineField);
 
-        cookingTimeLabel = new JLabel("Cooking Time:");
-        cookingTimeField = new JTextField();
+        JLabel cookingTimeLabel = new JLabel("Cooking Time:");
+        JTextField cookingTimeField = new JTextField();
 
         recipeInfoPanel.add(cookingTimeLabel);
         recipeInfoPanel.add(cookingTimeField);
 
-        mealTypeLabel = new JLabel("Meal Type:");
-        mealTypeField = new JTextField();
+        JLabel mealTypeLabel = new JLabel("Meal Type:");
+        JTextField mealTypeField = new JTextField();
 
         recipeInfoPanel.add(mealTypeLabel);
         recipeInfoPanel.add(mealTypeField);
 
-        tagsLabel = new JLabel("Tags:");
+        JLabel tagsLabel = new JLabel("Tags:");
         // tooltip not working :(
         tagsLabel.setToolTipText("Enter multiple tags separated by commas.");
-        tagsField = new JTextField();
+        JTextField tagsField = new JTextField();
 
         recipeInfoPanel.add(tagsLabel);
         recipeInfoPanel.add(tagsField);
@@ -81,8 +74,8 @@ public class AddRecipeForm {
         ingredientsPanel.setBorder(BorderFactory.createTitledBorder("Ingredients"));
 
         String[] columnNames = {"Ingredient", "Quantity", "Unit"};
-        ingredientsModel = new DefaultTableModel(columnNames, 1);
-        ingredientsTable = new JTable(ingredientsModel);
+        DefaultTableModel ingredientsModel = new DefaultTableModel(columnNames, 1);
+        JTable ingredientsTable = new JTable(ingredientsModel);
 
         JScrollPane ingredientsScrollPane = new JScrollPane(ingredientsTable);
         ingredientsPanel.add(ingredientsScrollPane, BorderLayout.CENTER);
