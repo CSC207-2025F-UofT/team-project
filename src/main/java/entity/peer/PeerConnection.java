@@ -51,6 +51,12 @@ public class PeerConnection {
   private PeerConnectCallback connectCallback;
   private PeerDataCallback dataCallback;
 
+  /**
+   * Creates a new PeerConnection with the specified ID.
+   * Initializes WebRTC configuration with ICE servers and connects to MQTT broker.
+   * 
+   * @param id the unique identifier for this peer connection
+   */
   public PeerConnection(String id) {
     uid = id;
 
@@ -81,10 +87,17 @@ public class PeerConnection {
     }
   }
 
+  /**
+   * Creates a new PeerConnection with a randomly generated UUID as the ID.
+   */
   public PeerConnection() {
     this(UUID.randomUUID().toString());
   }
 
+  /**
+   * Creates a WebRTC offer for establishing a peer connection.
+   * Initializes the peer connection, creates a data channel, and generates ICE candidates.
+   */
   private void createOffer() {
     System.out.println("Creating offer...");
 
@@ -156,6 +169,13 @@ public class PeerConnection {
     });
   }
 
+  /**
+   * Creates a WebRTC answer in response to an offer from another peer.
+   * Parses the offer, sets up the peer connection, and generates an answer with ICE candidates.
+   * 
+   * @param offerJsonStr the JSON string containing the offer SDP and ICE candidates
+   * @param targetID the ID of the peer that sent the offer
+   */
   private void createAnswer(String offerJsonStr, String targetID) {
     System.out.println("Creating answer...");
 
@@ -287,6 +307,12 @@ public class PeerConnection {
     });
   }
 
+  /**
+   * Establishes the connection by processing the answer from the remote peer.
+   * Parses the answer SDP and ICE candidates, then completes the connection setup.
+   * 
+   * @param answerJsonStr the JSON string containing the answer SDP and ICE candidates
+   */
   private void connect(String answerJsonStr) {
     if (peerConnection == null) {
       System.out.println("Peer connection not initialized.");
@@ -332,6 +358,13 @@ public class PeerConnection {
     });
   }
 
+  /**
+   * Creates an observer for monitoring data channel events.
+   * Handles state changes and incoming messages on the data channel.
+   * 
+   * @param channel the RTCDataChannel to observe
+   * @return an RTCDataChannelObserver configured to handle channel events
+   */
   private RTCDataChannelObserver creatDataChannelObserver(RTCDataChannel channel) {
     return new RTCDataChannelObserver() {
       @Override
@@ -370,10 +403,22 @@ public class PeerConnection {
     };
   }
 
+  /**
+   * Registers a callback to be invoked when data is received from the peer.
+   * 
+   * @param cb the callback to handle incoming data
+   */
   public void onDataRecieved(PeerDataCallback cb) {
     dataCallback = cb;
   }
 
+  /**
+   * Initiates a connection to another peer identified by the target ID.
+   * Subscribes to MQTT topics and requests an offer from the target peer.
+   * 
+   * @param targetId the unique identifier of the peer to connect to
+   * @param cb the callback to be invoked when the connection is established
+   */
   public void connectToPeer(String targetId, PeerConnectCallback cb) {
     connectCallback = cb;
     try {
@@ -395,6 +440,12 @@ public class PeerConnection {
     }
   }
 
+  /**
+   * Sets up this peer as a host ready to accept incoming connections.
+   * Creates an offer and subscribes to MQTT topics for offer requests and answers.
+   * 
+   * @param cb the callback to be invoked when a peer connects
+   */
   public void onConnection(PeerConnectCallback cb) {
     connectCallback = cb;
     createOffer();
@@ -419,6 +470,11 @@ public class PeerConnection {
     }
   }
 
+  /**
+   * Sends a text message to the connected peer through the data channel.
+   * 
+   * @param message the text message to send
+   */
   public void sendData(String message) {
     if (gDataChannel != null && gDataChannel.getState() == RTCDataChannelState.OPEN) {
       ByteBuffer messaBuffer = ByteBuffer.wrap(message.getBytes(StandardCharsets.UTF_8));
@@ -434,6 +490,17 @@ public class PeerConnection {
     }
   }
 
+  /**
+   * Gets the unique identifier of this peer connection.
+   */
+  public String getUid() {
+    return uid;
+  }
+
+  /**
+   * Cleans up resources by closing the peer connection and disconnecting from MQTT broker.
+   * Should be called when the connection is no longer needed.
+   */
   public void dispose() {
     if (peerConnection != null) {
       peerConnection.close();
