@@ -21,7 +21,7 @@ public class FoodFinderApp {
         this.currentUser = currentUser;
     }
 
-    public list<Restaurant> getRestaurantlist() {
+    public list<Restaurant> getFullRestaurantlist() {
         return restaurantList;
     }
 
@@ -29,12 +29,20 @@ public class FoodFinderApp {
         restaurantList.add(restaurant);
     }
 
-    public double getDistance(Restaurant restaurant) throws SignedOutException {
-        return 0.0;
+    public double getDistance(Restaurant restaurant) {
+        float userX = currentUser.getCoords()[0];
+        float userY = currentUser.getCoords()[1];
+        float restaurantX = restaurant.getCoords()[0];
+        float restaurantY = restaurant.getCoords()[1];
+
+        float xSquared = (float) Math.pow(restaurantX - userX, 2);
+        float ySquared = (float) Math.pow(restaurantY - userY, 2);
+        return Math.sqrt(xSquared + ySquared);
     }
 
-    public void sortByDistance() {
-        Collections.sort(restaurantList, new Comparator<Restaurant>() {
+    public List<Restaurant> getSortByClosest() {
+        List<Restaurant> sortedList = new ArrayList<Restaurant>(restaurantList);
+        sortedList.sort(new Comparator<Restaurant>() {
             @Override
             public int compare(Restaurant A, Restaurant B) {
                 double distA = getDistance(A);
@@ -42,10 +50,12 @@ public class FoodFinderApp {
                 return Double.compare(distA, distB);
             }
         });
+        return sortedList;
     }
 
-    public void sortByCheapest(){
-        Collections.sort(restaurantList, new Comparator<Restaurant>() {
+    public List<Restaurant> getSortByCheapest(){
+        List<Restaurant> sortedList = new ArrayList<Restaurant>(restaurantList);
+        sortedList.sort(new Comparator<Restaurant>() {
             @Override
             public int compare(Restaurant A, Restaurant B) {
                 double priceA = A.getPriceRange;
@@ -53,6 +63,7 @@ public class FoodFinderApp {
                 return Double.compare(distA, distB);
             }
         });
+        return sortedList;
     }
 }
 
