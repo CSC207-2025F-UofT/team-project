@@ -1,55 +1,73 @@
 package game.entity;
 
-import java.util.ArrayList;
+import java.util.*;
 
 public class User {
-    /*
-    PetInventory: List<Pet>
-    itemsList: List<Item>
-    + coinCount: int
-    clickBonus (Click multiplier; how many coins you get per click):int
-    clickBonusTime:int
-    petSlot:int
-    */
-    ArrayList<Pet> PetInventory = new ArrayList<Pet>();
-    ArrayList<Item> ItemInventory = new ArrayList<Item>();
-    int coinCount = 0;
-    int clickBonus = 0;
-    int slotsUnlocked = 0;
+        public int coinCount;
+        private int clickBonus;
+        private int clickBonusTime;
+        private List<Pet> PetInventory= new ArrayList<>();
+        private List<Item> itemsList = new ArrayList<>();
+        private int unlockedSlots;
+        final private int INITIAL_COINS = 100;
+        final private int INITIAL_CLICKBONUS = 1;
+        final private int INITIAL_CLICKBONUSINCREASE = 1;
 
-    private static final int LOOT_BOX_PRICE = 50;
-    private static final int PET_FOOD_PRICE = 15;
-    private static final int PET_TOY_PRICE = 20;
+        public User() {
+            this.coinCount = INITIAL_COINS;
+            this.clickBonus = INITIAL_CLICKBONUS;
+            this.clickBonusTime = 1;
+            this.unlockedSlots = 2;
+        }
 
-    public boolean buyLootBox() {
-        if (coinCount >= LOOT_BOX_PRICE) {
-            coinCount -= LOOT_BOX_PRICE;
-            return true;
+        public boolean coinCheck(int price) {
+            if (this.coinCount >= price) {
+                return true;
+            }
+            return false;
         }
-        return false;
 
-    }
-    public void addToPetInventory(Pet pet) {
-        if (pet != null) {
-            PetInventory.add(pet);
+        private void buy(int price){
+            this.coinCount -= price;
         }
-    }
-    public boolean buyPetFood() {
-        if (coinCount >= PET_FOOD_PRICE) {
-            coinCount -= PET_FOOD_PRICE;
-            Item food = new Item();
-            ItemInventory.add(food);
-            return true;
+
+        public void buyLootBox(LootBox lootBox){
+            this.buy(lootBox.getPrice());
+            this.addToPetInventory(lootBox.getPet());
         }
-        return false;
-    }
-    public boolean buyPetToy() {
-        if (coinCount >= PET_TOY_PRICE) {
-            coinCount -= PET_TOY_PRICE;
-            Item toy = new Item();
-            ItemInventory.add(toy);
-            return true;
+
+        public void buyPetFood(PetFood petFood){
+            this.buy(petFood.getPrice());
+            this.addToItemList(petFood);
         }
-        return false;
-    }
+
+        public void buyPetToy(PetToy petToy){
+            this.buy(petToy.getPrice());
+            this.addToItemList(petToy);
+        }
+
+        //pre: the clickBonusTime should be less than 5
+        public void upgradeClickBonus(){
+            this.clickBonusTime+=1;
+            this.clickBonus+=INITIAL_CLICKBONUSINCREASE;
+        }
+
+        public int getClickBonusTime(){
+            return this.clickBonusTime;
+        }
+
+        //pre: the unlockPetSlot should be less than 5
+        public void unlockPetSlot(){
+            this.unlockedSlots+=1;
+        }
+
+        public void addToPetInventory(Pet pet) {
+            this.PetInventory.add(pet);
+        }
+        public void addToItemList(Item item) {
+            this.itemsList.add(item);
+        }
+
+
+
 }
