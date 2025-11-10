@@ -9,16 +9,14 @@ public final class Question {
     private final int correctOptionId;
 
     public Question(int questionId, String text, List<AnswerOption> options, int correctOptionId) {
-        if (options == null || options.size() != 4) {
-            throw new IllegalArgumentException("Question must have exactly 4 options");
-        }
+
+        // for checking during programming process
+        assert options != null : "options cannot be null";
+        assert options.size() == 4 : "Question must have exactly 4 options";
 
         boolean containsCorrect = options.stream()
-                .anyMatch(o -> o.getOptionId() == correctOptionId);
-
-        if (!containsCorrect) {
-            throw new IllegalArgumentException("correctOptionId must match one of the options");
-        }
+                .anyMatch(option -> option.getOptionId() == correctOptionId);
+        assert containsCorrect : "correctOptionId must match one of the provided options";
 
         this.questionId = questionId;
         this.text = text;

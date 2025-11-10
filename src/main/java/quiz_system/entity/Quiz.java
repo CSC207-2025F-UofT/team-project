@@ -18,16 +18,15 @@ public final class Quiz {
     public boolean isCompleted() { return completed; }
     public Integer getUserAnswerOptionId() { return userAnswerOptionId; }
 
-    /** Called when the user selects an answer option. */
+    // when user selects answer option
     public void recordAnswer(int optionId) {
-        // Option must belong to this question — this prevents bugs
-        if (question.getOptionById(optionId) == null) {
-            throw new IllegalArgumentException("Option does not belong to this question.");
-        }
+        // // for checking during programming process
+        assert question.getOptionById(optionId) != null : "Option does not belong to this question.";
+
         this.userAnswerOptionId = optionId;
     }
 
-    /** Applies the business rules: correct / incorrect / unanswered. */
+    // unfinished or finished quiz
     public QuizResult submit() {
         if (userAnswerOptionId == null) {
             return QuizResult.warning("Question Not Answered");
