@@ -9,4 +9,8 @@ public abstract class Question {
         this.difficultyLevel = difficultyLevel;
     }
 
+    public abstract boolean checkAnswer(String userAnswer);
+
+    public String getQuestionText() { return questionText; }
+    public int getDifficultyLevel() { return difficultyLevel; }
 }
