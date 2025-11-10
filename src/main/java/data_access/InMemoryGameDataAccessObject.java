@@ -16,9 +16,11 @@ public class InMemoryGameDataAccessObject implements SwitchToGameViewDataAccessI
     private Map<String, Scene> scenes = new HashMap<>();
 
     public InMemoryGameDataAccessObject() {
-        ClickableObject object1 = new ClickableObjectFactory().create("Object1", 0, 0, "object1.png");
-        ClickableObject object2 = new ClickableObjectFactory().create("Object2", 600, 300, "object2.png");
-        Scene scene1 = new SceneFactory().create("Scene1", new ArrayList<>(List.of(object1, object2)), "scene1.png");
+        ClickableObject object1 = new ClickableObjectFactory().create("Object1", 0, 0, "object1.png",false);
+        ClickableObject object2 = new ClickableObjectFactory().create("Object2", 600, 300, "object2.png", false);
+        ClickableObject object3 = new ClickableObjectFactory().create("Object3", 200, 200, "object2.png", true);
+        ArrayList<ClickableObject> sceneOneList = new ArrayList<>(List.of(object1, object2, object3));
+        Scene scene1 = new SceneFactory().create("Scene1", sceneOneList, "scene1.png");
         Scene scene2 = new SceneFactory().create("Scene2", new ArrayList<>(List.of(object2, object1)), "scene2.png");
         scenes.put("Scene1", scene1);
         scenes.put("Scene2", scene2);
