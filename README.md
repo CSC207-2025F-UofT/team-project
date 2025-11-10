@@ -8,13 +8,20 @@ The readme should include information such as:
 - information about the API(s) that your project uses 
 - screenshots or animations demonstrating current functionality
 
+## Summary
+A UofT campus exploration app where students can check-in to landmarks across campus. UofT Passport encourages exploration and engagement with the university environment, allowing users to check in at points of interest, plan routes, and track their progress.
+
 ## User Stories
-1. As a user, I want to browse a list or map of UofT landmarks so that I can see what places I can visit and learn more about each one.
+1. As a user, I want to browse a list of UofT landmarks so that I can see what places I can visit and learn more about each one.
 2. As a user, I want to “check in” to a location so that my visit is recorded in my passport.
-3. As a user, I want to view my overall progress (e.g., number of landmarks visited, a filled passport, or a colour-coded map) so that I can track my exploration achievements.
+3. As a user, I want to view my overall progress (e.g., number of landmarks visited, a filled passport, a pinned map) so that I can track my exploration achievements.
 4. As a user, I want to plan a route that visits multiple landmarks so that I can efficiently explore several locations in one trip.
-5. As a user, I want to leave private notes or reflections on places I’ve visited so that I can remember experiences or tips.
-6. As a user, I want to view public notes or recommendations left by others so that I can discover interesting or lesser-known spots
+5. As a user, I want to leave private notes on places I’ve visited so that I can remember experiences or tips.
+6. As a user, I want to see all my past visits and undo a visit.
+7. As a user, I want to filter the list of landmarks by different parameters (number of visits, landmark type)
+8. As a user, I want to be able to edit or delete my note on a place I’ve visited.
+9. As a user, I want to login/register to use the program.
+
 
 ## Use Cases
 
@@ -24,5 +31,5 @@ The readme should include information such as:
 | Nathan | Check into a location | 2 |
 | Kitas | View exploration progress | 3 |
 | Dan | Plan a route | 4 |
-| Steven | Add personal notes | 5 |
-| Joey | View public notes | 6 |
+| Joey | Add personal note | 6 |
+| Steven | View visit history | 6 |
