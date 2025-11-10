@@ -6,12 +6,16 @@ import java.util.List;
 public class Flashcard {
     private String sourceWord;
     private String targetWord;
+    private String sourceLang;
+    private String targetLang;
     private boolean known;
     private List<String> deckIds;
 
-    public Flashcard(String sourceWord, String targetWord) {
+    public Flashcard(String sourceWord, String targetWord, String sourceLang, String targetLang) {
         this.sourceWord = sourceWord;
         this.targetWord = targetWord;
+        this.sourceLang = sourceLang;
+        this.targetLang = targetLang;
         this.deckIds = new ArrayList<>();
         this.known = false;
     }
@@ -40,5 +44,15 @@ public class Flashcard {
 
     public void removeDeck(String deckId) {
         deckIds.remove(deckId);
+    }
+
+    public List<String> getDeckIds() {
+        return deckIds;
+    }
+    public String getSourceLang() {
+        return sourceLang;
+    }
+    public String getTargetLang() {
+        return targetLang;
     }
 }
