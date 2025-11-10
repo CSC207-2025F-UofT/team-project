@@ -3,18 +3,15 @@ import java.time.LocalDate;
 
 public class Transaction {
     private final LocalDate date;
-    private final String  source;
+    private final Source source;
     private final double amount;
-    private String category;
 
 
     //create transaction class with category
-    public Transaction(String source, double amount, LocalDate date, String category){
+    public Transaction(Source source, double amount, LocalDate date){
         this.date = date;
         this.source = source;
         this.amount =  amount;
-        this.category = category;
-
 
     }
 
@@ -24,11 +21,8 @@ public class Transaction {
         return this.amount;
     }
 
-    public String getCategory(){
-        return this.category;
-    }
 
-    public String getSource(){
+    public Source getSource(){
         return this.source;
     }
 
