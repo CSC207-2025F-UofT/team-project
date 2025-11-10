@@ -1,3 +1,4 @@
+// Initial UI for browsing study set - HUZAIFA
 package view;
 
 import utility.FontLoader;
