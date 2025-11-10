@@ -6,6 +6,7 @@ import com.studyarc.entity.Milestone;
 import com.studyarc.entity.User;
 
 import java.util.ArrayList;
+import java.util.Map;
 
 /**
  * DAO interface for the MilestoneTasks Case.
@@ -28,6 +29,6 @@ public interface MilestoneTasksDataAccessInterface {
      * Saves the milestones and tasks to the User's StudyPlan
      * @return an ArrayList of Task Objects
      */
-    void save(User user, StudyPlan plan);
+    void save(User user, StudyPlan plan, Map<Milestone, ArrayList<Task>> milestonesToTasks);
 
 }
