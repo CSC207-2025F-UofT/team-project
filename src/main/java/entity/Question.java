@@ -1,3 +1,6 @@
+// Represents a generic question in the quiz application
+// Mahir and Albert
+
 package entity;
 
 public abstract class Question {
