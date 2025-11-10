@@ -7,5 +7,8 @@ public class Main {
         AppBuilder appBuilder = new AppBuilder();
         JFrame application = appBuilder.build();
 
+        application.pack();
+        application.setSize(800, 600);
+        application.setVisible(true);
     }
 }
