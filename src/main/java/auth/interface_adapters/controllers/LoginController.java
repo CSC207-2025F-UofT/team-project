@@ -1,4 +1,4 @@
-package auth.interface_adapter.controllers;
+package auth.interface_adapters.controllers;
 
 import auth.use_case.login.LoginInputData;
 import auth.use_case.login.LoginInteractor;

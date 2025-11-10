@@ -1,6 +1,5 @@
-package auth.interface_adapter.controllers;
+package auth.interface_adapters.controllers;
 
-import auth.use_case.login.LoginInputData;
 import auth.use_case.signup.SignUpInputData;
 import auth.use_case.signup.SignUpInteractor;
 import auth.use_case.signup.SignUpOutputData;
@@ -13,7 +12,7 @@ public class SignUpController {
         this.signUpInteractor = signUpInteractor;
     }
 
-    public SignUpOutputData signup(String username, String password) {
+    public SignUpOutputData signUp(String username, String password) {
         SignUpInputData input = new SignUpInputData(username, password);
         return signUpInteractor.execute(input);
     }
