@@ -5,30 +5,30 @@ import java.util.List;
 
 public class Goal {
 
-    private YearMonth month;
+    private YearMonth yearMonth;
     private List<Category> categories;
     private float goalAmount;
 
 
-    public Goal(YearMonth month, float goalAmount) {
-        this.month = month;
+    public Goal(YearMonth yearMonth, float goalAmount) {
+        this.yearMonth = yearMonth;
         this.categories = new ArrayList<>(categories);
         this.goalAmount = goalAmount;
     }
 
     // Alternative constructor for utility
-    public Goal(YearMonth month, List<Category> categories, float goalAmount) {
-        this.month = month;
+    public Goal(YearMonth yearMonth, List<Category> categories, float goalAmount) {
+        this.yearMonth = yearMonth;
         this.categories = categories;
         this.goalAmount = goalAmount;
     }
 
     public YearMonth getMonth() {
-        return month;
+        return yearMonth;
     }
 
-    public void setMonth(YearMonth month) {
-        this.month = month;
+    public void setMonth(YearMonth yearMonth) {
+        this.yearMonth = yearMonth;
     }
 
     public List<Category> getCategories() {
