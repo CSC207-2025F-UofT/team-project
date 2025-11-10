@@ -1,4 +1,4 @@
-# Team Project
+# Team Project - UofT Passport
 
 Please keep this up-to-date with information about your project throughout the term.
 
@@ -33,3 +33,8 @@ A UofT campus exploration app where students can check-in to landmarks across ca
 | Dan | Plan a route | 4 |
 | Joey | Add personal note | 6 |
 | Steven | View visit history | 6 |
+
+## API Information
+- [Maps Static API](https://developers.google.com/maps/documentation/maps-static)
+- [Routes API](https://developers.google.com/maps/documentation/routes)
+- [Places API](https://developers.google.com/maps/documentation/places/)
