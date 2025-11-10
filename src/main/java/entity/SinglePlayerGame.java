@@ -43,4 +43,16 @@ public class SinglePlayerGame {
     public StudySet getStudySet() { return studySet; }
     public Player getPlayer() { return player; }
 
+    // Optional  setters
+    public void setScore(int score) {
+        if (score >= 0) this.score = score;}
+    public void setCorrectAnswers(int correctAnswers) {
+        if (correctAnswers >= 0 && correctAnswers <= totalQuestions)
+            this.correctAnswers = correctAnswers;}
+    public void setAverageResponseTime(double averageResponseTime) {
+        if (averageResponseTime >= 0) this.averageResponseTime = averageResponseTime;}
+    public void setEndTime(LocalDateTime endTime) {
+        this.endTime = endTime;
+    }
+
 }
