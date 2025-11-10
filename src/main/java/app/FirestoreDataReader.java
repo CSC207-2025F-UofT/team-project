@@ -92,7 +92,7 @@ public class FirestoreDataReader {
 class Recipe {
     private String title;
     private String description;
-// ... other fields
+    // ... other fields
 
     public Recipe() {
         // No-argument constructor required for Firestore object mapping
@@ -114,5 +114,4 @@ class Recipe {
         this.description = description;
     }
 // ... getters and setters for other fields
-
 }
