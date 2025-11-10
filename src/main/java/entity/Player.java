@@ -6,6 +6,7 @@ package entity;
 public class Player {
 
     private final String userName;
+    private final String password;
     private int level;
     private int experiencePoints;
     private int questionsAnswered;
@@ -16,8 +17,9 @@ public class Player {
      * @param userName the player's username
      */
 
-    public Player(String userName) {
+    public Player(String userName, String password) {
         this.userName = userName;
+        this.password = password;
         // Assuming new players start at level 1 with 0 experience points and no questions answered
         // TODO: Implement loading existing player data from a database or file
         this.level = 1;
@@ -27,6 +29,8 @@ public class Player {
     }
 
     public String getUserName() { return userName; }
+
+    public String getPassword() { return password; }
 
     public int getLevel() { return level; }
     public void setLevel(int level) { this.level = level; }
