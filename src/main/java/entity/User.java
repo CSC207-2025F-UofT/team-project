@@ -1,7 +1,6 @@
 package entity;
 
-import java.util.Date;
-import java.util.List;
+import java.util.ArrayList;
 
 public class User {
     private String username;
@@ -10,15 +9,15 @@ public class User {
     private ArrayList<Recipe> savedRecipes;
     priavte ArrayList<Review> reviews;
 
-    public List<Recipe> getpublishedRecipes() {
+    public ArrayList<Recipe> getpublishedRecipes() {
         return publishedRecipes;
     }
 
-    public List<Recipe> getsavedRecipes() {
+    public ArrayList<Recipe> getsavedRecipes() {
         return savedRecipes;
     }
 
-    public List<Review> getpublishedReviews() {
+    public ArrayList<Review> getpublishedReviews() {
         return reviews;
     }
 }
