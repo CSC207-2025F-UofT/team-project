@@ -10,42 +10,58 @@ import javax.swing.*;
 
 public class Main {
 
+    private static DataSource dataSource;
+    private static JdbcUserRepository userRepository;
+
+    private static SignUpController signUpController;
+    private static LoginController loginController;
+
+    private static JFrame currentFrame;
+
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
-            // set up user database
-            DataSource dataSource = DataSourceFactory.sqlite("app.db");
+            // Setup database
+            dataSource = DataSourceFactory.sqlite("app.db");
             SchemaInitializer.ensureSchema(dataSource);
-            JdbcUserRepository repo = new JdbcUserRepository(dataSource);
+            userRepository = new JdbcUserRepository(dataSource);
 
             // Create interactors
-            SignUpInteractor signUpInteractor = new SignUpInteractor(repo);
-            LoginInteractor loginInteractor = new LoginInteractor(repo);
+            SignUpInteractor signUpInteractor = new SignUpInteractor(userRepository);
+            LoginInteractor loginInteractor = new LoginInteractor(userRepository);
 
-            // Controllers
-            SignUpController signUpController = new SignUpController(signUpInteractor);
-            LoginController loginController = new LoginController(loginInteractor);
+            // Create controllers
+            signUpController = new SignUpController(signUpInteractor);
+            loginController = new LoginController(loginInteractor);
 
-            // Screen switching
-            final JFrame[] currentFrame = new JFrame[1];
-
-            Runnable showLogin = () -> {
-                currentFrame[0] = new LoginView(loginController, () -> {
-                    currentFrame[0].dispose();
-                    showSignUp.run();
-                });
-                currentFrame[0].setVisible(true);
-            };
-
-            Runnable showSignUp = () -> {
-                currentFrame[0] = new SignUpView(signUpController, () -> {
-                    currentFrame[0].dispose();
-                    showLogin.run();
-                });
-                currentFrame[0].setVisible(true);
-            };
-
-            // Start on Login screen
-            showLogin.run();
+            // Start application on the login screen
+            showLoginView();
         });
+    }
+
+    /** Displays the login window */
+    private static void showLoginView() {
+        // Close any open frame first
+        if (currentFrame != null) currentFrame.dispose();
+
+        LoginView loginView = new LoginView(
+                loginController,
+                Main::showSignUpView // callback to switch to sign up
+        );
+
+        currentFrame = loginView;
+        loginView.setVisible(true);
+    }
+
+    /** Displays the sign-up window */
+    private static void showSignUpView() {
+        if (currentFrame != null) currentFrame.dispose();
+
+        SignUpView signUpView = new SignUpView(
+                signUpController,
+                Main::showLoginView // callback to switch back
+        );
+
+        currentFrame = signUpView;
+        signUpView.setVisible(true);
     }
 }
