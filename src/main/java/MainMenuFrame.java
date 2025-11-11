@@ -5,7 +5,7 @@ public class MainMenuFrame extends JFrame {
     public MainMenuFrame(User user) {
         setTitle("BET366 Main Menu");
         setDefaultCloseOperation(EXIT_ON_CLOSE);
-        setSize(350, 300);
+        setSize(1920,1080);
         setLayout(new GridLayout(5, 1));
 
         JLabel title = new JLabel("Welcome to BET366", SwingConstants.CENTER);
