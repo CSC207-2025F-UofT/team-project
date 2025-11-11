@@ -11,8 +11,8 @@ public class LoggedInState {
     private String to = "";
     private String day = "";
     private String passwordError;
-    private String month = "";
-    private String year = "";
+    private String month = "January";
+    private String year = "2025";
 
     public LoggedInState(LoggedInState copy) {
         username = copy.username;
