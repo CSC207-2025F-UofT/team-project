@@ -54,9 +54,7 @@ public class TestBuildPokemonTeam {
             ArrayList<Integer> pokedexes = new ArrayList<>();
             egggroup.add(1);
 
-
-
-
+            
             Pokemon pikachu = new Pokemon(name, type1, type2, stats, abilities, hidden,  moves, egggroup, pokedexes);
 
             // Create the interactor
