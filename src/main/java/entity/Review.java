@@ -44,7 +44,10 @@ public class Review {
     public int getUpvotes() {
         return upvotes;
     }
-    public void upvoted() {
-        this.upvotes ++;
+    public void add_upvoted() {
+        this.upvotes++;
+    }
+    public void remove_upvote() {
+        this.upvotes--;
     }
 }
