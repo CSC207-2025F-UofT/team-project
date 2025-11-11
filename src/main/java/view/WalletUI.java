@@ -39,13 +39,11 @@ public class WalletUI extends JFrame {
 
         add(inputPanel, BorderLayout.CENTER);
 
-        // ===== 底部交易历史 =====
         historyArea = new JTextArea(10, 30);
         historyArea.setEditable(false);
         JScrollPane scrollPane = new JScrollPane(historyArea);
         add(scrollPane, BorderLayout.SOUTH);
 
-        // ===== 按钮事件 =====
         depositBtn.addActionListener(e -> deposit());
         withdrawBtn.addActionListener(e -> withdraw());
     }
