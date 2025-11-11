@@ -138,4 +138,23 @@ public class CalendarPanel extends JPanel {
 
     public void updateSchedule(Schedule schedule) {
     }
+
+    public void clear() {
+        for (int r = 0; r < 24; r++) {
+            for (int c = 0; c < currentColumns; c++) {
+                cells[r][c].setBackground(Color.WHITE);
+                cells[r][c].removeAll();
+            }
+        }
+    }
+
+    public void colorCell(String time, Color color, String label) {
+        try {
+            int hour = Integer.parseInt(time.split(":")[0]);
+            if (hour >= 0 && hour < 24) {
+                cells[hour][0].setBackground(color); // first column for now
+                cells[hour][0].add(new JLabel(label));
+            }
+        } catch (Exception ignored) {}
+    }
 }

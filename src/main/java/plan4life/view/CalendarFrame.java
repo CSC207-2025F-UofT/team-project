@@ -3,8 +3,10 @@ package plan4life.view;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import plan4life.entities.Schedule;
+import java.util.Random; //Temp till we get langchain/langgraph working
 
-public class CalendarFrame extends JFrame {
+public class CalendarFrame extends JFrame implements CalendarViewInterface {
     private final CalendarPanel calendarPanel;
     private final ActivityPanel activityPanel;
 
@@ -32,10 +34,10 @@ public class CalendarFrame extends JFrame {
         topBar.add(rightPanel, BorderLayout.EAST);
 
         // <--- Calendar Panel --->
-        calendarPanel = new CalendarPanel();
+        this.calendarPanel = new CalendarPanel();
 
         // <--- Activities Panel --->
-        activityPanel = new ActivityPanel();
+        this.activityPanel = new ActivityPanel();
 
         // --- Add to frame ---
         add(topBar, BorderLayout.NORTH);
@@ -47,5 +49,25 @@ public class CalendarFrame extends JFrame {
         weekBtn.addActionListener((ActionEvent e) -> calendarPanel.setWeekView());
 
         setVisible(true);
+    }
+
+    @Override
+    public void displaySchedule(Schedule schedule) {
+        if (schedule == null) return;
+
+        // This is where you’ll color each entry in the schedule
+        // For now, until Activities exist, let’s simulate visually:
+        calendarPanel.clear();
+
+        Random random = new Random(); //Temp till we get langchain/langgraph working
+
+        schedule.getActivities().forEach((time, activityName) -> {
+            Color color = new Color(random.nextInt(156) + 100,
+                    random.nextInt(156) + 100,
+                    random.nextInt(156) + 100);
+            calendarPanel.colorCell(time, color, activityName);
+        });
+
+        calendarPanel.repaint();
     }
 }
