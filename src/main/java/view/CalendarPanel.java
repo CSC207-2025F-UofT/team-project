@@ -104,7 +104,7 @@ public class CalendarPanel extends JPanel implements PropertyChangeListener {
             try {
                 String name = nameField.getText().trim();
                 LocalDate date = LocalDate.parse(dateField.getText().trim());
-                Color color = colorPicker.getSelectedColor(); // ✅ selected swatch
+                Color color = colorPicker.getSelectedColor();
                 controller.addEvent(name, date, color);
                 dlg.dispose();
             } catch (Exception ex) {
@@ -166,7 +166,7 @@ public class CalendarPanel extends JPanel implements PropertyChangeListener {
             for (Event e : events) {
                 JLabel l = new JLabel("• " + e.getName());
                 l.setForeground(e.getColor());
-                l.setFont(l.getFont().deriveFont(13f));
+                l.setFont(l.getFont().deriveFont(15f));
                 list.add(l);
             }
             p.add(list, BorderLayout.CENTER);

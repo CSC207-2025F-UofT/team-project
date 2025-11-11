@@ -123,7 +123,6 @@ public class DashboardView extends JPanel {
                     @Override public void mouseEntered(MouseEvent e) { btn.setBackground(accentHover); }
                     @Override public void mouseExited(MouseEvent e) { btn.setBackground(buttonBase); }
                 });
-                // Action (keeps your hover effect)
                 btn.addActionListener(ev -> {
                     if ("Calendar".equals(text)) {
                         cardLayout.show(content, "calendar");
