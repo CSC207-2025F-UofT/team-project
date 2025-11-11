@@ -54,13 +54,16 @@
   </component>
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
+    "Application.blackjackview.executor": "Run",
+    "Application.minesview.executor": "Run",
     "ModuleVcsDetector.initialDetectionPerformed": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.git.unshallow": "true",
     "SONARLINT_PRECOMMIT_ANALYSIS": "true",
     "git-widget-placeholder": "viewmanager",
     "ignore.virus.scanning.warn.message": "true",
-    "kotlin-language-version-configured": "true"
+    "kotlin-language-version-configured": "true",
+    "node.js.selected.package.tslint": "(autodetect)"
   }
 }]]></component>
   <component name="RunManager">
@@ -157,6 +160,7 @@
     <MESSAGE value="Team contract final" />
     <MESSAGE value="n" />
     <MESSAGE value="packages for CA" />
-    <option name="LAST_COMMIT_MESSAGE" value="packages for CA" />
+    <MESSAGE value="mines UI added" />
+    <option name="LAST_COMMIT_MESSAGE" value="mines UI added" />
   </component>
 </project>
