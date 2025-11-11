@@ -19,7 +19,7 @@ public class SignUpView extends JFrame {
     public SignUpView(SignUpController signUpController, Runnable showLoginView) {
         setTitle("Sign Up");
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        setSize(300, 180);
+        setSize(450, 250);
         setLocationRelativeTo(null);
 
         JPanel panel = new JPanel(new GridLayout(3, 2, 10, 10));

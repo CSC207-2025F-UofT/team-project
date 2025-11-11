@@ -5,13 +5,22 @@ import java.awt.*;
 
 /**
  * The main dashboard screen shown after successful login.
+ * Acts as a navigation hub to different use cases in the FinWise app.
  */
 public class DashboardView extends JFrame {
 
-    public DashboardView(Runnable onLogout) {
+    public DashboardView(
+            Runnable onLogout,
+            Runnable onTrackExpenses,
+            Runnable onFinancialTrends,
+            Runnable onStockPrices,
+            Runnable onSimulatedInvestment,
+            Runnable onPortfolioAnalysis,
+            Runnable onMarketNews
+    ) {
         setTitle("FinWise Dashboard");
         setSize(600, 400);
-        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE); // only close this window
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLocationRelativeTo(null);
 
         // Layout Setup
@@ -42,12 +51,21 @@ public class DashboardView extends JFrame {
 
         // Logout Button
         JButton logoutBtn = new JButton("Logout");
-        logoutBtn.addActionListener(e -> {
-            onLogout.run();  // switch back to loginView
-            dispose();       // close dashboard
-        });
         mainPanel.add(logoutBtn, BorderLayout.SOUTH);
+
+        // Add action listeners (connect each button to its callback)
+        logoutBtn.addActionListener(e -> {
+            onLogout.run();
+            dispose();
+        });
+        expensesBtn.addActionListener(e -> onTrackExpenses.run());
+        trendsBtn.addActionListener(e -> onFinancialTrends.run());
+        stockBtn.addActionListener(e -> onStockPrices.run());
+        investBtn.addActionListener(e -> onSimulatedInvestment.run());
+        portfolioBtn.addActionListener(e -> onPortfolioAnalysis.run());
+        newsBtn.addActionListener(e -> onMarketNews.run());
 
         add(mainPanel);
     }
 }
+

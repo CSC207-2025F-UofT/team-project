@@ -72,10 +72,41 @@ public class Main {
         if (currentFrame != null) currentFrame.dispose();
 
         DashboardView dashboardView = new DashboardView(
-                Main::showLoginView   // callback for "Logout" button
+                Main::showLoginView,         // Logout
+                Main::showExpensesView,      // Track Expenses
+                Main::showTrendsView,        // Financial Trends
+                Main::showStockPricesView,   // Stock Prices
+                Main::showInvestmentView,    // Simulated Investment
+                Main::showPortfolioView,     // Portfolio Analysis
+                Main::showNewsView           // Market News
         );
 
         currentFrame = dashboardView;
         dashboardView.setVisible(true);
     }
+
+    private static void showNewsView() {
+        // ToDo
+    }
+
+    private static void showPortfolioView() {
+        // ToDo
+    }
+
+    private static void showInvestmentView() {
+        // ToDo
+    }
+
+    private static void showStockPricesView() {
+        // ToDo
+    }
+
+    private static void showTrendsView() {
+        // ToDo
+    }
+
+    private static void showExpensesView() {
+        // ToDo
+    }
+
 }

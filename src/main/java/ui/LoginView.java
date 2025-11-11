@@ -29,7 +29,7 @@ public class LoginView extends JFrame {
     public LoginView(LoginController loginController, Runnable showSignUpView, Runnable onLoginSuccess) {
         setTitle("Login");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setSize(320, 180);
+        setSize(450, 250);
         setLocationRelativeTo(null);
 
         // Layout Setup
