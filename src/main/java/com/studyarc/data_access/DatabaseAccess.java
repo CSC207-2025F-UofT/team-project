@@ -7,13 +7,13 @@ import com.studyarc.entity.User;
 import com.studyarc.use_case.job_postings.JobPostingsDataAccessInterface;
 import com.studyarc.use_case.login.LoginDataAccessInterface;
 import com.studyarc.use_case.milestone_tasks.MilestoneTasksDataAccessInterface;
-import com.studyarc.use_case.reflection_log.ReflectionLogDataAccessInterface;
+import com.studyarc.use_case.add_reflection.AddReflectionDataAccessInterface;
 import com.studyarc.use_case.track_plan.TrackPlanDataAccessinterface;
 
 import java.util.ArrayList;
 import java.util.Map;
 
-public class DatabaseAccess implements JobPostingsDataAccessInterface, LoginDataAccessInterface, MilestoneTasksDataAccessInterface, ReflectionLogDataAccessInterface, TrackPlanDataAccessinterface {
+public class DatabaseAccess implements JobPostingsDataAccessInterface, LoginDataAccessInterface, MilestoneTasksDataAccessInterface, AddReflectionDataAccessInterface, TrackPlanDataAccessinterface {
 
     @Override
     public ArrayList<String> getFocuses() {
