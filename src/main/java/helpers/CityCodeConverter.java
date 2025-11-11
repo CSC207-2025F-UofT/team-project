@@ -39,7 +39,7 @@ public class CityCodeConverter {
 
     public static void main(String[] args) {
         CityCodeConverter converter = new CityCodeConverter("city_codes_to_name.json");
-        System.out.println(converter.getCode("Port Of Spain"));
-        System.out.println(converter.getCode("Toronto"));
+        System.out.println(converter.getCode("Sydney"));
+        System.out.println(converter.getCode("Bangkok"));
     }
 }
