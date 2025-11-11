@@ -7,8 +7,8 @@ import java.util.List;
 
 public class SinglePlayerGame {
     private final Player player;
-    private final StudySet studySet;
-    private final List<Question> questions;
+    private final StudyDeck studySet;
+    private final List<Card> questions;
     private int score;
     private int correctAnswers;
     private int totalQuestions;
@@ -20,7 +20,7 @@ public class SinglePlayerGame {
     private final int fixedTimePerQuestion;
 
     // Constructor
-    public SinglePlayerGame(Player player, StudySet studySet, int timerPerQuestion, boolean shuffleEnabled) {
+    public SinglePlayerGame(Player player, StudyDeck studySet, int timerPerQuestion, boolean shuffleEnabled) {
         this.player = player;
         this.studySet = studySet;
         this.questions = studySet.getQuestions();
@@ -40,7 +40,7 @@ public class SinglePlayerGame {
     public int getScore() { return score; }
     public int getCorrectAnswers() { return correctAnswers; }
     public double getAverageResponseTime() { return averageResponseTime; }
-    public StudySet getStudySet() { return studySet; }
+    public StudyDeck getStudySet() { return studySet; }
     public Player getPlayer() { return player; }
 
     // Optional  setters
