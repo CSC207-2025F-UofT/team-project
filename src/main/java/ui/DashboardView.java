@@ -14,7 +14,7 @@ public class DashboardView extends JFrame {
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE); // only close this window
         setLocationRelativeTo(null);
 
-        // ====== Layout Setup ======
+        // ====== Layout Setup =====
         JPanel mainPanel = new JPanel(new BorderLayout());
 
         JLabel welcomeLabel = new JLabel("Welcome to FinWise!", SwingConstants.CENTER);
