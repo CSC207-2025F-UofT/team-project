@@ -9,6 +9,10 @@ import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * This class is used to convert an airline code to its full name. For example "AC" -> "Air Canada"
+ */
+
 public class CarrierCodeConverter {
 
     private final Map<String, String> translations = new HashMap<>();

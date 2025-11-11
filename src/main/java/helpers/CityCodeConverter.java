@@ -9,6 +9,10 @@ import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * This class is used to convert a city to its corresponding IATA code. For example "Toronto" -> "YYZ"
+ */
+
 public class CityCodeConverter {
 
     private final Map<String, String> translations = new HashMap<>();
