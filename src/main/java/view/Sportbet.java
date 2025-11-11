@@ -1,3 +1,5 @@
+package view;
+
 public class Sportbet {
     private String id;
     private String sport;
