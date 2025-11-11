@@ -1,6 +1,6 @@
 package entity;
 
 public interface FavoriteList {
-    public void addFavorite(Media movie);
-    public void removeFavorite(Media movie);
+    public void addFavorite(Media media);
+    public void removeFavorite(Media media);
 }
