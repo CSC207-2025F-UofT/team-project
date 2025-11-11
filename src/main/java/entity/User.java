@@ -22,24 +22,24 @@ public class User implements FavoriteList, Watchlist {
     public Media[] getWatchlist() {return watchlist;}
 
     @Override
-    public void addFavorite(Media movie) {
+    public void addFavorite(Media media) {
         // TODO document why this method is empty
     }
 
     @Override
-    public void removeFavorite(Media movie) {
-        // TODO document why this method is empty
-
-    }
-
-    @Override
-    public void addWatchlist(Media movie) {
+    public void removeFavorite(Media media) {
         // TODO document why this method is empty
 
     }
 
     @Override
-    public void removeWatchList(Media movie) {
+    public void addWatchlist(Media media) {
+        // TODO document why this method is empty
+
+    }
+
+    @Override
+    public void removeWatchList(Media media) {
         // TODO document why this method is empty
 
     }
