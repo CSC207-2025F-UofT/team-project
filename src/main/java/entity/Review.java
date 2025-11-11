@@ -3,7 +3,6 @@ package entity;
 
 public class Review {
 
-
     private final User author;
     private final String comment;
     private final Song song;
@@ -24,7 +23,7 @@ public class Review {
         this.comment = comment;
         this.song = song;
         if (rating < 1 || rating > 5)
-            throw new IllegalArgumentException("rating must be between 1 and 5");
+            throw new IllegalArgumentException("Rating must be between 1 and 5");
         this.rating = rating;
         this.upvotes = upvotes;
     }
@@ -46,6 +45,6 @@ public class Review {
         return upvotes;
     }
     public void upvoted() {
-        this.upvotes= upvotes + 1;
+        this.upvotes ++;
     }
 }
