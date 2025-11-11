@@ -8,7 +8,7 @@ import java.util.List;
 public class SinglePlayerGame {
     private final Player player;
     private final StudyDeck studySet;
-    private final List<Card> questions;
+    private final List<StudyCard> questions;
     private int score;
     private int correctAnswers;
     private int totalQuestions;
@@ -23,7 +23,7 @@ public class SinglePlayerGame {
     public SinglePlayerGame(Player player, StudyDeck studySet, int timerPerQuestion, boolean shuffleEnabled) {
         this.player = player;
         this.studySet = studySet;
-        this.questions = studySet.getQuestions();
+        this.questions = studySet.getCards();
         // this will come from StudySet file
         this.timerPerQuestion = timerPerQuestion;
         this.shuffleEnabled = shuffleEnabled;

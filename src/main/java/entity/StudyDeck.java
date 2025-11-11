@@ -3,12 +3,18 @@
 package entity;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class StudyDeck {
     public String title;
     public String description;
     public ArrayList<StudyCard> deck;
     public int id;
+
+    public List<StudyCard> getCards() {
+        return deck;
+    }
+
 }
 
 // todos:
