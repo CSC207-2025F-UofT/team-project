@@ -21,7 +21,7 @@ public class TestBuildPokemonTeam {
             };
 
             String name = "pikachu" ;
-            int type1 = 0;
+            int type1 = 1;
             int type2 = 0;
             ArrayList<Integer> stats = new ArrayList<>();
             ArrayList<Integer> abilities = new ArrayList<>();
