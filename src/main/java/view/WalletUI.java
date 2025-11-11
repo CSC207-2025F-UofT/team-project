@@ -2,7 +2,6 @@ package view;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.*;
 import java.math.BigDecimal;
 import java.text.NumberFormat;
 import java.util.Locale;
