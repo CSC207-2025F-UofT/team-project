@@ -40,4 +40,4 @@ Team Member Signatures:
 
 Caleb Irwin,
 Qishan Wei,
-Stephanie Anaele,
+Stephanie Anaele
