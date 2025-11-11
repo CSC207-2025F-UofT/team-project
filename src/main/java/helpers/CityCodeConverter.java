@@ -13,6 +13,10 @@ public class CityCodeConverter {
 
     private final Map<String, String> translations = new HashMap<>();
 
+    public CityCodeConverter() {
+        this("city_codes_to_name.json");
+    }
+
     public CityCodeConverter(String filename) {
 
         try {
@@ -35,11 +39,5 @@ public class CityCodeConverter {
 
     public String getCode(String cityName) {
         return this.translations.get(cityName);
-    }
-
-    public static void main(String[] args) {
-        CityCodeConverter converter = new CityCodeConverter("city_codes_to_name.json");
-        System.out.println(converter.getCode("Sydney"));
-        System.out.println(converter.getCode("Bangkok"));
     }
 }

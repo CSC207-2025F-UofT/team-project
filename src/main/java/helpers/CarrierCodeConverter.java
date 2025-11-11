@@ -13,6 +13,10 @@ public class CarrierCodeConverter {
 
     private final Map<String, String> translations = new HashMap<>();
 
+    public CarrierCodeConverter() {
+        this("carrier_to_name(airline).json");
+    }
+
     public CarrierCodeConverter(String filename) {
 
         try {
@@ -35,11 +39,5 @@ public class CarrierCodeConverter {
 
     public String getAirline(String carrierCode) {
         return this.translations.get(carrierCode);
-    }
-
-    public static void main(String[] args) {
-        CarrierCodeConverter converter = new CarrierCodeConverter("carrier_to_name(airline).json");
-        System.out.println(converter.getAirline("AC"));
-        System.out.println(converter.getAirline("BW"));
     }
 }
