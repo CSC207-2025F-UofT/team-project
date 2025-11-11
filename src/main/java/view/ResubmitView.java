@@ -13,7 +13,8 @@ public class ResubmitView {
             resubmitButton.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                    //TODO: Should go to upload page, select file and then data access.
+                    //TODO: Should go to upload page(SubmitView), select file and then data access. Note
+                    // here should change viewModel and Controller. To be specific, let
                 }
             });
             resubmitPanel.add(resubmitButton);
