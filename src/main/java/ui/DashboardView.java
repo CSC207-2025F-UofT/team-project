@@ -14,14 +14,14 @@ public class DashboardView extends JFrame {
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE); // only close this window
         setLocationRelativeTo(null);
 
-        // ====== Layout Setup =====
+        // Layout Setup
         JPanel mainPanel = new JPanel(new BorderLayout());
 
         JLabel welcomeLabel = new JLabel("Welcome to FinWise!", SwingConstants.CENTER);
         welcomeLabel.setFont(new Font("SansSerif", Font.BOLD, 22));
         mainPanel.add(welcomeLabel, BorderLayout.NORTH);
 
-        // ====== Buttons for Use Cases ======
+        // Buttons for Use Cases
         JPanel buttonPanel = new JPanel(new GridLayout(3, 2, 10, 10));
 
         JButton expensesBtn = new JButton("Track Expenses");
@@ -40,11 +40,11 @@ public class DashboardView extends JFrame {
 
         mainPanel.add(buttonPanel, BorderLayout.CENTER);
 
-        // ====== Logout Button ======
+        // Logout Button
         JButton logoutBtn = new JButton("Logout");
         logoutBtn.addActionListener(e -> {
-            onLogout.run(); // switch back to login
-            dispose();      // close dashboard
+            onLogout.run();  // switch back to loginView
+            dispose();       // close dashboard
         });
         mainPanel.add(logoutBtn, BorderLayout.SOUTH);
 

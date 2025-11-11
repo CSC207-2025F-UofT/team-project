@@ -46,8 +46,8 @@ public class Main {
 
         LoginView loginView = new LoginView(
                 loginController,
-                Main::showSignUpView, // callback to switch to sign up
-                Main::showDashboardView    // callback: open dashboard after login success
+                Main::showSignUpView,      // callback switch to sign up
+                Main::showDashboardView    // callback open dashboard after login success
         );
 
         currentFrame = loginView;
@@ -60,7 +60,7 @@ public class Main {
 
         SignUpView signUpView = new SignUpView(
                 signUpController,
-                Main::showLoginView // callback to switch back
+                Main::showLoginView   // callback to switch back
         );
 
         currentFrame = signUpView;
@@ -72,7 +72,7 @@ public class Main {
         if (currentFrame != null) currentFrame.dispose();
 
         DashboardView dashboardView = new DashboardView(
-                Main::showLoginView // callback for "Logout" button
+                Main::showLoginView   // callback for "Logout" button
         );
 
         currentFrame = dashboardView;
