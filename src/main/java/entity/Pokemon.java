@@ -5,8 +5,8 @@ import java.util.List;
 public class Pokemon {
         // Private fields
         private String name;
-        private int type1;
-        private int type2;
+        private Type type1;
+        private Type type2;
         private ArrayList<Integer> stats;
         private ArrayList<Integer> abilities;
         private int hidden;
@@ -14,7 +14,7 @@ public class Pokemon {
         private ArrayList<Integer> egggroup;
         private ArrayList<Integer> pokedexes;
         // Constructor
-        public Pokemon(String name, int type1, int type2, ArrayList<Integer> stats,
+        public Pokemon(String name, Type type1, Type type2, ArrayList<Integer> stats,
                        ArrayList<Integer> abilities, int hidden, ArrayList<Integer> moves, ArrayList<Integer> egggroup, ArrayList<Integer> pokedexes) {
             this.name = name;
             this.type1 = type1;
@@ -50,19 +50,19 @@ public class Pokemon {
             this.name = name;
         }
 
-        public int getType1() {
+        public Type getType1() {
             return type1;
         }
 
-        public void setType1(int type1) {
+        public void setType1(Type type1) {
             this.type1 = type1;
         }
 
-        public int getType2() {
+        public Type getType2() {
             return type2;
         }
 
-        public void setType2(int type2) {
+        public void setType2(Type type2) {
             this.type2 = type2;
         }
 
