@@ -36,7 +36,7 @@ public class HomePageView extends JPanel implements PropertyChangeListener {
         this.setBackground(Color.white);
 
         // Page Title
-        final JLabel title = new JLabel("Premier League Fantasy App");
+        final JLabel title = new JLabel(HomeViewModel.TITLE_LABEL);
         title.setFont(new Font("Arial", Font.BOLD, 15));
         title.setAlignmentX(Component.CENTER_ALIGNMENT);
         this.add(title);
