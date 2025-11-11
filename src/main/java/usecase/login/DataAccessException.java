@@ -1,4 +1,4 @@
-package usecase.example;
+package usecase.login;
 
 /**
  * Exception thrown when there is an error with accessing data.
