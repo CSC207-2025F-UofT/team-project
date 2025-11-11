@@ -1,5 +1,7 @@
 package plan4life.view;
 
+import plan4life.entities.Schedule;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
@@ -132,5 +134,27 @@ public class CalendarPanel extends JPanel {
                 cells[r][column].setBackground(new Color(173, 216, 230)); // light blue
             }
         }
+    }
+
+    public void updateSchedule(Schedule schedule) {
+    }
+
+    public void clear() {
+        for (int r = 0; r < 24; r++) {
+            for (int c = 0; c < currentColumns; c++) {
+                cells[r][c].setBackground(Color.WHITE);
+                cells[r][c].removeAll();
+            }
+        }
+    }
+
+    public void colorCell(String time, Color color, String label) {
+        try {
+            int hour = Integer.parseInt(time.split(":")[0]);
+            if (hour >= 0 && hour < 24) {
+                cells[hour][0].setBackground(color); // first column for now
+                cells[hour][0].add(new JLabel(label));
+            }
+        } catch (Exception ignored) {}
     }
 }
