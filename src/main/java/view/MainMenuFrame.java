@@ -1,9 +1,11 @@
+package view;
+
 import javax.swing.*;
 import java.awt.*;
 
 public class MainMenuFrame extends JFrame {
     public MainMenuFrame(User user) {
-        setTitle("BET366 Main Menu");
+        setTitle("BET366 view.Main Menu");
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setSize(1920,1080);
         setLayout(new GridLayout(5, 1));
