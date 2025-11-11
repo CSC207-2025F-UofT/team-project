@@ -18,7 +18,7 @@ public class EventList {
     }
     public void rename(String newName) {
         if (newName == null || newName.isBlank()) {
-            throw new IllegalArgumentException("List name cannot be empty.");
+            throw new IllegalArgumentException("Please insert list name!");
         }
         this.name = newName;
     }
@@ -26,7 +26,7 @@ public class EventList {
         return events.contains(event); // To be implemented
     }
 
-    /** Adds an event if it is not already in the list. */
+    // User able to Add an event if it is not already in the list
     public void addEvent(Event event) {
         if (!contains(event)) {
             events.add(event);
