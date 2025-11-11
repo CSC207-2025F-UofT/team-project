@@ -62,7 +62,7 @@ public class BuildPokemonTeamInteractor implements BuildPokemonTeamInputBoundary
                     JSONObject json2 = new JSONObject(responseBody2);
 
                     String pokename = json.getString("name");
-                    System.out.println(pokename);
+//                    System.out.println(pokename);
 //                    System.out.println(json);
 //                    System.out.println(json.getJSONArray("types").getJSONObject(0).getJSONObject("type").getString("url"));
 

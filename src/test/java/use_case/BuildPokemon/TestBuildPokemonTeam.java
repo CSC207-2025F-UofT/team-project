@@ -1,6 +1,10 @@
-package use_case.BuildPokemonTeam;
+package use_case.BuildPokemon;
 
 import entity.Pokemon;
+import use_case.BuildPokemonTeam.BuildPokemonTeamInputData;
+import use_case.BuildPokemonTeam.BuildPokemonTeamInteractor;
+import use_case.BuildPokemonTeam.BuildPokemonTeamOutputBoundary;
+import use_case.BuildPokemonTeam.BuildPokemonTeamOutputData;
 
 import java.util.ArrayList;
 
@@ -54,7 +58,7 @@ public class TestBuildPokemonTeam {
             ArrayList<Integer> pokedexes = new ArrayList<>();
             egggroup.add(1);
 
-            
+
             Pokemon pikachu = new Pokemon(name, type1, type2, stats, abilities, hidden,  moves, egggroup, pokedexes);
 
             // Create the interactor
