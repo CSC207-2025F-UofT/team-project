@@ -22,7 +22,7 @@ public class SignUpView extends JFrame {
         setSize(300, 180);
         setLocationRelativeTo(null);
 
-        JPanel panel = new JPanel(new GridLayout(3, 2, 5, 5));
+        JPanel panel = new JPanel(new GridLayout(3, 2, 10, 10));
         panel.add(new JLabel("Username:"));
         panel.add(usernameField);
         panel.add(new JLabel("Password:"));

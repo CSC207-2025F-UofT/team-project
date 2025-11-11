@@ -32,8 +32,8 @@ public class LoginView extends JFrame {
         setSize(320, 180);
         setLocationRelativeTo(null);
 
-        // ====== Layout Setup ======
-        JPanel panel = new JPanel(new GridLayout(3, 2, 5, 5));
+        // Layout Setup
+        JPanel panel = new JPanel(new GridLayout(3, 2, 10, 10));
         panel.add(new JLabel("Username:"));
         panel.add(usernameField);
         panel.add(new JLabel("Password:"));
@@ -42,25 +42,25 @@ public class LoginView extends JFrame {
         panel.add(signUpButton);
         add(panel);
 
-        // ====== Login Button Action ======
+        // Login Button Action
         loginButton.addActionListener(e -> {
             String username = usernameField.getText();
-            String password = new String(passwordField.getPassword()); // Convert password to plain text
+            String password = new String(passwordField.getPassword());  // Convert password to plain text
 
             LoginOutputData output = loginController.login(username, password);
             JOptionPane.showMessageDialog(this, output.getMessage());
 
             if (output.isSuccess()) {
-                // Login successful: close this window and navigate to the Dashboard
-                dispose(); // Close current Login window
+                // if Login successful then close this window and navigate to the Dashboard
+                dispose();            // Close current Login window
                 onLoginSuccess.run(); // Trigger the callback defined in Main.java
             }
         });
 
-        // ====== Sign-Up Button Action ======
+        // Sign-Up Button Action
         signUpButton.addActionListener(e -> {
-            showSignUpView.run(); // Trigger the callback to open SignUpView
-            dispose(); // Close current window
+            showSignUpView.run();    // Trigger the callback to open SignUpView
+            dispose();               // Close current window
         });
     }
 }
