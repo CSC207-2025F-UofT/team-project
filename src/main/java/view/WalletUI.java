@@ -22,11 +22,9 @@ public class WalletUI extends JFrame {
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         setLayout(new BorderLayout(10, 10));
 
-        // ===== 顶部余额显示 =====
         balanceLabel = new JLabel("Balance: " + CURRENCY.format(balance), SwingConstants.CENTER);
         add(balanceLabel, BorderLayout.NORTH);
 
-        // ===== 中间输入区 =====
         JPanel inputPanel = new JPanel(new FlowLayout());
         inputPanel.add(new JLabel("Amount:"));
         amountField = new JTextField(10);
