@@ -17,13 +17,13 @@ public class Main {
                 .addWriteTestView()
                 .addEvaluateTestView()
                 .addLoadingView()
-                .addMockTestGenerationUseCase()
-                .addEvaluateTestUseCase()
                 .addCourseDashboardView()
                 .addCourseWorkspaceView()
                 .addCourseCreateView()
                 .addCourseEditView()
                 .addCourseUseCases()
+                .addMockTestGenerationUseCase()
+                .addEvaluateTestUseCase()
                 .build();
 
         application.pack();

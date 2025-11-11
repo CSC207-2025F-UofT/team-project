@@ -31,7 +31,7 @@ public class AppBuilder {
     private final ViewManager viewManager = new ViewManager(cardPanel, cardLayout, viewManagerModel);
 
     // --- Data Access Objects ---
-    private DemoCourseAccess courseDAO = new DemoCourseAccess();
+    private LocalCourseRepository courseDAO = new LocalCourseRepository();
     private final GeminiApiDataAccess geminiDAO = new GeminiApiDataAccess();
 
     // --- ViewModels and Views (stored for wiring) ---
@@ -40,7 +40,6 @@ public class AppBuilder {
     private LoadingViewModel loadingViewModel;
     private WriteTestView writeTestView;
     private EvaluateTestView evaluateTestView;
-    private DemoView demoView;
 
     // === SHIRLEY: Course dashboard/workspace view models & views ===
     private CourseDashboardViewModel courseDashboardViewModel;
@@ -57,22 +56,14 @@ public class AppBuilder {
 
     public AppBuilder() {
         PDFFile dummyPdf = new PDFFile("test.pdf");
-        Course dummyCourse = new Course("CS207");
+        Course dummyCourse = new Course("PHL245", "Modern Symbolic Logic", "demo course");
         dummyCourse.addFile(dummyPdf);
-        courseDAO.save(dummyCourse);
-        System.out.println("Dummy course 'Software Design' created with ID: " + dummyCourse.getCourseId());
-    }
-
-    public AppBuilder addDemoView() {
-        // The DemoView doesn't have its own ViewModel but needs the MockTestViewModel for the Presenter to target
-        mockTestViewModel = new MockTestViewModel();
-        demoView = new DemoView(); // Assumes a simple constructor
-        cardPanel.add(demoView, "demo view");
-        return this;
+        courseDAO.create(dummyCourse);
     }
 
 
     public AppBuilder addWriteTestView() {
+        mockTestViewModel = new MockTestViewModel();
         writeTestView = new WriteTestView(mockTestViewModel); // The view for taking the test
         cardPanel.add(writeTestView, mockTestViewModel.getViewName());
         return this;
@@ -96,7 +87,8 @@ public class AppBuilder {
         MockTestPresenter presenter = new MockTestPresenter(mockTestViewModel, viewManagerModel, loadingViewModel);
         MockTestGenerationInteractor interactor = new MockTestGenerationInteractor(courseDAO, geminiDAO, presenter);
         MockTestController controller = new MockTestController(interactor);
-        demoView.setMockTestController(controller);
+        this.courseWorkspaceView.setMockTestController(controller);
+
         return this;
     }
 
@@ -123,7 +115,6 @@ public class AppBuilder {
         return this;
     }
 
-    
 
     // === SHIRLEY: Course dashboard / workspace methods ===
 

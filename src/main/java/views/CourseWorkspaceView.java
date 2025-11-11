@@ -15,12 +15,14 @@ import java.util.List;
 import entities.*;
 import interface_adapters.*;
 import interface_adapters.dashboard.*;
+import interface_adapters.mock_test.MockTestController;
 import interface_adapters.workspace.*;
 
 public class CourseWorkspaceView extends JPanel implements ActionListener, PropertyChangeListener {
     private final String viewName = "workspace";
     private JPanel centerPanel = null; // To keep track of the previously selected button
     private CourseDashboardController courseDashboardController = null;
+    private MockTestController mockTestController = null;
     private CourseController courseController = null;
     private String courseId = null;
     private ViewManager viewManager = null;
@@ -113,6 +115,12 @@ public class CourseWorkspaceView extends JPanel implements ActionListener, Prope
         JButton createtestButton = new JButton("Create Test");
         createFlashCardButton.setPreferredSize(new Dimension(150, 30));
         bottomPanel.add(createtestButton);
+        createtestButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                mockTestController.execute(courseId);
+            }
+        });
 
         // return
         JButton returnButton = new JButton("Return");
@@ -158,6 +166,14 @@ public class CourseWorkspaceView extends JPanel implements ActionListener, Prope
     }
     public void setCourseWorkspaceController(CourseController courseController) {
         this.courseController = courseController;
+    }
+
+    public MockTestController getMockTestController() {
+        return mockTestController;
+    }
+
+    public void setMockTestController(MockTestController mockTestController) {
+        this.mockTestController = mockTestController;
     }
 }
 

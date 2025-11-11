@@ -30,11 +30,6 @@ public class Course {
         this.generatedContent = new ArrayList<GeneratedContent>();
     }
 
-    public Course(String courseID) {
-        this.courseID = courseID;
-        this.uploadedFiles = new ArrayList<>();
-    }
-
     public String getCourseId() {
         return courseID;
     }

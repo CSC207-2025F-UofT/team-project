@@ -4,6 +4,7 @@ import entities.Course;
 
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Collections;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Optional;
@@ -13,8 +14,11 @@ import java.io.FileWriter;
 import java.io.IOException;
 import org.json.JSONObject;
 import org.json.JSONArray;
+import usecases.evaluate_test.EvaluateTestCourseDataAccessInterface;
+import usecases.mock_test_generation.MockTestGenerationCourseDataAccessInterface;
 
-public class LocalCourseRepository implements usecases.ICourseRepository {
+public class LocalCourseRepository implements usecases.ICourseRepository, MockTestGenerationCourseDataAccessInterface,
+        EvaluateTestCourseDataAccessInterface {
     private List<Course> courses = null;
     private final String FILE_NAME = "courses.json";
     public LocalCourseRepository(){
@@ -32,7 +36,6 @@ public class LocalCourseRepository implements usecases.ICourseRepository {
     }
     @Override
     public void create(Course course) {
-        List<Course> courses = this.readCourses();
         courses.add(course);
         writeCourses(courses);
     }
@@ -184,5 +187,19 @@ public class LocalCourseRepository implements usecases.ICourseRepository {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    @Override
+    public List<PDFFile> getCourseMaterials(String courseId) {
+        System.out.println("Searching for: " + courseId);
+        System.out.println("Saved courses: " +  this.courses);
+        for (Course course :  this.courses) {
+            if (course.getCourseId().equals(courseId)) {
+                System.out.println(course.getCourseId() + course.getName() + course.getUploadedFiles().get(0).getPath());
+                return course.getUploadedFiles();
+            }
+        }
+        // Return an empty list if the course is not found, preventing null pointer exceptions.
+        return Collections.emptyList();
     }
 }
