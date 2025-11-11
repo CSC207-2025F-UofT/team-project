@@ -1,6 +1,7 @@
 package use_case.grade_team;
 
 import data_access.InMemoryUserDataAccessObject;
+import entity.EmptyPokemonFactory;
 import entity.GradingStrategy;
 import entity.Pokemon;
 import entity.Team;
@@ -37,8 +38,9 @@ class GradeTeamInteractorTest {
     @Test
     void fullTeamTest(){
         Team team = new Team("fullTeam");
+        EmptyPokemonFactory emptyPokemonFactory = new EmptyPokemonFactory();
         for(int i = 0; i < 6; i++){
-            team.setPokemon(new Pokemon(), i);
+            team.setPokemon(emptyPokemonFactory.create(), i);
         }
         GradingStrategy strategy = new TestStrategy();
         GradeTeamInputData inputData = new GradeTeamInputData("fullTeam", strategy);
@@ -64,8 +66,9 @@ class GradeTeamInteractorTest {
     @Test
     void firstHalfTeamTest(){
         Team team = new Team("halfFullTeam");
+        EmptyPokemonFactory emptyPokemonFactory = new EmptyPokemonFactory();
         for(int i = 0; i < 3; i++){
-            team.setPokemon(new Pokemon(), i);
+            team.setPokemon(emptyPokemonFactory.create(), i);
         }
         GradingStrategy strategy = new TestStrategy();
         GradeTeamInputData inputData = new GradeTeamInputData("halfFullTeam", strategy);
