@@ -4,6 +4,7 @@ import auth.use_case.login.*;
 import auth.use_case.signup.*;
 import ui.LoginView;
 import ui.SignUpView;
+import ui.DashboardView;
 
 import javax.sql.DataSource;
 import javax.swing.*;
@@ -45,7 +46,8 @@ public class Main {
 
         LoginView loginView = new LoginView(
                 loginController,
-                Main::showSignUpView // callback to switch to sign up
+                Main::showSignUpView, // callback to switch to sign up
+                Main::showDashboardView    // callback: open dashboard after login success
         );
 
         currentFrame = loginView;
@@ -63,5 +65,17 @@ public class Main {
 
         currentFrame = signUpView;
         signUpView.setVisible(true);
+    }
+
+    /** Displays the dashboard window after login */
+    private static void showDashboardView() {
+        if (currentFrame != null) currentFrame.dispose();
+
+        DashboardView dashboardView = new DashboardView(
+                Main::showLoginView // callback for "Logout" button
+        );
+
+        currentFrame = dashboardView;
+        dashboardView.setVisible(true);
     }
 }
