@@ -1,8 +1,8 @@
-package auth.interface_adapters.controllers;
+package controllers;
 
-import auth.use_case.login.LoginInputData;
-import auth.use_case.login.LoginInteractor;
-import auth.use_case.login.LoginOutputData;
+import use_case.login.LoginInputData;
+import use_case.login.LoginInteractor;
+import use_case.login.LoginOutputData;
 
 public class LoginController {
 

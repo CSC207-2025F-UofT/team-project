@@ -1,7 +1,7 @@
-package auth.use_case.login;
+package use_case.login;
 
-import auth.data.UserRepository;
-import auth.entity.User;
+import data.UserRepository;
+import entity.User;
 import java.util.Optional;
 
 public class LoginInteractor {

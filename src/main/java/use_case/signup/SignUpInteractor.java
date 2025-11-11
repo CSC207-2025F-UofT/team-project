@@ -1,7 +1,7 @@
-package auth.use_case.signup;
+package use_case.signup;
 
-import auth.data.UserRepository;
-import auth.entity.User;
+import data.UserRepository;
+import entity.User;
 
 public class SignUpInteractor {
 

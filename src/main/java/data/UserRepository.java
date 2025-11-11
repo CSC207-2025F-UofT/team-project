@@ -1,8 +1,7 @@
-package auth.data;
+package data;
 
-import auth.entity.User;
+import entity.User;
 
-import java.sql.SQLException;
 import java.util.Optional;
 
 public interface UserRepository {

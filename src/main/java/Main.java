@@ -1,10 +1,13 @@
-import auth.data.*;
-import auth.interface_adapters.controllers.*;
-import auth.use_case.login.*;
-import auth.use_case.signup.*;
+import controllers.LoginController;
+import controllers.SignUpController;
+import data.DataSourceFactory;
+import data.JdbcUserRepository;
+import data.SchemaInitializer;
 import ui.LoginView;
 import ui.SignUpView;
 import ui.DashboardView;
+import use_case.login.LoginInteractor;
+import use_case.signup.SignUpInteractor;
 
 import javax.sql.DataSource;
 import javax.swing.*;

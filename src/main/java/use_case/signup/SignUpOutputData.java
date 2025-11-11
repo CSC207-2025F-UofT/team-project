@@ -1,11 +1,11 @@
-package auth.use_case.login;
+package use_case.signup;
 
-public class LoginOutputData {
+public class SignUpOutputData {
 
     private final boolean success;
     private final String message;
 
-    public LoginOutputData(boolean success, String message) {
+    public SignUpOutputData(boolean success, String message) {
         this.success = success;
         this.message = message;
     }
@@ -13,6 +13,7 @@ public class LoginOutputData {
     public boolean isSuccess() {
         return success;
     }
+
     public String getMessage() {
         return message;
     }

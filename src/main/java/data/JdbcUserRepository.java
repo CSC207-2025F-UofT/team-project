@@ -1,6 +1,6 @@
-package auth.data;
+package data;
 
-import auth.entity.User;
+import entity.User;
 
 import javax.sql.DataSource;
 import java.sql.*;
