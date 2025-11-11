@@ -1,4 +1,4 @@
-package interface_adapter.view;
+package view;
 
 import javax.swing.*;
 
