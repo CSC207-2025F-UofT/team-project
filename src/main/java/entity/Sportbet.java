@@ -1,3 +1,5 @@
+package entity;
+
 public class Sportbet {
     private String id;
     private String sport;
