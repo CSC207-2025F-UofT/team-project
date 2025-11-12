@@ -5,7 +5,7 @@ package entity;
  */
 public class ClickableObjectFactory {
 
-    public ClickableObject create(String name, int coordinateX, int coordinateY, String image) {
-        return new ClickableObject(name, coordinateX, coordinateY, image);
+    public ClickableObject create(String name, int coordinateX, int coordinateY, String image, Boolean collectable) {
+        return new ClickableObject(name, coordinateX, coordinateY, image, collectable);
     }
 }
