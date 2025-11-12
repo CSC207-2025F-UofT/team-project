@@ -7,7 +7,7 @@ public class Note {
     private final Landmark landmark;
     private final String content;
     private final Instant createdAt;
-    private final Instant updatedAt;
+    private Instant updatedAt;
 
     public Note(String noteId, Landmark landmark, String content) {
         this.noteId = noteId;
@@ -30,5 +30,8 @@ public class Note {
     }
     public Instant getUpdatedAt() {
         return updatedAt;
+    }
+    public void setUpdatedAt(Instant updatedAt) {
+        this.updatedAt = updatedAt;
     }
 }
