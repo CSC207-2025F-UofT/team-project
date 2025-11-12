@@ -4,9 +4,11 @@ import auth.use_case.login.*;
 import auth.use_case.signup.*;
 import ui.LoginView;
 import ui.SignUpView;
+import ui.DashboardFrame;
 
 import javax.sql.DataSource;
 import javax.swing.*;
+
 
 public class Main {
 
@@ -45,7 +47,8 @@ public class Main {
 
         LoginView loginView = new LoginView(
                 loginController,
-                Main::showSignUpView // callback to switch to sign up
+                Main::showSignUpView, // callback to switch to sign up
+                Main::showDashboardView   // callback to go to dashboard after login
         );
 
         currentFrame = loginView;
@@ -64,4 +67,13 @@ public class Main {
         currentFrame = signUpView;
         signUpView.setVisible(true);
     }
+
+    /** Displays the dashboard (JavaFX embedded in Swing) */
+    private static void showDashboardView() {
+        if (currentFrame != null) currentFrame.dispose();
+
+        currentFrame = new DashboardFrame();  // JavaFX Stocks UI inside Swing frame
+        currentFrame.setVisible(true);
+    }
+
 }

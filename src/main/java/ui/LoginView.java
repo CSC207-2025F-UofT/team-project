@@ -14,13 +14,14 @@ public class LoginView extends JFrame {
     private final JButton loginButton = new JButton("Login");
     private final JButton signUpButton = new JButton("Sign Up");
 
-    public LoginView(LoginController loginController, Runnable showSignUpView) {
+    /* new parameter Runnable onLoginSuccess */
+    public LoginView(LoginController loginController, Runnable showSignUpView, Runnable onLoginSuccess) {
         setTitle("Login");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(300, 180);
         setLocationRelativeTo(null);
 
-        JPanel panel = new JPanel(new GridLayout(3 ,2, 5, 5));
+        JPanel panel = new JPanel(new GridLayout(3 ,2, 6, 6)); //spaceing change on hgap and vgap
         panel.add(new JLabel("Username:"));
         panel.add(usernameField);
         panel.add(new JLabel("Password:"));
@@ -34,10 +35,14 @@ public class LoginView extends JFrame {
             String password = Arrays.toString(passwordField.getPassword());
 
             LoginOutputData output = loginController.login(username, password);
-            JOptionPane.showMessageDialog(this, output.getMessage());
+            
             if (output.isSuccess()) {
-                // insert code for dashboard here
-                System.out.println("Login success — navigate to dashboard!");
+                // Close login window first, then show dashboard
+                dispose();
+                onLoginSuccess.run();  // go to dashboard
+            } else {
+                // Only show error dialog for failures
+                JOptionPane.showMessageDialog(this, output.getMessage(), "Login Error", JOptionPane.ERROR_MESSAGE);
             }
         });
 
