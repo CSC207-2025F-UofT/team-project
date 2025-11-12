@@ -4,6 +4,7 @@ Please keep this up-to-date with information about your project throughout the t
 
 # Project Overview: 
 Gacha Pets.
+
 A tradable card game where players can get random pets from blind boxes and keep the pets in their collection. Players can interact with their pets. And between players, pet cards are tradable.
  (Add a summary of what we are trying to make)
 # User Stories:
