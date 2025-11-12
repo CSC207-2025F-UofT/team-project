@@ -1,44 +1,24 @@
 package app;
 
-import javax.swing.*;
-import java.awt.*;
+import javax.swing.JFrame;
 
 /**
  * MainFrame is the main window of the application.
+ * Clean Architecture version - content is set externally.
  */
 public class MainFrame extends JFrame {
     
     public MainFrame() {
-        setTitle("Java Swing Application");
+        setTitle("Portfolio Tracker - Clean Architecture");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setSize(800, 600);
+        setSize(1000, 700);
         setLocationRelativeTo(null); // Center the window
-        
-        initComponents();
     }
     
     /**
-     * Initialize the components of the frame.
+     * TODO: Add menu bar with File, Edit, View, Help menus
+     * TODO: Add status bar at bottom
+     * TODO: Add toolbar for common actions
+     * TODO: Support multiple portfolio tabs/windows
      */
-    private void initComponents() {
-        // Set layout
-        setLayout(new BorderLayout());
-        
-        // Create a welcome label
-        JLabel welcomeLabel = new JLabel("Welcome to Java Swing!", SwingConstants.CENTER);
-        welcomeLabel.setFont(new Font("Arial", Font.BOLD, 24));
-        add(welcomeLabel, BorderLayout.CENTER);
-        
-        // Create a button panel at the bottom
-        JPanel buttonPanel = new JPanel();
-        JButton exampleButton = new JButton("Click Me!");
-        exampleButton.addActionListener(e -> 
-            JOptionPane.showMessageDialog(this, 
-                "Hello from Java Swing!", 
-                "Message", 
-                JOptionPane.INFORMATION_MESSAGE)
-        );
-        buttonPanel.add(exampleButton);
-        add(buttonPanel, BorderLayout.SOUTH);
-    }
 }
