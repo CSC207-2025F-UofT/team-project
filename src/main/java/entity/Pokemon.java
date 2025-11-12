@@ -1,5 +1,6 @@
 package entity;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 public class Pokemon {
@@ -112,6 +113,24 @@ public class Pokemon {
 
         public List<Integer> getPokedexes() {
             return pokedexes;
+        }
+
+        public HashSet<String> getWeaknesses() {
+            HashSet<String> weaknesses = new HashSet<>(type1.getWeaknesses());
+            weaknesses.addAll(type2.getWeaknesses());
+            return weaknesses;
+        }
+
+        public HashSet<String> getStrengths() {
+        HashSet<String> strengths = new HashSet<>(type1.getStrengths());
+        strengths.addAll(type2.getStrengths());
+        return strengths;
+        }
+
+        public HashSet<String> getResistances() {
+        HashSet<String> resistances = new HashSet<>(type1.getResistances());
+        resistances.addAll(type2.getResistances());
+        return resistances;
         }
 
     // Helper methods to add single elements
