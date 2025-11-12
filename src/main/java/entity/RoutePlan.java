@@ -1,4 +1,5 @@
 package entity;
 
-public class RoutePlan {
+public class RoutePlan
+{
 }
