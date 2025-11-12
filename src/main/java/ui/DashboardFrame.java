@@ -6,8 +6,6 @@ import javafx.scene.Scene;
 
 import javax.swing.*;
 
-import java.util.concurrent.CountDownLatch;
-
 public class DashboardFrame extends JFrame {
     
     public DashboardFrame() {
@@ -27,3 +25,4 @@ public class DashboardFrame extends JFrame {
         });
     }
 }
+
