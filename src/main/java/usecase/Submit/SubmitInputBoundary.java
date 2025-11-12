@@ -1,5 +1,5 @@
-package usecase.Resubmit;
+package usecase.Submit;
 
-public interface ResubmitInputBoundary {
-    void execute(ResubmitInputData inputData);
+public interface SubmitInputBoundary {
+    void execute(SubmitInputData inputData);
 }

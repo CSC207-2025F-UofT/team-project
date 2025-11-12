@@ -1,12 +1,10 @@
 package view;
-import interface_adapter.Resubmit.ResubmitController;
+import interface_adapter.Submit.SubmitController;
 
 import javax.swing.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
 public class ResubmitView {
-    ResubmitController reSubmitController;
+    SubmitController reSubmitController;
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
             JPanel resubmitPanel = new JPanel();
@@ -16,8 +14,8 @@ public class ResubmitView {
             JButton resubmitButton = new JButton("Resubmit");
             resubmitButton.addActionListener(e -> {
                 //TODO: Should go to upload page(SubmitView), select file and then data access. Note
-                // here should change viewModel and Controller. To be specific, current time is also needed to
-                // compare with ddl
+                // here should change viewModel and Controller. To be specific, current time is also
+                // needed to compare with ddl
             });
             resubmitPanel.add(resubmitButton);
             JFrame frame = new JFrame("Resubmit");

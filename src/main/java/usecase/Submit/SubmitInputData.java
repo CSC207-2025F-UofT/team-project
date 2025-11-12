@@ -1,13 +1,13 @@
-package usecase.Resubmit;
+package usecase.Submit;
 
 import java.io.File;
 import java.time.*;
 
-public class ResubmitInputData {
+public class SubmitInputData {
     private final LocalTime time;
     private final File selectedFile;
 
-    public ResubmitInputData(LocalTime time, File selectedFile){
+    public SubmitInputData(LocalTime time, File selectedFile){
         this.time = time;
         this.selectedFile = selectedFile;
     }

@@ -1,22 +1,22 @@
-package interface_adapter.Resubmit;
+package interface_adapter.Submit;
 
-import usecase.Resubmit.ResubmitInputBoundary;
-import usecase.Resubmit.ResubmitInputData;
+import usecase.Submit.SubmitInputBoundary;
+import usecase.Submit.SubmitInputData;
 
 import java.io.File;
 import java.time.LocalTime;
 
 
-public class ResubmitController {
+public class SubmitController {
 
-    private final ResubmitInputBoundary resubmitUsecaseInteractor;
+    private final SubmitInputBoundary submitUsecaseInteractor;
 
-    public ResubmitController(ResubmitInputBoundary resubmitInputBoundary){
-        this.resubmitUsecaseInteractor = resubmitInputBoundary;
+    public SubmitController(SubmitInputBoundary submitInputBoundary){
+        this.submitUsecaseInteractor = submitInputBoundary;
     }
 
     public void resubmitExecute(LocalTime time, File selectedFile){
-        ResubmitInputData inputData = new ResubmitInputData(time, selectedFile);
-        resubmitUsecaseInteractor.execute(inputData);
+        final SubmitInputData inputData = new SubmitInputData(time, selectedFile);
+        submitUsecaseInteractor.execute(inputData);
     }
 }

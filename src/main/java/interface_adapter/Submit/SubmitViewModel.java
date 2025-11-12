@@ -1,5 +1,11 @@
-package usecase.Submit;
+package interface_adapter.Submit;
 
-public class SubmitViewModel{
-    
+import interface_adapter.ViewModel;
+
+public class SubmitViewModel extends ViewModel<SubmitState> {
+
+    public SubmitViewModel() {
+        super("submit");
+        setState(new SubmitState());
+    }
 }
