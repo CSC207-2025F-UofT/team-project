@@ -187,27 +187,20 @@ public class PokemonLookupInteractor implements PokemonLookupInputBoundary {
             JSONArray doubleDamageFromJSON = json.getJSONArray("double_damage_from");
             JSONArray doubleDamageToJSON = json.getJSONArray("double_damage_to");
             JSONArray halfDamageFromJSON = json.getJSONArray("half_damage_from");
-            JSONArray halfDamageToJSON = json.getJSONArray("half_damage_to");
             JSONArray noDamageFromJSON = json.getJSONArray("no_damage_from");
-            JSONArray noDamageToJSON = json.getJSONArray("no_damage_to");
 
             HashSet<String> doubleDamageTo = getTypeNames(doubleDamageToJSON);
-            HashSet<String> halfDamageFrom = getTypeNames(halfDamageFromJSON);
-            HashSet<String> noDamageFrom = getTypeNames(noDamageFromJSON);
-
             HashSet<String> strengths = new HashSet<>(doubleDamageTo);
-            strengths.addAll(halfDamageFrom);
-            strengths.addAll(noDamageFrom);
 
             HashSet<String> doubleDamageFrom = getTypeNames(doubleDamageFromJSON);
-            HashSet<String> halfDamageTo = getTypeNames(halfDamageToJSON);
-            HashSet<String> noDamageTo = getTypeNames(noDamageToJSON);
-
             HashSet<String> weaknesses = new HashSet<>(doubleDamageFrom);
-            weaknesses.addAll(halfDamageTo);
-            weaknesses.addAll(noDamageTo);
 
-            return new Type(name, typeID, strengths, weaknesses);
+            HashSet<String> halfDamageFrom = getTypeNames(halfDamageFromJSON);
+            HashSet<String> noDamageFrom = getTypeNames(noDamageFromJSON);
+            HashSet<String> resistances = new HashSet<>(halfDamageFrom);
+            resistances.addAll(noDamageFrom);
+
+            return new Type(name, typeID, strengths, weaknesses, resistances);
         }
     }
 
