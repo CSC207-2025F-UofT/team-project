@@ -1,4 +1,5 @@
 package use_case.PokemonLookup;
+import entity.Type;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -10,6 +11,8 @@ import entity.Pokemon;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
 
 public class PokemonLookupInteractor implements PokemonLookupInputBoundary {
     private final PokemonLookupOutputBoundary userPresenter;
@@ -61,12 +64,18 @@ public class PokemonLookupInteractor implements PokemonLookupInputBoundary {
                     String pokename = json.getString("name");
                     String ptype1 = json.getJSONArray("types").getJSONObject(0).getJSONObject("type").getString("url");
                     String[] atype1 = ptype1.split("/");
-                    int type1 = Integer.parseInt(atype1[atype1.length - 1]);
-                    int type2 = 0;
+                    int type1ID = Integer.parseInt(atype1[atype1.length - 1]);
+
+                    Type type1 = getType(type1ID, client);
+
+                    int type2ID = 0;
+                    Type type2 = null;
                     if (json.getJSONArray("types").length() == 2) {
                         String ptype2 = json.getJSONArray("types").getJSONObject(1).getJSONObject("type").getString("url");
                         String[] atype2 = ptype2.split("/");
-                        type2 = Integer.parseInt(atype2[atype2.length - 1]);
+                        type2ID = Integer.parseInt(atype2[atype2.length - 1]);
+                        type2 = getType(type2ID, client);
+
                     }
                     ArrayList<Integer> stats = new ArrayList<Integer>();
                     for (int count = 0; count < 6; count++) {
@@ -159,6 +168,55 @@ public class PokemonLookupInteractor implements PokemonLookupInputBoundary {
             userPresenter.prepareSuccessView(pokemonLookupOutputData);
 
         }
+    }
+    private Type getType(int typeID, OkHttpClient client) throws IOException {
+        Request request = new Request.Builder()
+                .url("https://pokeapi.co/api/v2/type/" + typeID)
+                .build();
+        try (Response response = client.newCall(request).execute()) {
+            if (!response.isSuccessful()) {
+                userPresenter.prepareFailView("Type not found: " + typeID);
+            }
+            String responseBody =  response.body().string();
+            JSONObject json = new JSONObject(responseBody);
+
+            String name = json.getString("name");
+
+            json = json.getJSONObject("damage_relations");
+
+            JSONArray doubleDamageFromJSON = json.getJSONArray("double_damage_from");
+            JSONArray doubleDamageToJSON = json.getJSONArray("double_damage_to");
+            JSONArray halfDamageFromJSON = json.getJSONArray("half_damage_from");
+            JSONArray halfDamageToJSON = json.getJSONArray("half_damage_to");
+            JSONArray noDamageFromJSON = json.getJSONArray("no_damage_from");
+            JSONArray noDamageToJSON = json.getJSONArray("no_damage_to");
+
+            HashSet<String> doubleDamageTo = getTypeNames(doubleDamageToJSON);
+            HashSet<String> halfDamageFrom = getTypeNames(halfDamageFromJSON);
+            HashSet<String> noDamageFrom = getTypeNames(noDamageFromJSON);
+
+            HashSet<String> strengths = new HashSet<>(doubleDamageTo);
+            strengths.addAll(halfDamageFrom);
+            strengths.addAll(noDamageFrom);
+
+            HashSet<String> doubleDamageFrom = getTypeNames(doubleDamageFromJSON);
+            HashSet<String> halfDamageTo = getTypeNames(halfDamageToJSON);
+            HashSet<String> noDamageTo = getTypeNames(noDamageToJSON);
+
+            HashSet<String> weaknesses = new HashSet<>(doubleDamageFrom);
+            weaknesses.addAll(halfDamageTo);
+            weaknesses.addAll(noDamageTo);
+
+            return new Type(name, typeID, strengths, weaknesses);
+        }
+    }
+
+    private static HashSet<String> getTypeNames(JSONArray typeList) {
+        HashSet<String> types = new HashSet<>();
+        for(int i = 0; i < typeList.length(); i++) {
+            types.add(typeList.getJSONObject(i).getString("name"));
+        }
+        return types;
     }
 }
 
