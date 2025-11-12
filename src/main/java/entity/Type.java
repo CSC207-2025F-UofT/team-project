@@ -33,5 +33,12 @@ public class Type {
         return weaknesses;
     }
 
-    public HashSet<String> getResistances() { return resistances; }
+    public HashSet<String> getResistances() {
+        return resistances;
+    }
+
+    @Override
+    public String toString() {
+        return name;
+    }
 }
