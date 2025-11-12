@@ -115,11 +115,33 @@ public class Pokemon {
             return pokedexes;
         }
 
-        public HashSet<String> getWeaknesses() {
-            HashSet<String> weaknesses = new HashSet<>(type1.getWeaknesses());
-            weaknesses.addAll(type2.getWeaknesses());
-            return weaknesses;
-        }
+        public int getHP() { return stats.get(0);}
+        public int getAttack() { return stats.get(1);}
+        public int getDefense() { return stats.get(2);}
+        public int getSpecialAttack() { return stats.get(3);}
+        public int getSpecialDefense() { return stats.get(4);}
+        public int getSpeed() { return stats.get(5);}
+
+
+
+
+    public HashSet<String> getWeaknesses() {
+        HashSet<String> weaknesses1 = new HashSet<>(type1.getWeaknesses());
+        HashSet<String> weaknesses2 = new HashSet<>(type2.getWeaknesses());
+        HashSet<String> resistances1 = new HashSet<>(type1.getResistances());
+        HashSet<String> resistances2 = new HashSet<>(type2.getResistances());
+        HashSet<String> compare12 = new HashSet<>(weaknesses1);
+        compare12.retainAll(resistances2);
+        HashSet<String> compare21 = new HashSet<>(weaknesses2);
+        compare21.retainAll(resistances1);
+        HashSet<String> weaknessesf1 = new HashSet<>(weaknesses1);
+        weaknessesf1.removeAll(compare12);
+        HashSet<String> weaknessesf2 = new HashSet<>(weaknesses2);
+        weaknessesf2.removeAll(compare21);
+        HashSet<String> weaknesses = new HashSet<>(weaknessesf1);
+        weaknessesf1.addAll(weaknessesf2);
+        return weaknesses;
+    }
 
         public HashSet<String> getStrengths() {
         HashSet<String> strengths = new HashSet<>(type1.getStrengths());
@@ -128,9 +150,21 @@ public class Pokemon {
         }
 
         public HashSet<String> getResistances() {
-        HashSet<String> resistances = new HashSet<>(type1.getResistances());
-        resistances.addAll(type2.getResistances());
-        return resistances;
+            HashSet<String> weaknesses1 = new HashSet<>(type1.getWeaknesses());
+            HashSet<String> weaknesses2 = new HashSet<>(type2.getWeaknesses());
+            HashSet<String> resistances1 = new HashSet<>(type1.getResistances());
+            HashSet<String> resistances2 = new HashSet<>(type2.getResistances());
+            HashSet<String> compare12 = new HashSet<>(weaknesses1);
+            compare12.retainAll(resistances2);
+            HashSet<String> compare21 = new HashSet<>(weaknesses2);
+            compare21.retainAll(resistances1);
+            HashSet<String> resistancesf1 = new HashSet<>(resistances1);
+            resistancesf1.removeAll(compare12);
+            HashSet<String> resistancesf2 = new HashSet<>(resistances2);
+            resistancesf2.removeAll(compare21);
+            HashSet<String> weaknesses = new HashSet<>(resistancesf1);
+            resistancesf1.addAll(resistancesf2);
+            return weaknesses;
         }
 
     // Helper methods to add single elements
