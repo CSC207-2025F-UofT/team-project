@@ -6,6 +6,10 @@ import javafx.scene.Scene;
 
 import javax.swing.*;
 
+import stock.data.AlphaVantageAPI;
+import stock.interface_adapters.controllers.StockSearchController;
+import stock.use_case.stock_search.StockSearchInteractor;
+
 public class DashboardFrame extends JFrame {
     
     public DashboardFrame() {
@@ -20,7 +24,10 @@ public class DashboardFrame extends JFrame {
 
         // Create the JavaFX scene on the JavaFX Application Thread
         Platform.runLater(() -> {
-            StocksView view = new StocksView();
+            AlphaVantageAPI api = new AlphaVantageAPI();
+            StockSearchController searchController =
+                    new StockSearchController(new StockSearchInteractor(api));
+            StocksView view = new StocksView(searchController, api);
             fxPanel.setScene(new Scene(view, 1000, 700));
         });
     }
