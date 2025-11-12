@@ -44,4 +44,29 @@ public class Player {
     public void removeFromInventory(ClickableObject object) {
         inventory.remove(object);
     }
+    public boolean hasItemNamed(String name) {
+        for (ClickableObject obj : inventory) {
+            if (obj.getName().equals(name)) return true;
+        }
+        return false;
+    }
+    public boolean removeItemNamed(String name) {
+        for (int i = 0; i < inventory.size(); i++) {
+            if (inventory.get(i).getName().equals(name)) {
+                inventory.remove(i);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /** Optional: returns the first item with this name, or null if none. */
+    public ClickableObject findItemNamed(String name) {
+        for (ClickableObject obj : inventory) {
+            if (obj.getName().equals(name)) return obj;
+        }
+        return null;
+    }
+
+
 }

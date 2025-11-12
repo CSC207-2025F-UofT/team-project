@@ -21,42 +21,96 @@ public class GameInteractor implements GameInputBoundary {
 
     @Override
     public void execute(GameInputData gameInputData) {
-        // 1) Get clicked & rule
         ClickableObject clicked = gameInputData.getClickableObject();
-        ClickRule rule = gameManager.ruleFor(clicked);
 
-        // 2) Start from current scene
         Scene cur = gameDataAccessInterface.getCurrentScene();
 
-        // 3) Apply collection/removal to current scene (immutably)
-        Scene updatedCur = gameManager.applyToCurrentScene(rule, cur, clicked);
-        gameDataAccessInterface.getScenes().put(updatedCur.getName(), updatedCur);
-        gameDataAccessInterface.setCurrentScene(updatedCur);
+        // ✅ Handle collectable objects
+        if (clicked.isCollectable()) {
+            // 1. Add to inventory
+            gameDataAccessInterface.getPlayer().addToInventory(clicked);
 
-        // 4) Handle scene change if the rule asks for it
-        if (rule.getType() == ClickActionType.CHANGE_SCENE
-                || rule.getType() == ClickActionType.COLLECT_AND_CHANGE_SCENE) {
-            rule.getTargetScene().ifPresent(sceneName -> {
-                Scene target = gameDataAccessInterface.getScenes().get(sceneName);
-                if (target != null) {
-                    gameDataAccessInterface.setCurrentScene(target);
-                }
-            });
+            // 2. Remove from scene (rebuild because Scene is immutable)
+            java.util.List<ClickableObject> updated = new java.util.ArrayList<>(cur.getObjects());
+            updated.removeIf(o -> o.getName().equals(clicked.getName()));
+            Scene updatedScene = new Scene(cur.getName(), updated, cur.getImage());
+
+            // 3. Save new scene state
+            gameDataAccessInterface.getScenes().put(updatedScene.getName(), updatedScene);
+            gameDataAccessInterface.setCurrentScene(updatedScene);
+
+            // 4. Optional: show popup or in-game message
+            javax.swing.SwingUtilities.invokeLater(() ->
+                    javax.swing.JOptionPane.showMessageDialog(null,
+                            "You collected " + clicked.getName() + "!",
+                            "Item Collected",
+                            javax.swing.JOptionPane.INFORMATION_MESSAGE)
+            );
         }
 
-        // 5) Optional: show a popup/message if provided
-        rule.getMessage().ifPresent(msg ->
-                SwingUtilities.invokeLater(() ->
-                        JOptionPane.showMessageDialog(
-                                null, msg, "Info", JOptionPane.INFORMATION_MESSAGE
-                        )));
+        // ✅ Optional: handle non-collectable objects (scene switching, etc.)
+        else if (clicked.getName().equals("Object1")) {
+            gameDataAccessInterface.setCurrentScene(gameDataAccessInterface.getScenes().get("Scene1"));
+        } else if (clicked.getName().equals("Object2")) {
+            entity.Player player = gameDataAccessInterface.getPlayer();
+            if (player == null) {
+                player = new entity.Player();
+                gameDataAccessInterface.setPlayer(player);
+            }
 
-        // 6) Refresh UI via presenter (unchanged from your flow)
+            // If already unlocked, just go to Scene2
+            if (gameDataAccessInterface.isDoorUnlocked("Object2")) {
+                entity.Scene scene2 = gameDataAccessInterface.getScenes().get("Scene2");
+                if (scene2 != null) {
+                    gameDataAccessInterface.setCurrentScene(scene2);
+                }
+            } else {
+                // Not unlocked yet: require Object3 (the key)
+                if (player.hasItemNamed("Object3")) {
+                    // consume the key
+                    // (use your helper removeItemNamed from earlier)
+                    // or do the manual loop if you didn't add the helper
+                    java.util.List<entity.ClickableObject> inv = player.getInventory();
+                    for (int i = 0; i < inv.size(); i++) {
+                        if (inv.get(i).getName().equals("Object3")) {
+                            player.removeFromInventory(inv.get(i));
+                            break;
+                        }
+                    }
+
+                    // mark door as unlocked forever
+                    gameDataAccessInterface.unlockDoor("Object2");
+
+                    // go to Scene2
+                    entity.Scene scene2 = gameDataAccessInterface.getScenes().get("Scene2");
+                    if (scene2 != null) {
+                        gameDataAccessInterface.setCurrentScene(scene2);
+                    }
+
+                    // optional UX feedback
+                    javax.swing.SwingUtilities.invokeLater(() ->
+                            javax.swing.JOptionPane.showMessageDialog(
+                                    null, "Door unlocked with Object3. It will stay open.",
+                                    "Door Unlocked", javax.swing.JOptionPane.INFORMATION_MESSAGE));
+                } else {
+                    // still locked
+                    javax.swing.SwingUtilities.invokeLater(() ->
+                            javax.swing.JOptionPane.showMessageDialog(
+                                    null, "It's locked. You need Object3.",
+                                    "Locked", javax.swing.JOptionPane.WARNING_MESSAGE));
+                }
+            }
+        }
+
+
+
+        // ✅ Refresh UI
         Scene currentScene = gameDataAccessInterface.getCurrentScene();
         GameOutputData out = new GameOutputData();
         out.setBackgroundImage(currentScene.getImage());
         out.setClickableObjects(currentScene.getObjects());
         presenter.prepareView(out);
     }
+
 }
 

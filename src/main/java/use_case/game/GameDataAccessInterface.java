@@ -14,6 +14,10 @@ public interface GameDataAccessInterface {
      * Returns the current scene.
      * @return the current scene
      */
+    // add these:
+    boolean isDoorUnlocked(String doorName);
+    void unlockDoor(String doorName);
+
     Scene getCurrentScene();
 
     /**
@@ -30,5 +34,7 @@ public interface GameDataAccessInterface {
      * Get the player
      */
     Player getPlayer();
+    void setPlayer(Player player);
+
 
 }
