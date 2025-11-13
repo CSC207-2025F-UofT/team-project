@@ -55,7 +55,7 @@ public class AmadeusRawJsonDemo {
                     .addQueryParameter("destinationLocationCode", "BKK")
                     .addQueryParameter("departureDate", "2025-12-02")
                     .addQueryParameter("adults", "1")
-                    .addQueryParameter("nonStop", "true")
+                    .addQueryParameter("nonStop", "false")
                     .build();
 
             Request offersRequest = new Request.Builder()
