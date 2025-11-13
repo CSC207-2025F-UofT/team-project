@@ -5,6 +5,9 @@ import entity.Pokemon;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.HashSet;
+
+import entity.Type;
 import org.junit.jupiter.api.Test;
 import use_case.PokemonLookup.*;
 
@@ -19,9 +22,13 @@ class TestPokemonLookupInteractor {
         ArrayList<Integer> moveskarp = new ArrayList<>(Arrays.asList(33, 56, 150, 175, 340));
         ArrayList<Integer> eggkarp = new ArrayList<>(Arrays.asList(12, 14));
         ArrayList<Integer> pokedexkarp = new ArrayList<>(Arrays.asList(129, 129, 76, 52, 23, 23, 76, 13, 49, 53, 91, 91, 34, 51, 41, 111, 34, 54, 53, 129, 144, 42, 62, 80, 134, 43, 32));
+        HashSet<String> waterstrength = new HashSet<>(Arrays.asList("fire", "rock", "ground"));
+        HashSet<String> waterweak = new HashSet<>(Arrays.asList("grass", "electric"));
+        HashSet<String> wateres = new HashSet<>(Arrays.asList("fire", "rock", "ground"));
 
-
-        Pokemon magikarp = new Pokemon("pikachu", 11, 0, statsikarp, abilitykarp, 155, moveskarp, eggkarp, pokedexkarp);
+        Type type1 = new Type("water", 11,
+                waterstrength, waterweak, wateres);
+        Pokemon magikarp = new Pokemon("magikarp", type1, null, statsikarp, abilitykarp, 155, moveskarp, eggkarp, pokedexkarp);
         PokemonLookupInputData inputData = new PokemonLookupInputData("magikarp");
         PokemonLookupOutputBoundary successPresenter = new PokemonLookupOutputBoundary() {
             @Override
@@ -31,7 +38,7 @@ class TestPokemonLookupInteractor {
 
             @Override
             public void prepareFailView(String errorMessage) {
-                fail("Use Case failure is unexpected.");
+                fail(errorMessage);
             }
         };
         PokemonLookupInputBoundary interactor = new PokemonLookupInteractor(successPresenter, magikarp);
