@@ -7,7 +7,7 @@ public class ApiTest {
 
             // Test 1: Overview
             System.out.println("=== OVERVIEW ===");
-            System.out.println(api.getOverview("BRK"));
+            System.out.println(api.getOverview("IBM"));
 
             // Test 2: Intraday (5min)
             System.out.println("\n=== INTRADAY ===");
@@ -35,7 +35,7 @@ public class ApiTest {
 
             // Test 8: News Sentiment
             System.out.println("\n=== NEWS SENTIMENT ===");
-            System.out.println(api.getFuncNewsSentiment("IBM"));
+            System.out.println(api.getFuncNewsSentiment("BRK"));
 
         } catch (Exception e) {
             e.printStackTrace();
