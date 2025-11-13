@@ -49,7 +49,7 @@ public class AppBuilder {
     }
 
     public JFrame build() {
-        JFrame application = new JFrame("Metagross");
+        JFrame application = new JFrame("MetaGross");
         application.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
         application.add(cardPanel);
