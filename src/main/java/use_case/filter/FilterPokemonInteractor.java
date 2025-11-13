@@ -30,15 +30,8 @@ public class FilterPokemonInteractor implements FilterPokemonInputBoundary {
             presenter.prepareFailView("Filter value does not exist.");
         } else {
             List<String> results = dataAccess.getPokemonByFilter(category, value);
-//for empty results(maybe redundant)
-            if (results == null || results.isEmpty()) {
-                presenter.prepareFailView("No Pokémon found for the given filter.");
-            } else {
-                FilterPokemonOutputData outputData = new FilterPokemonOutputData(category, value, results);
-                presenter.prepareSuccessView(outputData);
+            FilterPokemonOutputData outputData = new FilterPokemonOutputData(category, value, results);
+            presenter.prepareSuccessView(outputData);
             }
         }
     }
-
-
-}
