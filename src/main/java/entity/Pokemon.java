@@ -136,7 +136,7 @@ public class Pokemon {
         HashSet<String> weaknessesf2 = new HashSet<>(weaknesses2);
         weaknessesf2.removeAll(compare21);
         HashSet<String> weaknesses = new HashSet<>(weaknessesf1);
-        weaknessesf1.addAll(weaknessesf2);
+        weaknesses.addAll(weaknessesf2);
         return weaknesses;
     }
 
@@ -151,17 +151,26 @@ public class Pokemon {
             HashSet<String> weaknesses2 = new HashSet<>(type2.getWeaknesses());
             HashSet<String> resistances1 = new HashSet<>(type1.getResistances());
             HashSet<String> resistances2 = new HashSet<>(type2.getResistances());
-            HashSet<String> compare12 = new HashSet<>(weaknesses1);
-            compare12.retainAll(resistances2);
-            HashSet<String> compare21 = new HashSet<>(weaknesses2);
-            compare21.retainAll(resistances1);
+
+// Compare overlaps between resistances and the other type’s weaknesses
+            HashSet<String> compare12 = new HashSet<>(resistances1);
+            compare12.retainAll(weaknesses2);
+
+            HashSet<String> compare21 = new HashSet<>(resistances2);
+            compare21.retainAll(weaknesses1);
+
+// Remove cancelled resistances
             HashSet<String> resistancesf1 = new HashSet<>(resistances1);
             resistancesf1.removeAll(compare12);
+
             HashSet<String> resistancesf2 = new HashSet<>(resistances2);
             resistancesf2.removeAll(compare21);
-            HashSet<String> weaknesses = new HashSet<>(resistancesf1);
-            resistancesf1.addAll(resistancesf2);
-            return weaknesses;
+
+// Combine remaining resistances
+            HashSet<String> resistances = new HashSet<>(resistancesf1);
+            resistances.addAll(resistancesf2);
+
+            return resistances;
         }
 
     // Helper methods to add single elements

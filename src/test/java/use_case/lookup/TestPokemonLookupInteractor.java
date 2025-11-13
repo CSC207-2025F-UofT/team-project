@@ -50,26 +50,27 @@ class TestPokemonLookupInteractor {
     // dual type return the right weakness test
     @Test
     void LudicoloTest() throws IOException {
-        HashSet<String> waterstrength = new HashSet<>(Arrays.asList("fire", "rock", "ground"));
-        HashSet<String> waterweak = new HashSet<>(Arrays.asList("grass", "electric"));
-        HashSet<String> wateres = new HashSet<>(Arrays.asList("fire", "rock", "ground"));
-
-        HashSet<String> grassstrength = new HashSet<>(Arrays.asList("ground", "rock", "water"));
-        HashSet<String> grassweak = new HashSet<>(Arrays.asList("flying", "fire", "bug", "ice", "poison"));
-        HashSet<String> grassres = new HashSet<>(Arrays.asList("ground", "grass", "water", "electric"));
-        Type type1 = new Type("water", 11,
-                waterstrength, waterweak, wateres);
-        Type type2 = new Type("grass", 12,
-                grassstrength, grassweak, grassres);
+//        HashSet<String> waterstrength = new HashSet<>(Arrays.asList("fire", "rock", "ground"));
+//        HashSet<String> waterweak = new HashSet<>(Arrays.asList("grass", "electric"));
+//        HashSet<String> wateres = new HashSet<>(Arrays.asList("fire", "rock", "ground"));
+//
+//        HashSet<String> grassstrength = new HashSet<>(Arrays.asList("ground", "rock", "water"));
+//        HashSet<String> grassweak = new HashSet<>(Arrays.asList("flying", "fire", "bug", "ice", "poison"));
+//        HashSet<String> grassres = new HashSet<>(Arrays.asList("ground", "grass", "water", "electric"));
+//        Type type1 = new Type("water", 11,
+//                waterstrength, waterweak, wateres);
+//        Type type2 = new Type("grass", 12,
+//                grassstrength, grassweak, grassres);
         EmptyPokemonFactory factoree = new EmptyPokemonFactory();
         Pokemon emptymon = factoree.create();
-        emptymon.setType1(type1);
-        emptymon.setType2(type2);
+//        emptymon.setType1(type1);
+//        emptymon.setType2(type2);
+        HashSet<String> ludicoloweakness = new HashSet<>(Arrays.asList("poison", "flying", "bug"));
         PokemonLookupInputData inputData = new PokemonLookupInputData("ludicolo");
         PokemonLookupOutputBoundary successPresenter = new PokemonLookupOutputBoundary() {
             @Override
             public void prepareSuccessView(PokemonLookupOutputData outputData) {
-                assertEquals(emptymon.getWeaknesses(), outputData.getPokemon().getWeaknesses());
+                assertEquals(ludicoloweakness, outputData.getPokemon().getWeaknesses());
             }
 
             @Override
@@ -84,26 +85,27 @@ class TestPokemonLookupInteractor {
     // dual type return the right strengths test (no duplicates)
     @Test
     void AurorusTest() throws IOException {
-        HashSet<String> icestrength = new HashSet<>(Arrays.asList("flying", "ground", "grass", "dragon"));
-        HashSet<String> iceweak = new HashSet<>(Arrays.asList("fighting", "fire", "rock", "steel"));
-        HashSet<String> iceres = new HashSet<>(Arrays.asList("ice"));
-
-        HashSet<String> rockstrength = new HashSet<>(Arrays.asList("flying", "bug", "fire", "ice"));
-        HashSet<String> rockweak = new HashSet<>(Arrays.asList("water", "grass", "ground", "steel", "fighting"));
-        HashSet<String> rockres = new HashSet<>(Arrays.asList("ground", "grass", "water", "electric"));
-        Type type2 = new Type("ice", 15,
-                icestrength, iceweak, iceres);
-        Type type1 = new Type("rock", 6,
-                rockstrength, rockweak, rockres);
+//        HashSet<String> icestrength = new HashSet<>(Arrays.asList("flying", "ground", "grass", "dragon"));
+//        HashSet<String> iceweak = new HashSet<>(Arrays.asList("fighting", "fire", "rock", "steel"));
+//        HashSet<String> iceres = new HashSet<>(Arrays.asList("ice"));
+//
+//        HashSet<String> rockstrength = new HashSet<>(Arrays.asList("flying", "bug", "fire", "ice"));
+//        HashSet<String> rockweak = new HashSet<>(Arrays.asList("water", "grass", "ground", "steel", "fighting"));
+//        HashSet<String> rockres = new HashSet<>(Arrays.asList("ground", "grass", "water", "electric"));
+//        Type type2 = new Type("ice", 15,
+//                icestrength, iceweak, iceres);
+//        Type type1 = new Type("rock", 6,
+//                rockstrength, rockweak, rockres);
         EmptyPokemonFactory factoree = new EmptyPokemonFactory();
         Pokemon emptymon = factoree.create();
-        emptymon.setType1(type1);
-        emptymon.setType2(type2);
+        HashSet<String> aurorusstrength = new HashSet<>(Arrays.asList("flying", "ground", "grass", "dragon", "bug", "fire", "ice"));
+//        emptymon.setType1(type1);
+//        emptymon.setType2(type2);
         PokemonLookupInputData inputData = new PokemonLookupInputData("aurorus");
         PokemonLookupOutputBoundary successPresenter = new PokemonLookupOutputBoundary() {
             @Override
             public void prepareSuccessView(PokemonLookupOutputData outputData) {
-                assertEquals(emptymon.getStrengths(), outputData.getPokemon().getStrengths());
+                assertEquals(aurorusstrength, outputData.getPokemon().getStrengths());
             }
 
             @Override
@@ -119,26 +121,27 @@ class TestPokemonLookupInteractor {
 
     @Test
     void DurantTest() throws IOException {
-        HashSet<String> bugstrength = new HashSet<>(Arrays.asList("grass", "dark", "psychic"));
-        HashSet<String> bugweak = new HashSet<>(Arrays.asList("fire", "rock", "flying"));
-        HashSet<String> bugres = new HashSet<>(Arrays.asList("ground", "grass", "fighting"));
-
-        HashSet<String> steelstrength = new HashSet<>(Arrays.asList("rock", "ice", "fairy"));
-        HashSet<String> steelweak = new HashSet<>(Arrays.asList("fire", "fighting", "ground"));
-        HashSet<String> steelres = new HashSet<>(Arrays.asList("normal", "flying", "rock", "bug", "steel", "grass", "psychic", "ice", "dragon", "fairy"));
-        Type type1 = new Type("bug", 7,
-                bugstrength, bugweak, bugres);
-        Type type2 = new Type("steel", 9,
-                steelstrength, steelweak, steelres);
+//        HashSet<String> bugstrength = new HashSet<>(Arrays.asList("grass", "dark", "psychic"));
+//        HashSet<String> bugweak = new HashSet<>(Arrays.asList("fire", "rock", "flying"));
+//        HashSet<String> bugres = new HashSet<>(Arrays.asList("ground", "grass", "fighting"));
+//
+//        HashSet<String> steelstrength = new HashSet<>(Arrays.asList("rock", "ice", "fairy"));
+//        HashSet<String> steelweak = new HashSet<>(Arrays.asList("fire", "fighting", "ground"));
+//        HashSet<String> steelres = new HashSet<>(Arrays.asList("normal", "flying", "rock", "bug", "steel", "grass", "psychic", "ice", "dragon", "fairy"));
+//        Type type1 = new Type("bug", 7,
+//                bugstrength, bugweak, bugres);
+//        Type type2 = new Type("steel", 9,
+//                steelstrength, steelweak, steelres);
         EmptyPokemonFactory factoree = new EmptyPokemonFactory();
         Pokemon emptymon = factoree.create();
-        emptymon.setType1(type1);
-        emptymon.setType2(type2);
+//        emptymon.setType1(type1);
+//        emptymon.setType2(type2);
+        HashSet<String> durantres = new HashSet<>(Arrays.asList("normal", "bug", "poison", "steel", "grass", "psychic", "ice", "dragon", "fairy"));
         PokemonLookupInputData inputData = new PokemonLookupInputData("durant");
         PokemonLookupOutputBoundary successPresenter = new PokemonLookupOutputBoundary() {
             @Override
             public void prepareSuccessView(PokemonLookupOutputData outputData) {
-                assertEquals(emptymon.getResistances(), outputData.getPokemon().getResistances());
+                assertEquals(durantres, outputData.getPokemon().getResistances());
             }
 
             @Override
