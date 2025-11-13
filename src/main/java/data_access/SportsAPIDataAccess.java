@@ -48,16 +48,18 @@ public class SportsAPIDataAccess {
                 String[] splits = line.split("id");
                 splits = Arrays.copyOfRange(splits,1,splits.length);
                 for(String i: splits){
-                    String[] splits2 = i.split("\",\"");
-                    System.out.println(i);
-                    String id = i.substring(3,35);
-                    String sport = i.substring(i.indexOf("sport_key")+12,i.indexOf("sport_title")-3);
-
-                    System.out.println(id);
-                    System.out.println(sport);
-                    System.out.println("ok");
-                    for(String j:splits2){
-                        //System.out.println(j);
+                    if(i.substring(i.indexOf("bookmakers")).length()>20){
+                        System.out.println(i);
+                        String id = i.substring(3,35);
+                        String sport = i.substring(i.indexOf("sport_title")+14,i.indexOf("commence")-3);
+                        String teamodds = i.substring(i.indexOf("outcomes")+10,i.length()-8);
+                        String[] teams = teamodds.split("},\\{");
+                        for (String a:teams){
+                            System.out.println(a);
+                        }
+                        //System.out.println(id);
+                        System.out.println(sport);
+                        //System.out.println("ok");
                     }
                     System.out.println();
                 }
