@@ -13,7 +13,7 @@ import java.util.List;
 
 /**
  * Fetches Pokémon lists from PokeAPI for:
- * type, ability, egg group
+ * type, ability, egg group, move
  */
 public class FilterPokemonDataAccess implements FilterPokemonDataAccessInterface {
 
@@ -64,6 +64,8 @@ public class FilterPokemonDataAccess implements FilterPokemonDataAccessInterface
                     return parseAbility(json);
                 case "egg-group":
                     return parseEggGroup(json);
+                case "move":
+                    return parseMove(json);
                 default:
                     return Collections.emptyList();
             }
@@ -85,6 +87,8 @@ public class FilterPokemonDataAccess implements FilterPokemonDataAccessInterface
             return BASE_URL + "ability/" + value;
         } else if (category.equals("egg-group")) {
             return BASE_URL + "egg-group/" + value;
+        } else if (category.equals("move")) {
+            return BASE_URL + "move/" + value;
         } else {
             return null;
         }
@@ -128,6 +132,18 @@ public class FilterPokemonDataAccess implements FilterPokemonDataAccessInterface
     private List<String> parseEggGroup(JSONObject json) {
         List<String> names = new ArrayList<>();
         JSONArray arr = json.getJSONArray("pokemon_species");
+        for (int i = 0; i < arr.length(); i++) {
+            names.add(arr.getJSONObject(i).getString("name").toLowerCase());
+        }
+        return names;
+    }
+
+    /**
+     * move
+     */
+    private List<String> parseMove(JSONObject json) {
+        List<String> names = new ArrayList<>();
+        JSONArray arr = json.getJSONArray("learned_by_pokemon");
         for (int i = 0; i < arr.length(); i++) {
             names.add(arr.getJSONObject(i).getString("name").toLowerCase());
         }
