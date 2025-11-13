@@ -1,10 +1,13 @@
 package data_access;
 
+import entity.Sportbet;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
-import java.io.FileWriter;
-import java.io.IOException;
+
+import java.io.*;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 public class SportsAPIDataAccess {
     private OkHttpClient client = new OkHttpClient();
@@ -33,6 +36,33 @@ public class SportsAPIDataAccess {
 
             System.out.println("Data saved to odds.txt");
         } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+    public void readdata(){
+        ArrayList<Sportbet> possibleBets = new ArrayList<>();
+        try {
+            BufferedReader br = new BufferedReader(new FileReader("odds.txt"));
+            String line;
+            while ((line = br.readLine()) != null){
+                String[] splits = line.split("id");
+                splits = Arrays.copyOfRange(splits,1,splits.length);
+                for(String i: splits){
+                    String[] splits2 = i.split("\",\"");
+                    System.out.println(i);
+                    String id = i.substring(3,35);
+                    String sport = i.substring(i.indexOf("sport_key")+12,i.indexOf("sport_title")-3);
+
+                    System.out.println(id);
+                    System.out.println(sport);
+                    System.out.println("ok");
+                    for(String j:splits2){
+                        //System.out.println(j);
+                    }
+                    System.out.println();
+                }
+            }
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
