@@ -10,6 +10,8 @@ public class Main {
                 .addLoginView()
                 .addSignupView()
                 .addLoggedInView()
+                .addChatView()
+                .addNewChatView()
                 .addSignupUseCase()
                 .addLoginUseCase()
                 .addLogoutUseCase()
