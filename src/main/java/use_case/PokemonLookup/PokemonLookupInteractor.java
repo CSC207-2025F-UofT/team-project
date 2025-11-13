@@ -4,24 +4,24 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import entity.Pokemon;
 
+import java.awt.*;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
-import java.util.List;
 
 public class PokemonLookupInteractor implements PokemonLookupInputBoundary {
     private final PokemonLookupOutputBoundary userPresenter;
-    private final Pokemon Pokemon;
+    private final Pokemon pokemon;
 
     public PokemonLookupInteractor(PokemonLookupOutputBoundary pokemonLookupOutputBoundary,
                                    Pokemon Pokemon) {
         this.userPresenter = pokemonLookupOutputBoundary;
-       this.Pokemon = Pokemon;
+       this.pokemon = Pokemon;
     }
 
     @Override
@@ -32,16 +32,53 @@ public class PokemonLookupInteractor implements PokemonLookupInputBoundary {
             return;
         } else {
             name = name.replace(" ", "-");
+            ArrayList<String> hyphens = new ArrayList<>(Arrays.asList(
+                    "ho-oh", "jangmo-o", "kommo-o", "hakamo-o", "porygon-z",
+                    "ting-lu", "chi-yu", "wo-chien", "chien-pao"
+            ));
+            OkHttpClient client;
+            Request request1;
+            Request request2;
+            if (name.split("-").length == 1) {
 
-            OkHttpClient client = new OkHttpClient();
+                client = new OkHttpClient();
 
-            Request request1 = new Request.Builder()
-                    .url("https://pokeapi.co/api/v2/pokemon/" + name)
-                    .build();
+                request1 = new Request.Builder()
+                        .url("https://pokeapi.co/api/v2/pokemon/" + name)
+                        .build();
 
-            Request request2 = new Request.Builder()
-                    .url("https://pokeapi.co/api/v2/pokemon-species/" + name)
-                    .build();
+                request2 = new Request.Builder()
+                        .url("https://pokeapi.co/api/v2/pokemon-species/" + name)
+                        .build();
+
+            }
+            if (name.split("-").length == 2 && hyphens.contains(name)) {
+                client = new OkHttpClient();
+
+                request1 = new Request.Builder()
+                        .url("https://pokeapi.co/api/v2/pokemon/" + name)
+                        .build();
+
+                request2 = new Request.Builder()
+                        .url("https://pokeapi.co/api/v2/pokemon-species/" + name)
+                        .build();
+            }
+            else {
+                client = new OkHttpClient();
+
+                request1 = new Request.Builder()
+                        .url("https://pokeapi.co/api/v2/pokemon/" + name)
+                        .build();
+
+                int index = name.indexOf("-");
+                if (index != -1) {
+                    name = name.substring(0, index);
+                }
+
+                request2 = new Request.Builder()
+                        .url("https://pokeapi.co/api/v2/pokemon-species/" + name)
+                        .build();
+            }
 
             try (Response response = client.newCall(request1).execute()) {
                 if (!response.isSuccessful()) {
@@ -136,22 +173,23 @@ public class PokemonLookupInteractor implements PokemonLookupInputBoundary {
                         int dex = Integer.parseInt(adex[adex.length - 1]);
                         pokedexes.add(dex);
                     }
+                    String sprite = json.getJSONObject("sprites").getString("front_default");
 //                    Pokemon Pokemon = new Pokemon(pokename, type1, type2, stats, abilities, hidden, moves, egggroup, pokedexes);
-                    Pokemon.setName(pokename);
-                    Pokemon.setType1(type1);
-                    Pokemon.setType2(type2);
-                    Pokemon.setStats(stats);
-                    Pokemon.setAbilities(abilities);
-                    Pokemon.setHidden(hidden);
-                    Pokemon.setMoves(moves);
-                    Pokemon.setEgggroup(egggroup);
-                    Pokemon.setPokedexes(pokedexes);
+                    pokemon.setName(pokename);
+                    pokemon.setType1(type1);
+                    pokemon.setType2(type2);
+                    pokemon.setStats(stats);
+                    pokemon.setAbilities(abilities);
+                    pokemon.setHidden(hidden);
+                    pokemon.setMoves(moves);
+                    pokemon.setEgggroup(egggroup);
+                    pokemon.setPokedexes(pokedexes);
+                    pokemon.setSprite(sprite);
                     final PokemonLookupOutputData pokemonLookupOutputData =
-                            new PokemonLookupOutputData(Pokemon);
+                            new PokemonLookupOutputData(pokemon);
                     userPresenter.prepareSuccessView(pokemonLookupOutputData);
                 }
-
-            }
+                }
 //            ;
 //            final PokemonLookupOutputData pokemonLookupOutputData =
 //                    new PokemonLookupOutputData(Pokemon);

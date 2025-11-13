@@ -30,7 +30,7 @@ class TestPokemonLookupInteractor {
 
         Type type1 = new Type("water", 11,
                 waterstrength, waterweak, wateres);
-        Pokemon magikarp = new Pokemon("magikarp", type1, null, statsikarp, abilitykarp, 155, moveskarp, eggkarp, pokedexkarp);
+        Pokemon magikarp = new Pokemon("magikarp", type1, null, statsikarp, abilitykarp, 155, moveskarp, eggkarp, pokedexkarp, "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/129.png");
         PokemonLookupInputData inputData = new PokemonLookupInputData("magikarp");
         PokemonLookupOutputBoundary successPresenter = new PokemonLookupOutputBoundary() {
             @Override
@@ -46,6 +46,53 @@ class TestPokemonLookupInteractor {
         PokemonLookupInputBoundary interactor = new PokemonLookupInteractor(successPresenter, magikarp);
         interactor.execute(inputData);
     }
+
+    // returns the specific form data
+    @Test
+    void AegislashTest() throws IOException {
+        ArrayList<Integer> stats = new ArrayList<>(Arrays.asList(60, 50, 140, 50, 140, 60));
+        EmptyPokemonFactory factoree = new EmptyPokemonFactory();
+        Pokemon emptymon = factoree.create();
+        PokemonLookupInputData inputData = new PokemonLookupInputData("aegislash-shield");
+        PokemonLookupOutputBoundary successPresenter = new PokemonLookupOutputBoundary() {
+            @Override
+            public void prepareSuccessView(PokemonLookupOutputData outputData) {
+                assertEquals("aegislash-shield", outputData.getPokemon().getName());
+                assertEquals(stats, outputData.getPokemon().getStats());
+            }
+
+            @Override
+            public void prepareFailView(String errorMessage) {
+                fail(errorMessage);
+            }
+        };
+        PokemonLookupInputBoundary interactor = new PokemonLookupInteractor(successPresenter, emptymon);
+        interactor.execute(inputData);
+
+    }
+
+    // returns a formless pokemon that still has a hyphen
+    @Test
+    void TingLuTest() throws IOException {
+        EmptyPokemonFactory factoree = new EmptyPokemonFactory();
+        Pokemon emptymon = factoree.create();
+        PokemonLookupInputData inputData = new PokemonLookupInputData("ting-lu");
+        PokemonLookupOutputBoundary successPresenter = new PokemonLookupOutputBoundary() {
+            @Override
+            public void prepareSuccessView(PokemonLookupOutputData outputData) {
+                assertEquals("ting-lu", outputData.getPokemon().getName());
+            }
+
+            @Override
+            public void prepareFailView(String errorMessage) {
+                fail(errorMessage);
+            }
+        };
+        PokemonLookupInputBoundary interactor = new PokemonLookupInteractor(successPresenter, emptymon);
+        interactor.execute(inputData);
+
+    }
+
 
     // dual type return the right weakness test
     @Test
