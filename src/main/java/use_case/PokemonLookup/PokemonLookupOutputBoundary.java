@@ -1,14 +1,15 @@
-package use_case.BuildPokemonTeam;
+package use_case.PokemonLookup;
+
 
 /**
  * The output boundary for the Pokemon Lookup Use Case.
  */
-public interface BuildPokemonTeamOutputBoundary {
+public interface PokemonLookupOutputBoundary {
     /**
      * Prepares the success view for the Pokemon Lookup Use Case.
      * @param outputData the output data
      */
-    void prepareSuccessView(BuildPokemonTeamOutputData outputData);
+    void prepareSuccessView(PokemonLookupOutputData outputData);
 
     /**
      * Prepares the failure view for the Pokemon Lookup Use Case.
