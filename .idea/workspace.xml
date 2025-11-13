@@ -4,27 +4,12 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e8f37d7d-e497-4269-85ef-a78d9eb08446" name="Changes" comment="mines UI added">
-      <change afterPath="$PROJECT_DIR$/src/main/java/entity/BlackjackGame.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/entity/Card.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/entity/Deck.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/entity/GameResult.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/entity/Hand.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/entity/MinesGame.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/interface_adapter/BlackjackController.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/interface_adapter/BlackjackPresenter.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/interface_adapter/BlackjackViewModel.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/interface_adapter/MinesController.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/interface_adapter/MinesPresenter.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/use_case/BlackjackInteractor.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/use_case/BlackjackOutputBoundary.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/use_case/MinesOutputBoundary.java" afterDir="false" />
+    <list default="true" id="e8f37d7d-e497-4269-85ef-a78d9eb08446" name="Changes" comment="CA for Mines and Blackjack added">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/entity/tempentity.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/use_case/tempusecase.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/use_case/MinesInteractor.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/view/blackjackview.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/view/BlackjackView.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/view/minesview.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/view/MinesView.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/view/tempview.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/view/TempView.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/data_access/tempdata.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/view/BlackjackView.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/view/BlackjackView.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/view/MinesView.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/view/MinesView.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/view/TempView.java" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -67,20 +52,22 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;Application.blackjackview.executor&quot;: &quot;Run&quot;,
-    &quot;Application.minesview.executor&quot;: &quot;Run&quot;,
-    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;SONARLINT_PRECOMMIT_ANALYSIS&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;nikita&quot;,
-    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
-    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Application.BlackjackView.executor": "Run",
+    "Application.MinesView.executor": "Run",
+    "Application.blackjackview.executor": "Run",
+    "Application.minesview.executor": "Run",
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "SONARLINT_PRECOMMIT_ANALYSIS": "true",
+    "git-widget-placeholder": "nikita",
+    "ignore.virus.scanning.warn.message": "true",
+    "kotlin-language-version-configured": "true",
+    "node.js.selected.package.tslint": "(autodetect)"
   }
-}</component>
+}]]></component>
   <component name="RunManager">
     <configuration default="true" type="JetRunConfigurationType">
       <module name="team-project" />
@@ -149,7 +136,15 @@
       <option name="project" value="LOCAL" />
       <updated>1762880078562</updated>
     </task>
-    <option name="localTasksCounter" value="6" />
+    <task id="LOCAL-00006" summary="CA for Mines and Blackjack added">
+      <option name="closed" value="true" />
+      <created>1763062301141</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1763062301141</updated>
+    </task>
+    <option name="localTasksCounter" value="7" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -168,6 +163,7 @@
     <MESSAGE value="n" />
     <MESSAGE value="packages for CA" />
     <MESSAGE value="mines UI added" />
-    <option name="LAST_COMMIT_MESSAGE" value="mines UI added" />
+    <MESSAGE value="CA for Mines and Blackjack added" />
+    <option name="LAST_COMMIT_MESSAGE" value="CA for Mines and Blackjack added" />
   </component>
 </project>
