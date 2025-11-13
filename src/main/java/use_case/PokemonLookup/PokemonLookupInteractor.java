@@ -21,7 +21,7 @@ public class PokemonLookupInteractor implements PokemonLookupInputBoundary {
     public PokemonLookupInteractor(PokemonLookupOutputBoundary pokemonLookupOutputBoundary,
                                    Pokemon Pokemon) {
         this.userPresenter = pokemonLookupOutputBoundary;
-        this.Pokemon = Pokemon;
+       this.Pokemon = Pokemon;
     }
 
     @Override
@@ -101,17 +101,6 @@ public class PokemonLookupInteractor implements PokemonLookupInputBoundary {
                         String[] ahiden = hiden.split("/");
                         hidden = Integer.parseInt(ahiden[ahiden.length - 1]);
                     }
-                    // a pokemon has two regular abilities and no hidden ability
-                    if (json.getJSONArray("abilities").length() == 2 && json.getJSONArray("abilities").getJSONObject(1).getInt("slot") == 2) {
-                        String pabil = json.getJSONArray("abilities").getJSONObject(0).getJSONObject("ability").getString("url");
-                        String[] aabil = pabil.split("/");
-                        int abil = Integer.parseInt(aabil[aabil.length - 1]);
-                        abilities.add(abil);
-                        String pabil2 = json.getJSONArray("abilities").getJSONObject(1).getJSONObject("ability").getString("url");
-                        String[] aabil2 = pabil2.split("/");
-                        int abil2 = Integer.parseInt(aabil2[aabil2.length - 1]);
-                        abilities.add(abil2);
-                    }
                     // a pokemon has all regular and hidden abilities
                     if (json.getJSONArray("abilities").length() == 3) {
                         String pabil = json.getJSONArray("abilities").getJSONObject(0).getJSONObject("ability").getString("url");
@@ -147,6 +136,7 @@ public class PokemonLookupInteractor implements PokemonLookupInputBoundary {
                         int dex = Integer.parseInt(adex[adex.length - 1]);
                         pokedexes.add(dex);
                     }
+//                    Pokemon Pokemon = new Pokemon(pokename, type1, type2, stats, abilities, hidden, moves, egggroup, pokedexes);
                     Pokemon.setName(pokename);
                     Pokemon.setType1(type1);
                     Pokemon.setType2(type2);
@@ -162,10 +152,10 @@ public class PokemonLookupInteractor implements PokemonLookupInputBoundary {
                 }
 
             }
-            ;
-            final PokemonLookupOutputData pokemonLookupOutputData =
-                    new PokemonLookupOutputData(Pokemon);
-            userPresenter.prepareSuccessView(pokemonLookupOutputData);
+//            ;
+//            final PokemonLookupOutputData pokemonLookupOutputData =
+//                    new PokemonLookupOutputData(Pokemon);
+//            userPresenter.prepareSuccessView(pokemonLookupOutputData);
 
         }
     }

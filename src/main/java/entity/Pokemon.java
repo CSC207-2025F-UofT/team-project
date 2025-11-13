@@ -122,9 +122,6 @@ public class Pokemon {
         public int getSpecialDefense() { return stats.get(4);}
         public int getSpeed() { return stats.get(5);}
 
-
-
-
     public HashSet<String> getWeaknesses() {
         HashSet<String> weaknesses1 = new HashSet<>(type1.getWeaknesses());
         HashSet<String> weaknesses2 = new HashSet<>(type2.getWeaknesses());
