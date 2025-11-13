@@ -7,7 +7,7 @@ public class ApiTest {
 
             // Test 1: Overview
             System.out.println("=== OVERVIEW ===");
-            System.out.println(api.getOverview("IBM"));
+            System.out.println(api.getOverview("BRK"));
 
             // Test 2: Intraday (5min)
             System.out.println("\n=== INTRADAY ===");
