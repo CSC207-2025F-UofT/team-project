@@ -1,5 +1,6 @@
 package view;
 
+import interface_adapter.ViewManagerModel;
 import interface_adapter.logged_in.ChangePasswordController;
 import interface_adapter.logged_in.LoggedInState;
 import interface_adapter.logged_in.LoggedInViewModel;
@@ -34,9 +35,12 @@ public class LoggedInView extends JPanel implements ActionListener, PropertyChan
 
     private final JButton logOut;
     private final JButton changePassword;
+    private final ViewManagerModel viewManagerModel; // This field is now correctly defined
 
-    public LoggedInView(LoggedInViewModel loggedInViewModel) {
+    // CONSTRUCTOR SIGNATURE CORRECTED TO ACCEPT ViewManagerModel
+    public LoggedInView(LoggedInViewModel loggedInViewModel, ViewManagerModel viewManagerModel) {
         this.loggedInViewModel = loggedInViewModel;
+        this.viewManagerModel = viewManagerModel; // This assignment now works
         this.loggedInViewModel.addPropertyChangeListener(this);
 
         // Top Bar Panel (User, New Chat)
@@ -54,6 +58,7 @@ public class LoggedInView extends JPanel implements ActionListener, PropertyChan
         profileButton.setContentAreaFilled(false);
 
         usernameLabel = new JLabel("User"); // Placeholder text, updated on login
+        // Assuming Font "Oxygen" is custom or a mistake, changed to "SansSerif" for safety
         usernameLabel.setFont(new Font("SansSerif", Font.BOLD, 18));
 
         userInfoPanel.add(profileButton);
@@ -63,7 +68,7 @@ public class LoggedInView extends JPanel implements ActionListener, PropertyChan
 
         // Right Side: New Chat Button (Plus Icon)
         newChatButton = new JButton("⊕");
-        newChatButton.setFont(new Font("SansSerif", Font.PLAIN, 24));
+        newChatButton.setFont(new Font("SansSerif", Font.PLAIN, 24)); // Changed font
         newChatButton.setFocusPainted(false);
         newChatButton.setBorderPainted(false);
         newChatButton.setContentAreaFilled(false);
@@ -75,7 +80,7 @@ public class LoggedInView extends JPanel implements ActionListener, PropertyChan
 
 
         JLabel recentChatsTitle = new JLabel("Recent Chats");
-        recentChatsTitle.setFont(new Font("Oxygen", Font.BOLD, 20));
+        recentChatsTitle.setFont(new Font("SansSerif", Font.BOLD, 20)); // Changed font
 
 
         recentPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
@@ -107,7 +112,9 @@ public class LoggedInView extends JPanel implements ActionListener, PropertyChan
         });
 
         newChatButton.addActionListener(e -> {
-            System.out.println("New Chat Button Clicked");
+            // Navigate to the NewChatView
+            viewManagerModel.setState("new chat");
+            viewManagerModel.firePropertyChange();
         });
 
         // Action Listeners for existing functionality

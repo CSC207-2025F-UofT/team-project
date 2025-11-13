@@ -31,6 +31,8 @@ import view.LoginView;
 import view.SignupView;
 import view.ViewManager;
 import view.WelcomeView;
+import view.SearchUserView;
+import view.ChatView;
 
 import javax.swing.*;
 import java.awt.*;
@@ -57,7 +59,9 @@ public class AppBuilder {
     private LoggedInViewModel loggedInViewModel;
     private LoggedInView loggedInView;
     private LoginView loginView;
-    private WelcomeView welcomeView; // <-- NEW FIELD
+    private WelcomeView welcomeView;
+    private SearchUserView newChatView;
+    private ChatView chatView;
 
     public AppBuilder() {
         cardPanel.setLayout(cardLayout);
@@ -85,7 +89,7 @@ public class AppBuilder {
 
     public AppBuilder addLoggedInView() {
         loggedInViewModel = new LoggedInViewModel();
-        loggedInView = new LoggedInView(loggedInViewModel);
+        loggedInView = new LoggedInView(loggedInViewModel, viewManagerModel);
         cardPanel.add(loggedInView, loggedInView.getViewName());
         return this;
     }
@@ -151,5 +155,16 @@ public class AppBuilder {
         viewManagerModel.firePropertyChange();
 
         return application;
+    }
+    public AppBuilder addNewChatView() {
+        newChatView = new SearchUserView(viewManagerModel);
+        cardPanel.add(newChatView, newChatView.getViewName());
+        return this;
+    }
+
+    public AppBuilder addChatView() {
+        chatView = new ChatView(viewManagerModel);
+        cardPanel.add(chatView, chatView.getViewName());
+        return this;
     }
 }
