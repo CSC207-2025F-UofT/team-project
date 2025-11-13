@@ -4,23 +4,37 @@ import javax.swing.*;
 import java.awt.*;
 
 public class MainMenuFrame extends JFrame {
+
     public MainMenuFrame(User user) {
-        setTitle("BET366 view.Main Menu");
+        setTitle("BET366 Main Menu");
         setDefaultCloseOperation(EXIT_ON_CLOSE);
-        setSize(1920,1080);
-        setLayout(new GridLayout(5, 1));
+        setExtendedState(JFrame.MAXIMIZED_BOTH);
+
+        getContentPane().setBackground(Color.WHITE);
+        setLayout(new BorderLayout());
 
         JLabel title = new JLabel("Welcome to BET366", SwingConstants.CENTER);
-        JButton profileBtn = new JButton("Profile");
-        JButton betHistoryBtn = new JButton("View Bet History");
-        JButton depositBtn = new JButton("Deposit / Withdraw");
-        JButton logoutBtn = new JButton("Logout");
+        title.setFont(new Font("Arial", Font.BOLD, 50));
+        title.setForeground(Color.BLACK);
+        title.setBorder(BorderFactory.createEmptyBorder(40, 0, 40, 0));
 
-        add(title);
-        add(profileBtn);
-        add(betHistoryBtn);
-        add(depositBtn);
-        add(logoutBtn);
+        JPanel panel = new JPanel(new GridLayout(5, 1, 15, 15));
+        panel.setOpaque(false);
+
+        JButton profileBtn = createMenuButton("Profile");
+        JButton betHistoryBtn = createMenuButton("View Bet History");
+        JButton playBetGameBtn = createMenuButton("Play Bet Game");
+        JButton depositBtn = createMenuButton("Deposit / Withdraw");
+        JButton logoutBtn = createMenuButton("Logout");
+
+        panel.add(profileBtn);
+        panel.add(betHistoryBtn);
+        panel.add(playBetGameBtn);
+        panel.add(depositBtn);
+        panel.add(logoutBtn);
+
+        add(title, BorderLayout.NORTH);
+        add(panel, BorderLayout.CENTER);
 
         profileBtn.addActionListener(e -> {
             new ProfileFrame(user, this);
@@ -32,6 +46,23 @@ public class MainMenuFrame extends JFrame {
             setVisible(false);
         });
 
+        playBetGameBtn.addActionListener(e -> {
+            new SportbetFrame(user, this);
+            setVisible(false);
+        });
+
         setVisible(true);
+    }
+
+    private JButton createMenuButton(String text) {
+        JButton btn = new JButton(text);
+        btn.setFont(new Font("Arial", Font.PLAIN, 28));
+        btn.setForeground(Color.BLACK);
+        btn.setBackground(Color.WHITE);
+        btn.setOpaque(true);
+        btn.setBorder(BorderFactory.createLineBorder(Color.BLACK, 2, true));
+        btn.setFocusPainted(false);
+        btn.setUI(new javax.swing.plaf.basic.BasicButtonUI());
+        return btn;
     }
 }
