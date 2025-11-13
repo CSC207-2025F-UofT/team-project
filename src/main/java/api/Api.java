@@ -39,7 +39,22 @@ public class Api {
             if (body == null) {
                 throw new IOException("Empty response body");
             }
-            return body.string();
+
+            String text = body.string().trim();
+
+            if (text.isEmpty()) {
+                throw new IOException("Empty response text");
+            }
+
+            if (text.equals("{}") || text.equals("{ }")) {
+                throw new IOException("AlphaVantage returned empty JSON (invalid symbol)");
+            }
+
+            if (text.contains("\"Error Message\"")) {
+                throw new IOException("AlphaVantage error: " + text);
+            }
+
+            return text;
         }
     }
 
