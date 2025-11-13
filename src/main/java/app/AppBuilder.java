@@ -96,7 +96,7 @@ public class AppBuilder {
         final use_case.game.GameOutputBoundary gameOutputBoundary =
                 new interface_adapter.game.GamePresenter(gameViewModel);
         final use_case.game.GameInputBoundary clickButtonInteractor =
-                new use_case.game.GameInteractor(gameDataAccessObject, gameOutputBoundary, manager);
+                new use_case.game.GameInteractor(gameDataAccessObject, gameOutputBoundary);
 
         // 4) Controller wiring
         interface_adapter.game.GameController gameController =

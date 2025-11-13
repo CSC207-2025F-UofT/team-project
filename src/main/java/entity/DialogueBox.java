@@ -9,23 +9,23 @@ import java.util.List;
 
 public class DialogueBox extends Scene{
 
-    private final String name;
+
     private final List<ClickableObject> options;
     private final String image;
-    private final int id;
 
-    public DialogueBox(String name, List<ClickableObject> options, String image, int id) {
-        super(name, options, image);
-        if ("".equals(name)) {
-            throw new IllegalArgumentException("DialogueBox name cannot be empty");
-        }
-        this.name = name;
+    public DialogueBox(List<ClickableObject> options, String image) {
+        super("qq", new ArrayList<>(), "qq");
         this.options = new ArrayList<>(options);
         this.image = image;
-        this.id = id;
     }
-    public String getName() {return name;}
-    public List<ClickableObject> getOptions() {return options;}
+
+
+    @Override
+    public List<ClickableObject> getObjects() {return options;}
+    @Override
     public String getImage() {return image;}
-    public int getId() {return id;}
+    @Override
+    public void addObject(ClickableObject object) {
+        options.add(object);
+    }
 }

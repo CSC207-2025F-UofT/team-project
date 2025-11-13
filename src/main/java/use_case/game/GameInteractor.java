@@ -1,6 +1,8 @@
 package use_case.game;
 
 import entity.ClickableObject;
+import entity.DialogueOption;
+import entity.NonPlayableCharacter;
 import entity.Scene;
 import use_case.switch_to_game.SwitchToGameOutputData;
 import use_case.switch_to_game.SwitchToGameViewDataAccessInterface;
@@ -23,23 +25,21 @@ public class GameInteractor implements GameInputBoundary {
         ClickableObject clicked = gameInputData.getClickableObject();
 
         // game logic
-
-        if (clicked.getName().equals("Object1")) {
-            gameDataAccessInterface.setCurrentScene(gameDataAccessInterface.getScenes().get("Scene1"));
-        } else if (clicked.getName().equals("Object2")) {
-            gameDataAccessInterface.setCurrentScene(gameDataAccessInterface.getScenes().get("Scene2"));
-        } else if (clicked.getName().equals("NPC1")) {
-            gameDataAccessInterface.setCurrentScene(gameDataAccessInterface.getScenes().get("DialogueBox1"));
-        } else if  (clicked.getName().equals("d1e")) {
-            gameDataAccessInterface.setCurrentScene(gameDataAccessInterface.getScenes().get("Scene2"));
-        } else if  (clicked.getName().equals("d1op11")) {
-            gameDataAccessInterface.setCurrentScene(gameDataAccessInterface.getScenes().get("DialogueBoxOption1"));
-        } else if  (clicked.getName().equals("d1op12")) {
-            gameDataAccessInterface.setCurrentScene(gameDataAccessInterface.getScenes().get("DialogueBoxOption2"));
-        } else if  (clicked.getName().equals("d1op13")) {
-            gameDataAccessInterface.setCurrentScene(gameDataAccessInterface.getScenes().get("DialogueBoxOption3"));
-        } else if  (clicked.getName().equals("d1r")) {
-            gameDataAccessInterface.setCurrentScene(gameDataAccessInterface.getScenes().get("DialogueBox1"));
+        if (clicked instanceof NonPlayableCharacter) {
+            gameDataAccessInterface.setCurrentScene(((NonPlayableCharacter) clicked).getDB());
+        }
+        else if (clicked instanceof DialogueOption) {
+            gameDataAccessInterface.setCurrentScene(((DialogueOption) clicked).getScene());
+        }
+        else {
+            switch (clicked.getName()) {
+                case "Object1":
+                    gameDataAccessInterface.setCurrentScene(gameDataAccessInterface.getScenes().get("Scene1"));
+                    break;
+                case "Object2":
+                    gameDataAccessInterface.setCurrentScene(gameDataAccessInterface.getScenes().get("Scene2"));
+                    break;
+            }
         }
 
         // update game ui
