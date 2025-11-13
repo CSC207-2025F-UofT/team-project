@@ -51,6 +51,8 @@ public class PokemonLookupView extends JPanel implements ActionListener, Propert
 
                             } catch (IOException e) {
                                 throw new RuntimeException(e);
+                            } catch (NullPointerException e) {
+                                JOptionPane.showMessageDialog(null, "Not a valid Pokemon Name");
                             }
                         }
                     }
