@@ -1,10 +1,10 @@
-package use_case.find_flight;
+package entity;
 
 /**
- * The Input Data for the Find Flight use case
+ * Entity representing the Flight Search Information
  */
 
-public class FindFlightInputData {
+public class FlightSearchInformation {
 
     private final String from;
     private final String to;
@@ -12,12 +12,12 @@ public class FindFlightInputData {
     private final String month;
     private final int year;
 
-    public FindFlightInputData(String from, String to, String day, String month, String year) {
+    public FlightSearchInformation(String from, String to, int day, String month, int year) {
         this.from = from;
         this.to = to;
-        this.day = Integer.parseInt(day);
+        this.day = day;
         this.month = month;
-        this.year = Integer.parseInt(year);
+        this.year = year;
     }
 
     public String getFrom() {
