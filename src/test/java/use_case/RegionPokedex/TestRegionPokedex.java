@@ -1,11 +1,13 @@
 package use_case.RegionPokedex;
 
 import entity.Pokemon;
+import entity.Type;
 import use_case.seeRegionPokedex.RegionPokedexInputData;
 import use_case.seeRegionPokedex.RegionPokedexInteractor;
 import use_case.seeRegionPokedex.RegionPokedexOutputBoundary;
 import use_case.seeRegionPokedex.RegionPokedexOutputData;
 import java.util.ArrayList;
+import java.util.HashSet;
 
 
 public class TestRegionPokedex {
@@ -26,15 +28,15 @@ public class TestRegionPokedex {
                 }
             };
             Pokemon dummy = new Pokemon(
-                    "dummy",
-                    0,
-                    0,
+                    "dummy",new Type("", 0, new HashSet<>(), new HashSet<>(), new HashSet<>()),
+                    new Type("", 0, new HashSet<>(), new HashSet<>(), new HashSet<>()),
                     new ArrayList<>(),
                     new ArrayList<>(),
                     0,
                     new ArrayList<>(),
                     new ArrayList<>(),
-                    new ArrayList<>()
+                    new ArrayList<>(),
+                    ""
             );
 
             RegionPokedexInteractor interactor = new RegionPokedexInteractor(dummy, presenter);

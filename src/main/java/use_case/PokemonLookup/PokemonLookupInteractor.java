@@ -136,6 +136,7 @@ public class PokemonLookupInteractor implements PokemonLookupInputBoundary {
                         int dex = Integer.parseInt(adex[adex.length - 1]);
                         pokedexes.add(dex);
                     }
+                    String sprite = json.getJSONObject("sprites").getString("front_default");
 //                    Pokemon Pokemon = new Pokemon(pokename, type1, type2, stats, abilities, hidden, moves, egggroup, pokedexes);
                     Pokemon.setName(pokename);
                     Pokemon.setType1(type1);
@@ -146,6 +147,7 @@ public class PokemonLookupInteractor implements PokemonLookupInputBoundary {
                     Pokemon.setMoves(moves);
                     Pokemon.setEgggroup(egggroup);
                     Pokemon.setPokedexes(pokedexes);
+                    Pokemon.setSprite(sprite);
                     final PokemonLookupOutputData pokemonLookupOutputData =
                             new PokemonLookupOutputData(Pokemon);
                     userPresenter.prepareSuccessView(pokemonLookupOutputData);

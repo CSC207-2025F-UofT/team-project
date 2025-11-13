@@ -14,9 +14,10 @@ public class Pokemon {
         private ArrayList<Integer> moves;
         private ArrayList<Integer> egggroup;
         private ArrayList<Integer> pokedexes;
+        private String sprite;
         // Constructor
         public Pokemon(String name, Type type1, Type type2, ArrayList<Integer> stats,
-                       ArrayList<Integer> abilities, int hidden, ArrayList<Integer> moves, ArrayList<Integer> egggroup, ArrayList<Integer> pokedexes) {
+                       ArrayList<Integer> abilities, int hidden, ArrayList<Integer> moves, ArrayList<Integer> egggroup, ArrayList<Integer> pokedexes, String sprite) {
             this.name = name;
             this.type1 = type1;
             this.type2 = type2;
@@ -26,6 +27,7 @@ public class Pokemon {
             this.moves = moves;
             this.egggroup = egggroup;
             this.pokedexes = pokedexes;
+            this.sprite = sprite;
         }
 
         @Override
@@ -39,6 +41,7 @@ public class Pokemon {
                     ", hidden=" + hidden +
                     ", moves=" + moves +
                     ", egggroups=" + egggroup +
+                    ", pokedexes=" + pokedexes +
                     '}';
         }
 
@@ -113,6 +116,14 @@ public class Pokemon {
 
         public List<Integer> getPokedexes() {
             return pokedexes;
+        }
+
+        public void setSprite(String sprite) {
+            this.sprite = sprite;
+        }
+
+        public String getSprite() {
+            return sprite;
         }
 
         public int getHP() { return stats.get(0);}

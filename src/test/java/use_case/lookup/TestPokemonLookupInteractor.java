@@ -30,7 +30,7 @@ class TestPokemonLookupInteractor {
 
         Type type1 = new Type("water", 11,
                 waterstrength, waterweak, wateres);
-        Pokemon magikarp = new Pokemon("magikarp", type1, null, statsikarp, abilitykarp, 155, moveskarp, eggkarp, pokedexkarp);
+        Pokemon magikarp = new Pokemon("magikarp", type1, null, statsikarp, abilitykarp, 155, moveskarp, eggkarp, pokedexkarp, "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/129.png");
         PokemonLookupInputData inputData = new PokemonLookupInputData("magikarp");
         PokemonLookupOutputBoundary successPresenter = new PokemonLookupOutputBoundary() {
             @Override
