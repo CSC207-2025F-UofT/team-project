@@ -112,6 +112,7 @@ public class AppBuilder {
 
         application.add(cardPanel);
         application.setPreferredSize(new Dimension(800, 600));
+        application.setResizable(false);
 
         viewManagerModel.setState(mainMenuView.getViewName());
         viewManagerModel.firePropertyChange();

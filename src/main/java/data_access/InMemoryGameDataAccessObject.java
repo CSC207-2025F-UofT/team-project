@@ -28,17 +28,17 @@ public class InMemoryGameDataAccessObject implements SwitchToGameViewDataAccessI
         ClickableObject object1 = new ClickableObjectFactory().create("Object1", 0, 0, "object1.png",false);
         ClickableObject object2 = new ClickableObjectFactory().create("Object2", 600, 300, "object2.png", false);
 
-        Scene scene1 = new SceneFactory().create("Scene1", new ArrayList<>(List.of(object1, object2)), "scene1.png");
-        Scene scene2 = new SceneFactory().create("Scene2", new ArrayList<>(List.of(object2, object1)), "scene2.png");
+        Scene scene1 = new SceneFactory().create("Scene1", new ArrayList<>(List.of(object2)), "scene1.png");
+        Scene scene2 = new SceneFactory().create("Scene2", new ArrayList<>(List.of(object1)), "scene2.png");
 
         DialogueBox db1m1 = new DialogueBoxFactory().create(new ArrayList<>(List.of()), db1_pic);
-        DialogueOption db1op11 = new DialogueOptionFactory().create("Ok.", option_xpos, option1_ypos, db1m1);
+        DialogueOption db1op11 = new DialogueOptionFactory().create("Ok.", option_xpos, option1_ypos, scene2);
 
         DialogueBox db1m2 = new DialogueBoxFactory().create(new ArrayList<>(List.of()), db1_pic);
-        DialogueOption db1op21 = new DialogueOptionFactory().create("Ok", option_xpos, option1_ypos, db1m2);
+//        DialogueOption db1op21 = new DialogueOptionFactory().create("Ok", option_xpos, option1_ypos, db1m2);
 
         DialogueBox db1m3 = new DialogueBoxFactory().create(new ArrayList<>(List.of()), db1_pic);
-        DialogueOption db1op31 = new DialogueOptionFactory().create("Ok", option_xpos, option1_ypos, db1m3);
+//        DialogueOption db1op31 = new DialogueOptionFactory().create("Ok", option_xpos, option1_ypos, db1m3);
 
         DialogueOption db1op1 = new DialogueOptionFactory().create("What do you think of me?", option_xpos, option1_ypos, db1m1);
         DialogueOption db1op2 = new DialogueOptionFactory().create("Tell me a story", option_xpos, option2_ypos, db1m2);
@@ -66,8 +66,8 @@ public class InMemoryGameDataAccessObject implements SwitchToGameViewDataAccessI
         NonPlayableCharacter npc1 = new NonPlayableCharacterFactory().create("NPC1", 300, 300, "npc1.png", db1m);
 
         db1m1.addObject(db1op11);
-        db1m2.addObject(db1op21);
-        db1m3.addObject(db1op31);
+//        db1m2.addObject(db1op21);
+//        db1m3.addObject(db1op31);
         db1m1.addObject(db1re);
         db1m1.addObject(db11txt);
         db1m2.addObject(db12txt);
