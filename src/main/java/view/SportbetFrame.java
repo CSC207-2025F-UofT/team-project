@@ -1,3 +1,5 @@
+package view;
+
 import javax.swing.*;
 
 public class SportbetFrame extends JFrame {

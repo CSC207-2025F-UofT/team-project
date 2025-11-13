@@ -1,3 +1,5 @@
+package view;
+
 public class User {
     private String username;
     private double balance;

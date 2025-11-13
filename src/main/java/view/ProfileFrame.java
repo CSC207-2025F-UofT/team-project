@@ -1,6 +1,7 @@
+package view;
+
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.*;
 
 public class ProfileFrame extends JFrame {
     public ProfileFrame(User user, JFrame mainMenu) {
