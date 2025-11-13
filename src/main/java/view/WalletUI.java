@@ -12,9 +12,15 @@ public class WalletUI extends JFrame {
     private final JTextArea historyArea;
     private BigDecimal balance = new BigDecimal("100.00");
 
+    private final User user;
+    private final JFrame previousFrame;
+
     private static final NumberFormat CURRENCY = NumberFormat.getCurrencyInstance(Locale.CANADA);
 
-    public WalletUI() {
+    public WalletUI(User user, JFrame previousFrame) {
+        this.user = user;
+        this.previousFrame = previousFrame;
+
         setTitle("Wallet");
         setSize(400, 350);
         setLocationRelativeTo(null);
@@ -43,6 +49,9 @@ public class WalletUI extends JFrame {
 
         depositBtn.addActionListener(e -> deposit());
         withdrawBtn.addActionListener(e -> withdraw());
+
+        updateUI("Wallet opened");
+        setVisible(true);
     }
 
     private void deposit() {
@@ -87,7 +96,4 @@ public class WalletUI extends JFrame {
         JOptionPane.showMessageDialog(this, msg, "Error", JOptionPane.ERROR_MESSAGE);
     }
 
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> new WalletUI().setVisible(true));
-    }
 }

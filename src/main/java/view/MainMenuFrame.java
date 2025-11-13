@@ -27,6 +27,11 @@ public class MainMenuFrame extends JFrame {
             setVisible(false);
         });
 
+        depositBtn.addActionListener(e -> {
+            new WalletUI(user, this);
+            setVisible(false);
+        });
+
         setVisible(true);
     }
 }
