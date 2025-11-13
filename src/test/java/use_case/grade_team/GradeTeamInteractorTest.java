@@ -38,9 +38,8 @@ class GradeTeamInteractorTest {
     @Test
     void fullTeamTest(){
         Team team = new Team("fullTeam");
-        EmptyPokemonFactory emptyPokemonFactory = new EmptyPokemonFactory();
         for(int i = 0; i < 6; i++){
-            team.setPokemon(emptyPokemonFactory.create(), i);
+            team.setPokemon(EmptyPokemonFactory.create(), i);
         }
         GradingStrategy strategy = new TestStrategy();
         GradeTeamInputData inputData = new GradeTeamInputData("fullTeam", strategy);
@@ -66,9 +65,8 @@ class GradeTeamInteractorTest {
     @Test
     void firstHalfTeamTest(){
         Team team = new Team("halfFullTeam");
-        EmptyPokemonFactory emptyPokemonFactory = new EmptyPokemonFactory();
         for(int i = 0; i < 3; i++){
-            team.setPokemon(emptyPokemonFactory.create(), i);
+            team.setPokemon(EmptyPokemonFactory.create(), i);
         }
         GradingStrategy strategy = new TestStrategy();
         GradeTeamInputData inputData = new GradeTeamInputData("halfFullTeam", strategy);
