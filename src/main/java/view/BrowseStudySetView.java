@@ -2,6 +2,8 @@
 package view;
 
 import utility.FontLoader;
+import view.main_screen.MainView;
+
 import javax.swing.*;
 import javax.swing.border.*;
 import java.awt.*;
