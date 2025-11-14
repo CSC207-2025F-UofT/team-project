@@ -1,8 +1,8 @@
 package com.studyarc.use_case.viewing_research_papers;
 
-public interface ViewingResearchPapersDataAccessInterface {
-    List<ResearchPaper> getResearchPapersByUser(String userId);
-
-
-
-}
+//public interface ViewingResearchPapersDataAccessInterface {
+//    List<ResearchPaper> getResearchPapersByUser(String userId);
+//
+//
+//
+//}
