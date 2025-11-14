@@ -6,9 +6,10 @@ import java.awt.event.ActionEvent;
 import plan4life.entities.Schedule;
 import plan4life.use_case.block_off_time.BlockOffTimeController;
 
+import java.time.LocalDateTime;
 import java.util.Random; //Temp till we get langchain/langgraph working
 
-public class CalendarFrame extends JFrame implements CalendarViewInterface {
+public class CalendarFrame extends JFrame implements CalendarViewInterface, TimeSelectionListener {
     private final CalendarPanel calendarPanel;
     private final ActivityPanel activityPanel;
     private BlockOffTimeController blockOffTimeController;
@@ -38,6 +39,7 @@ public class CalendarFrame extends JFrame implements CalendarViewInterface {
 
         // <--- Calendar Panel --->
         this.calendarPanel = new CalendarPanel();
+        calendarPanel.setTimeSelectionListener(this);
 
         // <--- Activities Panel --->
         this.activityPanel = new ActivityPanel();
@@ -84,5 +86,17 @@ public class CalendarFrame extends JFrame implements CalendarViewInterface {
         });
 
         calendarPanel.repaint();
+    }
+
+    @Override
+    public void onTimeSelected(LocalDateTime start, LocalDateTime end, int scheduleId) {
+        String description = JOptionPane.showInputDialog(this,
+                "Optional description for this blocked time:");
+
+        if (description == null) {
+            return; // user pressed Cancel
+        }
+
+        blockOffTimeController.blockTime(scheduleId, start, end, description);
     }
 }
