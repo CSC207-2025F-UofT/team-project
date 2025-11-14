@@ -50,8 +50,6 @@ public class CalendarFrame extends JFrame implements CalendarViewInterface {
         // --- Button Logic ---
         dayBtn.addActionListener((ActionEvent e) -> calendarPanel.setDayView());
         weekBtn.addActionListener((ActionEvent e) -> calendarPanel.setWeekView());
-
-        setVisible(true);
     }
 
     public CalendarFrame(BlockOffTimeController blockOffTimeController) {
@@ -61,6 +59,11 @@ public class CalendarFrame extends JFrame implements CalendarViewInterface {
 
     public void setBlockOffTimeController(BlockOffTimeController controller) {
         this.blockOffTimeController = controller;
+    }
+
+    @Override
+    public void showMessage(String message) {
+        JOptionPane.showMessageDialog(this, message);
     }
 
     @Override

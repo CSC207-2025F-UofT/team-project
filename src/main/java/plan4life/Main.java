@@ -16,7 +16,8 @@ public class Main {
             BlockOffTimeInputBoundary interactor = new BlockOffTimeInteractor(scheduleDAO, presenter);
             BlockOffTimeController controller = new BlockOffTimeController(interactor);
 
-            view.setBlockOffTimeController(controller); // We'll add this method
+            view.setBlockOffTimeController(controller);
+            view.setVisible(true);
         });
     }
 }

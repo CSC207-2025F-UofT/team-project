@@ -33,5 +33,6 @@ public class CalendarPresenter implements
         if (response.getUpdatedSchedule() != null) {
             view.displaySchedule(response.getUpdatedSchedule());
         }
+        view.showMessage(response.getMessage());
     }
 }
