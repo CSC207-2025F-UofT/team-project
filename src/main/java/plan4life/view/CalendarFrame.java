@@ -4,11 +4,14 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import plan4life.entities.Schedule;
+import plan4life.use_case.block_off_time.BlockOffTimeController;
+
 import java.util.Random; //Temp till we get langchain/langgraph working
 
 public class CalendarFrame extends JFrame implements CalendarViewInterface {
     private final CalendarPanel calendarPanel;
     private final ActivityPanel activityPanel;
+    private BlockOffTimeController blockOffTimeController;
 
     public CalendarFrame() {
         super("Plan4Life - Scheduler");
@@ -49,6 +52,15 @@ public class CalendarFrame extends JFrame implements CalendarViewInterface {
         weekBtn.addActionListener((ActionEvent e) -> calendarPanel.setWeekView());
 
         setVisible(true);
+    }
+
+    public CalendarFrame(BlockOffTimeController blockOffTimeController) {
+        this();
+        this.blockOffTimeController = blockOffTimeController;
+    }
+
+    public void setBlockOffTimeController(BlockOffTimeController controller) {
+        this.blockOffTimeController = controller;
     }
 
     @Override
