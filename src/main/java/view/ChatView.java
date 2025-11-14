@@ -26,7 +26,7 @@ public class ChatView extends JPanel implements ActionListener, PropertyChangeLi
         this.viewManagerModel = viewManagerModel;
         this.setLayout(new BorderLayout());
 
-        // --- 1. Top Bar (Chat Partner and Exit/Back Button) ---
+        // Top Bar (Chat Partner and Exit/Back Button)
         JPanel topBar = new JPanel(new BorderLayout());
         topBar.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 

@@ -63,11 +63,11 @@ public class SearchUserView extends JPanel implements ActionListener, PropertyCh
         startChatButton = new JButton("Start Chat");
         buttonPanel.add(startChatButton);
 
-        // --- 4. Listeners ---
+        // Listeners
         startChatButton.addActionListener(this);
         searchExitButton.addActionListener(this);
 
-        // --- 5. Assembly ---
+        // Assembly
         this.add(searchPanel);
         this.add(Box.createVerticalStrut(10));
         this.add(scrollPane);
