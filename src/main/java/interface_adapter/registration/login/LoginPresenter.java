@@ -2,7 +2,7 @@ package interface_adapter.registration.login;
 
 import interface_adapter.ViewManagerModel;
 import interface_adapter.main_screen.LoggedInState;
-import interface_adapter.registration.logged_in.LoggedInViewModel;
+import interface_adapter.main_screen.MainScreenViewModel;
 import use_case.registration.login.LoginOutputBoundary;
 import use_case.registration.login.LoginOutputData;
 
@@ -12,29 +12,29 @@ import use_case.registration.login.LoginOutputData;
 public class LoginPresenter implements LoginOutputBoundary {
 
     private final LoginViewModel loginViewModel;
-    private final LoggedInViewModel loggedInViewModel;
+    private final MainScreenViewModel mainScreenViewModel;
     private final ViewManagerModel viewManagerModel;
 
     public LoginPresenter(ViewManagerModel viewManagerModel,
-                          LoggedInViewModel loggedInViewModel,
+                          MainScreenViewModel mainScreenViewModel,
                           LoginViewModel loginViewModel) {
         this.viewManagerModel = viewManagerModel;
-        this.loggedInViewModel = loggedInViewModel;
+        this.mainScreenViewModel = mainScreenViewModel;
         this.loginViewModel = loginViewModel;
     }
 
     @Override
     public void prepareSuccessView(LoginOutputData response) {
         // On success, update the loggedInViewModel's state
-        final LoggedInState loggedInState = loggedInViewModel.getState();
+        final LoggedInState loggedInState = mainScreenViewModel.getState();
         loggedInState.setUsername(response.getUsername());
-        this.loggedInViewModel.firePropertyChange();
+        this.mainScreenViewModel.firePropertyChange();
 
         // and clear everything from the LoginViewModel's state
         loginViewModel.setState(new LoginState());
 
         // switch to the logged in view
-        this.viewManagerModel.setState(loggedInViewModel.getViewName());
+        this.viewManagerModel.setState(mainScreenViewModel.getViewName());
         this.viewManagerModel.firePropertyChange();
     }
 

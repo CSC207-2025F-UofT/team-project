@@ -1,5 +1,5 @@
 // Albert - MAIN UI
-package view.main_screen;
+package view;
 
 import utility.FontLoader;
 
