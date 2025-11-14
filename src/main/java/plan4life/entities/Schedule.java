@@ -1,5 +1,6 @@
 package plan4life.entities;
 
+import java.time.LocalDateTime;
 import java.util.*;
 
 public class Schedule {
@@ -56,6 +57,45 @@ public class Schedule {
                 activities.put(time, sampleActivities[new Random().nextInt(sampleActivities.length)]);
             }
         }
+    }
+
+    public boolean overlapsWithExistingBlocks(LocalDateTime start, LocalDateTime end) {
+        for (BlockedTime block : blockedTimes) {
+            if (block.overlaps(start, end)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public boolean overlapsWithActivities(LocalDateTime start, LocalDateTime end) {
+        for (ScheduledBlock block : lockedBlocks) {
+            if (block.overlaps(start, end)) {
+                return true;
+            }
+        }
+
+        for (ScheduledBlock block : unlockedBlocks) {
+            if (block.overlaps(start, end)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public void removeOverlappingActivities(LocalDateTime start, LocalDateTime end) {
+        // This means remove block if block overlaps this range
+        unlockedBlocks.removeIf(block -> block.overlaps(start, end));
+        lockedBlocks.removeIf(block -> block.overlaps(start, end));
+    }
+
+    public void addBlockedTime(BlockedTime block) {
+        blockedTimes.add(block);
+    }
+
+    public void removeBlockedTime(BlockedTime block) {
+        blockedTimes.remove(block);
     }
 }
 
