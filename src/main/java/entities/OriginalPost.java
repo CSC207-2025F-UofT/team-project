@@ -8,7 +8,7 @@ public class OriginalPost extends Post {
 
 
     public OriginalPost(String title, String content, String username) {
-        super(content, username);
+        super(username, content);
         this.title = title;
     }
 
