@@ -1,7 +1,16 @@
 package app;
 
+import data_access.DBUserDataAccessObject;
+
+import interface_adapter.Submit.SubmitController;
+import interface_adapter.Submit.SubmitPresenter;
 import interface_adapter.Submit.SubmitViewModel;
 import interface_adapter.ViewManagerModel;
+
+import usecase.Submit.SubmitInputBoundary;
+import usecase.Submit.SubmitInteractor;
+import usecase.Submit.SubmitOutputBoundary;
+
 import view.SubmitView;
 import view.ViewManager;
 
@@ -19,6 +28,7 @@ public class AppBuilder {
 
     private SubmitView submitView;
     private SubmitViewModel submitViewModel;
+    private final DBUserDataAccessObject userDataAccessObject =  new DBUserDataAccessObject();
 
     public AppBuilder() {
         cardPanel.setLayout(cardLayout);
@@ -30,10 +40,19 @@ public class AppBuilder {
         cardPanel.add(submitView, submitView.getViewName());
         return this;
     }
+    public AppBuilder addSubmitUseCase() {
+        final SubmitOutputBoundary submitOutputBoundary = new SubmitPresenter(submitViewModel);
+        final SubmitInputBoundary SubmitInteractor = new SubmitInteractor(
+                userDataAccessObject, submitOutputBoundary);
+
+        SubmitController submitController = new SubmitController(SubmitInteractor);
+        submitView.setSubmitController(submitController);
+        return this;
+    }
     // TODO: Implement builder methods
 
     public JFrame build() {
-        final JFrame application = new JFrame("User Login Example");
+        final JFrame application = new JFrame("This is a title");
         application.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
         application.add(cardPanel);

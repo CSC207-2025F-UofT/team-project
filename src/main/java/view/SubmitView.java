@@ -35,7 +35,7 @@ public class SubmitView extends JPanel implements PropertyChangeListener {
                 JOptionPane.showMessageDialog(this,
                         "File selected: " + selectedFile.getAbsolutePath());
                 // Then go to controller
-                submitController.resubmitExecute(LocalTime.now(), selectedFile);
+                submitController.submitExecute(LocalTime.now(), selectedFile);
 
             } else {
                 JOptionPane.showMessageDialog(this, "No file selected");

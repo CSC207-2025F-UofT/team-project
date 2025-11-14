@@ -8,7 +8,11 @@ public class Main {
         AppBuilder appBuilder = new AppBuilder();
         JFrame application = appBuilder
                 .addSubmitView()
+                // TODO: TBA
+                .addSubmitUseCase()
+                //...
                 .build();
+
         application.pack();
         application.setLocationRelativeTo(null);
         application.setVisible(true);

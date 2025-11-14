@@ -15,7 +15,7 @@ public class SubmitController {
         this.submitUsecaseInteractor = submitInputBoundary;
     }
 
-    public void resubmitExecute(LocalTime time, File selectedFile){
+    public void submitExecute(LocalTime time, File selectedFile){
         final SubmitInputData inputData = new SubmitInputData(time, selectedFile);
         submitUsecaseInteractor.execute(inputData);
     }
