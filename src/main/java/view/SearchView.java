@@ -40,12 +40,12 @@ public class SearchView {
     private final JLabel artistLabel = new JLabel("Artist");
     private final JTextField artistField = new JTextField();
 
-    // price panel
-    private final JLabel priceLabel = new JLabel("Price");
-    private final JLabel priceMinLabel = new JLabel("Min:");
-    private final JTextField priceMinField = new JTextField();
-    private final JLabel priceMaxLabel = new JLabel("Max:");
-    private final JTextField priceMaxField = new JTextField();
+//    // price panel
+//    private final JLabel priceLabel = new JLabel("Price");
+//    private final JLabel priceMinLabel = new JLabel("Min:");
+//    private final JTextField priceMinField = new JTextField();
+//    private final JLabel priceMaxLabel = new JLabel("Max:");
+//    private final JTextField priceMaxField = new JTextField();
 
     //genre panel
     private final JLabel genreLabel = new JLabel("Genre");
@@ -86,13 +86,13 @@ public class SearchView {
         artistNamePanel.add(artistLabel);
         artistNamePanel.add(artistField);
 
-        JPanel pricePanel = new JPanel();
-        pricePanel.setLayout(new BoxLayout(pricePanel, BoxLayout.X_AXIS));
-        pricePanel.add(priceLabel);
-        pricePanel.add(priceMinLabel);
-        pricePanel.add(priceMinField);
-        pricePanel.add(priceMaxLabel);
-        pricePanel.add(priceMaxField);
+//        JPanel pricePanel = new JPanel();
+//        pricePanel.setLayout(new BoxLayout(pricePanel, BoxLayout.X_AXIS));
+//        pricePanel.add(priceLabel);
+//        pricePanel.add(priceMinLabel);
+//        pricePanel.add(priceMinField);
+//        pricePanel.add(priceMaxLabel);
+//        pricePanel.add(priceMaxField);
 
         JPanel genrePanel = new JPanel();
         genrePanel.setLayout(new BoxLayout(genrePanel, BoxLayout.X_AXIS));
@@ -117,7 +117,7 @@ public class SearchView {
         mainPanel.add(searchPanel);
         mainPanel.add(comboBoxPanel);
         mainPanel.add(artistNamePanel);
-        mainPanel.add(pricePanel);
+//        mainPanel.add(pricePanel);
         mainPanel.add(genrePanel);
         mainPanel.add(datePickerPanel);
         mainPanel.add(findPanel);
