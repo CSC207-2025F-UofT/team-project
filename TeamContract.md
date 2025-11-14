@@ -58,4 +58,7 @@ By signing below, we acknowledge that we have read, discussed, and agreed to the
 
 Team Member Signatures:
 
-(type names here)
+
+Yuanzhe Li
+Avery Ng
+Tian Liu
