@@ -16,7 +16,7 @@ public abstract class Post {
     }
 
     public Date getCreationDate() {
-        return new Date();
+        return this.creation_date;
     }
 
     public void editText(String text) {
@@ -25,6 +25,14 @@ public abstract class Post {
 
     public int[] getVotes() {
         return this.votes;
+    }
+
+    public String getContent() {
+        return this.content;
+    }
+
+    public String getCreatorUsername() {
+        return this.creator_username;
     }
 
     public String getTranslation(String language) {
