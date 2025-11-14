@@ -1,46 +1,45 @@
 package entity;
 
+import java.util.ArrayList;
+
 public class User implements FavoriteList, Watchlist {
     private String username;
     private String password;
     private final int accountID;
-    private final Media[] favorites;
-    private final Media[] watchlist;
+    private final ArrayList<Media> favorites;
+    private final ArrayList<Media> watchlist;
 
-    public User(String username, String password, int accountID, Media[] favorites, Media[] watchlist) {
+    public User(String username, String password, int accountID) {
         this.username = username;
         this.password = password;
         this.accountID = accountID;
-        this.favorites = favorites;
-        this.watchlist = watchlist;
+        this.favorites = new ArrayList<>();
+        this.watchlist =new ArrayList<>();
     }
 
     public String getUsername() {return username;}
     public String getPassword() {return password;}
     public int getAccountID() {return accountID;}
-    public Media[] getFavorites() {return favorites;}
-    public Media[] getWatchlist() {return watchlist;}
+    public ArrayList<Media> getFavorites() {return favorites;}
+    public ArrayList<Media> getWatchlist() {return watchlist;}
 
     @Override
     public void addFavorite(Media media) {
-        // TODO document why this method is empty
+        favorites.add(media);
     }
 
     @Override
     public void removeFavorite(Media media) {
-        // TODO document why this method is empty
-
+        favorites.remove(media);
     }
 
     @Override
     public void addWatchlist(Media media) {
-        // TODO document why this method is empty
-
+        watchlist.add(media);
     }
 
     @Override
     public void removeWatchList(Media media) {
-        // TODO document why this method is empty
-
+        watchlist.remove(media);
     }
 }
