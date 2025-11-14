@@ -1,16 +1,12 @@
-package interface_adapters.use_case5;
+package controllers;
 
+import interface_adapters.use_case5.PortfolioViewModel;
 import use_case.portfolio.PortfolioInputBoundary;
 import use_case.portfolio.PortfolioInputData;
 
 /**
  * Controller for the Portfolio Analysis use case (Use Case 5).
- *
- * Interface Adapters 层：
- * - 接收 UI 传入的 username
- * - 封装成 PortfolioInputData
- * - 调用 Use Case InputBoundary
- * - 返回已经由 Presenter 填好的 ViewModel
+ * Interface Adapters layer
  */
 public class PortfolioController {
 
@@ -29,7 +25,6 @@ public class PortfolioController {
 
     /**
      * Trigger the portfolio analysis use case for a given user.
-     *
      * @param  username the username of the logged-in user
      * @return ViewModel containing holdings, snapshots, message, etc.
      */

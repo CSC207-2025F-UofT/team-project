@@ -6,7 +6,7 @@ import data.SchemaInitializer;
 import data.usecase5.InMemoryPortfolioRepository;
 import data.usecase5.InMemoryPriceHistoryRepository;
 import interface_adapters.use_case5.Presenter;
-import interface_adapters.use_case5.PortfolioController;
+import controllers.PortfolioController;
 import interface_adapters.use_case5.PortfolioViewModel;
 import ui.LoginView;
 import ui.PortfolioView;
