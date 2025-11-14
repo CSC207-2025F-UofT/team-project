@@ -1,15 +1,21 @@
 package entities;
 import java.util.Date;
 
-public class Post {
+public abstract class Post {
 
     private Date creation_date;
     private String creator_username;
     private String content;
     private int[] votes;
 
+    public Post(String creator_username, String content) {
+        this.creator_username = creator_username;
+        this.content = content;
+        this.creation_date = new Date();
+        this.votes = new int[2];
+    }
+
     public Date getCreationDate() {
-        // TODO
         return new Date();
     }
 
@@ -18,8 +24,7 @@ public class Post {
     }
 
     public int[] getVotes() {
-        // TODO
-        return new int[0];
+        return this.votes;
     }
 
     public String getTranslation(String language) {
@@ -28,11 +33,11 @@ public class Post {
     }
 
     public void upvote() {
-        // TODO
+        this.votes[0]++;
     }
 
     public void downvote() {
-        // TODO
+        this.votes[1]++;
     }
 
 }
