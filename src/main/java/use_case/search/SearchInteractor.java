@@ -22,9 +22,8 @@ public class SearchInteractor  implements SearchInputDataBoundary {
             List<SearchOutputData.SongResult> results = songs.stream()
                     .map(song -> new SearchOutputData.SongResult(
                             song.getId(),
-                            song.getTitle(),
-                            song.getArtistName(),
-                            song.getAlbumName()
+                            song.getName(),
+                            song.getArtist()
                     ))
                     .toList();
 
