@@ -55,7 +55,7 @@ public class GoalTree {
         YearMonth goalMonth = goal.getMonth();
         int spent = 0;
 
-        for (Category c: goal.getCategories){
+        for (Category c: goal.getCategories()){
             spent += 0;
         }
         // this loop will be updated based on later implementations
