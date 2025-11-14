@@ -17,7 +17,7 @@ public class Song {
     private int id;
     private final String name;
     private final String artist;
-    private double rating;
+    private int rating;
     private final List<Review> reviews;
 
     public Song(int id, String name, String artist) {
@@ -43,7 +43,7 @@ public class Song {
     public List<Review> getReviews() {
         return reviews;
     }
-    public void setRating(double rating) {
+    public void setRating(int rating) {
         this.rating = rating;
     }
     public void addReview(Review review) {
