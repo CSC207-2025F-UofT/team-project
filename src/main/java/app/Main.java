@@ -7,6 +7,8 @@ public class Main {
         AppBuilder appBuilder = new AppBuilder();
         JFrame application = appBuilder
                 .addHomePageView()
+                .addTeamEntryView()
+                .addOpenTeamEntryViewUseCase()
                 .addHomeUseCase()
                 .build();
         application.setSize(500, 500);  // width=1000px, height=700px
