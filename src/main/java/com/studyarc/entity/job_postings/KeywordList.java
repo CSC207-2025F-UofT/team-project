@@ -3,13 +3,13 @@ package com.studyarc.entity.job_postings;
 import java.util.List;
 
 public class KeywordList {
-    private final List<String> keywords;
+    private final String keywords;
 
-    public KeywordList(List<String> keywords) {
+    public KeywordList(String keywords) {
         this.keywords = keywords;
     }
 
-    public List<String> getKeywords() {
+    public String getKeywords() {
         return keywords;
     }
 }
