@@ -1,4 +1,4 @@
-package auth.data;
+package data;
 
 import javax.sql.DataSource;
 import java.sql.Connection;

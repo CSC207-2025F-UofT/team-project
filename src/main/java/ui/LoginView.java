@@ -1,12 +1,17 @@
 package ui;
 
-import auth.interface_adapters.controllers.LoginController;
-import auth.use_case.login.LoginOutputData;
+import controllers.LoginController;
+import use_case.login.LoginOutputData;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.Arrays;
+import java.util.function.Consumer;
 
+/**
+ * The login window that allows the user to log into the system or navigate to the sign-up screen.
+ * This class belongs to the View layer (UI) in Clean Architecture.
+ * It communicates with the LoginController and triggers a callback to the Dashboard view upon successful login.
+ */
 public class LoginView extends JFrame {
 
     private final JTextField usernameField = new JTextField();
@@ -14,14 +19,19 @@ public class LoginView extends JFrame {
     private final JButton loginButton = new JButton("Login");
     private final JButton signUpButton = new JButton("Sign Up");
 
-    /* new parameter Runnable onLoginSuccess */
-    public LoginView(LoginController loginController, Runnable showSignUpView, Runnable onLoginSuccess) {
+    /**
+     * @param loginController the controller that handles login logic
+     * @param showSignUpView  callback that opens the SignUpView
+     * @param onLoginSuccess  callback that opens the Dashboard after successful login
+     */
+    public LoginView(LoginController loginController, Runnable showSignUpView, Consumer<String> onLoginSuccess) {
         setTitle("Login");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setSize(300, 180);
+        setSize(450, 250);
         setLocationRelativeTo(null);
 
-        JPanel panel = new JPanel(new GridLayout(3 ,2, 6, 6)); //spaceing change on hgap and vgap
+        // Layout Setup
+        JPanel panel = new JPanel(new GridLayout(3, 2, 10, 10));
         panel.add(new JLabel("Username:"));
         panel.add(usernameField);
         panel.add(new JLabel("Password:"));
@@ -30,26 +40,25 @@ public class LoginView extends JFrame {
         panel.add(signUpButton);
         add(panel);
 
+        // Login Button Action
         loginButton.addActionListener(e -> {
             String username = usernameField.getText();
-            String password = Arrays.toString(passwordField.getPassword());
+            String password = new String(passwordField.getPassword());  // Convert password to plain text
 
             LoginOutputData output = loginController.login(username, password);
-            
+            JOptionPane.showMessageDialog(this, output.getMessage());
+
             if (output.isSuccess()) {
-                // Close login window first, then show dashboard
-                dispose();
-                onLoginSuccess.run();  // go to dashboard
-            } else {
-                // Only show error dialog for failures
-                JOptionPane.showMessageDialog(this, output.getMessage(), "Login Error", JOptionPane.ERROR_MESSAGE);
+                dispose();                        // close the current Login window
+                onLoginSuccess.accept(username);  // trigger the callback defined
             }
         });
 
+        // Sign-Up Button Action
         signUpButton.addActionListener(e -> {
-            showSignUpView.run();
-            dispose();
+            showSignUpView.run();    // trigger the callback to open SignUpView
+            dispose();               // close the current window
         });
-
     }
 }
+
