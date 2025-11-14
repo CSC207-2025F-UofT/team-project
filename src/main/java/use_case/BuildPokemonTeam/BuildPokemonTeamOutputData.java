@@ -1,16 +1,17 @@
 package use_case.BuildPokemonTeam;
 
 import entity.Pokemon;
+import entity.Team;
 
 public class BuildPokemonTeamOutputData {
-    private final Pokemon Pokemon;
+    private final Team Team;
 
-    public BuildPokemonTeamOutputData(Pokemon Pokemon) {
-        this.Pokemon = Pokemon;
+    public BuildPokemonTeamOutputData(Team Team) {
+        this.Team = Team;
     }
 
-    public Pokemon getPokemon() {
-        return Pokemon;
+    public Team getTeam() {
+        return Team;
     }
 
 }

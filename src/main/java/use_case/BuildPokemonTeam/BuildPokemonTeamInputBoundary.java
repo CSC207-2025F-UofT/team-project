@@ -10,8 +10,8 @@ public interface BuildPokemonTeamInputBoundary {
 
     /**
      * Execute the Pokemon Lookup Use Case.
-     * @param pokemonLookupInputData the input data for this use case
+     * @param BuildPokemonTeamInputData the input data for this use case
      */
 
-    void execute(BuildPokemonTeamInputData pokemonLookupInputData) throws IOException;
+    void execute(BuildPokemonTeamInputData BuildPokemonTeamInputData) throws IOException;
 }

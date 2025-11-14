@@ -1,9 +1,8 @@
 package use_case.BuildPokemonTeam;
+import entity.Team;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
-import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import entity.Pokemon;
@@ -11,21 +10,22 @@ import entity.Pokemon;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
 public class BuildPokemonTeamInteractor implements BuildPokemonTeamInputBoundary {
     private final BuildPokemonTeamOutputBoundary userPresenter;
     private final Pokemon Pokemon;
 
-    public BuildPokemonTeamInteractor(BuildPokemonTeamOutputBoundary pokemonLookupOutputBoundary,
+
+    public BuildPokemonTeamInteractor(BuildPokemonTeamOutputBoundary buildPokemonTeamOutputBoundary,
                                    Pokemon Pokemon) {
-        this.userPresenter = pokemonLookupOutputBoundary;
+        this.userPresenter = buildPokemonTeamOutputBoundary;
         this.Pokemon = Pokemon;
     }
 
+
     @Override
-    public void execute(BuildPokemonTeamInputData pokemonLookupInputData) throws IOException {
-        String name = pokemonLookupInputData.getName().toLowerCase();
+    public void execute(BuildPokemonTeamInputData buildPokemonTeamInputData) throws IOException {
+        String name = buildPokemonTeamInputData.getName().toLowerCase();
         if ("".equals(name)) {
             userPresenter.prepareFailView("No Pokemon name provided.");
             return;
@@ -174,17 +174,19 @@ public class BuildPokemonTeamInteractor implements BuildPokemonTeamInputBoundary
                     Pokemon.setMoves(moves);
                     Pokemon.setEgggroup(egggroup);
                     Pokemon.setPokedexes(pokedexes);
+
+
                 }
-
-
             };
 
+            final int index = buildPokemonTeamInputData.getIndex();
+            final Team team = buildPokemonTeamInputData.getTeam();
+            team.setPokemon(Pokemon, index);
 
 
-
-            final BuildPokemonTeamOutputData pokemonLookupOutputData =
-                    new BuildPokemonTeamOutputData(Pokemon);
-            userPresenter.prepareSuccessView(pokemonLookupOutputData);
+            final BuildPokemonTeamOutputData buildPokemonTeamOutputData =
+                    new BuildPokemonTeamOutputData(team);
+            userPresenter.prepareSuccessView(buildPokemonTeamOutputData);
 
         }
     }
