@@ -11,7 +11,6 @@ import interface_adapters.use_case5.PortfolioViewModel;
 import ui.LoginView;
 import ui.PortfolioView;
 import ui.SignUpView;
-import ui.DashboardFrame;
 import ui.DashboardView;
 import use_case.login.LoginInteractor;
 import use_case.portfolio.PortfolioInputBoundary;
@@ -20,7 +19,6 @@ import use_case.signup.SignUpInteractor;
 
 import javax.sql.DataSource;
 import javax.swing.*;
-
 
 public class Main {
 
