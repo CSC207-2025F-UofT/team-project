@@ -33,11 +33,11 @@ public abstract class Post {
     }
 
     public void upvote() {
-        this.votes[0]++;
+        //TODO
     }
 
     public void downvote() {
-        this.votes[1]++;
+       // TODO
     }
 
 }
