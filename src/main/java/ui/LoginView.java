@@ -5,14 +5,12 @@ import use_case.login.LoginOutputData;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.function.Consumer;
 
 /**
- * The login window that allows the user to log into the system
- * or navigate to the sign-up screen.
- *
+ * The login window that allows the user to log into the system or navigate to the sign-up screen.
  * This class belongs to the View layer (UI) in Clean Architecture.
- * It communicates with the LoginController and triggers a callback
- * to the Dashboard view upon successful login.
+ * It communicates with the LoginController and triggers a callback to the Dashboard view upon successful login.
  */
 public class LoginView extends JFrame {
 
@@ -26,7 +24,7 @@ public class LoginView extends JFrame {
      * @param showSignUpView  callback that opens the SignUpView
      * @param onLoginSuccess  callback that opens the Dashboard after successful login
      */
-    public LoginView(LoginController loginController, Runnable showSignUpView, Runnable onLoginSuccess) {
+    public LoginView(LoginController loginController, Runnable showSignUpView, Consumer<String> onLoginSuccess) {
         setTitle("Login");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(450, 250);
@@ -51,16 +49,15 @@ public class LoginView extends JFrame {
             JOptionPane.showMessageDialog(this, output.getMessage());
 
             if (output.isSuccess()) {
-                // if Login successful then close this window and navigate to the Dashboard
-                dispose();            // Close current Login window
-                onLoginSuccess.run(); // Trigger the callback defined in Main.java
+                dispose();                        // close the current Login window
+                onLoginSuccess.accept(username);  // trigger the callback defined
             }
         });
 
         // Sign-Up Button Action
         signUpButton.addActionListener(e -> {
-            showSignUpView.run();    // Trigger the callback to open SignUpView
-            dispose();               // Close current window
+            showSignUpView.run();    // trigger the callback to open SignUpView
+            dispose();               // close the current window
         });
     }
 }
