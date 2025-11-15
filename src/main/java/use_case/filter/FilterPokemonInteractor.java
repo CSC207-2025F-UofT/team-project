@@ -24,7 +24,7 @@ public class FilterPokemonInteractor implements FilterPokemonInputBoundary {
         category = category.trim().toLowerCase();
         value = value.trim().toLowerCase();
 //for invalid input(category and value)
-        if (!category.equals("type") && !category.equals("ability") && !category.equals("egg-group")) {
+        if (!category.equals("type") && !category.equals("ability") && !category.equals("egg-group") && !category.equals("move")) {
             presenter.prepareFailView("Invalid filter category.");
         } else if (!dataAccess.filterTargetExists(category, value)) {
             presenter.prepareFailView("Filter value does not exist.");
