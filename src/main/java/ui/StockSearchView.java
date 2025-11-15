@@ -254,8 +254,6 @@ public class StockSearchView extends JFrame {
         });
     }
 
-    // ---------------- 行为逻辑 ----------------
-
     private void onSearchTextChanged() {
         String text = searchField.getText().trim();
         if (text.isEmpty()) {
