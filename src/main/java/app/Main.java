@@ -14,6 +14,7 @@ public class Main {
         application.setLocationRelativeTo(null);
         application.setVisible(true);
         application.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        application.setSize(800, 800);
+        application.setSize(600, 480);
+        application.setResizable(false);
     }
 }
