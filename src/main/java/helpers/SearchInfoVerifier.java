@@ -47,26 +47,61 @@ public class SearchInfoVerifier {
         return cityCodeConverter.getCode(cityName) != null;
     }
 
+    // In helpers/SearchInfoVerifier.java
+
+    public int getMonthAsInt(String month) {
+        return monthToNumber.get(month);
+    }
+
     public boolean isDayValid(int day, String month, int year) {
         int maxDay = monthToMaxDays.get(month);
-        int minDay = LocalDate.now().getDayOfMonth();
+        LocalDate now = LocalDate.now();
 
-        if (LocalDate.now().getYear() < year) {
-           return 1 <= day && day <= maxDay;
+        // If it's a future year, any valid day is fine.
+        if (now.getYear() < year) {
+            return 1 <= day && day <= maxDay;
         }
 
-        else {
-            return minDay <= day && day <= maxDay;
+        // If it's the current year...
+        if (now.getYear() == year) {
+            int currentMonth = now.getMonthValue();
+            int targetMonth = monthToNumber.get(month);
+
+            // If it's a future month, any valid day is fine.
+            if (currentMonth < targetMonth) {
+                return 1 <= day && day <= maxDay;
+            }
+
+            // If it's the current month...
+            if (currentMonth == targetMonth) {
+                // ...it must be today or a future day.
+                int minDay = now.getDayOfMonth();
+                return minDay <= day && day <= maxDay;
+            }
+
+            // If it's a past month (currentMonth > targetMonth), it's invalid.
+            return false;
         }
+
+        // If it's a past year, it's invalid.
+        return false;
     }
 
     public boolean isMonthValid(String month, int year) {
-        if (LocalDate.now().getYear() < year) {
+        LocalDate now = LocalDate.now();
+
+        // If it's a future year, any month is fine.
+        if (now.getYear() < year) {
             return true;
         }
 
-        else {
-            return monthToNumber.get(month) >= LocalDate.now().getMonthValue();
+        // If it's the current year...
+        if (now.getYear() == year) {
+            // ...it must be this month or a future one.
+            return monthToNumber.get(month) >= now.getMonthValue();
         }
+
+        // If it's a past year, it's invalid.
+        return false;
     }
 }

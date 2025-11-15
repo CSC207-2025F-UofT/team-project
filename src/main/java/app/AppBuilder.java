@@ -31,6 +31,23 @@ import view.LoginView;
 import view.SignupView;
 import view.ViewManager;
 
+import data_access.FlightSearchInformationDataAccessObject;
+import data_access.InMemoryFlightDataAccessObject;
+import helpers.CityCodeConverter;
+import helpers.SearchInfoVerifier;
+import interface_adapter.flight_results.FlightResultsViewModel;
+import interface_adapter.flight_results.FindFlightPresenter;
+import interface_adapter.logged_in.FindFlightController;
+import use_case.find_flight.*;
+import view.FlightResultsView;
+import interface_adapter.go_back.GoBackController;
+
+import interface_adapter.sort_flights.SortFlightsController;
+import interface_adapter.sort_flights.SortFlightsPresenter;
+import use_case.sort_flights.SortFlightsInputBoundary;
+import use_case.sort_flights.SortFlightsInteractor;
+import use_case.sort_flights.SortFlightsOutputBoundary;
+
 import javax.swing.*;
 import java.awt.*;
 
@@ -56,6 +73,8 @@ public class AppBuilder {
     private LoggedInViewModel loggedInViewModel;
     private LoggedInView loggedInView;
     private LoginView loginView;
+    private FlightResultsViewModel flightResultsViewModel;
+    private FlightResultsView flightResultsView;
 
     public AppBuilder() {
         cardPanel.setLayout(cardLayout);
@@ -144,5 +163,66 @@ public class AppBuilder {
         return application;
     }
 
+    public AppBuilder addFlightResultsView() {
+        flightResultsViewModel = new FlightResultsViewModel();
+        flightResultsView = new FlightResultsView(flightResultsViewModel);
+        cardPanel.add(flightResultsView, flightResultsView.viewName);
 
+        GoBackController goBackController = new GoBackController(viewManagerModel);
+        flightResultsView.setGoBackController(goBackController);
+
+        return this;
+    }
+
+    // In app/AppBuilder.java
+    public AppBuilder addFindFlightUseCase() {
+        // --- Initialize DAOs ---
+        // (We use InMemory for this example, but you could swap it)
+        FindFlightUserDataAccessInterface flightDataAccessObject = new InMemoryFlightDataAccessObject();
+        LogSearchInfoDataAccessInterface logSearchInfoDAO = new FlightSearchInformationDataAccessObject();
+
+        // --- Initialize Helpers ---
+        CityCodeConverter cityCodeConverter = new CityCodeConverter();
+        SearchInfoVerifier searchInfoVerifier = new SearchInfoVerifier();
+
+        // --- Initialize Presenter ---
+        FindFlightOutputBoundary findFlightPresenter = new FindFlightPresenter(
+                this.flightResultsViewModel,
+                this.loggedInViewModel,
+                this.viewManagerModel
+        );
+
+        // --- Initialize Interactor ---
+        FindFlightInputBoundary findFlightInteractor = new FindFlightInteractor(
+                searchInfoVerifier,
+                findFlightPresenter,
+                logSearchInfoDAO,
+                cityCodeConverter,
+                flightDataAccessObject
+        );
+
+        // --- Initialize Controller ---
+        FindFlightController findFlightController = new FindFlightController(findFlightInteractor);
+
+        // --- Set Controller on the View ---
+        this.loggedInView.setFindFlightController(findFlightController);
+
+        return this;
+    }
+
+    public AppBuilder addSortFlightsUseCase() {
+        // --- Initialize Presenter ---
+        SortFlightsOutputBoundary sortFlightsPresenter = new SortFlightsPresenter(flightResultsViewModel);
+
+        // --- Initialize Interactor ---
+        SortFlightsInputBoundary sortFlightsInteractor = new SortFlightsInteractor(sortFlightsPresenter);
+
+        // --- Initialize Controller ---
+        SortFlightsController sortFlightsController = new SortFlightsController(sortFlightsInteractor);
+
+        // --- Set Controller on the View ---
+        this.flightResultsView.setSortFlightsController(sortFlightsController);
+
+        return this;
+    }
 }
