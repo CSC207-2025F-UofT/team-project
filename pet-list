@@ -2,14 +2,14 @@ Dogs
 
 | Breed              | Tier     | Base Energy | Base Click | Base Recovery | Base AffectionGain |
 | ------------------ | -------- | ----------- | ---------- | ------------- | ------------------ |
-| Labrador Retriever | Mediocre | 5           | 4          | 5             | 7                  |
-| Golden Retriever   | Mediocre | 5           | 3          | 5             | 8                  |
-| French Bulldog     | Mediocre | 2           | 3          | 2             | 5                  |
-| Poodle             | Mediocre | 4           | 5          | 5             | 4                  |
-| Beagle             | Mediocre | 4           | 4          | 4             | 3                  |
-| Shih Tzu           | Mediocre | 3           | 2          | 4             | 6                  |
-| Boxer              | Mediocre | 5           | 5          | 3             | 3                  |
-| Pomeranian         | Mediocre | 2           | 6          | 4             | 4                  |
+| Labrador Retriever | Common   | 5           | 4          | 5             | 7                  |
+| Golden Retriever   | Common   | 5           | 3          | 5             | 8                  |
+| French Bulldog     | Common   | 2           | 3          | 2             | 5                  |
+| Poodle             | Common   | 4           | 5          | 5             | 4                  |
+| Beagle             | Common   | 4           | 4          | 4             | 3                  |
+| Shih Tzu           | Common   | 3           | 2          | 4             | 6                  |
+| Boxer              | Common   | 5           | 5          | 3             | 3                  |
+| Pomeranian         | Common   | 2           | 6          | 4             | 4                  |
 | Siberian Husky     | Elite    | 8           | 7          | 5             | 4                  |
 | German Shepherd    | Elite    | 7           | 6          | 6             | 5                  |
 
@@ -19,13 +19,13 @@ Cats
 
 | Breed              | Tier     | Base Energy | Base Click | Base Recovery | Base Affection |
 | ------------------ | -------- | ----------- | ---------- | ------------- | -------------- |
-| Siamese            | Mediocre | 5           | 6          | 4             | 7              |
-| British Shorthair  | Mediocre | 5           | 4          | 5             | 5              |
-| Persian            | Mediocre | 3           | 2          | 3             | 8              |
-| Russian Blue       | Mediocre | 4           | 5          | 6             | 6              |
-| Ragdoll            | Mediocre | 4           | 3          | 5             | 9              |
-| American Shorthair | Mediocre | 5           | 4          | 5             | 5              |
-| Sphynx             | Mediocre | 4           | 6          | 4             | 5              |
-| Scottish Fold      | Mediocre | 4           | 3          | 4             | 7              |
+| Siamese            | Common   | 5           | 6          | 4             | 7              |
+| British Shorthair  | Common   | 5           | 4          | 5             | 5              |
+| Persian            | Common   | 3           | 2          | 3             | 8              |
+| Russian Blue       | Common   | 4           | 5          | 6             | 6              |
+| Ragdoll            | Common   | 4           | 3          | 5             | 9              |
+| American Shorthair | Common   | 5           | 4          | 5             | 5              |
+| Sphynx             | Common   | 4           | 6          | 4             | 5              |
+| Scottish Fold      | Common   | 4           | 3          | 4             | 7              |
 | Maine Coon         | Elite    | 7           | 6          | 6             | 4              |
 | Bengal             | Elite    | 8           | 7          | 5             | 3              |
