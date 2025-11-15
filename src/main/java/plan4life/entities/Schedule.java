@@ -3,8 +3,40 @@ package plan4life.entities;
 import java.util.*;
 
 public class Schedule {
-    private final Map<String, String> activities = new LinkedHashMap<>();
-    // e.g., "Monday 9 AM" -> "Workout"
+    private final int scheduleId;
+    private final String type;    // "day", "week", etc.
+    private final Map<String, String> activities = new LinkedHashMap<>();    // e.g., "Monday 9 AM" -> "Workout"
+    private final List<ScheduledBlock> unlockedBlocks;
+    private final List<ScheduledBlock> lockedBlocks;
+    private final List<BlockedTime> blockedTimes;
+
+    public Schedule(int scheduleId, String type) {
+        this.scheduleId = scheduleId;
+        this.type = type;
+
+        this.unlockedBlocks = new ArrayList<>();
+        this.lockedBlocks = new ArrayList<>();
+        this.blockedTimes = new ArrayList<>();
+    }
+
+    public Schedule() {
+        this(0, "testing");
+    }
+
+    public int getScheduleId() { return scheduleId; }
+    public String getType() { return type; }
+
+    public List<BlockedTime> getBlockedTimes() {
+        return Collections.unmodifiableList(blockedTimes);
+    }
+
+    public List<ScheduledBlock> getLockedBlocks() {
+        return Collections.unmodifiableList(lockedBlocks);
+    }
+
+    public List<ScheduledBlock> getUnlockedBlocks() {
+        return Collections.unmodifiableList(unlockedBlocks);
+    }
 
     public void addActivity(String timeSlot, String activity) {
         activities.put(timeSlot, activity);
