@@ -1,19 +1,18 @@
 Dogs
 
-| Breed              | Tier     | Base Energy | Base Click | Base Recovery | Base AffectionGain |
-| ------------------ | -------- | ----------- | ---------- | ------------- | ------------------ |
-| Labrador Retriever | Common   | 5           | 4          | 5             | 7                  |
-| Golden Retriever   | Common   | 5           | 3          | 5             | 8                  |
-| French Bulldog     | Common   | 2           | 3          | 2             | 5                  |
-| Poodle             | Common   | 4           | 5          | 5             | 4                  |
-| Beagle             | Common   | 4           | 4          | 4             | 3                  |
-| Shih Tzu           | Common   | 3           | 2          | 4             | 6                  |
-| Boxer              | Common   | 5           | 5          | 3             | 3                  |
-| Pomeranian         | Common   | 2           | 6          | 4             | 4                  |
-| Siberian Husky     | Elite    | 8           | 7          | 5             | 4                  |
-| German Shepherd    | Elite    | 7           | 6          | 6             | 5                  |
-
-______________________
+| Breed              | Tier     | Base Energy | Base Click | Base Recovery | Base Affection |
+| ------------------ | -------- | ----------- | ---------- | ------------- | -------------- |
+| Labrador Retriever | Common   | 5           | 4          | 5             | 7              |
+| Golden Retriever   | Common   | 5           | 3          | 5             | 8              |
+| French Bulldog     | Common   | 2           | 3          | 2             | 5              |
+| Poodle             | Common   | 4           | 5          | 5             | 4              |
+| Beagle             | Common   | 4           | 4          | 4             | 3              |
+| Shih Tzu           | Common   | 3           | 2          | 4             | 6              |
+| Boxer              | Common   | 5           | 5          | 3             | 3              |
+| Pomeranian         | Common   | 2           | 6          | 4             | 4              |
+| Siberian Husky     | Elite    | 8           | 7          | 5             | 4              |
+| German Shepherd    | Elite    | 7           | 6          | 6             | 5              |
+_____________________________________________________________________________________________
 
 Cats 
 
