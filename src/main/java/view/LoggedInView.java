@@ -4,6 +4,7 @@ import interface_adapter.logged_in.ChangePasswordController;
 import interface_adapter.logged_in.LoggedInState;
 import interface_adapter.logged_in.LoggedInViewModel;
 import interface_adapter.logout.LogoutController;
+import interface_adapter.logged_in.FindFlightController;
 
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
@@ -24,7 +25,8 @@ public class LoggedInView extends JPanel implements ActionListener, PropertyChan
     private final LoggedInViewModel loggedInViewModel;
     private ChangePasswordController changePasswordController = null;
     private LogoutController logoutController;
-//  TODO: IMPLEMENT the controllers, then uncomment this code
+    private FindFlightController findFlightController;
+    //  TODO: IMPLEMENT the controllers, then uncomment this code
 //  private FindFlightController findFlightController;
 //  private SeeHistoryController seeHistoryController;
 //  private SeeSavedFlightsController seeSavedFlightsController;
@@ -65,11 +67,11 @@ public class LoggedInView extends JPanel implements ActionListener, PropertyChan
                 new JLabel("Day of Arrival:"), dayInputField);
 
         final JPanel monthInfo = new JPanel();
-        monthInfo.add(new  JLabel("Month of Arrival:"));
+        monthInfo.add(new JLabel("Month of Arrival:"));
         monthInfo.add(monthInputField);
 
         final JPanel yearInfo = new JPanel();
-        yearInfo.add(new  JLabel("Year of Arrival:"));
+        yearInfo.add(new JLabel("Year of Arrival:"));
         yearInfo.add(yearInputField);
 
         final JPanel buttons = new JPanel();
@@ -188,27 +190,27 @@ public class LoggedInView extends JPanel implements ActionListener, PropertyChan
         });
 
         findFlight.addActionListener(
-                // This creates an anonymous subclass of ActionListener and instantiates it.
                 evt -> {
+                    System.out.println("Find my Flight button clicked!"); // <-- 1. Did the click register?
+
                     if (evt.getSource().equals(findFlight)) {
                         final LoggedInState currentState = loggedInViewModel.getState();
-                        // TODO: Implement findFlightController
 
-//                          this.logHistoryController.execute(
-//                                  currentState.getFrom(),
-//                                  currentState.getTo(),
-//                                  currentState.getDay(),
-//                                  currentState.getMonth(),
-//                                  currentState.getYear()
-//                          );
-//                        this.findFlightController.execute(
-//                                currentState.getFrom(),
-//                                currentState.getTo(),
-//                                currentState.getDay(),
-//                                currentState.getMonth(),
-//                                currentState.getYear()
-//                        );
+                        if (this.findFlightController != null) {
+                            System.out.println("Controller is NOT null. Executing use case..."); // <-- 2. Is controller valid?
 
+                            this.findFlightController.execute(
+                                    currentState.getFrom(),
+                                    currentState.getTo(),
+                                    currentState.getDay(),
+                                    currentState.getMonth(),
+                                    currentState.getYear()
+                            );
+                        } else {
+                            // THIS IS THE MOST LIKELY PROBLEM
+                            System.err.println("FindFlightController is NULL. Check AppBuilder wiring."); // <-- 3. Is it null?
+                            JOptionPane.showMessageDialog(this, "Error: FindFlightController is not initialized.", "Wiring Error", JOptionPane.ERROR_MESSAGE);
+                        }
                     }
                 }
         );
@@ -247,6 +249,7 @@ public class LoggedInView extends JPanel implements ActionListener, PropertyChan
 
     /**
      * React to a button click that results in evt.
+     *
      * @param evt the ActionEvent to react to
      */
     public void actionPerformed(ActionEvent evt) {
@@ -285,8 +288,12 @@ public class LoggedInView extends JPanel implements ActionListener, PropertyChan
 //        this.seeSavedFlightsController = seeSavedFlightsController;
 //    }
 
-//    public void setlogHistoryController(LogHistoryController logHistoryController) {
+    //    public void setlogHistoryController(LogHistoryController logHistoryController) {
 //        this.logHistoryController = logHistoryController;
 //    }
+// ADD THIS METHOD
+    public void setFindFlightController(FindFlightController findFlightController) {
+        this.findFlightController = findFlightController;
+    }
 }
 
