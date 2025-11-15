@@ -14,14 +14,15 @@ public class FindFlightInteractor implements FindFlightInputBoundary{
     private final FindFlightOutputBoundary flightPresenter;
     private final LogSearchInfoDataAccessInterface logSearchInfoDataObject;
     private final CityCodeConverter cityCodeConverter;
-
+    private final FindFlightUserDataAccessInterface flightUserDataAccessObject;
 
     public FindFlightInteractor(SearchInfoVerifier searchInfoVerifier, FindFlightOutputBoundary findFlightOutputBoundary,
-                                LogSearchInfoDataAccessInterface logSearchInfoDataAccessInterface,  CityCodeConverter cityCodeConverter) {
+                                LogSearchInfoDataAccessInterface logSearchInfoDataAccessInterface, CityCodeConverter cityCodeConverter, FindFlightUserDataAccessInterface flightUserDataAccessObject) {
         this.searchInfoVerifier = searchInfoVerifier;
         this.flightPresenter = findFlightOutputBoundary;
         this.logSearchInfoDataObject = logSearchInfoDataAccessInterface;
         this.cityCodeConverter = cityCodeConverter;
+        this.flightUserDataAccessObject = flightUserDataAccessObject;
     }
 
     @Override
@@ -67,7 +68,7 @@ public class FindFlightInteractor implements FindFlightInputBoundary{
             int adults = 1;
             boolean nonstop = true;
 
-            List<Flight> flights = InMemoryFlightDataAccessObject.search(
+            List<Flight> flights = flightUserDataAccessObject.search(
                     originLocationCode, destinationLocationCode,
                     departureData, adults, nonstop
             );
