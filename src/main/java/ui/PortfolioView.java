@@ -1,6 +1,6 @@
 package ui;
 
-import controllers.PortfolioController;
+import interface_adapters.controllers.PortfolioController;
 import interface_adapters.use_case5.PortfolioViewModel;
 import interface_adapters.use_case5.HoldingRow;
 import interface_adapters.use_case5.SnapshotRow;
