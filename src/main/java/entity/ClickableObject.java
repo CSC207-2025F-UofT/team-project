@@ -48,4 +48,6 @@ public class ClickableObject {
     public String getImage() {
         return image;
     }
+
+    public boolean isCollectable() { return collectable; }
 }
