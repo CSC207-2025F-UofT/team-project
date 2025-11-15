@@ -3,6 +3,8 @@ package plan4life.view;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
+
+import plan4life.entities.BlockedTime;
 import plan4life.entities.Schedule;
 import plan4life.use_case.block_off_time.BlockOffTimeController;
 
@@ -84,6 +86,15 @@ public class CalendarFrame extends JFrame implements CalendarViewInterface, Time
                     random.nextInt(156) + 100);
             calendarPanel.colorCell(time, color, activityName);
         });
+
+        if (schedule.getBlockedTimes() != null) {
+            for (BlockedTime block : schedule.getBlockedTimes()) {
+                calendarPanel.colorBlockedRange(
+                        block.getStart(),
+                        block.getEnd()
+                );
+            }
+        }
 
         calendarPanel.repaint();
     }

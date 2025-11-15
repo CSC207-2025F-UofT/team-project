@@ -173,4 +173,20 @@ public class CalendarPanel extends JPanel {
             }
         } catch (Exception ignored) {}
     }
+
+    public void colorBlockedRange(LocalDateTime start, LocalDateTime end) {
+        int startHour = start.getHour();
+        int endHour = end.getHour();
+
+        int min = Math.max(0, startHour);
+        int max = Math.min(23, endHour - 1);
+
+        for (int r = min; r <= max; r++) {
+            for (int c = 0; c < currentColumns; c++) {
+                cells[r][c].setBackground(Color.GRAY);
+                cells[r][c].removeAll();
+                cells[r][c].add(new JLabel("Blocked"));
+            }
+        }
+    }
 }
