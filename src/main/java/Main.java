@@ -155,11 +155,11 @@ public class Main {
         StockSearchInteractor interactor = new StockSearchInteractor(api);
         StockSearchController controller = new StockSearchController(interactor);
 
-        StockSearchView view = new StockSearchView(
-                controller,
-                currentUsername,
-                Main::showDashboardView
-        );
+//        //StockSearchView view = new StockSearchView(
+//                controller,
+//                currentUsername,
+//                Main::showDashboardView
+//        );
 
         currentFrame = view;
         view.setVisible(true);
