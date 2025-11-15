@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Map;
 
 public class AlphaVantageAPI {
-    private static final String API_KEY = "9P17BCLZ42787NSY";
+    private static final String API_KEY = "JTSZQWNFASUDRTW5";
     // alternative : JTSZQWNFASUDRTW5 (hhc)
     // daily limit : 25
     private static final String BASE_URL = "https://www.alphavantage.co/query";
