@@ -1,19 +1,27 @@
 package use_case.find_flight;
 
+import data_access.InMemoryFlightDataAccessObject;
 import helpers.SearchInfoVerifier;
+import helpers.CityCodeConverter;
 import entity.FlightSearchInformation;
+import entity.Flight;
+
+import java.util.List;
 
 public class FindFlightInteractor implements FindFlightInputBoundary{
 
     private final SearchInfoVerifier searchInfoVerifier;
     private final FindFlightOutputBoundary flightPresenter;
     private final LogSearchInfoDataAccessInterface logSearchInfoDataObject;
+    private final CityCodeConverter cityCodeConverter;
 
 
-    public FindFlightInteractor(SearchInfoVerifier searchInfoVerifier, FindFlightOutputBoundary findFlightOutputBoundary,  LogSearchInfoDataAccessInterface logSearchInfoDataAccessInterface) {
+    public FindFlightInteractor(SearchInfoVerifier searchInfoVerifier, FindFlightOutputBoundary findFlightOutputBoundary,
+                                LogSearchInfoDataAccessInterface logSearchInfoDataAccessInterface,  CityCodeConverter cityCodeConverter) {
         this.searchInfoVerifier = searchInfoVerifier;
         this.flightPresenter = findFlightOutputBoundary;
         this.logSearchInfoDataObject = logSearchInfoDataAccessInterface;
+        this.cityCodeConverter = cityCodeConverter;
     }
 
     @Override
@@ -46,6 +54,26 @@ public class FindFlightInteractor implements FindFlightInputBoundary{
                                                                     findFlightInputData.getDay(), findFlightInputData.getMonth(), findFlightInputData.getYear());
             logSearchInfoDataObject.log(flightSearchInformation);
 
+            int day = findFlightInputData.getDay();
+            String month = findFlightInputData.getMonth();
+            int year = findFlightInputData.getYear();
+            String departureData = String.format("%04d-%02d-%02d", day, month, year);
+
+            String originCityName = findFlightInputData.getFrom();
+            String destCityName = findFlightInputData.getTo();
+
+            String originLocationCode = cityCodeConverter.getCode(originCityName);
+            String destinationLocationCode = cityCodeConverter.getCode(destCityName);
+            int adults = 1;
+            boolean nonstop = true;
+
+            List<Flight> flights = InMemoryFlightDataAccessObject.search(
+                    originLocationCode, destinationLocationCode,
+                    departureData, adults, nonstop
+            );
+//              Wait for finishing the Presenter part
+//            FindFlightOutputData outputData = new FindFlightOutputData(flights, flightSearchInformation);
+//            flightPresenter.prepareSuccessView(outputData);
         }
     }
 
