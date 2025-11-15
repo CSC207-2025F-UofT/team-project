@@ -42,4 +42,6 @@ public class Scene {
     public String getImage() {
         return image;
     }
+
+    public void addObject(ClickableObject object) {objects.add(object);}
 }

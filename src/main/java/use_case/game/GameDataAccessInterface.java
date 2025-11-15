@@ -1,5 +1,6 @@
 package use_case.game;
 
+import entity.DialogueBox;
 import entity.Player;
 import entity.Scene;
 

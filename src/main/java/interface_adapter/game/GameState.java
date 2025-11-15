@@ -10,7 +10,7 @@ import java.util.List;
 public class GameState {
     private String backgroundImage;
     private List<ClickableObject> clickableObjects;
-
+//    currentDialogBox
     public String getBackgroundImage() {
         return backgroundImage;
     }
