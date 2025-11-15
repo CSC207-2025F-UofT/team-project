@@ -1,8 +1,8 @@
-package auth.interface_adapters.controllers;
+package controllers;
 
-import auth.use_case.signup.SignUpInputData;
-import auth.use_case.signup.SignUpInteractor;
-import auth.use_case.signup.SignUpOutputData;
+import use_case.signup.SignUpInputData;
+import use_case.signup.SignUpInteractor;
+import use_case.signup.SignUpOutputData;
 
 public class SignUpController {
 

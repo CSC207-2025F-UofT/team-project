@@ -1,19 +1,13 @@
-package auth.entity;
+package use_case.login;
 
-public class User {
+public class LoginInputData {
 
-    private final Long id;
-    private final  String username;
+    private final String username;
     private final String password;
 
-    public User(Long id, String username, String password) {
-        this.id = id;
+    public LoginInputData(String username, String password) {
         this.username = username;
         this.password = password;
-    }
-
-    public Long getId() {
-        return id;
     }
 
     public String getUsername() {
