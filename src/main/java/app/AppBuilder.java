@@ -30,6 +30,7 @@ import view.LoggedInView;
 import view.LoginView;
 import view.SignupView;
 import view.ViewManager;
+import view.WelcomeView;
 
 import javax.swing.*;
 import java.awt.*;
@@ -56,9 +57,16 @@ public class AppBuilder {
     private LoggedInViewModel loggedInViewModel;
     private LoggedInView loggedInView;
     private LoginView loginView;
+    private WelcomeView welcomeView; // <-- NEW FIELD
 
     public AppBuilder() {
         cardPanel.setLayout(cardLayout);
+    }
+
+    public AppBuilder addWelcomeView() {
+        welcomeView = new WelcomeView(viewManagerModel);
+        cardPanel.add(welcomeView, welcomeView.getViewName());
+        return this;
     }
 
     public AppBuilder addSignupView() {
@@ -133,16 +141,15 @@ public class AppBuilder {
     }
 
     public JFrame build() {
-        final JFrame application = new JFrame("User Login Example");
+        final JFrame application = new JFrame("GoChat");
         application.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
         application.add(cardPanel);
 
-        viewManagerModel.setState(signupView.getViewName());
+        // Set the active view to WelcomeView
+        viewManagerModel.setState(welcomeView.getViewName());
         viewManagerModel.firePropertyChange();
 
         return application;
     }
-
-
 }
