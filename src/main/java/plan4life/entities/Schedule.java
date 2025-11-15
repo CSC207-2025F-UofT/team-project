@@ -59,8 +59,9 @@ public class Schedule {
         }
     }
 
-    public boolean overlapsWithExistingBlocks(LocalDateTime start, LocalDateTime end) {
+    public boolean overlapsWithExistingBlocks(LocalDateTime start, LocalDateTime end, int columnIndex) {
         for (BlockedTime block : blockedTimes) {
+            if (block.getColumnIndex() != columnIndex) continue;
             if (block.overlaps(start, end)) {
                 return true;
             }
@@ -68,8 +69,9 @@ public class Schedule {
         return false;
     }
 
-    public boolean overlapsWithActivities(LocalDateTime start, LocalDateTime end) {
+    public boolean overlapsWithActivities(LocalDateTime start, LocalDateTime end, int columnIndex) {
         for (ScheduledBlock block : lockedBlocks) {
+            if (block.getColumnIndex() != columnIndex) continue;
             if (block.overlaps(start, end)) {
                 return true;
             }

@@ -55,6 +55,7 @@ public class CalendarPanel extends JPanel {
 
             @Override
             public void mouseReleased(MouseEvent e) {
+                if (!dragging) return;
                 dragging = false;
 
                 if (column != -1 && startRow != -1 && endRow != -1) {
@@ -79,7 +80,7 @@ public class CalendarPanel extends JPanel {
                             .withNano(0);
 
                     int scheduleId = (currentColumns == 1) ? 1 : 2;
-                    listener.onTimeSelected(start, end, scheduleId);
+                    listener.onTimeSelected(start, end, scheduleId, column);
                 }
             }
         });
@@ -174,19 +175,21 @@ public class CalendarPanel extends JPanel {
         } catch (Exception ignored) {}
     }
 
-    public void colorBlockedRange(LocalDateTime start, LocalDateTime end) {
+    public void colorBlockedRange(LocalDateTime start, LocalDateTime end, int columnIndex) {
         int startHour = start.getHour();
         int endHour = end.getHour();
 
         int min = Math.max(0, startHour);
         int max = Math.min(23, endHour - 1);
 
+        if (columnIndex < 0 || columnIndex >= currentColumns) {
+            return;
+        }
+
         for (int r = min; r <= max; r++) {
-            for (int c = 0; c < currentColumns; c++) {
-                cells[r][c].setBackground(Color.GRAY);
-                cells[r][c].removeAll();
-                cells[r][c].add(new JLabel("Blocked"));
-            }
+            cells[r][columnIndex].setBackground(Color.GRAY);
+            cells[r][columnIndex].removeAll();
+            cells[r][columnIndex].add(new JLabel("Blocked"));
         }
     }
 }

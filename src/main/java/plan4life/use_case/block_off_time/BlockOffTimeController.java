@@ -9,8 +9,8 @@ public class BlockOffTimeController {
         this.interactor = interactor;
     }
 
-    public void blockTime(int scheduleId, LocalDateTime start, LocalDateTime end, String description) {
-        BlockOffTimeRequestModel request = new BlockOffTimeRequestModel(scheduleId, start, end, description);
+    public void blockTime(int scheduleId, LocalDateTime start, LocalDateTime end, String description, int columnIndex) {
+        BlockOffTimeRequestModel request = new BlockOffTimeRequestModel(scheduleId, start, end, description, columnIndex);
         interactor.execute(request);
     }
 }

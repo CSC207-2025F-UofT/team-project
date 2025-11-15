@@ -27,7 +27,7 @@ public class BlockOffTimeInteractor implements BlockOffTimeInputBoundary {
         if (!isValidTimeRange(requestModel)) {
             return fail("Invalid time range.");
         }
-        if (schedule.overlapsWithExistingBlocks(requestModel.getStart(), requestModel.getEnd())) {
+        if (schedule.overlapsWithExistingBlocks(requestModel.getStart(), requestModel.getEnd(), requestModel.getColumnIndex())) {
             return fail("The selected time overlaps with an existing blocked period.");
         }
         schedule.removeOverlappingActivities(requestModel.getStart(), requestModel.getEnd());
@@ -36,7 +36,8 @@ public class BlockOffTimeInteractor implements BlockOffTimeInputBoundary {
         BlockedTime newBlock = new BlockedTime(
                 requestModel.getStart(),
                 requestModel.getEnd(),
-                requestModel.getDescription()
+                requestModel.getDescription(),
+                requestModel.getColumnIndex()
         );
         schedule.addBlockedTime(newBlock);
         scheduleDAO.saveSchedule(schedule);

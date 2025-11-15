@@ -15,6 +15,7 @@ public class CalendarFrame extends JFrame implements CalendarViewInterface, Time
     private final CalendarPanel calendarPanel;
     private final ActivityPanel activityPanel;
     private BlockOffTimeController blockOffTimeController;
+    private Schedule currentSchedule;
 
     public CalendarFrame() {
         super("Plan4Life - Scheduler");
@@ -52,8 +53,15 @@ public class CalendarFrame extends JFrame implements CalendarViewInterface, Time
         add(activityPanel, BorderLayout.EAST);
 
         // --- Button Logic ---
-        dayBtn.addActionListener((ActionEvent e) -> calendarPanel.setDayView());
-        weekBtn.addActionListener((ActionEvent e) -> calendarPanel.setWeekView());
+        dayBtn.addActionListener(e -> {
+            calendarPanel.setDayView();
+            displaySchedule(currentSchedule);
+        });
+
+        weekBtn.addActionListener(e -> {
+            calendarPanel.setWeekView();
+            displaySchedule(currentSchedule);
+        });
     }
 
     public CalendarFrame(BlockOffTimeController blockOffTimeController) {
@@ -72,6 +80,7 @@ public class CalendarFrame extends JFrame implements CalendarViewInterface, Time
 
     @Override
     public void displaySchedule(Schedule schedule) {
+        this.currentSchedule = schedule;
         if (schedule == null) return;
 
         // This is where you’ll color each entry in the schedule
@@ -91,7 +100,8 @@ public class CalendarFrame extends JFrame implements CalendarViewInterface, Time
             for (BlockedTime block : schedule.getBlockedTimes()) {
                 calendarPanel.colorBlockedRange(
                         block.getStart(),
-                        block.getEnd()
+                        block.getEnd(),
+                        block.getColumnIndex()
                 );
             }
         }
@@ -100,7 +110,7 @@ public class CalendarFrame extends JFrame implements CalendarViewInterface, Time
     }
 
     @Override
-    public void onTimeSelected(LocalDateTime start, LocalDateTime end, int scheduleId) {
+    public void onTimeSelected(LocalDateTime start, LocalDateTime end, int scheduleId, int columnIndex) {
         String description = JOptionPane.showInputDialog(this,
                 "Optional description for this blocked time:");
 
@@ -108,6 +118,6 @@ public class CalendarFrame extends JFrame implements CalendarViewInterface, Time
             return; // user pressed Cancel
         }
 
-        blockOffTimeController.blockTime(scheduleId, start, end, description);
+        blockOffTimeController.blockTime(scheduleId, start, end, description, columnIndex);
     }
 }
