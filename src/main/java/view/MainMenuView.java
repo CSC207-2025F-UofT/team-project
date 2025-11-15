@@ -67,6 +67,23 @@ public class MainMenuView extends JPanel implements ActionListener, PropertyChan
                 }
         );
 
+        laodGameButton.addActionListener(
+                new ActionListener() {
+                    public void actionPerformed(ActionEvent evt) {
+                        // TODO: implement load game button functionality
+                        System.out.print("Load game (TODO)");
+                    }
+                }
+        );
+
+        exitGameButton.addActionListener(
+                new ActionListener() {
+                    public void actionPerformed(ActionEvent evt) {
+                        System.exit(0);
+                    }
+                }
+        );
+
         this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
         this.add(title);
         this.add(Box.createVerticalStrut(100));
