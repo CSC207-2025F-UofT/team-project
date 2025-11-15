@@ -1,6 +1,7 @@
 package use_case.find_flight;
 
-import data_access.InMemoryFlightDataAccessObject;
+// Make sure FindFlightUserDataAccessInterface is imported
+import use_case.find_flight.FindFlightUserDataAccessInterface;
 import helpers.SearchInfoVerifier;
 import helpers.CityCodeConverter;
 import entity.FlightSearchInformation;
@@ -15,14 +16,24 @@ public class FindFlightInteractor implements FindFlightInputBoundary{
     private final LogSearchInfoDataAccessInterface logSearchInfoDataObject;
     private final CityCodeConverter cityCodeConverter;
 
+    // 1. ADD THIS NEW FIELD
+    private final FindFlightUserDataAccessInterface flightDataAccessObject;
 
+
+    // 2. UPDATE THE CONSTRUCTOR TO ACCEPT THE DAO
     public FindFlightInteractor(SearchInfoVerifier searchInfoVerifier, FindFlightOutputBoundary findFlightOutputBoundary,
-                                LogSearchInfoDataAccessInterface logSearchInfoDataAccessInterface,  CityCodeConverter cityCodeConverter) {
+                                LogSearchInfoDataAccessInterface logSearchInfoDataAccessInterface,
+                                FindFlightUserDataAccessInterface flightDataAccessObject, // <-- ADD THIS
+                                CityCodeConverter cityCodeConverter) {
         this.searchInfoVerifier = searchInfoVerifier;
         this.flightPresenter = findFlightOutputBoundary;
         this.logSearchInfoDataObject = logSearchInfoDataAccessInterface;
+        this.flightDataAccessObject = flightDataAccessObject; // <-- ADD THIS
         this.cityCodeConverter = cityCodeConverter;
     }
+
+    // In helpers/SearchInfoVerifier.java
+
 
     @Override
     public void execute(FindFlightInputData findFlightInputData) {
@@ -51,30 +62,43 @@ public class FindFlightInteractor implements FindFlightInputBoundary{
 
             // This is the call to my logger
             final FlightSearchInformation flightSearchInformation = new FlightSearchInformation(findFlightInputData.getFrom(), findFlightInputData.getTo(),
-                                                                    findFlightInputData.getDay(), findFlightInputData.getMonth(), findFlightInputData.getYear());
+                    findFlightInputData.getDay(), findFlightInputData.getMonth(), findFlightInputData.getYear());
             logSearchInfoDataObject.log(flightSearchInformation);
 
-            int day = findFlightInputData.getDay();
-            String month = findFlightInputData.getMonth();
-            int year = findFlightInputData.getYear();
-            String departureData = String.format("%04d-%02d-%02d", day, month, year);
+            // --- START OF THE FIX ---
 
+            // 1. GET THE INPUT DATA
+            int day = findFlightInputData.getDay();
+            int year = findFlightInputData.getYear();
             String originCityName = findFlightInputData.getFrom();
             String destCityName = findFlightInputData.getTo();
 
+            // 2. FIX THE DATE FORMATTING BUG
+            // You must get the integer value for the month
+            int monthAsInt = searchInfoVerifier.getMonthAsInt(findFlightInputData.getMonth());
+            String departureData = String.format("%04d-%02d-%02d", year, monthAsInt, day); // Use Y-M-D order
+
+            // 3. DEFINE ALL YOUR VARIABLES
             String originLocationCode = cityCodeConverter.getCode(originCityName);
             String destinationLocationCode = cityCodeConverter.getCode(destCityName);
             int adults = 1;
             boolean nonstop = true;
 
-            List<Flight> flights = InMemoryFlightDataAccessObject.search(
+            // 4. THE CORRECTED API CALL
+            List<Flight> flights = this.flightDataAccessObject.search(
                     originLocationCode, destinationLocationCode,
                     departureData, adults, nonstop
             );
+
+            // --- END OF THE FIX ---
+
+//              Wait for finishing the Presenter part
+//            FindFlightOutputData outputData = new FindFlightOutputData(flights, flightSearchInformation);
+//            flightPresenter.prepareSuccessView(outputData);
+        }
+
 //              Wait for finishing the Presenter part
 //            FindFlightOutputData outputData = new FindFlightOutputData(flights, flightSearchInformation);
 //            flightPresenter.prepareSuccessView(outputData);
         }
     }
-
-}

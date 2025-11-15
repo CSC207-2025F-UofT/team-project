@@ -16,7 +16,7 @@ public class InMemoryFlightDataAccessObject implements FindFlightUserDataAccessI
     private final Map<String, List<Flight>> flights = new HashMap<>();
 
     @Override
-    public static List<Flight> search(String originLocationCode, String destinationLocationCode,
+    public  List<Flight> search(String originLocationCode, String destinationLocationCode,
                                       String departureDate, int adults, boolean nonstop) {
 
         List<Flight> result = AmadeusRawObject.searchFlights(

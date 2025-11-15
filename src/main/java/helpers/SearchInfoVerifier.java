@@ -59,6 +59,10 @@ public class SearchInfoVerifier {
             return minDay <= day && day <= maxDay;
         }
     }
+    // ADD THIS METHOD
+    public int getMonthAsInt(String month) {
+        return monthToNumber.get(month);
+    }
 
     public boolean isMonthValid(String month, int year) {
         if (LocalDate.now().getYear() < year) {
