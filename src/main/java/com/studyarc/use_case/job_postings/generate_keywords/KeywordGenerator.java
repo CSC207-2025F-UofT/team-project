@@ -8,5 +8,11 @@ public interface KeywordGenerator {
      * Returns the keywords for user's selected focus
      * @return
      */
-    KeywordList generate(String focus);
+    KeywordList generate(String focus) throws KeywordGeneratorException;
+
+    class KeywordGeneratorException extends Exception {
+        public KeywordGeneratorException(String message) {
+            super("Error with Cohere," + message);
+        }
+    }
 }

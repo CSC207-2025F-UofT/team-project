@@ -5,6 +5,8 @@ import com.studyarc.entity.job_postings.JobListing;
 import com.studyarc.entity.job_postings.KeywordList;
 import com.studyarc.use_case.job_postings.JobPostingsInputData;
 
+import com.studyarc.use_case.job_postings.generate_keywords.KeywordGenerator;
+import com.studyarc.use_case.job_postings.generate_keywords.LLMKeywordGenerator;
 import io.github.cdimascio.dotenv.Dotenv;
 
 import okhttp3.OkHttpClient;
@@ -29,20 +31,26 @@ public class AdzunaJobGenerator implements JobRepository {
     private static final OkHttpClient client = new OkHttpClient();
 
     @Override
-    public List<JobListing> getJobListings(KeywordList keywords) {
+    public List<JobListing> getJobListings(String countryCode, KeywordList keywords) throws JobRepositoryException{
         return List.of();
     }
 
     public static void main(String[] args) throws IOException {
-        getJobs("gb");
+        KeywordGenerator keywordGenerator = new LLMKeywordGenerator();
+
+        try {
+            String jobKeywords = keywordGenerator.generate("Game Development").getKeywords();
+            getJobs("gb", jobKeywords);
+        } catch (JobRepositoryException | KeywordGenerator.KeywordGeneratorException e) {
+            e.printStackTrace();
+        }
     }
 
-    public static void getJobs(String countryCode) throws IOException {
+    public static void getJobs(String countryCode, String jobKeywords) throws JobRepositoryException {
         String url = "https://api.adzuna.com/v1/api/jobs/" + countryCode +"/search/1?app_id=" + API_ID + "&app_key=" + API_KEY + "&results_per_page=20&what_or=";
 
         // adds the keywords
-        url += "machine%20learning%20ml%20deep%20learning%20neural%20networks%20data%20science%20ai%20artificial%20intelligence"
-                + "&content-type=application/json";
+        url += jobKeywords + "&content-type=application/json";
 
         System.out.println(url);
 
@@ -85,12 +93,11 @@ public class AdzunaJobGenerator implements JobRepository {
                 }
 
             } catch (Exception e) {
-                throw new IOException(e);
+                throw new JobRepositoryException(e.getMessage());
             }
 
     } catch (IOException e) {
-            System.out.println("Something went wrong :(");
-            System.out.println(e.getMessage());
+            throw new JobRepositoryException(e.getMessage());
         }
 
 

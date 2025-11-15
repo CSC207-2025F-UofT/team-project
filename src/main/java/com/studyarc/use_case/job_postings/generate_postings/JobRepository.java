@@ -7,5 +7,11 @@ import java.util.List;
 
 public interface JobRepository {
 
-    List<JobListing> getJobListings(KeywordList keywords);
+    List<JobListing> getJobListings(String countryCode, KeywordList keywords) throws JobRepositoryException;
+
+    class JobRepositoryException extends Exception {
+        public JobRepositoryException(String message) {
+            super("Error with Adzuna API, " + message);
+        }
+    }
 }

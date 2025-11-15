@@ -4,6 +4,7 @@ import com.studyarc.entity.job_postings.JobListing;
 import com.studyarc.entity.job_postings.KeywordList;
 import com.studyarc.use_case.job_postings.generate_keywords.KeywordGenerator;
 import com.studyarc.use_case.job_postings.generate_postings.AdzunaJobGenerator;
+import com.studyarc.use_case.job_postings.generate_postings.JobRepository;
 
 import java.util.List;
 
@@ -26,16 +27,23 @@ public class JobPostingsInteractor implements JobPostingsInputBoundary {
 
     @Override
     public void execute(JobPostingsInputData jobPostingsInputData) {
-        // generates keywords for the focus the user selected
-        KeywordList keywords = keywordGenerator.generate(jobPostingsInputData.getFocus());
 
-        // generates the job listings for the given keywords
-        List<JobListing> jobListings = jobGenerator.getJobListings(keywords);
+        try {
+            // generates keywords for the focus the user selected
+            KeywordList keywords = keywordGenerator.generate(jobPostingsInputData.getFocus());
 
-        // creates the output data object
-        final JobPostingsOutputData jobPostingsOutputData = new JobPostingsOutputData(jobListings);
+            // generates the job listings for the given keywords
+            List<JobListing> jobListings = jobGenerator.getJobListings("NEED TO CALL SMTH TO GET COUNTRY CODE", keywords);
 
-        // sends the success view
-        jobPostingsPresenter.prepareSuccessView(jobPostingsOutputData);
+            // creates the output data object
+            final JobPostingsOutputData jobPostingsOutputData = new JobPostingsOutputData(jobListings);
+
+            // sends the success view
+            jobPostingsPresenter.prepareSuccessView(jobPostingsOutputData);
+        } catch (KeywordGenerator.KeywordGeneratorException | JobRepository.JobRepositoryException e ){
+
+            // sends the failed view with NEED A MESSAGE
+            jobPostingsPresenter.prepareFailView("");
+        }
     }
 }
