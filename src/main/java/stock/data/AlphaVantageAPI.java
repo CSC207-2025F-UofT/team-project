@@ -266,4 +266,3 @@ public class AlphaVantageAPI {
         public double getPrice() { return price; }
     }
 }
-
