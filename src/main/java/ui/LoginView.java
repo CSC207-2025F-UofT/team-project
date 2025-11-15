@@ -1,6 +1,6 @@
 package ui;
 
-import controllers.LoginController;
+import interface_adapters.controllers.LoginController;
 import use_case.login.LoginOutputData;
 
 import javax.swing.*;

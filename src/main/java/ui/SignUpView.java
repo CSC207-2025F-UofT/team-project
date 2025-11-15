@@ -1,6 +1,6 @@
 package ui;
 
-import controllers.SignUpController;
+import interface_adapters.controllers.SignUpController;
 import use_case.signup.SignUpOutputData;
 
 import javax.swing.*;
