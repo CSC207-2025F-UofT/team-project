@@ -1,12 +1,14 @@
 package ui;
 
-import data.AlphaVantageAPI;
-import interface_adapters.controllers.StockSearchController;
-import use_case.stocksearch.StockSearchOutputData;
+import stock.data.AlphaVantageAPI;
+import stock.interface_adapters.StockSearchController;
+import stock.usecase_stocksearch.StockSearchOutputData;
 
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.List;
@@ -61,7 +63,7 @@ public class StockSearchView extends JFrame {
                            Runnable onBack) {
         this.controller = controller;
         this.onBack = onBack;
-        this.api = new AlphaVantageAPI();
+        this.api = new AlphaVantageAPI(); // 用于 quote & time series
 
         setTitle("FinWise — Live Stock Prices");
         setSize(1000, 700);
@@ -203,6 +205,7 @@ public class StockSearchView extends JFrame {
         rangeGroup.add(btn);
         rangePanel.add(btn);
     }
+
 
     private void initListeners() {
         backButton.addActionListener(e -> {
@@ -559,3 +562,4 @@ public class StockSearchView extends JFrame {
         }
     }
 }
+
