@@ -1,6 +1,6 @@
-package stock.usecase_stocksearch;
+package use_case.stocksearch;
 
-import stock.data.AlphaVantageAPI.StockSearchResult;
+import data.AlphaVantageAPI.StockSearchResult;
 import java.util.List;
 
 public class StockSearchOutputData {
@@ -19,3 +19,4 @@ public class StockSearchOutputData {
     public String getMessage() { return message; }
     public List<StockSearchResult> getResults() { return results; }
 }
+

@@ -10,8 +10,8 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.application.Platform;
 import javafx.scene.control.Alert;
-import stock.data.AlphaVantageAPI;
-import stock.interface_adapters.StockSearchController;
+import data.AlphaVantageAPI;
+import controllers.StockSearchController;
 
 import java.io.IOException;
 import java.util.*;
@@ -153,6 +153,7 @@ public class StocksView extends BorderPane {
         setCenter(new VBox(14, searchCard, detailsCard, chartCard));
 
         // Interactions
+        final StockSearchController controller = this.searchController;
         search.textProperty().addListener((o, ov, nv) -> {
             if (nv == null || nv.isBlank()) {
                 suggestions.getItems().clear();
@@ -161,7 +162,7 @@ public class StocksView extends BorderPane {
             }
             final String query = nv.trim();
             CompletableFuture
-                .supplyAsync(() -> searchController.search(query))
+                .supplyAsync(() -> controller.search(query))
                 .thenAccept(result -> Platform.runLater(() -> {
                     if (!search.getText().trim().equals(query)) {
                         return;

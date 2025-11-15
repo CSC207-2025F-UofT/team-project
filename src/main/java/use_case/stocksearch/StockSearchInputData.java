@@ -1,4 +1,4 @@
-package stock.usecase_stocksearch;
+package use_case.stocksearch;
 
 public class StockSearchInputData {
     private final String keywords;
@@ -12,3 +12,4 @@ public class StockSearchInputData {
         return keywords;
     }
 }
+

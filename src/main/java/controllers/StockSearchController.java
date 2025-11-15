@@ -1,8 +1,8 @@
-package stock.interface_adapters;
+package controllers;
 
-import stock.usecase_stocksearch.StockSearchInputData;
-import stock.usecase_stocksearch.StockSearchInteractor;
-import stock.usecase_stocksearch.StockSearchOutputData;
+import use_case.stocksearch.StockSearchInputData;
+import use_case.stocksearch.StockSearchInteractor;
+import use_case.stocksearch.StockSearchOutputData;
 
 public class StockSearchController {
     private final StockSearchInteractor stockSearchInteractor;

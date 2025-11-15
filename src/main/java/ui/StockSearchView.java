@@ -1,14 +1,12 @@
 package ui;
 
-import stock.data.AlphaVantageAPI;
-import stock.interface_adapters.StockSearchController;
-import stock.usecase_stocksearch.StockSearchOutputData;
+import data.AlphaVantageAPI;
+import controllers.StockSearchController;
+import use_case.stocksearch.StockSearchOutputData;
 
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
-import javax.swing.table.DefaultTableCellRenderer;
-import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.List;
