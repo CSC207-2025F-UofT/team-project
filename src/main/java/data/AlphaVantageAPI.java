@@ -1,4 +1,4 @@
-package data.usecase3;
+package data;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
@@ -12,14 +12,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public class API {
+public class AlphaVantageAPI {
     private static final String API_KEY = "9P17BCLZ42787NSY";
     // alternative : JTSZQWNFASUDRTW5 (hhc)
     // daily limit : 25
     private static final String BASE_URL = "https://www.alphavantage.co/query";
     private final OkHttpClient client;
 
-    public API() {
+    public AlphaVantageAPI() {
         this.client = new OkHttpClient();
     }
 
