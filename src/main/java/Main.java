@@ -8,9 +8,9 @@ import data.usecase5.InMemoryPriceHistoryRepository;
 import interface_adapters.use_case5.Presenter;
 import controllers.PortfolioController;
 import interface_adapters.use_case5.PortfolioViewModel;
-import stock.data.AlphaVantageAPI;
-import stock.interface_adapters.StockSearchController;
-import stock.usecase_stocksearch.StockSearchInteractor;
+import data.AlphaVantageAPI;
+import controllers.StockSearchController;
+import use_case.stocksearch.StockSearchInteractor;
 import ui.*;
 import use_case.login.LoginInteractor;
 import use_case.portfolio.PortfolioInputBoundary;
@@ -155,11 +155,11 @@ public class Main {
         StockSearchInteractor interactor = new StockSearchInteractor(api);
         StockSearchController controller = new StockSearchController(interactor);
 
-//        //StockSearchView view = new StockSearchView(
-//                controller,
-//                currentUsername,
-//                Main::showDashboardView
-//        );
+        StockSearchView view = new StockSearchView(
+                controller,
+                currentUsername,
+                Main::showDashboardView
+        );
 
         currentFrame = view;
         view.setVisible(true);
