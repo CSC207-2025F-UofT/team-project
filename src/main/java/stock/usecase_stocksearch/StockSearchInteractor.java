@@ -1,7 +1,5 @@
 package stock.usecase_stocksearch;
 
-package stock.use_case.stock_search;
-
 import stock.data.AlphaVantageAPI;
 import stock.data.AlphaVantageAPI.StockSearchResult;
 

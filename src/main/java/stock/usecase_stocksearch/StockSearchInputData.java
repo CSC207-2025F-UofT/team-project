@@ -1,7 +1,5 @@
 package stock.usecase_stocksearch;
 
-package stock.use_case.stock_search;
-
 public class StockSearchInputData {
     private final String keywords;
 
