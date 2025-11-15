@@ -1,8 +1,8 @@
 package view;
 
-import interface_adapter.pokemon.PokemonLookupController;
-import interface_adapter.pokemon.PokemonLookupState;
-import interface_adapter.pokemon.PokemonLookupViewModel;
+import interface_adapter.pokemon_lookup.PokemonLookupController;
+import interface_adapter.pokemon_lookup.PokemonLookupState;
+import interface_adapter.pokemon_lookup.PokemonLookupViewModel;
 
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;

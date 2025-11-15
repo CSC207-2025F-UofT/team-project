@@ -46,10 +46,8 @@ public class DisplayPokemonJPanel extends JPanel {
         JPanel basicPokemonInfo = new JPanel();
         basicPokemonInfo.setLayout(new BoxLayout(basicPokemonInfo, BoxLayout.Y_AXIS));
         basicPokemonInfo.setBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY));
-        StringBuilder nameBuild = new StringBuilder();
-        nameBuild.append(Character.toUpperCase(pokemon.getName().charAt(0)));
-        nameBuild.append(pokemon.getName().substring(1));
-        String name = nameBuild.toString();
+        String name = Character.toUpperCase(pokemon.getName().charAt(0)) +
+                pokemon.getName().substring(1);
         basicPokemonInfo.add(new JLabel("Name: " + name));
         basicPokemonInfo.add(new JLabel("Type 1: " + pokemon.getType1()));
         if (pokemon.getType2() != null) {
@@ -63,7 +61,7 @@ public class DisplayPokemonJPanel extends JPanel {
         JPanel pokemonStatsInfo = new JPanel();
         pokemonStatsInfo.setLayout(new BoxLayout(pokemonStatsInfo, BoxLayout.Y_AXIS));
         pokemonStatsInfo.setBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY));
-        ArrayList stats = pokemon.getStats();
+        ArrayList<Integer> stats = pokemon.getStats();
         pokemonStatsInfo.add(new JLabel("HP: " + stats.get(0)));
         pokemonStatsInfo.add(new JLabel("Attack: " + stats.get(1)));
         pokemonStatsInfo.add(new JLabel("Defense: " + stats.get(2)));
