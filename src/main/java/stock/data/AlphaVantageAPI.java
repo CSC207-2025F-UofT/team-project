@@ -14,7 +14,8 @@ import java.util.Map;
 
 public class AlphaVantageAPI {
     private static final String API_KEY = "9P17BCLZ42787NSY";
-    // alternative : JTSZQWNFASUDRTW5(hhc)
+    // alternative : JTSZQWNFASUDRTW5 (hhc)
+    // daily limit : 25
     private static final String BASE_URL = "https://www.alphavantage.co/query";
     private final OkHttpClient client;
 
@@ -26,7 +27,8 @@ public class AlphaVantageAPI {
      * Search for stocks using SYMBOL_SEARCH endpoint
      */
     public List<StockSearchResult> searchStocks(String keywords) throws IOException {
-        String url = BASE_URL + "?function=SYMBOL_SEARCH&keywords=" + keywords + "&apikey=" + API_KEY;
+        String encodedKeywords = java.net.URLEncoder.encode(keywords, java.nio.charset.StandardCharsets.UTF_8);
+        String url = BASE_URL + "?function=SYMBOL_SEARCH&keywords=" + encodedKeywords + "&apikey=" + API_KEY;
 
         Request request = new Request.Builder()
                 .url(url)
@@ -34,18 +36,30 @@ public class AlphaVantageAPI {
 
         try (Response response = client.newCall(request).execute()) {
             if (!response.isSuccessful()) {
-                throw new IOException("Unexpected code " + response);
+                throw new IOException("Unexpected HTTP code " + response.code() + " when calling: " + url);
             }
 
             String responseBody = response.body().string();
-            JsonObject json = JsonParser.parseString(responseBody).getAsJsonObject();
+            System.out.println("DEBUG searchStocks response = " + responseBody);
 
-            if (json.has("Note")) {
-                throw new IOException("API call frequency limit reached. " + json.get("Note").getAsString());
+            JsonObject json;
+            try {
+                json = JsonParser.parseString(responseBody).getAsJsonObject();
+            } catch (Exception e) {
+                throw new IOException("Failed to parse JSON from AlphaVantage: " + responseBody, e);
             }
 
+            if (json.has("Note")) {
+                throw new IOException("API note: " + json.get("Note").getAsString());
+            }
             if (json.has("Error Message")) {
-                throw new IOException("API Error: " + json.get("Error Message").getAsString());
+                throw new IOException("API error: " + json.get("Error Message").getAsString());
+            }
+            if (json.has("Information")) {
+                throw new IOException("API info: " + json.get("Information").getAsString());
+            }
+            if (!json.has("bestMatches")) {
+                throw new IOException("Unexpected API response: no 'bestMatches' field. Body = " + responseBody);
             }
 
             JsonArray matches = json.getAsJsonArray("bestMatches");
@@ -58,19 +72,12 @@ public class AlphaVantageAPI {
                     String name = match.get("2. name").getAsString();
                     String type = match.get("3. type").getAsString();
                     String region = match.get("4. region").getAsString();
-                    //String marketOpen = match.get("5. marketOpen").getAsString();
-                    //String marketClose = match.get("6. marketClose").getAsString();
-                    //String timezone = match.get("7. timezone").getAsString();
                     String currency = match.get("8. currency").getAsString();
-                    //String matchScore = match.get("9. matchScore").getAsString();
 
-                    // Extract exchange from region or symbol
                     String exchange = extractExchange(region, symbol);
-
                     results.add(new StockSearchResult(symbol, name, exchange, type, region, currency));
                 }
             }
-
             return results;
         }
     }
