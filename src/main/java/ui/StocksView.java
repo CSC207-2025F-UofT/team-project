@@ -11,7 +11,7 @@ import javafx.scene.text.FontWeight;
 import javafx.application.Platform;
 import javafx.scene.control.Alert;
 import stock.data.AlphaVantageAPI;
-import stock.interface_adapters.controllers.StockSearchController;
+import stock.interface_adapters.StockSearchController;
 
 import java.io.IOException;
 import java.util.*;

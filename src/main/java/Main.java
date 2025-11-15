@@ -8,11 +8,10 @@ import data.usecase5.InMemoryPriceHistoryRepository;
 import interface_adapters.use_case5.Presenter;
 import controllers.PortfolioController;
 import interface_adapters.use_case5.PortfolioViewModel;
-import ui.LoginView;
-import ui.PortfolioView;
-import ui.SignUpView;
-import ui.DashboardFrame;
-import ui.DashboardView;
+import stock.data.AlphaVantageAPI;
+import stock.interface_adapters.StockSearchController;
+import stock.usecase_stocksearch.StockSearchInteractor;
+import ui.*;
 import use_case.login.LoginInteractor;
 import use_case.portfolio.PortfolioInputBoundary;
 import use_case.portfolio.PortfolioInteractor;
@@ -20,7 +19,6 @@ import use_case.signup.SignUpInteractor;
 
 import javax.sql.DataSource;
 import javax.swing.*;
-
 
 public class Main {
 
@@ -151,7 +149,20 @@ public class Main {
     }
 
     private static void showStockPricesView() {
-        // ToDo
+        if (currentFrame != null) currentFrame.dispose();
+
+        AlphaVantageAPI api = new AlphaVantageAPI();
+        StockSearchInteractor interactor = new StockSearchInteractor(api);
+        StockSearchController controller = new StockSearchController(interactor);
+
+        StockSearchView view = new StockSearchView(
+                controller,
+                currentUsername,
+                Main::showDashboardView
+        );
+
+        currentFrame = view;
+        view.setVisible(true);
     }
 
     private static void showTrendsView() {

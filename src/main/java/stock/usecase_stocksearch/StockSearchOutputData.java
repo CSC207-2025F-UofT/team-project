@@ -1,4 +1,4 @@
-package stock.use_case.stock_search;
+package stock.usecase_stocksearch;
 
 import stock.data.AlphaVantageAPI.StockSearchResult;
 import java.util.List;
