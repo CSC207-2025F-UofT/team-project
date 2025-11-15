@@ -11,8 +11,8 @@ import java.util.ArrayList;
 
 public class DisplayPokemonJPanel extends JPanel {
 
-    JLabel spriteLabel = new JLabel();
-    JPanel pokemonInfo = new JPanel();
+    private final JLabel spriteLabel = new JLabel();
+    private final JPanel pokemonInfo = new JPanel();
 
     DisplayPokemonJPanel() {
         super();
@@ -35,6 +35,7 @@ public class DisplayPokemonJPanel extends JPanel {
             this.pokemonInfo.removeAll();
             this.pokemonInfo.add(pokemonBasicInfo);
             this.pokemonInfo.add(pokemonStatsInfo);
+            this.pokemonInfo.revalidate();
 
         } catch (MalformedURLException e) {
             throw new RuntimeException(e);
