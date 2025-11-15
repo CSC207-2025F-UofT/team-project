@@ -4,13 +4,18 @@ import javax.swing.*;
 
 public class Main {
     public static void main(String[] args) {
-        // TODO: Build app
+
         AppBuilder appBuilder = new AppBuilder();
+
         JFrame application = appBuilder
+                // TODO: Login,signup,loggedIn views
                 .addSubmitView()
-                // TODO: TBA
+                .addResubmitView()
+                // TODO: other Views
+                // TODO: signUp,LogIn use cases
                 .addSubmitUseCase()
-                //...
+                .addResubmitUseCase()
+                // TODO: other usecases
                 .build();
 
         application.pack();
