@@ -3,12 +3,19 @@ package plan4life.view;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
+
+import plan4life.entities.BlockedTime;
 import plan4life.entities.Schedule;
+import plan4life.use_case.block_off_time.BlockOffTimeController;
+
+import java.time.LocalDateTime;
 import java.util.Random; //Temp till we get langchain/langgraph working
 
-public class CalendarFrame extends JFrame implements CalendarViewInterface {
+public class CalendarFrame extends JFrame implements CalendarViewInterface, TimeSelectionListener {
     private final CalendarPanel calendarPanel;
     private final ActivityPanel activityPanel;
+    private BlockOffTimeController blockOffTimeController;
+    private Schedule currentSchedule;
 
     public CalendarFrame() {
         super("Plan4Life - Scheduler");
@@ -35,6 +42,7 @@ public class CalendarFrame extends JFrame implements CalendarViewInterface {
 
         // <--- Calendar Panel --->
         this.calendarPanel = new CalendarPanel();
+        calendarPanel.setTimeSelectionListener(this);
 
         // <--- Activities Panel --->
         this.activityPanel = new ActivityPanel();
@@ -45,14 +53,34 @@ public class CalendarFrame extends JFrame implements CalendarViewInterface {
         add(activityPanel, BorderLayout.EAST);
 
         // --- Button Logic ---
-        dayBtn.addActionListener((ActionEvent e) -> calendarPanel.setDayView());
-        weekBtn.addActionListener((ActionEvent e) -> calendarPanel.setWeekView());
+        dayBtn.addActionListener(e -> {
+            calendarPanel.setDayView();
+            displaySchedule(currentSchedule);
+        });
 
-        setVisible(true);
+        weekBtn.addActionListener(e -> {
+            calendarPanel.setWeekView();
+            displaySchedule(currentSchedule);
+        });
+    }
+
+    public CalendarFrame(BlockOffTimeController blockOffTimeController) {
+        this();
+        this.blockOffTimeController = blockOffTimeController;
+    }
+
+    public void setBlockOffTimeController(BlockOffTimeController controller) {
+        this.blockOffTimeController = controller;
+    }
+
+    @Override
+    public void showMessage(String message) {
+        JOptionPane.showMessageDialog(this, message);
     }
 
     @Override
     public void displaySchedule(Schedule schedule) {
+        this.currentSchedule = schedule;
         if (schedule == null) return;
 
         // This is where you’ll color each entry in the schedule
@@ -68,6 +96,28 @@ public class CalendarFrame extends JFrame implements CalendarViewInterface {
             calendarPanel.colorCell(time, color, activityName);
         });
 
+        if (schedule.getBlockedTimes() != null) {
+            for (BlockedTime block : schedule.getBlockedTimes()) {
+                calendarPanel.colorBlockedRange(
+                        block.getStart(),
+                        block.getEnd(),
+                        block.getColumnIndex()
+                );
+            }
+        }
+
         calendarPanel.repaint();
+    }
+
+    @Override
+    public void onTimeSelected(LocalDateTime start, LocalDateTime end, int scheduleId, int columnIndex) {
+        String description = JOptionPane.showInputDialog(this,
+                "Optional description for this blocked time:");
+
+        if (description == null) {
+            return; // user pressed Cancel
+        }
+
+        blockOffTimeController.blockTime(scheduleId, start, end, description, columnIndex);
     }
 }
