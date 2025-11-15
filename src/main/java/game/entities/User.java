@@ -1,4 +1,4 @@
-package game.entity;
+package game.entities;
 
 import java.util.*;
 

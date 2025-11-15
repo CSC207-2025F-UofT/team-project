@@ -1,4 +1,4 @@
-package game.entity;
+package game.entities;
 
 public abstract class Item {
         private String name;
