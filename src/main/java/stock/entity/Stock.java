@@ -1,7 +1,5 @@
 package stock.entity;
 
-package stock.entity;
-
 public class Stock {
     private final String symbol;
     private final String name;
