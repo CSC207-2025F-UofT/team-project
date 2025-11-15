@@ -1,17 +1,16 @@
 package use_case.post_review;
 
 public class PostInputData {
-
     private final String comment;
     private final int rating;
     private final String username;
-    private final String song;
+    private final int songid;
 
-    public PostInputData(String comment, int rating, String username, String song) {
+    public PostInputData(String comment, int rating, String username, int songid) {
         this.comment = comment;
         this.rating = rating;
         this.username = username;
-        this.song = song;
+        this.songid = songid;
     }
 
     public String getComment() {
@@ -26,8 +25,8 @@ public class PostInputData {
         return username;
     }
 
-    public String getSong() {
-        return song;
+    public int getSongid() {
+        return songid;
     }
 
 }
