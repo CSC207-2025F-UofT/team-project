@@ -1,16 +1,16 @@
-import controllers.LoginController;
-import controllers.SignUpController;
+import interface_adapters.controllers.LoginController;
+import interface_adapters.controllers.SignUpController;
 import data.DataSourceFactory;
 import data.JdbcUserRepository;
 import data.SchemaInitializer;
 import data.usecase5.InMemoryPortfolioRepository;
 import data.usecase5.InMemoryPriceHistoryRepository;
 import interface_adapters.use_case5.Presenter;
-import controllers.PortfolioController;
+import interface_adapters.controllers.PortfolioController;
 import interface_adapters.use_case5.PortfolioViewModel;
-import stock.data.AlphaVantageAPI;
-import stock.interface_adapters.StockSearchController;
-import stock.usecase_stocksearch.StockSearchInteractor;
+import data.AlphaVantageAPI;
+import interface_adapters.controllers.StockSearchController;
+import use_case.stocksearch.StockSearchInteractor;
 import ui.*;
 import use_case.login.LoginInteractor;
 import use_case.portfolio.PortfolioInputBoundary;
@@ -155,8 +155,7 @@ public class Main {
         StockSearchInteractor interactor = new StockSearchInteractor(api);
         StockSearchController controller = new StockSearchController(interactor);
 
-        StockSearchView view = new StockSearchView(
-                controller,
+        StockSearchView view = new StockSearchView(controller,
                 currentUsername,
                 Main::showDashboardView
         );
