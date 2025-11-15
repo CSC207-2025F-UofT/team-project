@@ -148,7 +148,21 @@ public class Main {
         // ToDo
     }
 
+    private static void showStockPricesView() {
+        if (currentFrame != null) currentFrame.dispose();
 
+        AlphaVantageAPI api = new AlphaVantageAPI();
+        StockSearchInteractor interactor = new StockSearchInteractor(api);
+        StockSearchController controller = new StockSearchController(interactor);
+
+        StockSearchView view = new StockSearchView(controller,
+                currentUsername,
+                Main::showDashboardView
+        );
+
+        currentFrame = view;
+        view.setVisible(true);
+    }
 
     private static void showTrendsView() {
         // ToDo
