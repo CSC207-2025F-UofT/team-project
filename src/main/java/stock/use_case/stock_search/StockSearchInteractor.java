@@ -13,7 +13,8 @@ public class StockSearchInteractor {
     public StockSearchInteractor(AlphaVantageAPI api) {
         this.api = api;
     }
-    
+
+
     public StockSearchOutputData execute(StockSearchInputData input) {
         String keywords = input.getKeywords();
         

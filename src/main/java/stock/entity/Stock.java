@@ -19,7 +19,9 @@ public class Stock {
     }
     
     public String getSymbol() { return symbol; }
+
     public String getName() { return name; }
+
     public String getExchange() { return exchange; }
     public double getPrice() { return price; }
     public double getChangePercent() { return changePercent; }

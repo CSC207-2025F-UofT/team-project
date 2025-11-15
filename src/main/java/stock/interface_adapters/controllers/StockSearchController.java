@@ -10,7 +10,8 @@ public class StockSearchController {
     public StockSearchController(StockSearchInteractor stockSearchInteractor) {
         this.stockSearchInteractor = stockSearchInteractor;
     }
-    
+
+
     public StockSearchOutputData search(String keywords) {
         StockSearchInputData input = new StockSearchInputData(keywords);
         return stockSearchInteractor.execute(input);

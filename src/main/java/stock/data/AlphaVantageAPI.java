@@ -202,7 +202,7 @@ public class AlphaVantageAPI {
             if (symbol.contains(".")) {
                 return symbol.substring(symbol.indexOf(".") + 1);
             }
-            return "NASDAQ"; // Default for US stocks
+            return "NASDAQ";  // Default for US stocks
         }
         return region;
     }
