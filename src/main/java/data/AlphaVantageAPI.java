@@ -1,4 +1,4 @@
-package stock.data;
+package data;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
@@ -266,3 +266,4 @@ public class AlphaVantageAPI {
         public double getPrice() { return price; }
     }
 }
+

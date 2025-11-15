@@ -1,4 +1,4 @@
-package stock.entity;
+package entity;
 
 public class Stock {
     private final String symbol;

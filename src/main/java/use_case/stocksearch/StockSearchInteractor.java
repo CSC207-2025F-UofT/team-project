@@ -1,7 +1,7 @@
-package stock.usecase_stocksearch;
+package use_case.stocksearch;
 
-import stock.data.AlphaVantageAPI;
-import stock.data.AlphaVantageAPI.StockSearchResult;
+import data.AlphaVantageAPI;
+import data.AlphaVantageAPI.StockSearchResult;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -35,3 +35,4 @@ public class StockSearchInteractor {
         }
     }
 }
+
