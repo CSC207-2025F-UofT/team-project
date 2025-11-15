@@ -9,15 +9,13 @@ import java.beans.PropertyChangeListener;
 import java.util.List;
 
 /**
- * TODO: Host dashboard (shows room code, host token, controls for lock, compute winner, apply filters, etc.).
+ * TODO: Participants dashboard (shows room code).
  */
-public class HostDashboardView extends JPanel implements ActionListener, PropertyChangeListener {
+public class ParticipantsDashboardView extends JPanel implements ActionListener, PropertyChangeListener {
     private JLabel roomIdLabel;
-    private JTextField searchField;
-    private JButton searchButton;
     private JPanel participantsPanel;
 
-    public HostDashboardView() {
+    public ParticipantsDashboardView() {
         setLayout(new BorderLayout(10, 10));
 
         // Room ID
@@ -26,15 +24,6 @@ public class HostDashboardView extends JPanel implements ActionListener, Propert
         roomIdLabel.setFont(new Font("Serif", Font.BOLD, 20));
         topPanel.add(roomIdLabel);
         add(topPanel, BorderLayout.NORTH);
-
-        // Search Bar
-        final JPanel searchPanel = new JPanel();
-        searchField = new JTextField(20);
-        searchButton = new JButton("\uD83D\uDD0D");
-        searchButton.addActionListener(this);
-        searchPanel.add(searchField);
-        searchPanel.add(searchButton);
-        add(searchPanel, BorderLayout.CENTER);
 
         // Participants Names
         participantsPanel = new JPanel();
@@ -53,6 +42,8 @@ public class HostDashboardView extends JPanel implements ActionListener, Propert
             nameLabel.setFont(new Font("Serif", Font.BOLD, 14));
             participantsPanel.add(nameLabel);
         }
+        participantsPanel.revalidate();
+        participantsPanel.repaint();
     }
 
     @Override
