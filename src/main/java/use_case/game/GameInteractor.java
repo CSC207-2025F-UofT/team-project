@@ -1,22 +1,22 @@
 package use_case.game;
 
 import entity.ClickableObject;
+import entity.DialogueOption;
+import entity.NonPlayableCharacter;
 import entity.Scene;
+import use_case.switch_to_game.SwitchToGameOutputData;
+import use_case.switch_to_game.SwitchToGameViewDataAccessInterface;
 
-import javax.swing.*; // for optional popup
-import java.util.Objects;
-
+/**
+ * The Click Button Interactor.
+ */
 public class GameInteractor implements GameInputBoundary {
     private final GameOutputBoundary presenter;
     private final GameDataAccessInterface gameDataAccessInterface;
-    private final GameManager gameManager;
 
-    public GameInteractor(GameDataAccessInterface gameDataAccessInterface,
-                          GameOutputBoundary gameOutputBoundary,
-                          GameManager gameManager) {
-        this.presenter = Objects.requireNonNull(gameOutputBoundary);
-        this.gameDataAccessInterface = Objects.requireNonNull(gameDataAccessInterface);
-        this.gameManager = Objects.requireNonNull(gameManager);
+    public GameInteractor(GameDataAccessInterface gameDataAccessInterface, GameOutputBoundary gameOutputBoundary) {
+        this.presenter = gameOutputBoundary;
+        this.gameDataAccessInterface = gameDataAccessInterface;
     }
 
     @Override
@@ -105,12 +105,34 @@ public class GameInteractor implements GameInputBoundary {
 
 
         // ✅ Refresh UI
+        // the clickable object
+        ClickableObject clicked = gameInputData.getClickableObject();
+
+        // game logic
+        if (clicked instanceof NonPlayableCharacter) {
+            gameDataAccessInterface.setCurrentScene(((NonPlayableCharacter) clicked).getDB());
+        }
+        else if (clicked instanceof DialogueOption) {
+            gameDataAccessInterface.setCurrentScene(((DialogueOption) clicked).getScene());
+        }
+        else {
+            switch (clicked.getName()) {
+                case "Object1":
+                    gameDataAccessInterface.setCurrentScene(gameDataAccessInterface.getScenes().get("Scene1"));
+                    break;
+                case "Object2":
+                    gameDataAccessInterface.setCurrentScene(gameDataAccessInterface.getScenes().get("Scene2"));
+                    break;
+            }
+        }
+
+        // update game ui
         Scene currentScene = gameDataAccessInterface.getCurrentScene();
-        GameOutputData out = new GameOutputData();
-        out.setBackgroundImage(currentScene.getImage());
-        out.setClickableObjects(currentScene.getObjects());
-        presenter.prepareView(out);
+        GameOutputData gameOutputData = new GameOutputData();
+        gameOutputData.setBackgroundImage(currentScene.getImage());
+        gameOutputData.setClickableObjects(currentScene.getObjects());
+        presenter.prepareView(gameOutputData);
+
     }
 
 }
-
