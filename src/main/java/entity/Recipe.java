@@ -2,6 +2,7 @@ package entity;
 
 import java.util.Date;
 import java.util.List;
+import java.util.ArrayList;
 
 public class Recipe {
 
@@ -50,11 +51,13 @@ public class Recipe {
         this.ingredients = ingredients;
         this.imagePath = imagePath;
 
+        this.reviews = new ArrayList<>();
         this.category = category;
         this.tags = tags;
         this.status = status;
         this.creationDate = creationDate;
         this.updateDate = updateDate;
+        this.shareable = false;
 
         this.views = 0;
         this.saves = 0;
@@ -87,6 +90,19 @@ public class Recipe {
 
     public Status getStatus(){
         return this.status;
+    }
+
+    public Date getCreationDate(){
+        return this.creationDate;
+    }
+
+    public Date getUpdateDate(){
+        return this.updateDate;
+    }
+
+    public void touchUpdateDate(){
+        // Call this from a setter
+        this.updateDate = new Date();
     }
 
 }
