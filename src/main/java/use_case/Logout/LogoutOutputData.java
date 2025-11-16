@@ -1,4 +1,4 @@
-package Logout;
+package use_case.Logout;
 
 public class LogoutOutputData {
     private final String username;

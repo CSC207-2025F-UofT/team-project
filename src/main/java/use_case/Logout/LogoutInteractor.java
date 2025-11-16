@@ -1,4 +1,4 @@
-package Logout;
+package use_case.Logout;
 
 public class LogoutInteractor implements LogoutInputBoundary {
     private LogoutOutputBoundary presenter;
