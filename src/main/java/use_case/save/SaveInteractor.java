@@ -1,13 +1,10 @@
 package use_case.save;
 
-import java.util.List;
 import java.util.Map;
 
 import entity.Scene;
 import entity.Player;
 import use_case.save.SaveInputBoundary;
-import use_case.save.SaveOutputData;
-import use_case.save.SaveOutputBoundary;
 
 
 /**

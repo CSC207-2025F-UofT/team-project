@@ -59,4 +59,17 @@ public class Scene {
 
         return json;
     }
+
+    public static Scene fromJson(JSONObject json) {
+        String name = json.getString("name");
+        String image = json.getString("image");
+        JSONArray objArray = json.getJSONArray("objects");
+
+        List<ClickableObject> objects = new ArrayList<>();
+        for (int i = 0; i < objArray.length(); i++) {
+            objects.add(ClickableObject.fromJson(objArray.getJSONObject(i)));
+        }
+
+        return new Scene(name, objects, image);
+    }
 }

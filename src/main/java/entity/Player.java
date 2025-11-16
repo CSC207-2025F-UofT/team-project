@@ -59,4 +59,13 @@ public class Player {
         json.put("inventory", inventoryArray);
         return json;
     }
+
+    public static Player fromJson(JSONObject json) {
+        JSONArray invArray = json.getJSONArray("inventory");
+        List<ClickableObject> inventory = new ArrayList<>();
+        for (int i = 0; i < invArray.length(); i++) {
+            inventory.add(ClickableObject.fromJson(invArray.getJSONObject(i)));
+        }
+        return new Player(inventory);
+    }
 }

@@ -57,4 +57,13 @@ public class ClickableObject {
         json.put("image", this.image);
         return json;
     }
+
+    public static ClickableObject fromJson(JSONObject json) {
+        return new ClickableObject(
+                json.getString("name"),
+                json.getInt("coordinateX"),
+                json.getInt("coordinateY"),
+                json.getString("image")
+        );
+    }
 }
