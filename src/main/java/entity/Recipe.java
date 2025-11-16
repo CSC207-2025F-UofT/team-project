@@ -42,7 +42,7 @@ public class Recipe {
                   Date creationDate,
                   Date updateDate,
                   String imagePath
-                  ) {
+    ) {
         this.recipeId = recipeId;
         this.authorId = authorId;
 
@@ -51,58 +51,155 @@ public class Recipe {
         this.ingredients = ingredients;
         this.imagePath = imagePath;
 
-        this.reviews = new ArrayList<>();
+        this.reviews = new ArrayList<>(); // 初始化为空列表
         this.category = category;
         this.tags = tags;
         this.status = status;
         this.creationDate = creationDate;
         this.updateDate = updateDate;
-        this.shareable = false;
+        this.shareable = false; // 默认为 false
 
-        this.views = 0;
-        this.saves = 0;
+        this.views = 0; // 默认为 0
+        this.saves = 0; // 默认为 0
 
     }
 
-    public String getRecipeId(){
-        return this.recipeId;
-    }
-
-    public String getAuthorId(){
-        return this.authorId;
-    }
-
-    public String getTitle(){
-        return this.title;
-    }
-
-    public String getImagePath(){
-        return this.imagePath;
-    }
-
-    public String getDescription(){
-        return this.description;
-    }
-
-    public List<Ingredient> getIngredients(){
-        return this.ingredients;
-    }
-
-    public Status getStatus(){
-        return this.status;
-    }
-
-    public Date getCreationDate(){
-        return this.creationDate;
-    }
-
-    public Date getUpdateDate(){
-        return this.updateDate;
-    }
-
-    public void touchUpdateDate(){
-        // Call this from a setter
+    private void touchUpdateDate() {
         this.updateDate = new Date();
     }
 
+    // --- Getters and Setters ---
+
+    public String getRecipeId() {
+        return recipeId;
+    }
+
+    public void setRecipeId(String recipeId) {
+        this.recipeId = recipeId;
+        touchUpdateDate();
+    }
+
+    public String getAuthorId() {
+        return authorId;
+    }
+
+    public void setAuthorId(String authorId) {
+        this.authorId = authorId;
+        touchUpdateDate();
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+        touchUpdateDate();
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+        touchUpdateDate();
+    }
+
+    public List<Ingredient> getIngredients() {
+        return ingredients;
+    }
+
+    public void setIngredients(List<Ingredient> ingredients) {
+        this.ingredients = ingredients;
+        touchUpdateDate();
+    }
+
+    public String getImagePath() {
+        return imagePath;
+    }
+
+    public void setImagePath(String imagePath) {
+        this.imagePath = imagePath;
+        touchUpdateDate();
+    }
+
+    public String getCategory() {
+        return category;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
+        touchUpdateDate();
+    }
+
+    public List<String> getTags() {
+        return tags;
+    }
+
+    public void setTags(List<String> tags) {
+        this.tags = tags;
+        touchUpdateDate();
+    }
+
+    public List<Review> getReviews() {
+        return reviews;
+    }
+
+    public void setReviews(List<Review> reviews) {
+        this.reviews = reviews;
+        touchUpdateDate();
+    }
+
+    public int getViews() {
+        return views;
+    }
+
+    public void setViews(int views) {
+        this.views = views;
+        touchUpdateDate();
+    }
+
+    public int getSaves() {
+        return saves;
+    }
+
+    public void setSaves(int saves) {
+        this.saves = saves;
+        touchUpdateDate();
+    }
+
+    public boolean isShareable() {
+        return shareable;
+    }
+
+    public void setShareable(boolean shareable) {
+        this.shareable = shareable;
+        touchUpdateDate();
+    }
+
+    public Date getCreationDate() {
+        return creationDate;
+    }
+
+    public void setCreationDate(Date creationDate) {
+        this.creationDate = creationDate;
+        touchUpdateDate();
+    }
+
+    public Date getUpdateDate() {
+        return updateDate;
+    }
+
+    public void setUpdateDate(Date updateDate) {
+        this.updateDate = updateDate;
+    }
+    public Status getStatus() {
+        return status;
+    }
+
+    public void setStatus(Status status) {
+        this.status = status;
+        touchUpdateDate();
+    }
 }
