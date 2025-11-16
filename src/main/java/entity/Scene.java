@@ -1,5 +1,8 @@
 package entity;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -41,5 +44,19 @@ public class Scene {
 
     public String getImage() {
         return image;
+    }
+
+    public JSONObject toJson() {
+        JSONObject json = new JSONObject();
+        json.put("name", this.name);
+        json.put("image", this.image);
+
+        JSONArray objectsArr = new JSONArray();
+        for (ClickableObject obj : this.objects) {
+            objectsArr.put(obj.toJson());
+        }
+        json.put("objects", objectsArr);
+
+        return json;
     }
 }

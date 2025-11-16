@@ -4,6 +4,7 @@ import entity.Scene;
 import entity.Player;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Data access interface for the save use case.
@@ -15,6 +16,8 @@ public interface SaveDataAccessInterface {
      * @return the current scene
      */
     Scene getCurrentScene();
-    List<Scene> getScenes();
+    Map<String, Scene> getScenes();
     Player getPlayer();
+    void saveGame(SaveOutputData outputData);
+
 }

@@ -1,5 +1,7 @@
 package entity;
 
+import org.json.JSONObject;
+
 /**
  * Represents a clickable object in the game that can be interacted with.
  */
@@ -45,5 +47,14 @@ public class ClickableObject {
 
     public String getImage() {
         return image;
+    }
+
+    public JSONObject toJson() {
+        JSONObject json = new JSONObject();
+        json.put("name", this.name);
+        json.put("coordinateX", this.coordinateX);
+        json.put("coordinateY", this.coordinateY);
+        json.put("image", this.image);
+        return json;
     }
 }

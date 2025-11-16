@@ -4,6 +4,7 @@ import entity.Scene;
 import entity.Player;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Output data for the save use case.
@@ -11,7 +12,7 @@ import java.util.List;
 public class SaveOutputData {
 
     private Scene currentScene;
-    private List<Scene> scenes;
+    private Map<String, Scene> scenes;
     private Player player;
 
     public Scene getCurrentScene() {
@@ -22,11 +23,11 @@ public class SaveOutputData {
         this.currentScene = currentScene;
     }
 
-    public List<Scene> getScenes() {
+    public Map<String, Scene> getScenes() {
         return scenes;
     }
 
-    public void setScenes(List<Scene> scenes) {
+    public void setScenes(Map<String, Scene> scenes) {
         this.scenes = scenes;
     }
 

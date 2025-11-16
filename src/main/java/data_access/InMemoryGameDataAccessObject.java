@@ -1,15 +1,23 @@
 package data_access;
 
 import entity.*;
+import org.json.JSONArray;
+import org.json.JSONObject;
+import java.io.FileWriter;
+import java.io.IOException;
 import use_case.game.GameDataAccessInterface;
+import use_case.save.SaveOutputData;
 import use_case.switch_to_game.SwitchToGameViewDataAccessInterface;
+import use_case.save.SaveDataAccessInterface;
+import use_case.save.SaveOutputData;
 
 import java.util.*;
 
 /**
  * In-memory implementation of game data access.
  */
-public class InMemoryGameDataAccessObject implements SwitchToGameViewDataAccessInterface, GameDataAccessInterface {
+public class InMemoryGameDataAccessObject implements SwitchToGameViewDataAccessInterface, GameDataAccessInterface,
+    SaveDataAccessInterface {
 
     private Scene currentScene;
     private Player player;
@@ -40,6 +48,25 @@ public class InMemoryGameDataAccessObject implements SwitchToGameViewDataAccessI
 
     public Player getPlayer() {
         return player;
+    }
+
+    public void saveGame(SaveOutputData outputData) {
+        JSONObject gameState = new JSONObject();
+        List<Scene> scenesData = new ArrayList<>(outputData.getScenes().values());
+        JSONArray scenes = new JSONArray();
+        for (Scene s : scenesData) {
+            scenes.put(s.toJson());
+        }
+        gameState.put("scenes", scenes);
+        gameState.put("player", outputData.getPlayer().toJson());
+        gameState.put("currentScene", outputData.getCurrentScene().toJson());
+
+        // Save to file
+        try (FileWriter file = new FileWriter("save.json")) {
+            file.write(gameState.toString(4)); // pretty print indent
+        } catch (IOException e) {
+            System.out.println("Error writing JSON: " + e.getMessage());
+        }
     }
 
 }

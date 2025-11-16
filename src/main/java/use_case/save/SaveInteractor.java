@@ -1,11 +1,13 @@
 package use_case.save;
 
 import java.util.List;
+import java.util.Map;
+
 import entity.Scene;
 import entity.Player;
 import use_case.save.SaveInputBoundary;
 import use_case.save.SaveOutputData;
-// import use_case.game.GameOutputBoundary;
+import use_case.save.SaveOutputBoundary;
 
 
 /**
@@ -13,24 +15,25 @@ import use_case.save.SaveOutputData;
  */
 public class SaveInteractor implements SaveInputBoundary {
     private final SaveDataAccessInterface saveDataAccessObject;
-    // private final SaveOutputBoundary presenter;
+    private final SaveOutputBoundary presenter;
 
     public SaveInteractor(SaveDataAccessInterface saveDataAccessInterface,
-                                      SwitchToGameViewOutputBoundary switchToGameViewOutputBoundary) {
+                                      SaveOutputBoundary saveOutputBoundary) {
         this.saveDataAccessObject = saveDataAccessInterface;
-        // .presenter = switchToGameViewOutputBoundary;
+        this.presenter = saveOutputBoundary;
     }
 
     @Override
     public void execute() {
         Scene currentScene = saveDataAccessObject.getCurrentScene();
-        List<Scene> scenes = saveDataAccessObject.getScenes();
+        Map<String, Scene> scenes = saveDataAccessObject.getScenes();
         Player player = saveDataAccessObject.getPlayer();
 
         SaveOutputData saveOutputData = new SaveOutputData();
         saveOutputData.setPlayer(player);
         saveOutputData.setScenes(scenes);
         saveOutputData.setCurrentScene(currentScene);
-        presenter.switchToGameView(gameOutputData);
+        saveDataAccessObject.saveGame(saveOutputData);
+        presenter.switchToSaveView();
     }
 }
