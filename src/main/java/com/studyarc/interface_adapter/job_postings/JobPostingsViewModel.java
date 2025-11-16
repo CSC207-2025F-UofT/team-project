@@ -10,6 +10,7 @@ import java.beans.PropertyChangeSupport;
 public class JobPostingsViewModel extends ViewModel<JobPostingsState> {
 
     public static final String TITLE_LABEL = "Job Board";
+    public static final String PLAN_LABEL = "Plan:";
     public static final String LOCATION_LABEL = "Location:";
     public static final String SALARAY_LABEL = "Salary:";
     public static final String SORT_LABEL = "Sort:";
