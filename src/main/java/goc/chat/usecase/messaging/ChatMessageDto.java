@@ -2,6 +2,10 @@ package goc.chat.usecase.messaging;
 
 import java.time.Instant;
 
+/**
+ * A simple DTO representing one message in a chat history,
+ * ready for the presenter / view layer.
+ */
 public class ChatMessageDto {
 
     private final String messageId;
@@ -23,13 +27,19 @@ public class ChatMessageDto {
         this.timestamp = timestamp;
     }
 
-    public String getMessageId() { return messageId; }
+    public String getMessageId() {
+        return messageId;
+    }
 
-    public String getSenderUserId() { return senderUserId; }
+    public String getSenderName() {
+        return senderName;
+    }
 
-    public String getSenderName() { return senderName; }
+    public String getContent() {
+        return content;
+    }
 
-    public String getContent() { return content; }
-
-    public Instant getTimestamp() { return timestamp; }
+    public Instant getTimestamp() {
+        return timestamp;
+    }
 }
