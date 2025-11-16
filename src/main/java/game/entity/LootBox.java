@@ -3,29 +3,23 @@ package game.entity;
 import java.util.*;
 
 public class LootBox extends Item{
-    private String name;
-    private String type;
-    private int price;
-    private int energyIncrease;
     private List<String>dogBreedList=new ArrayList<>();
     private List<String>catBreedList=new ArrayList<>();
 
     public LootBox(String name,int price) {
-        super(name,price);
-        this.type="LootBox";
+        super(name,price,"LootBox");
     }
 
     public LootBox(int price){
-        super("LootBox",price);
-        this.type="LootBox";
+        super("LootBox",price,"LootBox");
     }
 
     public Pet getPet(){
-        String type="LootBox";
-        String breed="random";
+        String type;
+        String breed;
 
         Random random = new Random();
-        int typeIndex=random.nextInt(1);
+        int typeIndex=random.nextInt(2);
         if (typeIndex==0){
             type="Cat";
             int randomIndex = random.nextInt(this.catBreedList.size());

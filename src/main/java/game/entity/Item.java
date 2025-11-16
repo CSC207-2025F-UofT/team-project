@@ -5,10 +5,10 @@ public abstract class Item {
         private String type;
         private int price;
 
-        public Item(String name, int price) {
+        public Item(String name, int price,String type) {
             this.name = name;
             this.price = price;
-            this.type="Item";
+            this.type=type;
         }
         public String getName() {
             return this.name;
