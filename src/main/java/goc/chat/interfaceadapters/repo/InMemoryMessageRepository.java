@@ -27,5 +27,9 @@ public class InMemoryMessageRepository implements MessageRepository {
                 .filter(m -> m.getChatId().equals(chatId))
                 .collect(Collectors.toList());
     }
-}
 
+    @Override
+    public void deleteById(String id) {
+        messages.remove(id);
+    }
+}
