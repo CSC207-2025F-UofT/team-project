@@ -13,7 +13,7 @@ import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
-public class DeckMenuView extends JPanel implements PropertyChangeListener {
+public class DeckMenuView extends JPanel {
 
     private final DeckMenuViewModel vm;
     private final CreateDeckController createCtl;
@@ -57,7 +57,15 @@ public class DeckMenuView extends JPanel implements PropertyChangeListener {
         bottom.add(errorLabel);
         add(bottom, BorderLayout.SOUTH);
 
-        vm.addPropertyChangeListener(this);
+        // Register this View as a listener of the ViewModel
+        vm.addPropertyChangeListener(evt -> {
+            if (evt.getPropertyName().equals(DeckMenuViewModel.DECK_LIST_PROPERTY)) {
+                refreshGrid();
+            } else if (evt.getPropertyName().equals(DeckMenuViewModel.ERROR_PROPERTY)) {
+                String msg = vm.getErrorMessage();
+                errorLabel.setText(msg == null ? "" : msg);
+            }
+        });
 
         //register button listener
         newDeckBtn.addActionListener(new ActionListener() {
@@ -108,14 +116,14 @@ public class DeckMenuView extends JPanel implements PropertyChangeListener {
     }
 
     // Listen to ViewModel property changes
-    @Override
-    public void propertyChange(PropertyChangeEvent evt) {
-        String name = evt.getPropertyName();
-        if (DeckMenuViewModel.DECK_LIST_PROPERTY.equals(name)) {
-            refreshGrid();
-        } else if (DeckMenuViewModel.ERROR_PROPERTY.equals(name)) {
-            String msg = vm.getErrorMessage();
-            errorLabel.setText(msg == null ? "" : msg);
-        }
+    // @Override
+    // public void propertyChange(PropertyChangeEvent evt) {
+    //    String name = evt.getPropertyName();
+    //    if (DeckMenuViewModel.DECK_LIST_PROPERTY.equals(name)) {
+    //        refreshGrid();
+    //    } else if (DeckMenuViewModel.ERROR_PROPERTY.equals(name)) {
+    //       String msg = vm.getErrorMessage();
+    //        errorLabel.setText(msg == null ? "" : msg);
+    //    }
     }
-}
+
