@@ -33,7 +33,7 @@ public class JobPostingsInteractor implements JobPostingsInputBoundary {
             KeywordList keywords = keywordGenerator.generate(jobPostingsInputData.getFocus());
 
             // generates the job listings for the given keywords
-            List<JobListing> jobListings = jobGenerator.getJobListings("NEED TO CALL SMTH TO GET COUNTRY CODE", keywords);
+            List<JobListing> jobListings = jobGenerator.getJobListings("NEED TO CALL SMTH TO GET COUNTRY CODE", keywords, "NEED TO GET SORT", 0);
 
             // creates the output data object
             final JobPostingsOutputData jobPostingsOutputData = new JobPostingsOutputData(jobListings);

@@ -7,11 +7,13 @@ public class JobPostingsInputData {
     private final String focus;
     private final String preferredLoc;
     private final int minSalary;
+    private final String sort;
 
-    public JobPostingsInputData(String focus, String preferredLoc, int minSalary) {
+    public JobPostingsInputData(String focus, String preferredLoc, int minSalary, String sort) {
         this.focus = focus;
         this.preferredLoc = preferredLoc;
         this.minSalary = minSalary;
+        this.sort = sort;
     }
 
     String getFocus() {
@@ -24,5 +26,9 @@ public class JobPostingsInputData {
 
     int getMinSalary() {
         return minSalary;
+    }
+
+    String getSort() {
+        return sort;
     }
 }
