@@ -2,6 +2,7 @@ package data_access;
 
 import entity.User;
 import use_case.login.LoginUserDataAccessInterface;
+import use_case.signup.SignupUserDataAccessInterface;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -10,7 +11,8 @@ import java.util.Map;
  * In-memory implementation of the DAO for storing user data. This implementation does
  * NOT persist data between runs of the program.
  */
-public class InMemoryUserDataAccessObject implements LoginUserDataAccessInterface{
+public class InMemoryUserDataAccessObject implements LoginUserDataAccessInterface,
+        SignupUserDataAccessInterface {
 
     private final Map<String, User> users = new HashMap<>();
 
@@ -19,6 +21,11 @@ public class InMemoryUserDataAccessObject implements LoginUserDataAccessInterfac
     @Override
     public boolean existsByName(String identifier) {
         return users.containsKey(identifier);
+    }
+
+    @Override
+    public void save(User user) {
+        users.put(user.getUsername(), user);
     }
 
     @Override

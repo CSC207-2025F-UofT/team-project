@@ -8,7 +8,9 @@ public class Main {
         JFrame application = appBuilder
                 .addLoginView()
                 .addBlankView()
+                .addSignupView()
                 .addLoginUseCase()
+                .addSignupUseCase()
                 .build();
 
         application.pack();

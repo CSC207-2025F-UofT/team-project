@@ -25,6 +25,7 @@ public class LoginPresenter implements LoginOutputBoundary {
     @Override
     public void prepareSuccessView(LoginOutputData response) {
         loginViewModel.setState(new LoginState());
+        loginViewModel.firePropertyChange();
 
         // switch to the blank view
         this.viewManagerModel.setState("blank");

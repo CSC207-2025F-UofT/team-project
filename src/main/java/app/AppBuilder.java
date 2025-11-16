@@ -7,11 +7,18 @@ import interface_adapter.blank.BlankViewModel;
 import interface_adapter.login.LoginController;
 import interface_adapter.login.LoginPresenter;
 import interface_adapter.login.LoginViewModel;
+import interface_adapter.signup.SignupController;
+import interface_adapter.signup.SignupPresenter;
+import interface_adapter.signup.SignupViewModel;
 import use_case.login.LoginInputBoundary;
 import use_case.login.LoginInteractor;
 import use_case.login.LoginOutputBoundary;
+import use_case.signup.SignupInputBoundary;
+import use_case.signup.SignupInteractor;
+import use_case.signup.SignupOutputBoundary;
 import view.BlankView;
 import view.LoginView;
+import view.SignupView;
 import view.ViewManager;
 
 import javax.swing.*;
@@ -35,6 +42,8 @@ public class AppBuilder {
     private LoginView loginView;
     private BlankViewModel blankViewModel;
     private BlankView blankView;
+    private SignupViewModel signupViewModel;
+    private SignupView signupView;
 
     public AppBuilder() {
         cardPanel.setLayout(cardLayout);
@@ -43,7 +52,7 @@ public class AppBuilder {
     // === View registrations ===
     public AppBuilder addLoginView() {
         loginViewModel = new LoginViewModel();
-        loginView = new LoginView(loginViewModel);
+        loginView = new LoginView(loginViewModel, viewManagerModel);
         cardPanel.add(loginView, loginView.getViewName());
         return this;
     }
@@ -52,6 +61,35 @@ public class AppBuilder {
         blankViewModel = new BlankViewModel();
         blankView = new BlankView(blankViewModel);
         cardPanel.add(blankView, blankView.getViewName());
+        return this;
+    }
+
+    // New method for signup view
+    public AppBuilder addSignupView() {
+        signupViewModel = new SignupViewModel();
+        signupView = new SignupView(signupViewModel, viewManagerModel);
+        cardPanel.add(signupView, signupView.getViewName());
+        return this;
+    }
+
+    // New method for signup use case
+    public AppBuilder addSignupUseCase() {
+        final SignupOutputBoundary signupOutputBoundary = new SignupPresenter(
+                viewManagerModel,
+                signupViewModel,
+                loginViewModel
+        );
+
+        final SignupInputBoundary signupInteractor = new SignupInteractor(
+                userDataAccessObject,
+                signupOutputBoundary,
+                userFactory
+        );
+
+        final SignupController signupController = new SignupController(signupInteractor);
+
+        signupView.setSignupController(signupController);
+
         return this;
     }
 
