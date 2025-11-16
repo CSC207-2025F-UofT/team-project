@@ -2,6 +2,10 @@ package com.studyarc.app;
 
 import javax.swing.*;
 import java.awt.*;
+
+import com.studyarc.interface_adapter.ViewManagerModel;
+import com.studyarc.interface_adapter.job_postings.JobPostingsPresenter;
+import com.studyarc.use_case.job_postings.JobPostingsOutputBoundary;
 import com.studyarc.view.*;
 
 public class AppBuilder {
@@ -14,6 +18,10 @@ public class AppBuilder {
     private SidePanelView sidePanelView;
     private MilestoneTasksView milestoneTaskView;
 
+    final ViewManagerModel viewManagerModel = new ViewManagerModel();
+    ViewManager viewManager = new ViewManager(overallPanel, cardLayout, viewManagerModel);
+
+    private JobPostingsView jobPostingsView;
 
     public AppBuilder() {
         overallPanel.setLayout(cardLayout); // includes login and other things
@@ -35,6 +43,11 @@ public class AppBuilder {
         overallPanel.add(mainUIPanel);
         return this;
     }
+
+
+//    public AppBuilder addJobPostingsUseCase() {
+//        final JobPostingsOutputBoundary jobPostingsOutputBoundary= new JobPostingsPresenter(viewManagerModel);
+//    }
 
     public JFrame build() {
         final JFrame application = new JFrame("Code Example");
