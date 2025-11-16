@@ -9,17 +9,17 @@ import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 public class GameDataBase implements DataBase {
     // The database storing each game.
     // The string contains the prompt used for the game, and helps us search for specific prompts.
-    public HashMap<Integer, GameRecord> GameData;
+    public Map<Integer, GameRecord> GameData;
 
     public GameDataBase() {
         this.GameData = new HashMap<>();
         try {
-            List<String> lines = Files.readAllLines(Paths.get(getClass()
-                    .getClassLoader().getResource(games.csv).toURI()));
+            List<String> lines = Files.readAllLines(Paths.get("src\\main\\resources\\games.csv"));
 
             Iterator<String> iterator = lines.iterator();
             while (iterator.hasNext()) {
@@ -29,7 +29,7 @@ public class GameDataBase implements DataBase {
                 GameData.put(Integer.parseInt(parts[0]), currentGame);
             }
         }
-        catch (IOException | URISyntaxException ex) {
+        catch (IOException ex) {
             throw new RuntimeException(ex);
         }
         ;
@@ -44,15 +44,14 @@ public class GameDataBase implements DataBase {
         return GameData.get(GameCode);
     }
 
-    public GameDataBase SearchWord(GameDataBase DB, String Query) {
+    public GameDataBase SearchWord(String Query) {
         HashMap<Integer, GameRecord> Matches = new HashMap<>();
-        for (GameRecord g: DB.GameData.values()) {
+        for (GameRecord g: this.GameData.values()) {
             // TODO come back to this once gamerecord is implemented
             if (g.getPrompt().contains(Query)) {
                 Matches.put(Matches.size(), g);
             }
         }
-        GameDataBase MatchBase = new GameDataBase(Matches);
-        return MatchBase;
+        return new GameDataBase(Matches);
     }
 }
