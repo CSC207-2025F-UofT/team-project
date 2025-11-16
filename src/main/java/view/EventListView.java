@@ -72,24 +72,4 @@ public class EventListView extends JPanel {
     public JPanel getMasterListPanel() {
         return masterListPanel;
     }
-
-
-
-
-    // Preview for testing, to be deleted
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> {
-            JFrame frame = new JFrame("Test EventListView");
-            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-            frame.setSize(800, 500);
-
-            EventListView view = new EventListView();
-
-            // Examplar Lists
-            view.addListRow("My Favourites");
-
-            frame.add(view);
-            frame.setVisible(true);
-        });
-    }
 }
