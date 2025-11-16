@@ -1,23 +1,23 @@
 package use_case.search_event;
 
 import java.time.LocalDate;
+import java.util.List;
 
 public class SearchEventInputData {
     private final String keyword;
-    private final String continent;
     private final String country;
     private final String city;
-    private final String genre;
-    private final LocalDate startDate;
-    private final LocalDate endDate;
+    private final String genreIds;
+    private final String startDate;
+    private final String endDate;
 
-    public SearchEventInputData(String keyword, String continent, String country,
-                                String city, String genre, LocalDate startDate, LocalDate endDate){
+    public SearchEventInputData(String keyword, String country,
+                                String city, String genreIds, String startDate, String endDate){
+        // Artist is included in keyword
         this.keyword = keyword;
-        this.continent = continent;
         this.country = country;
         this.city = city;
-        this.genre = genre;
+        this.genreIds = genreIds;
         this.startDate = startDate;
         this.endDate = endDate;
     }
@@ -26,27 +26,24 @@ public class SearchEventInputData {
         return keyword;
     }
 
-    public String getContinent() {
-        return continent;
-    }
-
     public String getCountry() {
         return country;
     }
 
     public String getGenre() {
-        return genre;
+        return genreIds;
     }
 
     public String getCity() {
         return city;
     }
 
-    public LocalDate getStartDate() {
+    public String getStartDate() {
         return startDate;
     }
 
-    public LocalDate getEndDate() {
+    public String getEndDate() {
         return endDate;
     }
+
 }
