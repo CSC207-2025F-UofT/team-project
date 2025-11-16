@@ -7,6 +7,7 @@ import entity.Transaction;
 
 import java.io.File;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.time.LocalDate;
@@ -48,11 +49,24 @@ public class TransactionDataAccessObject {
         }
     }
 
-    // TODO: Implement save() method
-    // public void save() {}
+    public void save() {
+        try {
+            if (jsonFile.getParentFile() != null && !jsonFile.getParentFile().exists()) {
+                jsonFile.getParentFile().mkdirs();
+            }
+            
+            try (FileWriter writer = new FileWriter(jsonFile)) {
+                gson.toJson(transactions, writer);
+            }
+        } catch (IOException e) {
+            System.err.println("Error saving transactions to JSON: " + e.getMessage());
+            throw new RuntimeException("Failed to save transactions", e);
+        }
+    }
 
     public void add(Transaction transaction) {
         transactions.add(transaction);
+        save();
     }
 
     public List<Transaction> getAll() {
@@ -81,6 +95,10 @@ public class TransactionDataAccessObject {
     // }
 
     public boolean remove(Transaction transaction) {
-        return transactions.remove(transaction);
+        boolean removed = transactions.remove(transaction);
+        if (removed) {
+            save();
+        }
+        return removed;
     }
 }
