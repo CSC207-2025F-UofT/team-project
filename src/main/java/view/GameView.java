@@ -1,6 +1,9 @@
 package view;
 
+import data_access.InMemoryGameDataAccessObject;
 import entity.ClickableObject;
+import entity.DialogueOption;
+import entity.DialogueText;
 import interface_adapter.game.GameController;
 import interface_adapter.game.GameState;
 import interface_adapter.game.GameViewModel;
@@ -49,18 +52,51 @@ public class GameView extends JPanel implements ActionListener, PropertyChangeLi
         try {
             // add clickable objects
             for (ClickableObject clickableObject : state.getClickableObjects()) {
-                ImageIcon imageIcon = new ImageIcon();
-                imageIcon.setImage(ImageIO.read(new File("src/main/resources", clickableObject.getImage())));
-                JLabel label = new JLabel(imageIcon);
-                label.setBounds(clickableObject.getCoordinateX(), clickableObject.getCoordinateY(), imageIcon.getIconWidth(), imageIcon.getIconHeight());
-                add(label);
-
-                label.addMouseListener(new MouseAdapter() {
-                    @Override
-                    public void mouseClicked(MouseEvent e) {
-                        gameController.click(clickableObject);
-                    }
-                });
+                if (clickableObject instanceof DialogueOption)
+                {
+                    JLabel label = new JLabel(((DialogueOption) clickableObject).getText());
+                    label.setForeground(Color.RED);
+                    label.setFont(new Font(label.getFont().getName(), Font.BOLD, label.getFont().getSize()));
+                    Dimension preferredSize = label.getPreferredSize();
+                    label.setBounds(clickableObject.getCoordinateX(), clickableObject.getCoordinateY(), preferredSize.width, preferredSize.height);
+                    add(label);
+                    label.addMouseListener(new MouseAdapter()
+                    {
+                        @Override
+                        public void mouseClicked(MouseEvent e) {gameController.click(clickableObject);}
+                    });
+                }
+                else if (clickableObject instanceof DialogueText)
+                {
+                    JTextArea label = new JTextArea(((DialogueText) clickableObject).getText());
+                    label.setLineWrap(true);
+                    label.setWrapStyleWord(true);
+                    label.setEditable(false);
+                    label.setHighlighter(null);
+                    label.setForeground(Color.RED);
+                    label.setBackground(Color.BLACK);
+                    label.setFont(new Font(label.getFont().getName(), Font.BOLD, label.getFont().getSize()));
+                    label.setBounds(clickableObject.getCoordinateX(), clickableObject.getCoordinateY(), 800-InMemoryGameDataAccessObject.text_xpos-InMemoryGameDataAccessObject.option_xpos, InMemoryGameDataAccessObject.option4_ypos + 28 - InMemoryGameDataAccessObject.option1_ypos);
+                    add(label);
+//
+//                    label.addMouseListener(new MouseAdapter()
+//                    {
+//                        @Override
+//                        public void mouseClicked(MouseEvent e) {gameController.click(clickableObject);}
+//                    });
+                }
+                else {
+                    ImageIcon imageIcon = new ImageIcon();
+                    imageIcon.setImage(ImageIO.read(new File("src/main/resources", clickableObject.getImage())));
+                    JLabel label = new JLabel(imageIcon);
+                    label.setBounds(clickableObject.getCoordinateX(), clickableObject.getCoordinateY(), imageIcon.getIconWidth(), imageIcon.getIconHeight());
+                    add(label);
+                    label.addMouseListener(new MouseAdapter()
+                    {
+                        @Override
+                        public void mouseClicked(MouseEvent e) {gameController.click(clickableObject);}
+                    });
+                }
             }
 
             // add background image

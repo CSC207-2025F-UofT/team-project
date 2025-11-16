@@ -11,6 +11,7 @@ public class ClickableObject {
     private final int coordinateX;
     private final int coordinateY;
     private final String image;
+    private Boolean collectable=false ;
 
     /**
      * Creates a new clickable object.
@@ -20,7 +21,7 @@ public class ClickableObject {
      * @param image the path to the image asset
      * @throws IllegalArgumentException if the name or image path is empty
      */
-    public ClickableObject(String name, int coordinateX, int coordinateY, String image) {
+    public ClickableObject(String name, int coordinateX, int coordinateY, String image, Boolean collectable) {
         if ("".equals(name)) {
             throw new IllegalArgumentException("Object name cannot be empty");
         }
@@ -31,6 +32,7 @@ public class ClickableObject {
         this.coordinateX = coordinateX;
         this.coordinateY = coordinateY;
         this.image = image;
+        this.collectable = collectable;
     }
 
     public String getName() {
@@ -66,4 +68,5 @@ public class ClickableObject {
                 json.getString("image")
         );
     }
+    public boolean isCollectable() { return collectable; }
 }
