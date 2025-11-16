@@ -20,8 +20,24 @@ public class Flashcard {
         this.known = false;
     }
 
+    public void setSourceWord(String sourceWord) {
+        this.sourceWord = sourceWord;
+    }
+
     public String getSourceWord() {
         return sourceWord;
+    }
+
+    public void setTargetWord(String targetWord) {
+        this.targetWord = targetWord;
+    }
+
+    public void setSourceLang(Language sourceLang) {
+        this.sourceLang = sourceLang;
+    }
+
+    public void setTargetLang(Language targetLang) {
+        this.targetLang = targetLang;
     }
 
     public String getTargetWord() {
