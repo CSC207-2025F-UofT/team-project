@@ -6,6 +6,7 @@ import interface_adapter.login.LoginState;
 import interface_adapter.login.LoginViewModel;
 
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import java.awt.*;
@@ -39,14 +40,42 @@ public class LoginView extends JPanel implements ActionListener, PropertyChangeL
         this.loginViewModel.addPropertyChangeListener(this);
         this.viewManagerModel = viewManagerModel;
 
-        final JLabel title = new JLabel("Login Screen");
-        title.setAlignmentX(Component.CENTER_ALIGNMENT);
+        // Whole panel background + layout
+        setLayout(new BorderLayout());
+        setBackground(Color.WHITE);
 
+        // Center content panel (everything in the white “card”)
+        final JPanel centerPanel = new JPanel();
+        centerPanel.setLayout(new BoxLayout(centerPanel, BoxLayout.Y_AXIS));
+        centerPanel.setBackground(Color.WHITE);
+        centerPanel.setBorder(new EmptyBorder(60, 0, 60, 0)); // top/bottom padding
+
+        // Title & subtitle like the mockup
+        final JLabel welcomeLabel = new JLabel("Welcome!");
+        welcomeLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        welcomeLabel.setFont(new Font("SansSerif", Font.BOLD, 40));
+
+        final JLabel subtitleLabel = new JLabel("Ready to explore?");
+        subtitleLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        subtitleLabel.setFont(new Font("SansSerif", Font.PLAIN, 25));
+
+        // Add spacing **under** subtitle
+        subtitleLabel.setBorder(new EmptyBorder(15, 0, 40, 0));  // increased spacing
+
+
+        // Username & password rows
         final LabelTextPanel usernameInfo = new LabelTextPanel(
                 new JLabel("Username"), usernameInputField);
         final LabelTextPanel passwordInfo = new LabelTextPanel(
                 new JLabel("Password"), passwordInputField);
 
+        // Make input rows narrower and centered
+        usernameInfo.setMaximumSize(new Dimension(300, 50));
+        passwordInfo.setMaximumSize(new Dimension(300, 50));
+        usernameInfo.setAlignmentX(Component.CENTER_ALIGNMENT);
+        passwordInfo.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        // Error label (under username)
         usernameErrorField.setAlignmentX(Component.CENTER_ALIGNMENT);
         usernameErrorField.setHorizontalAlignment(SwingConstants.CENTER);
         usernameErrorField.setForeground(Color.RED);
@@ -55,12 +84,30 @@ public class LoginView extends JPanel implements ActionListener, PropertyChangeL
         usernameErrorField.setMaximumSize(new Dimension(300, 20));
         usernameErrorField.setText(" ");
 
-        final JPanel buttons = new JPanel();
-        logIn = new JButton("Log In");
-        buttons.add(logIn);
+        // Buttons panel – Login and Sign Up side by side
+        final JPanel buttons = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 0));
+        buttons.setOpaque(false);
+
+        logIn = new JButton("Login");
         signUp = new JButton("Sign Up");
+
+        Dimension buttonSize = new Dimension(140, 40);
+        logIn.setPreferredSize(buttonSize);
+        signUp.setPreferredSize(buttonSize);
+        logIn.setBackground(new Color(230, 240, 255));       // light blue
+        logIn.setForeground(new Color(20, 60, 160));         // deep blue text
+        logIn.setFocusPainted(false);
+        logIn.setBorder(BorderFactory.createLineBorder(new Color(20, 60, 160), 2));
+
+        signUp.setBackground(new Color(255, 255, 255));      // white
+        signUp.setForeground(new Color(20, 60, 160));        // deep blue
+        signUp.setFocusPainted(false);
+        signUp.setBorder(BorderFactory.createLineBorder(new Color(20, 60, 160), 2));
+
+        buttons.add(logIn);
         buttons.add(signUp);
 
+        // Add listeners
         logIn.addActionListener(
                 evt -> {
                     if (evt.getSource().equals(logIn)) {
@@ -110,8 +157,6 @@ public class LoginView extends JPanel implements ActionListener, PropertyChangeL
             }
         });
 
-        this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
-
         passwordInputField.getDocument().addDocumentListener(new DocumentListener() {
 
             private void documentListenerHelper() {
@@ -136,11 +181,24 @@ public class LoginView extends JPanel implements ActionListener, PropertyChangeL
             }
         });
 
-        this.add(title);
-        this.add(usernameInfo);
-        this.add(usernameErrorField);
-        this.add(passwordInfo);
-        this.add(buttons);
+        // Build the vertical layout inside the centered panel
+        centerPanel.add(welcomeLabel);
+        centerPanel.add(Box.createVerticalStrut(5));  // space between Welcome and subtitle
+        centerPanel.add(subtitleLabel);
+
+        centerPanel.add(Box.createVerticalStrut(25));  // space before Username
+        centerPanel.add(usernameInfo);
+        centerPanel.add(usernameErrorField);
+
+        centerPanel.add(Box.createVerticalStrut(5));  // space before Password
+        centerPanel.add(passwordInfo);
+
+        centerPanel.add(Box.createVerticalStrut(60));  // space before Login/Sign Up buttons
+        centerPanel.add(buttons);
+
+
+        // Put center panel in the middle of the view
+        add(centerPanel, BorderLayout.CENTER);
     }
 
     /**

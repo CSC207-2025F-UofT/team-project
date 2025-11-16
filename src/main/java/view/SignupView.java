@@ -6,6 +6,7 @@ import interface_adapter.signup.SignupState;
 import interface_adapter.signup.SignupViewModel;
 
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import java.awt.*;
@@ -16,10 +17,6 @@ import java.beans.PropertyChangeListener;
 
 /**
  * The View for the Signup screen.
- *
- * Displays input fields for username, password, and confirm password,
- * along with a signup button. Observes the SignupViewModel and updates
- * the display when the state changes (e.g., to show error messages).
  */
 public class SignupView extends JPanel implements ActionListener, PropertyChangeListener {
 
@@ -40,70 +37,91 @@ public class SignupView extends JPanel implements ActionListener, PropertyChange
 
     private SignupController signupController;
 
-    /**
-     * Constructs the Signup View.
-     *
-     * Sets up all UI components and registers as an observer of the
-     * SignupViewModel to receive state change notifications.
-     *
-     * @param signupViewModel the view model managing this view's state
-     */
     public SignupView(SignupViewModel signupViewModel, ViewManagerModel viewManagerModel) {
         this.signupViewModel = signupViewModel;
         this.signupViewModel.addPropertyChangeListener(this);
         this.viewManagerModel = viewManagerModel;
 
-        // Title
-        final JLabel title = new JLabel("Sign Up Screen");
-        title.setAlignmentX(Component.CENTER_ALIGNMENT);
+        // Overall layout (same as LoginView)
+        setLayout(new BorderLayout());
+        setBackground(Color.WHITE);
 
-        // Input fields
-        final LabelTextPanel usernameInfo = new LabelTextPanel(
-                new JLabel("Username"), usernameInputField);
-        final LabelTextPanel passwordInfo = new LabelTextPanel(
-                new JLabel("Password"), passwordInputField);
-        final LabelTextPanel confirmPasswordInfo = new LabelTextPanel(
-                new JLabel("Confirm Password"), confirmPasswordInputField);
+        final JPanel centerPanel = new JPanel();
+        centerPanel.setLayout(new BoxLayout(centerPanel, BoxLayout.Y_AXIS));
+        centerPanel.setBackground(Color.WHITE);
+        centerPanel.setBorder(new EmptyBorder(60, 0, 60, 0));
 
-        // Error and success labels with fixed size
+        // Title & subtitle
+        final JLabel titleLabel = new JLabel("Create your account");
+        titleLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        titleLabel.setFont(new Font("SansSerif", Font.BOLD, 35));
+
+        final JLabel subtitleLabel = new JLabel("Join us to start exploring");
+        subtitleLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        subtitleLabel.setFont(new Font("SansSerif", Font.PLAIN, 20));
+        subtitleLabel.setBorder(new EmptyBorder(15, 0, 40, 0));
+
+        // Input rows (custom panels instead of LabelTextPanel)
+        final JPanel usernameRow = createInputRow("Username", usernameInputField);
+        final JPanel passwordRow = createInputRow("Password", passwordInputField);
+        final JPanel confirmPasswordRow = createInputRow("Confirm Password", confirmPasswordInputField);
+
+        // Error / success labels
+        Dimension msgSize = new Dimension(300, 20);
+
         usernameErrorField.setAlignmentX(Component.CENTER_ALIGNMENT);
         usernameErrorField.setHorizontalAlignment(SwingConstants.CENTER);
         usernameErrorField.setForeground(Color.RED);
-        usernameErrorField.setPreferredSize(new Dimension(300, 20));
-        usernameErrorField.setMinimumSize(new Dimension(300, 20));
-        usernameErrorField.setMaximumSize(new Dimension(300, 20));
+        usernameErrorField.setPreferredSize(msgSize);
+        usernameErrorField.setMinimumSize(msgSize);
+        usernameErrorField.setMaximumSize(msgSize);
         usernameErrorField.setText(" ");
 
         passwordErrorField.setAlignmentX(Component.CENTER_ALIGNMENT);
         passwordErrorField.setHorizontalAlignment(SwingConstants.CENTER);
         passwordErrorField.setForeground(Color.RED);
-        passwordErrorField.setPreferredSize(new Dimension(300, 20));
-        passwordErrorField.setMinimumSize(new Dimension(300, 20));
-        passwordErrorField.setMaximumSize(new Dimension(300, 20));
+        passwordErrorField.setPreferredSize(msgSize);
+        passwordErrorField.setMinimumSize(msgSize);
+        passwordErrorField.setMaximumSize(msgSize);
         passwordErrorField.setText(" ");
 
         successField.setAlignmentX(Component.CENTER_ALIGNMENT);
         successField.setHorizontalAlignment(SwingConstants.CENTER);
         successField.setForeground(Color.GREEN);
-        successField.setPreferredSize(new Dimension(300, 20));
-        successField.setMinimumSize(new Dimension(300, 20));
-        successField.setMaximumSize(new Dimension(300, 20));
+        successField.setPreferredSize(msgSize);
+        successField.setMinimumSize(msgSize);
+        successField.setMaximumSize(msgSize);
         successField.setText(" ");
 
-        // Buttons
-        final JPanel buttons = new JPanel();
-        signUpButton = new JButton("Sign Up");
-        buttons.add(signUpButton);
+        // Buttons (same style as LoginView)
+        final JPanel buttons = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 0));
+        buttons.setOpaque(false);
 
+        signUpButton = new JButton("Sign Up");
         loginButton = new JButton("Login");
+
+        Dimension buttonSize = new Dimension(140, 40);
+        signUpButton.setPreferredSize(buttonSize);
+        loginButton.setPreferredSize(buttonSize);
+
+        signUpButton.setBackground(new Color(230, 240, 255)); // light blue
+        signUpButton.setForeground(new Color(20, 60, 160));   // deep blue
+        signUpButton.setFocusPainted(false);
+        signUpButton.setBorder(BorderFactory.createLineBorder(new Color(20, 60, 160), 2));
+
+        loginButton.setBackground(Color.WHITE);
+        loginButton.setForeground(new Color(20, 60, 160));
+        loginButton.setFocusPainted(false);
+        loginButton.setBorder(BorderFactory.createLineBorder(new Color(20, 60, 160), 2));
+
+        buttons.add(signUpButton);
         buttons.add(loginButton);
 
-        // Sign Up button action
+        // Button actions
         signUpButton.addActionListener(
                 evt -> {
                     if (evt.getSource().equals(signUpButton)) {
                         final SignupState currentState = signupViewModel.getState();
-
                         signupController.execute(
                                 currentState.getUsername(),
                                 currentState.getPassword(),
@@ -113,7 +131,6 @@ public class SignupView extends JPanel implements ActionListener, PropertyChange
                 }
         );
 
-        // go back to log in
         loginButton.addActionListener(
                 evt -> {
                     if (evt.getSource().equals(loginButton)) {
@@ -126,106 +143,103 @@ public class SignupView extends JPanel implements ActionListener, PropertyChange
                 }
         );
 
-        // Username field listener
+        // Listeners to sync fields with state
         usernameInputField.getDocument().addDocumentListener(new DocumentListener() {
-            private void documentListenerHelper() {
+            private void helper() {
                 final SignupState currentState = signupViewModel.getState();
                 currentState.setUsername(usernameInputField.getText());
                 signupViewModel.setState(currentState);
             }
-
-            @Override
-            public void insertUpdate(DocumentEvent e) {
-                documentListenerHelper();
-            }
-
-            @Override
-            public void removeUpdate(DocumentEvent e) {
-                documentListenerHelper();
-            }
-
-            @Override
-            public void changedUpdate(DocumentEvent e) {
-                documentListenerHelper();
-            }
+            public void insertUpdate(DocumentEvent e) { helper(); }
+            public void removeUpdate(DocumentEvent e) { helper(); }
+            public void changedUpdate(DocumentEvent e) { helper(); }
         });
 
-        // Password field listener
         passwordInputField.getDocument().addDocumentListener(new DocumentListener() {
-            private void documentListenerHelper() {
+            private void helper() {
                 final SignupState currentState = signupViewModel.getState();
                 currentState.setPassword(new String(passwordInputField.getPassword()));
                 signupViewModel.setState(currentState);
             }
-
-            @Override
-            public void insertUpdate(DocumentEvent e) {
-                documentListenerHelper();
-            }
-
-            @Override
-            public void removeUpdate(DocumentEvent e) {
-                documentListenerHelper();
-            }
-
-            @Override
-            public void changedUpdate(DocumentEvent e) {
-                documentListenerHelper();
-            }
+            public void insertUpdate(DocumentEvent e) { helper(); }
+            public void removeUpdate(DocumentEvent e) { helper(); }
+            public void changedUpdate(DocumentEvent e) { helper(); }
         });
 
-        // Confirm Password field listener
         confirmPasswordInputField.getDocument().addDocumentListener(new DocumentListener() {
-            private void documentListenerHelper() {
+            private void helper() {
                 final SignupState currentState = signupViewModel.getState();
                 currentState.setConfirmPassword(new String(confirmPasswordInputField.getPassword()));
                 signupViewModel.setState(currentState);
             }
-
-            @Override
-            public void insertUpdate(DocumentEvent e) {
-                documentListenerHelper();
-            }
-
-            @Override
-            public void removeUpdate(DocumentEvent e) {
-                documentListenerHelper();
-            }
-
-            @Override
-            public void changedUpdate(DocumentEvent e) {
-                documentListenerHelper();
-            }
+            public void insertUpdate(DocumentEvent e) { helper(); }
+            public void removeUpdate(DocumentEvent e) { helper(); }
+            public void changedUpdate(DocumentEvent e) { helper(); }
         });
 
-        // Layout
-        this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
-        this.add(title);
-        this.add(usernameInfo);
-        this.add(usernameErrorField);
-        this.add(passwordInfo);
-        this.add(passwordErrorField);
-        this.add(confirmPasswordInfo);
-        this.add(successField);
-        this.add(buttons);
+        // Build vertical layout
+        centerPanel.add(titleLabel);
+        centerPanel.add(Box.createVerticalStrut(5));
+        centerPanel.add(subtitleLabel);
+
+        centerPanel.add(Box.createVerticalStrut(20));
+        centerPanel.add(usernameRow);
+        centerPanel.add(usernameErrorField);
+
+        centerPanel.add(Box.createVerticalStrut(5));
+        centerPanel.add(passwordRow);
+        centerPanel.add(passwordErrorField);
+
+        centerPanel.add(Box.createVerticalStrut(5));
+        centerPanel.add(confirmPasswordRow);
+        centerPanel.add(successField);
+
+        centerPanel.add(Box.createVerticalStrut(40));
+        centerPanel.add(buttons);
+
+        add(centerPanel, BorderLayout.CENTER);
     }
 
-    /**
-     * React to a button click.
-     * @param evt the ActionEvent to react to
-     */
+    /** Helper to create a "label + field" row similar to LoginView. */
+    private JPanel createInputRow(String labelText, JComponent input) {
+        JPanel row = new JPanel();
+        row.setLayout(new BoxLayout(row, BoxLayout.X_AXIS));
+        row.setBackground(new Color(245, 245, 245));
+
+        Dimension rowSize = new Dimension(350, 40);
+        row.setPreferredSize(rowSize);
+        row.setMinimumSize(rowSize);
+        row.setMaximumSize(rowSize);
+
+        JLabel label = new JLabel(labelText);
+
+        // 🔥 FIX: make all labels same width
+        Dimension labelSize = new Dimension(140, 30);
+        label.setPreferredSize(labelSize);
+        label.setMinimumSize(labelSize);
+        label.setMaximumSize(labelSize);
+
+        label.setBorder(new EmptyBorder(0, 20, 0, 0));
+        row.add(label);
+
+        // Input field size (short height)
+        Dimension fieldSize = new Dimension(180, 24);
+        input.setPreferredSize(fieldSize);
+        input.setMinimumSize(fieldSize);
+        input.setMaximumSize(fieldSize);
+
+        row.add(Box.createHorizontalStrut(10));
+        row.add(input);
+
+        return row;
+    }
+
+
     @Override
     public void actionPerformed(ActionEvent evt) {
         System.out.println("Click " + evt.getActionCommand());
     }
 
-    /**
-     * Called when the SignupViewModel's state changes.
-     *
-     * Updates the error message display based on the new state.
-     *
-     * @param evt the property change event containing the new state
-     */
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
         final SignupState state = (SignupState) evt.getNewValue();
