@@ -1,7 +1,11 @@
 package use_case.search_event;
 
 import entity.Event;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
+import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 public class SearchEventInteractor implements SearchEventInputBoundary{
@@ -16,16 +20,187 @@ public class SearchEventInteractor implements SearchEventInputBoundary{
 
     @Override
     public void execute(SearchEventInputData inputData) {
-        List<Event> events = dataAccess.search(
+        String events = dataAccess.search(
                 inputData.getKeyword(),
-                inputData.getContinent(),
                 inputData.getCountry(),
                 inputData.getCity(),
-                inputData.getGenre(),
                 inputData.getStartDate(),
-                inputData.getEndDate()
+                inputData.getEndDate(),
+                inputData.getGenre()
         );
-        SearchEventOutputData outputData = new SearchEventOutputData(events);
+        SearchEventOutputData outputData = new SearchEventOutputData(createEventsFromJson(events));
         presenter.present(outputData);
+    }
+
+    public List<Event> createEventsFromJson(String dataJson) {
+        List<Event> events = new ArrayList<>();
+
+        if (dataJson == null || dataJson.isEmpty()) {
+            return events;
+        }
+
+        try {
+            // Root of json
+            JSONObject base = new JSONObject(dataJson);
+
+            if (base.has("_embedded") && base.getJSONObject("_embedded").has("events")) {
+                JSONArray eventsArray = base.getJSONObject("_embedded").getJSONArray("events");
+                // Each event in the events
+                for (int i = 0; i < eventsArray.length(); i++) {
+                    JSONObject jsonEvent = eventsArray.getJSONObject(i);
+
+                    Event event = eventFromJson(jsonEvent);
+                    events.add(event);
+                }
+            }
+
+
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
+        return events;
+    }
+
+    public static Event eventFromJson(JSONObject jsonEvent) {
+        String id = jsonEvent.optString("id", "N/A");
+        String name = jsonEvent.optString("name", "Unnamed Event");
+        String ticketUrl = jsonEvent.optString("url", "#");
+
+        LocalDate date = extractDateFromJson(jsonEvent);
+        List<Integer> priceRange = extractPriceFromJson(jsonEvent);
+        int priceMin = priceRange.get(0);
+        int priceMax = priceRange.get(1);
+
+        List<String> artists = extractArtists(jsonEvent);
+        List<String> genres = extractGenres(jsonEvent);
+        String venueName = extractVenueName(jsonEvent);
+        String cityName = extractCity(jsonEvent);
+        String countryName = extractCountry(jsonEvent);
+
+        return new Event(id, name, artists, venueName, cityName, countryName, date, priceMin, priceMax, ticketUrl, genres);
+    }
+
+    private static JSONObject getEmbedded(JSONObject jsonEvent) {
+        return jsonEvent.has("_embedded") ? jsonEvent.getJSONObject("_embedded") : null;
+    }
+
+    private static JSONObject getVenue(JSONObject embedded) {
+        if (embedded != null && embedded.has("venues")) {
+            // Safely return the first venue object
+            JSONArray venues = embedded.getJSONArray("venues");
+            if (!venues.isEmpty()) {
+                return venues.getJSONObject(0);
+            }
+        }
+        return null;
+    }
+
+    private static JSONArray getAttractions(JSONObject embedded) {
+        if (embedded != null && embedded.has("attractions")) {
+            return embedded.getJSONArray("attractions");
+        }
+        return null;
+    }
+
+    public static LocalDate extractDateFromJson(JSONObject jsonEvent) {
+        LocalDate date = null;
+        try {
+            if (jsonEvent.has("dates")) {
+                JSONObject start = jsonEvent.getJSONObject("dates").getJSONObject("start");
+                String startDateTimeStr = start.optString("dateTime");
+                if (!startDateTimeStr.isEmpty()) {
+                    date = LocalDate.parse(startDateTimeStr.split("T")[0]);
+                }
+            }
+        } catch (Exception e) {
+            System.err.println("Error parsing date:" + e.getMessage());
+        }
+        return date;
+    }
+
+
+    public static List<Integer> extractPriceFromJson(JSONObject jsonEvent) {
+        int priceMin = 0;
+        int priceMax = 0;
+
+        try {
+            if (jsonEvent.has("priceRanges")) {
+                JSONArray prices = jsonEvent.getJSONArray("priceRanges");
+                if (!prices.isEmpty()) {
+                    JSONObject priceRange = prices.getJSONObject(0);
+                    priceMin = priceRange.optInt("min", 0);
+                    priceMax = priceRange.optInt("max", 0);
+                }
+            }
+        } catch (Exception e) {
+            System.err.println("Error parsing price" + e.getMessage());
+        }
+
+        return List.of(priceMin, priceMax);
+
+    }
+
+    public static List<String> extractArtists(JSONObject jsonEvent) {
+        List<String> artists = new ArrayList<>();
+        JSONObject embedded = getEmbedded(jsonEvent);
+        if (embedded != null && embedded.has("attractions")) {
+            JSONArray artistArray = embedded.getJSONArray("attractions");
+            for (int i = 0; i < artistArray.length(); i++) {
+                JSONObject artist = artistArray.getJSONObject(i);
+                artists.add(artist.getString("name"));
+            }
+
+        }
+        return artists;
+    }
+
+
+    public static String extractVenueName(JSONObject jsonEvent) {
+        JSONObject embedded = getEmbedded(jsonEvent);
+        JSONObject venue = getVenue(embedded);
+
+        return venue != null ? venue.optString("name", "unknown") : "N/A";
+    }
+
+    public static String extractCity(JSONObject jsonEvent) {
+        JSONObject embedded = getEmbedded(jsonEvent);
+        JSONObject venue = getVenue(embedded);
+
+        if (venue != null && venue.has("city")) {
+            return venue.getJSONObject("city").optString("name", "unknown city");
+        }
+
+        return "N/A";
+    }
+
+    public static String extractCountry(JSONObject jsonEvent) {
+        JSONObject embedded = getEmbedded(jsonEvent);
+        JSONObject venue = getVenue(embedded);
+
+        if (venue != null && venue.has("country")) {
+            return venue.getJSONObject("country").optString("name", "unknown country");
+        }
+
+        return "N/A";
+    }
+
+    public static List<String> extractGenres(JSONObject jsonEvent) {
+        List<String> genres = new ArrayList<>();
+
+        if (jsonEvent.has("classifications")) {
+            JSONArray classifications = jsonEvent.getJSONArray("classifications");
+
+            for (int i = 0; i < classifications.length(); i++) {
+                JSONObject classification = classifications.getJSONObject(i);
+                if (classification.has("genre")) {
+                    genres.add(classification.getJSONObject("genre").optString("name"));
+                }
+                if (classification.has("subGenre")) {
+                    genres.add(classification.getJSONObject("subGenre").optString("name"));
+                }
+            }
+        }
+        return genres;
     }
 }
