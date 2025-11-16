@@ -6,7 +6,7 @@ import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.util.List;
 
-public class SearchViewModel {
+public class SearchEventViewModel {
     private final PropertyChangeSupport support = new PropertyChangeSupport(this);
 
     private List<Event> events;
