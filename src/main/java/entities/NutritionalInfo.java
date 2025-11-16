@@ -4,15 +4,15 @@ import java.util.Objects;
 
 /**
  * Value object representing nutritional information for a meal/food item.
- * Immutable design following Java best practices.
+ * Immutable and all measured in grams (except calories)
  */
 public final class NutritionalInfo {
     private final double calories;
-    private final double protein;      // in grams
-    private final double carbohydrates; // in grams
-    private final double fat;           // in grams
-    private final double fiber;         // in grams
-    private final double sugar;         // in grams
+    private final double protein;
+    private final double carbohydrates;
+    private final double fat;
+    private final double fiber;
+    private final double sugar;
 
     private NutritionalInfo(Builder builder) {
         this.calories = builder.calories;
