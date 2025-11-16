@@ -31,6 +31,8 @@ public class ChatMessageDto {
         return messageId;
     }
 
+    public String getSenderUserId() { return senderUserId; }
+
     public String getSenderName() {
         return senderName;
     }
