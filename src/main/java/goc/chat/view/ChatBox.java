@@ -13,6 +13,10 @@ import goc.chat.usecase.messaging.ViewChatHistoryOutputData;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 public class ChatBox extends JFrame implements ViewChatHistoryOutputBoundary {
@@ -27,11 +31,12 @@ public class ChatBox extends JFrame implements ViewChatHistoryOutputBoundary {
     private final JPanel chatPanel;
     private final JTextField inputField;
     private final JButton sendButton;
+    private final JScrollPane chatScrollPane;
 
     private final String currentChatId = "chat-1";
     private final String currentUserId = "user-1";
 
-    public Chatbox() {
+    public ChatBox() {
         super("GoChat Demo");
 
         chatRepository = new InMemoryChatRepository();
@@ -47,9 +52,9 @@ public class ChatBox extends JFrame implements ViewChatHistoryOutputBoundary {
         chatPanel.setLayout(new BoxLayout(chatPanel, BoxLayout.Y_AXIS));
         chatPanel.setBackground(new Color(30, 30, 30));
 
-        JScrollPane scrollPane = new JScrollPane(chatPanel);
-        scrollPane.setBorder(null);
-        scrollPane.getVerticalScrollBar().setUnitIncrement(16);
+        chatScrollPane = new JScrollPane(chatPanel);
+        chatScrollPane.setBorder(null);
+        chatScrollPane.getVerticalScrollBar().setUnitIncrement(16);
 
         // send button
         inputField = new JTextField();
@@ -61,7 +66,7 @@ public class ChatBox extends JFrame implements ViewChatHistoryOutputBoundary {
 
         // layout demo
         setLayout(new BorderLayout());
-        add(scrollPane, BorderLayout.CENTER);
+        add(chatScrollPane, BorderLayout.CENTER);
         add(bottom, BorderLayout.SOUTH);
 
         sendButton.addActionListener(e -> sendAndRefresh());
@@ -107,7 +112,9 @@ public class ChatBox extends JFrame implements ViewChatHistoryOutputBoundary {
 
             JPanel bubble = new JPanel();
             bubble.setLayout(new BoxLayout(bubble, BoxLayout.Y_AXIS));
+            bubble.setOpaque(false);
             bubble.setBorder(new EmptyBorder(5, 5, 5, 5));
+
             // receive ikons!!
             String text = dto.getContent() + (isMe ? "  ✓" : "");
             JLabel msgLabel = new JLabel("<html>" + text + "</html>");
@@ -125,8 +132,6 @@ public class ChatBox extends JFrame implements ViewChatHistoryOutputBoundary {
             }
 
             bubble.add(msgLabel);
-
-            bubble.add(textLabel);
 
             // timeline
             JLabel timeLabel = new JLabel(formatTimestamp(dto.getTimestamp()));
@@ -171,7 +176,7 @@ public class ChatBox extends JFrame implements ViewChatHistoryOutputBoundary {
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
-            ChatWindowWeChatStyle window = new ChatWindowWeChatStyle();
+            ChatBox window = new ChatBox();
             window.setVisible(true);
         });
     }
