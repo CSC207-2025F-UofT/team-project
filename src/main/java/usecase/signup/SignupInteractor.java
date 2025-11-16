@@ -27,7 +27,7 @@ public class SignupInteractor implements SignupInputBoundary {
         final String confirmPassword = signupInputData.getConfirmPassword();
 
         if (signupUserDataAccessObject.usernameExists(username)) {
-            signupPresenter.signupFailureView("User already exists.");
+            signupPresenter.signupFailureView("Username already exists. Login instead!");
         }
         else if (!password.equals(confirmPassword)) {
             signupPresenter.signupFailureView("Passwords don't match.");
@@ -36,7 +36,7 @@ public class SignupInteractor implements SignupInputBoundary {
             signupPresenter.signupFailureView("Email cannot be empty.");
         }
         else if (signupUserDataAccessObject.emailExists(email)) {
-            signupPresenter.signupFailureView("Email already exists.");
+            signupPresenter.signupFailureView("Email already exists. Login instead!");
         }
         else if (password.isEmpty()) {
             signupPresenter.signupFailureView("New password cannot be empty");

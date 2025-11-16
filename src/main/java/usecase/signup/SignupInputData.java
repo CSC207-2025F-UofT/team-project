@@ -1,7 +1,5 @@
 package usecase.signup;
 
-import java.util.Objects;
-
 public class SignupInputData {
     private String username;
     private String password;
