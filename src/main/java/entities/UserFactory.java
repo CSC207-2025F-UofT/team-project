@@ -1,6 +1,4 @@
-package use_case.signup;
-
-import entities.User;
+package entities;
 
 /**
  * Factory for creating User objects.

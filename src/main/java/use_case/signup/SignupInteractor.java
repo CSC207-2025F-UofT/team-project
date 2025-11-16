@@ -1,6 +1,7 @@
 package use_case.signup;
 
 import entities.User;
+import entities.UserFactory;
 
 /**
  * The Signup Interactor.

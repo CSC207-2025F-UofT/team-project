@@ -2,6 +2,7 @@ package data_access;
 
 import entities.User;
 import use_case.signup.SignupDataAccessInterface;
+import use_case.edit_profile.EditProfileDataAccessInterface;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -9,8 +10,12 @@ import java.util.Map;
 /**
  * In-memory implementation of the DAO for storing user data.
  * This implementation uses HashMaps to store users by username and email.
+ * Implements multiple data access interfaces to serve different use cases.
  */
-public class InMemoryUserDataAccessObject implements SignupDataAccessInterface {
+public class InMemoryUserDataAccessObject implements
+        SignupDataAccessInterface,
+        EditProfileDataAccessInterface
+{
 
     private final Map<String, User> usersByUsername = new HashMap<>();
     private final Map<String, User> usersByEmail = new HashMap<>();
@@ -64,19 +69,17 @@ public class InMemoryUserDataAccessObject implements SignupDataAccessInterface {
     public void clear() {
         usersByUsername.clear();
         usersByEmail.clear();
-import use_case.edit_profile.EditProfileDataAccessInterface;
-import entities.User;
+    }
 
-/**
- * In-memory implementation of user data access.
- * This is a placeholder until the actual data persistence layer is implemented.
- */
-public class InMemoryUserDataAccessObject implements EditProfileDataAccessInterface {
-    private final Map<String, User> users = new HashMap<>();
-
-    @Override
+    /**
+     * Updates a user's profile information.
+     * @param username the username of the user to update
+     * @param fullName the new full name
+     * @param bio the new bio
+     * @param profilePicture the new profile picture URL
+     */
     public void updateUserProfile(String username, String fullName, String bio, String profilePicture) {
-        User user = users.get(username);
+        User user = usersByUsername.get(username);
         if (user != null) {
             user.editProfile(fullName, bio, profilePicture);
         }
