@@ -8,13 +8,18 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.util.ArrayList;
-import java.util.List;
+import interface_adapter.user_search.SearchUserController;
+import interface_adapter.user_search.SearchUserViewModel;
 
 public class SearchUserView extends JPanel implements ActionListener, PropertyChangeListener {
 
     public final String viewName = "new chat";
+
+    // Final fields must be initialized in the constructor.
     private final ViewManagerModel viewManagerModel;
+    private final SearchUserViewModel searchUserViewModel;
+
+    private SearchUserController searchUserController;
 
     // UI Components
     private final JTextField searchInputField;
@@ -22,8 +27,13 @@ public class SearchUserView extends JPanel implements ActionListener, PropertyCh
     private final JButton startChatButton;
     private final JPanel userListPanel; // Container for dynamic checkboxes/users
 
-    public SearchUserView (ViewManagerModel viewManagerModel) {
+    public SearchUserView(ViewManagerModel viewManagerModel, SearchUserViewModel searchUserViewModel) {
+
+        // --- FIX: Initialize final fields immediately ---
         this.viewManagerModel = viewManagerModel;
+        this.searchUserViewModel = searchUserViewModel;
+        // -----------------------------------------------
+
         this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
         this.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
@@ -67,6 +77,14 @@ public class SearchUserView extends JPanel implements ActionListener, PropertyCh
         startChatButton.addActionListener(this);
         searchExitButton.addActionListener(this);
 
+        // Add listener to the search field for real-time searching
+        // searchInputField.addActionListener(e -> {
+        //     if (searchUserController != null) {
+        //         searchUserController.execute(searchInputField.getText());
+        //     }
+        // });
+
+
         // Assembly
         this.add(searchPanel);
         this.add(Box.createVerticalStrut(10));
@@ -85,6 +103,7 @@ public class SearchUserView extends JPanel implements ActionListener, PropertyCh
         }
     }
 
+
     @Override
     public void actionPerformed(ActionEvent evt) {
         if (evt.getSource().equals(searchExitButton)) {
@@ -92,27 +111,30 @@ public class SearchUserView extends JPanel implements ActionListener, PropertyCh
             viewManagerModel.setState("logged in");
             viewManagerModel.firePropertyChange();
         } else if (evt.getSource().equals(startChatButton)) {
-            // Start Chat logic (currently does nothing)
-
-
-            // For now, assume a single user is always selected (or just navigate)
-            // Real implementation requires checking checkboxes, but for now, we navigate.
-
             // Navigate to the ChatView
             viewManagerModel.setState("chat");
             viewManagerModel.firePropertyChange();
-
-            // Previous placeholder (remove or comment out):
-            // JOptionPane.showMessageDialog(this, "Starting chat with selected users (Not yet implemented)");
         }
     }
 
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
         // Will be used to update the user list based on search results
+        // You'll likely need to use searchUserViewModel.getState().getUsers() here
     }
 
     public String getViewName() {
         return viewName;
+    }
+
+    public void setUserSearchController(SearchUserController searchUserController) {
+        this.searchUserController = searchUserController;
+        // You would typically attach listeners to buttons/fields here
+        // If you want search on Enter key press:
+        searchInputField.addActionListener(e -> {
+            if (this.searchUserController != null) {
+                this.searchUserController.execute(searchInputField.getText());
+            }
+        });
     }
 }

@@ -3,9 +3,13 @@ package data_access;
 import entity.User;
 import entity.UserFactory;
 import use_case.change_password.ChangePasswordUserDataAccessInterface;
+import use_case.change_username.ChangeUsernameUserDataAccessInterface;
 import use_case.login.LoginUserDataAccessInterface;
 import use_case.logout.LogoutUserDataAccessInterface;
+import use_case.search_user.SearchUserDataAccessInterface;
 import use_case.signup.SignupUserDataAccessInterface;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import java.io.*;
 import java.util.HashMap;
@@ -18,14 +22,14 @@ import java.util.Map;
 public class FileUserDataAccessObject implements SignupUserDataAccessInterface,
                                                  LoginUserDataAccessInterface,
                                                  ChangePasswordUserDataAccessInterface,
-                                                 LogoutUserDataAccessInterface {
+                                                 LogoutUserDataAccessInterface, ChangeUsernameUserDataAccessInterface, SearchUserDataAccessInterface {
 
     private static final String HEADER = "username,password";
 
     private final File csvFile;
     private final Map<String, Integer> headers = new LinkedHashMap<>();
     private final Map<String, User> accounts = new HashMap<>();
-
+    private final UserFactory userFactory;
     private String currentUsername;
 
     /**
@@ -37,6 +41,7 @@ public class FileUserDataAccessObject implements SignupUserDataAccessInterface,
     public FileUserDataAccessObject(String csvPath, UserFactory userFactory) {
 
         csvFile = new File(csvPath);
+        this.userFactory = userFactory;
         headers.put("username", 0);
         headers.put("password", 1);
 
@@ -120,5 +125,37 @@ public class FileUserDataAccessObject implements SignupUserDataAccessInterface,
         // Replace the User object in the map
         accounts.put(user.getName(), user);
         save();
+    }
+
+    @Override
+    public void changeUsername(String oldUsername, String newUsername) {
+        // 1. Check if the user exists in the 'accounts' map
+        if (this.accounts.containsKey(oldUsername)) {
+
+            // 2. Retrieve the old User object
+            User oldUser = this.accounts.get(oldUsername);
+
+            // 3. Remove the entry indexed by the old username
+            this.accounts.remove(oldUsername);
+
+            // 4. Create a new User entity with the new username, reusing the old password
+            //    (Assuming User entity has a getPassword() method)
+            User newUser = userFactory.create(newUsername, oldUser.getPassword());
+
+            // 5. Add the new user to the map using the new username as the key
+            this.accounts.put(newUsername, newUser);
+
+            // 6. Save the updated map state to the file (assuming you have a save() method)
+            this.save();
+        }
+    }
+    @Override
+    public List<String> searchUsers(String query) {
+        // Simple case-insensitive containment search
+        String lowerCaseQuery = query.toLowerCase();
+
+        return this.accounts.keySet().stream()
+                .filter(username -> username.toLowerCase().contains(lowerCaseQuery))
+                .collect(Collectors.toList());
     }
 }

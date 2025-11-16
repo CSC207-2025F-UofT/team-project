@@ -142,7 +142,7 @@ public class LoggedInView extends JPanel implements ActionListener, PropertyChan
     public void propertyChange(PropertyChangeEvent evt) {
         if (evt.getPropertyName().equals("state")) {
             final LoggedInState state = (LoggedInState) evt.getNewValue();
-            usernameLabel.setText(state.getUsername());
+            usernameLabel.setText(state.getUsername()); // <--- This line will now execute correctly
         }
         // propertyChange for "password" update remains important as it shows success/failure
         // regardless of which view triggered the change (LoggedInView or AccountDetailsView)

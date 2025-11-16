@@ -13,6 +13,8 @@ import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
+import interface_adapter.logged_in.ChangeUsernameController;
+
 /**
  * The View for displaying Account Details, allowing password changes, and handling the Logout functionality.
  */
@@ -23,6 +25,7 @@ public class AccountDetailsView extends JPanel implements ActionListener, Proper
     private final LoggedInViewModel loggedInViewModel;
     private LogoutController logoutController;
     private ChangePasswordController changePasswordController;
+    private ChangeUsernameController changeUsernameController;
 
     // Components
     private final JButton logoutButton;
@@ -39,14 +42,12 @@ public class AccountDetailsView extends JPanel implements ActionListener, Proper
         this.setLayout(new BorderLayout());
         this.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
-        // --- 1. Top Bar (Title and Back Button) ---
+        // --- 1. Top Bar (Title and Back Button)
         topBar = new JPanel(new BorderLayout());
 
         JButton backButton = new JButton("⬅");
         backButton.setFont(new Font("SansSerif", Font.BOLD, 20));
-        backButton.setFocusPainted(false);
-        backButton.setBorderPainted(false);
-        backButton.setContentAreaFilled(false);
+
 
         backButton.addActionListener(e -> {
             viewManagerModel.setState("logged in");
@@ -71,9 +72,7 @@ public class AccountDetailsView extends JPanel implements ActionListener, Proper
 
         changeUsernameButton = new JButton("Change Username");
         changeUsernameButton.setAlignmentX(Component.CENTER_ALIGNMENT);
-        changeUsernameButton.addActionListener(e -> {
-            JOptionPane.showMessageDialog(this, "Change Username feature not yet implemented.");
-        });
+        changeUsernameButton.addActionListener(this);
 
         changePasswordButton = new JButton("Change Password");
         changePasswordButton.setAlignmentX(Component.CENTER_ALIGNMENT);
@@ -122,6 +121,24 @@ public class AccountDetailsView extends JPanel implements ActionListener, Proper
                         newPassword
                 );
             }
+        } else if (evt.getSource().equals(changeUsernameButton) && changeUsernameController != null) {
+            final String currentUsername = loggedInViewModel.getState().getUsername();
+
+            String newUsername = JOptionPane.showInputDialog(this,
+                    "Enter new username:",
+                    "Change Username",
+                    JOptionPane.PLAIN_MESSAGE
+            );
+
+            if (newUsername != null) {
+                changeUsernameController.execute(
+                        currentUsername,
+                        newUsername
+                );
+            } else {
+                // display that the username
+                // Print panel that says invalid username
+            }
         }
     }
 
@@ -131,6 +148,13 @@ public class AccountDetailsView extends JPanel implements ActionListener, Proper
             final LoggedInState state = (LoggedInState) evt.getNewValue();
             String newUsername = state.getUsername();
             usernameLabel.setText("Username: " + (newUsername != null ? newUsername : "User"));
+            if (evt.getPropertyName().equals("username")) {
+                if (state.getUsernameError() == null) {
+                    JOptionPane.showMessageDialog(this, "Username successfully updated to " + newUsername);
+                } else {
+                    JOptionPane.showMessageDialog(this, state.getUsernameError(), "Username Change Failed", JOptionPane.ERROR_MESSAGE);
+                }
+            }
         } else if (evt.getPropertyName().equals("password")) {
             final LoggedInState state = (LoggedInState) evt.getNewValue();
         }
@@ -146,5 +170,9 @@ public class AccountDetailsView extends JPanel implements ActionListener, Proper
 
     public void setChangePasswordController(ChangePasswordController changePasswordController) {
         this.changePasswordController = changePasswordController;
+    }
+
+    public void setChangeUsernameController(ChangeUsernameController changeUsernameController) {
+        this.changeUsernameController = changeUsernameController;
     }
 }

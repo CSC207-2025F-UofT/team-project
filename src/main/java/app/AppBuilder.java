@@ -14,6 +14,15 @@ import interface_adapter.logout.LogoutPresenter;
 import interface_adapter.signup.SignupController;
 import interface_adapter.signup.SignupPresenter;
 import interface_adapter.signup.SignupViewModel;
+// Corrected SearchUser Imports (Assuming your packages are named 'search_user')
+import interface_adapter.user_search.SearchUserController;
+import interface_adapter.user_search.SearchUserPresenter;
+import interface_adapter.user_search.SearchUserViewModel;
+import use_case.search_user.SearchUserInputBoundary;
+import use_case.search_user.SearchUserInteractor;
+import use_case.search_user.SearchUserOutputBoundary;
+import use_case.search_user.SearchUserDataAccessInterface;
+
 import use_case.change_password.ChangePasswordInputBoundary;
 import use_case.change_password.ChangePasswordInteractor;
 import use_case.change_password.ChangePasswordOutputBoundary;
@@ -34,6 +43,12 @@ import view.WelcomeView;
 import view.SearchUserView;
 import view.ChatView;
 import view.AccountDetailsView;
+import interface_adapter.logged_in.ChangeUsernameController;
+import interface_adapter.logged_in.ChangeUsernamePresenter;
+import use_case.change_username.ChangeUsernameInputBoundary;
+import use_case.change_username.ChangeUsernameInteractor;
+import use_case.change_username.ChangeUsernameOutputBoundary;
+import use_case.change_username.ChangeUsernameUserDataAccessInterface;
 
 import javax.swing.*;
 import java.awt.*;
@@ -61,9 +76,13 @@ public class AppBuilder {
     private LoggedInView loggedInView;
     private LoginView loginView;
     private WelcomeView welcomeView;
-    private SearchUserView newChatView;
+    // Removed 'newChatView' field for consistency
     private ChatView chatView;
     private AccountDetailsView accountDetailsView;
+
+    // Field for the Search User use case
+    private final SearchUserViewModel searchUserViewModel = new SearchUserViewModel();
+    private SearchUserView searchUserView; // This will hold the instantiated view
 
     public AppBuilder() {
         cardPanel.setLayout(cardLayout);
@@ -173,11 +192,8 @@ public class AppBuilder {
 
         return application;
     }
-    public AppBuilder addNewChatView() {
-        newChatView = new SearchUserView(viewManagerModel);
-        cardPanel.add(newChatView, newChatView.getViewName());
-        return this;
-    }
+
+    // REMOVED: addNewChatView() method (consolidated into addSearchUserView)
 
     public AppBuilder addChatView() {
         chatView = new ChatView(viewManagerModel);
@@ -189,6 +205,64 @@ public class AppBuilder {
         // AccountDetailsView requires ViewManagerModel and LoggedInViewModel
         accountDetailsView = new AccountDetailsView(viewManagerModel, loggedInViewModel);
         cardPanel.add(accountDetailsView, accountDetailsView.getViewName());
+        return this;
+    }
+
+    public AppBuilder addChangeUsernameUseCase() {
+        final ChangeUsernameOutputBoundary changeUsernameOutputBoundary =
+                new ChangeUsernamePresenter(loggedInViewModel, viewManagerModel);
+
+        final ChangeUsernameInputBoundary changeUsernameInteractor =
+                new ChangeUsernameInteractor(
+                        (ChangeUsernameUserDataAccessInterface) userDataAccessObject,
+                        changeUsernameOutputBoundary,
+                        userFactory
+                );
+
+        ChangeUsernameController changeUsernameController = new ChangeUsernameController(changeUsernameInteractor);
+
+        if (accountDetailsView != null) {
+            accountDetailsView.setChangeUsernameController(changeUsernameController);
+        }
+
+        return this;
+    }
+
+    /**
+     * Adds the Search User View to the application and instantiates it correctly.
+     * @return this builder
+     */
+    public AppBuilder addSearchUserView() {
+        // FIX: Pass the view model instance (searchUserViewModel)
+        this.searchUserView = new SearchUserView(viewManagerModel, searchUserViewModel);
+        cardPanel.add(searchUserView, searchUserView.getViewName());
+        return this;
+    }
+
+    /**
+     * Adds the User Search Use Case to the application.
+     * @return this builder
+     */
+    public AppBuilder addUserSearchUseCase() {
+        // Renamed to match the singular 'SearchUser' convention
+        final SearchUserOutputBoundary searchUserOutputBoundary =
+                new SearchUserPresenter(searchUserViewModel); // Uses declared field
+
+        // Renamed to match the singular 'SearchUser' convention
+        final SearchUserInputBoundary searchUsersInteractor =
+                new SearchUserInteractor(
+                        (SearchUserDataAccessInterface) userDataAccessObject,
+                        searchUserOutputBoundary
+                );
+
+        // Renamed to match the singular 'SearchUser' convention
+        final SearchUserController searchUserController = new SearchUserController(searchUsersInteractor);
+
+        if (this.searchUserView != null) {
+            // FIX: Call the setter on the INSTANCE field (this.searchUserView), not the static class
+            this.searchUserView.setUserSearchController(searchUserController);
+        }
+
         return this;
     }
 }
