@@ -11,6 +11,9 @@ public class Schedule {
     private final List<ScheduledBlock> lockedBlocks;
     private final List<BlockedTime> blockedTimes;
 
+    // Set of locked time keys (e.g., "Mon 9:00")
+    private final Set<String> lockedSlotKeys = new HashSet<>();
+
     public Schedule(int scheduleId, String type) {
         this.scheduleId = scheduleId;
         this.type = type;
@@ -39,6 +42,26 @@ public class Schedule {
         return Collections.unmodifiableList(unlockedBlocks);
     }
 
+    // locked keys accessor
+    public Set<String> getLockedSlotKeys() {
+        return Collections.unmodifiableSet(lockedSlotKeys);
+    }
+
+    // lock/unlock using time-key strings
+    public void lockSlotKey(String timeKey) {
+        if (timeKey == null) return;
+        lockedSlotKeys.add(timeKey);
+    }
+
+    public void unlockSlotKey(String timeKey) {
+        if (timeKey == null) return;
+        lockedSlotKeys.remove(timeKey);
+    }
+
+    public boolean isLockedKey(String timeKey) {
+        return timeKey != null && lockedSlotKeys.contains(timeKey);
+    }
+
     public void addActivity(String timeSlot, String activity) {
         activities.put(timeSlot, activity);
     }
@@ -47,14 +70,27 @@ public class Schedule {
         return Collections.unmodifiableMap(activities);
     }
 
+    // Reformatted populateRandomly
     public void populateRandomly() {
+        populateRandomly(Collections.emptySet());
+    }
+
+    // New populateRandomly that respects locked keys
+    public void populateRandomly(Set<String> lockedKeys) {
         activities.clear();
         String[] sampleActivities = {"Work", "Gym", "Lunch", "Relax", "Sleep"};
         String[] days = {"Mon", "Tue", "Wed", "Thu", "Fri"};
+        Random rand = new Random();
+
         for (String day : days) {
             for (int i = 9; i <= 17; i += 2) {
                 String time = day + " " + i + ":00";
-                activities.put(time, sampleActivities[new Random().nextInt(sampleActivities.length)]);
+                if (lockedKeys != null && lockedKeys.contains(time)) {
+                    // If the old schedule had a locked activity for this time, preserve it if present:
+                    // We'll not overwrite — caller should already have added locked activities into activities map before calling populate.
+                    continue;
+                }
+                activities.put(time, sampleActivities[rand.nextInt(sampleActivities.length)]);
             }
         }
     }
@@ -98,6 +134,19 @@ public class Schedule {
 
     public void removeBlockedTime(BlockedTime block) {
         blockedTimes.remove(block);
+    }
+
+    // Copy locked activities into this schedule from a source schedule
+    public void copyLockedActivitiesFrom(Schedule source) {
+        if (source == null) return;
+        // copy map entries for locked keys if present in source
+        for (String key : source.getLockedSlotKeys()) {
+            String activity = source.getActivities().get(key);
+            if (activity != null) {
+                this.activities.put(key, activity);
+                this.lockedSlotKeys.add(key);
+            }
+        }
     }
 }
 
