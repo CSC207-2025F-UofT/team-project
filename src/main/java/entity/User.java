@@ -35,9 +35,20 @@ public class User {
         return eventLists;
     }
 
+    public EventList getMasterList() {
+        return masterList;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    // Mutators
+
     public void setPassword(String password) {
         this.password = password;
     }
+
 
 
 
