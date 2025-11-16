@@ -1,6 +1,6 @@
 package entity;
 
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.List;
 
 public class Event {
@@ -10,13 +10,13 @@ public class Event {
     final String venue;
     final String city;
     final String country;
-    final Date date;
+    final LocalDate date;
     final int priceMin;
     final int priceMax;
     final String ticketUrl;
     final List<String> genres;
 
-    public Event(String id, String name, List<String> artists, String venue, String city, String country, Date date, int priceMin, int priceMax, String ticketUrl, List<String> genres) {
+    public Event(String id, String name, List<String> artists, String venue, String city, String country, LocalDate date, int priceMin, int priceMax, String ticketUrl, List<String> genres) {
         this.id = id;
         this.name = name;
         this.artists = artists;
@@ -48,7 +48,7 @@ public class Event {
     public String getCountry() {
         return country;
     }
-    public Date getDate() {
+    public LocalDate getDate() {
         return date;
     }
     public int getPriceMin() {
