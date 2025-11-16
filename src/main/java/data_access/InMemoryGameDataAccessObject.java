@@ -33,9 +33,6 @@ public class InMemoryGameDataAccessObject implements SwitchToGameViewDataAccessI
         Scene scene1 = new SceneFactory().create("Scene1", sceneOneList, "scene1.png");
         Scene scene2 = new SceneFactory().create("Scene2", new ArrayList<>(List.of(object2, object1)), "scene2.png");
 
-        Scene scene1 = new SceneFactory().create("Scene1", new ArrayList<>(List.of(object2)), "scene1.png");
-        Scene scene2 = new SceneFactory().create("Scene2", new ArrayList<>(List.of(object1)), "scene2.png");
-
         DialogueBox db1m1 = new DialogueBoxFactory().create(new ArrayList<>(List.of()), db1_pic);
         DialogueOption db1op11 = new DialogueOptionFactory().create("Ok.", option_xpos, option1_ypos, scene2);
 

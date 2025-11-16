@@ -105,9 +105,6 @@ public class GameInteractor implements GameInputBoundary {
 
 
         // ✅ Refresh UI
-        // the clickable object
-        ClickableObject clicked = gameInputData.getClickableObject();
-
         // game logic
         if (clicked instanceof NonPlayableCharacter) {
             gameDataAccessInterface.setCurrentScene(((NonPlayableCharacter) clicked).getDB());
