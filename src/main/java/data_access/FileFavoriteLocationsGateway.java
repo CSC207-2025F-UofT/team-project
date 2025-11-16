@@ -54,6 +54,11 @@ public class FileFavoriteLocationsGateway implements FavoriteLocationsGateway {
     }
 
     @Override
+    public void save(String cityName) {
+        saveFavorites(cityName);
+    }
+
+    @Override
     public boolean saveFavorites(String cityName) {
         if (!favorites.contains(cityName)) {
             favorites.add(cityName);
@@ -68,5 +73,20 @@ public class FileFavoriteLocationsGateway implements FavoriteLocationsGateway {
     @Override
     public List<String> getFavorites() {
         return new ArrayList<>(favorites);
+    }
+
+    @Override
+    public void delete(String cityName) {
+        if (cityName == null) {
+            return;
+        }
+        String trimmed =  cityName.trim();
+        if (trimmed.isEmpty()) {
+            return;
+        }
+
+        if (favorites.remove(trimmed)) {
+            saveToFile();
+        }
     }
 }
