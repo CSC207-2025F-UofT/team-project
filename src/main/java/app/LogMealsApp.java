@@ -48,7 +48,7 @@ public class LogMealsApp {
 
         // Create and show view
         SwingUtilities.invokeLater(() -> {
-            LogMealsView view = new LogMealsView(viewModel, controller, USER_ID);
+            LogMealsView view = new LogMealsView(viewModel, controller, mealDataAccess, USER_ID);
             view.setVisible(true);
         });
     }

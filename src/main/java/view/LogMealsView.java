@@ -3,6 +3,7 @@ package view;
 import entities.MealType;
 import interface_adapter.LogMeals.LogMealsController;
 import interface_adapter.LogMeals.LogMealsViewModel;
+import use_case.LogMeals.MealDataAccessInterface;
 
 import javax.swing.*;
 import java.awt.*;
@@ -16,15 +17,20 @@ public class LogMealsView extends JFrame implements PropertyChangeListener {
 
     private final LogMealsViewModel viewModel;
     private final LogMealsController controller;
+    private final MealDataAccessInterface mealDataAccess;
     private final String userId;
 
     private JTextArea resultArea;
     private JTextField foodNameField;
     private JComboBox<MealType> mealTypeComboBox;
+    private JButton saveButton;
+    private JPanel buttonPanel;
 
-    public LogMealsView(LogMealsViewModel viewModel, LogMealsController controller, String userId) {
+    public LogMealsView(LogMealsViewModel viewModel, LogMealsController controller,
+                        MealDataAccessInterface mealDataAccess, String userId) {
         this.viewModel = viewModel;
         this.controller = controller;
+        this.mealDataAccess = mealDataAccess;
         this.userId = userId;
 
         viewModel.addPropertyChangeListener(this);
@@ -50,27 +56,40 @@ public class LogMealsView extends JFrame implements PropertyChangeListener {
         foodNameField = new JTextField();
         inputPanel.add(foodNameField);
 
-        JButton logButton = new JButton("Log Meal");
-        logButton.addActionListener(e -> logMeal());
+        JButton fetchButton = new JButton("Fetch Nutrition");
+        fetchButton.addActionListener(e -> fetchNutrition());
         inputPanel.add(new JLabel()); // Empty cell
-        inputPanel.add(logButton);
+        inputPanel.add(fetchButton);
 
         add(inputPanel, BorderLayout.NORTH);
+
+        // Button panel at bottom
+        buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 10));
+
+        saveButton = new JButton("Save Meal");
+        saveButton.setEnabled(false); // Disabled initially
+        saveButton.addActionListener(e -> saveMeal());
+        buttonPanel.add(saveButton);
+
+        JButton viewMealsButton = new JButton("View All Logged Meals");
+        viewMealsButton.addActionListener(e -> openViewLoggedMealsWindow());
+        buttonPanel.add(viewMealsButton);
 
         // Center panel with results
         resultArea = new JTextArea();
         resultArea.setEditable(false);
         resultArea.setFont(new Font("Monospaced", Font.PLAIN, 12));
-        resultArea.setText("Enter a food name and click 'Log Meal' to fetch nutrition info from CalorieNinjas API\n\n");
+        resultArea.setText("Enter a food name and click 'Fetch Nutrition' to get nutrition info from CalorieNinjas API\n\n");
 
         JScrollPane scrollPane = new JScrollPane(resultArea);
         add(scrollPane, BorderLayout.CENTER);
+        add(buttonPanel, BorderLayout.SOUTH);
 
         // Allow Enter key to submit
-        foodNameField.addActionListener(e -> logMeal());
+        foodNameField.addActionListener(e -> fetchNutrition());
     }
 
-    private void logMeal() {
+    private void fetchNutrition() {
         String foodName = foodNameField.getText().trim();
         MealType mealType = (MealType) mealTypeComboBox.getSelectedItem();
 
@@ -83,15 +102,30 @@ public class LogMealsView extends JFrame implements PropertyChangeListener {
         controller.logMeal(foodName, mealType, userId);
     }
 
+    private void saveMeal() {
+        // Meal is already saved during fetch, this just confirms to user
+        JOptionPane.showMessageDialog(this, "Meal has been saved successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
+        saveButton.setEnabled(false); // Disable after saving
+    }
+
+    private void openViewLoggedMealsWindow() {
+        ViewLoggedMealsView viewLoggedMealsView = new ViewLoggedMealsView(mealDataAccess, userId);
+        viewLoggedMealsView.setVisible(true);
+    }
+
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
         if (viewModel.getSuccessMessage() != null) {
             resultArea.append("\n" + viewModel.getSuccessMessage() + "\n");
             resultArea.append("=" + "=".repeat(60) + "\n\n");
             foodNameField.setText("");
+            // Enable save button after successful fetch
+            saveButton.setEnabled(true);
         } else if (viewModel.getErrorMessage() != null) {
             resultArea.append("ERROR: " + viewModel.getErrorMessage() + "\n\n");
             JOptionPane.showMessageDialog(this, viewModel.getErrorMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            // Disable save button on error
+            saveButton.setEnabled(false);
         }
     }
 }
