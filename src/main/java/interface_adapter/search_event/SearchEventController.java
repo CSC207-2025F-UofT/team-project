@@ -23,10 +23,9 @@ public class SearchEventController {
 
     private void initializeCountriesMap() {
         String[] isoCountries = Locale.getISOCountries();
-        countriesMap = new HashMap<String, String>();
+        countriesMap = new HashMap<>();
         for (String country : isoCountries) {
             Locale locale = new Locale("en", country);
-            String iso = locale.getISO3Country();
             String code = locale.getCountry();
             String name = locale.getDisplayCountry();
             countriesMap.put(name.toLowerCase(), code);
@@ -37,7 +36,7 @@ public class SearchEventController {
      * populates the genre map in the format of <genreName, genreId>
      */
     private void initializeGenreMap() {
-        genreMap = new HashMap<String, String>();
+        genreMap = new HashMap<>();
         genreMap.put("alternative", "KnvZfZ7vAvv");
         genreMap.put("ballads/romantic", "KnvZfZ7vAve");
         genreMap.put("blues", "KnvZfZ7vAvd");
@@ -65,8 +64,9 @@ public class SearchEventController {
     /**
      * Executes the search event Use Case by processing raw search parameters.
      * * @param rawKeyword The keyword or artist name string from the UI.
-     * @param rawStartDate The raw start date string (e.g., "YYYY-MM-DD").
-     * @param rawEndDate The raw end date string (e.g., "YYYY-MM-DD").
+     *
+     * @param rawStartDate   The raw start date string (e.g., "YYYY-MM-DD").
+     * @param rawEndDate     The raw end date string (e.g., "YYYY-MM-DD").
      * @param rawCountryName The raw name of the country with proper spelling
      */
     public void execute(String rawKeyword, String rawArtist, String rawCountryName, String rawCityName, String rawStartDate, String rawEndDate, List<String> genre) {
@@ -80,14 +80,7 @@ public class SearchEventController {
         String genreIds = formatGenre(genre);
 
         // Create the input data
-        final SearchEventInputData searchEventInputData = new SearchEventInputData(
-                keyword,
-                country,
-                city,
-                genreIds,
-                startDateTime,
-                endDateTime
-        );
+        final SearchEventInputData searchEventInputData = new SearchEventInputData(keyword, country, city, genreIds, startDateTime, endDateTime);
 
         //Call interactor
         searchInteractor.execute(searchEventInputData);
@@ -97,6 +90,7 @@ public class SearchEventController {
      * Helper to convert a simple YYYY-MM-DD date string into the required ISO 8601 UTC format.
      * The TicketMaster api uses the ISO format.
      * * @param rawDate The date string (e.g., "2025-12-15").
+     *
      * @param isStart If true, uses the start of the day (00:00:00Z). If false, uses the end of the day (23:59:59Z).
      * @return Formatted ISO 8601 string or null if input is invalid/empty.
      */
@@ -146,6 +140,7 @@ public class SearchEventController {
 
     /**
      * Returns the ISO code for the given country as specified by TicketMaster API
+     *
      * @param countryName is the full name of the country
      * @return The two digit ISO code of the country
      */
@@ -158,9 +153,11 @@ public class SearchEventController {
     private String formatGenre(List<String> genreNames) {
         String genreIds = "";
         for (String genreName : genreNames) {
-            genreIds = genreIds.concat(genreMap.getOrDefault(genreName, ""))+",";
+            genreIds = genreIds.concat(genreMap.getOrDefault(genreName, "")) + ",";
         }
-        genreIds = genreIds.substring(0, genreIds.length() - 1);
+        if (!genreIds.isEmpty()) {
+            genreIds = genreIds.substring(0, genreIds.length() - 1);
+        }
         return genreIds;
     }
 
