@@ -16,6 +16,7 @@
 
 //    /**
 //     * Reorders the replies list using Merge Sort based on the vote score (descending).
+//     * Note: to be added into OriginalPost class
 //     */
 //    public void reorderReplies() {
 //        if (this.replies == null || this.replies.size() <= 1) {
