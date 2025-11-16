@@ -1,4 +1,6 @@
-package entity;
+package use_case.spending_report;
+
+import entity.SpendingReport;
 
 public class GenerateReportOutput {
     private final SpendingReport report;

@@ -1,6 +1,11 @@
-package use_case.spending_report;
-
 import java.util.*;
+import entity.transaction.Transaction;
+import use_case.transaction.TransactionDataAccessInterface;
+import use_case.spending_report.GenerateReportInputBoundary;
+import use_case.spending_report.GenerateReportInput;
+import use_case.spending_report.GenerateReportOutputBoundary;
+import use_case.spending_report.GenerateReportOutputData;
+import entity.report.Report;
 
 public class GenerateReportInteractor implements GenerateReportInputBoundary {
     private final TransactionDataAccessInterface transactionDAO;
@@ -13,12 +18,12 @@ public class GenerateReportInteractor implements GenerateReportInputBoundary {
     }
 
     @Override
-    public void execute(GenerateReportInputData inputData) {
+    public void execute(GenerateReportInput inputData) {
         List<Transaction> transactions = transactionDAO.getTransactionsByUserAndMonth(
                 inputData.getUserId(), inputData.getMonth());
 
         if (transactions.isEmpty()) {
-            presenter.present(new GenerateReportOutput(null, false));
+            presenter.present(new GenerateReportOutputData(null, false));
             return;
         }
 
@@ -28,6 +33,6 @@ public class GenerateReportInteractor implements GenerateReportInputBoundary {
         }
 
         Report report = new Report(inputData.getMonth(), categoryTotals);
-        presenter.present(new GenerateReportOutput(report, true));
+        presenter.present(new GenerateReportOutputData(report, true));
     }
 }

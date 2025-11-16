@@ -1,4 +1,5 @@
 package use_case.spending_report;
+import entity.SpendingReportViewModel;
 
 public class GenerateReportPresenter implements GenerateReportOutputBoundary {
     private final SpendingReportViewModel viewModel;
@@ -8,7 +9,7 @@ public class GenerateReportPresenter implements GenerateReportOutputBoundary {
     }
 
     @Override
-    public void present(GenerateReportOutput outputData) {
+    public void presentReport(GenerateReportOutput outputData) {
         if (outputData.isSuccess()) {
             viewModel.setReport(outputData.getReport());
             viewModel.displayChart();
