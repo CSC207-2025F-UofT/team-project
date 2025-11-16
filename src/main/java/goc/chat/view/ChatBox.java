@@ -15,7 +15,7 @@ import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.util.List;
 
-public class ChatWindowWeChatStyle extends JFrame implements ViewChatHistoryOutputBoundary {
+public class ChatBox extends JFrame implements ViewChatHistoryOutputBoundary {
 
     private final InMemoryChatRepository chatRepository;
     private final InMemoryMessageRepository messageRepository;
@@ -31,8 +31,8 @@ public class ChatWindowWeChatStyle extends JFrame implements ViewChatHistoryOutp
     private final String currentChatId = "chat-1";
     private final String currentUserId = "user-1";
 
-    public ChatWindowWeChatStyle() {
-        super("GoChat - Dark WeChat Style");
+    public Chatbox() {
+        super("GoChat Demo");
 
         chatRepository = new InMemoryChatRepository();
         messageRepository = new InMemoryMessageRepository();
@@ -76,12 +76,19 @@ public class ChatWindowWeChatStyle extends JFrame implements ViewChatHistoryOutp
 
     private void sendAndRefresh() {
         String text = inputField.getText().trim();
-        if (text.isEmpty()) return;
+        if (text.isEmpty()) {
+            return;
+        }
 
         sendMessageInteractor.execute(currentChatId, currentUserId, text);
         inputField.setText("");
 
         loadChatHistory();
+
+        SwingUtilities.invokeLater(() -> {
+            JScrollBar verticalBar = chatScrollPane.getVerticalScrollBar();
+            verticalBar.setValue(verticalBar.getMaximum());
+        });
     }
 
     private void loadChatHistory() {
@@ -102,20 +109,22 @@ public class ChatWindowWeChatStyle extends JFrame implements ViewChatHistoryOutp
             bubble.setLayout(new BoxLayout(bubble, BoxLayout.Y_AXIS));
             bubble.setBorder(new EmptyBorder(5, 5, 5, 5));
             // receive ikons!!
-            JLabel textLabel = new JLabel("<html>" + dto.getContent()
-                    + (isMe ? "  ✓" : "") + "</html>");
+            String text = dto.getContent() + (isMe ? "  ✓" : "");
+            JLabel msgLabel = new JLabel("<html>" + text + "</html>");
 
-            textLabel.setOpaque(true);
-            textLabel.setBorder(new EmptyBorder(10, 10, 10, 10));
+            msgLabel.setOpaque(true);
+            msgLabel.setBorder(new EmptyBorder(10, 10, 10, 10));
 
             if (isMe) {
                 bubble.setAlignmentX(Component.RIGHT_ALIGNMENT);
-                textLabel.setBackground(new Color(0x95EC69));
+                msgLabel.setBackground(new Color(0x95EC69));
             } else {
                 bubble.setAlignmentX(Component.LEFT_ALIGNMENT);
-                textLabel.setBackground(new Color(60, 60, 60));
-                textLabel.setForeground(Color.WHITE);
+                msgLabel.setBackground(new Color(60, 60, 60));
+                msgLabel.setForeground(Color.WHITE);
             }
+
+            bubble.add(msgLabel);
 
             bubble.add(textLabel);
 
@@ -152,6 +161,12 @@ public class ChatWindowWeChatStyle extends JFrame implements ViewChatHistoryOutp
     public void prepareFailView(String errorMessage) {
         JOptionPane.showMessageDialog(this, errorMessage,
                 "Error", JOptionPane.ERROR_MESSAGE);
+    }
+
+    private String formatTimestamp(Instant timestamp) {
+        ZonedDateTime time = timestamp.atZone(ZoneId.systemDefault());
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm");
+        return formatter.format(time);
     }
 
     public static void main(String[] args) {
