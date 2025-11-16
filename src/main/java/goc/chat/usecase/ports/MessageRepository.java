@@ -8,4 +8,5 @@ public interface MessageRepository {
     Optional<Message> findById(String id);
     Message save(Message message);
     List<Message> findByChatId(String chatId);
+    void deleteById(String id);
 }

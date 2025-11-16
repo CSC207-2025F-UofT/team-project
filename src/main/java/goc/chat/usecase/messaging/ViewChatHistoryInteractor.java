@@ -63,6 +63,7 @@ public class ViewChatHistoryInteractor {
             String senderName = resolveSenderName(m.getSenderUserId());
             dtos.add(new ChatMessageDto(
                     m.getId(),
+                    m.getSenderUserId(),
                     senderName,
                     m.getContent(),
                     m.getTimestamp()
