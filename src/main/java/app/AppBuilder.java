@@ -91,7 +91,7 @@ public class AppBuilder {
 
     public AppBuilder addLoggedInView() {
         loggedInViewModel = new LoggedInViewModel();
-        loggedInView = new LoggedInView(loggedInViewModel, viewManagerModel);
+        loggedInView = new LoggedInView(loggedInViewModel, viewManagerModel); // <-- PASS viewManagerModel
         cardPanel.add(loggedInView, loggedInView.getViewName());
         return this;
     }
@@ -126,7 +126,14 @@ public class AppBuilder {
                 new ChangePasswordInteractor(userDataAccessObject, changePasswordOutputBoundary, userFactory);
 
         ChangePasswordController changePasswordController = new ChangePasswordController(changePasswordInteractor);
+
         loggedInView.setChangePasswordController(changePasswordController);
+
+        // SET CONTROLLER ON NEW VIEW
+        if (accountDetailsView != null) {
+            accountDetailsView.setChangePasswordController(changePasswordController);
+        }
+
         return this;
     }
 
@@ -142,8 +149,14 @@ public class AppBuilder {
                 new LogoutInteractor(userDataAccessObject, logoutOutputBoundary);
 
         final LogoutController logoutController = new LogoutController(logoutInteractor);
+
+        // Set controller on BOTH views
         loggedInView.setLogoutController(logoutController);
-        accountDetailsView.setLogoutController(logoutController);
+
+        // This line assumes you call addAccountDetailsView() BEFORE this method (AppBuilder order matters)
+        if (accountDetailsView != null) {
+            accountDetailsView.setLogoutController(logoutController);
+        }
 
         return this;
     }
@@ -173,8 +186,8 @@ public class AppBuilder {
     }
 
     public AppBuilder addAccountDetailsView() {
-        // Assuming the AppBuilder now has a constructor that accepts ViewManagerModel
-        accountDetailsView = new AccountDetailsView(viewManagerModel);
+        // AccountDetailsView requires ViewManagerModel and LoggedInViewModel
+        accountDetailsView = new AccountDetailsView(viewManagerModel, loggedInViewModel);
         cardPanel.add(accountDetailsView, accountDetailsView.getViewName());
         return this;
     }

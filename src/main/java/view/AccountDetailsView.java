@@ -1,7 +1,10 @@
 package view;
 
 import interface_adapter.ViewManagerModel;
+import interface_adapter.logged_in.ChangePasswordController;
+import interface_adapter.logged_in.LoggedInViewModel;
 import interface_adapter.logout.LogoutController;
+import interface_adapter.logged_in.LoggedInState;
 
 import javax.swing.*;
 import java.awt.*;
@@ -11,79 +14,86 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
 /**
- * The View for displaying Account Details and handling the Logout functionality.
+ * The View for displaying Account Details, allowing password changes, and handling the Logout functionality.
  */
 public class AccountDetailsView extends JPanel implements ActionListener, PropertyChangeListener {
 
     public final String viewName = "account details";
     private final ViewManagerModel viewManagerModel;
-    private LogoutController logoutController; // Will need a setter for this
+    private final LoggedInViewModel loggedInViewModel;
+    private LogoutController logoutController;
+    private ChangePasswordController changePasswordController;
 
     // Components
     private final JButton logoutButton;
-    private final JLabel additionalInfoLabel;
-
-    // Top bar component for the title and navigation
+    private final JButton changeUsernameButton;
+    private final JButton changePasswordButton;
+    private final JLabel usernameLabel;
     private final JPanel topBar;
 
-    public AccountDetailsView(ViewManagerModel viewManagerModel) {
+    public AccountDetailsView(ViewManagerModel viewManagerModel, LoggedInViewModel loggedInViewModel) {
         this.viewManagerModel = viewManagerModel;
+        this.loggedInViewModel = loggedInViewModel;
+        this.loggedInViewModel.addPropertyChangeListener(this);
+
         this.setLayout(new BorderLayout());
         this.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
-        // Top Bar (Title and Back Button)
+        // --- 1. Top Bar (Title and Back Button) ---
         topBar = new JPanel(new BorderLayout());
 
-        // Left Side: Back/Exit Button (Go back to LoggedInView/Recent Chats)
-        JButton backButton = new JButton("⬅"); // Unicode for back arrow
-        backButton.setFont(new Font("Oxygen", Font.BOLD, 20));
+        JButton backButton = new JButton("⬅");
+        backButton.setFont(new Font("SansSerif", Font.BOLD, 20));
         backButton.setFocusPainted(false);
         backButton.setBorderPainted(false);
         backButton.setContentAreaFilled(false);
 
         backButton.addActionListener(e -> {
-            // Navigate back to the LoggedInView
             viewManagerModel.setState("logged in");
             viewManagerModel.firePropertyChange();
         });
 
         topBar.add(backButton, BorderLayout.WEST);
 
-        // Center: Title
         JLabel title = new JLabel("Account Details", SwingConstants.CENTER);
-        title.setFont(new Font("Oxygen", Font.BOLD, 24));
+        title.setFont(new Font("SansSerif", Font.BOLD, 24));
         topBar.add(title, BorderLayout.CENTER);
 
-        // Main Content Area
+        // --- 2. Main Content Area ---
         JPanel contentPanel = new JPanel();
         contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.Y_AXIS));
         contentPanel.setBorder(BorderFactory.createEmptyBorder(50, 20, 50, 20));
 
-        additionalInfoLabel = new JLabel("Additional Information here");
-        additionalInfoLabel.setFont(new Font("Oxygen", Font.ITALIC, 16));
-        additionalInfoLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        String currentUsername = loggedInViewModel.getState().getUsername();
+        usernameLabel = new JLabel("Username: " + (currentUsername != null ? currentUsername : "User"));
+        usernameLabel.setFont(new Font("SansSerif", Font.PLAIN, 20));
+        usernameLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-        // Placeholder for real account data (username, email, etc.)
-        JLabel usernamePlaceholder = new JLabel("Username: [Current User]");
-        usernamePlaceholder.setAlignmentX(Component.CENTER_ALIGNMENT);
-        JLabel statusPlaceholder = new JLabel("Status: Active");
-        statusPlaceholder.setAlignmentX(Component.CENTER_ALIGNMENT);
+        changeUsernameButton = new JButton("Change Username");
+        changeUsernameButton.setAlignmentX(Component.CENTER_ALIGNMENT);
+        changeUsernameButton.addActionListener(e -> {
+            JOptionPane.showMessageDialog(this, "Change Username feature not yet implemented.");
+        });
 
-        contentPanel.add(usernamePlaceholder);
+        changePasswordButton = new JButton("Change Password");
+        changePasswordButton.setAlignmentX(Component.CENTER_ALIGNMENT);
+        changePasswordButton.addActionListener(this);
+
+        contentPanel.add(usernameLabel);
+        contentPanel.add(Box.createVerticalStrut(20));
+        contentPanel.add(changeUsernameButton);
         contentPanel.add(Box.createVerticalStrut(10));
-        contentPanel.add(statusPlaceholder);
-        contentPanel.add(Box.createVerticalStrut(30));
-        contentPanel.add(additionalInfoLabel);
-        contentPanel.add(Box.createVerticalGlue()); // Push elements up
+        contentPanel.add(changePasswordButton);
+        contentPanel.add(Box.createVerticalGlue());
 
-        // Logout Button Panel (Bottom)
+        // --- 3. Logout Button Panel (Bottom) ---
         JPanel southPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
         logoutButton = new JButton("Logout");
         logoutButton.addActionListener(this);
 
         southPanel.add(logoutButton);
 
-        // Assembly
+        // --- 4. Assembly ---
         this.add(topBar, BorderLayout.NORTH);
         this.add(contentPanel, BorderLayout.CENTER);
         this.add(southPanel, BorderLayout.SOUTH);
@@ -92,14 +102,38 @@ public class AccountDetailsView extends JPanel implements ActionListener, Proper
     @Override
     public void actionPerformed(ActionEvent evt) {
         if (evt.getSource().equals(logoutButton) && logoutController != null) {
-            // Use the existing Logout use case
             logoutController.execute();
+        } else if (evt.getSource().equals(changePasswordButton) && changePasswordController != null) {
+
+            // 1. Get the current username
+            final String currentUsername = loggedInViewModel.getState().getUsername();
+
+            // 2. Prompt user for the new password
+            String newPassword = JOptionPane.showInputDialog(this,
+                    "Enter new password for " + currentUsername + ":",
+                    "Change Password",
+                    JOptionPane.PLAIN_MESSAGE
+            );
+
+            // 3. Execute the use case if a password was entered
+            if (newPassword != null) {
+                changePasswordController.execute(
+                        currentUsername,
+                        newPassword
+                );
+            }
         }
     }
 
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
-        // Future logic for updating username/details here
+        if (evt.getPropertyName().equals("state")) {
+            final LoggedInState state = (LoggedInState) evt.getNewValue();
+            String newUsername = state.getUsername();
+            usernameLabel.setText("Username: " + (newUsername != null ? newUsername : "User"));
+        } else if (evt.getPropertyName().equals("password")) {
+            final LoggedInState state = (LoggedInState) evt.getNewValue();
+        }
     }
 
     public String getViewName() {
@@ -108,5 +142,9 @@ public class AccountDetailsView extends JPanel implements ActionListener, Proper
 
     public void setLogoutController(LogoutController logoutController) {
         this.logoutController = logoutController;
+    }
+
+    public void setChangePasswordController(ChangePasswordController changePasswordController) {
+        this.changePasswordController = changePasswordController;
     }
 }
