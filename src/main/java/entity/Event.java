@@ -22,8 +22,9 @@ public class Event {
     final int priceMax;
     final String ticketUrl;
     final List<String> genres;
+    final String imageURL;
 
-    public Event(String id, String name, List<String> artists, String venue, String city, String country, LocalDate date, int priceMin, int priceMax, String ticketUrl, List<String> genres) {
+    public Event(String id, String name, List<String> artists, String venue, String city, String country, LocalDate date, int priceMin, int priceMax, String ticketUrl, List<String> genres, String imageURL) {
         this.id = id;
         this.name = name;
         this.artists = artists;
@@ -35,6 +36,7 @@ public class Event {
         this.priceMax = priceMax;
         this.ticketUrl = ticketUrl;
         this.genres = genres;
+        this.imageURL = imageURL;
     }
 
     // Getters
@@ -79,6 +81,9 @@ public class Event {
 
     public List<String> getGenres() {
         return genres;
+    }
+    public String getImageURL() {
+        return imageURL;
     }
 
 

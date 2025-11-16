@@ -8,6 +8,7 @@ public class User {
     private final String lastName;
     private String password;
     private final List<EventList> eventLists;
+    private final EventList masterList = new EventList("master_list", "Master List");
 
     public User(String username, String firstName, String lastName, String password, List<EventList> eventLists) {
         this.username = username;
@@ -33,6 +34,12 @@ public class User {
     public List<EventList> getEventLists() {
         return eventLists;
     }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+
 
 
 }
