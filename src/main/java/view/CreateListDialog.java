@@ -35,9 +35,8 @@ public class CreateListDialog extends JDialog {
         panel.add(createButton);
 
         // Attach panel to dialog
-        setContentPane(panel);
-        pack();
-        setLocationRelativeTo(parent);
+        setContentPane(panel); // Places the UI inside the window
+        pack(); // Automatically resize
     }
 
     public String getListName() {
