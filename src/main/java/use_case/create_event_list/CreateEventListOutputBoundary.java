@@ -1,5 +1,5 @@
 package use_case.create_event_list;
 
-public class CreateEventInputData {
+public interface CreateEventListOutputBoundary {
     // To be implemented
 }

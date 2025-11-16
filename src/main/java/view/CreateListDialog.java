@@ -1,12 +1,12 @@
 package view;
 
 import javax.swing.*;
-import java.awt.*;
+        import java.awt.*;
 
 public class CreateListDialog extends JDialog {
 
     private final JTextField nameField = new JTextField(20);
-    private String listName;
+    private final JButton createButton = new JButton("Create");
 
     public CreateListDialog(Frame parent) {
         super(parent, "Create List", true);
@@ -23,23 +23,29 @@ public class CreateListDialog extends JDialog {
         JPanel namePanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         namePanel.add(new JLabel("Name:"));
         namePanel.add(nameField);
-
         panel.add(namePanel);
 
         // Create button
-        JButton createButton = new JButton("Create");
-        createButton.addActionListener(e -> {
-            listName = nameField.getText();
-            dispose();
-        });
         panel.add(createButton);
-
-        // Attach panel to dialog
         setContentPane(panel); // Places the UI inside the window
         pack(); // Automatically resize
     }
 
-    public String getListName() {
-        return listName;
+
+    // Testing, to be deleted
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(() -> {
+            // Simple invisible parent frame just to center the dialog
+            JFrame frame = new JFrame("Parent Frame");
+            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+            frame.setSize(400, 300);
+            frame.setVisible(true);
+
+            CreateListDialog dialog = new CreateListDialog(frame);
+            dialog.setVisible(true);
+        });
     }
+
 }
+
+

@@ -45,11 +45,9 @@ public class EventListView extends JPanel {
 
         add(centerPanel, BorderLayout.CENTER);
 
-        // Create List Button
-        createListButton.addActionListener(e -> openCreateListDialog());
     }
 
-    public void addListRow(String listName) {
+    public JButton addListRow(String listName) {
         JPanel row = new JPanel(new BorderLayout());
         JLabel nameLabel = new JLabel(listName);
         JButton deleteButton = new JButton("Delete");
@@ -57,33 +55,26 @@ public class EventListView extends JPanel {
         row.add(nameLabel, BorderLayout.WEST);
         row.add(deleteButton, BorderLayout.EAST);
 
-        // When delete is clicked, remove this row from the container
-        deleteButton.addActionListener(e -> {
-            listsContainer.remove(row);
-            listsContainer.revalidate();
-            listsContainer.repaint();
-        });
-
         listsContainer.add(row);
-        listsContainer.add(Box.createVerticalStrut(5));
-
-        listsContainer.revalidate();
-        listsContainer.repaint();
+        // Controller will take care of the actions
+        return deleteButton;
     }
 
-    // Create-list popup
-    private void openCreateListDialog() {
-        Window window = SwingUtilities.getWindowAncestor(this);
-        Frame parent = window instanceof Frame ? (Frame) window : null;
-
-        CreateListDialog dialog = new CreateListDialog(parent);
-        dialog.setVisible(true);
-
-        String newName = dialog.getListName();
-        if (newName != null && !newName.isBlank()) {
-            addListRow(newName);
-        }
+    // Getters for controllers in the future
+    public JButton getCreateListButton() {
+        return createListButton;
     }
+
+    public JPanel getListsContainer() {
+        return listsContainer;
+    }
+
+    public JPanel getMasterListPanel() {
+        return masterListPanel;
+    }
+
+
+
 
     // Preview for testing, to be deleted
     public static void main(String[] args) {
