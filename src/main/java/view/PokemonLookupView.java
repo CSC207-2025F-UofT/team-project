@@ -3,6 +3,7 @@ package view;
 import interface_adapter.pokemon_lookup.PokemonLookupController;
 import interface_adapter.pokemon_lookup.PokemonLookupState;
 import interface_adapter.pokemon_lookup.PokemonLookupViewModel;
+import use_case.PokemonLookup.PokemonLookupInputBoundary;
 
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
@@ -51,9 +52,7 @@ public class PokemonLookupView extends JPanel implements ActionListener, Propert
                                 pokemonLookupController.execute(currentState.getPokemonName());
                                 displayPokemon.setPokemon(currentState.getDisplayPokemon());
 
-                            } catch (IOException e) {
-                                throw new RuntimeException(e);
-                            } catch (NullPointerException e) {
+                            } catch (IOException | PokemonLookupInputBoundary.PokemonNotFoundException e) {
                                 JOptionPane.showMessageDialog(null, "Not a valid Pokemon Name");
                             }
                         }
