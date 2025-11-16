@@ -1,6 +1,8 @@
 package com.studyarc.interface_adapter.track_plan;
 
 import com.studyarc.use_case.track_plan.TrackPlanInputBoundary;
+import com.studyarc.use_case.track_plan.TrackPlanInputData;
+
 
 public class TrackPlanController {
     final TrackPlanInputBoundary trackplaninteractor;
@@ -9,9 +11,10 @@ public class TrackPlanController {
         this.trackplaninteractor = trackplaninteractor;
     }
 
-    //Maybe will add parameter of inputdata to this execute method
-    public void execute(){
-//        this.trackplaninteractor.execute();
+
+    public void execute(String username){
+        TrackPlanInputData trackPlanInputData = new TrackPlanInputData(username);
+        this.trackplaninteractor.execute(trackPlanInputData);
     }
 
 }

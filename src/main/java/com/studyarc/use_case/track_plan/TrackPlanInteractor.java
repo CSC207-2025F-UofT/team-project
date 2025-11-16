@@ -4,6 +4,11 @@ package com.studyarc.use_case.track_plan;
 //1. access all plans from the user in database
 //2. display all the plan in w.e the view is called
 
+import com.studyarc.entity.StudyPlan;
+
+import java.util.ArrayList;
+import java.util.List;
+
 public class TrackPlanInteractor implements TrackPlanInputBoundary {
     final TrackPlanOutputBoundary presenter;
     final TrackPlanDataAccessinterface getPlanTool;
@@ -15,7 +20,18 @@ public class TrackPlanInteractor implements TrackPlanInputBoundary {
 
     @Override
     public void execute(TrackPlanInputData inputData) {
-
         System.out.println("interactor executes");
+
+        String username = inputData.getUsername();
+        ArrayList<StudyPlan> listofplans = this.getPlanTool.getPlans(username);
+        TrackPlanOutputData trackPlanOutputData = new TrackPlanOutputData(username, listofplans);
+
+        if (listofplans.isEmpty()) {
+            presenter.parepareShowRedirect(trackPlanOutputData);
+        } else {
+            presenter.prepareShowPlans(trackPlanOutputData);
+        }
+
+
     }
 }
