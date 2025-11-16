@@ -130,6 +130,20 @@ public class LoggedInView extends JPanel implements ActionListener, PropertyChan
                     }
                 }
         );
+
+        // Action Listeners for the new buttons
+        profileButton.addActionListener(e -> {
+            // Navigate to the new AccountDetailsView
+            viewManagerModel.setState("account details");
+            viewManagerModel.firePropertyChange();
+        });
+
+        newChatButton.addActionListener(e -> {
+            // Navigate to the NewChatView
+            viewManagerModel.setState("new chat");
+            viewManagerModel.firePropertyChange();
+        });
+
         buttonPanel.add(logOut);
         buttonPanel.add(changePassword);
         buttonPanel.setVisible(false); // Hide the buttons

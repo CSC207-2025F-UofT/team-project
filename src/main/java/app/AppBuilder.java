@@ -33,6 +33,7 @@ import view.ViewManager;
 import view.WelcomeView;
 import view.SearchUserView;
 import view.ChatView;
+import view.AccountDetailsView;
 
 import javax.swing.*;
 import java.awt.*;
@@ -62,6 +63,7 @@ public class AppBuilder {
     private WelcomeView welcomeView;
     private SearchUserView newChatView;
     private ChatView chatView;
+    private AccountDetailsView accountDetailsView;
 
     public AppBuilder() {
         cardPanel.setLayout(cardLayout);
@@ -141,6 +143,8 @@ public class AppBuilder {
 
         final LogoutController logoutController = new LogoutController(logoutInteractor);
         loggedInView.setLogoutController(logoutController);
+        accountDetailsView.setLogoutController(logoutController);
+
         return this;
     }
 
@@ -165,6 +169,13 @@ public class AppBuilder {
     public AppBuilder addChatView() {
         chatView = new ChatView(viewManagerModel);
         cardPanel.add(chatView, chatView.getViewName());
+        return this;
+    }
+
+    public AppBuilder addAccountDetailsView() {
+        // Assuming the AppBuilder now has a constructor that accepts ViewManagerModel
+        accountDetailsView = new AccountDetailsView(viewManagerModel);
+        cardPanel.add(accountDetailsView, accountDetailsView.getViewName());
         return this;
     }
 }
