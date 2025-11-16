@@ -22,10 +22,10 @@
 //            return;
 //        }
 //
-//        // 1. Convert the List to an array for efficient sorting
+//        // Convert the List to an array (for more efficient sorting)
 //        ReplyPost[] sortedReplies = mergeSort(this.replies.toArray(new ReplyPost[0]));
 //
-//        // 2. Update the instance variable list with the sorted results
+//        // Update the instance variable list with the sorted results
 //        this.replies = new ArrayList<>(Arrays.asList(sortedReplies));
 //    }
 //
@@ -42,18 +42,15 @@
 //
 //        int mid = n / 2;
 //
-//        // Create left and right subarrays
 //        ReplyPost[] left = new ReplyPost[mid];
 //        System.arraycopy(array, 0, left, 0, mid);
 //
 //        ReplyPost[] right = new ReplyPost[n - mid];
 //        System.arraycopy(array, mid, right, 0, n - mid);
 //
-//        // Recursively sort the two halves
 //        left = mergeSort(left);
 //        right = mergeSort(right);
 //
-//        // Merge the results
 //        return merge(left, right);
 //    }
 //
@@ -68,9 +65,6 @@
 //        int i = 0, j = 0, k = 0; // i for left, j for right, k for result
 //
 //        while (i < left.length && j < right.length) {
-//            // Comparison for DESCENDING order (highest score first):
-//            // If left[i] has a score greater than or equal to right[j]'s score,
-//            // it comes first.
 //            if (left[i].getScore() >= right[j].getScore()) {
 //                result[k++] = left[i++];
 //            } else {
@@ -78,12 +72,10 @@
 //            }
 //        }
 //
-//        // Copy remaining elements from left array
 //        while (i < left.length) {
 //            result[k++] = left[i++];
 //        }
 //
-//        // Copy remaining elements from right array
 //        while (j < right.length) {
 //            result[k++] = right[j++];
 //        }
@@ -93,7 +85,6 @@
 //
 //    public void addReply(ReplyPost reply) {
 //        this.replies.add(reply);
-//        // Automatically reorder after adding a new reply (optional)
 //        reorderReplies();
 //    }
 
