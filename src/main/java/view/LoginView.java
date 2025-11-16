@@ -1,5 +1,6 @@
 package view;
 
+import interface_adapter.ViewManagerModel;
 import interface_adapter.login.LoginController;
 import interface_adapter.login.LoginState;
 import interface_adapter.login.LoginViewModel;
@@ -20,6 +21,7 @@ public class LoginView extends JPanel implements ActionListener, PropertyChangeL
 
     private final String viewName = "log in";
     private final LoginViewModel loginViewModel;
+    private final ViewManagerModel viewManagerModel;
 
     private final JTextField usernameInputField = new JTextField(15);
     private final JLabel usernameErrorField = new JLabel();
@@ -28,12 +30,14 @@ public class LoginView extends JPanel implements ActionListener, PropertyChangeL
     private final JLabel passwordErrorField = new JLabel();
 
     private final JButton logIn;
+    private final JButton signUp;
     private LoginController loginController = null;
 
-    public LoginView(LoginViewModel loginViewModel) {
+    public LoginView(LoginViewModel loginViewModel, ViewManagerModel viewManagerModel) {
 
         this.loginViewModel = loginViewModel;
         this.loginViewModel.addPropertyChangeListener(this);
+        this.viewManagerModel = viewManagerModel;
 
         final JLabel title = new JLabel("Login Screen");
         title.setAlignmentX(Component.CENTER_ALIGNMENT);
@@ -43,21 +47,41 @@ public class LoginView extends JPanel implements ActionListener, PropertyChangeL
         final LabelTextPanel passwordInfo = new LabelTextPanel(
                 new JLabel("Password"), passwordInputField);
 
+        usernameErrorField.setAlignmentX(Component.CENTER_ALIGNMENT);
+        usernameErrorField.setHorizontalAlignment(SwingConstants.CENTER);
+        usernameErrorField.setForeground(Color.RED);
+        usernameErrorField.setPreferredSize(new Dimension(300, 20));
+        usernameErrorField.setMinimumSize(new Dimension(300, 20));
+        usernameErrorField.setMaximumSize(new Dimension(300, 20));
+        usernameErrorField.setText(" ");
+
         final JPanel buttons = new JPanel();
-        logIn = new JButton("log in");
+        logIn = new JButton("Log In");
         buttons.add(logIn);
+        signUp = new JButton("Sign Up");
+        buttons.add(signUp);
 
         logIn.addActionListener(
-                new ActionListener() {
-                    public void actionPerformed(ActionEvent evt) {
-                        if (evt.getSource().equals(logIn)) {
-                            final LoginState currentState = loginViewModel.getState();
+                evt -> {
+                    if (evt.getSource().equals(logIn)) {
+                        final LoginState currentState = loginViewModel.getState();
 
-                            loginController.execute(
-                                    currentState.getUsername(),
-                                    currentState.getPassword()
-                            );
-                        }
+                        loginController.execute(
+                                currentState.getUsername(),
+                                currentState.getPassword()
+                        );
+                    }
+                }
+        );
+
+        signUp.addActionListener(
+                evt -> {
+                    if (evt.getSource().equals(signUp)) {
+                        loginViewModel.setState(new LoginState());
+                        loginViewModel.firePropertyChange();
+
+                        this.viewManagerModel.setState("sign up");
+                        this.viewManagerModel.firePropertyChange();
                     }
                 }
         );

@@ -36,3 +36,6 @@ build/
 
 ### Mac OS ###
 .DS_Store
+
+### users.csv should never be updated remotely ###
+users.csv

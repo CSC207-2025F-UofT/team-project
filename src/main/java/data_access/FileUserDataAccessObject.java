@@ -3,6 +3,7 @@ package data_access;
 import entity.User;
 import entity.UserFactory;
 import use_case.login.LoginUserDataAccessInterface;
+import use_case.signup.SignupUserDataAccessInterface;
 
 import java.io.*;
 import java.util.HashMap;
@@ -12,7 +13,8 @@ import java.util.Map;
 /**
  * DAO for user data implemented using a File to persist the data.
  */
-public class FileUserDataAccessObject implements LoginUserDataAccessInterface{
+public class FileUserDataAccessObject implements LoginUserDataAccessInterface,
+        SignupUserDataAccessInterface {
 
     private static final String HEADER = "username,password";
 
@@ -35,7 +37,7 @@ public class FileUserDataAccessObject implements LoginUserDataAccessInterface{
         headers.put("password", 1);
 
         if (csvFile.length() == 0) {
-            save();
+            saveAll();
         }
         else {
 
@@ -61,7 +63,7 @@ public class FileUserDataAccessObject implements LoginUserDataAccessInterface{
         }
     }
 
-    private void save() {
+    private void saveAll() {
         final BufferedWriter writer;
         try {
             writer = new BufferedWriter(new FileWriter(csvFile));
@@ -83,6 +85,12 @@ public class FileUserDataAccessObject implements LoginUserDataAccessInterface{
         }
     }
 
+    @Override
+    public void save(User user) {
+        // add new user
+        accounts.put(user.getUsername(), user);
+        saveAll();
+    }
 
     @Override
     public User get(String username) {
