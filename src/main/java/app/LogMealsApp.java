@@ -1,5 +1,6 @@
 package app;
 
+import data_access.InMemoryUserDataAccessObject;
 import interface_adapter.LogMeals.*;
 import use_case.LogMeals.LogMealsInteractor;
 import view.LogMealsView;
@@ -26,6 +27,7 @@ public class LogMealsApp {
         // Create data access implementations
         InMemoryMealDataAccess mealDataAccess = new InMemoryMealDataAccess();
         CalorieNinjasApiClient nutritionApi = new CalorieNinjasApiClient(apiKey);
+        InMemoryUserDataAccessObject userDataAccess = new InMemoryUserDataAccessObject();
 
         // Create view model
         LogMealsViewModel viewModel = new LogMealsViewModel();
@@ -37,6 +39,7 @@ public class LogMealsApp {
         LogMealsInteractor interactor = new LogMealsInteractor(
             mealDataAccess,
             nutritionApi,
+            userDataAccess,
             presenter
         );
 
