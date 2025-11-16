@@ -3,6 +3,7 @@ package use_case.search;
 import entity.Song;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class SearchInteractor  implements SearchInputDataBoundary {
     private final SearchUserDataAccessInterface dataAccess;
@@ -25,7 +26,7 @@ public class SearchInteractor  implements SearchInputDataBoundary {
                             song.getName(),
                             song.getArtist()
                     ))
-                    .toList();
+                    .collect(Collectors.toList());
 
             presenter.prepareSuccessView(new SearchOutputData(results));
 

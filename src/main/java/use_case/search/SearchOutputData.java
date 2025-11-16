@@ -13,18 +13,18 @@ public class SearchOutputData {
     }
 
     public static class SongResult {
-        private final String id;
-        private final String title;
+        private final int id;
+        private final String name;
         private final String artist;
 
-        public SongResult(String id, String title, String artist) {
+        public SongResult(int id, String name, String artist) {
             this.id = id;
-            this.title = title;
+            this.name = name;
             this.artist = artist;
         }
 
-        public String getId() { return id; }
-        public String getTitle() { return title; }
+        public int getId() { return id; }
+        public String getName() { return name; }
         public String getArtist() { return artist; }
     }
 }
