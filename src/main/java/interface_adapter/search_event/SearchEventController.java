@@ -1,4 +1,4 @@
 package interface_adapter.search_event;
 
-public class SearchPresenter {
+public class SearchEventController {
 }
