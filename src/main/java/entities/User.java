@@ -27,10 +27,6 @@ public class User {
         this.replies = new ArrayList<>();
     }
 
-    public void signUp() {
-        // TODO: Implement signUp
-    }
-
     public void login() {
         // TODO: Implement login
     }
@@ -83,6 +79,10 @@ public class User {
         return email;
     }
 
+    public String getPassword() {
+        return password;
+    }
+
     public String getUsername() {
         return username;
     }
@@ -109,6 +109,35 @@ public class User {
 
     public List<ReplyPost> getReplies() {
         return replies;
+    }
+
+    // Setters for mutable fields
+    public void setFullName(String full_name) {
+        this.full_name = full_name;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public void setProfilePicture(String profilePicture) {
+        this.profilePicture = profilePicture;
+    }
+
+    public void setBio(String bio) {
+        this.bio = bio;
+    }
+
+    public void addOriginalPost(OriginalPost post) {
+        this.original_posts.add(post);
+    }
+
+    public void addMessage(DirectMessage message) {
+        this.messages.add(message);
+    }
+
+    public void addReply(ReplyPost reply) {
+        this.replies.add(reply);
     }
 }
 
