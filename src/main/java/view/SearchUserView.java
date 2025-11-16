@@ -15,7 +15,6 @@ public class SearchUserView extends JPanel implements ActionListener, PropertyCh
 
     public final String viewName = "new chat";
 
-    // Final fields must be initialized in the constructor.
     private final ViewManagerModel viewManagerModel;
     private final SearchUserViewModel searchUserViewModel;
 
@@ -29,10 +28,8 @@ public class SearchUserView extends JPanel implements ActionListener, PropertyCh
 
     public SearchUserView(ViewManagerModel viewManagerModel, SearchUserViewModel searchUserViewModel) {
 
-        // --- FIX: Initialize final fields immediately ---
         this.viewManagerModel = viewManagerModel;
         this.searchUserViewModel = searchUserViewModel;
-        // -----------------------------------------------
 
         this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
         this.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
@@ -77,14 +74,6 @@ public class SearchUserView extends JPanel implements ActionListener, PropertyCh
         startChatButton.addActionListener(this);
         searchExitButton.addActionListener(this);
 
-        // Add listener to the search field for real-time searching
-        // searchInputField.addActionListener(e -> {
-        //     if (searchUserController != null) {
-        //         searchUserController.execute(searchInputField.getText());
-        //     }
-        // });
-
-
         // Assembly
         this.add(searchPanel);
         this.add(Box.createVerticalStrut(10));
@@ -120,7 +109,6 @@ public class SearchUserView extends JPanel implements ActionListener, PropertyCh
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
         // Will be used to update the user list based on search results
-        // You'll likely need to use searchUserViewModel.getState().getUsers() here
     }
 
     public String getViewName() {
@@ -129,8 +117,6 @@ public class SearchUserView extends JPanel implements ActionListener, PropertyCh
 
     public void setUserSearchController(SearchUserController searchUserController) {
         this.searchUserController = searchUserController;
-        // You would typically attach listeners to buttons/fields here
-        // If you want search on Enter key press:
         searchInputField.addActionListener(e -> {
             if (this.searchUserController != null) {
                 this.searchUserController.execute(searchInputField.getText());

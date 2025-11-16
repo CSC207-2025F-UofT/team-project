@@ -76,13 +76,12 @@ public class AppBuilder {
     private LoggedInView loggedInView;
     private LoginView loginView;
     private WelcomeView welcomeView;
-    // Removed 'newChatView' field for consistency
     private ChatView chatView;
     private AccountDetailsView accountDetailsView;
 
     // Field for the Search User use case
     private final SearchUserViewModel searchUserViewModel = new SearchUserViewModel();
-    private SearchUserView searchUserView; // This will hold the instantiated view
+    private SearchUserView searchUserView;
 
     public AppBuilder() {
         cardPanel.setLayout(cardLayout);
@@ -148,7 +147,6 @@ public class AppBuilder {
 
         loggedInView.setChangePasswordController(changePasswordController);
 
-        // SET CONTROLLER ON NEW VIEW
         if (accountDetailsView != null) {
             accountDetailsView.setChangePasswordController(changePasswordController);
         }
@@ -169,10 +167,8 @@ public class AppBuilder {
 
         final LogoutController logoutController = new LogoutController(logoutInteractor);
 
-        // Set controller on BOTH views
         loggedInView.setLogoutController(logoutController);
 
-        // This line assumes you call addAccountDetailsView() BEFORE this method (AppBuilder order matters)
         if (accountDetailsView != null) {
             accountDetailsView.setLogoutController(logoutController);
         }
@@ -193,8 +189,6 @@ public class AppBuilder {
         return application;
     }
 
-    // REMOVED: addNewChatView() method (consolidated into addSearchUserView)
-
     public AppBuilder addChatView() {
         chatView = new ChatView(viewManagerModel);
         cardPanel.add(chatView, chatView.getViewName());
@@ -202,7 +196,6 @@ public class AppBuilder {
     }
 
     public AppBuilder addAccountDetailsView() {
-        // AccountDetailsView requires ViewManagerModel and LoggedInViewModel
         accountDetailsView = new AccountDetailsView(viewManagerModel, loggedInViewModel);
         cardPanel.add(accountDetailsView, accountDetailsView.getViewName());
         return this;
@@ -233,7 +226,6 @@ public class AppBuilder {
      * @return this builder
      */
     public AppBuilder addSearchUserView() {
-        // FIX: Pass the view model instance (searchUserViewModel)
         this.searchUserView = new SearchUserView(viewManagerModel, searchUserViewModel);
         cardPanel.add(searchUserView, searchUserView.getViewName());
         return this;
@@ -244,22 +236,18 @@ public class AppBuilder {
      * @return this builder
      */
     public AppBuilder addUserSearchUseCase() {
-        // Renamed to match the singular 'SearchUser' convention
         final SearchUserOutputBoundary searchUserOutputBoundary =
-                new SearchUserPresenter(searchUserViewModel); // Uses declared field
+                new SearchUserPresenter(searchUserViewModel);
 
-        // Renamed to match the singular 'SearchUser' convention
         final SearchUserInputBoundary searchUsersInteractor =
                 new SearchUserInteractor(
                         (SearchUserDataAccessInterface) userDataAccessObject,
                         searchUserOutputBoundary
                 );
 
-        // Renamed to match the singular 'SearchUser' convention
         final SearchUserController searchUserController = new SearchUserController(searchUsersInteractor);
 
         if (this.searchUserView != null) {
-            // FIX: Call the setter on the INSTANCE field (this.searchUserView), not the static class
             this.searchUserView.setUserSearchController(searchUserController);
         }
 

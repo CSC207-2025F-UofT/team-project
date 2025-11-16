@@ -129,29 +129,28 @@ public class FileUserDataAccessObject implements SignupUserDataAccessInterface,
 
     @Override
     public void changeUsername(String oldUsername, String newUsername) {
-        // 1. Check if the user exists in the 'accounts' map
+        // Check if the user exists in the 'accounts' map
         if (this.accounts.containsKey(oldUsername)) {
 
-            // 2. Retrieve the old User object
+            // Retrieve the old User object
             User oldUser = this.accounts.get(oldUsername);
 
-            // 3. Remove the entry indexed by the old username
+            // Remove the entry indexed by the old username
             this.accounts.remove(oldUsername);
 
-            // 4. Create a new User entity with the new username, reusing the old password
-            //    (Assuming User entity has a getPassword() method)
+            // Create a new User entity with the new username, reusing the old password
             User newUser = userFactory.create(newUsername, oldUser.getPassword());
 
-            // 5. Add the new user to the map using the new username as the key
+            // Add the new user to the map using the new username as the key
             this.accounts.put(newUsername, newUser);
 
-            // 6. Save the updated map state to the file (assuming you have a save() method)
+            // Save the updated map state to the file (assuming you have a save() method)
             this.save();
         }
     }
     @Override
     public List<String> searchUsers(String query) {
-        // Simple case-insensitive containment search
+        // Case-insensitive containment search
         String lowerCaseQuery = query.toLowerCase();
 
         return this.accounts.keySet().stream()

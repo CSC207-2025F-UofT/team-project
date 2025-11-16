@@ -19,7 +19,7 @@ public class ChatView extends JPanel implements ActionListener, PropertyChangeLi
     private final JTextArea messageInputField;
     private final JButton sendButton;
 
-    // We'll use this to display the initial prompt or history
+    // Use this to display the initial prompt or history
     private final JPanel chatDisplayPanel;
 
     public ChatView(ViewManagerModel viewManagerModel) {
@@ -35,7 +35,7 @@ public class ChatView extends JPanel implements ActionListener, PropertyChangeLi
         // Using the Profile icon again, but this time for the chat partner
         JLabel partnerIcon = new JLabel("👤");
         partnerIcon.setFont(new Font("SansSerif", Font.PLAIN, 24));
-        chatPartnerLabel = new JLabel("User"); // Placeholder, should be set by ViewModel later
+        chatPartnerLabel = new JLabel("User"); // Placeholder
         chatPartnerLabel.setFont(new Font("SansSerif", Font.BOLD, 18));
 
         partnerInfoPanel.add(partnerIcon);
@@ -45,9 +45,6 @@ public class ChatView extends JPanel implements ActionListener, PropertyChangeLi
         // Right Side: Back/Exit Button (Go back to LoggedInView/Recent Chats)
         JButton backButton = new JButton("⬅");
         backButton.setFont(new Font("SansSerif", Font.BOLD, 20));
-        backButton.setFocusPainted(false);
-        backButton.setBorderPainted(false);
-        backButton.setContentAreaFilled(false);
 
         backButton.addActionListener(e -> {
             // Navigate back to the LoggedInView

@@ -25,18 +25,17 @@ public class LoginPresenter implements LoginOutputBoundary {
 
     @Override
     public void prepareSuccessView(LoginOutputData response) {
-        // 1. Get the current LoggedInState
+        // Get the current LoggedInState
         LoggedInState loggedInState = loggedInViewModel.getState();
 
-        // 2. SET THE USERNAME from the LoginOutputData
-        // (This is the missing step that causes the view to be empty)
+        // Set the Username from the LoginOutputData
         loggedInState.setUsername(response.getUsername());
 
-        // 3. Update the ViewModel and notify listeners
+        // Update the ViewModel and notify listeners
         loggedInViewModel.setState(loggedInState);
         loggedInViewModel.firePropertyChanged("state");
 
-        // 4. Switch to the logged-in view
+        // Switch to the logged-in view
         viewManagerModel.setState(loggedInViewModel.getViewName());
         viewManagerModel.firePropertyChange();
     }

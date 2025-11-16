@@ -15,7 +15,6 @@ public class SearchUserViewModel extends ViewModel<SearchUserState> {
         super("user search");
     }
 
-    // FIX: Must include @Override and ensure return type matches ViewModel<T>'s abstract T getState()
     @Override
     public SearchUserState getState() {
         return state;

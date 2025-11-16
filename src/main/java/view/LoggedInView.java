@@ -24,7 +24,7 @@ public class LoggedInView extends JPanel implements ActionListener, PropertyChan
     // Removed passwordErrorField
     private ChangePasswordController changePasswordController = null;
     private LogoutController logoutController;
-    private final ViewManagerModel viewManagerModel; // <-- NEW FIELD
+    private final ViewManagerModel viewManagerModel;
 
     // Components for the New Design
     private final JLabel usernameLabel;
@@ -33,15 +33,11 @@ public class LoggedInView extends JPanel implements ActionListener, PropertyChan
     private final JButton profileButton;
     private final JButton newChatButton;
     private final JButton logOut;
-    // Removed JTextField passwordInputField
 
-    // CONSTRUCTOR UPDATED TO ACCEPT ViewManagerModel
     public LoggedInView(LoggedInViewModel loggedInViewModel, ViewManagerModel viewManagerModel) {
         this.loggedInViewModel = loggedInViewModel;
         this.viewManagerModel = viewManagerModel;
         this.loggedInViewModel.addPropertyChangeListener(this);
-
-        // --- NEW DESIGN IMPLEMENTATION ---
 
         // Top Bar Panel (User, New Chat)
         JPanel topBar = new JPanel(new BorderLayout(5, 0));
@@ -67,9 +63,6 @@ public class LoggedInView extends JPanel implements ActionListener, PropertyChan
         // Right Side: New Chat Button (Plus Icon)
         newChatButton = new JButton("⊕");
         newChatButton.setFont(new Font("SansSerif", Font.PLAIN, 24));
-        newChatButton.setFocusPainted(false);
-        newChatButton.setBorderPainted(false);
-        newChatButton.setContentAreaFilled(false);
 
         JPanel newChatPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 0, 0));
         newChatPanel.add(newChatButton);
@@ -94,11 +87,8 @@ public class LoggedInView extends JPanel implements ActionListener, PropertyChan
         scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
         scrollPane.setBorder(BorderFactory.createEmptyBorder());
 
-        // Old button panel (logOut)
         JPanel buttonPanel = new JPanel();
         logOut = new JButton("Logout");
-
-        // --- ACTION LISTENERS (UPDATED) ---
 
         // PROFILE BUTTON: Navigate to AccountDetailsView
         profileButton.addActionListener(e -> {
@@ -106,13 +96,13 @@ public class LoggedInView extends JPanel implements ActionListener, PropertyChan
             viewManagerModel.firePropertyChange();
         });
 
-        // NEW CHAT BUTTON: Navigate to NewChatView (placeholder)
+        // NEW CHAT BUTTON: Navigate to NewChatView
         newChatButton.addActionListener(e -> {
             viewManagerModel.setState("new chat");
             viewManagerModel.firePropertyChange();
         });
 
-        // LOGOUT BUTTON (old/hidden):
+        // LOGOUT BUTTON:
         logOut.addActionListener(this);
 
         buttonPanel.add(logOut);
@@ -128,8 +118,6 @@ public class LoggedInView extends JPanel implements ActionListener, PropertyChan
         this.add(buttonPanel);
     }
 
-    // ... actionPerformed, propertyChange, getViewName, setChangePasswordController, setLogoutController methods remain.
-
     @Override
     public void actionPerformed(ActionEvent evt) {
         if (evt.getSource().equals(logOut) && logoutController != null) {
@@ -142,14 +130,13 @@ public class LoggedInView extends JPanel implements ActionListener, PropertyChan
     public void propertyChange(PropertyChangeEvent evt) {
         if (evt.getPropertyName().equals("state")) {
             final LoggedInState state = (LoggedInState) evt.getNewValue();
-            usernameLabel.setText(state.getUsername()); // <--- This line will now execute correctly
+            usernameLabel.setText(state.getUsername());
         }
-        // propertyChange for "password" update remains important as it shows success/failure
-        // regardless of which view triggered the change (LoggedInView or AccountDetailsView)
+
         else if (evt.getPropertyName().equals("password")) {
             final LoggedInState state = (LoggedInState) evt.getNewValue();
             if (state.getPasswordError() == null) {
-                // This will show when a password change succeeds from ANY view
+                // This will show when a password change succeeds
                 JOptionPane.showMessageDialog(this, "password updated for " + state.getUsername());
             }
             else {

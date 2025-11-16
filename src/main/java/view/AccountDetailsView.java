@@ -42,7 +42,7 @@ public class AccountDetailsView extends JPanel implements ActionListener, Proper
         this.setLayout(new BorderLayout());
         this.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
-        // --- 1. Top Bar (Title and Back Button)
+        // Top Bar (Title and Back Button)
         topBar = new JPanel(new BorderLayout());
 
         JButton backButton = new JButton("⬅");
@@ -60,7 +60,7 @@ public class AccountDetailsView extends JPanel implements ActionListener, Proper
         title.setFont(new Font("SansSerif", Font.BOLD, 24));
         topBar.add(title, BorderLayout.CENTER);
 
-        // --- 2. Main Content Area ---
+        // Main Content Area
         JPanel contentPanel = new JPanel();
         contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.Y_AXIS));
         contentPanel.setBorder(BorderFactory.createEmptyBorder(50, 20, 50, 20));
@@ -85,14 +85,14 @@ public class AccountDetailsView extends JPanel implements ActionListener, Proper
         contentPanel.add(changePasswordButton);
         contentPanel.add(Box.createVerticalGlue());
 
-        // --- 3. Logout Button Panel (Bottom) ---
+        // Logout Button Panel (Bottom)
         JPanel southPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
         logoutButton = new JButton("Logout");
         logoutButton.addActionListener(this);
 
         southPanel.add(logoutButton);
 
-        // --- 4. Assembly ---
+        // Assembly
         this.add(topBar, BorderLayout.NORTH);
         this.add(contentPanel, BorderLayout.CENTER);
         this.add(southPanel, BorderLayout.SOUTH);
@@ -104,17 +104,17 @@ public class AccountDetailsView extends JPanel implements ActionListener, Proper
             logoutController.execute();
         } else if (evt.getSource().equals(changePasswordButton) && changePasswordController != null) {
 
-            // 1. Get the current username
+            // Get the current username
             final String currentUsername = loggedInViewModel.getState().getUsername();
 
-            // 2. Prompt user for the new password
+            // Prompt user for the new password
             String newPassword = JOptionPane.showInputDialog(this,
                     "Enter new password for " + currentUsername + ":",
                     "Change Password",
                     JOptionPane.PLAIN_MESSAGE
             );
 
-            // 3. Execute the use case if a password was entered
+            // Execute the use case if a password was entered
             if (newPassword != null) {
                 changePasswordController.execute(
                         currentUsername,

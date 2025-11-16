@@ -5,7 +5,6 @@ import use_case.search_user.SearchUserOutputData;
 
 public class SearchUserPresenter implements SearchUserOutputBoundary {
     private final SearchUserViewModel userSearchViewModel;
-    // Assuming you have a ViewManagerModel to switch views, if needed
 
     public SearchUserPresenter(SearchUserViewModel userSearchViewModel) {
         this.userSearchViewModel = userSearchViewModel;
