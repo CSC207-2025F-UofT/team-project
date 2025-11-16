@@ -1,12 +1,5 @@
 package view;
 
-import data_access.InMemoryCalendarRepository;
-import interface_adapter.calendar.AddEventPresenter;
-import interface_adapter.calendar.CalendarController;
-import interface_adapter.calendar.CalendarViewModel;
-import use_case.calendar.AddEventInteractor;
-import use_case.calendar.CalendarRepository;
-
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
@@ -36,12 +29,41 @@ public class DashboardView extends JPanel {
             frame.add(header, BorderLayout.NORTH);
 
             JPanel sidebar = new JPanel();
-            sidebar.setLayout(new GridLayout(6, 1, 0, 0));
-            sidebar.setBackground(bgBlack);
+            sidebar.setLayout(new GridLayout(6, 1, 0, 0)); // keep GridLayout
+            sidebar.setBackground(bgBlack);               // black gaps
             sidebar.setPreferredSize(new Dimension(220, 0));
 
-            CardLayout cardLayout = new CardLayout();
-            JPanel content = new JPanel(cardLayout);
+            String[] buttons = {"Home", "Grades", "Calendar", "Task Manager", "Courses", "Logout"};
+            for (String text : buttons) {
+                JButton btn = new JButton(text);
+                btn.setFont(new Font("Georgia", Font.PLAIN, 18));
+                btn.setForeground(textLight);
+                btn.setBackground(buttonBase);
+                btn.setOpaque(true);
+                btn.setFocusPainted(false);
+                btn.setBorderPainted(false);
+                btn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+
+                btn.addMouseListener(new MouseAdapter() {
+                    @Override
+                    public void mouseEntered(MouseEvent e) {
+                        btn.setBackground(accentHover);
+                    }
+
+                    @Override
+                    public void mouseExited(MouseEvent e) {
+                        btn.setBackground(buttonBase);
+                    }
+                });
+
+                JPanel buttonWrapper = new JPanel(new BorderLayout());
+                buttonWrapper.setOpaque(false);
+                buttonWrapper.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+                buttonWrapper.add(btn, BorderLayout.CENTER);
+
+                sidebar.add(buttonWrapper);
+            }
+            frame.add(sidebar, BorderLayout.WEST);
 
             JPanel mainPanel = new JPanel(new GridLayout(2, 1, 0, 0));
             mainPanel.setBackground(bgBlack);
@@ -59,6 +81,7 @@ public class DashboardView extends JPanel {
             section2.add(Box.createRigidArea(new Dimension(15, 0)));
 
             JPanel infoContainerPanel = new JPanel();
+
             infoContainerPanel.setLayout(new GridLayout(1, 3, 15, 0));
             infoContainerPanel.setOpaque(false);
 
@@ -76,6 +99,7 @@ public class DashboardView extends JPanel {
                 infoContainerPanel.add(infoPanel);
             }
             section2.add(infoContainerPanel);
+
 
             JPanel section3 = new JPanel();
             section3.setBackground(panelDark);
@@ -97,51 +121,7 @@ public class DashboardView extends JPanel {
             mainPanel.add(wrapper2);
             mainPanel.add(wrapper3);
 
-            content.add(mainPanel, "home");
-
-            CalendarRepository calendarRepository = new InMemoryCalendarRepository();
-            CalendarViewModel calendarViewModel = new CalendarViewModel(calendarRepository);
-            AddEventPresenter addEventPresenter = new AddEventPresenter(calendarViewModel);
-            AddEventInteractor addEventInteractor = new AddEventInteractor(calendarRepository, addEventPresenter);
-            CalendarController calendarController = new CalendarController(addEventInteractor);
-
-            CalendarPanel calendarPanel = new CalendarPanel(calendarController, calendarViewModel);
-            content.add(calendarPanel, "calendar");
-
-            String[] buttons = {"Home", "Grades", "Calendar", "Task Manager", "Courses", "Logout"};
-            for (String text : buttons) {
-                JButton btn = new JButton(text);
-                btn.setFont(new Font("Georgia", Font.PLAIN, 18));
-                btn.setForeground(textLight);
-                btn.setBackground(buttonBase);
-                btn.setOpaque(true);
-                btn.setFocusPainted(false);
-                btn.setBorderPainted(false);
-                btn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-
-                btn.addMouseListener(new MouseAdapter() {
-                    @Override public void mouseEntered(MouseEvent e) { btn.setBackground(accentHover); }
-                    @Override public void mouseExited(MouseEvent e) { btn.setBackground(buttonBase); }
-                });
-                btn.addActionListener(ev -> {
-                    if ("Calendar".equals(text)) {
-                        cardLayout.show(content, "calendar");
-                    } else if ("Home".equals(text)) {
-                        cardLayout.show(content, "home");
-                    }
-                });
-
-                JPanel buttonWrapper = new JPanel(new BorderLayout());
-                buttonWrapper.setOpaque(false);
-                buttonWrapper.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
-                buttonWrapper.add(btn, BorderLayout.CENTER);
-
-                sidebar.add(buttonWrapper);
-            }
-
-            frame.add(sidebar, BorderLayout.WEST);
-            frame.add(content, BorderLayout.CENTER);
-            cardLayout.show(content, "home");
+            frame.add(mainPanel, BorderLayout.CENTER);
 
             frame.getContentPane().setBackground(bgBlack);
             frame.setLocationRelativeTo(null);
