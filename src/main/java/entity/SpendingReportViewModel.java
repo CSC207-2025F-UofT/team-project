@@ -22,6 +22,7 @@ import use_case.spending_report.GenerateReportController;
 
 public class SpendingReportViewModel extends JFrame {
     private final JComboBox<String> monthDropdown;
+    private JComboBox<String> chartTypeDropdown;
     private final JPanel chartPanelContainer;
     private GenerateReportController controller;
     private final int userId = 1;
@@ -40,16 +41,19 @@ public class SpendingReportViewModel extends JFrame {
             "May 2025", "June 2025", "July 2025", "August 2025",
             "September 2025", "October 2025", "November 2025"
         });
-        topPanel.add(new JLabel("Select Month:"));
-        topPanel.add(monthDropdown);
+        JComboBox<String> chartTypeDropdown = new JComboBox<>(new String[]{
+            "Bar Chart", "Pie Chart"
+        });
 
+        topPanel.add(new JLabel("Select Month:"));
+        topPanel.add(new JLabel(" | Chart Type:"));
+        topPanel.add(monthDropdown);
+        topPanel.add(chartTypeDropdown);
         add(topPanel, BorderLayout.NORTH);
 
-        // Chart panel in the center
         chartPanelContainer = new JPanel(new BorderLayout());
         add(chartPanelContainer, BorderLayout.CENTER);
 
-        // On dropdown change, reload report - BUT with null check
         monthDropdown.addActionListener((ActionEvent e) -> {
             if (controller != null) {
                 String selectedMonth = (String) monthDropdown.getSelectedItem();
@@ -58,16 +62,10 @@ public class SpendingReportViewModel extends JFrame {
                 System.err.println("Controller not set yet!");
             }
         });
-
-        // REMOVE the auto-load for now - we'll trigger it manually after controller is set
     }
 
-    // Set controller and trigger initial load
     public void setController(GenerateReportController controller) {
         this.controller = controller;
-        System.out.println("Controller set successfully!");
-        
-        // Now that controller is set, trigger the initial report
         SwingUtilities.invokeLater(() -> {
             monthDropdown.setSelectedItem("November 2025");
             if (controller != null) {
@@ -84,9 +82,15 @@ public class SpendingReportViewModel extends JFrame {
             JOptionPane.showMessageDialog(this, "No transactions found for this month.");
             return;
         }
-        SimpleBarChartPanel panel = new SimpleBarChartPanel(categoryData, month);
         chartPanelContainer.removeAll();
-        chartPanelContainer.add(panel, BorderLayout.CENTER);
+        String type = (String) chartTypeDropdown.getSelectedItem();
+        
+        if ("Pie Chart".equals(type)) {
+            chartPanelContainer.add(new SimplePieChartPanel(categoryData, month), BorderLayout.CENTER);
+        } else {
+            chartPanelContainer.add(new SimpleBarChartPanel(categoryData, month), BorderLayout.CENTER);
+        }
+
         chartPanelContainer.revalidate();
         chartPanelContainer.repaint();
     }
@@ -163,4 +167,66 @@ public class SpendingReportViewModel extends JFrame {
             }
         }
     }
+
+    private static class SimplePieChartPanel extends JPanel {
+    private final java.util.List<Map.Entry<String, Float>> entries;
+    private final String month;
+
+    SimplePieChartPanel(Map<String, Float> data, String month) {
+        this.entries = new ArrayList<>(data.entrySet());
+        this.month = month;
+        setPreferredSize(new Dimension(800, 450));
+    }
+
+    @Override
+    protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
+        Graphics2D g2 = (Graphics2D) g;
+        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+        int width = getWidth();
+        int height = getHeight();
+
+        g2.setColor(Color.WHITE);
+        g2.fillRect(0, 0, width, height);
+
+        if (entries.isEmpty()) {
+            g2.setColor(Color.BLACK);
+            g2.drawString("No data to display for " + month, 10, 20);
+            return;
+        }
+
+        g2.setColor(Color.BLACK);
+        g2.setFont(g2.getFont().deriveFont(Font.BOLD, 16f));
+        g2.drawString("Spending for " + month, 20, 20);
+
+        int diameter = Math.min(width, height) - 100;
+        int x = (width - diameter) / 2;
+        int y = (height - diameter) / 2;
+
+        float total = 0;
+        for (Map.Entry<String, Float> e : entries) total += e.getValue();
+
+        float startAngle = 0;
+
+        for (Map.Entry<String, Float> e : entries) {
+            float value = e.getValue();
+            float angle = (value / total) * 360f;
+
+            g2.setColor(Color.getHSBColor((float)Math.random(), 0.5f, 0.9f));
+            g2.fillArc(x, y, diameter, diameter, Math.round(startAngle), Math.round(angle));
+
+            startAngle += angle;
+        }
+
+        int legendY = 40;
+        g2.setFont(g2.getFont().deriveFont(Font.PLAIN, 12f));
+        for (Map.Entry<String, Float> e : entries) {
+            g2.setColor(Color.BLACK);
+            g2.drawString(e.getKey() + " ($" + e.getValue() + ")", 20, legendY);
+            legendY += 20;
+        }
+    }
+}
+
 }
