@@ -5,7 +5,6 @@ import auth.use_case.login.LoginOutputData;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.Arrays;
 
 public class LoginView extends JFrame {
 

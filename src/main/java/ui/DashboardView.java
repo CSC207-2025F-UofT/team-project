@@ -31,7 +31,7 @@ public class DashboardView extends JFrame {
 
         // Top bar with greeting + logout
         JPanel topBar = new JPanel(new BorderLayout());
-        JLabel greeting = new JLabel("Welcome, " + (username == null ? "User" : username));
+        JLabel greeting = new JLabel("Welcome, " + (username == null ? "User" : username) + "!");
         JButton logoutBtn = new JButton("Log out");
         logoutBtn.addActionListener(e -> {
             dispose();
