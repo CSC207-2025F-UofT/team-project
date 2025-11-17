@@ -77,8 +77,12 @@ public class AppBuilder {
         // Dependencies for Login
         final LoginOutputBoundary loginOutputBoundary = new LoginPresenter(viewManagerModel,
                 loggedInViewModel, loginViewModel);
-        final LoginInputBoundary loginInteractor = new LoginInteractor(userDataAccessObject, loginOutputBoundary);
-        final LoginController loginController = new LoginController(loginInteractor);
+        final LoginInputBoundary loginInteractor =
+                new LoginInteractor(userDataAccessObject, loginOutputBoundary);
+
+        final LoginController loginController =
+                new LoginController(loginInteractor, viewManagerModel, signupViewModel);
+
 
         // View Creation
         this.loginView = new LoginView(loginViewModel);
