@@ -12,6 +12,6 @@ public class User {
         MessageDigest md = MessageDigest.getInstance("SHA-256");
         md.update(password.getBytes(StandardCharsets.UTF_8));
         md.update(this.salt);
-        return md.digest()==this.passwordHash;
+        return md.digest() == this.passwordHash;
     }
 }

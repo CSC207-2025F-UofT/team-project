@@ -13,6 +13,7 @@ public class AppBuilder {
 
     private SidePanelView sidePanelView;
     private MilestoneTasksView milestoneTaskView;
+    private TrackPlansView trackPlansView;
 
 
     public AppBuilder() {
@@ -39,10 +40,10 @@ public class AppBuilder {
     public JFrame build() {
         final JFrame application = new JFrame("Code Example");
         application.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-
         application.add(overallPanel);
 
         return application;
     }
+
 
 }
