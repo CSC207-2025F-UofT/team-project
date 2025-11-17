@@ -13,8 +13,8 @@ public class TaskController {
         this.interactor = interactor;
     }
 
-    public void addTask(String title, String description, LocalDate date, String type) {
-        AddTaskInputData input = new AddTaskInputData(title, description, date, type);
+    public void addTask(String title, String description, LocalDate date, String type, String course) {
+        AddTaskInputData input = new AddTaskInputData(title, description, date, type, course);
         interactor.add(input);
     }
 }

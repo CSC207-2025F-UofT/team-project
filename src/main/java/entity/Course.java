@@ -34,15 +34,15 @@ public class Course {
         return Collections.unmodifiableList(tasks);
     }
 
-    public boolean addTask(Task t) {
-        Objects.requireNonNull(t);
-        boolean exists = tasks.stream().anyMatch(x -> x.getId().equals(t.getId()));
-        if (exists) return false;
-        tasks.add(t);
-        return true;
-    }
-
-    public Task findTaskById(String taskId) {
-        return tasks.stream().filter(t -> t.getId().equals(taskId)).findFirst().orElse(null);
-    }
+//    public boolean addTask(Task t) {
+//        Objects.requireNonNull(t);
+//        boolean exists = tasks.stream().anyMatch(x -> x.getId().equals(t.getId()));
+//        if (exists) return false;
+//        tasks.add(t);
+//        return true;
+//    }
+//
+//    public Task findTaskById(String taskId) {
+//        return tasks.stream().filter(t -> t.getId().equals(taskId)).findFirst().orElse(null);
+//    }
 }
