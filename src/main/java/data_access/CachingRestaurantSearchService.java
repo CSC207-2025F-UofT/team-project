@@ -5,7 +5,6 @@ import java.util.*;
 
 /**
  * This RestaurantSearchService caches search results to improve performance.
- * Similar to CachingBreedFetcher - wraps another RestaurantSearchService implementation.
  *
  * Benefits of caching:
  * - Reduces API calls (saves rate limit quota)

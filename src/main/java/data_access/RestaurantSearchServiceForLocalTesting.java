@@ -6,7 +6,6 @@ import java.util.List;
 
 /**
  * A minimal implementation of RestaurantSearchService for testing purposes.
- * Similar to BreedFetcherForLocalTesting - avoids hitting the real API.
  *
  * Use this during development/testing to avoid API rate limits.
  */

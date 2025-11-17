@@ -5,8 +5,6 @@ import java.util.List;
 
 /**
  * Interface for restaurant search and details services.
- *
- * This interface allows us to swap between test and production implementations.
  */
 public interface RestaurantSearchService {
 

@@ -17,9 +17,6 @@ import java.util.List;
  * RestaurantSearchService implementation using Yelp API via RapidAPI.
  *
  * API Documentation: https://rapidapi.com/serg.osipchuk/api/YelpAPI
- *
- * Use this implementation in production. During development/testing, consider
- * using RestaurantSearchServiceForLocalTesting to avoid API rate limits.
  */
 public class YelpRestaurantSearchService implements RestaurantSearchService {
     private final OkHttpClient client;
