@@ -2,6 +2,7 @@ package interface_adapter.deck;
 
 import usecase.deck.create_deck.CreateDeckOutputData;
 import usecase.deck.list_deck.ListDecksOutputBoundary;
+import usecase.deck.list_deck.ListDecksOutputData;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,12 +16,15 @@ public class ListDecksPresenter implements ListDecksOutputBoundary {
     }
 
     @Override
-    public void present(CreateDeckOutputData output) {
+    public void present(ListDecksOutputData output) {
         List<DeckMenuViewModel.DeckTileVM> tiles = new ArrayList<>();
-        for (CreateDeckOutputData.DeckSummary s : output.getDeckSummaries()) {
-            tiles.add(new DeckMenuViewModel.DeckTileVM(s.deckId, s.title));
+        for (ListDecksOutputData.DeckSummary s : output.getDecks()) {
+            tiles.add(new DeckMenuViewModel.DeckTileVM(s.getId(), s.getTitle()));
         }
         vm.setErrorMessage(null);
         vm.setTiles(tiles);
     }
 }
+
+
+
