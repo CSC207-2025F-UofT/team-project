@@ -1,6 +1,7 @@
 package com.studyarc.view;
 
 import com.studyarc.interface_adapter.job_postings.JobPostingsController;
+import com.studyarc.interface_adapter.job_postings.JobPostingsState;
 import com.studyarc.interface_adapter.job_postings.JobPostingsViewModel;
 
 import javax.swing.*;
@@ -14,6 +15,8 @@ import java.beans.PropertyChangeListener;
  * The View for when the user is on the job postings page.
  */
 public class JobPostingsView extends JPanel implements ActionListener, PropertyChangeListener {
+
+    private final String viewName = "job postings";
 
     private final JobPostingsViewModel jobPostingsViewModel;
     private JobPostingsController jobPostingsController = null;
@@ -93,15 +96,54 @@ public class JobPostingsView extends JPanel implements ActionListener, PropertyC
 
         this.add(titleAndSelections, BorderLayout.NORTH);
 
+        search.addActionListener(
+                new ActionListener() {
+                    public void actionPerformed(ActionEvent e) {
+                        if (e.getSource().equals(search)) {
+                            final JobPostingsState currentState = jobPostingsViewModel.getState();
+
+                            jobPostingsController.execute(
+                                    currentState.getFocus(),
+                                    currentState.getLocation(),
+                                    currentState.getMinSalary(),
+                                    currentState.getSort()
+                            );
+                        }
+                    }
+                }
+        );
+
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
+        final JobPostingsState currentState = jobPostingsViewModel.getState();
 
+        // sets the user selected info in the state that will be eventually sent to the controller
+        if (e.getSource().equals(planComboBox)) {
+            currentState.setFocus(planComboBox.getSelectedItem().toString());
+        }
+        if (e.getSource().equals(locationComboBox)) {
+            currentState.setFocus(locationComboBox.getSelectedItem().toString());
+        }
+        if (e.getSource().equals(salaryComboBox)) {
+            currentState.setFocus(salaryComboBox.getSelectedItem().toString());
+        }
+        if (e.getSource().equals(sortComboBox)) {
+            currentState.setFocus(sortComboBox.getSelectedItem().toString());
+        }
     }
 
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
 
+    }
+
+    public String getViewName() {
+        return viewName;
+    }
+
+    public void setJobPostingsController(JobPostingsController jobPostingsController) {
+        this.jobPostingsController = jobPostingsController;
     }
 }

@@ -32,6 +32,8 @@ public class JobPostingsInteractor implements JobPostingsInputBoundary {
             // generates keywords for the focus the user selected
             KeywordList keywords = keywordGenerator.generate(jobPostingsInputData.getFocus());
 
+            // NEED TO STRIP THE MIN SALARY AND TURN TO INT
+
             // generates the job listings for the given keywords
             List<JobListing> jobListings = jobGenerator.getJobListings("NEED TO CALL SMTH TO GET COUNTRY CODE", keywords, "NEED TO GET SORT", 0);
 

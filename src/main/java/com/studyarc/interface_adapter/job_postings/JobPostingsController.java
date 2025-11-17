@@ -13,7 +13,7 @@ public class JobPostingsController {
         this.jobPostingsUseCaseInteractor = jobPostingsUseCaseInteractor;
     }
 
-    public void execute(String focus, String preferredLoc, int minSalary, String sort) {
+    public void execute(String focus, String preferredLoc, String minSalary, String sort) {
         final JobPostingsInputData jobPostingsInputData = new JobPostingsInputData(focus, preferredLoc, minSalary, sort);
 
         jobPostingsUseCaseInteractor.execute(jobPostingsInputData);

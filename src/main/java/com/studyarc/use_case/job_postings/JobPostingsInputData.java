@@ -6,10 +6,10 @@ package com.studyarc.use_case.job_postings;
 public class JobPostingsInputData {
     private final String focus;
     private final String preferredLoc;
-    private final int minSalary;
+    private final String minSalary;
     private final String sort;
 
-    public JobPostingsInputData(String focus, String preferredLoc, int minSalary, String sort) {
+    public JobPostingsInputData(String focus, String preferredLoc, String minSalary, String sort) {
         this.focus = focus;
         this.preferredLoc = preferredLoc;
         this.minSalary = minSalary;
@@ -24,7 +24,7 @@ public class JobPostingsInputData {
         return preferredLoc;
     }
 
-    int getMinSalary() {
+    String getMinSalary() {
         return minSalary;
     }
 
