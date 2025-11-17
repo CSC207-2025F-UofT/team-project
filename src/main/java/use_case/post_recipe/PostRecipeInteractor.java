@@ -56,6 +56,7 @@ public class PostRecipeInteractor implements PostRecipeInputBoundary {
     }
 
     private Recipe buildRecipeFromInput(PostRecipeInputData inputData, Recipe.Status status) {
+        // We will change this to firebase
         String recipeId = UUID.randomUUID().toString();
         Date now = new Date();
 
