@@ -1,17 +1,17 @@
-package usecase.setLearningGoal;
+package usecase.SetLearningGoal;
 
 import java.time.LocalDate;
 
 /**
  * The Input Data for the setLearningGoal Use Case.
  */
-public class setLearningGoalInputData {
+public class SetLearningGoalInputData {
     private int userId;
     private int dailyTarget;
     private LocalDate startDate;
     private LocalDate endDate;
 
-    public setLearningGoalInputData(int userId, int dailyTarget, LocalDate startDate, LocalDate endDate) {
+    public SetLearningGoalInputData(int userId, int dailyTarget, LocalDate startDate, LocalDate endDate) {
         this.userId = userId;
         this.dailyTarget = dailyTarget;
         this.startDate = startDate;
