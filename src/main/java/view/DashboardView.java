@@ -50,6 +50,7 @@ public class DashboardView extends JPanel {
             btn.setBorderPainted(false);
             btn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
+            // Hover effect
             btn.addMouseListener(new MouseAdapter() {
                 @Override
                 public void mouseEntered(MouseEvent e) {
@@ -61,12 +62,24 @@ public class DashboardView extends JPanel {
                 }
             });
 
+            // Action listener for page switching
             btn.addActionListener(e -> {
-                if (text.equals("Task Manager")) {
-                    showTasksPanel();
+                switch (text) {
+                    case "Home":
+                        showHomePanel(); // Switches to the Home content
+                        break;
+                    case "Task Manager":
+                        showTasksPanel(); // Switches to the TasksPanel content
+                        break;
+                    case "Logout":
+                        // Placeholder for actual logout logic
+                        System.exit(0);
+                        break;
+                    // Add logic for Grades, Calendar, and Courses here...
                 }
             });
 
+            // Wrapper panel to handle margin/padding around the button
             JPanel wrapper = new JPanel(new BorderLayout());
             wrapper.setOpaque(false);
             wrapper.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
@@ -76,16 +89,36 @@ public class DashboardView extends JPanel {
 
         add(sidebar, BorderLayout.WEST);
 
-        // Center content panel (empty on start)
+        // Center content panel
         centerPanel = new JPanel(new BorderLayout());
         centerPanel.setBackground(bgBlack);
         add(centerPanel, BorderLayout.CENTER);
+
+        // Show the initial panel (Home) when the dashboard loads
+        showHomePanel();
     }
 
-    // PAGE SWITCHING — replaces only the centerPanel
+    // --- PAGE SWITCHING METHODS ---
+
+    /**
+     * Replaces the content of centerPanel with a new TasksPanel.
+     */
     private void showTasksPanel() {
         centerPanel.removeAll();
+        // Uses the TasksPanel class provided earlier
         centerPanel.add(new TasksPanel(), BorderLayout.CENTER);
+        centerPanel.revalidate();
+        centerPanel.repaint();
+    }
+
+    /**
+     * Replaces the content of centerPanel with the Home Panel.
+     * Uses the simple placeholder HomePanel class.
+     */
+    private void showHomePanel() {
+        centerPanel.removeAll();
+        // Uses the separate HomePanel class
+        centerPanel.add(new HomePanel(), BorderLayout.CENTER);
         centerPanel.revalidate();
         centerPanel.repaint();
     }
