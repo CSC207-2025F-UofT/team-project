@@ -10,7 +10,7 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import interface_adapter.user_search.SearchUserController;
 import interface_adapter.user_search.SearchUserViewModel;
-import interface_adapter.user_search.SearchUserState; // NEW IMPORT
+import interface_adapter.user_search.SearchUserState;
 import java.util.List;
 
 public class SearchUserView extends JPanel implements ActionListener, PropertyChangeListener {
