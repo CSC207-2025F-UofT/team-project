@@ -1,68 +1,62 @@
-package use_case.save_outfit;
+package use_case;
 
-import entity.Outfit;
+import data_access.OutfitsGateway;
+import entities.Outfit;
 
 import java.util.List;
 
+/**
+ * Contains the business logic for saving an outfit.
+ */
 public class SaveOutfitInteractor implements SaveOutfitInputBoundary {
 
-    private final OutfitDataAccessInterface outfitDataAccess;
+    private final OutfitsGateway gateway;
     private final SaveOutfitOutputBoundary presenter;
 
-    public SaveOutfitInteractor(OutfitDataAccessInterface outfitDataAccess,
+    public SaveOutfitInteractor(OutfitsGateway gateway,
                                 SaveOutfitOutputBoundary presenter) {
-        this.outfitDataAccess = outfitDataAccess;
+        this.gateway = gateway;
         this.presenter = presenter;
     }
 
     @Override
-    public void execute(SaveOutfitInputData inputData) {
-        // 1. Validate required fields (main alt flow: Missing required fields)
-        if (inputData.getOutfitName() == null || inputData.getOutfitName().isBlank()) {
-            presenter.prepareFailView("Outfit name is required.");
+    public void execute(SaveOutfitInputData data) {
+
+        // 1. Validate
+        if (data.getName() == null || data.getName().isBlank()) {
+            presenter.prepareFailView("Name cannot be empty.");
             return;
         }
-        if (inputData.getItems() == null || inputData.getItems().isEmpty()) {
-            presenter.prepareFailView("At least one item is required.");
-            return;
-        }
-        if (inputData.getWeatherProfile() == null || inputData.getWeatherProfile().isBlank()) {
-            presenter.prepareFailView("Weather profile is required.");
+        if (data.getItems().isEmpty()) {
+            presenter.prepareFailView("Outfit must include at least one item.");
             return;
         }
 
-        // 2. Check duplicate (alt: duplicate name for same profile/location)
-        boolean exists = outfitDataAccess.existsByNameAndProfile(
-                inputData.getOutfitName(),
-                inputData.getWeatherProfile(),
-                inputData.getLocation()
+        // 2. Check duplicates
+        boolean exists = gateway.exists(
+                data.getName(),
+                data.getWeatherProfile(),
+                data.getLocation()
         );
 
-        if (exists && !inputData.isOverwrite()) {
-            presenter.prepareFailView(
-                    "An outfit with this name and weather/location already exists. " +
-                            "Please choose 'Overwrite' if you want to replace it.");
+        if (exists && !data.isOverwrite()) {
+            presenter.prepareFailView("An identical outfit already exists.");
             return;
         }
 
-        // 3. Create entity and save
+        // 3. Save entity
         Outfit outfit = new Outfit(
-                inputData.getOutfitName(),
-                inputData.getItems(),
-                inputData.getWeatherProfile(),
-                inputData.getLocation()
+                data.getName(),
+                data.getItems(),
+                data.getWeatherProfile(),
+                data.getLocation()
         );
 
-        outfitDataAccess.saveOutfit(outfit);
+        gateway.save(outfit);
 
-        // 4. Load all outfits so that the View can update "Saved Outfits" section
-        List<Outfit> allOutfits = outfitDataAccess.getAllOutfits();
-
-        SaveOutfitOutputData outputData = new SaveOutfitOutputData(
-                "Outfit saved successfully.",
-                allOutfits
-        );
-
-        presenter.prepareSuccessView(outputData);
+        // 4. Prepare output
+        List<Outfit> all = gateway.getAll();
+        SaveOutfitOutputData output = new SaveOutfitOutputData(all, "Outfit saved successfully!");
+        presenter.prepareSuccessView(output);
     }
 }

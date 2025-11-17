@@ -1,22 +1,21 @@
 package use_case;
 
-import entity.Outfit;
+import entities.Outfit;
 import java.util.List;
 
+/**
+ * DTO sent from Interactor → Presenter.
+ */
 public class SaveOutfitOutputData {
+
+    private final List<Outfit> outfits;
     private final String message;
-    private final List<Outfit> allOutfits;
 
-    public SaveOutfitOutputData(String message, List<Outfit> allOutfits) {
+    public SaveOutfitOutputData(List<Outfit> outfits, String message) {
+        this.outfits = outfits;
         this.message = message;
-        this.allOutfits = allOutfits;
     }
 
-    public String getMessage() {
-        return message;
-    }
-
-    public List<Outfit> getAllOutfits() {
-        return allOutfits;
-    }
+    public List<Outfit> getOutfits() { return outfits; }
+    public String getMessage() { return message; }
 }
