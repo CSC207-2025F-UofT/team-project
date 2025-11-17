@@ -106,7 +106,9 @@ public class SongProfileView extends JPanel {
             }
             else {
                 int rating = Integer.parseInt((String) selected);
-                // TODO: Execute post method in controller with this data (content & selected), songid and username
+                int songID = viewSongController.getSongId;
+                String username = viewSongController.getUsername;
+                postController.post(content, rating, username, songID);
                 postReviewDialog.dispose();
             }
         });
