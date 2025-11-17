@@ -22,7 +22,7 @@ public class Main {
 
 
             // Displays logged in User's stats
-            JPanel leftPanel = new StatisticsPanel();
+            JPanel leftPanel = new JPanel();
             leftPanel.setBackground(Color.CYAN);
 
             // Displays comparison stats
