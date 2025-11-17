@@ -2,8 +2,10 @@ package com.studyarc.view;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
-public class SidePanelView extends JPanel {
+public class SidePanelView extends JPanel{
     private final JPanel mainButtonPanel = new JPanel();
     private final JLabel logo = new JLabel("Study Arc");
     private final JLabel userLoggedIn = new JLabel("Logged In User");

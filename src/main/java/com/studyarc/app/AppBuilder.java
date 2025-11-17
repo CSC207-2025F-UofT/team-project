@@ -17,6 +17,7 @@ public class AppBuilder {
 
     private SidePanelView sidePanelView;
     private MilestoneTasksView milestoneTaskView;
+    private TrackPlansView trackPlansView;
 
     final ViewManagerModel viewManagerModel = new ViewManagerModel();
     ViewManager viewManager = new ViewManager(overallPanel, cardLayout, viewManagerModel);
@@ -52,10 +53,10 @@ public class AppBuilder {
     public JFrame build() {
         final JFrame application = new JFrame("Code Example");
         application.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-
         application.add(overallPanel);
 
         return application;
     }
+
 
 }
