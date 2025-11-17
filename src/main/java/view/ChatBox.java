@@ -154,11 +154,11 @@ public class ChatBox extends JFrame implements ViewChatHistoryOutputBoundary {
         for (ChatMessageDto dto : messages) {
             boolean isMe = dto.getSenderUserId().equals(currentUserId);
 
-            // bubble = message + timestamp stacked vertically
+            // bubble (message + timestamp)
             JPanel bubble = new JPanel();
             bubble.setLayout(new BoxLayout(bubble, BoxLayout.Y_AXIS));
             bubble.setOpaque(false);
-            bubble.setBorder(new EmptyBorder(6, 10, 4, 10)); // inner padding
+            bubble.setBorder(new EmptyBorder(6, 10, 4, 10));
 
             String text = dto.getContent() + (isMe ? "  ✓" : "");
             JLabel msgLabel = new JLabel("<html>" + text + "</html>");
@@ -166,10 +166,10 @@ public class ChatBox extends JFrame implements ViewChatHistoryOutputBoundary {
             msgLabel.setBorder(new EmptyBorder(8, 10, 8, 10));
 
             if (isMe) {
-                msgLabel.setBackground(new Color(0x95EC69)); // sent = green
+                msgLabel.setBackground(new Color(0x95EC69));    // sent
                 msgLabel.setForeground(Color.BLACK);
             } else {
-                msgLabel.setBackground(new Color(60, 60, 60)); // received = dark gray
+                msgLabel.setBackground(new Color(60, 60, 60));  // received
                 msgLabel.setForeground(Color.WHITE);
             }
             bubble.add(msgLabel);
@@ -180,24 +180,42 @@ public class ChatBox extends JFrame implements ViewChatHistoryOutputBoundary {
             bubble.add(Box.createVerticalStrut(2));
             bubble.add(timeLabel);
 
-            // wrapper controls left/right alignment and prevents vertical stretch
-            JPanel wrapper = new JPanel(new BorderLayout());
-            wrapper.setOpaque(false);
-            wrapper.setBorder(new EmptyBorder(2, 10, 2, 10)); // small outer padding
+            // action button + popup
+            JButton actionBtn = makeActionButton();
+            JPopupMenu menu = buildActionMenu(isMe, dto);
+            actionBtn.addActionListener(e -> menu.show(actionBtn, 0, actionBtn.getHeight()));
+
+            // side-by-side panel holding (button,bubble) or (bubble,button)
+            JPanel side = new JPanel();
+            side.setOpaque(false);
+            side.setLayout(new BoxLayout(side, BoxLayout.X_AXIS));
 
             if (isMe) {
-                wrapper.add(bubble, BorderLayout.EAST);  // right
+                side.add(bubble);
+                side.add(Box.createHorizontalStrut(6));
+                side.add(actionBtn);            // your messages: bubble on right, button to its right
             } else {
-                wrapper.add(bubble, BorderLayout.WEST);  // left
+                side.add(actionBtn);            // others' messages: button then bubble (left side)
+                side.add(Box.createHorizontalStrut(6));
+                side.add(bubble);
             }
 
-            // cap row height so BoxLayout won't create huge gaps
-            int rowH = bubble.getPreferredSize().height + 4;
+            // wrapper: keeps left/right alignment and prevents tall stretching
+            JPanel wrapper = new JPanel(new BorderLayout());
+            wrapper.setOpaque(false);
+            wrapper.setBorder(new EmptyBorder(2, 10, 2, 10));
+
+            if (isMe) wrapper.add(side, BorderLayout.EAST);
+            else      wrapper.add(side, BorderLayout.WEST);
+
+            // cap row height for even vertical spacing
+            int rowH = side.getPreferredSize().height + 4;
             wrapper.setMaximumSize(new Dimension(Integer.MAX_VALUE, rowH));
             wrapper.setAlignmentX(Component.LEFT_ALIGNMENT);
 
             chatPanel.add(wrapper);
-            chatPanel.add(Box.createVerticalStrut(4));       // compact, consistent gap
+            chatPanel.add(Box.createVerticalStrut(4));
+
         }
 
         chatPanel.revalidate();
@@ -242,6 +260,57 @@ public class ChatBox extends JFrame implements ViewChatHistoryOutputBoundary {
         if (l.endsWith("?")) return "good question!";
         return "nice ✓";
     }
+
+    // Small, neutral button used next to each bubble
+    private JButton makeActionButton() {
+        JButton b = new JButton("⋯");
+        b.setMargin(new Insets(2, 8, 2, 8));
+        b.setFocusable(false);
+        b.setBorder(BorderFactory.createLineBorder(new Color(80, 80, 80)));
+        b.setBackground(new Color(50, 50, 50));
+        b.setForeground(new Color(220, 220, 220));
+        return b;
+    }
+
+    // Build the popup menu; for now handlers are UI-only placeholders
+    private JPopupMenu buildActionMenu(boolean isMe, ChatMessageDto dto) {
+        JPopupMenu menu = new JPopupMenu();
+
+        if (isMe) {
+            JMenuItem delete = new JMenuItem("Delete");
+            delete.addActionListener(e ->
+                    JOptionPane.showMessageDialog(this, "Delete (UI only for now)"));
+            menu.add(delete);
+
+            JMenuItem reply = new JMenuItem("Reply");
+            reply.addActionListener(e ->
+                    JOptionPane.showMessageDialog(this, "Reply (UI only for now)"));
+            menu.add(reply);
+        } else {
+            JMenuItem reply = new JMenuItem("Reply");
+            reply.addActionListener(e ->
+                    JOptionPane.showMessageDialog(this, "Reply (UI only for now)"));
+            menu.add(reply);
+
+            JMenuItem report = new JMenuItem("Report");
+            report.addActionListener(e ->
+                    JOptionPane.showMessageDialog(this, "Report (UI only for now)"));
+            menu.add(report);
+
+            JMenuItem react = new JMenuItem("React");
+            react.addActionListener(e ->
+                    JOptionPane.showMessageDialog(this, "React (UI only for now)"));
+            menu.add(react);
+        }
+
+        menu.addSeparator();
+        JMenuItem cancel = new JMenuItem("Cancel");
+        cancel.addActionListener(e -> menu.setVisible(false));
+        menu.add(cancel);
+
+        return menu;
+    }
+
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
