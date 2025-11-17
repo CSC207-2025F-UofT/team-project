@@ -1,62 +1,62 @@
 [
   {
-    "Date (MM/DD/YYYY)": "11/01/2025",
-    "Source": "Employer",
-    "Category": "Income",
-    "Amount": 3500.00
+    "date": "2025-11-01",
+    "source": "Employer",
+    "category": "Income",
+    "amount": 3500.00
   },
   {
-    "Date (MM/DD/YYYY)": "11/02/2025",
-    "Source": "Condominium Corp",
-    "Category": "Rent_Utilities",
-    "Amount": -1850.00
+    "date": "2025-11-02",
+    "source": "Condominium Corp",
+    "category": "Rent_Utilities",
+    "amount": -1850.00
   },
   {
-    "Date (MM/DD/YYYY)": "11/03/2025",
-    "Source": "Hydro-Electric Co.",
-    "Category": "Rent_Utilities",
-    "Amount": -125.50
+    "date": "2025-11-03",
+    "source": "Hydro-Electric Co.",
+    "category": "Rent_Utilities",
+    "amount": -125.50
   },
   {
-    "Date (MM/DD/YYYY)": "11/04/2025",
-    "Source": "Metro Grocery",
-    "Category": "Food",
-    "Amount": -85.75
+    "date": "2025-11-04",
+    "source": "Metro Grocery",
+    "category": "Food",
+    "amount": -85.75
   },
   {
-    "Date (MM/DD/YYYY)": "11/05/2025",
-    "Source": "TTC",
-    "Category": "Transportation",
-    "Amount": -156.00
+    "date": "2025-11-05",
+    "source": "TTC",
+    "category": "Transportation",
+    "amount": -156.00
   },
   {
-    "Date (MM/DD/YYYY)": "11/06/2025",
-    "Source": "Starbucks",
-    "Category": "Food",
-    "Amount": -12.45
+    "date": "2025-11-06",
+    "source": "Starbucks",
+    "category": "Food",
+    "amount": -12.45
   },
   {
-    "Date (MM/DD/YYYY)": "11/08/2025",
-    "Source": "The Eaton Centre",
-    "Category": "Shopping",
-    "Amount": -210.99
+    "date": "2025-11-08",
+    "source": "The Eaton Centre",
+    "category": "Shopping",
+    "amount": -210.99
   },
   {
-    "Date (MM/DD/YYYY)": "11/10/2025",
-    "Source": "Freelance Client",
-    "Category": "Income",
-    "Amount": 450.00
+    "date": "2025-11-10",
+    "source": "Freelance Client",
+    "category": "Income",
+    "amount": 450.00
   },
   {
-    "Date (MM/DD/YYYY)": "11/12/2025",
-    "Source": "uber",
-    "Category": "Transportation",
-    "Amount": -23.50
+    "date": "2025-11-12",
+    "source": "uber",
+    "category": "Transportation",
+    "amount": -23.50
   },
   {
-    "Date (MM/DD/YYYY)": "11/15/2025",
-    "Source": "Bell Canada",
-    "Category": "Other",
-    "Amount": -95.00
+    "date": "2025-11-15",
+    "source": "Bell Canada",
+    "category": "Other",
+    "amount": -95.00
   }
 ]

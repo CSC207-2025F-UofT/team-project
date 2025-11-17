@@ -1,11 +1,13 @@
 package entity;
 import com.google.gson.annotations.SerializedName;
+
+import javax.xml.transform.Source;
 import java.time.LocalDate;
 
 public class Transaction {
     @SerializedName("date")
     private final LocalDate date;
-    
+
     @SerializedName("source")
     private final Source source;
     
@@ -20,6 +22,8 @@ public class Transaction {
         this.amount =  amount;
 
     }
+
+
 
 
 
