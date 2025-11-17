@@ -16,7 +16,7 @@ public class User {
 
         private List<Pet> petInventory= new ArrayList<>();//list of pets
         private HashMap<String,Integer> itemsAmountList = new HashMap<>();//list of item names and their amounts
-        private HashMap<String,Item> itemsList= new HashMap<>();//list of item names and their objects
+        private HashMap<String,Item> itemsList= new HashMap<>();//list of item names and their objects（easy to find the item by name）
 
         public User() {
             this.coinCount = Constants.INITIAL_COINS;
@@ -32,6 +32,11 @@ public class User {
                 itemsAmountList.put(item.getName(), 0);
                 itemsList.put(item.getName(), item);
             }
+        }
+
+        //helper method for getting an item by name
+        public Item getItemByName(String itemName) {
+            return itemsList.get(itemName);
         }
 
         //check if the user has enough coins
@@ -50,9 +55,54 @@ public class User {
             this.addToPetInventory(lootBox.getPet());
         }
 
-        public void buyPetItem(Item petItem){
-            this.buy(petItem.getPrice());
-            this.addToItemList(petItem.getName());
+        //adding a pet to the pet inventory
+        public void addToPetInventory(Pet pet) {
+            if (pet != null) {
+                petInventory.add(pet);
+            }
+        }
+
+        //pre: coinCheck is true
+        public void buyPetItem(String itemName){
+            Item petItemByName = getItemByName(itemName);
+            this.buy(petItemByName.getPrice());
+            this.addToItemList(petItemByName.getName());
+        }
+
+        //helper method that helps to add an item to the item list with the item name
+        public void addToItemList(String itemName) {
+            this.itemsAmountList.put(itemName, itemsAmountList.get(itemName) + 1);
+        }
+
+        //checking if the user have enough items 
+        public boolean itemCheck(String itemName){
+            return this.itemsAmountList.get(itemName) > 0;
+        }
+
+        //pre: itemCheck is true
+        public void usePetItem(Pet pet,String itemName){
+            //find the type of the item and use it
+            if (Objects.equals(getItemByName(itemName).getType(), "PetFood")){
+                PetFood petFood= (PetFood) getItemByName(itemName);
+                pet.increaseEnergyLevel(petFood.getEnergyIncrease());
+            }else if (Objects.equals(getItemByName(itemName).getType(), "PetToy")){
+                PetToy petToy= (PetToy) getItemByName(itemName);
+                pet.increaseAffectionXP(petToy.getAffectionIncrease());
+            }
+            this.itemsAmountList.put(itemName, itemsAmountList.get(itemName) - 1);
+        }
+        
+        // other getter methods
+        public List<Pet> getPetInventory() {
+            return new ArrayList<>(this.petInventory); 
+        }
+        
+        public HashMap<String, Integer> getItemsAmountList() {
+            return new HashMap<>(this.itemsAmountList); 
+        }
+        
+        public HashMap<String, Item> getItemsList() {
+            return new HashMap<>(this.itemsList); 
         }
 
         // Validation for upgrading the click bonus
@@ -100,48 +150,6 @@ public class User {
             return this.unlockedSlots;
         }
 
-        //adding a pet to the pet inventory
-        public void addToPetInventory(Pet pet) {
-            if (pet != null) {
-                petInventory.add(pet);
-            }
-        }
-
-        //adding an item to the item list with the item name
-        public void addToItemList(String itemName) {
-            this.itemsAmountList.put(itemName, itemsAmountList.get(itemName) + 1);
-        }
-
-        //checking if the user have enough items 
-        public boolean itemCheck(String itemName){
-            return this.itemsAmountList.get(itemName) > 0;
-        }
-
-        //pre: itemCheck is true
-        public void usePetItem(Pet pet,String itemName){
-            //find the type of the item and use it
-            if (Objects.equals(itemsList.get(itemName).getType(), "PetFood")){
-                PetFood petFood= (PetFood) itemsList.get(itemName);
-                pet.increaseEnergyLevel(petFood.getEnergyIncrease());
-            }else if (Objects.equals(itemsList.get(itemName).getType(), "PetToy")){
-                PetToy petToy= (PetToy) itemsList.get(itemName);
-                pet.increaseAffectionXP(petToy.getAffectionIncrease());
-            }
-            this.itemsAmountList.put(itemName, itemsAmountList.get(itemName) - 1);
-        }
-        
-        // other getter methods
-        public List<Pet> getPetInventory() {
-            return new ArrayList<>(this.petInventory); 
-        }
-        
-        public HashMap<String, Integer> getItemsAmountList() {
-            return new HashMap<>(this.itemsAmountList); 
-        }
-        
-        public HashMap<String, Item> getItemsList() {
-            return new HashMap<>(this.itemsList); 
-        }
         
 
 
