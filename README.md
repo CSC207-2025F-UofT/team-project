@@ -28,7 +28,7 @@ screen!
 ## Current Goals/Tasks
 
 - [x] Create the GitHub repo
-- [ ] Complete the Project Blueprint
+- [x] Complete the Project Blueprint
     - [x] Distribute user stories
     - [X] Write use cases
     - [X] Write entities
