@@ -51,7 +51,7 @@ public class User {
         //pre: buying need a coinCheck
         public void buyLootBox(LootBox lootBox){
             this.buy(lootBox.getPrice());
-            this.addToPetInventory(lootBox.getPet());
+            // this.addToPetInventory(lootBox.getPet());
         }
 
         public void buyPetItem(Item petItem){
