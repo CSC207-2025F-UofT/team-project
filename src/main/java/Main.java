@@ -5,6 +5,7 @@ import data.JdbcUserRepository;
 import data.SchemaInitializer;
 import data.usecase5.InMemoryPortfolioRepository;
 import data.usecase5.InMemoryPriceHistoryRepository;
+import interface_adapters.presenters.FetchNewsPresenter;
 import interface_adapters.use_case5.Presenter;
 import interface_adapters.controllers.PortfolioController;
 import interface_adapters.use_case5.PortfolioViewModel;
@@ -16,6 +17,10 @@ import use_case.login.LoginInteractor;
 import use_case.portfolio.PortfolioInputBoundary;
 import use_case.portfolio.PortfolioInteractor;
 import use_case.signup.SignUpInteractor;
+import data.news.MockNewsDAO;
+import use_case.fetch_news.*;
+import interface_adapters.controllers.NewsController;
+import ui.NewsView;
 
 import javax.sql.DataSource;
 import javax.swing.*;
@@ -110,7 +115,24 @@ public class Main {
     }
 
     private static void showNewsView() {
-        // ToDo
+        // 1. DAO（数据源） - 可以先用 MockNewsDAO 读本地 JSON
+        MockNewsDAO dao = new MockNewsDAO("sample_news.json");
+
+        // 2. Presenter（负责 ViewModel）
+        NewsView view = new NewsView(null); // 先传 null，稍后再注入 Controller
+        FetchNewsPresenter presenter = new FetchNewsPresenter(view);
+
+        // 3. Interactor（业务逻辑）
+        FetchNewsInteractor interactor = new FetchNewsInteractor(dao, presenter);
+
+        // 4. Controller（响应 View 的按钮事件）
+        NewsController controller = new NewsController(interactor, presenter);
+
+        // 5. 将 Controller 注入 View
+        view.setController((NewsView.Controller) controller);
+
+        // 6. 初始加载新闻
+        controller.fetchNews();
     }
 
     private static void showPortfolioView() {

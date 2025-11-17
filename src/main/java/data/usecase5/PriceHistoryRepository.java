@@ -1,7 +1,7 @@
 package data.usecase5;
 
 // 股票拿历史价格
-import entity.usecase5.PricePoint;
+import entities.usecase5.PricePoint;
 import java.util.List;
 
 /**

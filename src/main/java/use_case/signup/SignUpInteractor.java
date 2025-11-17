@@ -1,7 +1,7 @@
 package use_case.signup;
 
 import data.UserRepository;
-import entity.User;
+import entities.User;
 
 public class SignUpInteractor {
 

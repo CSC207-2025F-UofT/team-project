@@ -1,4 +1,4 @@
-package entity.usecase5;
+package entities.usecase5;
 
 /**
  * Represents a single stock holding in the user's portfolio.
