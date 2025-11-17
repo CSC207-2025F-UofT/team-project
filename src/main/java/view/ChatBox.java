@@ -49,6 +49,13 @@ public class ChatBox extends JFrame implements ViewChatHistoryOutputBoundary {
     private String currentUserId;
     private String botUserId;
 
+    // Temporary UI-only store: messageId -> emoji
+    private final java.util.Map<String, String> localReactions = new java.util.HashMap<>();
+    // The emojis for reaction
+    private static final String[] EMOJIS = new String[] {
+            "👍", "\uD83E\uDE77", "😂", "😮", "😢", "🔥", "👏", "🎉", "🤔", "😡"
+    };
+
     public ChatBox() {
         super("GoChat Demo");
 
@@ -172,7 +179,22 @@ public class ChatBox extends JFrame implements ViewChatHistoryOutputBoundary {
                 msgLabel.setBackground(new Color(60, 60, 60));  // received
                 msgLabel.setForeground(Color.WHITE);
             }
-            bubble.add(msgLabel);
+            // row: message label in CENTER, optional reaction on the RIGHT
+            JPanel msgRow = new JPanel(new BorderLayout());
+            msgRow.setOpaque(false);
+            msgRow.add(msgLabel, BorderLayout.CENTER);
+
+            // Only show reactions on OTHER people's messages
+            if (!isMe) {
+                String r = localReactions.get(getMessageId(dto));
+                if (r != null) {
+                    JLabel reaction = new JLabel(r);
+                    reaction.setBorder(new EmptyBorder(0, 6, 0, 0)); // tiny left pad
+                    msgRow.add(reaction, BorderLayout.EAST);
+                }
+            }
+
+            bubble.add(msgRow);
 
             JLabel timeLabel = new JLabel(formatTimestamp(dto.getTimestamp()));
             timeLabel.setFont(new Font("Dialog", Font.PLAIN, 11));
@@ -182,7 +204,7 @@ public class ChatBox extends JFrame implements ViewChatHistoryOutputBoundary {
 
             // action button + popup
             JButton actionBtn = makeActionButton();
-            JPopupMenu menu = buildActionMenu(isMe, dto);
+            JPopupMenu menu = buildActionMenu(isMe, dto, actionBtn);
             actionBtn.addActionListener(e -> menu.show(actionBtn, 0, actionBtn.getHeight()));
 
             // side-by-side panel holding (button,bubble) or (bubble,button)
@@ -273,7 +295,7 @@ public class ChatBox extends JFrame implements ViewChatHistoryOutputBoundary {
     }
 
     // Build the popup menu; for now handlers are UI-only placeholders
-    private JPopupMenu buildActionMenu(boolean isMe, ChatMessageDto dto) {
+    private JPopupMenu buildActionMenu(boolean isMe, ChatMessageDto dto, JButton anchor) {
         JPopupMenu menu = new JPopupMenu();
 
         if (isMe) {
@@ -298,9 +320,16 @@ public class ChatBox extends JFrame implements ViewChatHistoryOutputBoundary {
             menu.add(report);
 
             JMenuItem react = new JMenuItem("React");
-            react.addActionListener(e ->
-                    JOptionPane.showMessageDialog(this, "React (UI only for now)"));
+            react.addActionListener(e -> showReactionChooser(dto, anchor)); // ⭐ open emoji picker
             menu.add(react);
+
+            JMenuItem clear = new JMenuItem("Clear reaction");
+            clear.addActionListener(e -> {
+                localReactions.remove(getMessageId(dto));
+                loadChatHistory();
+                scrollToBottomSoon();
+            });
+            menu.add(clear);
         }
 
         menu.addSeparator();
@@ -309,6 +338,33 @@ public class ChatBox extends JFrame implements ViewChatHistoryOutputBoundary {
         menu.add(cancel);
 
         return menu;
+    }
+
+    private void showReactionChooser(ChatMessageDto dto, Component anchor) {
+        JPopupMenu menu = new JPopupMenu();
+        for (String e : EMOJIS) {
+            JMenuItem it = new JMenuItem(e);
+            it.addActionListener(a -> {
+                String msgId = getMessageId(dto);
+                localReactions.put(msgId, e);     // save UI-only reaction
+                // re-render messages so the emoji appears in-bubble
+                loadChatHistory();
+                scrollToBottomSoon();
+            });
+            menu.add(it);
+        }
+        menu.addSeparator();
+        JMenuItem cancel = new JMenuItem("Cancel");
+        cancel.addActionListener(a -> menu.setVisible(false));
+        menu.add(cancel);
+
+        menu.show(anchor, 0, anchor.getHeight());
+    }
+
+    // utility to read the dto id (rename if your DTO uses a different getter)
+    private String getMessageId(ChatMessageDto dto) {
+        // return dto.getId();  // ← if your dto uses getId()
+        return dto.getMessageId(); // ← if your dto uses getMessageId()
     }
 
 
