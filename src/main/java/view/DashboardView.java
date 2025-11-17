@@ -154,6 +154,9 @@ public class DashboardView extends JPanel {
                         }
                         break;
                 }
+                if (text.equals("Calendar")) {
+                    showCalendarPanel();
+                }
             });
 
             JPanel buttonWrapper = new JPanel(new BorderLayout());
@@ -189,5 +192,11 @@ public class DashboardView extends JPanel {
 
     public void setLogoutController(LogoutController logoutController) {
         this.logoutController = logoutController;
+    }
+    private void showCalendarPanel() {
+        centerPanel.removeAll();
+        centerPanel.add(new CalendarPanel(), BorderLayout.CENTER);
+        centerPanel.revalidate();
+        centerPanel.repaint();
     }
 }
