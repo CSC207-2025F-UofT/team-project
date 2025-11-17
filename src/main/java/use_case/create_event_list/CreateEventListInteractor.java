@@ -1,4 +1,4 @@
-package use_case.Create_event_list;
+package use_case.create_event_list;
 
 public class CreateEventListInteractor {
 // to be implemented
