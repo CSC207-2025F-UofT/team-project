@@ -79,6 +79,7 @@ public class StaticMethods {
             JSONObject responseJSON = new JSONObject(responseBody);
             int statusCode = response.code();
 
+            // If Statement
             if (statusCode == SUCCESS_CODE) {
                 return responseJSON;
             } else if (statusCode == API_KEY_ERROR) {
