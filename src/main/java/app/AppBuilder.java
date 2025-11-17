@@ -33,74 +33,92 @@ import view.ViewManager;
 
 import javax.swing.*;
 import java.awt.*;
+import java.io.IOException;
 
 public class AppBuilder {
     private final JPanel cardPanel = new JPanel();
     private final CardLayout cardLayout = new CardLayout();
-    final UserFactory userFactory = new UserFactory();
-    final ViewManagerModel viewManagerModel = new ViewManagerModel();
-    ViewManager viewManager = new ViewManager(cardPanel, cardLayout, viewManagerModel);
 
-    // set which data access implementation to use, can be any
-    // of the classes from the data_access package
+    // Data Access Objects and Factories
+    private FileUserDataAccessObject userDataAccessObject;
+    private UserFactory userFactory;
 
-    // DAO version using local file storage
-    final FileUserDataAccessObject userDataAccessObject = new FileUserDataAccessObject("users.csv", userFactory);
-
-    // DAO version using a shared external database
-    // final DBUserDataAccessObject userDataAccessObject = new DBUserDataAccessObject(userFactory);
-
-    private SignupView signupView;
-    private SignupViewModel signupViewModel;
+    // View Models
+    private ViewManagerModel viewManagerModel;
     private LoginViewModel loginViewModel;
+    private SignupViewModel signupViewModel;
     private LoggedInViewModel loggedInViewModel;
-    private LoggedInView loggedInView;
+
+    // Views
     private LoginView loginView;
+    private SignupView signupView;
+    private LoggedInView loggedInView; // <-- LoggedInView must be an accessible field
 
     public AppBuilder() {
         cardPanel.setLayout(cardLayout);
+
+        // Initialize Models
+        viewManagerModel = new ViewManagerModel();
+        loginViewModel = new LoginViewModel();
+        signupViewModel = new SignupViewModel();
+        loggedInViewModel = new LoggedInViewModel();
+
+        // Initialize DAO and Factory
+        userDataAccessObject = new FileUserDataAccessObject("./users.csv", new UserFactory());
+        userFactory = new UserFactory();
+
+        // Initialize ViewManager
+        new ViewManager(cardPanel, cardLayout, viewManagerModel);
     }
 
-    public AppBuilder addSignupView() {
-        signupViewModel = new SignupViewModel();
-        signupView = new SignupView(signupViewModel);
-        cardPanel.add(signupView, signupView.getViewName());
-        return this;
-    }
+    // --- VIEW BUILDERS ---
 
     public AppBuilder addLoginView() {
-        loginViewModel = new LoginViewModel();
-        loginView = new LoginView(loginViewModel);
+        // Dependencies for Login
+        final LoginOutputBoundary loginOutputBoundary = new LoginPresenter(viewManagerModel,
+                loggedInViewModel, loginViewModel);
+        final LoginInputBoundary loginInteractor = new LoginInteractor(userDataAccessObject, loginOutputBoundary);
+        final LoginController loginController = new LoginController(loginInteractor);
+
+        // View Creation
+        this.loginView = new LoginView(loginViewModel);
+        this.loginView.setLoginController(loginController);
         cardPanel.add(loginView, loginView.getViewName());
         return this;
     }
 
-    public AppBuilder addLoggedInView() {
-        loggedInViewModel = new LoggedInViewModel();
-        loggedInView = new LoggedInView(loggedInViewModel);
-        cardPanel.add(loggedInView, loggedInView.getViewName());
+    public AppBuilder addSignupView() {
+        // Dependencies for Signup
+        final SignupOutputBoundary signupOutputBoundary = new SignupPresenter(viewManagerModel,
+                signupViewModel, loginViewModel);
+        final SignupInputBoundary signupInteractor = new SignupInteractor(userDataAccessObject, signupOutputBoundary, userFactory);
+        final SignupController signupController = new SignupController(signupInteractor);
+
+        // View Creation
+        this.signupView = new SignupView(signupViewModel);
+        this.signupView.setSignupController(signupController);
+        cardPanel.add(signupView, signupView.getViewName());
         return this;
     }
 
-    public AppBuilder addSignupUseCase() {
-        final SignupOutputBoundary signupOutputBoundary = new SignupPresenter(viewManagerModel,
-                signupViewModel, loginViewModel);
-        final SignupInputBoundary userSignupInteractor = new SignupInteractor(
-                userDataAccessObject, signupOutputBoundary, userFactory);
+    // --- NEW METHOD FOR LOGGEDIN VIEW ---
+    public AppBuilder addLoggedInView() {
+        // LoggedInView is instantiated without the JFrame here.
+        this.loggedInView = new LoggedInView(loggedInViewModel);
 
-        SignupController controller = new SignupController(userSignupInteractor);
-        signupView.setSignupController(controller);
+        // Add the view to the CardPanel
+        cardPanel.add(loggedInView, loggedInView.getViewName());
+
+        return this;
+    }
+
+    // --- USE CASE BUILDERS ---
+
+    public AppBuilder addSignupUseCase() {
         return this;
     }
 
     public AppBuilder addLoginUseCase() {
-        final LoginOutputBoundary loginOutputBoundary = new LoginPresenter(viewManagerModel,
-                loggedInViewModel, loginViewModel);
-        final LoginInputBoundary loginInteractor = new LoginInteractor(
-                userDataAccessObject, loginOutputBoundary);
-
-        LoginController loginController = new LoginController(loginInteractor);
-        loginView.setLoginController(loginController);
         return this;
     }
 
@@ -112,14 +130,12 @@ public class AppBuilder {
                 new ChangePasswordInteractor(userDataAccessObject, changePasswordOutputBoundary, userFactory);
 
         ChangePasswordController changePasswordController = new ChangePasswordController(changePasswordInteractor);
+
+        // Pass controller to the LoggedInView field
         loggedInView.setChangePasswordController(changePasswordController);
         return this;
     }
 
-    /**
-     * Adds the Logout Use Case to the application.
-     * @return this builder
-     */
     public AppBuilder addLogoutUseCase() {
         final LogoutOutputBoundary logoutOutputBoundary = new LogoutPresenter(viewManagerModel,
                 loggedInViewModel, loginViewModel);
@@ -128,16 +144,25 @@ public class AppBuilder {
                 new LogoutInteractor(userDataAccessObject, logoutOutputBoundary);
 
         final LogoutController logoutController = new LogoutController(logoutInteractor);
+
+        // Pass controller to the LoggedInView field
         loggedInView.setLogoutController(logoutController);
         return this;
     }
 
+    // --- MODIFIED BUILD METHOD ---
     public JFrame build() {
         final JFrame application = new JFrame("User Login Example");
         application.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
+        // CRITICAL STEP: Inject the new JFrame into LoggedInView now that it exists.
+        if (loggedInView != null) {
+            loggedInView.setApplicationFrame(application);
+        }
+
         application.add(cardPanel);
 
+        // Set the initial view to Signup
         viewManagerModel.setState(signupView.getViewName());
         viewManagerModel.firePropertyChange();
 
