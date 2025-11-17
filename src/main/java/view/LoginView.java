@@ -1,5 +1,6 @@
 package view;
 
+import interface_adapter.ViewManagerModel;
 import interface_adapter.login.LoginController;
 import interface_adapter.login.LoginState;
 import interface_adapter.login.LoginViewModel;
@@ -30,11 +31,13 @@ public class LoginView extends JPanel implements ActionListener, PropertyChangeL
     private final JButton logIn;
     private final JButton cancel;
     private LoginController loginController = null;
+    private final ViewManagerModel viewManagerModel;
 
-    public LoginView(LoginViewModel loginViewModel) {
+    public LoginView(LoginViewModel loginViewModel, ViewManagerModel viewManagerModel) {
 
         this.loginViewModel = loginViewModel;
         this.loginViewModel.addPropertyChangeListener(this);
+        this.viewManagerModel = viewManagerModel;
 
         final JLabel title = new JLabel("Login Screen");
         title.setAlignmentX(Component.CENTER_ALIGNMENT);
@@ -49,6 +52,7 @@ public class LoginView extends JPanel implements ActionListener, PropertyChangeL
         buttons.add(logIn);
         cancel = new JButton("cancel");
         buttons.add(cancel);
+        cancel.addActionListener(this);
 
         logIn.addActionListener(
                 new ActionListener() {
@@ -65,7 +69,6 @@ public class LoginView extends JPanel implements ActionListener, PropertyChangeL
                 }
         );
 
-        cancel.addActionListener(this);
 
         usernameInputField.getDocument().addDocumentListener(new DocumentListener() {
 
@@ -129,7 +132,10 @@ public class LoginView extends JPanel implements ActionListener, PropertyChangeL
      * @param evt the ActionEvent to react to
      */
     public void actionPerformed(ActionEvent evt) {
-        System.out.println("Click " + evt.getActionCommand());
+        if (evt.getSource().equals(cancel)) {
+            viewManagerModel.setState("welcome");
+            viewManagerModel.firePropertyChange();
+        }
     }
 
     @Override
