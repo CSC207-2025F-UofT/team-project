@@ -21,6 +21,8 @@ public class Pet {
     int sellingPrice;
     boolean deployStatus;
 
+    private String name;
+
 
 
     public Pet(String petType, String petBreed) {
@@ -53,5 +55,13 @@ public class Pet {
 
     public void deployPet() {
         this.deployStatus = true;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getName() {
+        return this.name;
     }
 }

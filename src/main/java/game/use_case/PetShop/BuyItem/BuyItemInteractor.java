@@ -1,6 +1,7 @@
 package game.use_case.PetShop.BuyItem;
 
 import game.entity.User;
+import game.use_case.PetShop.ShopMessageConstants;
 
 /**
  * Interactor for buying an item use case.
@@ -37,14 +38,14 @@ public class BuyItemInteractor implements BuyItemInputBoundary {
         if (!user.coinCheck(user.getItemByName(itemName).getPrice())) {
             BuyItemOutputData outputData = new BuyItemOutputData(
                 false, 
-                "Oops! You do not have enough coins!", 
+                ShopMessageConstants.INSUFFICIENT_COINS, 
                 itemName
             );
             outputBoundary.presentBuyingFailure(outputData);
             return;
         }
         
-        // Execute the purchase (User class handles all the logic)
+        // buy item
         user.buyPetItem(itemName);
         
         // Save the updated user data
@@ -53,7 +54,7 @@ public class BuyItemInteractor implements BuyItemInputBoundary {
         // Create success output data
         BuyItemOutputData outputData = new BuyItemOutputData(
             true, 
-            "Successfully bought " + itemName + "!", 
+            ShopMessageConstants.PURCHASE_SUCCESS, 
             itemName
         );
         
