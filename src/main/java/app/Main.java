@@ -1,15 +1,19 @@
 package app;
 
-import view.DashboardView;
-
 import javax.swing.*;
 
 import data_access.InMemoryCalendarRepository;
-import interface_adapter.calendar.*;
-import use_case.calendar.*;
+import interface_adapter.calendar.AddEventPresenter;
+import interface_adapter.calendar.CalendarController;
+import interface_adapter.calendar.CalendarViewModel;
+import interface_adapter.calendar.ViewCalendarPresenter;
+import use_case.calendar.AddEventInputBoundary;
+import use_case.calendar.AddEventInteractor;
+import use_case.calendar.AddEventOutputBoundary;
+import use_case.calendar.ViewCalendarInputBoundary;
+import use_case.calendar.ViewCalendarInteractor;
+import use_case.calendar.ViewCalendarOutputBoundary;
 import view.CalendarPanel;
-import view.DashboardView;
-
 
 public class Main {
     public static void main(String[] args) {
@@ -35,13 +39,19 @@ public class Main {
             CalendarPanel.sharedViewModel = calendarViewModel;
             CalendarPanel.sharedCalendarController = calendarController;
 
+        AppBuilder appBuilder = new AppBuilder();
+        JFrame application = appBuilder
+                .addLoginView()
+                .addSignupView()
+                .addLoggedInView()
+                .addSignupUseCase()
+                .addLoginUseCase()
+                .addChangePasswordUseCase()
+                .addLogoutUseCase()
+                .build();
 
-            // Important: use BorderLayout so left panel stays visible
-            frame.getContentPane().setLayout(new java.awt.BorderLayout());
-            frame.getContentPane().add(dashboardView, java.awt.BorderLayout.CENTER);
-
-            frame.setLocationRelativeTo(null);
-            frame.setVisible(true);
-        });
+        application.pack();
+        application.setLocationRelativeTo(null);
+        application.setVisible(true);
     }
 }

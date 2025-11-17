@@ -15,22 +15,37 @@ public class Task {
     private String description;        // optional details
     private LocalDate date;            // date of the task/event
     private String type;               // e.g. "assignment", "test", "event"
+    private String course;             // e.g. "CSC207", "MAT137", may be null
     private boolean completed;         // true if finished
 
     /**
-     * Main constructor for a Task.
+     * Main constructor for a Task, including course.
+     */
+    public Task(int id,
+                String title,
+                String description,
+                LocalDate date,
+                String type,
+                String course) {
+        this.id = id;
+        this.title = title;
+        this.description = description;
+        this.date = date;
+        this.type = type;
+        this.course = course;
+        this.completed = false;
+    }
+
+    /**
+     * Convenience constructor without course (kept for compatibility).
+     * Sets course to null.
      */
     public Task(int id,
                 String title,
                 String description,
                 LocalDate date,
                 String type) {
-        this.id = id;
-        this.title = title;
-        this.description = description;
-        this.date = date;
-        this.type = type;
-        this.completed = false;
+        this(id, title, description, date, type, null);
     }
 
     // --- Getters ---
@@ -59,6 +74,10 @@ public class Task {
         return type;
     }
 
+    public String getCourse() {
+        return course;
+    }
+
     public boolean isCompleted() {
         return completed;
     }
@@ -79,6 +98,10 @@ public class Task {
 
     public void setType(String type) {
         this.type = type;
+    }
+
+    public void setCourse(String course) {
+        this.course = course;
     }
 
     public void markCompleted() {
