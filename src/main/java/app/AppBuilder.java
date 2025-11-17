@@ -109,7 +109,7 @@ public class AppBuilder {
 
     public AppBuilder addLoggedInView() {
         loggedInViewModel = new LoggedInViewModel();
-        loggedInView = new LoggedInView(loggedInViewModel, viewManagerModel); // <-- PASS viewManagerModel
+        loggedInView = new LoggedInView(loggedInViewModel, viewManagerModel);
         cardPanel.add(loggedInView, loggedInView.getViewName());
         return this;
     }
@@ -226,7 +226,7 @@ public class AppBuilder {
      * @return this builder
      */
     public AppBuilder addSearchUserView() {
-        this.searchUserView = new SearchUserView(viewManagerModel, searchUserViewModel);
+        this.searchUserView = new SearchUserView(viewManagerModel, searchUserViewModel, chatView);
         cardPanel.add(searchUserView, searchUserView.getViewName());
         return this;
     }

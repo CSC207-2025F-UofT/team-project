@@ -7,7 +7,7 @@ public class SearchUserInteractor implements SearchUserInputBoundary {
     private final SearchUserOutputBoundary userPresenter;
 
     public SearchUserInteractor(SearchUserDataAccessInterface userDataAccessObject,
-                                 SearchUserOutputBoundary userPresenter) {
+                                SearchUserOutputBoundary userPresenter) {
         this.userDataAccessObject = userDataAccessObject;
         this.userPresenter = userPresenter;
     }
@@ -16,10 +16,8 @@ public class SearchUserInteractor implements SearchUserInputBoundary {
     public void execute(SearchUserInputData inputData) {
         String query = inputData.getQuery();
 
-        if (query == null || query.trim().isEmpty()) {
-            // If the query is empty, return all users or handle as a failure
-            userPresenter.prepareFailView("Search query cannot be empty.");
-            return;
+        if (query == null) {
+            query = ""; // Treat null query as empty search
         }
 
         List<String> results = userDataAccessObject.searchUsers(query);
