@@ -11,6 +11,8 @@ import javax.swing.event.DocumentListener;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.IOException;
@@ -57,6 +59,30 @@ public class PokemonLookupView extends JPanel implements ActionListener, Propert
                             }
                         }
                     }
+                }
+        );
+        pokemonNameInputField.addKeyListener(
+                new KeyListener() {
+                    @Override
+                    public void keyTyped(KeyEvent e) {}
+
+                    @Override
+                    public void keyPressed(KeyEvent evt) {
+                        if (evt.getKeyCode() == KeyEvent.VK_ENTER) {
+                            final PokemonLookupState currentState = pokemonLookupViewModel.getState();
+
+                            try {
+                                pokemonLookupController.execute(currentState.getPokemonName());
+                                displayPokemon.setPokemon(currentState.getDisplayPokemon());
+
+                            } catch (IOException | PokemonLookupInputBoundary.PokemonNotFoundException e) {
+                                JOptionPane.showMessageDialog(null, "Not a valid Pokemon Name");
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void keyReleased(KeyEvent e) {}
                 }
         );
 
