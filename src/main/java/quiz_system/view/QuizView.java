@@ -116,7 +116,7 @@ public class QuizView extends JFrame {
         feedbackFrame.setVisible(true);
 
         // close original quiz window automatically for incorrect answer
-        if ("INCORRECT".equals(vm.status)) {
+        if ("INCORRECT".equals(vm.status) || "CORRECT".equals(vm.status)) {
             this.dispose(); //get rid of quiz window
         }
     }
