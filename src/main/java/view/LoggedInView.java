@@ -1,6 +1,7 @@
+// LoggedInView.java (Only showing the necessary changes/additions)
 package view;
 
-import interface_adapter.ViewManagerModel;
+import interface_adapter.ViewManagerModel; // <-- NEW IMPORT NEEDED
 import interface_adapter.logged_in.ChangePasswordController;
 import interface_adapter.logged_in.LoggedInState;
 import interface_adapter.logged_in.LoggedInViewModel;
@@ -20,45 +21,38 @@ public class LoggedInView extends JPanel implements ActionListener, PropertyChan
 
     private final String viewName = "logged in";
     private final LoggedInViewModel loggedInViewModel;
+    // Removed passwordErrorField
     private ChangePasswordController changePasswordController = null;
     private LogoutController logoutController;
+    private final ViewManagerModel viewManagerModel;
 
     // Components for the New Design
-    private final JLabel usernameLabel; // To display the logged-in username in the top bar
-    private final JList<String> recentChatsList; // Component to hold the list of chats
-    private final JPanel recentPanel; // Panel containing "Recent Chats" text
-
-    // NEW BUTTONS
-    private final JButton profileButton; // User icon button
-    private final JButton newChatButton; // Plus icon button
-
-
+    private final JLabel usernameLabel;
+    private final JList<String> recentChatsList;
+    private final JPanel recentPanel;
+    private final JButton profileButton;
+    private final JButton newChatButton;
     private final JButton logOut;
-    private final JButton changePassword;
-    private final ViewManagerModel viewManagerModel; // This field is now correctly defined
 
-    // CONSTRUCTOR SIGNATURE CORRECTED TO ACCEPT ViewManagerModel
     public LoggedInView(LoggedInViewModel loggedInViewModel, ViewManagerModel viewManagerModel) {
         this.loggedInViewModel = loggedInViewModel;
-        this.viewManagerModel = viewManagerModel; // This assignment now works
+        this.viewManagerModel = viewManagerModel;
         this.loggedInViewModel.addPropertyChangeListener(this);
 
         // Top Bar Panel (User, New Chat)
         JPanel topBar = new JPanel(new BorderLayout(5, 0));
-        topBar.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10)); // Padding
+        topBar.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
         // Left Side: Profile Button and Username Label
         JPanel userInfoPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
 
-        // Profile Button (User Icon)
         profileButton = new JButton("👤");
         profileButton.setFont(new Font("SansSerif", Font.PLAIN, 24));
         profileButton.setFocusPainted(false);
         profileButton.setBorderPainted(false);
         profileButton.setContentAreaFilled(false);
 
-        usernameLabel = new JLabel("User"); // Placeholder text, updated on login
-        // Assuming Font "Oxygen" is custom or a mistake, changed to "SansSerif" for safety
+        usernameLabel = new JLabel("User");
         usernameLabel.setFont(new Font("SansSerif", Font.BOLD, 18));
 
         userInfoPanel.add(profileButton);
@@ -68,87 +62,62 @@ public class LoggedInView extends JPanel implements ActionListener, PropertyChan
 
         // Right Side: New Chat Button (Plus Icon)
         newChatButton = new JButton("⊕");
-        newChatButton.setFont(new Font("SansSerif", Font.PLAIN, 24)); // Changed font
-        newChatButton.setFocusPainted(false);
-        newChatButton.setBorderPainted(false);
-        newChatButton.setContentAreaFilled(false);
+        newChatButton.setFont(new Font("SansSerif", Font.PLAIN, 24));
 
         JPanel newChatPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 0, 0));
         newChatPanel.add(newChatButton);
 
         topBar.add(newChatPanel, BorderLayout.EAST);
 
-
+        // Recent Chats Panel
         JLabel recentChatsTitle = new JLabel("Recent Chats");
-        recentChatsTitle.setFont(new Font("SansSerif", Font.BOLD, 20)); // Changed font
-
+        recentChatsTitle.setFont(new Font("SansSerif", Font.BOLD, 20));
 
         recentPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         recentPanel.add(recentChatsTitle);
-
         recentPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 0, 10));
         recentPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, recentPanel.getPreferredSize().height));
-
 
         JSeparator separator = new JSeparator(SwingConstants.HORIZONTAL);
         separator.setBorder(BorderFactory.createDashedBorder(Color.BLACK));
         separator.setMaximumSize(new Dimension(Integer.MAX_VALUE, 1));
-
 
         recentChatsList = new JList<>(new DefaultListModel<String>());
         JScrollPane scrollPane = new JScrollPane(recentChatsList);
         scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
         scrollPane.setBorder(BorderFactory.createEmptyBorder());
 
-
         JPanel buttonPanel = new JPanel();
         logOut = new JButton("Logout");
-        changePassword = new JButton("Change Password");
 
-
-        // Action Listeners for the new buttons (Do nothing for now)
+        // PROFILE BUTTON: Navigate to AccountDetailsView
         profileButton.addActionListener(e -> {
-            System.out.println("Profile Button Clicked");
+            viewManagerModel.setState("account details");
+            viewManagerModel.firePropertyChange();
         });
 
+        // NEW CHAT BUTTON: Navigate to NewChatView
         newChatButton.addActionListener(e -> {
-            // Navigate to the NewChatView
             viewManagerModel.setState("new chat");
             viewManagerModel.firePropertyChange();
         });
 
-        // Action Listeners for existing functionality
+        // LOGOUT BUTTON:
         logOut.addActionListener(this);
-        changePassword.addActionListener(
-                evt -> {
-                    if (evt.getSource().equals(changePassword) && changePasswordController != null) {
-                        final LoggedInState currentState = loggedInViewModel.getState();
-                        changePasswordController.execute(
-                                currentState.getUsername(),
-                                currentState.getPassword()
-                        );
-                    }
-                }
-        );
-        buttonPanel.add(logOut);
-        buttonPanel.add(changePassword);
-        buttonPanel.setVisible(false); // Hide the buttons
 
+        buttonPanel.add(logOut);
+        buttonPanel.setVisible(false); // Keep hidden
 
         this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 
         this.add(topBar);
         this.add(recentPanel);
-        this.add(Box.createVerticalStrut(5)); // Small gap
+        this.add(Box.createVerticalStrut(5));
         this.add(separator);
         this.add(scrollPane);
         this.add(buttonPanel);
     }
 
-    /**
-     * React to a button click that results in evt (handles Logout).
-     * @param evt the ActionEvent to react to
-     */
     @Override
     public void actionPerformed(ActionEvent evt) {
         if (evt.getSource().equals(logOut) && logoutController != null) {
@@ -162,6 +131,17 @@ public class LoggedInView extends JPanel implements ActionListener, PropertyChan
         if (evt.getPropertyName().equals("state")) {
             final LoggedInState state = (LoggedInState) evt.getNewValue();
             usernameLabel.setText(state.getUsername());
+        }
+
+        else if (evt.getPropertyName().equals("password")) {
+            final LoggedInState state = (LoggedInState) evt.getNewValue();
+            if (state.getPasswordError() == null) {
+                // This will show when a password change succeeds
+                JOptionPane.showMessageDialog(this, "password updated for " + state.getUsername());
+            }
+            else {
+                JOptionPane.showMessageDialog(this, state.getPasswordError());
+            }
         }
     }
 

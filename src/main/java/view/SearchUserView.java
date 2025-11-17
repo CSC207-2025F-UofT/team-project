@@ -8,22 +8,38 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.util.ArrayList;
+import interface_adapter.user_search.SearchUserController;
+import interface_adapter.user_search.SearchUserViewModel;
+import interface_adapter.user_search.SearchUserState;
 import java.util.List;
 
 public class SearchUserView extends JPanel implements ActionListener, PropertyChangeListener {
 
     public final String viewName = "new chat";
+
     private final ViewManagerModel viewManagerModel;
+    private final SearchUserViewModel searchUserViewModel;
+    private final ChatView chatView;
+
+    private SearchUserController searchUserController;
 
     // UI Components
     private final JTextField searchInputField;
     private final JButton searchExitButton;
     private final JButton startChatButton;
-    private final JPanel userListPanel; // Container for dynamic checkboxes/users
 
-    public SearchUserView (ViewManagerModel viewManagerModel) {
+    // JList and its model for displaying users
+    private final JList<String> userList;
+    private final DefaultListModel<String> userListModel;
+
+
+    public SearchUserView(ViewManagerModel viewManagerModel, SearchUserViewModel searchUserViewModel, ChatView chatView) { // <-- MODIFIED CONSTRUCTOR
+
         this.viewManagerModel = viewManagerModel;
+        this.searchUserViewModel = searchUserViewModel;
+        this.chatView = chatView;
+        this.searchUserViewModel.addPropertyChangeListener(this);
+
         this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
         this.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
@@ -34,7 +50,7 @@ public class SearchUserView extends JPanel implements ActionListener, PropertyCh
         searchInputField = new JTextField(20);
 
         // Exit/Cancel Button
-        searchExitButton = new JButton("X"); // Using Unicode X for the button
+        searchExitButton = new JButton("X");
         searchExitButton.setFont(new Font("Oxygen", Font.BOLD, 16));
         searchExitButton.setFocusPainted(false);
         searchExitButton.setBorderPainted(false);
@@ -49,13 +65,12 @@ public class SearchUserView extends JPanel implements ActionListener, PropertyCh
         searchPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, searchPanel.getPreferredSize().height));
 
 
-        userListPanel = new JPanel();
-        userListPanel.setLayout(new BoxLayout(userListPanel, BoxLayout.Y_AXIS));
+        // User List Components (New JList logic)
+        userListModel = new DefaultListModel<>();
+        userList = new JList<>(userListModel);
+        userList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION); // Single selection for a one-on-one chat
 
-        // Placeholder Users
-        addPlaceholderUsers(new String[]{"User1", "User2", "User3", "User4", "User5"}); // Temporary list of users
-
-        JScrollPane scrollPane = new JScrollPane(userListPanel);
+        JScrollPane scrollPane = new JScrollPane(userList);
         scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
         scrollPane.setBorder(BorderFactory.createEmptyBorder());
 
@@ -63,56 +78,81 @@ public class SearchUserView extends JPanel implements ActionListener, PropertyCh
         startChatButton = new JButton("Start Chat");
         buttonPanel.add(startChatButton);
 
-        // --- 4. Listeners ---
+        // Listeners
         startChatButton.addActionListener(this);
         searchExitButton.addActionListener(this);
 
-        // --- 5. Assembly ---
+        // Assembly
         this.add(searchPanel);
         this.add(Box.createVerticalStrut(10));
         this.add(scrollPane);
         this.add(buttonPanel);
     }
 
-    /**
-     * Helper to create placeholder users with checkboxes.
-     */
-    private void addPlaceholderUsers(String[] users) {
-        for (String user : users) {
-            JCheckBox checkBox = new JCheckBox(user);
-            checkBox.setAlignmentX(Component.LEFT_ALIGNMENT);
-            userListPanel.add(checkBox);
-        }
-    }
-
     @Override
     public void actionPerformed(ActionEvent evt) {
         if (evt.getSource().equals(searchExitButton)) {
-            // "Exit button to return to the home screen" (which is LoggedInView)
+            // "Exit button to return to the home screen"
             viewManagerModel.setState("logged in");
             viewManagerModel.firePropertyChange();
         } else if (evt.getSource().equals(startChatButton)) {
-            // Start Chat logic (currently does nothing)
+            String selectedUser = userList.getSelectedValue();
 
+            if (selectedUser == null || selectedUser.startsWith("Error:")) {
+                JOptionPane.showMessageDialog(this, "Please select a valid user to start a chat.");
+                return;
+            }
 
-            // For now, assume a single user is always selected (or just navigate)
-            // Real implementation requires checking checkboxes, but for now, we navigate.
+            // Set the chat partner in the ChatView before navigating
+            if (chatView != null) {
+                chatView.setChatPartner(selectedUser);
+            }
 
             // Navigate to the ChatView
             viewManagerModel.setState("chat");
             viewManagerModel.firePropertyChange();
-
-            // Previous placeholder (remove or comment out):
-            // JOptionPane.showMessageDialog(this, "Starting chat with selected users (Not yet implemented)");
         }
     }
 
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
-        // Will be used to update the user list based on search results
+        if ("state".equals(evt.getPropertyName())) {
+            SearchUserState state = (SearchUserState) evt.getNewValue();
+
+            userListModel.clear(); // Clear the list before updating
+
+            if (state.getSearchError() != null) {
+                // Display error message
+                userListModel.addElement("Error: " + state.getSearchError());
+            } else if (state.getSearchResults() != null) {
+                // Update the JList with search results
+                for (String username : state.getSearchResults()) {
+                    userListModel.addElement(username);
+                }
+                if (state.getSearchResults().isEmpty()) {
+                    userListModel.addElement("No users found.");
+                }
+            }
+        }
     }
+
 
     public String getViewName() {
         return viewName;
+    }
+
+    public void setUserSearchController(SearchUserController searchUserController) {
+        this.searchUserController = searchUserController;
+        searchInputField.addActionListener(e -> {
+            if (this.searchUserController != null) {
+                // Trigger search when user presses Enter in the search field
+                this.searchUserController.execute(searchInputField.getText());
+            }
+        });
+
+        // Trigger an initial search with an empty query to load all users on startup
+        if (this.searchUserController != null) {
+            this.searchUserController.execute("");
+        }
     }
 }

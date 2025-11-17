@@ -14,6 +14,15 @@ import interface_adapter.logout.LogoutPresenter;
 import interface_adapter.signup.SignupController;
 import interface_adapter.signup.SignupPresenter;
 import interface_adapter.signup.SignupViewModel;
+// Corrected SearchUser Imports (Assuming your packages are named 'search_user')
+import interface_adapter.user_search.SearchUserController;
+import interface_adapter.user_search.SearchUserPresenter;
+import interface_adapter.user_search.SearchUserViewModel;
+import use_case.search_user.SearchUserInputBoundary;
+import use_case.search_user.SearchUserInteractor;
+import use_case.search_user.SearchUserOutputBoundary;
+import use_case.search_user.SearchUserDataAccessInterface;
+
 import use_case.change_password.ChangePasswordInputBoundary;
 import use_case.change_password.ChangePasswordInteractor;
 import use_case.change_password.ChangePasswordOutputBoundary;
@@ -33,6 +42,13 @@ import view.ViewManager;
 import view.WelcomeView;
 import view.SearchUserView;
 import view.ChatView;
+import view.AccountDetailsView;
+import interface_adapter.logged_in.ChangeUsernameController;
+import interface_adapter.logged_in.ChangeUsernamePresenter;
+import use_case.change_username.ChangeUsernameInputBoundary;
+import use_case.change_username.ChangeUsernameInteractor;
+import use_case.change_username.ChangeUsernameOutputBoundary;
+import use_case.change_username.ChangeUsernameUserDataAccessInterface;
 
 import javax.swing.*;
 import java.awt.*;
@@ -60,8 +76,12 @@ public class AppBuilder {
     private LoggedInView loggedInView;
     private LoginView loginView;
     private WelcomeView welcomeView;
-    private SearchUserView newChatView;
     private ChatView chatView;
+    private AccountDetailsView accountDetailsView;
+
+    // Field for the Search User use case
+    private final SearchUserViewModel searchUserViewModel = new SearchUserViewModel();
+    private SearchUserView searchUserView;
 
     public AppBuilder() {
         cardPanel.setLayout(cardLayout);
@@ -124,7 +144,13 @@ public class AppBuilder {
                 new ChangePasswordInteractor(userDataAccessObject, changePasswordOutputBoundary, userFactory);
 
         ChangePasswordController changePasswordController = new ChangePasswordController(changePasswordInteractor);
+
         loggedInView.setChangePasswordController(changePasswordController);
+
+        if (accountDetailsView != null) {
+            accountDetailsView.setChangePasswordController(changePasswordController);
+        }
+
         return this;
     }
 
@@ -140,7 +166,13 @@ public class AppBuilder {
                 new LogoutInteractor(userDataAccessObject, logoutOutputBoundary);
 
         final LogoutController logoutController = new LogoutController(logoutInteractor);
+
         loggedInView.setLogoutController(logoutController);
+
+        if (accountDetailsView != null) {
+            accountDetailsView.setLogoutController(logoutController);
+        }
+
         return this;
     }
 
@@ -156,15 +188,69 @@ public class AppBuilder {
 
         return application;
     }
-    public AppBuilder addNewChatView() {
-        newChatView = new SearchUserView(viewManagerModel);
-        cardPanel.add(newChatView, newChatView.getViewName());
-        return this;
-    }
 
     public AppBuilder addChatView() {
         chatView = new ChatView(viewManagerModel);
         cardPanel.add(chatView, chatView.getViewName());
+        return this;
+    }
+
+    public AppBuilder addAccountDetailsView() {
+        accountDetailsView = new AccountDetailsView(viewManagerModel, loggedInViewModel);
+        cardPanel.add(accountDetailsView, accountDetailsView.getViewName());
+        return this;
+    }
+
+    public AppBuilder addChangeUsernameUseCase() {
+        final ChangeUsernameOutputBoundary changeUsernameOutputBoundary =
+                new ChangeUsernamePresenter(loggedInViewModel, viewManagerModel);
+
+        final ChangeUsernameInputBoundary changeUsernameInteractor =
+                new ChangeUsernameInteractor(
+                        (ChangeUsernameUserDataAccessInterface) userDataAccessObject,
+                        changeUsernameOutputBoundary,
+                        userFactory
+                );
+
+        ChangeUsernameController changeUsernameController = new ChangeUsernameController(changeUsernameInteractor);
+
+        if (accountDetailsView != null) {
+            accountDetailsView.setChangeUsernameController(changeUsernameController);
+        }
+
+        return this;
+    }
+
+    /**
+     * Adds the Search User View to the application and instantiates it correctly.
+     * @return this builder
+     */
+    public AppBuilder addSearchUserView() {
+        this.searchUserView = new SearchUserView(viewManagerModel, searchUserViewModel, chatView);
+        cardPanel.add(searchUserView, searchUserView.getViewName());
+        return this;
+    }
+
+    /**
+     * Adds the User Search Use Case to the application.
+     * @return this builder
+     */
+    public AppBuilder addUserSearchUseCase() {
+        final SearchUserOutputBoundary searchUserOutputBoundary =
+                new SearchUserPresenter(searchUserViewModel);
+
+        final SearchUserInputBoundary searchUsersInteractor =
+                new SearchUserInteractor(
+                        (SearchUserDataAccessInterface) userDataAccessObject,
+                        searchUserOutputBoundary
+                );
+
+        final SearchUserController searchUserController = new SearchUserController(searchUsersInteractor);
+
+        if (this.searchUserView != null) {
+            this.searchUserView.setUserSearchController(searchUserController);
+        }
+
         return this;
     }
 }

@@ -10,12 +10,15 @@ public class Main {
                 .addLoginView()
                 .addSignupView()
                 .addLoggedInView()
+                .addAccountDetailsView()
                 .addChatView()
-                .addNewChatView()
+                .addSearchUserView()
                 .addSignupUseCase()
                 .addLoginUseCase()
                 .addLogoutUseCase()
                 .addChangePasswordUseCase()
+                .addChangeUsernameUseCase()
+                .addUserSearchUseCase()
                 .build();
 
         application.pack();
