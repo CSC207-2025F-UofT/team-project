@@ -48,15 +48,7 @@ public class PokemonLookupView extends JPanel implements ActionListener, Propert
                 new ActionListener() {
                     public void actionPerformed(ActionEvent evt) {
                         if (evt.getSource().equals(search)) {
-                            final PokemonLookupState currentState = pokemonLookupViewModel.getState();
-
-                            try {
-                                pokemonLookupController.execute(currentState.getPokemonName());
-                                displayPokemon.setPokemon(currentState.getDisplayPokemon());
-
-                            } catch (IOException | PokemonLookupInputBoundary.PokemonNotFoundException e) {
-                                JOptionPane.showMessageDialog(null, "Not a valid Pokemon Name");
-                            }
+                            updatePokemonDisplay(pokemonLookupViewModel);
                         }
                     }
                 }
@@ -69,15 +61,7 @@ public class PokemonLookupView extends JPanel implements ActionListener, Propert
                     @Override
                     public void keyPressed(KeyEvent evt) {
                         if (evt.getKeyCode() == KeyEvent.VK_ENTER) {
-                            final PokemonLookupState currentState = pokemonLookupViewModel.getState();
-
-                            try {
-                                pokemonLookupController.execute(currentState.getPokemonName());
-                                displayPokemon.setPokemon(currentState.getDisplayPokemon());
-
-                            } catch (IOException | PokemonLookupInputBoundary.PokemonNotFoundException e) {
-                                JOptionPane.showMessageDialog(null, "Not a valid Pokemon Name");
-                            }
+                            updatePokemonDisplay(pokemonLookupViewModel);
                         }
                     }
 
@@ -93,6 +77,17 @@ public class PokemonLookupView extends JPanel implements ActionListener, Propert
         this.add(title);
         this.add(pokemonNameInfo);
         this.add(displayPokemon);
+    }
+
+    private void updatePokemonDisplay(PokemonLookupViewModel pokemonLookupViewModel) {
+        final PokemonLookupState currentState = pokemonLookupViewModel.getState();
+        try {
+            pokemonLookupController.execute(currentState.getPokemonName());
+            displayPokemon.setPokemon(currentState.getDisplayPokemon());
+
+        } catch (IOException | PokemonLookupInputBoundary.PokemonNotFoundException e) {
+            JOptionPane.showMessageDialog(null, "Not a valid Pokemon Name");
+        }
     }
 
     private void addPokemonNameListener() {
