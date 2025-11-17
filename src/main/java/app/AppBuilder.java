@@ -4,7 +4,13 @@ import entity.UserFactory;
 import interface_adapter.*;
 import interface_adapter.main_screen.MainScreenViewModel;
 import interface_adapter.registration.login.*;
+import interface_adapter.registration.signup.SignupController;
+import interface_adapter.registration.signup.SignupPresenter;
+import interface_adapter.registration.signup.SignupViewModel;
 import use_case.registration.login.*;
+import use_case.registration.signup.SignupInputBoundary;
+import use_case.registration.signup.SignupInteractor;
+import use_case.registration.signup.SignupOutputBoundary;
 import view.main_screen.MainScreenView;
 import view.registration.*;
 import data_access.*;
@@ -31,8 +37,8 @@ public class AppBuilder {
     // DAO version using a shared external database
     // final DBUserDataAccessObject userDataAccessObject = new DBUserDataAccessObject(userFactory);
 
-    //private SignupView signupView;
-    //private SignupViewModel signupViewModel;
+    private SignupView signupView;
+    private SignupViewModel signupViewModel;
     private LoginViewModel loginViewModel;
     private MainScreenViewModel mainScreenViewModel;
     private LoginView loginView;
@@ -40,6 +46,13 @@ public class AppBuilder {
 
     public AppBuilder() {
         cardPanel.setLayout(cardLayout);
+    }
+
+    public AppBuilder addSignupView() {
+        signupViewModel = new SignupViewModel();
+        signupView = new SignupView(signupViewModel);
+        cardPanel.add(signupView, signupView.getViewName());
+        return this;
     }
 
     public AppBuilder addLoginView() {
@@ -53,6 +66,17 @@ public class AppBuilder {
         mainScreenViewModel = new MainScreenViewModel();
         mainScreenView = new MainScreenView(mainScreenViewModel);
         cardPanel.add(mainScreenView, mainScreenView.getViewName());
+        return this;
+    }
+
+    public AppBuilder addSignupUseCase() {
+        final SignupOutputBoundary signupOutputBoundary = new SignupPresenter(viewManagerModel,
+                signupViewModel, loginViewModel);
+        final SignupInputBoundary userSignupInteractor = new SignupInteractor(
+                userDataAccessObject, signupOutputBoundary, userFactory);
+
+        SignupController controller = new SignupController(userSignupInteractor);
+        signupView.setSignupController(controller);
         return this;
     }
 

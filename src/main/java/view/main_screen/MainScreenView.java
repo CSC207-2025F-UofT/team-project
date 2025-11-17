@@ -56,9 +56,19 @@ public class MainScreenView extends JPanel implements ActionListener, PropertyCh
                 button.setFont(new Font("Helvetica", Font.BOLD, 48));
                 button.setBackground(Color.GRAY);
                 button.setForeground(Color.WHITE);
-                button.addActionListener(e -> {
-                    System.out.println(button.getText() + " button clicked");
-                });
+                switch (buttons[row][col].getName()) {
+                    case "Single Player":
+                        break;
+                    case "Multiplayer":
+                        break;
+                    case "Manage Study Set":
+                        button.addActionListener(e -> {
+
+                        });
+                        break;
+                    case "Leaderboard":
+                        break;
+                }
 
                 c.gridx = col;
                 c.gridy = row;
