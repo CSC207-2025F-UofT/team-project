@@ -18,7 +18,7 @@ public class DeleteFavoriteLocationInteractor implements DeleteFavoriteLocationI
         String rawCityName = inputData.getCityName();
 
         //Basic validation
-        if (rawCityName == null || rawCityName.isEmpty()) {
+        if (rawCityName == null || rawCityName.trim().isEmpty()) {
             presenter.prepareFailView("Please check your city name and try again.");
             return;
         }
