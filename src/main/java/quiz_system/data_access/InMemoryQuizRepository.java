@@ -19,7 +19,7 @@ public class InMemoryQuizRepository implements QuizRepository{
         store.put(quiz.getQuizId(), quiz);
     }
 
-     // helper for preloading quizzes during tests/demo
+     // helper for preloading quizzes during tests
     public void put(Quiz quiz) {
         save(quiz);
     }
