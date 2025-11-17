@@ -1,9 +1,12 @@
 package plan4life.view;
 
+import plan4life.entities.Schedule;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.time.LocalDateTime;
 
 public class CalendarPanel extends JPanel {
     private JPanel[][] cells;
@@ -13,6 +16,8 @@ public class CalendarPanel extends JPanel {
     private int endRow = -1;
     private int column = -1;
     private boolean dragging = false;
+
+    private TimeSelectionListener listener;
 
     public CalendarPanel() {
         setBorder(BorderFactory.createTitledBorder("Weekly Calendar"));
@@ -50,22 +55,32 @@ public class CalendarPanel extends JPanel {
 
             @Override
             public void mouseReleased(MouseEvent e) {
+                if (!dragging) return;
                 dragging = false;
 
                 if (column != -1 && startRow != -1 && endRow != -1) {
                     int min = Math.min(startRow, endRow);
                     int max = Math.max(startRow, endRow);
-                    String startTime = min + ":00";
-                    String endTime = (max + 1) + ":00";
+                    LocalDateTime now = LocalDateTime.now();
 
-                    String dayLabel;
-                    if (currentColumns == 1) {
-                        dayLabel = "Day View";
-                    } else {
-                        dayLabel = "Day " + (column + 1);
+                    if (listener == null) {
+                        return;
                     }
 
-                    System.out.printf("Selected %s from %s to %s%n", dayLabel, startTime, endTime);
+                    // TODO: Using today's date as a placeholder. Replace with actual selected calendar date once implemented.
+                    LocalDateTime start = now
+                            .withHour(min)
+                            .withMinute(0)
+                            .withSecond(0)
+                            .withNano(0);
+                    LocalDateTime end = now
+                            .withHour(max + 1)
+                            .withMinute(0)
+                            .withSecond(0)
+                            .withNano(0);
+
+                    int scheduleId = (currentColumns == 1) ? 1 : 2;
+                    listener.onTimeSelected(start, end, scheduleId, column);
                 }
             }
         });
@@ -95,6 +110,10 @@ public class CalendarPanel extends JPanel {
     public void setWeekView() {
         setBorder(BorderFactory.createTitledBorder("Weekly Calendar"));
         buildGrid(7);
+    }
+
+    public void setTimeSelectionListener(TimeSelectionListener listener) {
+        this.listener = listener;
     }
 
     private int getColumnFromX(int x) {
@@ -133,4 +152,80 @@ public class CalendarPanel extends JPanel {
             }
         }
     }
+
+    public void updateSchedule(Schedule schedule) {
+    }
+
+    public void clear() {
+        for (int r = 0; r < 24; r++) {
+            for (int c = 0; c < currentColumns; c++) {
+                cells[r][c].setBackground(Color.WHITE);
+                cells[r][c].removeAll();
+            }
+        }
+    }
+
+    public void colorCell(String time, Color color, String label, boolean locked) {
+        try {
+            // Assuming time corresponds to the first column's row index mapping logic you already have
+            int hour = Integer.parseInt(time.split(" ")[1].split(":")[0]); // crude, adapt to your keys
+            int columnIndex = 0; // if using daily view otherwise compute from day name
+
+            JPanel cell = cells[hour][columnIndex];
+            cell.removeAll();
+            cell.setBackground(color);
+            cell.setLayout(new BorderLayout());
+
+            JLabel title = new JLabel(label, SwingConstants.CENTER);
+            title.setOpaque(false);
+            cell.add(title, BorderLayout.CENTER);
+
+            // Create a small lock label on EAST
+            String lockText = locked ? "\uD83D\uDD12" : "\uD83D\uDD13"; // 🔒 vs 🔓 unicode (had to google it, might be wrong)
+            JLabel lockLabel = new JLabel(lockText);
+            lockLabel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+            lockLabel.setBorder(BorderFactory.createEmptyBorder(2,6,2,6));
+            lockLabel.addMouseListener(new MouseAdapter() {
+                @Override
+                public void mouseClicked(MouseEvent e) {
+                    if (lockListener != null) lockListener.onLockToggle(time);
+                }
+            });
+
+            cell.add(lockLabel, BorderLayout.EAST);
+            cell.revalidate();
+            cell.repaint();
+        } catch (Exception ignored) {}
+    }
+
+
+    public void colorBlockedRange(LocalDateTime start, LocalDateTime end, int columnIndex) {
+        int startHour = start.getHour();
+        int endHour = end.getHour();
+
+        int min = Math.max(0, startHour);
+        int max = Math.min(23, endHour - 1);
+
+        if (columnIndex < 0 || columnIndex >= currentColumns) {
+            return;
+        }
+
+        for (int r = min; r <= max; r++) {
+            cells[r][columnIndex].setBackground(Color.GRAY);
+            cells[r][columnIndex].removeAll();
+            cells[r][columnIndex].add(new JLabel("Blocked"));
+        }
+    }
+    // new listener interface inside or external:
+    public interface LockListener {
+        void onLockToggle(String timeKey);
+    }
+
+    // field
+    private LockListener lockListener;
+
+    public void setLockListener(LockListener listener) {
+        this.lockListener = listener;
+    }
+
 }
