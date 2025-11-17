@@ -77,8 +77,9 @@ public class SearchEventInteractor implements SearchEventInputBoundary{
         String venueName = extractVenueName(jsonEvent);
         String cityName = extractCity(jsonEvent);
         String countryName = extractCountry(jsonEvent);
+        String imageUrl = extractImageUrl(jsonEvent);
 
-        return new Event(id, name, artists, venueName, cityName, countryName, date, priceMin, priceMax, ticketUrl, genres);
+        return new Event(id, name, artists, venueName, cityName, countryName, date, priceMin, priceMax, ticketUrl, genres, imageUrl);
     }
 
     private static JSONObject getEmbedded(JSONObject jsonEvent) {
@@ -202,5 +203,15 @@ public class SearchEventInteractor implements SearchEventInputBoundary{
             }
         }
         return genres;
+    }
+
+    public static String extractImageUrl(JSONObject jsonEvent) {
+        if (jsonEvent.has("images")) {
+            JSONArray images = jsonEvent.getJSONArray("images");
+            if (!images.isEmpty()) {
+                return  images.getJSONObject(0).getString("url");
+            }
+        }
+        return "";
     }
 }
