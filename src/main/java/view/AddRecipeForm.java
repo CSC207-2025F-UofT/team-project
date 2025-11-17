@@ -2,8 +2,7 @@ package view;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
-import java.awt.GridLayout;
-import java.awt.BorderLayout;
+import java.awt.*;
 
 public class AddRecipeForm {
     private JLabel instructionsLabel;
@@ -104,6 +103,18 @@ public class AddRecipeForm {
         instructionsPanel.add(instructionsScrollPane, BorderLayout.CENTER);
 
         mainPanel.add(instructionsPanel);
+
+
+        // -------------- submit button panel ----------------
+        JPanel bottomButtonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
+
+        JButton addButton = new JButton("Add");
+        JButton cancelButton = new JButton("Cancel");
+
+        bottomButtonPanel.add(addButton);
+        bottomButtonPanel.add(cancelButton);
+
+        mainPanel.add(bottomButtonPanel);
     }
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
