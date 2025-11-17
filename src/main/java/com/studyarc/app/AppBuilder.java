@@ -33,11 +33,13 @@ public class AppBuilder {
     private final SidebarDataAccessInterface sidebarDataAccess = new SidebarDataAccessObject();
     private final MilestoneTasksDataAccessInterface milestoneDataAccessObject = new MilestoneTasksDatatAccessObject();
 
-    private final JPanel overallPanel = new JPanel();
+    private final JPanel overallPanel = new JPanel(new BorderLayout());
+    private final JPanel cardPanel = new JPanel(new CardLayout());
+    private CardLayout cardLayout = (CardLayout) cardPanel.getLayout();
+
     private final BorderLayout borderLayout = new BorderLayout();
     private final JPanel mainUIPanel = new JPanel();
     private final JPanel usecasePanel = new JPanel();
-    private final CardLayout cardLayout = new CardLayout();
 
     private SidebarViewModel sidebarViewModel;
     private SidePanelView sidePanelView;
@@ -50,22 +52,17 @@ public class AppBuilder {
     private TrackPlansView trackPlansView;
 
     final ViewManagerModel viewManagerModel = new ViewManagerModel();
-    ViewManager viewManager = new ViewManager(overallPanel, cardLayout, viewManagerModel);
+    ViewManager viewManager = new ViewManager(cardPanel, cardLayout, viewManagerModel);
 
 
     public AppBuilder() {
-        overallPanel.setLayout(cardLayout); // includes login and other things
-        mainUIPanel.setLayout(borderLayout); // for the side panel
-        usecasePanel.setLayout(cardLayout);
-        // another panel for switching between the panels
     }
 
     public AppBuilder addSidePanel() {
         sidebarViewModel = new SidebarViewModel();
         sidePanelView = new SidePanelView(sidebarViewModel);
 
-        mainUIPanel.add(sidePanelView, BorderLayout.WEST);
-        overallPanel.add(mainUIPanel);
+        overallPanel.add(sidePanelView, BorderLayout.WEST);
         return this;
     }
 
@@ -73,20 +70,7 @@ public class AppBuilder {
         jobPostingsViewModel = new JobPostingsViewModel();
         jobPostingsView = new JobPostingsView(jobPostingsViewModel);
 
-//        mainUIPanel.add(jobPostingsView, BorderLayout.CENTER);
-//        overallPanel.add(mainUIPanel, jobPostingsViewModel.getViewName());
-
-//        overallPanel.add(jobPostingsView, jobPostingsViewModel.getViewName());
-
-        JPanel jobScreen = new JPanel(new BorderLayout());
-//        jobScreen.add(sidePanelView, BorderLayout.WEST);
-
-        overallPanel.add(sidePanelView, BorderLayout.WEST);
-
-        jobScreen.add(jobPostingsView, BorderLayout.CENTER);
-
-
-        overallPanel.add(jobScreen, jobPostingsView.getViewName());
+        cardPanel.add(jobPostingsView, jobPostingsView.getViewName());
 
         return this;
     }
@@ -95,20 +79,8 @@ public class AppBuilder {
         milestoneTasksViewModel = new MilestoneTasksViewModel();
         milestoneTaskView = new MilestoneTasksView(milestoneTasksViewModel);
 
-//        mainUIPanel.add(milestoneTaskView, BorderLayout.CENTER);
-//        overallPanel.add(mainUIPanel, milestoneTaskView.getViewName());
-
-//        overallPanel.add(milestoneTaskView, milestoneTaskView.getViewName());
-
-
-        JPanel milestoneScreen = new JPanel(new BorderLayout());
-//        milestoneScreen.add(sidePanelView, BorderLayout.WEST);
-
-        overallPanel.add(sidePanelView, BorderLayout.WEST);
-
-        milestoneScreen.add(milestoneTaskView, BorderLayout.CENTER);
-
-        overallPanel.add(milestoneScreen, milestoneTaskView.getViewName());
+        cardPanel.add(milestoneTaskView, milestoneTaskView.getViewName());
+        overallPanel.add(cardPanel, BorderLayout.CENTER);
 
         return this;
     }
@@ -150,8 +122,8 @@ public class AppBuilder {
         application.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         application.add(overallPanel);
 
-        viewManagerModel.setState(jobPostingsView.getViewName());
-        System.out.println(jobPostingsView.getViewName());
+        viewManagerModel.setState(milestoneTaskView.getViewName());
+        System.out.println(milestoneTaskView.getViewName());
         viewManagerModel.firePropertyChange();
 
         return application;
