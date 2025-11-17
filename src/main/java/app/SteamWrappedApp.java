@@ -4,7 +4,7 @@ import auth.SessionManager;
 import data_access.UserDataAcessObject;
 import entity.User;
 import ui.LoginPanel;
-import ui.UserProfilePanel;
+import ui.ComparisonPanel;
 
 import javax.swing.*;
 import java.awt.*;
@@ -17,7 +17,7 @@ public class SteamWrappedApp extends JFrame {
     private JPanel mainPanel;
     private CardLayout cardLayout;
     private LoginPanel loginPanel;
-    private UserProfilePanel profilePanel;
+    private JPanel profilePanel;
     private UserDataAcessObject userDAO;
 
     // Card names for navigation
@@ -104,44 +104,26 @@ public class SteamWrappedApp extends JFrame {
     }
 
     /**
-     * Shows the user profile after successful login.
-     *
-     * @param user The logged-in user
-     */
-    private void showProfile(User user) {
-        // Remove old profile panel if it exists
-        if (profilePanel != null) {
-            mainPanel.remove(profilePanel);
-        }
-
-        // Create new profile panel
-        profilePanel = new UserProfilePanel(user, new UserProfilePanel.ProfileCallback() {
-            @Override
-            public void onLogout() {
-                showLogin();
-            }
-
-            @Override
-            public void onRefresh() {
-                refreshProfile();
-            }
-        });
-
-        // Add to card layout and show
-        mainPanel.add(profilePanel, PROFILE_CARD);
-        cardLayout.show(mainPanel, PROFILE_CARD);
-
-        // Update window title
-        setTitle("Steam Wrapped - " + user.getUsername());
+ * Shows the comparison view after successful login.
+ *
+ * @param user The logged-in user
+ */
+private void showProfile(User user) {
+    // Remove old profile panel if it exists
+    if (profilePanel != null) {
+        mainPanel.remove(profilePanel);
     }
 
-    /**
-     * Shows the login panel.
-     */
-    private void showLogin() {
-        cardLayout.show(mainPanel, LOGIN_CARD);
-        setTitle("Steam Wrapped");
-    }
+    profilePanel = new ComparisonPanel(user);
+
+    // Add to card layout and show
+    mainPanel.add(profilePanel, PROFILE_CARD);
+    cardLayout.show(mainPanel, PROFILE_CARD);
+
+    // Update window title
+    setTitle("Steam Wrapped - " + user.getUsername());
+}
+
 
     /**
      * Refreshes the current user's profile data.
