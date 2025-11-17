@@ -1,17 +1,22 @@
 package interface_adapter.search;
 
 import use_case.search.SearchInputBoundary;
+import use_case.search.SearchInputData;
+import use_case.search.SearchInteractor;
 
 /**
  * TODO: Accepts search queries and delegates to interactor.
  */
 public class SearchController {
-    private final SearchInputBoundary interactor;
+    private final SearchInputBoundary searchInteractor;
 
-    public SearchController(SearchInputBoundary interactor) {
-        this.interactor = interactor;
+    public SearchController(SearchInputBoundary searchInteractor) {
+        this.searchInteractor = searchInteractor;
     }
 
-    // TODO: Method to trigger search (e.g., search(query))
+    public void execute(String movieTitle) {
+        final SearchInputData searchMovieInputData = new SearchInputData(movieTitle);
+        searchInteractor.execute(searchMovieInputData);
+    }
 }
 
