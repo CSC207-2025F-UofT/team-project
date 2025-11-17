@@ -76,5 +76,17 @@ public class User {
 
     public void removeOutgoingRequest(String toUsername){
         outgoingFriendRequests.remove(toUsername);
+    public List<String> getMealIds() {
+        return mealIds;
+    }
+
+    public void addMeal(String mealId) {
+        if (!mealIds.contains(mealId)) {
+            mealIds.add(mealId);
+        }
+    }
+
+    public void removeMeal(String mealId) {
+        mealIds.remove(mealId);
     }
 }
