@@ -57,9 +57,6 @@ public class ChatView extends JPanel implements ActionListener, PropertyChangeLi
         // Right Side: Back/Exit Button (Go back to LoggedInView/Recent Chats)
         JButton settingButton = new JButton("⛭");
         settingButton.setFont(new Font("SansSerif", Font.BOLD, 20));
-        settingButton.setFocusPainted(false);
-        settingButton.setBorderPainted(false);
-        settingButton.setContentAreaFilled(false);
 
         settingButton.addActionListener(e -> {
             // Navigate to chat setting view (need to make)
