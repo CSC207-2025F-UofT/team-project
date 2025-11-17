@@ -17,22 +17,20 @@ public class DeleteFavoriteLocationInteractor implements DeleteFavoriteLocationI
     public void execute(DeleteFavoriteLocationInputData inputData) {
         String rawCityName = inputData.getCityName();
 
-        if (rawCityName == null) {
-            presenter.prepareFailView("City name cannot be null.");
+        //Basic validation
+        if (rawCityName == null || rawCityName.isEmpty()) {
+            presenter.prepareFailView("Please check your city name and try again.");
             return;
         }
 
+        //Location not found to delete
         String cityName = rawCityName.trim();
-        if (cityName.isEmpty()) {
-            presenter.prepareFailView("City name cannot be empty.");
-            return;
-        }
-
         if (!gateway.existsByName(cityName)) {
             presenter.prepareFailView("Location not found in favorites: " + cityName);
             return;
         }
 
+        //Succeesfully deleted
         gateway.delete(cityName);
 
         List<String> updatedFavorites = gateway.getFavorites();

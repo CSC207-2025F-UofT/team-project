@@ -16,9 +16,9 @@ public class SaveFavoriteLocationInteractor implements SaveFavoriteLocationInput
     public void execute(SaveFavoriteLocationInputData inputData) {
         String cityName = inputData.getCityName();
 
-        //Basic validation
+        //Basic validation: null or empty
         if (cityName == null || cityName.isEmpty()) {
-            presenter.prepareFailView("City name cannot be empty.");
+            presenter.prepareFailView("Please check your city name and try again.");
             return;
         }
 
@@ -34,16 +34,15 @@ public class SaveFavoriteLocationInteractor implements SaveFavoriteLocationInput
             return;
         }
 
-        //Try saving
         boolean success = gateway.saveFavorites(cityName);
 
-        //Alternative - storage error
+        //Storage error
         if (!success) {
             presenter.prepareFailView("Unable to save location, please try again.");
             return;
         }
 
-        //Main flow - success
+        //Successfully saved
         boolean isDuplicate = false;
         SaveFavoriteLocationOutputData outputData = new SaveFavoriteLocationOutputData(
                 cityName,
