@@ -1,5 +1,8 @@
 package view;
 
+import interface_adapter.navigation.NavigationController;
+import interface_adapter.navigation.NavigationViewModel;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -10,11 +13,20 @@ import java.util.Scanner;
 
 public class loginPage {
     private static final String USER_FILE = "users.txt";
+    private static ViewManager viewManager;
     
-    // Navigate to home page (placeholder)
-    private static void goToHomePage(String username) {
-        JOptionPane.showMessageDialog(null, "Welcome " + username + "! Redirecting to home page...");
-        // TODO: Implement actual home page navigation
+    // Navigate to home page
+    private static void goToHomePage(String username, JFrame loginFrame) {
+        loginFrame.dispose();
+        
+        // initialize ViewManager if not already initialized
+        if (viewManager == null) {
+            NavigationViewModel navigationViewModel = new NavigationViewModel();
+            viewManager = new ViewManager(navigationViewModel);
+        }
+        
+        NavigationController navigationController = viewManager.getNavigationController();
+        navigationController.execute("home", username);
     }
     
     // Save user credentials
@@ -271,7 +283,7 @@ public class loginPage {
                     }
                     
                     if (validateLogin(username, password)) {
-                        goToHomePage(username);
+                        goToHomePage(username, frame);
                     } else {
                         JOptionPane.showMessageDialog(frame, "Invalid credentials");
                     }
