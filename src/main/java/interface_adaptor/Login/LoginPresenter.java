@@ -19,7 +19,7 @@ public class LoginPresenter implements LoginOutputBoundary{
 
 
     @Override
-    public void PrepareSuccessView(LoginOutputData output) {
+    public void prepareSuccessView(LoginOutputData output) {
         // Switch to the Blank View
         this.viewModel.setState(blankModel.getViewName());
         this.viewModel.firePropertyChange();
@@ -27,7 +27,7 @@ public class LoginPresenter implements LoginOutputBoundary{
     }
 
     @Override
-    public void PrepareFailView(String errorMessage) {
+    public void prepareFailView(String errorMessage) {
         final LoginState loginState = loginModel.getState();
         loginState.setLoginError(errorMessage);
         loginModel.firePropertyChange();

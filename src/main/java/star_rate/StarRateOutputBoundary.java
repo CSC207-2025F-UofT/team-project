@@ -1,7 +1,7 @@
 package star_rate;
 
 public interface StarRateOutputBoundary {
-    void PrepareSuccessView(StarRateOutputData outputData);
+    void prepareSuccessView(StarRateOutputData outputData);
 
-    void PrepareFailView(String errorMessage);
+    void prepareFailView(String errorMessage);
 }

@@ -63,7 +63,7 @@ public class LoginView extends JPanel implements ActionListener, PropertyChangeL
 
         cancel.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent evt) {
-                if (evt.getSource().equals(logIn)) {
+                if (evt.getSource().equals(cancel)) {
                     final LoginState currentState = loginViewModel.getState();
 
                     loginController.execute(

@@ -12,15 +12,21 @@ public class StarRateInteractor implements StarRateInputBoundary{
 
     public void execute(StarRateInputData inputData){
         String restaurantId = inputData.getRestaurantId();
-        Restaurant restaurant = dataAccess.getRestaurantById(restaurantId);
 
-        int starRate = inputData.getStarRating();
+        if (dataAccess.getRestaurantById(restaurantId) == null){
+            outputBoundary.prepareFailView("Restaurant not found.");
+        }
+        else{
+            Restaurant restaurant = dataAccess.getRestaurantById(restaurantId);
 
-        restaurant.addToRating(starRate);
-        float newAverage = restaurant.getAverageRating();
-        dataAccess.save(restaurant);
+            int starRate = inputData.getStarRating();
 
-        StarRateOutputData outputData = new StarRateOutputData(starRate, newAverage);
-        outputBoundary.PrepareSuccessView(outputData);
+            restaurant.addToRating(starRate);
+            float newAverage = restaurant.getAverageRating();
+            dataAccess.save(restaurant);
+
+            StarRateOutputData outputData = new StarRateOutputData(starRate, newAverage);
+            outputBoundary.prepareSuccessView(outputData);
+        }
     }
 }
