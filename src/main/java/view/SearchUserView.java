@@ -28,7 +28,7 @@ public class SearchUserView extends JPanel implements ActionListener, PropertyCh
     private final JButton searchExitButton;
     private final JButton startChatButton;
 
-    // Changes: JList and its model for displaying users
+    // JList and its model for displaying users
     private final JList<String> userList;
     private final DefaultListModel<String> userListModel;
 
