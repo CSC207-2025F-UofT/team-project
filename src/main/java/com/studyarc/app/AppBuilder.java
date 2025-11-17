@@ -12,6 +12,7 @@ import com.studyarc.interface_adapter.job_postings.JobPostingsViewModel;
 import com.studyarc.interface_adapter.milestone_tasks.MilestoneTasksController;
 import com.studyarc.interface_adapter.milestone_tasks.MilestoneTasksPresenter;
 import com.studyarc.interface_adapter.milestone_tasks.MilestoneTasksViewModel;
+import com.studyarc.interface_adapter.track_plan.TrackPlanViewModel;
 import com.studyarc.interface_adapter.ui_sidebar.SidebarController;
 import com.studyarc.interface_adapter.ui_sidebar.SidebarPresenter;
 import com.studyarc.interface_adapter.ui_sidebar.SidebarViewModel;
@@ -50,6 +51,7 @@ public class AppBuilder {
     private MilestoneTasksView milestoneTaskView;
 
     private TrackPlansView trackPlansView;
+    private TrackPlanViewModel trackPlanViewModel;
 
     final ViewManagerModel viewManagerModel = new ViewManagerModel();
     ViewManager viewManager = new ViewManager(cardPanel, cardLayout, viewManagerModel);
@@ -63,6 +65,14 @@ public class AppBuilder {
         sidePanelView = new SidePanelView(sidebarViewModel);
 
         overallPanel.add(sidePanelView, BorderLayout.WEST);
+        return this;
+    }
+    public AppBuilder addTrackPlanView(){
+        this.trackPlanViewModel = new TrackPlanViewModel();
+        this.trackPlansView = new TrackPlansView(trackPlanViewModel);
+
+        cardPanel.add(trackPlansView, trackPlansView.getViewname());
+
         return this;
     }
 
@@ -86,7 +96,11 @@ public class AppBuilder {
     }
 
     public AppBuilder addSidebarUseCase() {
-        final SidebarOutputBoundary sidebarOutputBoundary = new SidebarPresenter(viewManagerModel, sidebarViewModel, jobPostingsViewModel, milestoneTasksViewModel);
+        final SidebarOutputBoundary sidebarOutputBoundary = new SidebarPresenter(viewManagerModel,
+                sidebarViewModel,
+                jobPostingsViewModel,
+                milestoneTasksViewModel,
+                trackPlanViewModel);
         final SidebarInputBoundary sidebarInteractor = new SidebarInteractor(sidebarDataAccess, sidebarOutputBoundary);
 
         SidebarController sidebarController = new SidebarController(sidebarInteractor);

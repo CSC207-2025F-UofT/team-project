@@ -12,6 +12,7 @@ import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 
 public class TrackPlansView extends JPanel implements PropertyChangeListener{
+    final String viewname = "track plan";
     final BorderLayout borderLayout = new BorderLayout();
 
     final JPanel trackPlansPanel;
@@ -54,5 +55,9 @@ public class TrackPlansView extends JPanel implements PropertyChangeListener{
 
     private void showPlansinView(ArrayList<StudyPlan> plans){
 
+    }
+
+    public String getViewname() {
+        return viewname;
     }
 }

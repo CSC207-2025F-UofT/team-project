@@ -23,15 +23,16 @@ public class SidePanelView extends JPanel implements ActionListener, PropertyCha
     private final JButton seePlans;
     private final JButton seePapers;
     private final JButton seeJobs;
+    private final JButton myPlans;
 
     public SidePanelView(SidebarViewModel sidebarViewModel) {
         this.sidebarViewModel = sidebarViewModel;
         this.sidebarViewModel.addPropertyChangeListener(this);
 
-        seePlans = new JButton("Plans");
+        seePlans = new JButton("New Plans");
         seePapers = new JButton("Papers");
         seeJobs = new JButton("Jobs");
-
+        myPlans = new JButton("My Plans");
 
         this.setLayout(new BorderLayout());
         mainButtonPanel.setLayout(new BoxLayout(mainButtonPanel, BoxLayout.Y_AXIS));
@@ -40,6 +41,7 @@ public class SidePanelView extends JPanel implements ActionListener, PropertyCha
         mainButtonPanel.add(seePlans);
         mainButtonPanel.add(seePapers);
         mainButtonPanel.add(seeJobs);
+        mainButtonPanel.add(myPlans);
 
         this.add(mainButtonPanel, BorderLayout.CENTER);
         this.add(userLoggedIn, BorderLayout.SOUTH);
@@ -61,6 +63,12 @@ public class SidePanelView extends JPanel implements ActionListener, PropertyCha
                     }
                 }
         );
+        myPlans.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+            sidebarController.switchToTrackPlan();
+            }
+        });
     }
 
     @Override

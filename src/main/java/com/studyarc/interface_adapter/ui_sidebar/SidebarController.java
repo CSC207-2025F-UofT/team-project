@@ -16,4 +16,6 @@ public class SidebarController {
     public void switchToMilestone() {
         sidebarUseCaseInteractor.switchToMilestone();
     }
+
+    public void switchToTrackPlan(){sidebarUseCaseInteractor.switchToTrackPlan();}
 }

@@ -19,4 +19,11 @@ public class SidebarInteractor implements SidebarInputBoundary {
     public void switchToMilestone() {
         userPresenter.switchToMilestone();
     }
+
+    @Override
+    public void switchToTrackPlan() {
+        userPresenter.switchToTrackPlan();
+    }
+
+
 }

@@ -8,9 +8,8 @@ public class Main {
         JFrame application = appBuilder
                 .addSidePanel()
                 .addMilestoneTasksPanel()
-                .addJobPostingsView()
+                .addTrackPlanView()
                 .addSidebarUseCase()
-                .addJobPostingsUseCase()
                 .addMilestoneTasksUseCase()
                 .build();
 

@@ -8,4 +8,6 @@ public interface SidebarInputBoundary {
     void switchToJobBoard();
 
     void switchToMilestone();
+
+    void switchToTrackPlan();
 }
