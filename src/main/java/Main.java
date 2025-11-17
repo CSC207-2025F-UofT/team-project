@@ -1,4 +1,5 @@
 import javax.swing.*;
+import java.awt.*;
 
 public class Main {
     public static void createAndShowGUI() { //user story 6
@@ -6,12 +7,14 @@ public class Main {
         JFrame frame = new JFrame("Tier List");
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
-        JTextField text = new JTextField("hi");
-        frame.add(text);
+        // Create the ItemList which now includes both model and GUI
+        ItemList itemList = new ItemList();
+
+        frame.add(itemList);
 
         frame.pack();
 
-        frame.setSize(1000, 750);
+        frame.setSize(350, 750);
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);
     }
