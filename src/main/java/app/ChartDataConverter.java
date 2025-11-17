@@ -1,16 +1,16 @@
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import entity.Transaction;
 
 import org.jfree.data.category.DefaultCategoryDataset;
+
+import entity.Transaction;
 
 public class ChartDataConverter {
     
     public static DefaultCategoryDataset convertToCategoryDataset(List<Transaction> transactions) {
         DefaultCategoryDataset dataset = new DefaultCategoryDataset();
         
-        // Group by category and month, then sum amounts
         Map<String, Map<String, Double>> categoryData = transactions.stream()
             .collect(Collectors.groupingBy(
                 Transaction::getCategory,
@@ -20,7 +20,6 @@ public class ChartDataConverter {
                 )
             ));
         
-        // Add to dataset
         for (String category : categoryData.keySet()) {
             Map<String, Double> monthlyData = categoryData.get(category);
             for (String month : monthlyData.keySet()) {
@@ -31,7 +30,6 @@ public class ChartDataConverter {
         return dataset;
     }
     
-    // Alternative: Simple category totals (pie chart data)
     public static DefaultCategoryDataset convertToCategoryTotals(List<Transaction> transactions) {
         DefaultCategoryDataset dataset = new DefaultCategoryDataset();
         
