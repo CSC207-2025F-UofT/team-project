@@ -48,7 +48,6 @@ public class MainMenuFrame extends JFrame {
 
         playBetGameBtn.addActionListener(e -> {
             new SportbetFrame(user, this);
-            setVisible(false);
         });
 
         setVisible(true);
