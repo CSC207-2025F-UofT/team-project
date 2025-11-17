@@ -1,7 +1,7 @@
 package app;
 
 import auth.SessionManager;
-import data_access.UserDataAcessObject;
+import data_access.UserDataAccessObject;
 import entity.User;
 import ui.LoginPanel;
 import ui.ComparisonPanel;
@@ -18,7 +18,7 @@ public class SteamWrappedApp extends JFrame {
     private CardLayout cardLayout;
     private LoginPanel loginPanel;
     private JPanel profilePanel;
-    private UserDataAcessObject userDAO;
+    private UserDataAccessObject userDAO;
 
     // Card names for navigation
     private static final String LOGIN_CARD = "LOGIN";
@@ -37,7 +37,7 @@ public class SteamWrappedApp extends JFrame {
      * Initializes all UI components.
      */
     private void initializeComponents() {
-        userDAO = new UserDataAcessObject();
+        userDAO = new UserDataAccessObject();
 
         // Create main panel with card layout for switching between views
         cardLayout = new CardLayout();

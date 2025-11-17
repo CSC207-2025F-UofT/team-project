@@ -6,17 +6,15 @@ public class Game {
     private final long appid;
     private final String name;
     private final int playtime_forever;
-    private final String img_icon_url;
+    private final String thumbnail;
     private final List<Integer> content_descriptorids;
 
-    public Game(long appid, String title, int playtime_forever, String img_icon_url, List<Integer> content_descriptorids) {
+    public Game(long appid, String title, int playtime_forever, String thumbnail, List<Integer> content_descriptorids) {
         this.appid = appid;
         this.name = title;
         this.playtime_forever = playtime_forever;
-        this.img_icon_url = img_icon_url;
+        this.thumbnail = thumbnail;
         this.content_descriptorids = content_descriptorids;
-
-        
     }
 
     public long getId() {
@@ -29,6 +27,10 @@ public class Game {
 
     public int getPlaytime() {
         return this.playtime_forever;
+    }
+
+    public String getThumbnail() {
+        return this.thumbnail;
     }
 
     public void getImage(){
@@ -45,7 +47,7 @@ public class Game {
                 "appid=" + appid +
                 ", name='" + name + '\'' +
                 ", playtime_forever=" + playtime_forever +
-                ", img_icon_url='" + img_icon_url + '\'' +
+                ", thumbnail='" + thumbnail + '\'' +
                 ", content_descriptorids=" + content_descriptorids +
                 '}';
     }

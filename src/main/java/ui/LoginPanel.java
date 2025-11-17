@@ -2,7 +2,7 @@ package ui;
 
 import auth.SessionManager;
 import auth.SteamAuthService;
-import data_access.UserDataAcessObject;
+import data_access.UserDataAccessObject;
 import entity.User;
 
 import javax.swing.*;
@@ -18,7 +18,7 @@ public class LoginPanel extends JPanel {
     private JLabel statusLabel;
     private JProgressBar progressBar;
     private SteamAuthService authService;
-    private UserDataAcessObject userDAO;
+    private UserDataAccessObject userDAO;
     private LoginCallback callback;
 
     /**
@@ -37,7 +37,7 @@ public class LoginPanel extends JPanel {
     public LoginPanel(LoginCallback callback) {
         this.callback = callback;
         this.authService = new SteamAuthService();
-        this.userDAO = new UserDataAcessObject();
+        this.userDAO = new UserDataAccessObject();
 
         initializeUI();
     }
