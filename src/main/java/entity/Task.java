@@ -1,31 +1,99 @@
 package entity;
 
-import java.util.Objects;
+import java.time.LocalDate;
 
+/**
+ * Represents a single task or calendar item in the LockIn application.
+ * Tasks include assignments, tests, events, reminders, or any dated item
+ * the user wants to track. This unified model allows tasks to naturally
+ * appear in both the to-do list and the calendar view.
+ */
 public class Task {
-    private final String id;
-    private String title;
-    private boolean completed;
 
-    public Task(String id, String title) {
-        if (title == null || title.trim().isEmpty()) {
-            throw new IllegalArgumentException("Task title cannot be empty");
-        }
-        this.id = Objects.requireNonNull(id);
+    private final int id;              // unique identifier
+    private String title;              // e.g. "Math Assignment 3"
+    private String description;        // optional details
+    private LocalDate date;            // date of the task/event
+    private String type;               // e.g. "assignment", "test", "event"
+    private boolean completed;         // true if finished
+
+    /**
+     * Main constructor for a Task.
+     */
+    public Task(int id,
+                String title,
+                String description,
+                LocalDate date,
+                String type) {
+        this.id = id;
         this.title = title;
+        this.description = description;
+        this.date = date;
+        this.type = type;
         this.completed = false;
     }
 
-    public String getId() { return id; }
+    // --- Getters ---
 
-    public String getTitle() { return title; }
+    public int getId() {
+        return id;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    /**
+     * Returns the date associated with this task.
+     * Used by the Calendar view to place tasks on the correct day.
+     */
+    public LocalDate getDate() {
+        return date;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public boolean isCompleted() {
+        return completed;
+    }
+
+    // --- Setters / Mutating methods ---
+
     public void setTitle(String title) {
-        if (title == null || title.trim().isEmpty()) {
-            throw new IllegalArgumentException("Task title cannot be empty");
-        }
         this.title = title;
     }
 
-    public boolean isCompleted() { return completed; }
-    public void setCompleted(boolean completed) { this.completed = completed; }
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public void setDate(LocalDate date) {
+        this.date = date;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public void markCompleted() {
+        this.completed = true;
+    }
+
+    public void markIncomplete() {
+        this.completed = false;
+    }
+
+    /**
+     * Helper method: checks if the task is overdue compared to the given date.
+     */
+    public boolean isOverdue(LocalDate today) {
+        if (date == null) return false;
+        return !completed && date.isBefore(today);
+    }
 }
