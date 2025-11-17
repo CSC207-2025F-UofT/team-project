@@ -42,6 +42,11 @@ public class Airport {
         return REGISTRY.get(iata);
     }
 
+    public static Airport find(String city, String country) {
+        if (city == null) return null;
+        else return REGISTRY.get(city + "-" + country);
+    }
+
     private Airport(String iata, String city, String country) {
         this.IATA = iata;
         this.city = city;
