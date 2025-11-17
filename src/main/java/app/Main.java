@@ -18,11 +18,6 @@ import view.CalendarPanel;
 public class Main {
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
-            JFrame frame = new JFrame("LockIn!");
-            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-            frame.setSize(1200, 800);
-
-            DashboardView dashboardView = new DashboardView(frame);
 
             InMemoryCalendarRepository repo = new InMemoryCalendarRepository();
             CalendarViewModel calendarViewModel = new CalendarViewModel(repo);
@@ -39,19 +34,20 @@ public class Main {
             CalendarPanel.sharedViewModel = calendarViewModel;
             CalendarPanel.sharedCalendarController = calendarController;
 
-        AppBuilder appBuilder = new AppBuilder();
-        JFrame application = appBuilder
-                .addLoginView()
-                .addSignupView()
-                .addLoggedInView()
-                .addSignupUseCase()
-                .addLoginUseCase()
-                .addChangePasswordUseCase()
-                .addLogoutUseCase()
-                .build();
+            AppBuilder appBuilder = new AppBuilder();
+            JFrame application = appBuilder
+                    .addLoginView()
+                    .addSignupView()
+                    .addLoggedInView()
+                    .addSignupUseCase()
+                    .addLoginUseCase()
+                    .addChangePasswordUseCase()
+                    .addLogoutUseCase()
+                    .build();
 
-        application.pack();
-        application.setLocationRelativeTo(null);
-        application.setVisible(true);
+            application.pack();
+            application.setLocationRelativeTo(null);
+            application.setVisible(true);
+        });
     }
 }
