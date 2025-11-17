@@ -171,7 +171,22 @@ public class SignupView extends JPanel implements ActionListener, PropertyChange
 
     @Override
     public void actionPerformed(ActionEvent evt) {
-        JOptionPane.showMessageDialog(this, "Cancel not implemented yet.");
+        if (evt.getSource() == cancel) {
+            // Find the parent frame of this panel
+            JFrame frame = (JFrame) SwingUtilities.getWindowAncestor(this);
+
+            int result = JOptionPane.showConfirmDialog(
+                    frame,
+                    "You are leaving the program now.",
+                    "Confirm Exit",
+                    JOptionPane.OK_CANCEL_OPTION,
+                    JOptionPane.WARNING_MESSAGE
+            );
+
+            if (result == JOptionPane.OK_OPTION) {
+                System.exit(0);
+            }
+        }
     }
 
     @Override
