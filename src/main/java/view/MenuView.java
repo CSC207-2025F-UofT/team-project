@@ -58,7 +58,12 @@ public class MenuView extends JPanel implements ActionListener, PropertyChangeLi
                         }
 
                         final MenuState currentState = menuViewModel.getState();
+
+                        // Important to remove this!!!
+                        currentState.setRestaurant("1012301023102301023");
+
                         starRateController.execute(userInputRating, currentState.getRestaurantId());
+
 
                     }
                 }
