@@ -20,6 +20,7 @@ import view.BlankView;
 import view.LoginView;
 import view.SignupView;
 import view.ViewManager;
+import view.BaseView;
 
 import javax.swing.*;
 import java.awt.*;
@@ -93,6 +94,12 @@ public class AppBuilder {
         return this;
     }
 
+    public AppBuilder addBaseView() {
+        BaseView baseView = new BaseView();
+        cardPanel.add(baseView, baseView.getViewName());
+        return this;
+    };
+
     // === Use case wiring ===
     public AppBuilder addLoginUseCase() {
         final LoginOutputBoundary loginOutputBoundary =
@@ -113,8 +120,8 @@ public class AppBuilder {
 
         application.add(cardPanel);
 
-        // Start on the login view
-        viewManagerModel.setState(loginView.getViewName());
+        // Start on the BaseView
+        viewManagerModel.setState("BaseView");
         viewManagerModel.firePropertyChange();
 
         return application;
