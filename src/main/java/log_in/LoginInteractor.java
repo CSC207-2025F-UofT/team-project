@@ -26,17 +26,17 @@ public class LoginInteractor implements LoginInputBoundary{
 
                 // Create a new output data.
                 LoginOutputData outputData = new LoginOutputData(username);
-                outputBoundary.PrepareSuccessView(outputData);
+                outputBoundary.prepareSuccessView(outputData);
             }
             // The password is wrong. Prepare fail view.
             else{
-                outputBoundary.PrepareFailView("The Username or Password is incorrect.");
+                outputBoundary.prepareFailView("The Username or Password is incorrect.");
             }
         }
 
         // The username is not in the data: Prepare fail view.
         else{
-            outputBoundary.PrepareFailView("The Username or Password is incorrect.");
+            outputBoundary.prepareFailView("The Username or Password is incorrect.");
         }
     }
 }
