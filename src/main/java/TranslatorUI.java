@@ -353,8 +353,7 @@ public class TranslatorUI extends JFrame {
                     value = parseObject(content.substring(i + 1, objectEnd));
                     i = objectEnd + 1;
                 } else {
-                    // Since the array only contains objects in the API response,
-                    // we can stop here, but for completeness, we could handle strings/numbers.
+                    // Handle strings/numbers for safety.
                     throw new Exception("Unsupported value type in array at: " + i);
                 }
 
