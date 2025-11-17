@@ -1,7 +1,6 @@
 package app;
 
 import data_access.InMemoryUserDataAccessObject;
-import entity.User;
 import interface_adapter.create_account.CreateAccountController;
 import interface_adapter.create_account.CreateAccountPresenter;
 import interface_adapter.create_account.CreateAccountViewModel;
