@@ -5,7 +5,11 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="e43c00b6-75ef-40f2-94e8-7abd57be8463" name="Changes" comment="Revert &quot;firebase test&quot;&#10;&#10;This reverts commit dac3f907">
-      <change afterPath="$PROJECT_DIR$/src/main/java/view/PostRecipeView.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/use_case/save_draft/SaveDraftDataAcessInterface.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/use_case/save_draft/SaveDraftInteractor.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/use_case/save_draft/SaveDraftInputData.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/use_case/save_draft/SaveDraftInputData.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/use_case/save_draft/SaveDraftOutputBoundary.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/use_case/save_draft/SaveDraftOutputBoundary.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -15,6 +19,7 @@
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
       <list>
+        <option value="Interface" />
         <option value="Class" />
       </list>
     </option>
@@ -58,7 +63,7 @@
     "node.js.selected.package.eslint": "(autodetect)",
     "node.js.selected.package.tslint": "(autodetect)",
     "nodejs_package_manager_path": "npm",
-    "settings.editor.selected.configurable": "preferences.keymap",
+    "settings.editor.selected.configurable": "preferences.pluginManager",
     "vue.rearranger.settings.migration": "true"
   }
 }]]></component>
@@ -103,6 +108,7 @@
       <workItem from="1763326321347" duration="6815000" />
       <workItem from="1763402843281" duration="2684000" />
       <workItem from="1763405538390" duration="379000" />
+      <workItem from="1763420716749" duration="1010000" />
     </task>
     <task id="LOCAL-00001" summary="Revert &quot;firebase test&quot;&#10;&#10;This reverts commit dac3f907">
       <option name="closed" value="true" />
