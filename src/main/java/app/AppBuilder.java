@@ -4,7 +4,13 @@ import entity.UserFactory;
 import interface_adapter.*;
 import interface_adapter.main_screen.MainScreenViewModel;
 import interface_adapter.registration.login.*;
+import interface_adapter.registration.signup.SignupController;
+import interface_adapter.registration.signup.SignupPresenter;
+import interface_adapter.registration.signup.SignupViewModel;
 import use_case.registration.login.*;
+import use_case.registration.signup.SignupInputBoundary;
+import use_case.registration.signup.SignupInteractor;
+import use_case.registration.signup.SignupOutputBoundary;
 import view.main_screen.MainScreenView;
 import view.registration.*;
 import data_access.*;
@@ -31,8 +37,8 @@ public class AppBuilder {
     // DAO version using a shared external database
     // final DBUserDataAccessObject userDataAccessObject = new DBUserDataAccessObject(userFactory);
 
-    //private SignupView signupView;
-    //private SignupViewModel signupViewModel;
+    private SignupView signupView;
+    private SignupViewModel signupViewModel;
     private LoginViewModel loginViewModel;
     private MainScreenViewModel mainScreenViewModel;
     private LoginView loginView;
@@ -40,6 +46,13 @@ public class AppBuilder {
 
     public AppBuilder() {
         cardPanel.setLayout(cardLayout);
+    }
+
+    public AppBuilder addSignupView() {
+        signupViewModel = new SignupViewModel();
+        signupView = new SignupView(signupViewModel);
+        cardPanel.add(signupView, signupView.getViewName());
+        return this;
     }
 
     public AppBuilder addLoginView() {
@@ -56,6 +69,22 @@ public class AppBuilder {
         return this;
     }
 
+    public AppBuilder addBrowseStudySetView() {
+
+        return this;
+    }
+
+    public AppBuilder addSignupUseCase() {
+        final SignupOutputBoundary signupOutputBoundary = new SignupPresenter(viewManagerModel,
+                signupViewModel, loginViewModel);
+        final SignupInputBoundary userSignupInteractor = new SignupInteractor(
+                userDataAccessObject, signupOutputBoundary, userFactory);
+
+        SignupController controller = new SignupController(userSignupInteractor);
+        signupView.setSignupController(controller);
+        return this;
+    }
+
     public AppBuilder addLoginUseCase() {
         final LoginOutputBoundary loginOutputBoundary = new LoginPresenter(viewManagerModel,
                 mainScreenViewModel, loginViewModel);
@@ -68,7 +97,7 @@ public class AppBuilder {
     }
 
     public JFrame build() {
-        final JFrame application = new JFrame("User Login Example");
+        final JFrame application = new JFrame("CourseClash");
         application.setSize(1200, 800);
         application.setResizable(false); // Fixed size window
         application.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
@@ -77,7 +106,7 @@ public class AppBuilder {
         application.add(cardPanel);
         viewManager = new ViewManager(cardPanel, cardLayout, viewManagerModel, application);
 
-        viewManagerModel.setState(loginView.getViewName());
+        viewManagerModel.setState(signupView.getViewName());
         viewManagerModel.firePropertyChange();
 
         return application;
