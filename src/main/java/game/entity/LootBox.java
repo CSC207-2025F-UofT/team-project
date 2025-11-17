@@ -1,4 +1,4 @@
-package game.entities;
+package game.entity;
 
 public class LootBox extends Item{
 

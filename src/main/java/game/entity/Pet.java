@@ -1,4 +1,4 @@
-package game.entities;
+package game.entity;
 
 public class Pet {
     // petType == 'Dog' || petType == 'Cat'

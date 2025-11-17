@@ -1,4 +1,4 @@
-package game.entities;
+package game.entity;
 
 public class PetToy extends Item{
     private int price;
