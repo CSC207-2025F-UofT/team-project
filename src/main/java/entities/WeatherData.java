@@ -6,9 +6,15 @@ public class WeatherData {
     private final double humidityPercentage;
     private final double windSpeed;
     private final String condition;
+    private final boolean isRaining;
 
+    public WeatherData(double temperature,
+                       double feelsLike,
+                       double humidityPercentage,
+                       double windSpeed,
+                       String condition,
+                       boolean isRaining) {
 
-    public WeatherData(double temperature, double feelsLike, double humidityPercentage, double windSpeed, String condition) {
         if (humidityPercentage < 0 || humidityPercentage > 100) {
             throw new IllegalArgumentException("Humidity must be between 0 and 100");
         }
@@ -24,32 +30,42 @@ public class WeatherData {
         this.humidityPercentage = humidityPercentage;
         this.windSpeed = windSpeed;
         this.condition = condition.trim();
+        this.isRaining = isRaining;
     }
 
     public double getTemperature() {
         return temperature;
     }
+
     public double getFeelsLike() {
         return feelsLike;
     }
+
     public double getHumidityPercentage() {
         return humidityPercentage;
     }
+
     public double getWindSpeed() {
         return windSpeed;
     }
+
     public String getCondition() {
         return condition;
     }
+
+    public boolean isRaining() {
+        return isRaining;
+    }
+
     @Override
     public String toString() {
         return "WeatherData{" +
-                ", temperature=" + temperature +
-                ", feelsliketemp=" + feelsLike +
+                "temperature=" + temperature +
+                ", feelsLike=" + feelsLike +
                 ", humidityPercentage=" + humidityPercentage +
-                ", windSpeed=" + windSpeed + '\'' +
+                ", windSpeed=" + windSpeed +
+                ", condition='" + condition + '\'' +
+                ", isRaining=" + isRaining +
                 '}';
-
-
     }
 }
