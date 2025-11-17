@@ -1,4 +1,10 @@
 package interface_adapter.signup;
 
-public class SignupViewModel {
+import interface_adapter.ViewModel;
+
+public class SignupViewModel extends ViewModel<SignupState> {
+    public SignupViewModel() {
+        super("signup");
+        setState(new SignupState());
+    }
 }
