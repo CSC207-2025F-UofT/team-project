@@ -21,7 +21,7 @@ public class User
         if ("".equals(password)) {
             throw new IllegalArgumentException("Password cannot be empty");
         }
-        this.name = name;
+        this.username = name;
         this.password = password;
     }
 
@@ -33,9 +33,6 @@ public class User
         return password;
     }
 
-    public ArrayList<Recipe> getpublishedRecipes() {
-        return publishedRecipes;
-    }
 
     public void saveRecipe(Recipe recipe) {
         if (recipe != null && !this.savedRecipes.contains(recipe)) {
