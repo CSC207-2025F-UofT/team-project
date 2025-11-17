@@ -19,50 +19,71 @@ public class AddRecipeForm {
         JPanel mainPanel = new JPanel();
         mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
         mainPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        mainPanel.setBackground(new Color(240, 235, 255));
 
         //--------------- top panel ----------------
 
         JPanel recipeInfoPanel = new JPanel(new GridLayout(7, 2, 10, 10));
+
+        recipeInfoPanel.setBackground(new Color(240, 235, 255));
+
+        Font labelFont = new Font("Arial", Font.PLAIN, 14);
+        Color labelColor = new Color(75, 0, 130);
+
         JLabel recipeNameLabel = new JLabel("Recipe Name:");
-        JTextField recipeNameField = new JTextField();
+        recipeNameLabel.setFont(labelFont);
+        recipeNameLabel.setForeground(labelColor);
+        JTextField recipeNameField = styledTextField();
 
         recipeInfoPanel.add(recipeNameLabel);
         recipeInfoPanel.add(recipeNameField);
 
         JLabel servingSizeLabel = new JLabel("Serving Size:");
-        JTextField servingSizeField = new JTextField();
+        servingSizeLabel.setFont(labelFont);
+        servingSizeLabel.setForeground(labelColor);
+        JTextField servingSizeField = styledTextField();
 
         recipeInfoPanel.add(servingSizeLabel);
         recipeInfoPanel.add(servingSizeField);
 
         JLabel cuisineLabel = new JLabel("Cuisine:");
-        JTextField cuisineField = new JTextField();
+        cuisineLabel.setFont(labelFont);
+        cuisineLabel.setForeground(labelColor);
+        JTextField cuisineField = styledTextField();
 
         recipeInfoPanel.add(cuisineLabel);
         recipeInfoPanel.add(cuisineField);
 
         JLabel cookingTimeLabel = new JLabel("Cooking Time:");
-        JTextField cookingTimeField = new JTextField();
+        cookingTimeLabel.setFont(labelFont);
+        cookingTimeLabel.setForeground(labelColor);
+        JTextField cookingTimeField = styledTextField();
 
         recipeInfoPanel.add(cookingTimeLabel);
         recipeInfoPanel.add(cookingTimeField);
 
         JLabel mealTypeLabel = new JLabel("Meal Type:");
-        JTextField mealTypeField = new JTextField();
+        mealTypeLabel.setFont(labelFont);
+        mealTypeLabel.setForeground(labelColor);
+        JTextField mealTypeField = styledTextField();
 
         recipeInfoPanel.add(mealTypeLabel);
         recipeInfoPanel.add(mealTypeField);
 
         JLabel tagsLabel = new JLabel("Tags:");
+        tagsLabel.setFont(labelFont);
+        tagsLabel.setForeground(labelColor);
         // tooltip not working :(
         tagsLabel.setToolTipText("Enter multiple tags separated by commas.");
-        JTextField tagsField = new JTextField();
+        JTextField tagsField = styledTextField();
 
         recipeInfoPanel.add(tagsLabel);
         recipeInfoPanel.add(tagsField);
 
         servingSizeLabel = new JLabel("Serving Size:");
-        servingSizeField = new JTextField();
+        servingSizeLabel.setFont(labelFont);
+        servingSizeLabel.setForeground(labelColor);
+        servingSizeField = styledTextField();
 
         recipeInfoPanel.add(servingSizeLabel);
         recipeInfoPanel.add(servingSizeField);
@@ -72,6 +93,8 @@ public class AddRecipeForm {
         ingredientsPanel.setLayout(new BorderLayout(10, 10));
         ingredientsPanel.setBorder(BorderFactory.createTitledBorder("Ingredients"));
 
+        ingredientsPanel.setBackground(new Color(240, 235, 255));
+
         String[] columnNames = {"Ingredient", "Quantity", "Unit"};
         DefaultTableModel ingredientsModel = new DefaultTableModel(columnNames, 1);
         JTable ingredientsTable = new JTable(ingredientsModel);
@@ -80,15 +103,20 @@ public class AddRecipeForm {
         ingredientsPanel.add(ingredientsScrollPane, BorderLayout.CENTER);
 
         JPanel buttonPanel = new JPanel();
-        JButton addIngredientButton = new JButton("Add Ingredient");
+        buttonPanel.setBackground(new Color(240, 235, 255));
+        JButton addIngredientButton = styledButton("Add Ingredient");
+
+        buttonPanel.add(addIngredientButton);
 
         mainPanel.add(recipeInfoPanel);
         mainPanel.add(ingredientsPanel);
+        mainPanel.add(buttonPanel);
         frame.add(mainPanel);
         frame.setVisible(true);
 
         // -------------- instructions panel ----------------
         JPanel instructionsPanel = new JPanel(new BorderLayout(10, 10));
+        instructionsPanel.setBackground(new Color(240, 235, 255));
         instructionsPanel.setBorder(BorderFactory.createTitledBorder("Instructions"));
 
         JTextArea instructionsTextArea = new JTextArea(6, 20);
@@ -107,14 +135,36 @@ public class AddRecipeForm {
 
         // -------------- submit button panel ----------------
         JPanel bottomButtonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
-
-        JButton addButton = new JButton("Add");
-        JButton cancelButton = new JButton("Cancel");
+        bottomButtonPanel.setBackground(new Color(240, 235, 255));
+        JButton addButton = styledButton("Add Recipe");
+        JButton cancelButton = styledButton("Cancel");
 
         bottomButtonPanel.add(addButton);
         bottomButtonPanel.add(cancelButton);
 
         mainPanel.add(bottomButtonPanel);
+    }
+
+    private JTextField styledTextField() {
+        JTextField textField = new JTextField();
+        textField.setFont(new Font("Arial", Font.PLAIN, 14));
+        textField.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(new Color(147, 112, 219)),
+                BorderFactory.createEmptyBorder(5, 5, 5, 5)
+        ));
+        return textField;
+    }
+
+    private JButton styledButton(String text) {
+        Color labelColor = new Color(75, 0, 130); // purple
+
+        JButton button = new JButton(text);
+        button.setFont(new Font("Arial", Font.BOLD, 14));
+        button.setBackground(new Color(138, 43, 226));
+        button.setForeground(labelColor);
+        button.setFocusPainted(false);
+        button.setPreferredSize(new Dimension(120, 35));
+        return button;
     }
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
