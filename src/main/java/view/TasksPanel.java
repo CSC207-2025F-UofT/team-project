@@ -1,121 +1,228 @@
 package view;
 
 import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
 import java.awt.*;
-
+import entity.Task;
+import java.time.LocalDate;
 
 public class TasksPanel extends JPanel {
 
-    public TasksPanel() {
-        setLayout(new BorderLayout());
-        setBackground(Color.decode("#000000"));
+    private JTable taskTable;
+    private DefaultTableModel tableModel;
+    private JButton addTaskBtn;
 
-        Color panelDark = Color.decode("#020F28");
+    public TasksPanel() {
+
+        // Colours
+        Color panelDark = Color.decode("#020F28");     // navy background
+        Color tableBackground = Color.decode("#001F3F");
         Color textLight = Color.decode("#E6E6E6");
 
-        // Title/top of page
+        setLayout(new BorderLayout());
+        setBackground(panelDark);
+
+        // Title
         JLabel title = new JLabel("Task Manager", SwingConstants.CENTER);
         title.setFont(new Font("Georgia", Font.BOLD, 28));
         title.setForeground(textLight);
-        title.setPreferredSize(new Dimension(0, 50));
+        title.setBorder(BorderFactory.createEmptyBorder(15, 0, 15, 0));
+        add(title, BorderLayout.NORTH);
 
-        JPanel titleWrapper = new JPanel(new BorderLayout());
-        titleWrapper.setBackground(panelDark);
-        titleWrapper.add(title, BorderLayout.CENTER);
-        add(titleWrapper, BorderLayout.NORTH);
+        // Table setup
+        String[] columnNames = {"Task", "Course", "Due Date", "Status"};
 
-        // content
-        JPanel rowsContainer = new JPanel();
-        rowsContainer.setLayout(new BoxLayout(rowsContainer, BoxLayout.Y_AXIS));
-        rowsContainer.setOpaque(false);
-        rowsContainer.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+        tableModel = new DefaultTableModel(columnNames, 0) {
+            @Override
+            public boolean isCellEditable(int row, int col) {
+                return false;
+            }
+        };
 
-        // Top row: 3 boxes
-        JPanel topRow = new JPanel(new FlowLayout(FlowLayout.CENTER, 30, 0));
-        topRow.setOpaque(false);
-        topRow.add(createCourseBox(panelDark, textLight));
-        topRow.add(createCourseBox(panelDark, textLight));
-        topRow.add(createCourseBox(panelDark, textLight));
-        rowsContainer.add(topRow);
+        taskTable = new JTable(tableModel);
+        taskTable.setFillsViewportHeight(true);
+        taskTable.setRowHeight(30);
 
-        rowsContainer.add(Box.createRigidArea(new Dimension(0, 30))); // spacing
+        // table styling
+        taskTable.setBackground(tableBackground);
+        taskTable.setForeground(textLight);
+        taskTable.setFont(new Font("Georgia", Font.PLAIN, 14));
+        taskTable.setGridColor(panelDark);
 
-        // Bottom row: 2 boxes centered
-        JPanel bottomRow = new JPanel(new FlowLayout(FlowLayout.CENTER, 30, 0));
-        bottomRow.setOpaque(false);
-        bottomRow.add(createCourseBox(panelDark, textLight));
-        bottomRow.add(createCourseBox(panelDark, textLight));
-        rowsContainer.add(bottomRow);
+        // table header
+        taskTable.getTableHeader().setFont(new Font("Georgia", Font.BOLD, 15));
+        taskTable.getTableHeader().setBackground(panelDark);
+        taskTable.getTableHeader().setForeground(textLight);
+        taskTable.getTableHeader().setReorderingAllowed(false);
 
-        // Scroll wrapper so content is always viewable
-        JScrollPane scroll = new JScrollPane(rowsContainer);
-        scroll.setBorder(null);
-        scroll.setOpaque(false);
-        scroll.getViewport().setOpaque(false);
-        add(scroll, BorderLayout.CENTER);
+        JScrollPane scrollPane = new JScrollPane(taskTable);
+        scrollPane.getViewport().setBackground(panelDark);
+        scrollPane.setBorder(null);
+
+        add(scrollPane, BorderLayout.CENTER);
+
+        // Add Task button
+        addTaskBtn = new JButton("Add Task");
+        addTaskBtn.setPreferredSize(new Dimension(120, 45));
+        addTaskBtn.setFont(new Font("Georgia", Font.BOLD, 16));
+        addTaskBtn.setForeground(tableBackground);
+        addTaskBtn.setBackground(new Color(0x003366));
+        addTaskBtn.setFocusPainted(false);
+
+        JPanel btnWrapper = new JPanel();
+        btnWrapper.setBackground(panelDark);
+        btnWrapper.add(addTaskBtn);
+
+        add(btnWrapper, BorderLayout.SOUTH);
+
+        // Popup panel to add information
+        addTaskBtn.addActionListener(e -> openAddTaskPopup());
     }
 
-    // Course boxes
-    private JPanel createCourseBox(Color panelDark, Color textLight) {
-        JPanel coursePanel = new JPanel(new BorderLayout());
-        coursePanel.setPreferredSize(new Dimension(320, 270)); // larger box
-        coursePanel.setBackground(panelDark);
-        coursePanel.setBorder(BorderFactory.createEmptyBorder(12, 12, 12, 12));
+    private void openAddTaskPopup() {
+        JDialog popup = new JDialog((Frame) null, "Add New Task", true);
+        popup.setSize(420, 420);
+        popup.setLocationRelativeTo(null);
+        popup.setLayout(new BorderLayout());
 
-        // Course: label and text box for user to input course name
-        JPanel top = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 6));
-        top.setOpaque(false);
+        Color panelDark = Color.decode("#020F28");
+        Color fieldDark = Color.decode("#001F3F");
+        Color textLight = Color.decode("#E6E6E6");
 
-        JLabel nameLabel = new JLabel("Course:");
-        nameLabel.setForeground(textLight);
-        nameLabel.setFont(new Font("Georgia", Font.PLAIN, 16));
+        JPanel form = new JPanel();
+        form.setLayout(new BoxLayout(form, BoxLayout.Y_AXIS));
+        form.setBackground(panelDark);
+        form.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
-        JTextField courseField = new JTextField();
-        courseField.setColumns(20); // longer field so text doesn't cut off
-        courseField.setPreferredSize(new Dimension(230, 45)); // fixed wider field
-        courseField.setBackground(Color.decode("#001F3F"));
-        courseField.setForeground(textLight);
-        courseField.setFont(new Font("Georgia", Font.PLAIN, 16));
-        courseField.setBorder(BorderFactory.createEmptyBorder(0, 8, 12, 8));
+        Font labelFont = new Font("Georgia", Font.PLAIN, 16);
+        Font fieldFont = new Font("Georgia", Font.PLAIN, 14);
 
-        top.add(nameLabel);
-        top.add(courseField);
+        // Title
+        JLabel titleLabel = new JLabel("Task Name:");
+        titleLabel.setForeground(textLight);
+        titleLabel.setFont(labelFont);
 
-        coursePanel.add(top, BorderLayout.NORTH);
+        JTextField titleField = new JTextField();
+        titleField.setMaximumSize(new Dimension(Integer.MAX_VALUE, 35));
+        titleField.setBackground(fieldDark);
+        titleField.setForeground(textLight);
+        titleField.setBorder(BorderFactory.createEmptyBorder(5, 8, 5, 8));
+        titleField.setFont(fieldFont);
 
+        // Description
+        JLabel descLabel = new JLabel("Description:");
+        descLabel.setForeground(textLight);
+        descLabel.setFont(labelFont);
 
-        JLabel tasksPlaceholder = new JLabel(
-                "<html><div style='text-align:center;'>Tasks go here...<br>(Add tasks later)</div></html>",
-                SwingConstants.CENTER
-        );
-        tasksPlaceholder.setForeground(textLight);
-        tasksPlaceholder.setFont(new Font("Georgia", Font.ITALIC, 14));
+        JTextArea descArea = new JTextArea(4, 20);
+        descArea.setLineWrap(true);
+        descArea.setWrapStyleWord(true);
+        descArea.setBackground(fieldDark);
+        descArea.setForeground(textLight);
+        descArea.setFont(fieldFont);
+        descArea.setBorder(BorderFactory.createEmptyBorder(8, 8, 8, 8));
 
-        coursePanel.add(tasksPlaceholder, BorderLayout.CENTER);
+        JScrollPane descScroll = new JScrollPane(descArea);
 
-        // Add Task button (at the bottom of each course box)
-        JButton addTaskBtn = new JButton("Add Task");
-        addTaskBtn.setFocusPainted(false);
-        addTaskBtn.setBackground(panelDark);
-        addTaskBtn.setForeground(textLight);
-        addTaskBtn.setFont(new Font("Georgia", Font.PLAIN, 16));
-        addTaskBtn.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-        addTaskBtn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        // ---- DATE ----
+        JLabel dateLabel = new JLabel("Due Date (YYYY-MM-DD):");
+        dateLabel.setForeground(textLight);
+        dateLabel.setFont(labelFont);
 
-        // Hover effect
-        addTaskBtn.addMouseListener(new java.awt.event.MouseAdapter() {
-            @Override
-            public void mouseEntered(java.awt.event.MouseEvent e) {
-                addTaskBtn.setBackground(Color.decode("#0047A3")); // accentHover
-            }
-            @Override
-            public void mouseExited(java.awt.event.MouseEvent e) {
-                addTaskBtn.setBackground(panelDark);
+        JTextField dateField = new JTextField();
+        dateField.setMaximumSize(new Dimension(Integer.MAX_VALUE, 35));
+        dateField.setBackground(fieldDark);
+        dateField.setForeground(textLight);
+        dateField.setBorder(BorderFactory.createEmptyBorder(5, 8, 5, 8));
+        dateField.setFont(fieldFont);
+
+        // ---- TYPE ----
+        JLabel typeLabel = new JLabel("Type:");
+        typeLabel.setForeground(panelDark);
+        typeLabel.setFont(labelFont);
+
+        String[] types = {"Assignment", "Test", "Event", "Reminder", "Other"};
+        JComboBox<String> typeDropdown = new JComboBox<>(types);
+        typeDropdown.setMaximumSize(new Dimension(Integer.MAX_VALUE, 35));
+        typeDropdown.setFont(fieldFont);
+        typeDropdown.setBackground(fieldDark);
+        typeDropdown.setForeground(textLight);
+
+        // ---- COMPLETED ----
+        JCheckBox completedCheck = new JCheckBox("Completed?");
+        completedCheck.setFont(labelFont);
+        completedCheck.setForeground(textLight);
+        completedCheck.setBackground(panelDark);
+
+        // Add all fields in order
+        form.add(titleLabel);
+        form.add(titleField);
+        form.add(Box.createVerticalStrut(10));
+        form.add(descLabel);
+        form.add(descScroll);
+        form.add(Box.createVerticalStrut(10));
+        form.add(dateLabel);
+        form.add(dateField);
+        form.add(Box.createVerticalStrut(10));
+        form.add(typeLabel);
+        form.add(typeDropdown);
+        form.add(Box.createVerticalStrut(10));
+        form.add(completedCheck);
+
+        popup.add(form, BorderLayout.CENTER);
+
+        // Buttons
+        JPanel buttons = new JPanel();
+        buttons.setBackground(panelDark);
+
+        JButton saveBtn = new JButton("Save Task");
+        JButton cancelBtn = new JButton("Cancel");
+
+        saveBtn.setFont(new Font("Georgia", Font.BOLD, 14));
+        cancelBtn.setFont(new Font("Georgia", Font.BOLD, 14));
+
+        saveBtn.addActionListener(e -> {
+            try {
+                // Create Task object using your entity
+                Task newTask = new Task(
+                        (int) (Math.random() * 1000000),          // temporary ID
+                        titleField.getText(),
+                        descArea.getText(),
+                        LocalDate.parse(dateField.getText()),
+                        (String) typeDropdown.getSelectedItem()
+                );
+
+                if (completedCheck.isSelected()) {
+                    newTask.markCompleted();
+                }
+
+                // Add row to table
+                tableModel.addRow(new Object[]{
+                        newTask.getTitle(),
+                        newTask.getType(),
+                        newTask.getDate(),
+                        newTask.isCompleted() ? "Done" : "Not started"
+                });
+
+                popup.dispose();
+
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(
+                        popup,
+                        "Invalid date format or missing fields.",
+                        "Error",
+                        JOptionPane.ERROR_MESSAGE
+                );
             }
         });
 
-        coursePanel.add(addTaskBtn, BorderLayout.SOUTH);
+        cancelBtn.addActionListener(e -> popup.dispose());
 
-        return coursePanel;
+        buttons.add(saveBtn);
+        buttons.add(cancelBtn);
+
+        popup.add(buttons, BorderLayout.SOUTH);
+        popup.setVisible(true);
     }
+
 }
