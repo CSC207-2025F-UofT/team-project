@@ -92,7 +92,7 @@ public class AppBuilder {
     }
 
     public JFrame build() {
-        final JFrame application = new JFrame("User Login Example");
+        final JFrame application = new JFrame("CourseClash");
         application.setSize(1200, 800);
         application.setResizable(false); // Fixed size window
         application.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
@@ -101,7 +101,7 @@ public class AppBuilder {
         application.add(cardPanel);
         viewManager = new ViewManager(cardPanel, cardLayout, viewManagerModel, application);
 
-        viewManagerModel.setState(loginView.getViewName());
+        viewManagerModel.setState(signupView.getViewName());
         viewManagerModel.firePropertyChange();
 
         return application;

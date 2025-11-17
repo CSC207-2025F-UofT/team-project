@@ -4,6 +4,7 @@ import entity.User;
 import entity.UserFactory;
 
 import use_case.registration.login.LoginUserDataAccessInterface;
+import use_case.registration.signup.SignupUserDataAccessInterface;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -11,7 +12,7 @@ import java.util.Map;
 /**
  * DAO for user data implemented using an in-memory Map (dummy mode for testing).
  */
-public class FileUserDataAccessObject implements LoginUserDataAccessInterface {
+public class FileUserDataAccessObject implements LoginUserDataAccessInterface, SignupUserDataAccessInterface {
 
     private final Map<String, User> accounts = new HashMap<>();
     private String currentUsername;

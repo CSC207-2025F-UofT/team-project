@@ -2,10 +2,6 @@ package use_case.registration.signup;
 
 import entity.User;
 import entity.UserFactory;
-import use_case.signup.SignupInputBoundary;
-import use_case.signup.SignupOutputBoundary;
-import use_case.signup.SignupOutputData;
-import use_case.signup.SignupUserDataAccessInterface;
 
 /**
  * The Signup Interactor.
@@ -41,7 +37,7 @@ public class SignupInteractor implements SignupInputBoundary {
             final User user = userFactory.create(signupInputData.getUsername(), signupInputData.getPassword());
             userDataAccessObject.save(user);
 
-            final SignupOutputData signupOutputData = new SignupOutputData(user.getName());
+            final SignupOutputData signupOutputData = new SignupOutputData(user.getUserName());
             userPresenter.prepareSuccessView(signupOutputData);
         }
     }
