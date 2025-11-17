@@ -1,10 +1,24 @@
 package entity;
 
-import use_case.spending_report.GenerateReportController;
-import javax.swing.*;
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.RenderingHints;
 import java.awt.event.ActionEvent;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Map;
+
+import javax.swing.JComboBox;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
+
+import use_case.spending_report.GenerateReportController;
 
 public class SpendingReportViewModel extends JFrame {
     private final JComboBox<String> monthDropdown;
@@ -62,6 +76,18 @@ public class SpendingReportViewModel extends JFrame {
         chartPanelContainer.add(panel, BorderLayout.CENTER);
         chartPanelContainer.revalidate();
         chartPanelContainer.repaint();
+    }
+
+    // Add these methods to your existing SpendingReportViewModel class
+    public void setReport(entity.SpendingReport report) {
+        // This method might be needed for property change listeners
+        if (report != null) {
+            displayChart(report.getCategoryBreakdown(), report.getMonth());
+        }
+    }
+
+    public void displayNoDataMessage() {
+        displayChart(null, "");
     }
 
     // lightweight in-project bar chart to avoid external dependency on JFreeChart

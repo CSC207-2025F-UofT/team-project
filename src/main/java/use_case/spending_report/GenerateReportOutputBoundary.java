@@ -1,3 +1,5 @@
+package use_case.spending_report;
+
 public interface GenerateReportOutputBoundary {
-    void presentReport(GenerateReportOutputData outputData);
+    void presentReport(GenerateReportOutput outputData);
 }

@@ -1,0 +1,21 @@
+date,category,amount,description
+2024-01-15,Food,45.50,Grocery store
+2024-01-20,Transport,35.00,Gas station
+2024-02-05,Entertainment,29.99,Movie tickets
+2024-01-25,Food,68.75,Restaurant
+2024-02-10,Utilities,120.00,Electricity bill
+2024-02-15,Shopping,89.99,Clothing store
+2024-03-01,Transport,40.50,Bus pass
+2024-03-05,Food,52.25,Supermarket
+2024-03-12,Entertainment,15.00,Streaming service
+2024-03-20,Shopping,125.30,Electronics
+2024-04-02,Utilities,95.75,Internet bill
+2024-04-10,Food,32.40,Coffee shop
+2024-04-18,Transport,55.00,Car maintenance
+2024-05-05,Entertainment,45.00,Concert tickets
+2024-05-12,Shopping,75.60,Books
+2024-05-25,Food,90.15,Restaurant
+2024-06-01,Utilities,110.25,Water bill
+2024-06-10,Transport,60.00,Gas station
+2024-06-15,Entertainment,12.99,App purchase
+2024-06-20,Shopping,200.00,Furniture

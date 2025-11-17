@@ -1,17 +1,18 @@
-import java.util.*;
-import entity.transaction.Transaction;
-import use_case.transaction.TransactionDataAccessInterface;
-import use_case.spending_report.GenerateReportInputBoundary;
-import use_case.spending_report.GenerateReportInput;
-import use_case.spending_report.GenerateReportOutputBoundary;
-import use_case.spending_report.GenerateReportOutputData;
-import entity.report.Report;
+package use_case.spending_report;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import entity.SpendingReport;
+import entity.Transaction;
+import interface_adapter.TransactionDataAccess;
 
 public class GenerateReportInteractor implements GenerateReportInputBoundary {
-    private final TransactionDataAccessInterface transactionDAO;
+    private final TransactionDataAccess transactionDAO;
     private final GenerateReportOutputBoundary presenter;
 
-    public GenerateReportInteractor(TransactionDataAccessInterface transactionDAO,
+    public GenerateReportInteractor(TransactionDataAccess transactionDAO,
                                     GenerateReportOutputBoundary presenter) {
         this.transactionDAO = transactionDAO;
         this.presenter = presenter;
@@ -19,11 +20,11 @@ public class GenerateReportInteractor implements GenerateReportInputBoundary {
 
     @Override
     public void execute(GenerateReportInput inputData) {
-        List<Transaction> transactions = transactionDAO.getTransactionsByUserAndMonth(
+        List<Transaction> transactions = transactionDAO.getTransactions(
                 inputData.getUserId(), inputData.getMonth());
 
         if (transactions.isEmpty()) {
-            presenter.present(new GenerateReportOutputData(null, false));
+            presenter.presentReport(new GenerateReportOutput(null, false));
             return;
         }
 
@@ -32,7 +33,7 @@ public class GenerateReportInteractor implements GenerateReportInputBoundary {
             categoryTotals.merge(t.getCategory(), t.getAmount(), Float::sum);
         }
 
-        Report report = new Report(inputData.getMonth(), categoryTotals);
-        presenter.present(new GenerateReportOutputData(report, true));
+        SpendingReport report = new SpendingReport(inputData.getMonth(), categoryTotals);
+        presenter.presentReport(new GenerateReportOutput(report, true));
     }
 }
