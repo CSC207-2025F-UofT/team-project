@@ -106,6 +106,12 @@ public class AddRecipeForm {
         buttonPanel.setBackground(new Color(240, 235, 255));
         JButton addIngredientButton = styledButton("Add Ingredient");
 
+        addIngredientButton.addActionListener(e -> {
+            DefaultTableModel model = (DefaultTableModel) ingredientsTable.getModel();
+            model.addRow(new Object[]{"", "", ""});
+        });
+
+
         buttonPanel.add(addIngredientButton);
 
         mainPanel.add(recipeInfoPanel);
@@ -138,6 +144,12 @@ public class AddRecipeForm {
         bottomButtonPanel.setBackground(new Color(240, 235, 255));
         JButton addButton = styledButton("Add Recipe");
         JButton cancelButton = styledButton("Cancel");
+
+        cancelButton.addActionListener(e ->
+                frame.dispose()
+                //TODO: Make it return to the home page when a user hits cancel
+        );
+        bottomButtonPanel.add(cancelButton);
 
         bottomButtonPanel.add(addButton);
         bottomButtonPanel.add(cancelButton);
