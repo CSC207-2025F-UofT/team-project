@@ -65,6 +65,9 @@ public class DashboardView extends JPanel {
                 if (text.equals("Task Manager")) {
                     showTasksPanel();
                 }
+                if (text.equals("Calendar")) {
+                    showCalendarPanel();
+                }
             });
 
             JPanel wrapper = new JPanel(new BorderLayout());
@@ -86,6 +89,12 @@ public class DashboardView extends JPanel {
     private void showTasksPanel() {
         centerPanel.removeAll();
         centerPanel.add(new TasksPanel(), BorderLayout.CENTER);
+        centerPanel.revalidate();
+        centerPanel.repaint();
+    }
+    private void showCalendarPanel() {
+        centerPanel.removeAll();
+        centerPanel.add(new CalendarPanel(), BorderLayout.CENTER);
         centerPanel.revalidate();
         centerPanel.repaint();
     }
