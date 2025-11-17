@@ -56,6 +56,13 @@ public class ChatBox extends JFrame implements ViewChatHistoryOutputBoundary {
             "👍", "\uD83E\uDE77", "😂", "😮", "😢", "🔥", "👏", "🎉", "🤔", "😡"
     };
 
+    // UI-only read receipts for demo
+    private final java.util.Set<String> readIds = new java.util.HashSet<>();
+    private boolean markAllMyReadOnNextRender = false; // flip to true when bot replies
+
+    // UI-only: the time of the latest bot reply (used to mark messages as "Read")
+    private java.time.Instant lastBotReplyTime = null;
+
     public ChatBox() {
         super("GoChat Demo");
 
@@ -119,6 +126,14 @@ public class ChatBox extends JFrame implements ViewChatHistoryOutputBoundary {
 
         // initial load
         loadChatHistory();
+
+        chatScrollPane.getViewport().addComponentListener(new java.awt.event.ComponentAdapter() {
+            @Override
+            public void componentResized(java.awt.event.ComponentEvent e) {
+                loadChatHistory();
+                scrollToBottomSoon();
+            }
+        });
     }
 
     // ===================== sending & loading =====================
@@ -135,10 +150,14 @@ public class ChatBox extends JFrame implements ViewChatHistoryOutputBoundary {
         scrollToBottomSoon();
 
         // simulate an incoming reply after 600ms
-        javax.swing.Timer t = new javax.swing.Timer(600, ev -> {
+        javax.swing.Timer t = new javax.swing.Timer(2000, ev -> {
             ((javax.swing.Timer) ev.getSource()).stop();
             String reply = autoReply(text);
             sendMessageInteractor.execute(currentChatId, botUserId, reply);
+
+            // Mark all of *my* messages up to now as "Read"
+            lastBotReplyTime = java.time.Instant.now();
+
             loadChatHistory();
             scrollToBottomSoon();
         });
@@ -166,80 +185,132 @@ public class ChatBox extends JFrame implements ViewChatHistoryOutputBoundary {
             bubble.setLayout(new BoxLayout(bubble, BoxLayout.Y_AXIS));
             bubble.setOpaque(false);
             bubble.setBorder(new EmptyBorder(6, 10, 4, 10));
+            int maxW = currentMaxBubbleWidth();
 
-            String text = dto.getContent() + (isMe ? "  ✓" : "");
-            JLabel msgLabel = new JLabel("<html>" + text + "</html>");
-            msgLabel.setOpaque(true);
-            msgLabel.setBorder(new EmptyBorder(8, 10, 8, 10));
+            String raw = dto.getContent();
+            JComponent msgComp = makeWrappingBubbleText(raw, isMe, maxW);
+
+            msgComp.setOpaque(true);
+            msgComp.setBorder(new javax.swing.border.EmptyBorder(8, 10, 8, 10));
 
             if (isMe) {
-                msgLabel.setBackground(new Color(0x95EC69));    // sent
-                msgLabel.setForeground(Color.BLACK);
+                msgComp.setBackground(new java.awt.Color(0x95EC69));
+                msgComp.setForeground(java.awt.Color.BLACK);
             } else {
-                msgLabel.setBackground(new Color(60, 60, 60));  // received
-                msgLabel.setForeground(Color.WHITE);
+                msgComp.setBackground(new java.awt.Color(60, 60, 60));
+                msgComp.setForeground(java.awt.Color.WHITE);
             }
-            // row: message label in CENTER, optional reaction on the RIGHT
-            JPanel msgRow = new JPanel(new BorderLayout());
-            msgRow.setOpaque(false);
-            msgRow.add(msgLabel, BorderLayout.CENTER);
 
-            // Only show reactions on OTHER people's messages
+            JPanel msgRow = new JPanel();
+            msgRow.setOpaque(false);
+            msgRow.setLayout(new BoxLayout(msgRow, BoxLayout.X_AXIS));
+            msgRow.add(msgComp);
+            msgRow.setAlignmentX(LEFT_ALIGNMENT);
+            msgComp.setAlignmentX(LEFT_ALIGNMENT);
+
+            // if you render a reaction, add it to the right as before
             if (!isMe) {
                 String r = localReactions.get(getMessageId(dto));
                 if (r != null) {
                     JLabel reaction = new JLabel(r);
-                    reaction.setBorder(new EmptyBorder(0, 6, 0, 0)); // tiny left pad
-                    msgRow.add(reaction, BorderLayout.EAST);
+                    reaction.setBorder(new javax.swing.border.EmptyBorder(0, 6, 0, 0));
+                    // reaction.setFont(emojiFont());
+                    msgRow.add(javax.swing.Box.createHorizontalStrut(6));
+                    msgRow.add(reaction);
                 }
             }
 
             bubble.add(msgRow);
 
+            // ---- meta (time + status) OUTSIDE the bubble ----
             JLabel timeLabel = new JLabel(formatTimestamp(dto.getTimestamp()));
             timeLabel.setFont(new Font("Dialog", Font.PLAIN, 11));
             timeLabel.setForeground(new Color(160, 160, 160));
-            bubble.add(Box.createVerticalStrut(2));
-            bubble.add(timeLabel);
+
+            JLabel statusLabel = null;
+            if (isMe) {
+                boolean isRead = lastBotReplyTime != null
+                        && (!dto.getTimestamp().isAfter(lastBotReplyTime));
+                statusLabel = new JLabel(isRead ? "Read" : "✓");
+                statusLabel.setFont(new Font("Dialog", Font.PLAIN, 11));
+                statusLabel.setForeground(new Color(160, 160, 160));
+            }
 
             // action button + popup
             JButton actionBtn = makeActionButton();
             JPopupMenu menu = buildActionMenu(isMe, dto, actionBtn);
             actionBtn.addActionListener(e -> menu.show(actionBtn, 0, actionBtn.getHeight()));
 
-            // side-by-side panel holding (button,bubble) or (bubble,button)
+            // row: (button + bubble) for others, (bubble + button) for me
+            final int GAP = 4; // tighter gap than before
             JPanel side = new JPanel();
             side.setOpaque(false);
             side.setLayout(new BoxLayout(side, BoxLayout.X_AXIS));
-
             if (isMe) {
                 side.add(bubble);
-                side.add(Box.createHorizontalStrut(6));
-                side.add(actionBtn);            // your messages: bubble on right, button to its right
+                side.add(Box.createHorizontalStrut(GAP));
+                side.add(actionBtn);
             } else {
-                side.add(actionBtn);            // others' messages: button then bubble (left side)
-                side.add(Box.createHorizontalStrut(6));
+                side.add(actionBtn);
+                side.add(Box.createHorizontalStrut(GAP));
                 side.add(bubble);
             }
+
+            // meta row (time [+ status]) aligned with bubble’s OUTER edge
+            JPanel metaRow = new JPanel();
+            metaRow.setOpaque(false);
+            metaRow.setLayout(new BoxLayout(metaRow, BoxLayout.X_AXIS));
+            metaRow.add(timeLabel);
+            if (statusLabel != null) {
+                metaRow.add(Box.createHorizontalStrut(6));
+                metaRow.add(statusLabel);
+            }
+
+            // stack side (top) and meta (bottom)
+            JPanel column = new JPanel();
+            column.setOpaque(false);
+            column.setLayout(new BoxLayout(column, BoxLayout.Y_AXIS));
+            column.add(side);
+            column.add(Box.createVerticalStrut(2));
+
+            // for others: indent the meta by the button width + gap
+            JPanel metaWrap = new JPanel(new BorderLayout());
+            metaWrap.setOpaque(false);
+            if (isMe) {
+                metaWrap.add(metaRow, BorderLayout.EAST);
+            } else {
+                int btnW = actionBtn.getPreferredSize().width;
+                JPanel padded = new JPanel(new BorderLayout());
+                padded.setOpaque(false);
+                padded.setBorder(new EmptyBorder(0, btnW + GAP, 0, 0));
+                padded.add(metaRow, BorderLayout.WEST);
+                metaWrap.add(padded, BorderLayout.WEST);
+            }
+            column.add(metaWrap);
 
             // wrapper: keeps left/right alignment and prevents tall stretching
             JPanel wrapper = new JPanel(new BorderLayout());
             wrapper.setOpaque(false);
             wrapper.setBorder(new EmptyBorder(2, 10, 2, 10));
-
-            if (isMe) wrapper.add(side, BorderLayout.EAST);
-            else      wrapper.add(side, BorderLayout.WEST);
+            if (isMe) wrapper.add(column, BorderLayout.EAST);
+            else      wrapper.add(column, BorderLayout.WEST);
 
             // cap row height for even vertical spacing
-            int rowH = side.getPreferredSize().height + 4;
+            int rowH = column.getPreferredSize().height + 4;
             wrapper.setMaximumSize(new Dimension(Integer.MAX_VALUE, rowH));
             wrapper.setAlignmentX(Component.LEFT_ALIGNMENT);
 
             chatPanel.add(wrapper);
             chatPanel.add(Box.createVerticalStrut(4));
 
+            // If the bot just replied, mark all my messages as "Read" for this demo.
+            if (markAllMyReadOnNextRender && dto.getSenderUserId().equals(currentUserId)) {
+                readIds.add(getMessageId(dto));
+            }
+            // After we process the list once, clear the flag.
         }
 
+        markAllMyReadOnNextRender = false;
         chatPanel.revalidate();
         chatPanel.repaint();
         scrollToBottomSoon(); // always land at latest message
@@ -291,6 +362,7 @@ public class ChatBox extends JFrame implements ViewChatHistoryOutputBoundary {
         b.setBorder(BorderFactory.createLineBorder(new Color(80, 80, 80)));
         b.setBackground(new Color(50, 50, 50));
         b.setForeground(new Color(220, 220, 220));
+        b.setPreferredSize(new Dimension(26, 18));
         return b;
     }
 
@@ -365,6 +437,58 @@ public class ChatBox extends JFrame implements ViewChatHistoryOutputBoundary {
     private String getMessageId(ChatMessageDto dto) {
         // return dto.getId();  // ← if your dto uses getId()
         return dto.getMessageId(); // ← if your dto uses getMessageId()
+    }
+
+    // ~2/3 of current viewport width (with a little margin)
+    private int currentMaxBubbleWidth() {
+        int w = chatScrollPane.getViewport().getExtentSize().width;
+        if (w <= 0) w = chatScrollPane.getWidth();
+        if (w <= 0) w = 480;
+        return (int)Math.round(w * 0.66) - 16; // subtract a bit for padding/scrollbar
+    }
+
+    // Build a wrapping bubble that is COMPACT for short text and wraps at ~2/3 width for long text
+    private JComponent makeWrappingBubbleText(String raw, boolean isMe, int maxW) {
+        JTextArea ta = new JTextArea(raw);
+        ta.setWrapStyleWord(true);
+        ta.setEditable(false);
+        ta.setOpaque(true);
+        ta.setBorder(new javax.swing.border.EmptyBorder(8, 10, 8, 10));
+        ta.setFont(new Font("Dialog", Font.PLAIN, 13));
+        ta.setHighlighter(null);
+        ta.setAlignmentX(LEFT_ALIGNMENT);
+
+        if (isMe) {
+            ta.setBackground(new Color(0x95EC69));
+            ta.setForeground(Color.BLACK);
+        } else {
+            ta.setBackground(new Color(60, 60, 60));
+            ta.setForeground(Color.WHITE);
+        }
+
+        // --- 1) Measure natural single-line width (no wrapping) ---
+        ta.setLineWrap(false);
+        // Let Swing compute based on actual text metrics
+        Dimension noWrap = ta.getPreferredSize();
+
+        // --- 2) Decide compact vs wrapped ---
+        if (noWrap.width <= maxW) {
+            // Short text: keep it compact (use the natural width)
+            ta.setPreferredSize(noWrap);
+            ta.setMaximumSize(new Dimension(noWrap.width, Integer.MAX_VALUE));
+        } else {
+            // Long text: enable wrapping and cap at maxW
+            ta.setLineWrap(true);
+            // Ask layout to compute height when constrained to maxW
+            ta.setSize(new Dimension(maxW, Short.MAX_VALUE));
+            Dimension wrapped = ta.getPreferredSize();
+            // Enforce width cap; height grows automatically
+            wrapped.width = Math.min(wrapped.width, maxW);
+            ta.setPreferredSize(wrapped);
+            ta.setMaximumSize(new Dimension(maxW, Integer.MAX_VALUE));
+        }
+
+        return ta;
     }
 
 
