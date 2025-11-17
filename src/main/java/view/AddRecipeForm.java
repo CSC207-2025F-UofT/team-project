@@ -87,6 +87,23 @@ public class AddRecipeForm {
         mainPanel.add(ingredientsPanel);
         frame.add(mainPanel);
         frame.setVisible(true);
+
+        // -------------- instructions panel ----------------
+        JPanel instructionsPanel = new JPanel(new BorderLayout(10, 10));
+        instructionsPanel.setBorder(BorderFactory.createTitledBorder("Instructions"));
+
+        JTextArea instructionsTextArea = new JTextArea(6, 20);
+        instructionsTextArea.setLineWrap(true);
+        instructionsTextArea.setWrapStyleWord(true);
+
+        JScrollPane instructionsScrollPane = new JScrollPane(instructionsTextArea,
+                JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
+                JScrollPane.HORIZONTAL_SCROLLBAR_NEVER
+        );
+
+        instructionsPanel.add(instructionsScrollPane, BorderLayout.CENTER);
+
+        mainPanel.add(instructionsPanel);
     }
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
