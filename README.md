@@ -7,6 +7,12 @@ you need to set the environment variable before running the compiled app
 $ export APIKEY=<ACTUAL_API_KEY>
 ```
 
+to compile and run:
+```
+$ mvn compile
+$ mvn exec:java -Dexec.mainClass="app.SteamWrappedApp"
+```
+
 The readme should include information such as:
 - a summary of what your application is all about
 - a list of the user stories, along with who is responsible for each one
