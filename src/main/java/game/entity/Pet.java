@@ -1,5 +1,7 @@
 package game.entity;
 
+import game.Constants;
+
 public class Pet {
     // petType == 'Dog' || petType == 'Cat'
     // petBreed is a valid breed of Dog (if applicable) or Cat (if applicable)
@@ -25,9 +27,9 @@ public class Pet {
         this.petType = petType;
         this.petBreed = petBreed;
         // call to visual database to get appropriate url
-        this.affectionXP = 0;
-        this.affectionLevel = 1;
-        this.energyLevel = 100;
+        this.affectionXP = Constants.INITIAL_AFFECTION_XP;
+        this.affectionLevel = Constants.INITIAL_AFFECTION_LEVEL;
+        this.energyLevel = Constants.INITIAL_ENERGY_LEVEL;
         // call to info database to get clicking speed
         // call to info database to get selling price
         this.deployStatus = false;
