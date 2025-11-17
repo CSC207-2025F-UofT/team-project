@@ -1,16 +1,18 @@
 package data_access;
 
+import use_case.initialise_predictions.BootstrapDataAccessInterface;
+
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 
 import java.io.IOException;
 
-public class APIDataAccessObject {
+public class BootstrapDataGateway implements BootstrapDataAccessInterface {
     private static final String API_URL = "https://fantasy.premierleague.com/api/bootstrap-static/";
     private final OkHttpClient client;
 
-    public APIDataAccessObject() {
+    public BootstrapDataGateway() {
         this.client = new OkHttpClient();
     }
 
