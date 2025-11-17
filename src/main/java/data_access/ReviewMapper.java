@@ -8,7 +8,7 @@ import org.json.JSONObject;
  */
 public class ReviewMapper {
     private final JSONObject review;
-    private static final String AUTHOR = "author";
+    private static final String USERNAME = "username";
     private static final String COMMENT = "comment";
     private static final String SONGID = "songid";
     private static final String RATING = "rating";
@@ -19,7 +19,7 @@ public class ReviewMapper {
     }
 
     public Review mapReview() {
-        String author = review.getString(AUTHOR);
+        String author = review.getString(USERNAME);
         String comment = review.getString(COMMENT);
         String songid = review.getString(SONGID);
         int rating = review.getInt(RATING);
