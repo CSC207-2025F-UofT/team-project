@@ -3,6 +3,7 @@ package view.main_screen;
 import interface_adapter.ViewManagerModel;
 import interface_adapter.main_screen.MainScreenViewModel;
 import interface_adapter.studyset.studyset_browse.BrowseStudySetViewModel;
+import view.ViewManager;
 
 import javax.swing.*;
 import java.awt.*;
