@@ -22,7 +22,6 @@ import java.util.Date;
 
 public class SearchView extends JPanel{
     // default information
-    String[] continents = {"NA", "EU"};
     String[] countries = {"Canada", "USA"};
     String[] cities = {"Toronto", "London"};
     String[] genre = {"Pop", "Rock", "Hip-pop"};
@@ -34,7 +33,6 @@ public class SearchView extends JPanel{
     private final JTextField searchField = new JTextField("your event name");
 
     // JComboBox panel
-    private final JComboBox continentComboBox = new JComboBox(continents);
     private final JComboBox countryComboBox = new JComboBox(countries);
     private final JComboBox cityComboBox = new JComboBox(cities);
 
@@ -98,7 +96,6 @@ public class SearchView extends JPanel{
         // panel
         JPanel comboBoxPanel = new JPanel();
         comboBoxPanel.setLayout(new BoxLayout(comboBoxPanel, BoxLayout.X_AXIS));
-        comboBoxPanel.add(continentComboBox);
         comboBoxPanel.add(countryComboBox);
         comboBoxPanel.add(cityComboBox);
         frame.add(comboBoxPanel, gbc);
