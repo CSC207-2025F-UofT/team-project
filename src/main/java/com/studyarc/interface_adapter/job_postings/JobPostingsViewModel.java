@@ -19,4 +19,6 @@ public class JobPostingsViewModel extends ViewModel<JobPostingsState> {
         super("job postings");
         setState(new JobPostingsState());
     }
+
+
 }

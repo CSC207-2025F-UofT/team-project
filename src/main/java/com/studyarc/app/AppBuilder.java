@@ -3,26 +3,55 @@ package com.studyarc.app;
 import javax.swing.*;
 import java.awt.*;
 
+import com.studyarc.data_access.DatabaseAccess;
+import com.studyarc.data_access.MilestoneTasksDatatAccessObject;
 import com.studyarc.interface_adapter.ViewManagerModel;
+import com.studyarc.interface_adapter.job_postings.JobPostingsController;
 import com.studyarc.interface_adapter.job_postings.JobPostingsPresenter;
+import com.studyarc.interface_adapter.job_postings.JobPostingsViewModel;
+import com.studyarc.interface_adapter.milestone_tasks.MilestoneTasksController;
+import com.studyarc.interface_adapter.milestone_tasks.MilestoneTasksPresenter;
+import com.studyarc.interface_adapter.milestone_tasks.MilestoneTasksViewModel;
+import com.studyarc.interface_adapter.ui_sidebar.SidebarController;
+import com.studyarc.interface_adapter.ui_sidebar.SidebarPresenter;
+import com.studyarc.interface_adapter.ui_sidebar.SidebarViewModel;
+import com.studyarc.use_case.job_postings.JobPostingsInputBoundary;
+import com.studyarc.use_case.job_postings.JobPostingsInteractor;
 import com.studyarc.use_case.job_postings.JobPostingsOutputBoundary;
+import com.studyarc.use_case.job_postings.generate_keywords.KeywordGenerator;
+import com.studyarc.use_case.job_postings.generate_keywords.LLMKeywordGenerator;
+import com.studyarc.use_case.job_postings.generate_postings.AdzunaJobGenerator;
+import com.studyarc.use_case.milestone_tasks.MilestoneTasksDataAccessInterface;
+import com.studyarc.use_case.milestone_tasks.MilestoneTasksInputBoundary;
+import com.studyarc.use_case.milestone_tasks.MilestoneTasksInteractor;
+import com.studyarc.use_case.milestone_tasks.MilestoneTasksOutputBoundary;
+import com.studyarc.use_case.ui_sidebar.*;
 import com.studyarc.view.*;
 
 public class AppBuilder {
+    private final DatabaseAccess databaseAccess = new DatabaseAccess();
+    private final SidebarDataAccessInterface sidebarDataAccess = new SidebarDataAccessObject();
+    private final MilestoneTasksDataAccessInterface milestoneDataAccessObject = new MilestoneTasksDatatAccessObject();
+
     private final JPanel overallPanel = new JPanel();
     private final BorderLayout borderLayout = new BorderLayout();
     private final JPanel mainUIPanel = new JPanel();
     private final JPanel usecasePanel = new JPanel();
     private final CardLayout cardLayout = new CardLayout();
 
+    private SidebarViewModel sidebarViewModel;
     private SidePanelView sidePanelView;
+    private JobPostingsViewModel jobPostingsViewModel;
+    private JobPostingsView jobPostingsView;
+
+    private MilestoneTasksViewModel milestoneTasksViewModel;
     private MilestoneTasksView milestoneTaskView;
+
     private TrackPlansView trackPlansView;
 
     final ViewManagerModel viewManagerModel = new ViewManagerModel();
     ViewManager viewManager = new ViewManager(overallPanel, cardLayout, viewManagerModel);
 
-    private JobPostingsView jobPostingsView;
 
     public AppBuilder() {
         overallPanel.setLayout(cardLayout); // includes login and other things
@@ -32,28 +61,98 @@ public class AppBuilder {
     }
 
     public AppBuilder addSidePanel() {
-        sidePanelView = new SidePanelView();
+        sidebarViewModel = new SidebarViewModel();
+        sidePanelView = new SidePanelView(sidebarViewModel);
+
         mainUIPanel.add(sidePanelView, BorderLayout.WEST);
         overallPanel.add(mainUIPanel);
         return this;
     }
 
-    public AppBuilder addMilestoneTasksPanel() {
-        milestoneTaskView = new MilestoneTasksView();
-        mainUIPanel.add(milestoneTaskView, BorderLayout.CENTER);
-        overallPanel.add(mainUIPanel);
+    public AppBuilder addJobPostingsView() {
+        jobPostingsViewModel = new JobPostingsViewModel();
+        jobPostingsView = new JobPostingsView(jobPostingsViewModel);
+
+//        mainUIPanel.add(jobPostingsView, BorderLayout.CENTER);
+//        overallPanel.add(mainUIPanel, jobPostingsViewModel.getViewName());
+
+//        overallPanel.add(jobPostingsView, jobPostingsViewModel.getViewName());
+
+        JPanel jobScreen = new JPanel(new BorderLayout());
+//        jobScreen.add(sidePanelView, BorderLayout.WEST);
+
+        overallPanel.add(sidePanelView, BorderLayout.WEST);
+
+        jobScreen.add(jobPostingsView, BorderLayout.CENTER);
+
+
+        overallPanel.add(jobScreen, jobPostingsView.getViewName());
+
         return this;
     }
 
+    public AppBuilder addMilestoneTasksPanel() {
+        milestoneTasksViewModel = new MilestoneTasksViewModel();
+        milestoneTaskView = new MilestoneTasksView(milestoneTasksViewModel);
 
-//    public AppBuilder addJobPostingsUseCase() {
-//        final JobPostingsOutputBoundary jobPostingsOutputBoundary= new JobPostingsPresenter(viewManagerModel);
-//    }
+//        mainUIPanel.add(milestoneTaskView, BorderLayout.CENTER);
+//        overallPanel.add(mainUIPanel, milestoneTaskView.getViewName());
+
+//        overallPanel.add(milestoneTaskView, milestoneTaskView.getViewName());
+
+
+        JPanel milestoneScreen = new JPanel(new BorderLayout());
+//        milestoneScreen.add(sidePanelView, BorderLayout.WEST);
+
+        overallPanel.add(sidePanelView, BorderLayout.WEST);
+
+        milestoneScreen.add(milestoneTaskView, BorderLayout.CENTER);
+
+        overallPanel.add(milestoneScreen, milestoneTaskView.getViewName());
+
+        return this;
+    }
+
+    public AppBuilder addSidebarUseCase() {
+        final SidebarOutputBoundary sidebarOutputBoundary = new SidebarPresenter(viewManagerModel, sidebarViewModel, jobPostingsViewModel, milestoneTasksViewModel);
+        final SidebarInputBoundary sidebarInteractor = new SidebarInteractor(sidebarDataAccess, sidebarOutputBoundary);
+
+        SidebarController sidebarController = new SidebarController(sidebarInteractor);
+        sidePanelView.setSidebarController(sidebarController);
+        return this;
+    }
+
+    public AppBuilder addJobPostingsUseCase() {
+        final JobPostingsOutputBoundary jobPostingsOutputBoundary = new JobPostingsPresenter(jobPostingsView);
+
+        KeywordGenerator keywordGenerator = new LLMKeywordGenerator();
+        AdzunaJobGenerator jobGenerator = new AdzunaJobGenerator();
+
+        final JobPostingsInputBoundary jobPostingsInteractor = new JobPostingsInteractor(databaseAccess, jobPostingsOutputBoundary, keywordGenerator, jobGenerator);
+
+        JobPostingsController jobPostingsController = new JobPostingsController(jobPostingsInteractor);
+        jobPostingsView.setJobPostingsController(jobPostingsController);
+        return this;
+    }
+
+    public AppBuilder addMilestoneTasksUseCase() {
+        final MilestoneTasksOutputBoundary milestoneTasksOutputBoundary = new MilestoneTasksPresenter(milestoneTaskView);
+        final MilestoneTasksInputBoundary milestoneTasksInteractor = new MilestoneTasksInteractor(milestoneDataAccessObject, milestoneTasksOutputBoundary);
+
+        MilestoneTasksController milestoneTasksController = new MilestoneTasksController(milestoneTasksInteractor);
+        milestoneTaskView.setMilestoneTasksController(milestoneTasksController);
+        return this;
+    }
+
 
     public JFrame build() {
         final JFrame application = new JFrame("Code Example");
         application.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         application.add(overallPanel);
+
+        viewManagerModel.setState(jobPostingsView.getViewName());
+        System.out.println(jobPostingsView.getViewName());
+        viewManagerModel.firePropertyChange();
 
         return application;
     }

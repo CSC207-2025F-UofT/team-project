@@ -21,10 +21,10 @@ public class JobPostingsView extends JPanel implements ActionListener, PropertyC
     private final JobPostingsViewModel jobPostingsViewModel;
     private JobPostingsController jobPostingsController = null;
 
-    private JPanel locationSelectionPanel;
-    private JPanel planSelectionPanel;
-    private JPanel salarySelectionPanel;
-    private JPanel sortSelectionPanel;
+    private JPanel locationSelectionPanel = new JPanel();;
+    private JPanel planSelectionPanel = new JPanel();;
+    private JPanel salarySelectionPanel = new JPanel();;
+    private JPanel sortSelectionPanel = new JPanel();;
 
     private JComboBox<String> locationComboBox;
     private JComboBox<String> salaryComboBox;
