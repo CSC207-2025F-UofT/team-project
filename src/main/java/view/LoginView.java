@@ -35,7 +35,7 @@ public class LoginView extends JPanel implements PropertyChangeListener, ActionL
         this.loginButton.addActionListener(this);
         this.signupButton.addActionListener(this);
 
-        final JLabel title = new JLabel("Login Screen");
+        final JLabel title = new JLabel("VocabVault Login Page");
         title.setAlignmentX(Component.CENTER_ALIGNMENT);
 
         final LabelTextPanel usernameInfo = new LabelTextPanel(
