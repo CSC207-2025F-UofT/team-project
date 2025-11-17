@@ -1,7 +1,9 @@
 package view.main_screen;
 
+import interface_adapter.ViewManagerModel;
 import interface_adapter.main_screen.MainScreenViewModel;
 import interface_adapter.registration.login.LoginViewModel;
+import view.ViewManager;
 
 import javax.swing.*;
 import java.awt.*;
@@ -13,6 +15,7 @@ import java.beans.PropertyChangeListener;
 public class MainScreenView extends JPanel implements ActionListener, PropertyChangeListener {
     private final String viewName = "main screen";
     private final MainScreenViewModel mainScreenViewModel;
+    private final ViewManagerModel viewManagerModel = new ViewManagerModel();
 
     public MainScreenView(MainScreenViewModel mainScreenViewModel) {
         this.mainScreenViewModel = mainScreenViewModel;
@@ -56,19 +59,19 @@ public class MainScreenView extends JPanel implements ActionListener, PropertyCh
                 button.setFont(new Font("Helvetica", Font.BOLD, 48));
                 button.setBackground(Color.GRAY);
                 button.setForeground(Color.WHITE);
-//                switch (button.getName()) {
-//                    case "Single Player":
-//                        break;
-//                    case "Multiplayer":
-//                        break;
-//                    case "Manage Study Set":
-//                        button.addActionListener(e -> {
-//
-//                        });
-//                        break;
-//                    case "Leaderboard":
-//                        break;
-//                }
+                switch (button.getText()) {
+                    case "Single Player":
+                        break;
+                    case "Multiplayer":
+                        break;
+                    case "Manage Study Set":
+                        button.addActionListener(e -> {
+                            viewManagerModel.setA
+                        });
+                        break;
+                    case "Leaderboard":
+                        break;
+                }
 
                 c.gridx = col;
                 c.gridy = row;
