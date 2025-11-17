@@ -8,7 +8,7 @@
 1; C; An interpreted language; false
 1; D; A scripting language; false
 
-2; 102; Select the correct order (from top to bottom) of the layered computer architecture.
+2; 102; Select the correct order (top to bottom) of the layered computer architecture.
 2; A; OS, hardware, JVM, Java program; false
 2; B; Java program, JVM, OS, hardware; true
 2; C; application, hardware, OS; false
