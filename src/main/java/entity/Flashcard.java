@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Flashcard {
+    private final int id;
     private String sourceWord;
     private String targetWord;
     private Language sourceLang;
@@ -11,7 +12,8 @@ public class Flashcard {
     private boolean known;
     private List<String> deckIds;
 
-    public Flashcard(String sourceWord, String targetWord, Language sourceLang, Language targetLang) {
+    public Flashcard(int id, String sourceWord, String targetWord, Language sourceLang, Language targetLang) {
+        this.id = id;
         this.sourceWord = sourceWord;
         this.targetWord = targetWord;
         this.sourceLang = sourceLang;
@@ -70,5 +72,9 @@ public class Flashcard {
     }
     public Language getTargetLang() {
         return targetLang;
+    }
+
+    public int getId() {
+        return id;
     }
 }
