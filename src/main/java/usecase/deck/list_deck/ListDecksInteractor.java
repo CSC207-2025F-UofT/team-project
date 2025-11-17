@@ -18,27 +18,29 @@ public class ListDecksInteractor implements  ListDecksInputBoundary {
     }
 
     @Override
-    public void listForUser(int userId) {
+    public void execute(ListDecksInputData inputData) {
+        int userId = inputData.getUserId();
 
-        // Make sure the "Don't know" deck exists
+        // Ensure "Don't know deck" exists
         int dkId = deckDAO.findOrCreateDontKnowDeckId(userId);
 
         List<FlashcardDeck> decks = deckDAO.findByUser(userId);
 
-        // Sort so that "Don't know" deck comes first and others follow in alphabetical order by title
+        // Sort: "Don't know deck" first, others alphabetically
         decks.sort((a, b) -> {
             int aKey = (a.getId() == dkId) ? 0 : 1;
             int bKey = (b.getId() == dkId) ? 0 : 1;
             if (aKey != bKey) return Integer.compare(aKey, bKey);
-            // If both are same key, sort alphabetically by title
             return a.getTitle().compareToIgnoreCase(b.getTitle());
         });
 
-        // Convert to output data format
-        List<CreateDeckOutputData.DeckSummary> list = new ArrayList<>();
+        // Convert entities → DTOs
+        List<ListDecksOutputData.DeckSummary> summaries = new ArrayList<>();
         for (FlashcardDeck d : decks) {
-            list.add(new CreateDeckOutputData.DeckSummary(d.getId(), d.getTitle()));
+            summaries.add(new ListDecksOutputData.DeckSummary(d.getId(), d.getTitle()));
         }
-        presenter.present(new CreateDeckOutputData(list));
+
+        // Send to presenter
+        presenter.present(new ListDecksOutputData(summaries));
     }
 }
