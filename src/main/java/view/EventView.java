@@ -51,8 +51,6 @@ public class EventView extends JDialog {
         detailsPanel.add(genresLabel);
         detailsPanel.add(priceRangeLabel);
         detailsPanel.add(ticketPriceRangeLabel);
-        detailsPanel.add(buyButton);
-        detailsPanel.add(attendButton);
         add(detailsPanel, BorderLayout.CENTER);
 
         JPanel buttonPanel = new JPanel();
@@ -60,6 +58,16 @@ public class EventView extends JDialog {
         buttonPanel.add(attendButton);
         buttonPanel.add(saveButton);
         buttonPanel.add(buyButton);
+
+        buyButton.addActionListener(e -> {
+            if (ticketUrl != null) {
+                try {
+                    Desktop.getDesktop().browse(new java.net.URI(ticketUrl));
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+            }
+        });
 
         add(buttonPanel, BorderLayout.SOUTH);
 
@@ -127,7 +135,7 @@ public class EventView extends JDialog {
         view.setPriceRange(150, 900);
 
         ImageIcon sampleIcon = new ImageIcon(
-                "sample.png" // sample.png does not exist on our repo. this will break. test with your own URL
+                "/Users/hugoye/IdeaProjects/team-project/example_image.png" // sample.png does not exist on our repo. this will break. test with your own URL
         );
         view.setImageIcon(sampleIcon);
 
