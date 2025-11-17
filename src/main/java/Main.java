@@ -116,7 +116,7 @@ public class Main {
 
     private static void showNewsView() {
         // 1. DAO（数据源） - 可以先用 MockNewsDAO 读本地 JSON
-        MockNewsDAO dao = new MockNewsDAO("sample_news.json");
+        MockNewsDAO dao = new MockNewsDAO("src/main/resources/sample_news.json");
 
         // 2. Presenter（负责 ViewModel）
         NewsView view = new NewsView(null); // 先传 null，稍后再注入 Controller
@@ -129,7 +129,7 @@ public class Main {
         NewsController controller = new NewsController(interactor, presenter);
 
         // 5. 将 Controller 注入 View
-        view.setController((NewsView.Controller) controller);
+        view.setController(controller);
 
         // 6. 初始加载新闻
         controller.fetchNews();

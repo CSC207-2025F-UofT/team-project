@@ -7,6 +7,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.net.URI;
 
+import entities.News;
 import interface_adapters.controllers.NewsController;
 import ui.NewsViewModel;
 
@@ -17,9 +18,9 @@ public class NewsView extends JFrame {
     private final JButton prevButton = new JButton("previous page");
     private final JButton nextButton = new JButton("next page");
 
-    private Controller controller;
+    private NewsController controller;
 
-    public NewsView(Controller controller) {
+    public NewsView(NewsController controller) {
         this.controller = controller;
         initializeUI();
     }
@@ -62,9 +63,6 @@ public class NewsView extends JFrame {
         add(mainPanel, BorderLayout.CENTER);
         add(buttonPanel, BorderLayout.SOUTH);
 
-        prevButton.addActionListener(e -> controller.goToPreviousPage());
-        nextButton.addActionListener(e -> controller.goToNextPage());
-
         setVisible(true);
     }
 
@@ -105,8 +103,13 @@ public class NewsView extends JFrame {
         JOptionPane.showMessageDialog(this, message, "Error", JOptionPane.ERROR_MESSAGE);
     }
 
-    public void setController(Controller controller) {
+    public void setController(NewsController controller) {
         this.controller = controller;
+
+        // 仅在 Controller 注入时，绑定按钮事件
+        // 这样可以确保 this.controller 不为 null
+        prevButton.addActionListener(e -> this.controller.goToPreviousPage());
+        nextButton.addActionListener(e -> this.controller.goToNextPage());
     }
 
     public interface Controller {
