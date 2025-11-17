@@ -4,6 +4,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 
+import plan4life.controller.CalendarController; // imported controller
 import plan4life.entities.BlockedTime;
 import plan4life.entities.Schedule;
 import plan4life.use_case.block_off_time.BlockOffTimeController;
@@ -16,6 +17,7 @@ public class CalendarFrame extends JFrame implements CalendarViewInterface, Time
     private final ActivityPanel activityPanel;
     private BlockOffTimeController blockOffTimeController;
     private Schedule currentSchedule;
+    private CalendarController calendarController; // added controller
 
     public CalendarFrame() {
         super("Plan4Life - Scheduler");
@@ -43,6 +45,31 @@ public class CalendarFrame extends JFrame implements CalendarViewInterface, Time
         // <--- Calendar Panel --->
         this.calendarPanel = new CalendarPanel();
         calendarPanel.setTimeSelectionListener(this);
+
+        calendarPanel.setLockListener(timeKey -> {
+            if (currentSchedule == null) return;
+
+            // Toggle lock state
+            if (currentSchedule.isLockedKey(timeKey)) {
+                currentSchedule.unlockSlotKey(timeKey);
+            } else {
+                currentSchedule.lockSlotKey(timeKey);
+            }
+
+            // Call your controller (must exist in the Frame)
+            if (blockOffTimeController != null) {
+                // If your controller regenerates based on block-offs,
+                // call it here (optional depending on final design)
+            }
+
+            // Call your schedule-locking controller
+            if (this.calendarController != null) {
+                calendarController.lockAndRegenerate(
+                        currentSchedule.getScheduleId(),
+                        currentSchedule.getLockedSlotKeys()
+                );
+            }
+        });
 
         // <--- Activities Panel --->
         this.activityPanel = new ActivityPanel();
@@ -73,6 +100,11 @@ public class CalendarFrame extends JFrame implements CalendarViewInterface, Time
         this.blockOffTimeController = controller;
     }
 
+    public void setCalendarController(CalendarController controller) {
+        this.calendarController = controller;
+    }
+
+
     @Override
     public void showMessage(String message) {
         JOptionPane.showMessageDialog(this, message);
@@ -90,10 +122,11 @@ public class CalendarFrame extends JFrame implements CalendarViewInterface, Time
         Random random = new Random(); //Temp till we get langchain/langgraph working
 
         schedule.getActivities().forEach((time, activityName) -> {
+            boolean isLocked = currentSchedule.isLockedKey(time);
             Color color = new Color(random.nextInt(156) + 100,
                     random.nextInt(156) + 100,
                     random.nextInt(156) + 100);
-            calendarPanel.colorCell(time, color, activityName);
+            calendarPanel.colorCell(time, color, activityName, isLocked);
         });
 
         if (schedule.getBlockedTimes() != null) {

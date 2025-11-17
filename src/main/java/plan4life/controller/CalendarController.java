@@ -20,9 +20,11 @@ public class CalendarController {
         generateScheduleInteractor.execute(request);
     }
 
-    public void lockAndRegenerate(Set<String> lockedSlots) {
-        LockActivityRequestModel request = new LockActivityRequestModel(lockedSlots);
+    // Update: include schedule id so interactor can load/save proper schedule
+    public void lockAndRegenerate(int scheduleId, Set<String> lockedSlots) {
+        LockActivityRequestModel request = new LockActivityRequestModel(scheduleId, lockedSlots);
         lockActivityInteractor.execute(request);
     }
 }
+
 

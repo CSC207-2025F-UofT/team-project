@@ -165,15 +165,39 @@ public class CalendarPanel extends JPanel {
         }
     }
 
-    public void colorCell(String time, Color color, String label) {
+    public void colorCell(String time, Color color, String label, boolean locked) {
         try {
-            int hour = Integer.parseInt(time.split(":")[0]);
-            if (hour >= 0 && hour < 24) {
-                cells[hour][0].setBackground(color); // first column for now
-                cells[hour][0].add(new JLabel(label));
-            }
+            // Assuming time corresponds to the first column's row index mapping logic you already have
+            int hour = Integer.parseInt(time.split(" ")[1].split(":")[0]); // crude, adapt to your keys
+            int columnIndex = 0; // if using daily view otherwise compute from day name
+
+            JPanel cell = cells[hour][columnIndex];
+            cell.removeAll();
+            cell.setBackground(color);
+            cell.setLayout(new BorderLayout());
+
+            JLabel title = new JLabel(label, SwingConstants.CENTER);
+            title.setOpaque(false);
+            cell.add(title, BorderLayout.CENTER);
+
+            // Create a small lock label on EAST
+            String lockText = locked ? "\uD83D\uDD12" : "\uD83D\uDD13"; // 🔒 vs 🔓 unicode (had to google it, might be wrong)
+            JLabel lockLabel = new JLabel(lockText);
+            lockLabel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+            lockLabel.setBorder(BorderFactory.createEmptyBorder(2,6,2,6));
+            lockLabel.addMouseListener(new MouseAdapter() {
+                @Override
+                public void mouseClicked(MouseEvent e) {
+                    if (lockListener != null) lockListener.onLockToggle(time);
+                }
+            });
+
+            cell.add(lockLabel, BorderLayout.EAST);
+            cell.revalidate();
+            cell.repaint();
         } catch (Exception ignored) {}
     }
+
 
     public void colorBlockedRange(LocalDateTime start, LocalDateTime end, int columnIndex) {
         int startHour = start.getHour();
@@ -192,4 +216,16 @@ public class CalendarPanel extends JPanel {
             cells[r][columnIndex].add(new JLabel("Blocked"));
         }
     }
+    // new listener interface inside or external:
+    public interface LockListener {
+        void onLockToggle(String timeKey);
+    }
+
+    // field
+    private LockListener lockListener;
+
+    public void setLockListener(LockListener listener) {
+        this.lockListener = listener;
+    }
+
 }
