@@ -14,6 +14,6 @@ public class DeleteGameUseCase {
      * @return ture if the record is deleted successfully, false if failed to be deleted
      */
     public boolean delete (GameRecord gameRecord) {
-        return gameDataBase.removeGame(gameRecord);
+        return gameDataBase.DeleteGame(gameRecord);
     }
 }
