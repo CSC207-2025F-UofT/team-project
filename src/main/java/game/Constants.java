@@ -17,8 +17,8 @@ public final class Constants {
     public static final int INITIAL_ENERGY_LEVEL=100;
 
     public static final int MAX_ENERGY_LEVEL = 100;
-    public static final int MAX_AFFECTION_LEVEL = 30;
-    public static final int MAX_AFFECTION_XP = 100;
+    public static final int MAX_AFFECTION_LEVEL = 3;
+    public static final int MAX_AFFECTION_XP = 30;
 
     public static final int SELLING_BASE_PRICE = 25;
 
@@ -40,13 +40,13 @@ public final class Constants {
 
     // Pet Energy increase constants
     public static final int PET_ENERGY_BASIC_INCREASE = 10;
-    public static final int PET_ENERGY_MEDIUM_INCREASE = 50;
-    public static final int PET_ENERGY_PREMIUM_INCREASE = 100;
+    public static final int PET_ENERGY_MEDIUM_INCREASE = 30;
+    public static final int PET_ENERGY_PREMIUM_INCREASE = 50;
     
     // Pet Toy prices 
-    public static final int PET_TOY_BASIC_PRICE = 50;     // +1 affection XP
-    public static final int PET_TOY_MEDIUM_PRICE = 80;   // +2 affection XP
-    public static final int PET_TOY_PREMIUM_PRICE = 100;  // +3 affection XP
+    public static final int PET_TOY_BASIC_PRICE =30;     // +1 affection XP
+    public static final int PET_TOY_MEDIUM_PRICE = 50;   // +2 affection XP
+    public static final int PET_TOY_PREMIUM_PRICE = 80;  // +3 affection XP
 
     // Pet Toy affection increase constants
     public static final int PET_TOY_BASIC_AFFECTION_INCREASE = 1;
@@ -67,7 +67,7 @@ public final class Constants {
     public static final int UPGRADE_CLICKER_BASE_PRICE = 50; 
     
     // Slot limits and pricing  
-    public static final int MAX_PET_SLOTS = 5;
+    public static final int MAX_PET_SLOTS = 4;
     public static final int UNLOCK_SLOT_BASE_PRICE = 100; 
 
     private Constants() {}
