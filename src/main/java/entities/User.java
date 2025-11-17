@@ -15,6 +15,7 @@ public class User {
     private final List<String> friendsUsernames = new ArrayList<>();
     private final List<String> incomingFriendRequests = new ArrayList<>();
     private final List<String> outgoingFriendRequests = new ArrayList<>();
+    private final List<String> mealIds = new ArrayList<>();
 
     public User(String username, String password) {
         this(username, password, 0.0, 0.0, "", false);
@@ -76,6 +77,8 @@ public class User {
 
     public void removeOutgoingRequest(String toUsername){
         outgoingFriendRequests.remove(toUsername);
+    }
+
     public List<String> getMealIds() {
         return mealIds;
     }
