@@ -1,30 +1,39 @@
 // Initial UI for browsing study set - HUZAIFA
 package view.study_set;
 
+import interface_adapter.ViewManagerModel;
 import interface_adapter.main_screen.MainScreenViewModel;
 import interface_adapter.studyset.studyset_browse.BrowseStudySetViewModel;
-import utility.FontLoader;
-import view.MainView;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
 import javax.swing.border.MatteBorder;
 import java.awt.*;
-import java.awt.event.ActionEvent;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 
-public class BrowseStudySetView extends JFrame {
+public class BrowseStudySetView extends JPanel implements PropertyChangeListener {
     private final String viewName = "browse study set";
     private final BrowseStudySetViewModel browseStudySetViewModel;
+    private final MainScreenViewModel mainScreenViewModel;
+    private final ViewManagerModel viewManagerModel;
 
-    public BrowseStudySetView(BrowseStudySetViewModel browseStudySetViewModel) {
+    public BrowseStudySetView(BrowseStudySetViewModel browseStudySetViewModel,
+                              MainScreenViewModel mainScreenViewModel,
+                              ViewManagerModel viewManagerModel) {
         this.browseStudySetViewModel = browseStudySetViewModel;
+        this.mainScreenViewModel = mainScreenViewModel;
+        this.viewManagerModel = viewManagerModel;
+        this.browseStudySetViewModel.addPropertyChangeListener(this);
+
+        setLayout(new BorderLayout());
 
         // ---------- Root Panel ----------
         JPanel rootPanel = new JPanel(new BorderLayout(10, 10));
         rootPanel.setBackground(Color.WHITE);
         rootPanel.setBorder(new EmptyBorder(20, 60, 20, 60));
-        add(rootPanel);
+        add(rootPanel, BorderLayout.CENTER);
 
         // ---------- Title ----------
         JLabel title = new JLabel("Study Sets Overview", SwingConstants.CENTER);
@@ -103,21 +112,15 @@ public class BrowseStudySetView extends JFrame {
         rootPanel.add(buttonPanel, BorderLayout.SOUTH);
 
         // ---------- Button Logic ----------
-        backButton.addActionListener((ActionEvent e) -> {
-            dispose();
-            new MainView(); // return back to main menu
-        });
+        backButton.addActionListener(e -> switchToMainScreen());
 
         uploadButton.addActionListener(e ->
-                JOptionPane.showMessageDialog(this, "Upload feature coming soon!")
+            JOptionPane.showMessageDialog(this, "Upload feature coming soon!")
         );
 
         createButton.addActionListener(e ->
-                JOptionPane.showMessageDialog(this, "Create new study set...")
+            JOptionPane.showMessageDialog(this, "Create new study set...")
         );
-
-        // ---------- Show Frame ----------
-        setVisible(true);
     }
 
     // ---------- Create a Study Set Card ----------
@@ -137,8 +140,8 @@ public class BrowseStudySetView extends JFrame {
         JPanel actionPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
         actionPanel.setBackground(Color.WHITE);
 
-        JButton bookmarkButton = new JButton("🔖");
-        JButton editButton = new JButton("✏️");
+        JButton bookmarkButton = new JButton("bookmark");
+        JButton editButton = new JButton("edit");
         styleIconButton(bookmarkButton);
         styleIconButton(editButton);
 
@@ -166,10 +169,23 @@ public class BrowseStudySetView extends JFrame {
     // ---------- Styled Small Icon Buttons ----------
     private void styleIconButton(JButton button) {
         button.setFont(new Font("Helvetica", Font.PLAIN, 18));
-        button.setBackground(Color.WHITE);
+        button.setBackground(new Color(70, 130, 180)); // blue accent
         button.setFocusPainted(false);
         button.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
         button.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
     }
 
+    private void switchToMainScreen() {
+        viewManagerModel.setState(mainScreenViewModel.getViewName());
+        viewManagerModel.firePropertyChange();
+    }
+
+    public String getViewName() {
+        return viewName;
+    }
+
+    @Override
+    public void propertyChange(PropertyChangeEvent evt) {
+        // No dynamic fields to update yet.
+    }
 }
