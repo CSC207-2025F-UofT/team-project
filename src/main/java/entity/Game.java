@@ -1,12 +1,21 @@
 package entity;
+import java.util.List;
+
 
 public class Game {
     private final long appid;
-    private final String title;
+    private final String name;
+    private final int playtime_forever;
+    private final String img_icon_url;
+    private final List<Integer> content_descriptorids;
 
-    public Game(long appid, String title) {
+    public Game(long appid, String title, int playtime_forever, String img_icon_url, List<Integer> content_descriptorids) {
         this.appid = appid;
-        this.title = title;
+        this.name = title;
+        this.playtime_forever = playtime_forever;
+        this.img_icon_url = img_icon_url;
+        this.content_descriptorids = content_descriptorids;
+        
     }
 
     public long getId() {
@@ -14,6 +23,18 @@ public class Game {
     }
 
     public String getTitle() {
-        return this.title;
+        return this.name;
+    }
+
+    public int getPlaytime() {
+        return this.playtime_forever;
+    }
+
+    public void getImage(){
+        // TODO: implement, return Image
+    }
+
+    public void getDescriptors(){
+        // TODO: implement, return List of strings containing categories ; List<String>
     }
 }
