@@ -17,6 +17,8 @@ public class UserDataAcessObject {
     private static final String apikey = System.getenv("APIKEY");
     private final OkHttpClient client = new OkHttpClient().newBuilder().build();
 
+
+
     /**
      * Fetches a User object with their profile, friends, and games.
      *
@@ -134,7 +136,7 @@ public class UserDataAcessObject {
 
         try {
             final Request request = new Request.Builder()
-                .url(String.format("https://api.steampowered.com/IPlayerService/GetOwnedGames/v0001/?key=%s&steamid=%d&format=json&include_appinfo=true",
+                .url(String.format("https://api.steampowered.com/IPlayerService/GetOwnedGames/v0001/?key=%s&steamid=%d&format=json&include_appinfo=1",
                     apikey, steamid))
                 .build();
 
@@ -155,8 +157,20 @@ public class UserDataAcessObject {
                     final JSONObject game = gamesArray.getJSONObject(i);
                     final long appid = game.getLong("appid");
                     final String name = game.getString("name");
+                    final int playtime_forever = game.getInt("playtime_forever");
+                    final String img_icon_url = game.getString("img_icon_url");
 
-                    games.add(new Game(appid, name));
+                    List<Integer> descriptorIds = new ArrayList<>();
+
+                    if (game.has("content_descriptorids")) {
+                        JSONArray idArray = game.getJSONArray("content_descriptorids");
+                        for (int j = 0; j < idArray.length(); j++) {
+                            descriptorIds.add(idArray.getInt(j));
+                        }
+                    }
+
+
+                    games.add(new Game(appid, name, playtime_forever, img_icon_url, descriptorIds));
                 }
             }
 
@@ -180,11 +194,11 @@ public class UserDataAcessObject {
         );
 
         List<Game> demoGames = Arrays.asList(
-            new Game(730L, "Counter-Strike 2"),
-            new Game(570L, "Dota 2"),
-            new Game(440L, "Team Fortress 2"),
-            new Game(271590L, "Grand Theft Auto V"),
-            new Game(1245620L, "ELDEN RING")
+            new Game(730L, "Counter-Strike 2", 42, "www.csgo.com", new ArrayList<Integer>()),
+            new Game(570L, "Dota 2", 42, "www.dota2.com", new ArrayList<Integer>()),
+            new Game(440L, "Team Fortress 2", 42, "www.tf2.com", new ArrayList<Integer>()),
+            new Game(271590L, "Grand Theft Auto V", 42, "www.gtav.com", new ArrayList<Integer>()),
+            new Game(1245620L, "ELDEN RING", 42, "www.er.com", new ArrayList<Integer>())
         );
 
         return new User(steamid, "DemoUser" + steamid, demoFriends, demoGames);

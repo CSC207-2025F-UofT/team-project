@@ -15,6 +15,7 @@ public class Game {
         this.playtime_forever = playtime_forever;
         this.img_icon_url = img_icon_url;
         this.content_descriptorids = content_descriptorids;
+
         
     }
 
@@ -36,5 +37,16 @@ public class Game {
 
     public void getDescriptors(){
         // TODO: implement, return List of strings containing categories ; List<String>
+    }
+
+    @Override
+    public String toString() {
+        return "Game{" +
+                "appid=" + appid +
+                ", name='" + name + '\'' +
+                ", playtime_forever=" + playtime_forever +
+                ", img_icon_url='" + img_icon_url + '\'' +
+                ", content_descriptorids=" + content_descriptorids +
+                '}';
     }
 }
