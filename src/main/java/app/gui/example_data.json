@@ -1,0 +1,62 @@
+[
+  {
+    "Date (MM/DD/YYYY)": "11/01/2025",
+    "Source": "Employer",
+    "Category": "Income",
+    "Amount": 3500.00
+  },
+  {
+    "Date (MM/DD/YYYY)": "11/02/2025",
+    "Source": "Condominium Corp",
+    "Category": "Rent_Utilities",
+    "Amount": -1850.00
+  },
+  {
+    "Date (MM/DD/YYYY)": "11/03/2025",
+    "Source": "Hydro-Electric Co.",
+    "Category": "Rent_Utilities",
+    "Amount": -125.50
+  },
+  {
+    "Date (MM/DD/YYYY)": "11/04/2025",
+    "Source": "Metro Grocery",
+    "Category": "Food",
+    "Amount": -85.75
+  },
+  {
+    "Date (MM/DD/YYYY)": "11/05/2025",
+    "Source": "TTC",
+    "Category": "Transportation",
+    "Amount": -156.00
+  },
+  {
+    "Date (MM/DD/YYYY)": "11/06/2025",
+    "Source": "Starbucks",
+    "Category": "Food",
+    "Amount": -12.45
+  },
+  {
+    "Date (MM/DD/YYYY)": "11/08/2025",
+    "Source": "The Eaton Centre",
+    "Category": "Shopping",
+    "Amount": -210.99
+  },
+  {
+    "Date (MM/DD/YYYY)": "11/10/2025",
+    "Source": "Freelance Client",
+    "Category": "Income",
+    "Amount": 450.00
+  },
+  {
+    "Date (MM/DD/YYYY)": "11/12/2025",
+    "Source": "uber",
+    "Category": "Transportation",
+    "Amount": -23.50
+  },
+  {
+    "Date (MM/DD/YYYY)": "11/15/2025",
+    "Source": "Bell Canada",
+    "Category": "Other",
+    "Amount": -95.00
+  }
+]
