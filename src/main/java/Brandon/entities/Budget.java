@@ -15,8 +15,20 @@ public class Budget {
         this.limit = limit;
     }
 
+    public void setTotalSpent (float totalSpent) {
+        this.totalSpent = totalSpent;
+    }
+
     public String getMonth() {
         return month;
+    }
+
+    public float getTotalSpent() {
+        return totalSpent;
+    }
+
+    public float getRemaining() {
+        return limit - totalSpent;
     }
 
     // + updateSpent(amount)

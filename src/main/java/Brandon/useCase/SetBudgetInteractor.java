@@ -17,20 +17,35 @@ public class SetBudgetInteractor implements SetBudgetInputBoundary {
     public void execute(SetBudgetInputData inputData) {
         String month = inputData.getMonth();
         float limit = inputData.getLimit();
+        float totalSpent = inputData.getTotalSpent();
 
         // Validate
-        if (limit < 0) {
+        if (limit <= 0) {
             SetBudgetOutputData outputData =
-                    new SetBudgetOutputData(month, limit, false,
-                            "Budget cannot be negative.");
+                    new SetBudgetOutputData(
+                            month, limit, totalSpent, limit - totalSpent, false,
+                            "Budget must be positive."
+                    );
+            presenter.present(outputData);
+            return;
+        }
+
+        if (totalSpent <= 0) {
+            SetBudgetOutputData outputData =
+                    new SetBudgetOutputData
+                            (month, limit, totalSpent, limit - totalSpent, false,
+                                    "Spent amount cannot be negative."
+                            );
             presenter.present(outputData);
             return;
         }
 
         if (month == null || month.isBlank()) {
             SetBudgetOutputData outputData =
-                    new SetBudgetOutputData(month, limit, false,
-                            "Month cannot be empty.");
+                    new SetBudgetOutputData(
+                            month, limit, totalSpent, limit - totalSpent, false,
+                            "Month cannot be empty."
+                    );
             presenter.present(outputData);
             return;
         }
@@ -41,13 +56,15 @@ public class SetBudgetInteractor implements SetBudgetInputBoundary {
             budget = new Budget(month);
         }
         budget.setLimit(limit);
+        budget.setTotalSpent(totalSpent);
+        float remaining = budget.getRemaining();
 
         // Save through DAO
         budgetDataAccess.saveBudget(budget);
 
         // Build output and notify presenter
         SetBudgetOutputData outputData =
-                new SetBudgetOutputData(month, limit, true,
+                new SetBudgetOutputData(month, limit, totalSpent, remaining, false,
                         "Budget set successfully.");
         presenter.present(outputData);
     }

@@ -15,6 +15,8 @@ public class SetBudgetPresenter implements SetBudgetOutputBoundary {
     public void present(SetBudgetOutputData outputData) {
         viewModel.setMonth(outputData.getMonth());
         viewModel.setLimit(outputData.getLimit());
+        viewModel.setTotalSpent(outputData.getTotalSpent());
+        viewModel.setRemaining(outputData.getRemaining());
         viewModel.setSuccess(outputData.getSuccess());
         viewModel.setMessage(outputData.getMessage());
     }

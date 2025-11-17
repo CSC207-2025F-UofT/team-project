@@ -11,8 +11,8 @@ public class SetBudgetController {
         this.interactor = interactor;
     }
 
-    public void setBudget(String month, float limit) {
-        SetBudgetInputData inputData= new SetBudgetInputData(month, limit);
+    public void setBudget(String month, float limit, float totalSpent) {
+        SetBudgetInputData inputData = new SetBudgetInputData(month, limit, totalSpent);
         interactor.execute(inputData);
     }
 }
