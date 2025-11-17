@@ -1,5 +1,5 @@
 package use_case.view;
 
-public class ViewSavedItemsInputBoundary {
-    
+public interface ViewSavedItemsInputBoundary {
+    void execute(ViewSavedItemsInputData inputData);
 }

@@ -1,4 +1,4 @@
-package use_case.delete_favorite;
+package use_case.delete;
 
 public class DeleteFavoriteLocationInputData {
     private final String cityName;

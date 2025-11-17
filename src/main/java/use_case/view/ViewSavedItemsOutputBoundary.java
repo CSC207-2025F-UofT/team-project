@@ -1,5 +1,6 @@
 package use_case.view;
 
-public class ViewSavedItemsOutputBoundary {
-    
+public interface ViewSavedItemsOutputBoundary {
+    void prepareSuccessView(ViewSavedItemsOutputData data);
+    void prepareFailView(String errorMessage);
 }
