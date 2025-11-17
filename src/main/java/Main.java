@@ -1,10 +1,14 @@
-import auth.data.*;
-import auth.interface_adapters.controllers.*;
-import auth.use_case.login.*;
-import auth.use_case.signup.*;
+import controllers.DashboardController;
+import controllers.LoginController;
+import controllers.SignUpController;
+import data.DataSourceFactory;
+import data.RegisteredUserRepository;
+import data.TableInitializer;
 import ui.LoginView;
 import ui.SignUpView;
 import ui.DashboardView;
+import use_case.login.LoginInteractor;
+import use_case.signup.SignUpInteractor;
 
 import javax.sql.DataSource;
 import javax.swing.*;
@@ -12,7 +16,7 @@ import javax.swing.*;
 public class Main {
 
     private static DataSource dataSource;
-    private static JdbcUserRepository userRepository;
+    private static RegisteredUserRepository userRepository;
 
     private static SignUpController signUpController;
     private static LoginController loginController;
@@ -24,8 +28,8 @@ public class Main {
         SwingUtilities.invokeLater(() -> {
             // Setup database
             dataSource = DataSourceFactory.sqlite("app.db");
-            SchemaInitializer.ensureSchema(dataSource);
-            userRepository = new JdbcUserRepository(dataSource);
+            TableInitializer.ensureSchema(dataSource);
+            userRepository = new RegisteredUserRepository(dataSource);
 
             // Create interactors
             SignUpInteractor signUpInteractor = new SignUpInteractor(userRepository);

@@ -1,4 +1,4 @@
-package auth.use_case.signup;
+package use_case.signup;
 
 public class SignUpInputData {
     private final String username;

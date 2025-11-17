@@ -1,6 +1,6 @@
 package ui;
 
-import auth.interface_adapters.controllers.DashboardController;
+import controllers.DashboardController;
 
 import javax.swing.*;
 import java.awt.*;

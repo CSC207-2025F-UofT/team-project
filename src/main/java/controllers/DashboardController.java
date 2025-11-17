@@ -1,4 +1,4 @@
-package auth.interface_adapters.controllers;
+package controllers;
 
 public class DashboardController {
     // Add methods later as dashboard needs data/actions.

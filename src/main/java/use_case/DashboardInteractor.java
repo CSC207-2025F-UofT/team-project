@@ -1,4 +1,4 @@
-package auth.use_case;
+package use_case;
 
 public class DashboardInteractor {
 }

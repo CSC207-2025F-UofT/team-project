@@ -1,7 +1,7 @@
 package ui;
 
-import auth.interface_adapters.controllers.LoginController;
-import auth.use_case.login.LoginOutputData;
+import controllers.LoginController;
+import use_case.login.LoginOutputData;
 
 import javax.swing.*;
 import java.awt.*;
