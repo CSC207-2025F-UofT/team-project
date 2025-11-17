@@ -1,22 +1,26 @@
-// Albert - MAIN UI
-package view;
+package view.main_screen;
 
-import utility.FontLoader;
+import interface_adapter.main_screen.MainScreenViewModel;
+import interface_adapter.registration.login.LoginViewModel;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 
-public class MainView {
+public class MainScreenView extends JPanel implements ActionListener, PropertyChangeListener {
+    private final String viewName = "main screen";
+    private final MainScreenViewModel mainScreenViewModel;
 
-    public MainView(){
-        FontLoader.registerFonts();
-        JFrame frame = new JFrame("Main Screen");
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setSize(1200, 800);
-        frame.setResizable(false); // Fixed size window
-        frame.setLayout(new BorderLayout(10, 10));
+    public MainScreenView(MainScreenViewModel mainScreenViewModel) {
+        this.mainScreenViewModel = mainScreenViewModel;
 
-        // ---------- TitleImage ----------
+        // Set panel layout (this is now the root of this panel)
+        this.setLayout(new BorderLayout(10, 10));
+
+        // ---------- Title Image ----------
         ImageIcon originalTitleImage = new ImageIcon("images/TitleImage.png");
         int titleImageWidth = originalTitleImage.getIconWidth();
         int titleImageHeight = originalTitleImage.getIconHeight();
@@ -30,7 +34,7 @@ public class MainView {
         JPanel imagePanel = new JPanel(new GridLayout());
         imagePanel.add(imageLabel);
 
-        frame.add(imagePanel, BorderLayout.NORTH);
+        this.add(imagePanel, BorderLayout.NORTH);
 
         // ---------- 2x2 Buttons ----------
         JPanel buttonPanel = new JPanel(new GridBagLayout());
@@ -38,13 +42,10 @@ public class MainView {
         GridBagConstraints c = new GridBagConstraints();
         c.fill = GridBagConstraints.BOTH;
         c.insets = new Insets(30, 30, 30, 30);
-        c.gridx = 0;
-        c.gridy = 0;
         c.weightx = 1.0;
         c.weighty = 1.0;
-        buttonPanel.add(new JPanel(),c); // Empty panel for spacing
 
-        JButton[][] buttons = { // 2D array of buttons
+        JButton[][] buttons = {
                 {new JButton("Single Player"), new JButton("Multiplayer")},
                 {new JButton("Manage Study Set"), new JButton("Leaderboard")}
         };
@@ -58,16 +59,28 @@ public class MainView {
                 button.addActionListener(e -> {
                     System.out.println(button.getText() + " button clicked");
                 });
+
                 c.gridx = col;
-                c.gridy = row + 1;
+                c.gridy = row;
                 button.setPreferredSize(new Dimension(400, 150));
                 buttonPanel.add(button, c);
             }
         }
-        frame.add(buttonPanel, BorderLayout.CENTER);
 
-        // ---------- Finish ----------
-        frame.setLocationRelativeTo(null);
-        frame.setVisible(true);
+        this.add(buttonPanel, BorderLayout.CENTER);
+    }
+
+    public String getViewName() {
+        return viewName;
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent evt) {
+        System.out.println("Click " + evt.getActionCommand());
+    }
+
+    @Override
+    public void propertyChange(PropertyChangeEvent evt) {
+
     }
 }
