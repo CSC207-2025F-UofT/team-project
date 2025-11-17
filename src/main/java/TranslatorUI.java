@@ -14,9 +14,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * A standalone Java Swing application for demonstrating Google Cloud Text Translation.
- * This version uses a simplified HTTP GET request and a robust, self-contained
- * JSON utility for reliable parsing.
+ * A Java Swing application for demonstrating Google Cloud Text Translation.
+ * This version requires the user to type in the text they want to translate.
  */
 public class TranslatorUI extends JFrame {
 
@@ -117,7 +116,7 @@ public class TranslatorUI extends JFrame {
             SwingWorker<String, Void> worker = new SwingWorker<String, Void>() {
                 @Override
                 protected String doInBackground() throws Exception {
-                    return TranslatorApp.getTranslation(inputText, targetLang);
+                    return TranslatorUI.getTranslation(inputText, targetLang);
                 }
 
                 @Override
@@ -221,7 +220,8 @@ public class TranslatorUI extends JFrame {
                             String translatedText = (String) firstTranslation.get("translatedText");
 
                             // Unescape common JSON characters that might be returned in the text value
-                            return translatedText.replace("\\\"", "\"").replace("\\n", "\n").replace("\\/", "/");
+                            return translatedText.replace("\\\"", "\"").replace("\\n",
+                                    "\n").replace("\\/", "/");
                         }
                     }
                 }
@@ -239,8 +239,7 @@ public class TranslatorUI extends JFrame {
     }
 
     /**
-     * A simple, minimal, and self-contained JSON parser to avoid external dependencies.
-     * This utility is robust enough to handle the specific structure of the Google Translation API V2 response.
+     * A JSON parser to avoid external dependencies.
      * It parses the JSON string into standard Java Map and List objects.
      */
     private static class SimpleJsonParser {
@@ -266,7 +265,7 @@ public class TranslatorUI extends JFrame {
                 // Skip non-significant whitespace
                 while (i < content.length() && Character.isWhitespace(content.charAt(i))) i++;
 
-                // 1. Parse Key
+                // Parse Key
                 if (content.charAt(i) != '"') throw new Exception("Expected start of key quote at: " + i);
                 int keyStart = ++i;
                 int keyEnd = content.indexOf('"', keyStart);
@@ -274,15 +273,15 @@ public class TranslatorUI extends JFrame {
                 String key = content.substring(keyStart, keyEnd);
                 i = keyEnd + 1;
 
-                // 2. Skip whitespace and find colon
+                // Skip whitespace and find colon
                 while (i < content.length() && Character.isWhitespace(content.charAt(i))) i++;
                 if (content.charAt(i) != ':') throw new Exception("Expected colon after key at: " + i);
                 i++; // Skip colon
 
-                // 3. Skip whitespace before value
+                // Skip whitespace before value
                 while (i < content.length() && Character.isWhitespace(content.charAt(i))) i++;
 
-                // 4. Parse Value
+                // Parse Value
                 Object value;
                 char startChar = content.charAt(i);
 
@@ -322,7 +321,7 @@ public class TranslatorUI extends JFrame {
 
                 map.put(key, value);
 
-                // 5. Skip whitespace and look for comma or end
+                // Skip whitespace and look for comma or end
                 while (i < content.length() && Character.isWhitespace(content.charAt(i))) i++;
 
                 if (i < content.length() && content.charAt(i) == ',') {
@@ -410,6 +409,6 @@ public class TranslatorUI extends JFrame {
 
 
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(TranslatorApp::new);
+        SwingUtilities.invokeLater(TranslatorUI::new);
     }
 }
