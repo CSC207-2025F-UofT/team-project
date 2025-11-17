@@ -7,7 +7,9 @@ public class Main {
         JFrame application = appBuilder
                 .addBlankView()
                 .addLoginView()
+                .addMenuView()
                 .addLoginUseCase()
+                .addStarRateUseCase()
                 .build();
         application.pack();
         application.setLocationRelativeTo(null);

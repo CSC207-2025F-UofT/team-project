@@ -8,17 +8,23 @@ public class Restaurant {
     private float priceRange;
     private List<Float> coordinates;
     private String foodType;
+    private String id;
 
-    public Restaurant(float priceRange, List<Float> coordinates, String foodType) {
+    public Restaurant(float priceRange, List<Float> coordinates, String foodType, String id) {
         this.priceRange = priceRange;
         this.coordinates = coordinates;
         this.foodType = foodType;
         this.ratingsList = new ArrayList<>();
+        this.id = id;
     }
 
     public Restaurant() {
         this.ratingsList = new ArrayList<>();
         this.coordinates = new ArrayList<>();
+    }
+
+    public String getId(){
+        return this.id;
     }
 
     public void addToRating(int rating) {
