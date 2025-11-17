@@ -82,7 +82,7 @@ public class UserProfileView extends JPanel {
         for (Review r : reviews) {
             String line = String.format(
                     "%s  |  Your rating: %d  |  %s",
-                    r.getSong().getName(),    // Song 有 getName()
+                    r.getSong().getName(),
                     r.getRating(),
                     r.getComment()
             );
