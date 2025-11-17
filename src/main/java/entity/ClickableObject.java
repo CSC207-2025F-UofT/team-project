@@ -61,12 +61,13 @@ public class ClickableObject {
     }
 
     public static ClickableObject fromJson(JSONObject json) {
+        boolean collectable = json.has("collectable") ? json.getBoolean("collectable") : false;
         return new ClickableObject(
                 json.getString("name"),
                 json.getInt("coordinateX"),
                 json.getInt("coordinateY"),
                 json.getString("image"),
-                json.getBoolean("collectable")
+                collectable
         );
     }
     public boolean isCollectable() { return collectable; }

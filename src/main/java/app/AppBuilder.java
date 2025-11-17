@@ -10,12 +10,17 @@ import interface_adapter.load.LoadPresenter;
 import interface_adapter.main_menu.MainMenuController;
 import interface_adapter.main_menu.MainMenuPresenter;
 import interface_adapter.main_menu.MainMenuViewModel;
+import interface_adapter.save.SaveController;
+import interface_adapter.save.SavePresenter;
 import use_case.game.GameInputBoundary;
 import use_case.game.GameInteractor;
 import use_case.game.GameOutputBoundary;
 import use_case.load.LoadInteractor;
 import use_case.load.LoadOutputBoundary;
 import use_case.load.LoadInputBoundary;
+import use_case.save.SaveInputBoundary;
+import use_case.save.SaveInteractor;
+import use_case.save.SaveOutputBoundary;
 import use_case.switch_to_game.SwitchToGameViewInputBoundary;
 import use_case.switch_to_game.SwitchToGameViewInteractor;
 import use_case.switch_to_game.SwitchToGameViewOutputBoundary;
@@ -69,7 +74,7 @@ public class AppBuilder {
         final LoadOutputBoundary loadPresenter = new LoadPresenter(mainMenuViewModel, viewManagerModel, gameViewModel);
         final LoadInputBoundary loadInteractor = new LoadInteractor(gameDataAccessObject, loadPresenter);
 
-        MainMenuController controller = new MainMenuController(switchInteractor, loadInteractor);
+        MainMenuController controller = new MainMenuController(switchInteractor, loadInteractor, gameDataAccessObject);
         mainMenuView.setMainMenuController(controller);
         return this;
     }
@@ -109,6 +114,14 @@ public class AppBuilder {
         interface_adapter.game.GameController gameController =
                 new interface_adapter.game.GameController(clickButtonInteractor);
         gameView.setGameController(gameController);
+        return this;
+    }
+
+    public AppBuilder addSaveUseCase() {
+        SaveOutputBoundary savePresenter = new SavePresenter(viewManagerModel, gameViewModel, mainMenuViewModel);
+        SaveInputBoundary saveInteractor = new SaveInteractor(gameDataAccessObject, savePresenter);
+        SaveController saveController = new SaveController(saveInteractor);
+        gameView.setSaveController(saveController);
         return this;
     }
 

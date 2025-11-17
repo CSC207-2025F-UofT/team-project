@@ -76,7 +76,6 @@ public class MainMenuView extends JPanel implements ActionListener, PropertyChan
         loadGameButton.addActionListener(
                 new ActionListener() {
                     public void actionPerformed(ActionEvent evt) {
-                        // TODO: implement load game button functionality
                         if  (evt.getSource().equals(loadGameButton)) {
                             mainMenuController.loadGame();
                         }

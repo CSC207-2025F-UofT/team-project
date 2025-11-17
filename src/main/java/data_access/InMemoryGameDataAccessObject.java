@@ -139,6 +139,9 @@ public class InMemoryGameDataAccessObject implements SwitchToGameViewDataAccessI
             }
         } catch (IOException e) {
             System.out.println("Error reading save file: " + e.getMessage());
+            this.currentScene = null;
+            this.player = null;
+            this.scenes = new  HashMap<>();
             return;
         }
         JSONObject gameState = new JSONObject(jsonText.toString());
@@ -157,7 +160,32 @@ public class InMemoryGameDataAccessObject implements SwitchToGameViewDataAccessI
         JSONObject currentSceneJson = gameState.getJSONObject("currentScene");
         this.currentScene = Scene.fromJson(currentSceneJson);
     }
-      
+
+    public void resetGame() {
+        // Re-run the constructor logic to rebuild fresh world
+        SceneFactory sceneFactory = new SceneFactory();
+        PlayerFactory playerFactory = new PlayerFactory();
+
+        // Reset everything exactly like the constructor:
+        ClickableObject object1 = new ClickableObjectFactory().create("Object1", 0, 0, "object1.png",false);
+        ClickableObject object2 = new ClickableObjectFactory().create("Object2", 600, 300, "object2.png", false);
+        ClickableObject object3 = new ClickableObjectFactory().create("Object3", 200, 200, "object2.png", true);
+
+        this.player = playerFactory.create();
+
+        ArrayList<ClickableObject> sceneOneList = new ArrayList<>(List.of(object1, object2, object3));
+        Scene scene1 = sceneFactory.create("Scene1", sceneOneList, "scene1.png");
+        Scene scene2 = sceneFactory.create("Scene2", new ArrayList<>(List.of(object2, object1)), "scene2.png");
+
+        // Rebuild dialogues, NPCs, etc (copy same code from your constructor)
+
+        this.scenes = new HashMap<>();
+        scenes.put("Scene1", scene1);
+        scenes.put("Scene2", scene2);
+
+        this.currentScene = scene1;
+    }
+
     public void setPlayer(Player player) {
         this.player = player;
     }
