@@ -1,14 +1,15 @@
 package goc.chat.usecase.messaging;
 
-import goc.chat.entity.Chat;
-import goc.chat.entity.Message;
+import entity.Chat;
+import entity.Message;
 import goc.chat.entity.User;
-import goc.chat.interfaceadapters.repo.InMemoryChatRepository;
-import goc.chat.interfaceadapters.repo.InMemoryMessageRepository;
-import goc.chat.interfaceadapters.repo.InMemoryUserRepository;
-import goc.chat.usecase.ports.ChatRepository;
-import goc.chat.usecase.ports.MessageRepository;
-import goc.chat.usecase.ports.UserRepository;
+import interface_adapter.repo.InMemoryChatRepository;
+import interface_adapter.repo.InMemoryMessageRepository;
+import interface_adapter.repo.InMemoryUserRepository;
+import use_case.messaging.*;
+import use_case.ports.ChatRepository;
+import use_case.ports.MessageRepository;
+import use_case.ports.UserRepository;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
