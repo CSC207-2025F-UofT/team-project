@@ -39,6 +39,8 @@ public class LogoutPresenter implements LogoutOutputBoundary {
 
         LoginState loginState = loginViewModel.getState();
         loginState.setUsername(response.getUsername());
+        loginState.setPassword(null); // Clear password
+        loginState.setLoginError(null); // Clear any old error message
 
         loginViewModel.setState(loginState);
         loginViewModel.firePropertyChange();

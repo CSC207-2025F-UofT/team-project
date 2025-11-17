@@ -19,8 +19,9 @@ public class ChatView extends JPanel implements ActionListener, PropertyChangeLi
     private final JTextArea messageInputField;
     private final JButton sendButton;
 
-    // We'll use this to display the initial prompt or history
+    // Use this to display the initial prompt or history
     private final JPanel chatDisplayPanel;
+    private final JLabel initialPrompt;
 
     public ChatView(ViewManagerModel viewManagerModel) {
         this.viewManagerModel = viewManagerModel;
@@ -35,7 +36,7 @@ public class ChatView extends JPanel implements ActionListener, PropertyChangeLi
         // Using the Profile icon again, but this time for the chat partner
         JLabel partnerIcon = new JLabel("👤");
         partnerIcon.setFont(new Font("SansSerif", Font.PLAIN, 24));
-        chatPartnerLabel = new JLabel("User"); // Placeholder, should be set by ViewModel later
+        chatPartnerLabel = new JLabel("User"); // Placeholder
         chatPartnerLabel.setFont(new Font("SansSerif", Font.BOLD, 18));
 
         partnerInfoPanel.add(partnerIcon);
@@ -45,9 +46,6 @@ public class ChatView extends JPanel implements ActionListener, PropertyChangeLi
         // Right Side: Back/Exit Button (Go back to LoggedInView/Recent Chats)
         JButton backButton = new JButton("⬅");
         backButton.setFont(new Font("SansSerif", Font.BOLD, 20));
-        backButton.setFocusPainted(false);
-        backButton.setBorderPainted(false);
-        backButton.setContentAreaFilled(false);
 
         backButton.addActionListener(e -> {
             // Navigate back to the LoggedInView
@@ -62,7 +60,7 @@ public class ChatView extends JPanel implements ActionListener, PropertyChangeLi
         chatDisplayPanel.setLayout(new GridBagLayout()); // Using GridBagLayout for centering the message
 
         // Initial Prompt: "Send 'User' a message to start a chat!"
-        JLabel initialPrompt = new JLabel("<html><div style='text-align: center;'>Send \"" + chatPartnerLabel.getText() +
+        initialPrompt = new JLabel("<html><div style='text-align: center;'>Send \"" + chatPartnerLabel.getText() +
                 "\" a message to start a chat!</div></html>");
         initialPrompt.setFont(new Font("SansSerif", Font.ITALIC, 16));
 
@@ -116,5 +114,18 @@ public class ChatView extends JPanel implements ActionListener, PropertyChangeLi
 
     public String getViewName() {
         return viewName;
+    }
+
+    /**
+     * Public method to set the chat partner's username and update the view.
+     * @param username The username of the chat partner.
+     */
+    public void setChatPartner(String username) {
+        this.chatPartnerLabel.setText(username);
+        // Update the initial prompt to reflect the new user
+        this.initialPrompt.setText("<html><div style='text-align: center;'>Send \"" + username +
+                "\" a message to start a chat!</div></div>");
+        this.revalidate();
+        this.repaint();
     }
 }
