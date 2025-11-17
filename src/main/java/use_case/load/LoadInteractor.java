@@ -1,5 +1,6 @@
 package use_case.load;
 
+import java.io.File;
 import java.util.Map;
 
 import entity.Scene;
@@ -19,6 +20,14 @@ public class LoadInteractor implements LoadInputBoundary {
 
     @Override
     public void execute() {
+        File saveFile = new File("save.json");
+
+        if (!saveFile.exists()) {
+            presenter.displayError("No saved game found!");
+            return;
+        }
+
+
         loadDataAccessObject.loadGame("save.json");
 
         Scene currentScene = loadDataAccessObject.getCurrentScene();

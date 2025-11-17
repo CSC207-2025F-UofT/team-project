@@ -65,7 +65,8 @@ public class ClickableObject {
                 json.getString("name"),
                 json.getInt("coordinateX"),
                 json.getInt("coordinateY"),
-                json.getString("image")
+                json.getString("image"),
+                json.getBoolean("collectable")
         );
     }
     public boolean isCollectable() { return collectable; }

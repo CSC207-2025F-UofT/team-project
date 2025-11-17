@@ -1,5 +1,6 @@
 package interface_adapter.main_menu;
 
+import use_case.load.LoadInputBoundary;
 import use_case.switch_to_game.SwitchToGameViewInputBoundary;
 
 /**
@@ -8,9 +9,11 @@ import use_case.switch_to_game.SwitchToGameViewInputBoundary;
 public class MainMenuController {
 
     private final SwitchToGameViewInputBoundary switchToGameViewInteractor;
+    private final LoadInputBoundary loadInputBoundary;
 
-    public MainMenuController(SwitchToGameViewInputBoundary switchToGameViewInteractor) {
+    public MainMenuController(SwitchToGameViewInputBoundary switchToGameViewInteractor, LoadInputBoundary loadInputBoundary) {
         this.switchToGameViewInteractor = switchToGameViewInteractor;
+        this.loadInputBoundary = loadInputBoundary;
     }
 
     /**
@@ -18,5 +21,9 @@ public class MainMenuController {
      */
     public void switchToGameView() {
         switchToGameViewInteractor.execute();
+    }
+
+    public void loadGame() {
+        loadInputBoundary.execute();
     }
 }
