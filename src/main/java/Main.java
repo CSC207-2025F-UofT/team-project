@@ -1,0 +1,84 @@
+import auth.data.*;
+import auth.interface_adapters.controllers.*;
+import auth.use_case.login.*;
+import auth.use_case.signup.*;
+import ui.LoginView;
+import ui.SignUpView;
+import ui.DashboardView;
+
+import javax.sql.DataSource;
+import javax.swing.*;
+
+public class Main {
+
+    private static DataSource dataSource;
+    private static JdbcUserRepository userRepository;
+
+    private static SignUpController signUpController;
+    private static LoginController loginController;
+    private static DashboardController dashboardController;
+
+    private static JFrame currentFrame;
+
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(() -> {
+            // Setup database
+            dataSource = DataSourceFactory.sqlite("app.db");
+            SchemaInitializer.ensureSchema(dataSource);
+            userRepository = new JdbcUserRepository(dataSource);
+
+            // Create interactors
+            SignUpInteractor signUpInteractor = new SignUpInteractor(userRepository);
+            LoginInteractor loginInteractor = new LoginInteractor(userRepository);
+
+            // Create controllers
+            signUpController = new SignUpController(signUpInteractor);
+            loginController = new LoginController(loginInteractor);
+            dashboardController = new DashboardController();
+
+
+            // Start application on the login screen
+            showLoginView();
+        });
+    }
+
+    /** Displays the login window */
+    private static void showLoginView() {
+        if (currentFrame != null) currentFrame.dispose();
+
+        LoginView loginView = new LoginView(
+                loginController,
+                Main::showSignUpView,         // Runnable
+                Main::showDashboardView       // Consumer<String>
+        );
+
+        currentFrame = loginView;
+        loginView.setVisible(true);
+    }
+
+    /** Displays the sign-up window */
+    private static void showSignUpView() {
+        if (currentFrame != null) currentFrame.dispose();
+
+        SignUpView signUpView = new SignUpView(
+                signUpController,
+                Main::showLoginView // callback to switch back
+        );
+
+        currentFrame = signUpView;
+        signUpView.setVisible(true);
+    }
+
+    private static void showDashboardView(String username) {
+        if (currentFrame != null) currentFrame.dispose();
+
+        DashboardView dashboardView = new DashboardView(
+                dashboardController,
+                Main::showLoginView,   // callback to login screen
+                username               // show welcome message
+        );
+
+        currentFrame = dashboardView;
+        dashboardView.setVisible(true);
+    }
+}
