@@ -1,5 +1,7 @@
 package entity;
 
+import org.json.JSONObject;
+
 /**
  * Represents a clickable object in the game that can be interacted with.
  */
@@ -49,5 +51,22 @@ public class ClickableObject {
         return image;
     }
 
+    public JSONObject toJson() {
+        JSONObject json = new JSONObject();
+        json.put("name", this.name);
+        json.put("coordinateX", this.coordinateX);
+        json.put("coordinateY", this.coordinateY);
+        json.put("image", this.image);
+        return json;
+    }
+
+    public static ClickableObject fromJson(JSONObject json) {
+        return new ClickableObject(
+                json.getString("name"),
+                json.getInt("coordinateX"),
+                json.getInt("coordinateY"),
+                json.getString("image")
+        );
+    }
     public boolean isCollectable() { return collectable; }
 }
