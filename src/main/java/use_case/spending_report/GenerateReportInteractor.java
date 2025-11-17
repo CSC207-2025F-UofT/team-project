@@ -30,7 +30,14 @@ public class GenerateReportInteractor implements GenerateReportInputBoundary {
 
         Map<String, Float> categoryTotals = new HashMap<>();
         for (Transaction t : transactions) {
-            categoryTotals.merge(t.getCategory(), t.getAmount(), Float::sum);
+            String category = t.getCategory();
+            Float amount = t.getAmount();
+            
+            if (categoryTotals.containsKey(category)) {
+                categoryTotals.put(category, categoryTotals.get(category) + amount);
+            } else {
+                categoryTotals.put(category, amount);
+            }
         }
 
         SpendingReport report = new SpendingReport(inputData.getMonth(), categoryTotals);

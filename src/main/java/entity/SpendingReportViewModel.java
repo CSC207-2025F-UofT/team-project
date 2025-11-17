@@ -23,12 +23,10 @@ import use_case.spending_report.GenerateReportController;
 public class SpendingReportViewModel extends JFrame {
     private final JComboBox<String> monthDropdown;
     private final JPanel chartPanelContainer;
-    private final GenerateReportController controller;
-    private final int userId = 1; // example user ID
+    private GenerateReportController controller;
+    private final int userId = 1;
 
-    public SpendingReportViewModel(GenerateReportController controller) {
-        this.controller = controller;
-
+    public SpendingReportViewModel() { // Remove controller from constructor
         // UI setup
         setTitle("Monthly Spending Report");
         setSize(900, 600);
@@ -51,18 +49,33 @@ public class SpendingReportViewModel extends JFrame {
         chartPanelContainer = new JPanel(new BorderLayout());
         add(chartPanelContainer, BorderLayout.CENTER);
 
-        // On dropdown change, reload report
+        // On dropdown change, reload report - BUT with null check
         monthDropdown.addActionListener((ActionEvent e) -> {
-            String selectedMonth = (String) monthDropdown.getSelectedItem();
-            controller.onGenerateReportClicked(userId, selectedMonth);
+            if (controller != null) {
+                String selectedMonth = (String) monthDropdown.getSelectedItem();
+                controller.onGenerateReportClicked(userId, selectedMonth);
+            } else {
+                System.err.println("Controller not set yet!");
+            }
         });
 
-        // Automatically display the latest month when opened
+        // REMOVE the auto-load for now - we'll trigger it manually after controller is set
+    }
+
+    // Set controller and trigger initial load
+    public void setController(GenerateReportController controller) {
+        this.controller = controller;
+        System.out.println("Controller set successfully!");
+        
+        // Now that controller is set, trigger the initial report
         SwingUtilities.invokeLater(() -> {
             monthDropdown.setSelectedItem("November 2025");
-            controller.onGenerateReportClicked(userId, "November 2025");
+            if (controller != null) {
+                controller.onGenerateReportClicked(userId, "November 2025");
+            }
         });
     }
+
     public void displayChart(Map<String, Float> categoryData, String month) {
         if (categoryData == null || categoryData.isEmpty()) {
             chartPanelContainer.removeAll();
@@ -78,9 +91,7 @@ public class SpendingReportViewModel extends JFrame {
         chartPanelContainer.repaint();
     }
 
-    // Add these methods to your existing SpendingReportViewModel class
     public void setReport(entity.SpendingReport report) {
-        // This method might be needed for property change listeners
         if (report != null) {
             displayChart(report.getCategoryBreakdown(), report.getMonth());
         }
@@ -90,7 +101,6 @@ public class SpendingReportViewModel extends JFrame {
         displayChart(null, "");
     }
 
-    // lightweight in-project bar chart to avoid external dependency on JFreeChart
     private static class SimpleBarChartPanel extends JPanel {
         private final java.util.List<Map.Entry<String, Float>> entries;
         private final String month;
@@ -117,7 +127,6 @@ public class SpendingReportViewModel extends JFrame {
                 return;
             }
 
-            // find max
             float max = 0f;
             for (Map.Entry<String, Float> e : entries) {
                 max = Math.max(max, e.getValue());
@@ -130,7 +139,6 @@ public class SpendingReportViewModel extends JFrame {
             int x = padding;
             int yBase = height - padding - labelHeight;
 
-            // draw title
             g2.setColor(Color.BLACK);
             g2.setFont(g2.getFont().deriveFont(Font.BOLD, 16f));
             g2.drawString("Spending for " + month, padding, 20);
@@ -144,12 +152,10 @@ public class SpendingReportViewModel extends JFrame {
                 g2.fillRect(x, y, barWidth, barHeight);
                 g2.setColor(Color.BLACK);
                 g2.drawRect(x, y, barWidth, barHeight);
-                // label
                 String label = e.getKey();
                 int strWidth = g2.getFontMetrics().stringWidth(label);
                 int labelX = x + Math.max(0, (barWidth - strWidth) / 2);
                 g2.drawString(label, labelX, yBase + 15);
-                // value
                 String valStr = String.format("$%.2f", value);
                 int valWidth = g2.getFontMetrics().stringWidth(valStr);
                 g2.drawString(valStr, x + Math.max(0, (barWidth - valWidth) / 2), y - 5);

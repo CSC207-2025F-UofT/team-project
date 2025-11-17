@@ -1,6 +1,7 @@
 package data_access;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.time.LocalDate;
@@ -22,38 +23,52 @@ public class CSVTransactionDAO implements TransactionDataAccess {
     
     private List<Transaction> loadTransactionsFromCSV() {
         List<Transaction> loadedTransactions = new ArrayList<>();
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         
-        try (BufferedReader br = new BufferedReader(new FileReader(csvFilePath))) {
-            String line;
-            boolean isFirstLine = true;
+        try {
+            File file = new File(csvFilePath);
+            if (!file.exists()) {
+                System.err.println("CSV file not found: " + csvFilePath);
+                System.err.println("Current directory: " + new File(".").getAbsolutePath());
+                return loadedTransactions; // Return empty list instead of crashing
+            }
             
-            while ((line = br.readLine()) != null) {
-                if (isFirstLine) {
-                    isFirstLine = false;
-                    continue;
-                }
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+            
+            try (BufferedReader br = new BufferedReader(new FileReader(file))) {
+                String line;
+                boolean isFirstLine = true;
                 
-                String[] values = line.split(",");
-                if (values.length == 4) {
-                    LocalDate date = LocalDate.parse(values[0], formatter);
-                    String category = values[1];
-                    double amount = Double.parseDouble(values[2]);
-                    String description = values[3];
+                while ((line = br.readLine()) != null) {
+                    if (isFirstLine) {
+                        isFirstLine = false;
+                        continue;
+                    }
                     
-                    loadedTransactions.add(new Transaction(date, category, amount, description));
+                    String[] values = line.split(",");
+                    if (values.length == 4) {
+                        LocalDate date = LocalDate.parse(values[0].trim(), formatter);
+                        String category = values[1].trim();
+                        double amount = Double.parseDouble(values[2].trim());
+                        String description = values[3].trim();
+                        
+                        loadedTransactions.add(new Transaction(date, category, amount, description));
+                    }
                 }
             }
         } catch (IOException e) {
             System.err.println("Error reading CSV file: " + e.getMessage());
+            e.printStackTrace();
+        } catch (Exception e) {
+            System.err.println("Error parsing CSV data: " + e.getMessage());
+            e.printStackTrace();
         }
         
+        System.out.println("Loaded " + loadedTransactions.size() + " transactions from CSV");
         return loadedTransactions;
     }
     
     @Override
     public List<Transaction> getTransactions(int userId, String month) {
-        // Filter by month if needed, or return all transactions
         List<Transaction> filteredTransactions = new ArrayList<>();
         String targetMonthYear = convertToYearMonth(month);
         
@@ -68,7 +83,6 @@ public class CSVTransactionDAO implements TransactionDataAccess {
     }
     
     private String convertToYearMonth(String monthString) {
-        // Convert "Nov 2024" to "2024-11" format
         String[] parts = monthString.split(" ");
         String monthName = parts[0];
         String year = parts[1];
