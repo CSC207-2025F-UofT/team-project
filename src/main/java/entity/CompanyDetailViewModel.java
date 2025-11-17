@@ -7,7 +7,7 @@ public class CompanyDetailViewModel {
     private final String ticker;
     private final String name;
     private final String sector;
-    private final String marketCapFormatted; // 格式化为可读字符串 (e.g., $2.8T)
+    private final String marketCapFormatted; // (e.g., $2.8T)
     private final String peRatioFormatted;
 
     private final String latestRevenue;
