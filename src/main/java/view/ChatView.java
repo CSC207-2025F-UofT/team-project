@@ -39,10 +39,6 @@ public class ChatView extends JPanel implements ActionListener, PropertyChangeLi
         chatPartnerLabel = new JLabel("User"); // Placeholder
         chatPartnerLabel.setFont(new Font("SansSerif", Font.BOLD, 18));
 
-        partnerInfoPanel.add(partnerIcon);
-        partnerInfoPanel.add(chatPartnerLabel);
-        topBar.add(partnerInfoPanel, BorderLayout.WEST);
-
         // Right Side: Back/Exit Button (Go back to LoggedInView/Recent Chats)
         JButton backButton = new JButton("⬅");
         backButton.setFont(new Font("SansSerif", Font.BOLD, 20));
@@ -53,7 +49,24 @@ public class ChatView extends JPanel implements ActionListener, PropertyChangeLi
             viewManagerModel.firePropertyChange();
         });
 
-        topBar.add(backButton, BorderLayout.EAST);
+        partnerInfoPanel.add(backButton);
+        partnerInfoPanel.add(partnerIcon);
+        partnerInfoPanel.add(chatPartnerLabel);
+        topBar.add(partnerInfoPanel, BorderLayout.WEST);
+
+        // Right Side: Back/Exit Button (Go back to LoggedInView/Recent Chats)
+        JButton settingButton = new JButton("⛭");
+        settingButton.setFont(new Font("SansSerif", Font.BOLD, 20));
+        settingButton.setFocusPainted(false);
+        settingButton.setBorderPainted(false);
+        settingButton.setContentAreaFilled(false);
+
+        settingButton.addActionListener(e -> {
+            // Navigate to chat setting view (need to make)
+            System.out.println("clicked chat setting button");
+        });
+
+        topBar.add(settingButton, BorderLayout.EAST);
 
         // Chat Display Area (Main Content)
         chatDisplayPanel = new JPanel();
