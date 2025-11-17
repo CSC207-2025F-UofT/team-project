@@ -104,6 +104,7 @@ public class Event {
                 "Genres:     " + String.join(", ", genres) + "\n" +
                 "Price ($):  " + priceRange + "\n" +
                 "Tickets:    " + ticketUrl + "\n" +
+                "Image:      " + imageURL + "\n" +
                 "----------------------";
     }
 }
