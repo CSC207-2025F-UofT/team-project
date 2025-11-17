@@ -16,6 +16,7 @@ public class Main {
 
     private static SignUpController signUpController;
     private static LoginController loginController;
+    private static DashboardController dashboardController;
 
     private static JFrame currentFrame;
 
@@ -33,6 +34,8 @@ public class Main {
             // Create controllers
             signUpController = new SignUpController(signUpInteractor);
             loginController = new LoginController(loginInteractor);
+            dashboardController = new DashboardController();
+
 
             // Start application on the login screen
             showLoginView();
@@ -41,13 +44,12 @@ public class Main {
 
     /** Displays the login window */
     private static void showLoginView() {
-        // Close any open frame first
         if (currentFrame != null) currentFrame.dispose();
 
         LoginView loginView = new LoginView(
                 loginController,
-                Main::showSignUpView, // callback to switch to sign up
-                Main::showDashboardView    // callback: open dashboard after login success
+                Main::showSignUpView,         // Runnable
+                Main::showDashboardView       // Consumer<String>
         );
 
         currentFrame = loginView;
@@ -67,12 +69,13 @@ public class Main {
         signUpView.setVisible(true);
     }
 
-    /** Displays the dashboard window after login */
-    private static void showDashboardView() {
+    private static void showDashboardView(String username) {
         if (currentFrame != null) currentFrame.dispose();
 
         DashboardView dashboardView = new DashboardView(
-                Main::showLoginView // callback for "Logout" button
+                dashboardController,
+                Main::showLoginView,   // callback to login screen
+                username               // show welcome message
         );
 
         currentFrame = dashboardView;
