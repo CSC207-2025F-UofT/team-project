@@ -12,6 +12,7 @@ import java.util.Arrays;
 public class SportsAPIDataAccess {
     private OkHttpClient client = new OkHttpClient();
     private String apiKey = "0c5ba9bf08780b2ed18e605b84f07565";
+    public ArrayList<Sportbet> allbets = new ArrayList<>();
 
     public void fetchOdds() {
         String sport = "basketball_nba";
@@ -40,7 +41,6 @@ public class SportsAPIDataAccess {
         }
     }
     public void readdata(){
-        ArrayList<Sportbet> possibleBets = new ArrayList<>();
         try {
             BufferedReader br = new BufferedReader(new FileReader("odds.txt"));
             String line;
@@ -48,16 +48,19 @@ public class SportsAPIDataAccess {
                 String[] splits = line.split("id");
                 splits = Arrays.copyOfRange(splits,1,splits.length);
                 for(String i: splits){
-                    String[] splits2 = i.split("\",\"");
-                    System.out.println(i);
-                    String id = i.substring(3,35);
-                    String sport = i.substring(i.indexOf("sport_key")+12,i.indexOf("sport_title")-3);
-
-                    System.out.println(id);
-                    System.out.println(sport);
-                    System.out.println("ok");
-                    for(String j:splits2){
-                        //System.out.println(j);
+                    if(i.substring(i.indexOf("bookmakers")).length()>20){
+                        String id = i.substring(3,35);
+                        String sport = i.substring(i.indexOf("sport_title")+14,i.indexOf("commence")-3);
+                        String teamodds = i.substring(i.indexOf("outcomes")+10,i.length()-8);
+                        String[] teams = teamodds.split("},\\{");
+                        String team1 = teams[0].substring(10,teams[0].indexOf("price")-3);
+                        double team1odds = Double.parseDouble(teams[0].substring(teams[0].indexOf("price")+7));
+                        String team2 = teams[1].substring(8,teams[1].indexOf("price")-3);
+                        double team2odds = Double.parseDouble(teams[1].substring(teams[1].indexOf("price")+7,teams[1].indexOf("}")));
+                        Sportbet sb = new Sportbet(id,sport,team1,team2,team1odds,team2odds,"N/A");
+                        /*public Sportbet(String id, String sport, String team1, String team2,
+                     double team1price, double team2price, String status)*/
+                        allbets.add(sb);
                     }
                     System.out.println();
                 }
@@ -65,5 +68,11 @@ public class SportsAPIDataAccess {
         } catch (Exception e) {
             e.printStackTrace();
         }
+        /*for(Sportbet s:allbets){
+            System.out.println(s);
+        }*/
+    }
+    public ArrayList<Sportbet> getAllbets(){
+        return this.allbets;
     }
 }

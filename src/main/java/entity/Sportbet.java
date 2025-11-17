@@ -9,12 +9,10 @@ public class Sportbet {
     private double team2price;
     private String selection;
     private String status;
-    private double odds;
     private double stake;
 
     public Sportbet(String id, String sport, String team1, String team2,
-                     double team1price, double team2price, String status,
-                     double odds, double stake){
+                     double team1price, double team2price, String status){
         this.id = id;
         this.sport = sport;
         this.team1 = team1;
@@ -22,8 +20,8 @@ public class Sportbet {
         this.team1price = team1price;
         this.team2price = team2price;
         this.status = status;
-        this.odds = odds;
-        this.stake = stake;
+
+        this.stake = 0;
     }
     public String getId() { return id; }
     public void setId(String id) { this.id = id; }
@@ -46,10 +44,13 @@ public class Sportbet {
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }
 
-    public double getOdds() { return odds; }
-    public void setOdds(double odds) { this.odds = odds; }
-
     public double getStake() { return stake; }
     public void setStake(double stake) { this.stake = stake; }
+    public String toString(){
+        String result = "";
+        result += "ID: "+this.getId()+", Sport: "+this.getSport()+", Teams: "+this.getTeam1()+
+                " vs "+this.getTeam2()+", Odds: "+this.getTeam1price()+"/"+this.getTeam2price();
+        return result;
+    }
 
 }
