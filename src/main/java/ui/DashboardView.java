@@ -1,6 +1,7 @@
 package ui;
 
 import controllers.DashboardController;
+import data.ExpenseRepository;
 
 import javax.swing.*;
 import java.awt.*;
@@ -10,6 +11,7 @@ public class DashboardView extends JFrame {
     private final DashboardController controller;
     private final Runnable onLogout;
     private final String username;
+    private final ExpenseRepository expenseRepository;
 
     private final JTabbedPane tabs = new JTabbedPane();
 
@@ -19,10 +21,12 @@ public class DashboardView extends JFrame {
     private static final int TRACKER_TAB = 2;
     private static final int STOCK_TAB = 3;
 
-    public DashboardView(DashboardController controller, Runnable onLogout, String username) {
+    public DashboardView(DashboardController controller, Runnable onLogout, String username,
+                         ExpenseRepository expenseRepository) {
         this.controller = controller;
         this.onLogout = onLogout;
         this.username = username;
+        this.expenseRepository = expenseRepository;
 
         setTitle("Dashboard");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -53,7 +57,8 @@ public class DashboardView extends JFrame {
 
             switch (idx) {
                 case NEWS_TAB -> SwingUtilities.invokeLater(() -> new ui.NewsView().setVisible(true));
-                case TRACKER_TAB -> SwingUtilities.invokeLater(() -> new ui.TrackerView().setVisible(true));
+                case TRACKER_TAB -> SwingUtilities.invokeLater(() ->
+                        new ui.TrackerView(username, expenseRepository).setVisible(true));
                 case STOCK_TAB -> SwingUtilities.invokeLater(() -> new ui.StockView().setVisible(true));
                 default -> {}
             }

@@ -56,7 +56,7 @@ public class RegisteredExpenseRepository implements ExpenseRepository {
         String query = "SELECT SUM(amount) FROM expenses WHERE username = ?";
         try (Connection connection = dataSource.getConnection(); PreparedStatement preparedStatement = connection.prepareStatement(query)) {
             preparedStatement.setString(1, username);
-            try (ResultSet resultSet = preparedStatement.getResultSet()) {
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 if (resultSet.next()) {
                     return resultSet.getDouble(1);
                 } return 0.0;

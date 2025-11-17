@@ -2,6 +2,7 @@ import controllers.DashboardController;
 import controllers.LoginController;
 import controllers.SignUpController;
 import data.DataSourceFactory;
+import data.RegisteredExpenseRepository;
 import data.RegisteredUserRepository;
 import data.TableInitializer;
 import ui.LoginView;
@@ -17,6 +18,7 @@ public class Main {
 
     private static DataSource dataSource;
     private static RegisteredUserRepository userRepository;
+    private static RegisteredExpenseRepository expenseRepository;
 
     private static SignUpController signUpController;
     private static LoginController loginController;
@@ -27,9 +29,10 @@ public class Main {
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
             // Setup database
-            dataSource = DataSourceFactory.sqlite("app.db");
+            dataSource = DataSourceFactory.sqlite("sqllite.db");
             TableInitializer.ensureSchema(dataSource);
             userRepository = new RegisteredUserRepository(dataSource);
+            expenseRepository = new RegisteredExpenseRepository(dataSource);
 
             // Create interactors
             SignUpInteractor signUpInteractor = new SignUpInteractor(userRepository);
@@ -39,7 +42,6 @@ public class Main {
             signUpController = new SignUpController(signUpInteractor);
             loginController = new LoginController(loginInteractor);
             dashboardController = new DashboardController();
-
 
             // Start application on the login screen
             showLoginView();
@@ -79,7 +81,8 @@ public class Main {
         DashboardView dashboardView = new DashboardView(
                 dashboardController,
                 Main::showLoginView,   // callback to login screen
-                username               // show welcome message
+                username,              // show welcome message
+                expenseRepository
         );
 
         currentFrame = dashboardView;

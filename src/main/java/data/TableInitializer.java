@@ -20,7 +20,7 @@ public class TableInitializer {
             username    TEXT NOT NULL,
             datetime    TEXT NOT NULL,
             type        TEXT NOT NULL,
-            amount      REAL NOT NULL,
+            amount      REAL NOT NULL
         );
         CREATE INDEX IF NOT EXISTS idx_expenses_username ON expenses(username);
         """;
