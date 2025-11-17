@@ -1,6 +1,6 @@
 package use_case;
 
-import entity.Outfit;
+import entities.Outfit;
 import java.util.List;
 
 /**
