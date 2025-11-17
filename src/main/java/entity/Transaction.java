@@ -25,8 +25,6 @@ public class Transaction {
 
 
 
-
-
     public double getAmount(){
         return this.amount;
     }
@@ -39,6 +37,12 @@ public class Transaction {
     public LocalDate getDate(){
         return this.date;
     }
+
+    public Category getCategory(){
+        return this.source.getCategory();
+    }
+
+
 
 
 }
