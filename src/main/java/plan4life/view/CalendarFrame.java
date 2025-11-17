@@ -1,3 +1,4 @@
+// 文件路径: src/main/java/plan4life/view/CalendarFrame.java
 package plan4life.view;
 
 import javax.swing.*;
@@ -12,6 +13,11 @@ import plan4life.use_case.block_off_time.BlockOffTimeController;
 import java.time.LocalDateTime;
 import java.util.Random; //Temp till we get langchain/langgraph working
 
+// --- 1. IMPORT SETTINGS CLASSES ---
+import plan4life.controller.SettingsController;
+import java.awt.event.ActionListener;
+// (ActionEvent is already imported by your teammate)
+
 public class CalendarFrame extends JFrame implements CalendarViewInterface, TimeSelectionListener {
     private final CalendarPanel calendarPanel;
     private final ActivityPanel activityPanel;
@@ -19,8 +25,18 @@ public class CalendarFrame extends JFrame implements CalendarViewInterface, Time
     private Schedule currentSchedule;
     private CalendarController calendarController; // added controller
 
+    // --- 2. ADD SETTINGS MEMBER VARIABLES ---
+    private SettingsView settingsView;
+    private SettingsController settingsController;
+
+
     public CalendarFrame() {
         super("Plan4Life - Scheduler");
+
+        // --- 3. INITIALIZE SETTINGS CLASSES (at the top) ---
+        // (This MUST be done before they are used)
+        this.settingsView = new SettingsView(this);
+        this.settingsController = new SettingsController(this.settingsView);
 
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(1200, 750);
@@ -37,7 +53,12 @@ public class CalendarFrame extends JFrame implements CalendarViewInterface, Time
 
         JPanel rightPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         JButton generateBtn = new JButton("Generate Schedule");
+
+        // --- 4. ADD SETTINGS BUTTON TO THE UI ---
+        JButton settingsBtn = new JButton("Settings");
+
         rightPanel.add(generateBtn);
+        rightPanel.add(settingsBtn); // Add the button to the panel
 
         topBar.add(leftPanel, BorderLayout.WEST);
         topBar.add(rightPanel, BorderLayout.EAST);
@@ -88,6 +109,15 @@ public class CalendarFrame extends JFrame implements CalendarViewInterface, Time
         weekBtn.addActionListener(e -> {
             calendarPanel.setWeekView();
             displaySchedule(currentSchedule);
+        });
+
+        // --- 5. ADD SETTINGS BUTTON LOGIC ---
+        settingsBtn.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                // When the button is clicked, show the SettingsView dialog
+                settingsView.setVisible(true);
+            }
         });
     }
 
