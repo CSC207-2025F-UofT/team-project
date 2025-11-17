@@ -3,6 +3,7 @@ package app;
 import entity.UserFactory;
 import interface_adapter.*;
 import interface_adapter.main_screen.MainScreenViewModel;
+import interface_adapter.studyset.studyset_browse.BrowseStudySetViewModel;
 import interface_adapter.registration.login.*;
 import interface_adapter.registration.signup.SignupController;
 import interface_adapter.registration.signup.SignupPresenter;
@@ -13,6 +14,7 @@ import use_case.registration.signup.SignupInteractor;
 import use_case.registration.signup.SignupOutputBoundary;
 import view.main_screen.MainScreenView;
 import view.registration.*;
+import view.study_set.BrowseStudySetView;
 import data_access.*;
 import utility.FontLoader;
 
@@ -43,6 +45,8 @@ public class AppBuilder {
     private MainScreenViewModel mainScreenViewModel;
     private LoginView loginView;
     private MainScreenView mainScreenView;
+    private BrowseStudySetViewModel browseStudySetViewModel;
+    private BrowseStudySetView browseStudySetView;
 
     public AppBuilder() {
         cardPanel.setLayout(cardLayout);
@@ -64,8 +68,13 @@ public class AppBuilder {
 
     public AppBuilder addMainScreenView() {
         mainScreenViewModel = new MainScreenViewModel();
-        mainScreenView = new MainScreenView(mainScreenViewModel);
+        browseStudySetViewModel = new BrowseStudySetViewModel();
+
+        mainScreenView = new MainScreenView(mainScreenViewModel, viewManagerModel, browseStudySetViewModel);
         cardPanel.add(mainScreenView, mainScreenView.getViewName());
+
+        browseStudySetView = new BrowseStudySetView(browseStudySetViewModel, mainScreenViewModel, viewManagerModel);
+        cardPanel.add(browseStudySetView, browseStudySetView.getViewName());
         return this;
     }
 
