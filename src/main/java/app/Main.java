@@ -9,6 +9,9 @@ public class Main {
         AppBuilder appBuilder = new AppBuilder();
         JFrame application = appBuilder
                 .addLoginView()
+                .addSignupView()
+                .addLoginUsecase()
+                .addSignupUsecase()
                 .build();
 
         application.pack();

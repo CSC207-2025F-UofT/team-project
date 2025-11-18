@@ -30,6 +30,6 @@ public class LoginController {
      * Executes the "switch to SignupView" Use Case.
      */
     public void switchToLoginView() {
-        loginUseCaseInteractor.switchToLoginView();
+        loginUseCaseInteractor.switchToSignupView();
     }
 }
