@@ -1,4 +1,4 @@
-package use_case.Profile;
+package use_case.profile;
 
 public class ProfileOutputData {
     private final String username;
