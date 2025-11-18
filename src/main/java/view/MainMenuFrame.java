@@ -18,18 +18,24 @@ public class MainMenuFrame extends JFrame {
         title.setForeground(Color.BLACK);
         title.setBorder(BorderFactory.createEmptyBorder(40, 0, 40, 0));
 
-        JPanel panel = new JPanel(new GridLayout(5, 1, 15, 15));
+        JPanel panel = new JPanel(new GridLayout(6, 1, 15, 15));
         panel.setOpaque(false);
 
         JButton profileBtn = createMenuButton("Profile");
         JButton betHistoryBtn = createMenuButton("View Bet History");
+        JButton sportBetBtn = createMenuButton("Sport Bet");
         JButton playBetGameBtn = createMenuButton("Play Bet Game");
         JButton depositBtn = createMenuButton("Deposit / Withdraw");
         JButton logoutBtn = createMenuButton("Logout");
 
+        JPanel betRow = new JPanel(new GridLayout(1, 2, 15, 0));
+        betRow.setOpaque(false);
+        betRow.add(sportBetBtn);
+        betRow.add(playBetGameBtn);
+
         panel.add(profileBtn);
         panel.add(betHistoryBtn);
-        panel.add(playBetGameBtn);
+        panel.add(betRow);
         panel.add(depositBtn);
         panel.add(logoutBtn);
 
@@ -44,6 +50,10 @@ public class MainMenuFrame extends JFrame {
         depositBtn.addActionListener(e -> {
             new WalletUI(user, this);
             setVisible(false);
+        });
+
+        sportBetBtn.addActionListener(e -> {
+            new SportbetFrame(user, this);
         });
 
         playBetGameBtn.addActionListener(e -> {
