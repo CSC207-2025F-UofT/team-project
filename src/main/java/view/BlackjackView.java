@@ -3,8 +3,11 @@ package view;
 
 import javax.swing.*;
 import java.awt.*;
-import interface_adapter.*;
+
 import entity.*;
+import interface_adapter.Blackjack.BlackjackController;
+import interface_adapter.Blackjack.BlackjackPresenter;
+import interface_adapter.Blackjack.BlackjackViewModel;
 import use_case.*;
 
 
