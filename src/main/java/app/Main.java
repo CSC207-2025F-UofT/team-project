@@ -10,6 +10,7 @@ public class Main {
                 .addFavoritesView()
                 .addRateAndCommentView("", "")
                 .addRandCView("")
+                .addClickingView()
                 .build();
 
         application.pack();

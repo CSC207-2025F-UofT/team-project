@@ -7,9 +7,15 @@ import interface_adapter.ViewManagerModel;
 import interface_adapter.rate_and_comment.CommentController;
 import interface_adapter.rate_and_comment.CommentPresenter;
 import interface_adapter.rate_and_comment.CommentViewModel;
+import interface_adapter.clicking.ClickingPresenter;
+import interface_adapter.clicking.ClickingController;
+import interface_adapter.clicking.ClickingViewModel;
 import use_case.rate_and_comment.CommentInputBoundary;
 import use_case.rate_and_comment.CommentInteractor;
 import use_case.rate_and_comment.CommentOutputBoundary;
+import use_case.clicking.ClickingInputBoundary;
+import use_case.clicking.ClickingInteractor;
+import use_case.clicking.ClickingOutputBoundary;
 import view.*;
 
 import javax.swing.*;
@@ -30,9 +36,18 @@ public class AppBuilder {
     private CommentViewModel commentViewModel;
     private RandCSuccessSubmitView randCSuccessSubmitView;
     private RandCSuccessViewModel randCSuccessViewModel;
+    private ClickingView clickingView;
+    private ClickingViewModel clickingViewModel;
+
 
     public AppBuilder() {
         cardPanel.setLayout(cardLayout);
+    }
+
+    public AppBuilder addClickingView(){
+      clickingView = new ClickingView();
+      cardPanel.add(clickingView,clickingView.getViewName());
+      return this;
     }
 
     public AppBuilder addWatchlistView() {

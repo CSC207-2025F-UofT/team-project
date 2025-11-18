@@ -16,7 +16,7 @@ public class ClickingPresenter implements ClickingOutputBoundary {
 
     @Override
     public void prepareSuccessView(ClickingOutputData outputData) {
-        // 清空错误信息
+
         viewModel.errorMessage = "";
 
         viewModel.title = outputData.title;
