@@ -1,5 +1,7 @@
 package use_case.rate_and_comment;
 
+import entity.Comment;
+
 /**
  * The rate and comment Interactor.
  */
@@ -20,8 +22,9 @@ public class CommentInteractor implements CommentInputBoundary{
         final String comment = commentInputData.getComment();
         final int rate = commentInputData.getRate();
 
-        //TODO 完成存储数据部分
-        //userDataAccessObject.execute();
+        //完成存储数据部分
+        Comment newcomment = new Comment(username, rate, comment, medianame);
+        userDataAccessObject.addComment(username, newcomment);
 
         final CommentOutputData commentOutputData = new CommentOutputData(medianame);
         commentPresenter.prepareSuccessView(commentOutputData);

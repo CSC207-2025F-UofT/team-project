@@ -35,6 +35,9 @@ public class RateAndCommentView extends JPanel implements ActionListener, Proper
         this.medianame = mn;
         this.commentViewModel = commentViewModel;
         this.commentViewModel.addPropertyChangeListener(this);
+        //TODO 注意这两个加的位置
+        //this.commentViewModel.getState().setMedianame(medianame);
+        //this.commentViewModel.getState().setUsername(username);
 
         setLayout(new BorderLayout(10, 10));
         setBackground(Color.LIGHT_GRAY);
@@ -50,6 +53,7 @@ public class RateAndCommentView extends JPanel implements ActionListener, Proper
             star.setForeground(Color.GRAY);
             final int index = i;
             star.addMouseListener(new MouseAdapter() {
+
                 @Override
                 public void mouseClicked(MouseEvent e) {
                     setRating(index + 1);
@@ -72,11 +76,11 @@ public class RateAndCommentView extends JPanel implements ActionListener, Proper
         add(ratingPanel, BorderLayout.NORTH);
 
         //TODO 加一个listener改变viewmodel的rate
-        //以在下方更改
+        //已在下方更改
 
         // ====== 中部：文本框 ======
         //TODO 改成文本框初始状态empty
-        reviewArea = new JTextArea("Insert Review Here", 5, 20);
+        reviewArea = new JTextArea("", 5, 20);
         reviewArea.setLineWrap(true);
         reviewArea.setWrapStyleWord(true);
         reviewArea.setBorder(BorderFactory.createLineBorder(Color.BLUE, 3));
@@ -88,7 +92,6 @@ public class RateAndCommentView extends JPanel implements ActionListener, Proper
                 final CommentState currentState = commentViewModel.getState();
                 currentState.setComment(reviewArea.getText());
                 commentViewModel.setState(currentState);
-                commentViewModel.firePropertyChange();
             }
 
             @Override
@@ -122,9 +125,9 @@ public class RateAndCommentView extends JPanel implements ActionListener, Proper
                                     JOptionPane.INFORMATION_MESSAGE
                             );
                         } else {
-                            final CommentState currentState = commentViewModel.getState();
+                            //final CommentState currentState = commentViewModel.getState();
 
-                            commentController.execute(username, medianame, reviewArea.getText(), rating);//TODO 写完controller改写此处execute
+                            commentController.execute(username, medianame, reviewArea.getText(), rating);// 写完controller改写此处execute
                             //清除评论和打分
                             //setRating(0);
                             //reviewArea.setText("");
@@ -173,7 +176,6 @@ public class RateAndCommentView extends JPanel implements ActionListener, Proper
         CommentState currentState = commentViewModel.getState();
         currentState.setRate(newRating);
         commentViewModel.setState(currentState);
-        commentViewModel.firePropertyChange();
     }
 
     private void highlightStars(int count) {

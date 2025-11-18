@@ -31,6 +31,7 @@ public class CommentPresenter implements CommentOutputBoundary {
 
         // and clear everything from the CommentViewModel's state
         commentViewModel.setState(new CommentState());
+        commentViewModel.firePropertyChange();
 
         //switch to the RandCSuccessSubmit view
         this.viewManagerModel.setState(randCSuccessViewModel.getViewName());
