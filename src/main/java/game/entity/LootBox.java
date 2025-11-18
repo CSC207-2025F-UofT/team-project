@@ -1,17 +1,24 @@
 package game.entity;
 
+import game.Constants;
 import java.util.*;
 
+/**
+ * Loot box for random new pets
+ */
 public class LootBox extends Item{
     private List<String>dogBreedList=new ArrayList<>();
     private List<String>catBreedList=new ArrayList<>();
 
-    public LootBox(String name,int price) {
-        super(name,price,"LootBox");
+    public LootBox(){
+        super("LootBox", Constants.LOOT_BOX_PRICE,"LootBox");
+        initializeBreedLists();
     }
-
-    public LootBox(int price){
-        super("LootBox",price,"LootBox");
+    
+    /**
+     * will be implemented in the future with api
+     */
+    private void initializeBreedLists() {
     }
 
     public Pet getPet(){
