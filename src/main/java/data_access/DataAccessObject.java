@@ -1,12 +1,30 @@
 package data_access;
 import java.io.*;
 import java.util.ArrayList;
+import java.util.Scanner;
 
 import entity.Pokemon;
 import entity.Team;
 import use_case.BuildPokemonTeam.BuildPokemonTeamDataAccessInterface;
 
 public class DataAccessObject implements BuildPokemonTeamDataAccessInterface {
+
+    public boolean teamExists(Team team) throws FileNotFoundException {
+        FileReader x = new FileReader("teamStorage/teams.csv");
+        Scanner sc = new Scanner(x);
+        String teamName = team.getTeamName();
+        while (sc.hasNextLine()) {
+            String line = sc.nextLine();
+            String[] data = line.split(",");
+            boolean equals = data[0].equals(teamName);
+
+            if (data[0].equals(teamName)) {
+                return true;
+            }
+
+        }
+        return false;
+    }
 
     public void saveTeam(Team team) {
         String teamName = team.getTeamName();
@@ -25,12 +43,21 @@ public class DataAccessObject implements BuildPokemonTeamDataAccessInterface {
         pokemons.add(p6);
 
         try (FileReader x = new FileReader("teamStorage/teams.csv")) {
+
+
+            if (teamExists(team)) {
+                System.out.println("ok i will do something about this");
+            }
+
             System.out.println("SUCCESS");
             System.out.println(teamName);
             System.out.println(pokemons + "\n");
 
 
+
             FileWriter writer = new FileWriter("teamStorage/teams.csv", true);
+
+
 
             writer.write(team.getTeamName() + "," + " ");
 
