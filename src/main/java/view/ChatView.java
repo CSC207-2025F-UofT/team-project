@@ -1,7 +1,10 @@
 package view;
 
 import interface_adapter.ViewManagerModel;
-
+import interface_adapter.messaging.send_m.SendMessageController;
+import interface_adapter.messaging.send_m.ChatState;
+import use_case.messaging.ChatMessageDto;
+import java.util.List;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -13,6 +16,11 @@ public class ChatView extends JPanel implements ActionListener, PropertyChangeLi
 
     public final String viewName = "chat";
     private final ViewManagerModel viewManagerModel;
+    private final SendMessageController sendMessageController;
+
+    private String currentChatId;
+    private String currentUserId;
+
 
     // Components
     private final JLabel chatPartnerLabel; // Displays the name of the user you're chatting with
@@ -23,8 +31,9 @@ public class ChatView extends JPanel implements ActionListener, PropertyChangeLi
     private final JPanel chatDisplayPanel;
     private final JLabel initialPrompt;
 
-    public ChatView(ViewManagerModel viewManagerModel) {
+    public ChatView(ViewManagerModel viewManagerModel, SendMessageController sendMessageController) {
         this.viewManagerModel = viewManagerModel;
+        this.sendMessageController = sendMessageController;
         this.setLayout(new BorderLayout());
 
         // Top Bar (Chat Partner and Exit/Back Button)
@@ -70,7 +79,8 @@ public class ChatView extends JPanel implements ActionListener, PropertyChangeLi
 
         // Chat Display Area (Main Content)
         chatDisplayPanel = new JPanel();
-        chatDisplayPanel.setLayout(new GridBagLayout()); // Using GridBagLayout for centering the message
+        // change to y-axis display frame
+        chatDisplayPanel.setLayout(new BoxLayout(chatDisplayPanel, BoxLayout.Y_AXIS));
 
         // Initial Prompt: "Send 'User' a message to start a chat!"
         initialPrompt = new JLabel("<html><div style='text-align: center;'>Send \"" + chatPartnerLabel.getText() +
@@ -110,19 +120,67 @@ public class ChatView extends JPanel implements ActionListener, PropertyChangeLi
     @Override
     public void actionPerformed(ActionEvent evt) {
         if (evt.getSource().equals(sendButton)) {
-            // Send message logic (currently does nothing)
-            String message = messageInputField.getText();
-            if (!message.trim().isEmpty()) {
-                JOptionPane.showMessageDialog(this, "Message sent to " + chatPartnerLabel.getText() + ": " + message);
-                messageInputField.setText(""); // Clear the input
+            String message = messageInputField.getText().trim();
+            if (!message.isEmpty()) {
+                sendMessageController.execute(currentChatId, currentUserId, message);
+                messageInputField.setText("");
             }
         }
     }
 
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
-        // This is where the view would update the chatPartnerLabel
-        // and load the chat history when the state changes.
+        if (!"state".equals(evt.getPropertyName())) {
+            return;
+        }
+
+        Object newValue = evt.getNewValue();
+        if (!(newValue instanceof ChatState)) {
+            return;
+        }
+
+        ChatState state = (ChatState) newValue;
+
+        // remove previous ui
+        chatDisplayPanel.removeAll();
+
+        if (state.getError() != null) {
+            JLabel errorLabel = new JLabel(state.getError());
+            errorLabel.setForeground(Color.RED);
+            chatDisplayPanel.add(errorLabel);
+        } else {
+            List<ChatMessageDto> messages = state.getMessages();
+
+            if (messages.isEmpty()) {
+                chatDisplayPanel.add(initialPrompt);
+            } else {
+                for (ChatMessageDto msg : messages) {
+                    boolean fromCurrentUser =
+                            msg.getSenderUserId().equals(currentUserId);
+
+                    JPanel row = new JPanel(new BorderLayout());
+                    row.setOpaque(false);
+                    row.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
+
+                    JLabel bubble = new JLabel(msg.getContent());
+                    bubble.setOpaque(true);
+                    bubble.setBorder(BorderFactory.createEmptyBorder(8, 10, 8, 10));
+
+                    if (fromCurrentUser) {
+                        bubble.setBackground(new Color(0x95EC69)); // 自己：浅绿
+                        bubble.setForeground(Color.BLACK);
+                        row.add(bubble, BorderLayout.EAST);
+                    } else {
+                        bubble.setBackground(new Color(230, 230, 230)); // 对方：灰
+                        bubble.setForeground(Color.BLACK);
+                        row.add(bubble, BorderLayout.WEST);
+                    }
+                    chatDisplayPanel.add(row);
+                }
+            }
+        }
+        chatDisplayPanel.revalidate();
+        chatDisplayPanel.repaint();
     }
 
     public String getViewName() {
@@ -141,4 +199,11 @@ public class ChatView extends JPanel implements ActionListener, PropertyChangeLi
         this.revalidate();
         this.repaint();
     }
+
+    public void setChatContext(String chatId, String currentUserId, String partnerUsername) {
+        this.currentChatId = chatId;
+        this.currentUserId = currentUserId;
+        setChatPartner(partnerUsername);
+    }
+
 }
