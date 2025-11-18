@@ -12,6 +12,7 @@ public class ClickingState {
     private int year = 0;
     private double rating = 0.0;
     private List<String> genres = new ArrayList<>();
+    private String errorMessage = "";
 
     public String getTitle() {
         return title;
@@ -55,5 +56,13 @@ public class ClickingState {
     }
     public void setGenres(List<String> genres) {
         this.genres = genres;
+    }
+
+    public void setErrorMessage(String s) {
+        this.errorMessage = s;
+    }
+
+    public String getErrorMessage() {
+        return errorMessage;
     }
 }
