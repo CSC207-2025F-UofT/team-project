@@ -21,7 +21,7 @@ public class User {
 
     public String getUsername() { return username; }
     public double getBalance() { return balance; }
-    public int getTotalBets() { return totalBets; }
+    public int getBets() { return totalBets; }
     public int getGamesPlayed() { return gamesPlayed; }
     public String getPasswordHash() { return passwordHash; }
 

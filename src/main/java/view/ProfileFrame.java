@@ -18,7 +18,7 @@ public class ProfileFrame extends JFrame {
 
         JLabel usernameLabel = new JLabel("Username: " + user.getUsername(), SwingConstants.CENTER);
         JLabel balanceLabel = new JLabel("Balance: $" + user.getBalance(), SwingConstants.CENTER);
-        JLabel betLabel = new JLabel("Number of Bets: " + user.getTotalBets(), SwingConstants.CENTER);
+        JLabel betLabel = new JLabel("Number of Bets: " + user.getBets(), SwingConstants.CENTER);
         JLabel gamesLabel = new JLabel("Games Played: " + user.getGamesPlayed(), SwingConstants.CENTER);
 
         usernameLabel.setFont(new Font("Arial", Font.PLAIN, 40));

@@ -26,8 +26,7 @@ public class MainMenuFrame extends JFrame {
         JButton profileBtn = createMenuButton("interface_adapter/Profile");
         JButton betHistoryBtn = createMenuButton("View Bet History");
         JButton sportBetBtn = createMenuButton("Sport Bet");
-        JButton minesBtn = createMenuButton("Play Mines");
-        JButton blackjackBtn = createMenuButton("Play Blackjack");
+        JButton minesBtn = createMenuButton("Play Bet Games");
         JButton depositBtn = createMenuButton("Deposit / Withdraw");
         JButton logoutBtn = createMenuButton("Logout");
 
@@ -35,7 +34,6 @@ public class MainMenuFrame extends JFrame {
         betRow.setOpaque(false);
         betRow.add(sportBetBtn);
         betRow.add(minesBtn);
-        betRow.add(blackjackBtn);
 
         panel.add(profileBtn);
         panel.add(betHistoryBtn);
@@ -64,9 +62,6 @@ public class MainMenuFrame extends JFrame {
             new MinesView(user);
         });
 
-        blackjackBtn.addActionListener(e -> {
-            new BlackjackView(user);
-        });
 
         setVisible(true);
     }
