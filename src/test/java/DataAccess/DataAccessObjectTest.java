@@ -1,5 +1,5 @@
 package DataAccess;
-import data_access.DataAccessObject;
+import data_access.BuildPokemonTeamDataAccessObject;
 import entity.Pokemon;
 import entity.Team;
 import org.junit.Test;
@@ -9,8 +9,8 @@ import java.util.ArrayList;
 public class DataAccessObjectTest {
 
     @Test
-    public void AccessTest() {
-        DataAccessObject d = new DataAccessObject();
+    public void BuildPokemonTeamAccessTest() {
+        BuildPokemonTeamDataAccessObject d = new BuildPokemonTeamDataAccessObject();
         Team t = new Team("Ash's Team");
 
         int type1 = 1;
@@ -51,7 +51,7 @@ public class DataAccessObjectTest {
         t.setPokemon(charmander, 1);
         t.setPokemon(squirtle, 2);
         t.setPokemon(bulbasaur, 3);
-        t.setPokemon(mewtwo, 4);
+//        t.setPokemon(mewtwo, 4);
         t.setPokemon(mew, 5);
 
         d.saveTeam(t);

@@ -15,4 +15,6 @@ public interface BuildPokemonTeamInputBoundary {
     void addToTeam(BuildPokemonTeamInputData BuildPokemonTeamInputData) throws IOException;
 
     void removeFromTeam(BuildPokemonTeamInputData BuildPokemonTeamInputData) throws IOException;
+
+    void saveTeam(BuildPokemonTeamInputData BuildPokemonTeamInputData) throws IOException;
 }

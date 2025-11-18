@@ -1,4 +1,5 @@
 package use_case.BuildPokemonTeam;
+import data_access.BuildPokemonTeamDataAccessObject;
 import entity.Team;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -17,7 +18,7 @@ public class BuildPokemonTeamInteractor implements BuildPokemonTeamInputBoundary
 
 
     public BuildPokemonTeamInteractor(BuildPokemonTeamOutputBoundary buildPokemonTeamOutputBoundary,
-                                   Pokemon Pokemon) {
+                                      Pokemon Pokemon) {
         this.userPresenter = buildPokemonTeamOutputBoundary;
         this.Pokemon = Pokemon;
     }
@@ -28,6 +29,7 @@ public class BuildPokemonTeamInteractor implements BuildPokemonTeamInputBoundary
 
             final int index = buildPokemonTeamInputData.getIndex();
             final Team team = buildPokemonTeamInputData.getTeam();
+
 
             // Checks to see if the team can even be added to.
             if (index == -1){
@@ -53,6 +55,7 @@ public class BuildPokemonTeamInteractor implements BuildPokemonTeamInputBoundary
 
         }
 
+    @Override
     public void removeFromTeam(BuildPokemonTeamInputData buildPokemonTeamInputData) throws IOException {
 
         final int index = buildPokemonTeamInputData.getIndex();
@@ -64,4 +67,11 @@ public class BuildPokemonTeamInteractor implements BuildPokemonTeamInputBoundary
         userPresenter.prepareSuccessView(buildPokemonTeamOutputData);
 
     }
+
+    @Override
+    public void saveTeam(BuildPokemonTeamInputData buildPokemonTeamInputData) throws IOException {
+        final BuildPokemonTeamDataAccessObject dataAccessObject = new BuildPokemonTeamDataAccessObject();
+        final Team team = buildPokemonTeamInputData.getTeam();
+        dataAccessObject.saveTeam(team);
     }
+}
