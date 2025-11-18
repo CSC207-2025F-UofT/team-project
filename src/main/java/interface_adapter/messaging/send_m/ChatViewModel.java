@@ -1,4 +1,4 @@
-package interface_adapter.messaging.send_m.chat;
+package interface_adapter.messaging.send_m;
 
 import interface_adapter.ViewModel;
 
