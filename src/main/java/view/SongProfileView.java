@@ -17,8 +17,6 @@ public class SongProfileView extends JPanel {
     private final JLabel artistLabel = new JLabel();
     private final JLabel averageRatingLabel = new JLabel();
 
-    private final JPanel reviewsPanel = new JPanel();
-
     private final JButton addReview = new JButton("Write a Review");
     private final JButton backButton = new JButton("Back");
     private final JButton refreshButton = new JButton("Refresh");
@@ -34,31 +32,28 @@ public class SongProfileView extends JPanel {
 
         //  Song Information  //
         JPanel labelPanel = new JPanel();
-        labelPanel.setLayout(new BoxLayout(labelPanel, BoxLayout.X_AXIS));
-        songNameLabel.setText(viewSongController.getSongName);
-        artistLabel.setText("By" + viewSongController.getArtist);
-        songNameLabel.setText(viewSongController.getAverageRating);
-        labelPanel.add(songNameLabel);
-        labelPanel.add(artistLabel);
-        labelPanel.add(averageRatingLabel);
+        labelPanel.setLayout(new BorderLayout());
+        songNameLabel.setHorizontalAlignment(SwingConstants.LEFT);
+        labelPanel.add(songNameLabel, BorderLayout.WEST);
+
+        artistLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        labelPanel.add(artistLabel, BorderLayout.CENTER);
+
+        labelPanel.add(backButton, BorderLayout.EAST);
+
         add(labelPanel, BorderLayout.NORTH);
 
-
-        // Buttons //
-        JPanel buttonPanel = new JPanel();
-        buttonPanel.add(backButton);
-
-        add(buttonPanel, BorderLayout.SOUTH);
-
-        // from viewmodel -> add list of reviews to reviewsScrollPane
-        // REVIEWS SECTION //
-        reviewsPanel.setLayout(new BoxLayout(reviewsPanel, BoxLayout.X_AXIS));
+        // Reviews, Average Rating and Add Review //
+        JPanel reviewsPanel = new JPanel(new BorderLayout());
         JScrollPane reviewsScrollPane = new JScrollPane();
-        // TODO: Add reviews from view model in in scrollpane()
-        reviewsPanel.add(reviewsScrollPane);
-
         reviewsPanel.add(reviewsScrollPane, BorderLayout.CENTER);
-        reviewsPanel.add(addReview, BorderLayout.EAST);
+        // TODO: Add reviews from view model in in scrollpane()
+
+        JPanel rightPanel = new JPanel();
+        rightPanel.setLayout(new BoxLayout(rightPanel, BoxLayout.Y_AXIS));
+        rightPanel.add(averageRatingLabel);
+        rightPanel.add(addReview);
+        reviewsPanel.add(rightPanel, BorderLayout.EAST);
 
         add(reviewsPanel, BorderLayout.CENTER);
 
@@ -71,14 +66,14 @@ public class SongProfileView extends JPanel {
 
     private void openWriteReviewDialog() {
         JDialog postReviewDialog = new JDialog((Frame) null, "Write a Review", true);
-        // set pixel size?
         postReviewDialog.setLocationRelativeTo(this);
+        postReviewDialog.setSize(300, 250);
         postReviewDialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 
         // Comment area as scrollpane //
         JTextArea comment = new JTextArea();
-        postReviewDialog.add(comment, BorderLayout.CENTER);
         JScrollPane commentScrollPane = new JScrollPane(comment);
+        postReviewDialog.add(commentScrollPane, BorderLayout.CENTER);
 
         //Rating Dropdown menu//
         String[] ratings = {"1", "2", "3", "4", "5"};
@@ -96,6 +91,7 @@ public class SongProfileView extends JPanel {
         postReviewDialog.add(buttonPanel);
 
         postReviewDialog.setVisible(true);
+
 
 
         postButton.addActionListener(e -> {
