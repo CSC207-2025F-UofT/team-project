@@ -4,6 +4,7 @@ import use_case.search.SearchOutputData;
 import use_case.search.SearchOutputDataBoundary;
 
 public class SearchPresenter implements SearchOutputDataBoundary {
+
     private final SearchViewModel viewModel;
 
     public SearchPresenter(SearchViewModel viewModel) {
@@ -15,7 +16,7 @@ public class SearchPresenter implements SearchOutputDataBoundary {
         viewModel.setResults(outputData.getResults());
         viewModel.setErrorMessage(null);
 
-        viewModel.updateUI();
+        viewModel.firePropertyChanged();  // 通知 LoggedInView 更新 UI
     }
 
     @Override
@@ -23,6 +24,6 @@ public class SearchPresenter implements SearchOutputDataBoundary {
         viewModel.setResults(null);
         viewModel.setErrorMessage(errorMessage);
 
-        viewModel.updateUI();
+        viewModel.firePropertyChanged();  // 通知 LoggedInView 显示错误
     }
 }
