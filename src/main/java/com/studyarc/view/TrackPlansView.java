@@ -43,11 +43,6 @@ public class TrackPlansView extends JPanel implements PropertyChangeListener {
         JScrollPane jScrollPane = new JScrollPane(this.trackPlansPanel);
         jScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
 
-
-        for (int i = 0; i < 10; i++) {
-            trackPlansPanel.add(new JLabel("Plan " + (i + 1)));
-        }
-
         this.add(TitlePanel, BorderLayout.NORTH);
         this.add(jScrollPane, BorderLayout.CENTER);
 
@@ -70,21 +65,17 @@ public class TrackPlansView extends JPanel implements PropertyChangeListener {
     }
 
     private void showPlansinView(ArrayList<StudyPlan> plans) {
-        System.out.println("chatgpt is the best!!!");
         trackPlansPanel.removeAll();
 
         if (plans == null || plans.isEmpty()) {
             trackPlansPanel.add(new JLabel("You have no plans yet."));
         } else {
-            int index = 0;
             for (StudyPlan plan : plans) {
                 JPanel planPanel = createPlanPanel(plan);
                 trackPlansPanel.add(planPanel);
                 trackPlansPanel.add(Box.createVerticalStrut(15)); // space between plans
-                index++;
             }
         }
-
         trackPlansPanel.revalidate();
         trackPlansPanel.repaint();
 
@@ -147,7 +138,6 @@ public class TrackPlansView extends JPanel implements PropertyChangeListener {
                 Task t = tasks.get(j);
 
                 JPanel taskRow = new JPanel(new FlowLayout(FlowLayout.LEFT));
-
                 JLabel taskLabel = new JLabel("Task " + (j + 1) + ": " + t.getName() + "    ");
 
 //              JTextField taskNameField = new JTextField(15);
@@ -269,47 +259,6 @@ public class TrackPlansView extends JPanel implements PropertyChangeListener {
 
     }
 
-//    public static void main(String[] args) {
-//        SwingUtilities.invokeLater(() -> {
-//
-//
-//
-//            // ===== hook up ViewModel, View, and State =====
-//            TrackPlanViewModel viewModel = new TrackPlanViewModel();
-//            TrackPlansView trackPlansView = new TrackPlansView(viewModel);
-//
-//            ArrayList<StudyPlan> plans = trackPlansView.generateTestPlans();
-//
-//            TrackPlanState state = new TrackPlanState();
-//            state.setStudyPlans(plans);
-//            viewModel.setState(state);
-//            viewModel.firePropertyChange();
-//            // this should call firePropertyChanged()
-//            // and make TrackPlansView render the plans
-//
-//            // ===== simple frame to display the TrackPlansView =====
-//            JFrame frame = new JFrame("Code Example");
-//            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-//            frame.setSize(960, 700);
-//            frame.setLayout(new BorderLayout());
-//
-//            // left sidebar like your screenshot (just to mimic layout)
-//            JPanel leftSidebar = new JPanel();
-//            leftSidebar.setLayout(new BoxLayout(leftSidebar, BoxLayout.Y_AXIS));
-//            leftSidebar.add(new JButton("New Plans"));
-//            leftSidebar.add(Box.createVerticalStrut(10));
-//            leftSidebar.add(new JButton("Papers"));
-//            leftSidebar.add(Box.createVerticalStrut(10));
-//            leftSidebar.add(new JButton("Jobs"));
-//            leftSidebar.add(Box.createVerticalStrut(10));
-//            leftSidebar.add(new JButton("My Plans"));
-//
-//            frame.add(leftSidebar, BorderLayout.WEST);
-//            frame.add(trackPlansView, BorderLayout.CENTER);
-//
-//            frame.setLocationRelativeTo(null);
-//            frame.setVisible(true);
-//        });
-//    }
+
 
 }
