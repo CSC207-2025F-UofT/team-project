@@ -15,27 +15,29 @@ public class SearchViewModel {
     private List<SearchOutputData.SongResult> results;
     private String errorMessage;
 
+    // --- setters ---
     public void setResults(List<SearchOutputData.SongResult> results) {
+        List<SearchOutputData.SongResult> old = this.results;
         this.results = results;
-    }
-
-    public List<SearchOutputData.SongResult> getResults() {
-        return results;
+        support.firePropertyChange(RESULTS_PROPERTY, old, results);
     }
 
     public void setErrorMessage(String errorMessage) {
+        String old = this.errorMessage;
         this.errorMessage = errorMessage;
+        support.firePropertyChange(ERROR_PROPERTY, old, errorMessage);
+    }
+
+    // --- getters ---
+    public List<SearchOutputData.SongResult> getResults() {
+        return results;
     }
 
     public String getErrorMessage() {
         return errorMessage;
     }
 
-    public void firePropertyChanged() {
-        support.firePropertyChange(RESULTS_PROPERTY, null, results);
-        support.firePropertyChange(ERROR_PROPERTY, null, errorMessage);
-    }
-
+    // presenter / view register listeners
     public void addPropertyChangeListener(PropertyChangeListener listener) {
         support.addPropertyChangeListener(listener);
     }
