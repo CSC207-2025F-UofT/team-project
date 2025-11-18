@@ -1,10 +1,16 @@
 package app;
 
+import data_access.FileUserDataAccessObject;
+import interface_adapter.RandC_success_submit.RandCSuccessViewModel;
 import interface_adapter.ViewManagerModel;
 
-import view.WatchlistView;
-import view.FavoritesView;
-import view.ViewManager;
+import interface_adapter.rate_and_comment.CommentController;
+import interface_adapter.rate_and_comment.CommentPresenter;
+import interface_adapter.rate_and_comment.CommentViewModel;
+import use_case.rate_and_comment.CommentInputBoundary;
+import use_case.rate_and_comment.CommentInteractor;
+import use_case.rate_and_comment.CommentOutputBoundary;
+import view.*;
 
 import javax.swing.*;
 import java.awt.*;
@@ -16,8 +22,14 @@ public class AppBuilder {
     final ViewManagerModel viewManagerModel = new ViewManagerModel();
     ViewManager viewManager = new ViewManager(cardPanel, cardLayout, viewManagerModel);
 
+    final FileUserDataAccessObject userDataAccessObject = new FileUserDataAccessObject();
+
     private WatchlistView watchlistView;
     private FavoritesView favoritesView;
+    private RateAndCommentView rateAndCommentView;
+    private CommentViewModel commentViewModel;
+    private RandCSuccessSubmitView randCSuccessSubmitView;
+    private RandCSuccessViewModel randCSuccessViewModel;
 
     public AppBuilder() {
         cardPanel.setLayout(cardLayout);
@@ -32,6 +44,32 @@ public class AppBuilder {
     public AppBuilder addFavoritesView() {
         favoritesView = new FavoritesView();
         cardPanel.add(favoritesView, favoritesView.getViewName());
+        return this;
+    }
+
+    public AppBuilder addRateAndCommentView(String un, String mn) {
+        commentViewModel = new CommentViewModel();
+        //TODO 将emptystring替换成实际的名字
+        rateAndCommentView = new RateAndCommentView(commentViewModel, un, mn);
+        cardPanel.add(rateAndCommentView, rateAndCommentView.getViewName());
+        return this;
+    }
+
+    public AppBuilder addRandCView(String movie) {
+        randCSuccessViewModel = new RandCSuccessViewModel();
+        randCSuccessSubmitView = new RandCSuccessSubmitView(movie);
+        cardPanel.add(randCSuccessSubmitView, randCSuccessViewModel.getViewName());
+        return this;
+    }
+
+    public AppBuilder addCommentUseCase(){
+        final CommentOutputBoundary commentOutputBoundary = new CommentPresenter(commentViewModel,
+                randCSuccessViewModel, viewManagerModel);
+        final CommentInputBoundary commentInputBoundary = new CommentInteractor(userDataAccessObject,
+                commentOutputBoundary);
+
+        CommentController commentController = new CommentController(commentInputBoundary);
+        rateAndCommentView.setCommentController(commentController);
         return this;
     }
 

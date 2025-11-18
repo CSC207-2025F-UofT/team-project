@@ -8,6 +8,8 @@ public class Main {
         JFrame application = appBuilder
                 .addWatchlistView()
                 .addFavoritesView()
+                .addRateAndCommentView("", "")
+                .addRandCView("")
                 .build();
 
         application.pack();

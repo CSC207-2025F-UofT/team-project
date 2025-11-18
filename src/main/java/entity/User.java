@@ -8,6 +8,7 @@ public class User implements FavoriteList, Watchlist {
     private final int accountID;
     private final ArrayList<Media> favorites;
     private final ArrayList<Media> watchlist;
+    private ArrayList<Comment> comments = new ArrayList<>();
 
     public User(String username, String password, int accountID) {
         this.username = username;
@@ -22,6 +23,7 @@ public class User implements FavoriteList, Watchlist {
     public int getAccountID() {return accountID;}
     public ArrayList<Media> getFavorites() {return favorites;}
     public ArrayList<Media> getWatchlist() {return watchlist;}
+    public ArrayList<Comment> getComments() {return comments;}
 
     @Override
     public void addFavorite(Media media) {
@@ -42,4 +44,13 @@ public class User implements FavoriteList, Watchlist {
     public void removeWatchList(Media media) {
         watchlist.remove(media);
     }
+
+
+    public void addcomment(Comment comment) {
+        comments.add(comment);
+    }
+
+    public void setPassword(String password) {this.password = password;}
+
+
 }
