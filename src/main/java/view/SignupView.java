@@ -1,8 +1,8 @@
 package view;
 
-import interface_adapter.login.LoginController;
-import interface_adapter.login.LoginState;
-import interface_adapter.login.LoginViewModel;
+import interface_adapter.signup.SignupController;
+import interface_adapter.signup.SignupState;
+import interface_adapter.signup.SignupViewModel;
 
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
@@ -15,10 +15,10 @@ import java.beans.PropertyChangeListener;
 /**
  * The View for when the user is logging in to the program.
  */
-public class LoginView extends JPanel implements ActionListener, PropertyChangeListener {
+public class SignupView extends JPanel implements ActionListener, PropertyChangeListener {
 
-    private final String viewName = "login";
-    private final LoginViewModel loginViewModel;
+    private final String viewName = "signup";
+    private final SignupViewModel signupViewModel;
 
     private final JTextField usernameInputField = new JTextField(24);
     private final JLabel usernameErrorField = new JLabel();
@@ -26,17 +26,16 @@ public class LoginView extends JPanel implements ActionListener, PropertyChangeL
     private final JPasswordField passwordInputField = new JPasswordField(24);
     private final JLabel passwordErrorField = new JLabel();
 
-    private final JButton logIn;
-    private final JButton cancel;
     private final JButton register;
-    private LoginController loginController = null;
+    private final JButton cancel;
+    private SignupController signupController = null;
 
-    public LoginView(LoginViewModel loginViewModel) {
+    public SignupView(SignupViewModel signupViewModel) {
 
-        this.loginViewModel = loginViewModel;
-        this.loginViewModel.addPropertyChangeListener(this);
+        this.signupViewModel = signupViewModel;
+        this.signupViewModel.addPropertyChangeListener(this);
 
-        final JLabel title = new JLabel("Login Screen");
+        final JLabel title = new JLabel("Signup Screen");
         title.setAlignmentX(Component.CENTER_ALIGNMENT);
 
         final LabelTextPanel usernameInfo = new LabelTextPanel(
@@ -45,29 +44,20 @@ public class LoginView extends JPanel implements ActionListener, PropertyChangeL
                 new JLabel("Password"), passwordInputField);
 
         final JPanel buttons = new JPanel();
-        logIn = new JButton("Log In");
-        buttons.add(logIn);
         register = new JButton("Register");
-        cancel = new JButton("Cancel");
+        buttons.add(register);
+        cancel = new JButton("cancel");
         buttons.add(cancel);
 
-        logIn.addActionListener(
+        register.addActionListener(
                 evt -> {
-                    if (evt.getSource().equals(logIn)) {
-                        final LoginState currentState = loginViewModel.getState();
+                    if (evt.getSource().equals(register)) {
+                        final SignupState currentState = signupViewModel.getState();
 
-                        loginController.execute(
+                        signupController.execute(
                                 currentState.getUsername(),
                                 currentState.getPassword()
                         );
-                    }
-                }
-        );
-
-        register.addActionListener(
-                new ActionListener() {
-                    public void actionPerformed(ActionEvent evt) {
-                        loginController.switchToLoginView();
                     }
                 }
         );
@@ -77,9 +67,9 @@ public class LoginView extends JPanel implements ActionListener, PropertyChangeL
         usernameInputField.getDocument().addDocumentListener(new DocumentListener() {
 
             private void documentListenerHelper() {
-                final LoginState currentState = loginViewModel.getState();
+                final SignupState currentState = signupViewModel.getState();
                 currentState.setUsername(usernameInputField.getText());
-                loginViewModel.setState(currentState);
+                signupViewModel.setState(currentState);
             }
 
             @Override
@@ -103,9 +93,9 @@ public class LoginView extends JPanel implements ActionListener, PropertyChangeL
         passwordInputField.getDocument().addDocumentListener(new DocumentListener() {
 
             private void documentListenerHelper() {
-                final LoginState currentState = loginViewModel.getState();
+                final SignupState currentState = signupViewModel.getState();
                 currentState.setPassword(new String(passwordInputField.getPassword()));
-                loginViewModel.setState(currentState);
+                signupViewModel.setState(currentState);
             }
 
             @Override
@@ -141,12 +131,12 @@ public class LoginView extends JPanel implements ActionListener, PropertyChangeL
 
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
-        final LoginState state = (LoginState) evt.getNewValue();
+        final SignupState state = (SignupState) evt.getNewValue();
         setFields(state);
-        usernameErrorField.setText(state.getLoginError());
+        usernameErrorField.setText(state.getSignupError());
     }
 
-    private void setFields(LoginState state) {
+    private void setFields(SignupState state) {
         usernameInputField.setText(state.getUsername());
     }
 
@@ -154,7 +144,7 @@ public class LoginView extends JPanel implements ActionListener, PropertyChangeL
         return viewName;
     }
 
-    public void setLoginController(LoginController loginController) {
-        this.loginController = loginController;
+    public void setSignupController(SignupController signupController) {
+        this.signupController = signupController;
     }
 }
