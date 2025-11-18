@@ -9,13 +9,13 @@ import entity.UserFactory;
 public class SignupInteractor implements SignupInputBoundary {
     private final SignupUserDataAccessInterface userDataAccessObject;
     private final SignupOutputBoundary userPresenter;
-    //private final UserFactory userFactory;
+    private static UserFactory userFactory;
 
     public SignupInteractor(SignupUserDataAccessInterface signupDataAccessInterface,
                             SignupOutputBoundary signupOutputBoundary) {
         this.userDataAccessObject = signupDataAccessInterface;
         this.userPresenter = signupOutputBoundary;
-        //this.userFactory = userFactory;
+        this.userFactory = userFactory;
     }
 
     @Override
