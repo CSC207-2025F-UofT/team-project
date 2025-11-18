@@ -31,6 +31,16 @@ public class BuildPokemonTeamInteractor implements BuildPokemonTeamInputBoundary
 
             // Checks to see if the team can even be added to.
             if (index == -1){
+                // Goes through each team slot to see if there's a slot that can be added to.
+                for ( int i = 0; i < 6; i++) {
+                    if (team.getPokemon(i) == null){
+                        team.setPokemon(Pokemon, i);
+                        final BuildPokemonTeamOutputData buildPokemonTeamOutputData =
+                                new BuildPokemonTeamOutputData(team);
+                        userPresenter.prepareSuccessView(buildPokemonTeamOutputData);
+                        return;
+                    }
+                }
                 userPresenter.prepareFailView("Team is full. Please remove a Pokemon or create a new Team.");
                 return;
             }
