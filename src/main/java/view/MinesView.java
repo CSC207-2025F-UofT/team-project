@@ -15,7 +15,7 @@ public class MinesView extends JFrame {
     private final MinesViewModel viewModel;
 
 
-    public MinesView() {
+    public MinesView(User user) {
         viewModel = new MinesViewModel();
         MinesPresenter presenter = new MinesPresenter(viewModel);
         MinesGame game = new MinesGame(5, 5);
@@ -107,7 +107,4 @@ public class MinesView extends JFrame {
         setVisible(true);
     }
 
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(MinesView::new);
-    }
 }

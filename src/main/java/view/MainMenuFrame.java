@@ -1,5 +1,7 @@
 package view;
 
+import entity.User;
+
 import javax.swing.*;
 import java.awt.*;
 
@@ -24,14 +26,16 @@ public class MainMenuFrame extends JFrame {
         JButton profileBtn = createMenuButton("Profile");
         JButton betHistoryBtn = createMenuButton("View Bet History");
         JButton sportBetBtn = createMenuButton("Sport Bet");
-        JButton playBetGameBtn = createMenuButton("Play Bet Game");
+        JButton minesBtn = createMenuButton("Play Mines");
+        JButton blackjackBtn = createMenuButton("Play Blackjack");
         JButton depositBtn = createMenuButton("Deposit / Withdraw");
         JButton logoutBtn = createMenuButton("Logout");
 
         JPanel betRow = new JPanel(new GridLayout(1, 2, 15, 0));
         betRow.setOpaque(false);
         betRow.add(sportBetBtn);
-        betRow.add(playBetGameBtn);
+        betRow.add(minesBtn);
+        betRow.add(blackjackBtn);
 
         panel.add(profileBtn);
         panel.add(betHistoryBtn);
@@ -56,8 +60,12 @@ public class MainMenuFrame extends JFrame {
             new SportbetFrame(user, this);
         });
 
-        playBetGameBtn.addActionListener(e -> {
-            new SportbetFrame(user, this);
+        minesBtn.addActionListener(e -> {
+            new MinesView(user);
+        });
+
+        blackjackBtn.addActionListener(e -> {
+            new BlackjackView(user);
         });
 
         setVisible(true);

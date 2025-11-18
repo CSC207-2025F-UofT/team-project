@@ -24,7 +24,7 @@ public class BlackjackView extends JFrame {
 // row 0 = dealer, row 1 = player
 
 
-    public BlackjackView() {
+    public BlackjackView(User user) {
 // === Build Clean Architecture Stack ===
         viewModel = new BlackjackViewModel();
         BlackjackPresenter presenter = new BlackjackPresenter(viewModel);
@@ -156,8 +156,6 @@ public class BlackjackView extends JFrame {
         card.setFont(new Font("SansSerif", Font.BOLD, 24));
         return card;
     }
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(BlackjackView::new);
-    }
+
 
 }

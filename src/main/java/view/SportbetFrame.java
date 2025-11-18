@@ -2,7 +2,7 @@ package view;
 
 import data_access.SportsAPIDataAccess;
 import entity.Sportbet;
-
+import entity.User;
 import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
@@ -45,6 +45,8 @@ public class SportbetFrame extends JFrame {
                 JOptionPane.showMessageDialog(this, "Enter a valid integer amount.");
                 return;
             }
+            user.addBet(selected);
+            user.viewBets();
 
             JOptionPane.showMessageDialog(this,
                     "Bet placed: " + selected.toString() + " for $" + amount);
