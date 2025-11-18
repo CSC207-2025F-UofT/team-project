@@ -1,6 +1,8 @@
 package ui;
 
 import controllers.DashboardController;
+import controllers.PortfolioController;
+import controllers.StockSearchController;
 import data.ExpenseRepository;
 
 import javax.swing.*;
@@ -8,7 +10,9 @@ import java.awt.*;
 
 public class DashboardView extends JFrame {
 
-    private final DashboardController controller;
+    private final DashboardController dashController;
+    private final StockSearchController stockController;
+//    private final PortfolioController portfolioController;
     private final Runnable onLogout;
     private final String username;
     private final ExpenseRepository expenseRepository;
@@ -20,10 +24,16 @@ public class DashboardView extends JFrame {
     private static final int NEWS_TAB = 1;
     private static final int TRACKER_TAB = 2;
     private static final int STOCK_TAB = 3;
+    private static final int PORTFOLIO_TAB = 4;
 
-    public DashboardView(DashboardController controller, Runnable onLogout, String username,
+    public DashboardView(DashboardController dashController,
+                         StockSearchController stockController,
+                         Runnable onLogout,
+                         String username,
                          ExpenseRepository expenseRepository) {
-        this.controller = controller;
+        this.dashController = dashController;
+        this.stockController = stockController;
+//        this.portfolioController = portfolioController;
         this.onLogout = onLogout;
         this.username = username;
         this.expenseRepository = expenseRepository;
@@ -49,6 +59,7 @@ public class DashboardView extends JFrame {
         tabs.addTab("News", buildTabPlaceholder("Open the News window…"));
         tabs.addTab("Tracker", buildTabPlaceholder("Open the Tracker window…"));
         tabs.addTab("Stock", buildTabPlaceholder("Open the Stock window…"));
+        tabs.addTab("Portfolio", buildTabPlaceholder("Open the Portfolio window"));
 
         // When user selects a tab, open a new window and reset back to Home
         tabs.addChangeListener(e -> {
@@ -59,7 +70,10 @@ public class DashboardView extends JFrame {
                 case NEWS_TAB -> SwingUtilities.invokeLater(() -> new ui.NewsView().setVisible(true));
                 case TRACKER_TAB -> SwingUtilities.invokeLater(() ->
                         new ui.TrackerView(username, expenseRepository).setVisible(true));
-                case STOCK_TAB -> SwingUtilities.invokeLater(() -> new ui.StockView().setVisible(true));
+                case STOCK_TAB -> SwingUtilities.invokeLater(() ->
+                        new ui.StockSearchView(stockController, username).setVisible(true));
+//                case PORTFOLIO_TAB -> SwingUtilities.invokeLater(() ->
+//                        new  ui.PortfolioView(portfolioController, username).setVisible(true));
                 default -> {}
             }
             // Reset to Home to avoid repeated auto-opens on focus changes
