@@ -4,7 +4,6 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import entity.Comment;
 import entity.Media;
-import entity.Movie;
 import entity.User;
 import use_case.rate_and_comment.CommentUserDataAccessInterface;
 
@@ -18,21 +17,41 @@ import java.util.Map;
 
 public class FileUserDataAccessObject implements CommentUserDataAccessInterface {
 
-    private final String filePath = "users.json";
+    private final String filePath = "src/main/java/userdata/users.json";
     private final Gson gson = new Gson();
     private final Type mapType = new TypeToken<Map<String, User>>(){}.getType();
 
     private Map<String, User> readFile() {
         try {
             File file = new File(filePath);
+
+            // 调试信息
+            System.out.println("=== File Debug Info ===");
+            System.out.println("File exists: " + file.exists());
+            System.out.println("File path: " + file.getAbsolutePath());
+            System.out.println("Can read: " + file.canRead());
+
             if (!file.exists()) {
+                System.out.println("File not found, returning empty map");
                 return new HashMap<>();
             }
+
             FileReader reader = new FileReader(file);
             Map<String, User> map = gson.fromJson(reader, mapType);
             reader.close();
-            return map == null ? new HashMap<>() : map;
+
+            // 调试信息
+            if (map == null) {
+                System.out.println("Gson returned null, returning empty map");
+                return new HashMap<>();
+            }
+
+            System.out.println("Successfully loaded " + map.size() + " users");
+            System.out.println("User keys: " + map.keySet());
+
+            return map;
         } catch (Exception e) {
+            System.err.println("Error reading file:");
             e.printStackTrace();
             return new HashMap<>();
         }
@@ -43,85 +62,133 @@ public class FileUserDataAccessObject implements CommentUserDataAccessInterface 
             FileWriter writer = new FileWriter(filePath);
             gson.toJson(map, writer);
             writer.close();
+            System.out.println("Successfully wrote " + map.size() + " users to file");
         } catch (Exception e) {
+            System.err.println("Error writing file:");
             e.printStackTrace();
         }
     }
 
-    //@Override
     public void createUser(String username, String password, int accountID) {
         Map<String, User> map = readFile();
         if (!map.containsKey(username)) {
             map.put(username, new User(username, password, accountID));
             writeFile(map);
+            System.out.println("Created user: " + username);
+        } else {
+            System.out.println("User already exists: " + username);
         }
     }
 
-    //@Override
     public User getUser(String username) {
-        return readFile().get(username);
+        Map<String, User> map = readFile();
+
+        // 调试信息
+        System.out.println("=== Get User Debug ===");
+        System.out.println("Looking for: '" + username + "'");
+        System.out.println("Available users: " + map.keySet());
+
+        User user = map.get(username);
+        System.out.println("User found: " + (user != null));
+
+        if (user == null) {
+            System.out.println("Trying with trimmed username...");
+            user = map.get(username.trim());
+            System.out.println("User found after trim: " + (user != null));
+        }
+
+        return user;
     }
 
-    //@Override
     public void addToWatchlist(String username, Media movie) {
         Map<String, User> map = readFile();
-        map.get(username).addWatchlist(movie);
+        User user = map.get(username);
+        if (user == null) {
+            throw new RuntimeException("User not found: " + username);
+        }
+        user.addWatchlist(movie);
         writeFile(map);
     }
 
-    //@Override
     public void deleteFromWatchlist(String username, Media movie) {
         Map<String, User> map = readFile();
-        map.get(username).removeWatchList(movie);
+        User user = map.get(username);
+        if (user == null) {
+            throw new RuntimeException("User not found: " + username);
+        }
+        user.removeWatchList(movie);
         writeFile(map);
     }
 
-    //@Override
     public void addToFavoritelist(String username, Media movie) {
         Map<String, User> map = readFile();
-        map.get(username).addFavorite(movie);
+        User user = map.get(username);
+        if (user == null) {
+            throw new RuntimeException("User not found: " + username);
+        }
+        user.addFavorite(movie);
         writeFile(map);
     }
 
-    //@Override
     public void deleteFromFavoritelist(String username, Media movie) {
         Map<String, User> map = readFile();
-        map.get(username).removeFavorite(movie);
+        User user = map.get(username);
+        if (user == null) {
+            throw new RuntimeException("User not found: " + username);
+        }
+        user.removeFavorite(movie);
         writeFile(map);
     }
 
-    //@Override
     public List<Media> getWatchlist(String username) {
-        return readFile().get(username).getWatchlist();
+        User user = getUser(username);
+        if (user == null) {
+            throw new RuntimeException("User not found: " + username);
+        }
+        return user.getWatchlist();
     }
 
-    //@Override
     public List<Media> getFavoritelist(String username) {
-        return readFile().get(username).getFavorites();
+        User user = getUser(username);
+        if (user == null) {
+            throw new RuntimeException("User not found: " + username);
+        }
+        return user.getFavorites();
     }
 
     @Override
     public void addComment(String username, Comment comment) {
         Map<String, User> map = readFile();
+        if (!map.containsKey(username)) {
+            throw new RuntimeException("User '" + username + "' does not exist in users.json");
+        }
         map.get(username).addcomment(comment);
         writeFile(map);
     }
 
-    //@Override
     public List<Comment> getComments(String username) {
-        return readFile().get(username).getComments();
+        User user = getUser(username);
+        if (user == null) {
+            throw new RuntimeException("User not found: " + username);
+        }
+        return user.getComments();
     }
 
-    //@Override
     public String getPassword(String username) {
-        return readFile().get(username).getPassword();
+        User user = getUser(username);
+        if (user == null) {
+            throw new RuntimeException("User not found: " + username);
+        }
+        return user.getPassword();
     }
 
-    //@Override
     public void changePassword(String username, String newPassword) {
         Map<String, User> map = readFile();
-        map.get(username).setPassword(newPassword);
+        User user = map.get(username);
+        if (user == null) {
+            throw new RuntimeException("User not found: " + username);
+        }
+        user.setPassword(newPassword);
         writeFile(map);
     }
 }
-
