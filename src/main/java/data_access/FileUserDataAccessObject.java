@@ -21,6 +21,8 @@ public class FileUserDataAccessObject implements CommentUserDataAccessInterface 
     private final Gson gson = new Gson();
     private final Type mapType = new TypeToken<Map<String, User>>(){}.getType();
 
+
+    // Do not want to look at all users. only one
     private Map<String, User> readFile() {
         try {
             File file = new File(filePath);
@@ -106,7 +108,7 @@ public class FileUserDataAccessObject implements CommentUserDataAccessInterface 
         if (user == null) {
             throw new RuntimeException("User not found: " + username);
         }
-        user.addWatchlist(movie);
+        user.addWatchlist(movie.getReferenceNumber());
         writeFile(map);
     }
 
@@ -116,7 +118,7 @@ public class FileUserDataAccessObject implements CommentUserDataAccessInterface 
         if (user == null) {
             throw new RuntimeException("User not found: " + username);
         }
-        user.removeWatchList(movie);
+        user.removeWatchList(movie.getReferenceNumber());
         writeFile(map);
     }
 
@@ -126,7 +128,7 @@ public class FileUserDataAccessObject implements CommentUserDataAccessInterface 
         if (user == null) {
             throw new RuntimeException("User not found: " + username);
         }
-        user.addFavorite(movie);
+        user.addFavorite(movie.getReferenceNumber());
         writeFile(map);
     }
 
@@ -136,11 +138,11 @@ public class FileUserDataAccessObject implements CommentUserDataAccessInterface 
         if (user == null) {
             throw new RuntimeException("User not found: " + username);
         }
-        user.removeFavorite(movie);
+        user.removeFavorite(movie.getReferenceNumber());
         writeFile(map);
     }
 
-    public List<Media> getWatchlist(String username) {
+    public List<Integer> getWatchlist(String username) {
         User user = getUser(username);
         if (user == null) {
             throw new RuntimeException("User not found: " + username);
@@ -148,7 +150,7 @@ public class FileUserDataAccessObject implements CommentUserDataAccessInterface 
         return user.getWatchlist();
     }
 
-    public List<Media> getFavoritelist(String username) {
+    public List<Integer> getFavoritelist(String username) {
         User user = getUser(username);
         if (user == null) {
             throw new RuntimeException("User not found: " + username);

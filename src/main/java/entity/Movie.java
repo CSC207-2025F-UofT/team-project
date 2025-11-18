@@ -16,7 +16,6 @@ public class Movie extends Media {
         this.rating = rating;
         this.releaseDate = releaseDate;
         this.runtime = runtime;
-
     }
 
 }
