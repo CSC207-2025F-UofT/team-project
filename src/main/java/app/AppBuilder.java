@@ -1,5 +1,7 @@
 package app;
 
+import data_access.BestTeamDataAccessObject;
+import entity.Player;
 import interface_adapter.ViewManagerModel;
 import interface_adapter.home.HomeController;
 import interface_adapter.home.HomeViewModel;
@@ -10,18 +12,26 @@ import interface_adapter.starting_lineup.StartingLineupController;
 import interface_adapter.starting_lineup.StartingLineupPresenter;
 import interface_adapter.starting_lineup.StartingLineupViewModel;
 import interface_adapter.team_view.TeamViewModel;
+import interface_adapter.best_team.BestTeamController;
+import interface_adapter.best_team.BestTeamPresenter;
+import interface_adapter.best_team.BestTeamViewModel;
 import use_case.open_team_entry.OpenTeamEntryInputBoundary;
 import use_case.open_team_entry.OpenTeamEntryInteractor;
 import use_case.starting_lineup.StartingLineupInputBoundary;
 import use_case.starting_lineup.StartingLineupInteractor;
 import use_case.starting_lineup.StartingLineupOutputBoundary;
+import use_case.best_team.BestTeamDataAccessInterface;
+import use_case.best_team.BestTeamInputBoundary;
+import use_case.best_team.BestTeamInteractor;
 import view.HomePageView;
 import view.TeamDisplayView;
 import view.TeamEntryView;
 import view.ViewManager;
+import view.BestTeamView;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.List;
 
 public class AppBuilder {
     private final JPanel cardPanel = new JPanel();
@@ -41,6 +51,9 @@ public class AppBuilder {
     private StartingLineupViewModel startingLineupViewModelAdapter;
     private StartingLineupPresenter startingLineupPresenter;
     private StartingLineupInputBoundary startingLineupInputBoundary;
+    private BestTeamViewModel bestTeamViewModel;
+    private BestTeamView bestTeamView;
+    private BestTeamController bestTeamController;
 
 
     public AppBuilder() {
@@ -92,6 +105,20 @@ public class AppBuilder {
         return this;
     }
 
+    public AppBuilder addBestTeamView() {
+        bestTeamViewModel = new BestTeamViewModel();
+        bestTeamView = new BestTeamView(bestTeamViewModel);
+        cardPanel.add(bestTeamView, bestTeamView.getViewTitle());
+
+        bestTeamView.setBackAction("Back", () -> {
+            if (homePageView != null) {
+                viewManagerModel.setState(homePageView.getViewName());
+                viewManagerModel.firePropertyChange();
+            }
+        });
+        return this;
+    }
+
     public AppBuilder addOpenTeamEntryViewUseCase() {
         final OpenTeamEntryPresenter presenter =
                 new OpenTeamEntryPresenter(viewManagerModel, teamEntryViewModel, homeViewModel);
@@ -113,6 +140,15 @@ public class AppBuilder {
         return this;
     }
 
+    public AppBuilder addBestTeamUseCase() {
+        BestTeamDataAccessInterface dataAccess = new BestTeamDataAccessObject();
+        BestTeamPresenter presenter = new BestTeamPresenter(bestTeamViewModel, viewManagerModel);
+        BestTeamInteractor interactor = new BestTeamInteractor(dataAccess, presenter);
+        bestTeamController = new BestTeamController(interactor);
+        homePageView.setBestTeamController(bestTeamController);
+        return this;
+    }
+
     public JFrame build() {
         final JFrame application = new JFrame("Premier League Fantasy App");
         application.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
@@ -124,6 +160,4 @@ public class AppBuilder {
 
         return application;
     }
-
-
 }

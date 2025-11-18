@@ -9,9 +9,11 @@ public class   Main {
                 .addHomePageView()
                 .addTeamEntryView()
                 .addStartingLineupView()
+                .addBestTeamView()
                 .addOpenTeamEntryViewUseCase()
                 .addStartingLineupUseCase()
                 .addHomeUseCase()
+                .addBestTeamUseCase()
                 .build();
         application.setSize(500, 500);  // width=1000px, height=700px
         application.setLocationRelativeTo(null); // center on screen
