@@ -12,11 +12,18 @@ public class BuildPokemonTeamInputData {
     private final Team team;
 
 
-    public BuildPokemonTeamInputData(int index, String name, Team team) {
+    public BuildPokemonTeamInputData(String name, Team team, int index) {
         this.index = index;
         this.name = name;
         this.team = team;
     }
+
+    public BuildPokemonTeamInputData(String name, Team team) {
+        this.name = name;
+        this.team = team;
+        index = -1;
+    }
+
 
     public String getName() {
         return name;

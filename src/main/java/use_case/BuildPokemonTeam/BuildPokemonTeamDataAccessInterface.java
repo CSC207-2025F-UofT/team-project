@@ -7,13 +7,6 @@ import java.util.Map;
 
 public interface BuildPokemonTeamDataAccessInterface {
     /**
-     * Loads a team by its name.
-     * @param name the name of the team
-     * @return the team, or null if not found
-     */
-    Team loadTeam(String name);
-
-    /**
      * Saves or updates a team.
      * @param team the team to save
      */

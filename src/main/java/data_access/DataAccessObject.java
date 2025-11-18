@@ -53,8 +53,6 @@ public class DataAccessObject implements BuildPokemonTeamDataAccessInterface {
             System.out.println(teamName);
             System.out.println(pokemons + "\n");
 
-
-
             FileWriter writer = new FileWriter("teamStorage/teams.csv", true);
 
 

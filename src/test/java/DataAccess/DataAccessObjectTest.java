@@ -54,8 +54,6 @@ public class DataAccessObjectTest {
         t.setPokemon(mewtwo, 4);
         t.setPokemon(mew, 5);
 
-
-
         d.saveTeam(t);
 
     }
