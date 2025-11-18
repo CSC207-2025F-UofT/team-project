@@ -7,7 +7,7 @@ import java.awt.*;
 
 public class ProfileFrame extends JFrame {
     public ProfileFrame(User user, JFrame mainMenu) {
-        setTitle("Profile");
+        setTitle("interface_adapter/Profile");
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setExtendedState(JFrame.MAXIMIZED_BOTH);
         setLayout(new BorderLayout());
