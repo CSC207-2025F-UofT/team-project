@@ -1,4 +1,4 @@
-package interface_adapter;
+package interface_adapter.Blackjack;
 
 import entity.*;
 import use_case.BlackjackOutputBoundary;

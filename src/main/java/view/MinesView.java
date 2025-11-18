@@ -3,8 +3,11 @@ package view;
 
 import javax.swing.*;
 import java.awt.*;
-import interface_adapter.*;
+
 import entity.*;
+import interface_adapter.Mines.MinesController;
+import interface_adapter.Mines.MinesPresenter;
+import interface_adapter.Mines.MinesViewModel;
 import use_case.*;
 
 

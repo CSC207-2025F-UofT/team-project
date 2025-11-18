@@ -1,5 +1,5 @@
 
-package interface_adapter;
+package interface_adapter.Mines;
 
 import entity.MinesGame;
 
