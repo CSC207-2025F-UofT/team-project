@@ -4,7 +4,7 @@ import entity.Review;
 
 public interface PostReviewUserDataAccessInterface {
 
-    public void addReview(Review review, String Username);
+    void addReview(Review review, String Username);
 
 
 }
