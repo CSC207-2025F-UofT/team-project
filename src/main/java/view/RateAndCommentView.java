@@ -33,10 +33,9 @@ public class RateAndCommentView extends JPanel implements ActionListener, Proper
 
     private CommentController commentController = null;
 
-    public RateAndCommentView(CommentViewModel commentViewModel, ClickingViewModel clickingViewModel, String un, String mn) {
+    public RateAndCommentView(CommentViewModel commentViewModel, ClickingViewModel clickingViewModel) {
         this.clickingViewModel = clickingViewModel;
-        this.username = un;
-        this.medianame = mn;
+
         this.commentViewModel = commentViewModel;
         this.commentViewModel.addPropertyChangeListener(this);
         //TODO 注意这两个加的位置

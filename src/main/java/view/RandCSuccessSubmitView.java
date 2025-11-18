@@ -1,14 +1,18 @@
 package view;
 
+import interface_adapter.RandC_success_submit.RandCSuccessState;
 import interface_adapter.RandC_success_submit.RandCSuccessViewModel;
 import interface_adapter.clicking.ClickingViewModel;
+import interface_adapter.rate_and_comment.CommentState;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 
-public class RandCSuccessSubmitView extends JPanel {
+public class RandCSuccessSubmitView extends JPanel implements PropertyChangeListener {
     private String movieName;
     private JButton returnButton;
     private JLabel messageLabel;
@@ -16,8 +20,9 @@ public class RandCSuccessSubmitView extends JPanel {
     private ClickingViewModel clickingViewModel;
 
     // 构造函数：从外部传入电影名
-    public RandCSuccessSubmitView(String movieName) {
-        this.movieName = movieName;
+    public RandCSuccessSubmitView(RandCSuccessViewModel randCSuccessViewModel, ClickingViewModel clickingViewModel) {
+        this.randCSuccessViewModel = randCSuccessViewModel;
+        this.clickingViewModel = clickingViewModel;
         initUI();
     }
 
@@ -47,9 +52,12 @@ public class RandCSuccessSubmitView extends JPanel {
         returnButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                //清空此界面及对应的viewmodel
+                randCSuccessViewModel.setState(new RandCSuccessState());
+                randCSuccessViewModel.firePropertyChange();
                 // TODO: 切换回主界面，例如：
-                // mainFrame.setContentPane(previousPanel);
-                // mainFrame.revalidate();
+
+
                 JOptionPane.showMessageDialog(
                         RandCSuccessSubmitView.this,
                         "Return button clicked (you can switch UI here).",
@@ -65,15 +73,22 @@ public class RandCSuccessSubmitView extends JPanel {
         add(bottomPanel, BorderLayout.SOUTH);
     }
 
-    // 测试运行
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> {
-            JFrame frame = new JFrame("Submission Success");
-            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-            frame.setSize(500, 200);
-            frame.setLocationRelativeTo(null);
-            frame.add(new RandCSuccessSubmitView("Inception")); // 传入电影名
-            frame.setVisible(true);
-        });
+    @Override
+    public void propertyChange(PropertyChangeEvent evt) {
+        RandCSuccessState state = (RandCSuccessState) evt.getNewValue();
+        movieName = state.getMedianame();
+
     }
+
+    // 测试运行
+//    public static void main(String[] args) {
+//        SwingUtilities.invokeLater(() -> {
+//            JFrame frame = new JFrame("Submission Success");
+//            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+//            frame.setSize(500, 200);
+//            frame.setLocationRelativeTo(null);
+//            frame.add(new RandCSuccessSubmitView("Inception")); // 传入电影名
+//            frame.setVisible(true);
+//        });
+//    }
 }

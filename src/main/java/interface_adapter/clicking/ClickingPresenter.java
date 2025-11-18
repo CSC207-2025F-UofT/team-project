@@ -30,7 +30,7 @@ public class ClickingPresenter implements ClickingOutputBoundary {
         clickingViewModel.overview = outputData.overview;
         clickingViewModel.posterUrl = outputData.posterUrl;
 
-        final Comment;
+
 
         viewManagerModel.setState(clickingViewModel.viewName);
         viewManagerModel.firePropertyChange();
