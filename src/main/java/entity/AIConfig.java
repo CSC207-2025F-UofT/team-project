@@ -1,4 +1,5 @@
-package entities;
+package entity;
+
 /**
  * Stores the API key for AI-based flashcard generation.
  * Used for connecting to AI services (e.g., OpenRouter) to generate flashcards.
@@ -10,6 +11,7 @@ public class AIConfig {
     public AIConfig(String apikey) {
         this.apikey = apikey;
     }
+
     public String getApikey() {
         return apikey;
     }

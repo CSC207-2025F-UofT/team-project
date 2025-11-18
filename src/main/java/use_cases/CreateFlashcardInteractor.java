@@ -1,8 +1,8 @@
 package use_cases;
-import entities.Flashcard;
+
+import entity.Flashcard;
 
 public class CreateFlashcardInteractor {
-
 
     private CreateFlashcardInteractor() {
     }
