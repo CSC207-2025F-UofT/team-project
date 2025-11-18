@@ -4,6 +4,9 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
+import data_access.RestaurantSearchService;
+import data_access.YelpRestaurantSearchService;
+
 
 public class FoodFinderApp {
     private List<Restaurant> restaurantList;
@@ -20,6 +23,11 @@ public class FoodFinderApp {
 
     public void setCurrentUser(User currentUser) {
         this.currentUser = currentUser;
+    }
+
+    public void createRestaurantList() throws RestaurantSearchService.RestaurantSearchException {
+        YelpRestaurantSearchService searchService = new YelpRestaurantSearchService();
+        this.restaurantList = searchService.searchRestaurants(41.902656f, -87.650020f, "restaurant", 10);
     }
 
     public List<Restaurant> getFullRestaurantlist() {
