@@ -9,7 +9,7 @@ public class Movie extends Media {
 
 
     public Movie(int referenceNumber, int[] genreIDs, String overview, String title, double rating, String releaseDate, int runtime ) {
-        super(referenceNumber, genreIDs);
+        super(title,referenceNumber, genreIDs);
         this.genreIDs = genreIDs;
         this.overview = "";
         this.title = "";
