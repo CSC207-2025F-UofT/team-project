@@ -34,10 +34,11 @@ public class SignupInteractor implements SignupInputBoundary {
             userPresenter.prepareFailView("Username cannot be empty");
         }
         else {
-            final User user = userFactory.create(signupInputData.getUsername(), signupInputData.getPassword());
+            final User user = userFactory.create(signupInputData.getUsername(), 50, 0,
+                    0, signupInputData.getPassword());
             userDataAccessObject.save(user);
 
-            final SignupOutputData signupOutputData = new SignupOutputData(user.getName());
+            final SignupOutputData signupOutputData = new SignupOutputData(user.getUsername());
             userPresenter.prepareSuccessView(signupOutputData);
         }
     }
