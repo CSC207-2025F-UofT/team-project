@@ -1,5 +1,7 @@
 package view;
 
+import entity.User;
+
 import javax.swing.*;
 import java.awt.*;
 import java.math.BigDecimal;

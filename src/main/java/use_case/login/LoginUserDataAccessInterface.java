@@ -1,7 +1,7 @@
 package use_case.login;
 
-import view.User;
 
+import entity.User;
 
 public interface LoginUserDataAccessInterface {
 

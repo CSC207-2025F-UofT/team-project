@@ -1,7 +1,7 @@
 package test;
 
+import entity.User;
 import use_case.login.LoginUserDataAccessInterface;
-import view.User;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -24,6 +24,7 @@ public class InMemoryUserDataAccess implements LoginUserDataAccessInterface {
     public void save(User user) {
 
     }
+
 
     @Override
     public User get(String username) {
