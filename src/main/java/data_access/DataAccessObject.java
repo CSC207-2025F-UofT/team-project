@@ -46,7 +46,7 @@ public class DataAccessObject implements BuildPokemonTeamDataAccessInterface {
 
 
             if (teamExists(team)) {
-                System.out.println("ok i will do something about this");
+                System.out.println("this must change");
             }
 
             System.out.println("SUCCESS");
