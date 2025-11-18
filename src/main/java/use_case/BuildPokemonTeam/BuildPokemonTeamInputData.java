@@ -3,7 +3,7 @@ package use_case.BuildPokemonTeam;
 import entity.Team;
 
 /**
- * The input data for the Pokemon Lookup Use Case.
+ * The input data for the BuildPokemonTeam Use Case.
  */
 
 public class BuildPokemonTeamInputData {

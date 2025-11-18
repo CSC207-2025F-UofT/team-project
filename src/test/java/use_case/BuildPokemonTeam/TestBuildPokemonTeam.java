@@ -4,10 +4,6 @@ import entity.Pokemon;
 import entity.EmptyPokemonFactory;
 import entity.Team;
 import org.junit.Test;
-import use_case.BuildPokemonTeam.BuildPokemonTeamInputData;
-import use_case.BuildPokemonTeam.BuildPokemonTeamInteractor;
-import use_case.BuildPokemonTeam.BuildPokemonTeamOutputBoundary;
-import use_case.BuildPokemonTeam.BuildPokemonTeamOutputData;
 
 import java.io.IOException;
 

@@ -1,9 +1,7 @@
 package use_case.BuildPokemonTeam;
 import entity.Team;
-import entity.Pokemon;
 
 import java.io.FileNotFoundException;
-import java.util.Map;
 
 
 public interface BuildPokemonTeamDataAccessInterface {
