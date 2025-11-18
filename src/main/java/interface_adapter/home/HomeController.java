@@ -1,14 +1,22 @@
 package interface_adapter.home;
 
+import interface_adapter.open_team_entry.OpenTeamEntryController;
+import interface_adapter.open_team_entry.OpenTeamEntryViewModel;
+import use_case.open_team_entry.OpenTeamEntryInputBoundary;
+
 /**
  * Controller for the Signup Use Case.
  */
 public class HomeController {
 
     private final HomeViewModel homeViewModel;
+    private final OpenTeamEntryController openTeamEntryController;
+    private final OpenTeamEntryInputBoundary openTeamEntryInputBoundary;
 
-    public HomeController(HomeViewModel homeViewModel) {
+    public HomeController(HomeViewModel homeViewModel, OpenTeamEntryController openTeamEntryController, OpenTeamEntryInputBoundary openTeamEntryInputBoundary) {
         this.homeViewModel = homeViewModel;
+        this.openTeamEntryInputBoundary = openTeamEntryInputBoundary;
+        this.openTeamEntryController = openTeamEntryController;
     }
 
     // Placeholder print statements to confirm buttons work until we can implement the actual pages
@@ -17,7 +25,7 @@ public class HomeController {
     }
 
     public void openTeamInputPage() {
-        System.out.println("Navigating to Team Input Page...");
+        openTeamEntryController.execute();
     }
 
     public void openReplacementPage() {
