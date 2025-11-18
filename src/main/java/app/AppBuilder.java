@@ -1,6 +1,6 @@
 package app;
 
-import data_access.DummyLoginDataAccessObject;
+import data_access.DummyDataAccessObject;
 import interface_adapter.ViewManagerModel;
 import interface_adapter.login.LoginController;
 import interface_adapter.login.LoginPresenter;
@@ -8,7 +8,6 @@ import interface_adapter.login.LoginViewModel;
 import interface_adapter.signup.SignupController;
 import interface_adapter.signup.SignupPresenter;
 import interface_adapter.signup.SignupViewModel;
-import usecase.login.LoginDataAccessInterface;
 import usecase.login.LoginInputBoundary;
 import usecase.login.LoginInteractor;
 import usecase.login.LoginOutputBoundary;
@@ -29,7 +28,7 @@ public class AppBuilder {
     final ViewManagerModel viewManagerModel = new ViewManagerModel();
     ViewManager viewManager = new ViewManager(cardPanel, cardLayout, viewManagerModel);
 
-    final DummyLoginDataAccessObject userDataAccessObject = new DummyLoginDataAccessObject();
+    final DummyDataAccessObject userDataAccessObject = new DummyDataAccessObject();
 
     private LoginView loginView;
     private LoginViewModel loginViewModel;

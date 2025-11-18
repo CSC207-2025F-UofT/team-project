@@ -4,7 +4,7 @@ import entity.User;
 import usecase.login.LoginDataAccessInterface;
 import usecase.signup.SignupDataAccessInterface;
 
-public class DummyLoginDataAccessObject implements LoginDataAccessInterface,
+public class DummyDataAccessObject implements LoginDataAccessInterface,
                                                    SignupDataAccessInterface {
 
     @Override
