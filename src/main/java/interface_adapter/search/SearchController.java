@@ -10,8 +10,9 @@ public class SearchController {
         this.interactor = interactor;
     }
 
-    public void search(String query) {
-        SearchInputData inputData = new SearchInputData(query);
-        interactor.execute(inputData);
+    public void executeSearch(String query) {
+        SearchInputData input = new SearchInputData(query);
+        interactor.execute(input);
     }
 }
+
