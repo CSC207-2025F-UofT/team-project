@@ -2,7 +2,7 @@ package data.usecase5;
 
 // 按用户名拿持仓
 
-import entities.usecase5.Holding;
+import entity.usecase5.Holding;
 import java.util.List;
 
 /**

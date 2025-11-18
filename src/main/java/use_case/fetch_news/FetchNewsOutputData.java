@@ -1,6 +1,6 @@
 package use_case.fetch_news;
 
-import entities.News;
+import entity.News;
 
 import java.util.List;
 

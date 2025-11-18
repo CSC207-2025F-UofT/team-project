@@ -1,6 +1,6 @@
 package data.news;
 
-import entities.News;
+import entity.News;
 import use_case.fetch_news.NewsDataAccessInterface;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;

@@ -1,6 +1,6 @@
 package data.news;
 
-import entities.News;
+import entity.News;
 
 import java.util.List;
 

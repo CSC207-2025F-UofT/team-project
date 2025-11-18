@@ -1,7 +1,7 @@
 package interface_adapters.use_case5;
 
-import entities.usecase5.Holding;
-import entities.usecase5.PortfolioSnapshot;
+import entity.usecase5.Holding;
+import entity.usecase5.PortfolioSnapshot;
 import use_case.portfolio.PortfolioOutputBoundary;
 import use_case.portfolio.PortfolioOutputData;
 

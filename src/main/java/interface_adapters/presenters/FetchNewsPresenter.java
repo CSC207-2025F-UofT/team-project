@@ -1,6 +1,6 @@
 package interface_adapters.presenters;
 
-import entities.News;
+import entity.News;
 import ui.NewsView;
 import ui.NewsViewModel;
 import use_case.fetch_news.FetchNewsOutputBoundary;

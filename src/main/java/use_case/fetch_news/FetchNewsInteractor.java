@@ -1,7 +1,7 @@
 package use_case.fetch_news;
 
 import data.news.NewsApiDAO;
-import entities.News;
+import entity.News;
 import java.util.List;
 
 public class FetchNewsInteractor implements FetchNewsInputBoundary {

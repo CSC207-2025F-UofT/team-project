@@ -1,6 +1,6 @@
 package data.usecase5;
 
-import entities.usecase5.Holding;
+import entity.usecase5.Holding;
 
 import java.util.*;
 

@@ -1,6 +1,6 @@
 package data;
 
-import entities.User;
+import entity.User;
 
 import javax.sql.DataSource;
 import java.sql.*;

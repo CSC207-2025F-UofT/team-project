@@ -1,7 +1,7 @@
 package use_case.fetch_news;
 
 import java.util.List;
-import entities.News;
+import entity.News;
 
 public interface FetchNewsOutputBoundary {
     /**

@@ -1,7 +1,7 @@
 package use_case.login;
 
 import data.UserRepository;
-import entities.User;
+import entity.User;
 import java.util.Optional;
 
 public class LoginInteractor {

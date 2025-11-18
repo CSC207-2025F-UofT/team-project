@@ -1,4 +1,4 @@
-package entities.usecase5;
+package entity.usecase5;
 
 import java.time.LocalDate;
 

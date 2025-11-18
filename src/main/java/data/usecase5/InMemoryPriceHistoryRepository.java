@@ -1,6 +1,6 @@
 package data.usecase5;
 
-import entities.usecase5.PricePoint;
+import entity.usecase5.PricePoint;
 
 import java.time.LocalDate;
 import java.util.*;

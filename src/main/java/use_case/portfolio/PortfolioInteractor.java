@@ -2,9 +2,9 @@ package use_case.portfolio;
 
 import data.usecase5.PortfolioRepository;
 import data.usecase5.PriceHistoryRepository;
-import entities.usecase5.Holding;
-import entities.usecase5.PortfolioSnapshot;
-import entities.usecase5.PricePoint;
+import entity.usecase5.Holding;
+import entity.usecase5.PortfolioSnapshot;
+import entity.usecase5.PricePoint;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
