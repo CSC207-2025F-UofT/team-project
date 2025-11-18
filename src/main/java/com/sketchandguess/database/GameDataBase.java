@@ -59,6 +59,6 @@ public class GameDataBase implements DataBase {
         } catch (Exception e) {
             return Boolean.FALSE;
         }
-        }
+
     }
 }

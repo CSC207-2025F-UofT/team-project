@@ -12,6 +12,7 @@ public class Application extends JFrame {
     private Game game;
     private Gallery gallery;
     private Settings settings;
+    private GameResult gameResult;
     
     public Application() {
         setTitle("Sketch and Guess");
@@ -24,7 +25,7 @@ public class Application extends JFrame {
             @Override
             public void onDoneButtonClicked(java.awt.image.BufferedImage image) {
                 System.out.println("Game completed! Image saved.");
-                showMainmenu();
+                showGameResult();
             }
         };
         
@@ -63,7 +64,12 @@ public class Application extends JFrame {
         revalidate();
         repaint();
     }
-    
+
+    public void showGameResult() {
+        setContentPane(gameResult);
+        revalidate();
+        repaint();
+    }
     public static void main(String[] args) {
         SwingUtilities.invokeLater(new Runnable() {
             @Override

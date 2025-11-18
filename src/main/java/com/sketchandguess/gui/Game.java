@@ -24,6 +24,7 @@ public class Game extends JPanel {
     private JLabel timerLabel;
     private double timeLimitSeconds; // current game's time limit（from controller)
     private double timeLeftSeconds; // current left time
+    private boolean hasWon;
     private javax.swing.Timer countdownTimer;
     private DrawingCanvas canvas;
 
@@ -62,6 +63,7 @@ public class Game extends JPanel {
         doneButton.addActionListener(e -> {
             BufferedImage image = canvas.exportImage();
             controller.onDoneButtonClicked(image);
+            app.showGameResult();
         });
         backButton.addActionListener(e -> app.showMainmenu());
         clearButton.addActionListener(e -> canvas.clearCanvas());
