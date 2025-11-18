@@ -1,5 +1,6 @@
 package view;
 
+import data_access.RestaurantSearchService;
 import interface_adaptor.Menu.MenuState;
 import interface_adaptor.Menu.MenuViewModel;
 import interface_adaptor.Menu.StarRateController;
@@ -62,7 +63,11 @@ public class MenuView extends JPanel implements ActionListener, PropertyChangeLi
                         // Important to remove this!!!
                         currentState.setRestaurant("1012301023102301023");
 
-                        starRateController.execute(userInputRating, currentState.getRestaurantId());
+                        try {
+                            starRateController.execute(userInputRating, currentState.getRestaurantId());
+                        } catch (RestaurantSearchService.RestaurantSearchException e) {
+                            throw new RuntimeException(e);
+                        }
 
 
                     }

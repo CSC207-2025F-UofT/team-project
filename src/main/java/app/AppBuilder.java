@@ -1,6 +1,5 @@
 package app;
-import data_access.TempStarRateDataAccessObject;
-import data_access.TempUserDataAccessObject;
+import data_access.*;
 
 import interface_adaptor.BlankViewModel;
 import interface_adaptor.Login.LoginController;
@@ -82,7 +81,7 @@ public class AppBuilder {
         return this;
     }
 
-    public AppBuilder addStarRateUseCase(){
+    public AppBuilder addStarRateUseCase() throws RestaurantSearchService.RestaurantSearchException {
         final StarRateOutputBoundary starRateOutputBoundary = new StarRatePresenter(
                 viewManagerModel, menuViewModel);
         final StarRateInputBoundary starRateInteractor = new StarRateInteractor(
@@ -97,6 +96,8 @@ public class AppBuilder {
         Restaurant rest = new Restaurant(10f, coords, "Burger", "1012301023102301023");
         starRateDataAccessObject.addRestaurant(rest.getId(), rest);
         starRateDataAccessObject.setCurrentRestaurantId(rest.getId());
+//        YelpRestaurantSearchService apiCall = new YelpRestaurantSearchService();
+//        ArrayList restaurantList = (ArrayList) apiCall.searchRestaurants(40.7128f, -74.0060f, "Burger", 10);
 
         return this;
     }

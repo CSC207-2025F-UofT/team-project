@@ -1,4 +1,5 @@
 package star_rate;
+import data_access.RestaurantSearchService;
 import entity.Restaurant;
 
 public class StarRateInteractor implements StarRateInputBoundary{
@@ -10,7 +11,7 @@ public class StarRateInteractor implements StarRateInputBoundary{
         this.dataAccess = data;
     }
 
-    public void execute(StarRateInputData inputData){
+    public void execute(StarRateInputData inputData) throws RestaurantSearchService.RestaurantSearchException {
         String restaurantId = dataAccess.getCurrentRestaurantId();
 
         if (dataAccess.getRestaurantById(restaurantId) == null){

@@ -38,6 +38,9 @@ public class Restaurant {
     public Restaurant(float priceRange, List<Float> coordinates, String foodType, String id) {
         this(id, "Unknown", "", "", priceRange, coordinates, foodType);
     }
+    public Restaurant(float priceRange, List<Float> coordinates, String foodType) {
+        this("", "Unknown", "", "", priceRange, coordinates, foodType);
+    }
 
     /**
      * Default constructor.
