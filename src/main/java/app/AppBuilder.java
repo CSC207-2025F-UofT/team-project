@@ -21,6 +21,16 @@ import view.LoginView;
 import view.SignupView;
 import view.ViewManager;
 
+import interface_adapter.homescreen.HomescreenController;
+import interface_adapter.homescreen.HomescreenPresenter;
+import use_case.homescreen.HomescreenInputBoundary;
+import use_case.homescreen.HomescreenInteractor;
+import use_case.homescreen.HomescreenOutputBoundary;
+
+
+import interface_adapter.homescreen.HomescreenViewModel;
+import view.HomescreenView;
+
 import javax.swing.*;
 import java.awt.*;
 
@@ -44,6 +54,8 @@ public class AppBuilder {
     private BlankView blankView;
     private SignupViewModel signupViewModel;
     private SignupView signupView;
+    private HomescreenViewModel homescreenViewModel;
+    private HomescreenView homescreenView;
 
     public AppBuilder() {
         cardPanel.setLayout(cardLayout);
@@ -54,6 +66,13 @@ public class AppBuilder {
         loginViewModel = new LoginViewModel();
         loginView = new LoginView(loginViewModel, viewManagerModel);
         cardPanel.add(loginView, loginView.getViewName());
+        return this;
+    }
+
+    public AppBuilder addHomescreenView() {
+        homescreenViewModel = new HomescreenViewModel();
+        homescreenView = new HomescreenView(homescreenViewModel, viewManagerModel);  // Keep this
+        cardPanel.add(homescreenView, homescreenView.getViewName());
         return this;
     }
 
@@ -92,11 +111,26 @@ public class AppBuilder {
 
         return this;
     }
+    // new method for homescreen use case
+    public AppBuilder addHomescreenUseCase() {
+        final HomescreenOutputBoundary homescreenOutputBoundary =
+                new HomescreenPresenter(homescreenViewModel, viewManagerModel);
+
+        final HomescreenInputBoundary homescreenInteractor =
+                new HomescreenInteractor(homescreenOutputBoundary);
+
+        final HomescreenController homescreenController =
+                new HomescreenController(homescreenInteractor);
+
+        homescreenView.setHomescreenController(homescreenController);
+
+        return this;
+    }
 
     // === Use case wiring ===
     public AppBuilder addLoginUseCase() {
         final LoginOutputBoundary loginOutputBoundary =
-                new LoginPresenter(viewManagerModel, blankViewModel, loginViewModel);
+                new LoginPresenter(viewManagerModel, homescreenViewModel, loginViewModel);
 
         final LoginInputBoundary loginInteractor =
                 new LoginInteractor(userDataAccessObject, loginOutputBoundary);

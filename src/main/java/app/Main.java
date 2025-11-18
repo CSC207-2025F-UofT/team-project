@@ -11,6 +11,8 @@ public class Main {
                 .addSignupView()
                 .addLoginUseCase()
                 .addSignupUseCase()
+                .addHomescreenView()
+                .addHomescreenUseCase()
                 .build();
 
         application.pack();
