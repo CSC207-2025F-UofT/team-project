@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+// I didn;t use this actually
 public class DBMessageDataAccessObject implements MessageRepository {
 
     private static final int SUCCESS_CODE = 200;
