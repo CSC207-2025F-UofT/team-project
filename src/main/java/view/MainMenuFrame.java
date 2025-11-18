@@ -21,7 +21,7 @@ public class MainMenuFrame extends JFrame {
         JPanel panel = new JPanel(new GridLayout(6, 1, 15, 15));
         panel.setOpaque(false);
 
-        JButton profileBtn = createMenuButton("Profile");
+        JButton profileBtn = createMenuButton("interface_adapter/Profile");
         JButton betHistoryBtn = createMenuButton("View Bet History");
         JButton sportBetBtn = createMenuButton("Sport Bet");
         JButton playBetGameBtn = createMenuButton("Play Bet Game");
