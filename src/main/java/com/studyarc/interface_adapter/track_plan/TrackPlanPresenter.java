@@ -29,6 +29,7 @@ public class TrackPlanPresenter implements TrackPlanOutputBoundary {
 
     @Override
     public void parepareShowRedirect(TrackPlanOutputData outputData) {
+        System.out.println("TrackPlanPresenter redirect");
         TrackPlanState state = trackPlanViewModel.getState();
         state.setStudyPlans(outputData.getListofplan());
         trackPlanViewModel.firePropertyChange();

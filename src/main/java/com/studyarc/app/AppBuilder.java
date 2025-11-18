@@ -12,6 +12,8 @@ import com.studyarc.interface_adapter.job_postings.JobPostingsViewModel;
 import com.studyarc.interface_adapter.milestone_tasks.MilestoneTasksController;
 import com.studyarc.interface_adapter.milestone_tasks.MilestoneTasksPresenter;
 import com.studyarc.interface_adapter.milestone_tasks.MilestoneTasksViewModel;
+import com.studyarc.interface_adapter.track_plan.TrackPlanController;
+import com.studyarc.interface_adapter.track_plan.TrackPlanPresenter;
 import com.studyarc.interface_adapter.track_plan.TrackPlanViewModel;
 import com.studyarc.interface_adapter.ui_sidebar.SidebarController;
 import com.studyarc.interface_adapter.ui_sidebar.SidebarPresenter;
@@ -26,6 +28,7 @@ import com.studyarc.use_case.milestone_tasks.MilestoneTasksDataAccessInterface;
 import com.studyarc.use_case.milestone_tasks.MilestoneTasksInputBoundary;
 import com.studyarc.use_case.milestone_tasks.MilestoneTasksInteractor;
 import com.studyarc.use_case.milestone_tasks.MilestoneTasksOutputBoundary;
+import com.studyarc.use_case.track_plan.*;
 import com.studyarc.use_case.ui_sidebar.*;
 import com.studyarc.view.*;
 
@@ -67,12 +70,23 @@ public class AppBuilder {
         overallPanel.add(sidePanelView, BorderLayout.WEST);
         return this;
     }
-    public AppBuilder addTrackPlanView(){
+    
+    public AppBuilder addTrackPlanView() {
         this.trackPlanViewModel = new TrackPlanViewModel();
         this.trackPlansView = new TrackPlansView(trackPlanViewModel);
 
         cardPanel.add(trackPlansView, trackPlansView.getViewname());
 
+        return this;
+    }
+
+    public AppBuilder addTrackPlanUsecase() {
+        TrackPlanOutputBoundary presenter = new TrackPlanPresenter(trackPlanViewModel, viewManagerModel);
+        TrackPlanDataAccessinterface dataaccess = new TrackPlanDataAccessTool();
+
+        TrackPlanInputBoundary interactor = new TrackPlanInteractor(presenter, dataaccess);
+        TrackPlanController trackPlanController = new TrackPlanController(interactor);
+        sidePanelView.setTrackPlanController(trackPlanController);
         return this;
     }
 
@@ -135,6 +149,7 @@ public class AppBuilder {
         final JFrame application = new JFrame("Code Example");
         application.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         application.add(overallPanel);
+        application.setMinimumSize(new Dimension(1000, 800));
 
         viewManagerModel.setState(milestoneTaskView.getViewName());
         System.out.println(milestoneTaskView.getViewName());

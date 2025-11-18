@@ -2,9 +2,12 @@ package com.studyarc.view;
 
 import com.studyarc.interface_adapter.job_postings.JobPostingsController;
 import com.studyarc.interface_adapter.job_postings.JobPostingsViewModel;
+import com.studyarc.interface_adapter.track_plan.TrackPlanController;
 import com.studyarc.interface_adapter.ui_sidebar.SidebarController;
 import com.studyarc.interface_adapter.ui_sidebar.SidebarState;
 import com.studyarc.interface_adapter.ui_sidebar.SidebarViewModel;
+import com.studyarc.use_case.track_plan.TrackPlanInputBoundary;
+import com.studyarc.use_case.track_plan.TrackPlanInteractor;
 
 import javax.swing.*;
 import java.awt.*;
@@ -24,6 +27,9 @@ public class SidePanelView extends JPanel implements ActionListener, PropertyCha
     private final JButton seePapers;
     private final JButton seeJobs;
     private final JButton myPlans;
+
+    //controller of TrackPlan usecase
+    private TrackPlanController trackPlanController;
 
     public SidePanelView(SidebarViewModel sidebarViewModel) {
         this.sidebarViewModel = sidebarViewModel;
@@ -66,7 +72,10 @@ public class SidePanelView extends JPanel implements ActionListener, PropertyCha
         myPlans.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-            sidebarController.switchToTrackPlan();
+
+                trackPlanController.execute("qyz");
+                sidebarController.switchToTrackPlan();
+
             }
         });
     }
@@ -87,5 +96,9 @@ public class SidePanelView extends JPanel implements ActionListener, PropertyCha
 
     public void setSidebarController(SidebarController sidebarController) {
         this.sidebarController = sidebarController;
+    }
+
+    public void setTrackPlanController(TrackPlanController trackPlanController) {
+        this.trackPlanController = trackPlanController;
     }
 }
