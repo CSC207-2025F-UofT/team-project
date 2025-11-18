@@ -2,5 +2,5 @@ package usecases.lecturenotes;
 
 public interface GenerateLectureNotesOutputBoundary {
     void prepareSuccessView(GenerateLectureNotesOutputData outputData);
-    void prepareFailView(String errorMessage);
+    void prepareFailView(String error);
 }

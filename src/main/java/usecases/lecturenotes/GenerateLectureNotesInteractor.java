@@ -3,10 +3,6 @@ package usecases.lecturenotes;
 import entities.Course;
 import entities.LectureNotes;
 
-/**
- * Use case interactor for generating lecture notes
- * based on uploaded PDF files and a topic.
- */
 public class GenerateLectureNotesInteractor implements GenerateLectureNotesInputBoundary {
 
     private final CourseLookupGateway courseGateway;
@@ -26,31 +22,24 @@ public class GenerateLectureNotesInteractor implements GenerateLectureNotesInput
         String courseId = inputData.getCourseId();
         String topic = inputData.getTopic();
 
-        // 1. Look up the course (where the uploaded PDFs live)
         Course course = courseGateway.getCourseById(courseId);
+
+        // Fallback: allow ad-hoc generation even if not in the repository yet.
         if (course == null) {
-            presenter.prepareFailView("Course not found: " + courseId);
-            return;
+            course = new Course(courseId, courseId, "ad-hoc");
         }
 
         try {
-            // 2. Ask Gemini (through the gateway) to generate notes
             LectureNotes lectureNotes = notesGateway.generateNotes(course, topic);
 
-            // 3. Convert entity to output data for the presenter
-            GenerateLectureNotesOutputData outputData =
-                    new GenerateLectureNotesOutputData(
-                            lectureNotes.getCourseId(),
-                            lectureNotes.getTopic(),
-                            lectureNotes.getContent(),
-                            lectureNotes.getGeneratedAt()
-                    );
-
-            // 4. Tell the presenter it succeeded
+            GenerateLectureNotesOutputData outputData = new GenerateLectureNotesOutputData(
+                    lectureNotes.getCourseId(),
+                    lectureNotes.getTopic(),
+                    lectureNotes.getContent()
+            );
             presenter.prepareSuccessView(outputData);
 
         } catch (Exception e) {
-            // 5. If anything goes wrong (Gemini failure, etc.), show an error
             presenter.prepareFailView("Failed to generate lecture notes. Please try again.");
         }
     }

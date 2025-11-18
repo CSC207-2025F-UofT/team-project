@@ -1,18 +1,31 @@
 package interface_adapters.lecturenotes;
 
-import interface_adapters.ViewModel;
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
 
-/**
- * ViewModel wrapping LectureNotesState.
- * ViewManager will use VIEW_NAME to switch to this view.
- */
-public class LectureNotesViewModel extends ViewModel<LectureNotesState> {
+public class LectureNotesViewModel {
+    private static final String VIEW_NAME = "lecture_notes";
+    private final PropertyChangeSupport pcs = new PropertyChangeSupport(this);
+    private LectureNotesState state = new LectureNotesState();
 
-    public static final String VIEW_NAME = "lecture notes";
+    public String getViewName() { return VIEW_NAME; }
 
-    public LectureNotesViewModel() {
-        super(VIEW_NAME);
-        // start with an empty state
-        this.setState(new LectureNotesState());
+    public LectureNotesState getState() { return state; }
+
+    public void setState(LectureNotesState newState) {
+        this.state = newState;
+        firePropertyChange();
+    }
+
+    public void firePropertyChange() {
+        pcs.firePropertyChange("state", null, state);
+    }
+
+    public void addPropertyChangeListener(PropertyChangeListener l) {
+        pcs.addPropertyChangeListener(l);
+    }
+
+    public void removePropertyChangeListener(PropertyChangeListener l) {
+        pcs.removePropertyChangeListener(l);
     }
 }

@@ -14,10 +14,11 @@ public class Main {
 
         // Chain the building methods to construct the application piece by piece.
         JFrame application = appBuilder
+                .addLoadingView()
                 .addWriteTestView()
                 .addEvaluateTestView()
+
                 .addLectureNotesView()
-                .addLoadingView()
                 .addCourseDashboardView()
                 .addCourseWorkspaceView()
                 .addCourseCreateView()
