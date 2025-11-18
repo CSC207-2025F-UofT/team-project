@@ -2,6 +2,7 @@ package use_case.registration.signup;
 
 import entity.User;
 import entity.UserFactory;
+import use_case.DataAccessException;
 
 /**
  * The Signup Interactor.
@@ -20,7 +21,7 @@ public class SignupInteractor implements SignupInputBoundary {
     }
 
     @Override
-    public void execute(SignupInputData signupInputData) {
+    public void execute(SignupInputData signupInputData) throws DataAccessException {
         if (userDataAccessObject.existsByName(signupInputData.getUsername())) {
             userPresenter.prepareFailView("User already exists.");
         }

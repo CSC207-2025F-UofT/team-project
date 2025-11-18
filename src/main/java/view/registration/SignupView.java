@@ -3,6 +3,7 @@ package view.registration;
 import interface_adapter.registration.signup.SignupController;
 import interface_adapter.registration.signup.SignupState;
 import interface_adapter.registration.signup.SignupViewModel;
+import use_case.DataAccessException;
 import view.Component.LabelTextPanel;
 
 import javax.swing.*;
@@ -59,11 +60,15 @@ public class SignupView extends JPanel implements ActionListener, PropertyChange
                         if (evt.getSource().equals(signUp)) {
                             final SignupState currentState = signupViewModel.getState();
 
-                            signupController.execute(
-                                    currentState.getUsername(),
-                                    currentState.getPassword(),
-                                    currentState.getRepeatPassword()
-                            );
+                            try {
+                                signupController.execute(
+                                        currentState.getUsername(),
+                                        currentState.getPassword(),
+                                        currentState.getRepeatPassword()
+                                );
+                            } catch (DataAccessException e) {
+                                throw new RuntimeException(e);
+                            }
                         }
                     }
                 }

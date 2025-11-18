@@ -1,5 +1,6 @@
 package interface_adapter.registration.signup;
 
+import use_case.DataAccessException;
 import use_case.registration.signup.SignupInputBoundary;
 import use_case.registration.signup.SignupInputData;
 
@@ -20,7 +21,7 @@ public class SignupController {
      * @param password1 the password
      * @param password2 the password repeated
      */
-    public void execute(String username, String password1, String password2) {
+    public void execute(String username, String password1, String password2) throws DataAccessException {
         final SignupInputData signupInputData = new SignupInputData(
                 username, password1, password2);
 

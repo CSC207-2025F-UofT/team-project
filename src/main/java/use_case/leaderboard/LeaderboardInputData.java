@@ -8,6 +8,7 @@ import entity.User;
 
 public class LeaderboardInputData {
     private User user = null;
+    private LeaderboardType leaderboardType = null;
 
     public LeaderboardInputData(User user) {
         this.user = user;
@@ -17,4 +18,7 @@ public class LeaderboardInputData {
         return this.user;
     }
 
+    public LeaderboardType getLeaderboardType() {
+        return this.leaderboardType;
+    }
 }
