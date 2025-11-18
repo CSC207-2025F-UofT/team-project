@@ -1,6 +1,6 @@
 package app;
 
-import data_access.DBUserDataAccessObject;
+import data_access.FakeUserDataAccessObject;
 
 import interface_adapter.Resubmit.ResubmitController;
 import interface_adapter.Resubmit.ResubmitPresenter;
@@ -41,7 +41,7 @@ public class AppBuilder {
     private SubmitViewModel submitViewModel;
     private ResubmitViewModel resubmitViewModel;
 
-    private final DBUserDataAccessObject userDataAccessObject =  new DBUserDataAccessObject();
+    private final FakeUserDataAccessObject userDataAccessObject =  new FakeUserDataAccessObject();
 
     public AppBuilder() {
         cardPanel.setLayout(cardLayout);

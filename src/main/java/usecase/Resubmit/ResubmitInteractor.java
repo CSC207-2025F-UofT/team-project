@@ -19,7 +19,7 @@ public class ResubmitInteractor implements ResubmitInputBoundary {
         if (deadline.isAfter(inputData.getTime())) {
             switchToSubmitView();
         }else{
-            resubmitOutputBoundary.prepareFailView("Error: DDL is passed");
+            resubmitOutputBoundary.prepareFailView("DDL is passed, you cannot resubmit your assignment!");
         }
     }
     public void switchToSubmitView() {

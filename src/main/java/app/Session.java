@@ -4,6 +4,9 @@ import entity.Assignment;
 import entity.Course;
 import entity.User;
 
+/*
+Storing runtime data that will be passed between interactor (maybe DAO)
+ */
 public class Session {
 
     private User user;

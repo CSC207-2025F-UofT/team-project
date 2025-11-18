@@ -37,6 +37,13 @@ public class SubmitInteractor implements SubmitInputBoundary {
                     session.getAssignment().getName(),
                     session.getCourse().getCourseCode());
 
+            // This part might be useless because we do not need submission for student, we may only
+            // use it for instructor fetch data from dataAccessObject
+            //Student student = (Student) session.getUser();
+            //Submission thisSubmission = new Submission();
+            // TODO: add submission data, wait for submission implementation
+            //student.addSubmission(thisSubmission);
+
             SubmitOutputData outputData = new SubmitOutputData("Successfully submitted!");
             submitPresenter.prepareSuccessView(outputData);
         } catch (IOException e) {
