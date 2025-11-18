@@ -10,4 +10,8 @@ public abstract class Media {
         this.referenceNumber = referenceNumber;
         this.genreIDs = genreIDs;
     }
+
+    public int getReferenceNumber() {
+        return referenceNumber;
+    }
 }

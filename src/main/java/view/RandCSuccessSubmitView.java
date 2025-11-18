@@ -1,5 +1,8 @@
 package view;
 
+import interface_adapter.RandC_success_submit.RandCSuccessViewModel;
+import interface_adapter.clicking.ClickingViewModel;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -9,6 +12,8 @@ public class RandCSuccessSubmitView extends JPanel {
     private String movieName;
     private JButton returnButton;
     private JLabel messageLabel;
+    private RandCSuccessViewModel randCSuccessViewModel;
+    private ClickingViewModel clickingViewModel;
 
     // 构造函数：从外部传入电影名
     public RandCSuccessSubmitView(String movieName) {
