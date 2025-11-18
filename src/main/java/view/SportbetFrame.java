@@ -56,8 +56,6 @@ public class SportbetFrame extends JFrame {
         bottomPanel.add(placeBetButton);
 
         add(bottomPanel, BorderLayout.SOUTH);
-
-        // ***** THIS WAS MISSING *****
         setVisible(true);
     }
 }
