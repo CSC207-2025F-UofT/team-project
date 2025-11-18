@@ -76,7 +76,7 @@ public class FileUserDataAccessObject implements SignupUserDataAccessInterface,
 
             for (User user : accounts.values()) {
                 final String line = String.format("%s,%s",
-                        user.getName(), user.getPassword());
+                        user.getUsername(), user.getPassword());
                 writer.write(line);
                 writer.newLine();
             }
@@ -91,7 +91,7 @@ public class FileUserDataAccessObject implements SignupUserDataAccessInterface,
 
     @Override
     public void save(User user) {
-        accounts.put(user.getName(), user);
+        accounts.put(user.getUsername(), user);
         this.save();
     }
 
@@ -118,7 +118,7 @@ public class FileUserDataAccessObject implements SignupUserDataAccessInterface,
     @Override
     public void changePassword(User user) {
         // Replace the User object in the map
-        accounts.put(user.getName(), user);
+        accounts.put(user.getUsername(), user);
         save();
     }
 }
