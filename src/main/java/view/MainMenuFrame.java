@@ -49,6 +49,10 @@ public class MainMenuFrame extends JFrame {
             setVisible(false);
         });
 
+        betHistoryBtn.addActionListener(e -> {
+            new BetHistoryFrame(user, this);
+        });
+
         depositBtn.addActionListener(e -> {
             new WalletUI(user, this);
             setVisible(false);
