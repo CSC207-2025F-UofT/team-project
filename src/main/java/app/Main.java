@@ -10,10 +10,9 @@ public class Main {
                 .addFavoritesView()
                 .addRateAndCommentView("", "")
                 .addRandCView("")
+                .addHomepageView()
                 .build();
 
-        application.pack();
         application.setLocationRelativeTo(null);
-        application.setVisible(true);
     }
 }

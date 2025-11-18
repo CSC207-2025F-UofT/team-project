@@ -6,7 +6,7 @@ import javax.swing.*;
 import java.awt.*;
 
 public class BrowseView extends JPanel {
-
+    public final String viewName = "BROWSE";
     private JTextField searchField;
     private JButton searchButton;
     private JComboBox searchTypeSelect;
@@ -86,5 +86,9 @@ public class BrowseView extends JPanel {
 
         itemPanel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
         return itemPanel;
+    }
+
+    public String getViewName() {
+        return viewName;
     }
 }

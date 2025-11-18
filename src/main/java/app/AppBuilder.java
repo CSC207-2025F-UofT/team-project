@@ -4,6 +4,7 @@ import data_access.FileUserDataAccessObject;
 import interface_adapter.RandC_success_submit.RandCSuccessViewModel;
 import interface_adapter.ViewManagerModel;
 
+import interface_adapter.browse.BrowseViewModel;
 import interface_adapter.rate_and_comment.CommentController;
 import interface_adapter.rate_and_comment.CommentPresenter;
 import interface_adapter.rate_and_comment.CommentViewModel;
@@ -26,7 +27,9 @@ public class AppBuilder {
 
     private WatchlistView watchlistView;
     private FavoritesView favoritesView;
+    private BrowseView browseView;
     private RateAndCommentView rateAndCommentView;
+    private HomepageView homepageView;
     private CommentViewModel commentViewModel;
     private RandCSuccessSubmitView randCSuccessSubmitView;
     private RandCSuccessViewModel randCSuccessViewModel;
@@ -47,6 +50,12 @@ public class AppBuilder {
         return this;
     }
 
+//    public AppBuilder addBrowseView() {
+//        browseView = new BrowseView();
+//        cardPanel.add(browseView, browseView.getViewname());
+//        return this;
+//    }
+
     public AppBuilder addRateAndCommentView(String un, String mn) {
         commentViewModel = new CommentViewModel();
         //TODO 将emptystring替换成实际的名字
@@ -54,6 +63,32 @@ public class AppBuilder {
         cardPanel.add(rateAndCommentView, rateAndCommentView.getViewName());
         return this;
     }
+
+    public AppBuilder addHomepageView() {
+        homepageView = new HomepageView();
+        cardPanel.add(homepageView, homepageView.getViewName());
+
+        // Use the actual getViewName() for the two existing views.
+        // For browse: you said it's "in progress" so either add a browse view
+        // or use homepageView.getViewName() as a placeholder.
+        homepageView.setBrowseButtonListener(e -> {
+            viewManagerModel.setState("BROWSE");
+        });
+
+        // These two will use the actual view names (safer than hard-coded strings)
+        homepageView.setWatchlistButtonListener(e -> {
+            viewManagerModel.setState(watchlistView.getViewName());
+            viewManagerModel.firePropertyChange();
+        });
+
+        homepageView.setFavoritesButtonListener(e -> {
+            viewManagerModel.setState(favoritesView.getViewName());
+            viewManagerModel.firePropertyChange();
+        });
+
+        return this;
+    }
+
 
     public AppBuilder addRandCView(String movie) {
         randCSuccessViewModel = new RandCSuccessViewModel();
@@ -74,27 +109,17 @@ public class AppBuilder {
     }
 
     public JFrame build() {
-        final JFrame application = new JFrame("Watchlist");
+        final JFrame application = new JFrame("Homepage");
         application.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
-        // 1. ADD THE CARD CONTAINER TO THE FRAME FIRST
         application.add(cardPanel);
 
-        // 2. Set preferred size and center the window
+        viewManagerModel.setState(homepageView.getViewName());
+        viewManagerModel.firePropertyChange();
+
         application.pack();
         application.setSize(800, 600);
         application.setLocationRelativeTo(null);
-
-        // 3. SCHEDULE the view switch for later (Guaranteed fix)
-        SwingUtilities.invokeLater(() -> {
-            // This code runs *after* the JFrame is displayed and ready.
-            if (watchlistView != null) {
-                viewManagerModel.setState(watchlistView.getViewName());
-                viewManagerModel.firePropertyChange();
-            }
-        });
-
-        // 4. Make the window visible (must be outside the invokeLater)
         application.setVisible(true);
 
         return application;
