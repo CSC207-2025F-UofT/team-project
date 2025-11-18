@@ -8,6 +8,7 @@ import interface_adapter.registration.login.*;
 import interface_adapter.registration.signup.SignupController;
 import interface_adapter.registration.signup.SignupPresenter;
 import interface_adapter.registration.signup.SignupViewModel;
+import interface_adapter.user_session.UserSession;
 import use_case.registration.login.*;
 import use_case.registration.signup.SignupInputBoundary;
 import use_case.registration.signup.SignupInteractor;
@@ -24,7 +25,8 @@ import javax.swing.*;
 import java.awt.*;
 
 public class AppBuilder {
-    private String api_key;
+    private final UserSession session = new UserSession();
+
     private final JPanel cardPanel = new JPanel();
     private final CardLayout cardLayout = new CardLayout();
     final UserFactory userFactory = new UserFactory();
@@ -36,14 +38,6 @@ public class AppBuilder {
 
     // DAO version using local file storage
 //    final FileUserDataAccessObject userDataAccessObject = new FileUserDataAccessObject("users.csv", userFactory);
-    /// TODO: Convert to external DB storage
-    /// TODO: Figure out how API key passes
-    /// TODO: For the api key pass, login output boundary should return
-    /// a api string so we can store in the app builder and pass into
-    /// other usecase's input boundary
-    /// TODO: DAO should becreaetd within each view and then passed
-    /// into the input boundary
-    /// TODO: Ensure Leaderboard DAO
     // DAO version using a shared external database
     // final DBUserDataAccessObject userDataAccessObject = new DBUserDataAccessObject(userFactory);
 
@@ -92,22 +86,22 @@ public class AppBuilder {
     }
 
     public AppBuilder addSignupUseCase() {
+        final SignupUserDataAccessObject signupDAO = new SignupUserDataAccessObject();
         final SignupOutputBoundary signupOutputBoundary = new SignupPresenter(viewManagerModel,
                 signupViewModel, loginViewModel);
         final SignupInputBoundary userSignupInteractor = new SignupInteractor(
-                userDataAccessObject, signupOutputBoundary, userFactory);
-
+                signupDAO, signupOutputBoundary, userFactory);
         SignupController controller = new SignupController(userSignupInteractor);
         signupView.setSignupController(controller);
         return this;
     }
 
     public AppBuilder addLoginUseCase() {
+        final LoginUserDataAccessObject loginDAO = new LoginUserDataAccessObject();
         final LoginOutputBoundary loginOutputBoundary = new LoginPresenter(viewManagerModel,
-                mainScreenViewModel, loginViewModel);
+                mainScreenViewModel, loginViewModel, session);
         final LoginInputBoundary loginInteractor = new LoginInteractor(
-                userDataAccessObject, loginOutputBoundary);
-
+                loginDAO, loginOutputBoundary);
         LoginController loginController = new LoginController(loginInteractor);
         loginView.setLoginController(loginController);
         return this;

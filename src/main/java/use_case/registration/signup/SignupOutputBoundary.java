@@ -10,7 +10,6 @@ public interface SignupOutputBoundary {
      * @param outputData the output data
      */
     void prepareSuccessView(SignupOutputData outputData);
-
     /**
      * Prepares the failure view for the Signup Use Case.
      * @param errorMessage the explanation of the failure
