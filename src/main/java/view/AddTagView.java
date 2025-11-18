@@ -2,13 +2,10 @@ package view;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.io.*;
-import java.util.Scanner;
+
 
 public class AddTagView {
-    private static final String fontArial = "Arial";
+    private static final String FONT_ARIAL = "Arial";
     private static void showSuccessfulTagPage() {
         JFrame popout =  new JFrame("Successfully added tag");
         popout.setSize(300,120);
@@ -18,17 +15,12 @@ public class AddTagView {
         panel.setBackground(new Color(240, 235, 255));
         panel.setLayout(new BorderLayout());
         JLabel successMessage = new JLabel("Tag added Successfully!", SwingConstants.CENTER);
-        successMessage.setFont(new Font(fontArial, Font.BOLD, 16));
+        successMessage.setFont(new Font(FONT_ARIAL, Font.BOLD, 16));
         successMessage.setForeground(new Color(75, 0, 120));
         panel.add(successMessage, BorderLayout.CENTER);
         popout.setContentPane(panel);
         popout.setVisible(true);
-        javax.swing.Timer timer = new javax.swing.Timer(1500,  new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                popout.dispose();
-            }
-        });
+        javax.swing.Timer timer = new javax.swing.Timer(1500, e -> popout.dispose());
         timer.start();
     }
     //Adding tag window opens when user clicks add tag on recipe page
@@ -42,7 +34,7 @@ public class AddTagView {
             panel.setBackground(new Color(240, 235, 255));
             GridBagConstraints c = new GridBagConstraints();
             JLabel title = new JLabel("Add Your Tag");
-            title.setFont(new Font(fontArial, Font.BOLD, 28));
+            title.setFont(new Font(FONT_ARIAL, Font.BOLD, 28));
             title.setForeground(new Color(75, 0, 120));
             c.gridx = 0;
             c.gridy = 1;
@@ -52,7 +44,7 @@ public class AddTagView {
 
             //Tag name TextField
             JTextField tagNameField = new JTextField(15);
-            tagNameField.setFont(new Font(fontArial, Font.BOLD, 14));
+            tagNameField.setFont(new Font(FONT_ARIAL, Font.BOLD, 14));
             tagNameField.setBackground(Color.WHITE);
             tagNameField.setBorder(BorderFactory.createCompoundBorder(
                     BorderFactory.createLineBorder(Color.BLACK),
@@ -65,7 +57,7 @@ public class AddTagView {
 
             JLabel errorMessage = new JLabel(" ");
             errorMessage.setForeground(Color.RED);
-            errorMessage.setFont(new Font(fontArial, Font.BOLD, 14));
+            errorMessage.setFont(new Font(FONT_ARIAL, Font.BOLD, 14));
             c.gridx = 0;
             c.gridy = 4;
             c.gridwidth = 2;
@@ -75,7 +67,7 @@ public class AddTagView {
 
             //"Add Tag" Button
             JButton addTagButton = new JButton("Add Tag");
-            addTagButton.setFont(new Font(fontArial, Font.BOLD, 14));
+            addTagButton.setFont(new Font(FONT_ARIAL, Font.BOLD, 14));
             addTagButton.setBackground(new Color(138, 43, 226));
             addTagButton.setForeground(Color.WHITE);
             addTagButton.setFocusPainted(false);
@@ -83,37 +75,36 @@ public class AddTagView {
             addTagButton.setOpaque(true);
             addTagButton.setPreferredSize(new Dimension(120, 40));
 
-            addTagButton.addActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    String newTag = tagNameField.getText().trim();
-                    errorMessage.setText("");
+            addTagButton.addActionListener(e -> {
+                String newTag = tagNameField.getText().trim();
+                errorMessage.setText("");
 
-                    for (char c : newTag.toCharArray()) {
-                        if (Character.isDigit(c) || !Character.isLetterOrDigit(c)) { //Checking for numbers and symbols
-                            errorMessage.setText("Tag should only contain letters");
-                            tagNameField.setText(""); //Resetting the TextField
-                            return;
-                        }
-                    }
-
-                    if (newTag.isEmpty()) {
-                        errorMessage.setText("Please enter a tag name");
+                for (char c1 : newTag.toCharArray()) {
+                    if (Character.isDigit(c1) || !Character.isLetterOrDigit(c1)) { //Checking for numbers and symbols
+                        errorMessage.setText("Tag should only contain letters");
+                        tagNameField.setText(""); //Resetting the TextField
                         return;
                     }
-
-                    if (newTag.length() > 20) {
-                        errorMessage.setText("Tag name too long");
-                        tagNameField.setText("");
-                        return;
-                    }
-
-                    //TODO: check to see if added tag is a duplicate
-                    frame.dispose();
-                    showSuccessfulTagPage();
-
                 }
+
+                if (newTag.isEmpty()) {
+                    errorMessage.setText("Please enter a tag name");
+                    return;
+                }
+
+                if (newTag.length() > 20) {
+                    errorMessage.setText("Tag name too long");
+                    tagNameField.setText("");
+                    return;
+                }
+
+                //TODO: check to see if added tag is a duplicate
+                frame.dispose();
+                showSuccessfulTagPage();
+
             });
+            //User can press "ENTER" instead of clicking on the button
+            tagNameField.addActionListener(e -> addTagButton.doClick());
             c.gridx = 0;
             c.gridy = 3;
             c.gridwidth = 2;
@@ -144,7 +135,7 @@ public class AddTagView {
 
             // New tag button
             JButton createTagButton = new JButton("New Tag");
-            createTagButton.setFont(new Font(fontArial, Font.BOLD, 14));
+            createTagButton.setFont(new Font(FONT_ARIAL, Font.BOLD, 14));
             createTagButton.setBackground(new Color(138, 43, 226)); // Blue violet purple
             createTagButton.setForeground(Color.WHITE);
             createTagButton.setFocusPainted(false);
@@ -153,12 +144,7 @@ public class AddTagView {
             createTagButton.setPreferredSize(new Dimension(120, 40));
 
             // opening add tag page
-            createTagButton.addActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    showAddTagPage();
-                }
-            });
+            createTagButton.addActionListener(e -> showAddTagPage());
             mainPanel.add(createTagButton, gbc);
             frame.add(mainPanel);
             frame.pack();
