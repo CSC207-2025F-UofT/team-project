@@ -4,9 +4,11 @@ import org.junit.jupiter.api.Test;
 import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 
-// game.data_access.CompositePetFactDataAccessObject;
+import game.data_access.CatApiPetFactDataAccessObject;
+import game.data_access.DogApiPetFactDataAccessObject;
+import game.data_access.CompositePetFactDataAccessObject;
 
-
+// Interactor Unit Test
 class GetPetFactInteractorTest {
 
     private static class StubPetFactDAO implements PetFactDataAccessInterface {
@@ -35,6 +37,7 @@ class GetPetFactInteractorTest {
         @Override
         public void present(GetPetFactOutputData outputData) {
             this.lastOutput = outputData;
+            System.out.println("Did you know: " + outputData.getFactText());
         }
     }
 
@@ -106,5 +109,77 @@ class GetPetFactInteractorTest {
         assertEquals("", presenter.lastOutput.getFactText());
         assertEquals("", presenter.lastOutput.getSource());
         assertFalse(presenter.lastOutput.isSuccess());
+    }
+}
+
+
+// Integration Test (for API functionality)
+class LiveApiFactTest {
+
+    @Test
+    void dogApi_beagleFact() {
+        // real DAOs
+        CompositePetFactDataAccessObject dao =
+                new CompositePetFactDataAccessObject(
+                        new DogApiPetFactDataAccessObject(),
+                        new CatApiPetFactDataAccessObject());
+
+        // call the real API via DAO
+        Optional<GetPetFactOutputData> result = dao.fetchFact("dog", "Beagle");
+
+        if (result.isPresent()) {
+            System.out.println("Did you know: " + result.get().getFactText());
+        } else {
+            System.out.println("NO FACT AVAILABLE");
+        }
+    }
+    @Test
+    void liveDogApiThroughInteractor() {
+        CompositePetFactDataAccessObject dao =
+                new CompositePetFactDataAccessObject(
+                        new DogApiPetFactDataAccessObject(),
+                        new CatApiPetFactDataAccessObject());
+
+        GetPetFactOutputBoundary presenter = new GetPetFactOutputBoundary() {
+            @Override
+            public void present(GetPetFactOutputData outputData) {
+                System.out.println("Did you know: " + outputData.getFactText());
+            }
+        };
+
+        GetPetFactInteractor interactor = new GetPetFactInteractor(dao, presenter);
+        interactor.execute("dog", "Beagle");   // this will hit the real API
+    }
+    @Test
+    void catApi_siameseFact() {
+        CatApiPetFactDataAccessObject catDao = new CatApiPetFactDataAccessObject();
+
+        Optional<GetPetFactOutputData> result = catDao.fetchFact("cat", "Siamese");
+
+        if (result.isPresent()) {
+            System.out.println("Did you know: " + result.get().getFactText());
+        } else {
+            System.out.println("NO FACT AVAILABLE");
+        }
+    }
+    @Test
+    void liveCatApiThroughInteractor() {
+        // real DAO
+        CatApiPetFactDataAccessObject catDao = new CatApiPetFactDataAccessObject();
+
+        // minimal presenter that prints the result
+        GetPetFactOutputBoundary presenter = new GetPetFactOutputBoundary() {
+            @Override
+            public void present(GetPetFactOutputData outputData) {
+                if (outputData.isSuccess()) {
+                    System.out.println("Did you know: " + outputData.getFactText());
+                } else {
+                    System.out.println("NO FACT AVAILABLE");
+                }
+            }
+        };
+
+        GetPetFactInteractor interactor = new GetPetFactInteractor(catDao, presenter);
+        interactor.execute("cat", "Siamese");  // hits real API
     }
 }
