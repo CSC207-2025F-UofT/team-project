@@ -1,46 +1,35 @@
 package view;
 
-import entity.User;
+import interface_adapter.Profile.ProfileViewModel;
 
 import javax.swing.*;
 import java.awt.*;
 
 public class ProfileFrame extends JFrame {
-    public ProfileFrame(User user, JFrame mainMenu) {
-        setTitle("interface_adapter/Profile");
+
+    public ProfileFrame(ProfileViewModel vm, JFrame mainMenu) {
+
+        setTitle("Profile");
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setExtendedState(JFrame.MAXIMIZED_BOTH);
         setLayout(new BorderLayout());
 
-        JPanel centerPanel = new JPanel();
-        centerPanel.setLayout(new GridLayout(4, 1));
-        centerPanel.setFont(new Font("Arial", Font.PLAIN, 32));
+        JPanel centerPanel = new JPanel(new GridLayout(4, 1));
 
-        JLabel usernameLabel = new JLabel("Username: " + user.getUsername(), SwingConstants.CENTER);
-        JLabel balanceLabel = new JLabel("Balance: $" + user.getBalance(), SwingConstants.CENTER);
-        JLabel betLabel = new JLabel("Number of Bets: " + user.getBets(), SwingConstants.CENTER);
-        JLabel gamesLabel = new JLabel("Games Played: " + user.getGamesPlayed(), SwingConstants.CENTER);
-
-        usernameLabel.setFont(new Font("Arial", Font.PLAIN, 40));
-        balanceLabel.setFont(new Font("Arial", Font.PLAIN, 40));
-        betLabel.setFont(new Font("Arial", Font.PLAIN, 40));
-        gamesLabel.setFont(new Font("Arial", Font.PLAIN, 40));
-
-        centerPanel.add(usernameLabel);
-        centerPanel.add(balanceLabel);
-        centerPanel.add(betLabel);
-        centerPanel.add(gamesLabel);
+        centerPanel.add(new JLabel("Username: " + vm.getUsername(), SwingConstants.CENTER));
+        centerPanel.add(new JLabel("Balance: $" + vm.getBalance(), SwingConstants.CENTER));
+        centerPanel.add(new JLabel("Bets: " + vm.getBets(), SwingConstants.CENTER));
+        centerPanel.add(new JLabel("Games Played: " + vm.getGamesPlayed(), SwingConstants.CENTER));
 
         JButton returnBtn = new JButton("Return to Home");
         returnBtn.setFont(new Font("Arial", Font.BOLD, 35));
-
-        add(centerPanel, BorderLayout.CENTER);
-        add(returnBtn, BorderLayout.SOUTH);
-
         returnBtn.addActionListener(e -> {
             mainMenu.setVisible(true);
             dispose();
         });
+
+        add(centerPanel, BorderLayout.CENTER);
+        add(returnBtn, BorderLayout.SOUTH);
 
         setVisible(true);
     }
