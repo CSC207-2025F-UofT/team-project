@@ -33,7 +33,7 @@ public class SignupInteractor implements SignupInputBoundary {
             userPresenter.prepareFailView("Username cannot be empty");
         }
         else {
-            final User user = userFactory.create(signupInputData.getUsername(), 50, 0,
+            final User user = UserFactory.create(signupInputData.getUsername(), 50, 0,
                     0, signupInputData.getPassword());
             userDataAccessObject.save(user);
 
