@@ -74,10 +74,7 @@ public class DataAccessObject implements BuildPokemonTeamDataAccessInterface {
         }
 
     }
-    public Team loadTeam(String name){
-        Team team = null;
-        return team;
-    }
+
     public boolean exists(String name){
         boolean x = true;
         return x;

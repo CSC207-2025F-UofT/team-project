@@ -24,7 +24,7 @@ public class BuildPokemonTeamInteractor implements BuildPokemonTeamInputBoundary
 
 
     @Override
-    public void execute(BuildPokemonTeamInputData buildPokemonTeamInputData) throws IOException {
+    public void addToTeam(BuildPokemonTeamInputData buildPokemonTeamInputData) throws IOException {
 
             final int index = buildPokemonTeamInputData.getIndex();
             final Team team = buildPokemonTeamInputData.getTeam();
@@ -52,4 +52,16 @@ public class BuildPokemonTeamInteractor implements BuildPokemonTeamInputBoundary
             userPresenter.prepareSuccessView(buildPokemonTeamOutputData);
 
         }
+
+    public void removeFromTeam(BuildPokemonTeamInputData buildPokemonTeamInputData) throws IOException {
+
+        final int index = buildPokemonTeamInputData.getIndex();
+        final Team team = buildPokemonTeamInputData.getTeam();
+        team.setPokemon(null, index);
+
+        final BuildPokemonTeamOutputData buildPokemonTeamOutputData =
+                new BuildPokemonTeamOutputData(team);
+        userPresenter.prepareSuccessView(buildPokemonTeamOutputData);
+
+    }
     }

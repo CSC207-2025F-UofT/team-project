@@ -9,9 +9,10 @@ import java.io.IOException;
 public interface BuildPokemonTeamInputBoundary {
 
     /**
-     * Execute the Pokemon Lookup Use Case.
+     * Execute the add to Team Use Case.
      * @param BuildPokemonTeamInputData the input data for this use case
      */
+    void addToTeam(BuildPokemonTeamInputData BuildPokemonTeamInputData) throws IOException;
 
-    void execute(BuildPokemonTeamInputData BuildPokemonTeamInputData) throws IOException;
+    void removeFromTeam(BuildPokemonTeamInputData BuildPokemonTeamInputData) throws IOException;
 }

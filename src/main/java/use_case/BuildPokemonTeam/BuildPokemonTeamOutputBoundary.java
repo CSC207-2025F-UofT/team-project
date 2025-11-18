@@ -4,7 +4,7 @@ package use_case.BuildPokemonTeam;
  * The output boundary for the Pokemon Lookup Use Case.
  */
 public interface BuildPokemonTeamOutputBoundary {
-    /**-
+    /**-are you
      * Prepares the success view for the Pokemon Lookup Use Case.
      * @param outputData the output data
      */

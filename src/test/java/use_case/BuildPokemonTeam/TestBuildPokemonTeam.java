@@ -10,8 +10,8 @@ import use_case.BuildPokemonTeam.BuildPokemonTeamOutputBoundary;
 import use_case.BuildPokemonTeam.BuildPokemonTeamOutputData;
 
 import java.io.IOException;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+
+import static org.junit.Assert.*;
 
 public class TestBuildPokemonTeam {
 
@@ -38,7 +38,7 @@ public class TestBuildPokemonTeam {
         };
 
         BuildPokemonTeamInteractor interactor = new BuildPokemonTeamInteractor(successPresenter, a);
-        interactor.execute(inputData);
+        interactor.addToTeam(inputData);
 
     }
 
@@ -65,12 +65,12 @@ public class TestBuildPokemonTeam {
         };
 
         BuildPokemonTeamInteractor interactor = new BuildPokemonTeamInteractor(successPresenter, a);
-        interactor.execute(inputData);
+        interactor.addToTeam(inputData);
     }
 
     @Test
     public void BuildPokemonTeamTestWithoutIndexFullTeam() throws IOException {
-        Team t = new Team("Critical Roll");
+        Team t = new Team("Did Schlatt Win?");
         EmptyPokemonFactory x = new EmptyPokemonFactory();
         Pokemon a = x.create();
         Pokemon b = x.create();
@@ -96,13 +96,49 @@ public class TestBuildPokemonTeam {
             @Override
             public void prepareFailView(String errorMessage) {
                 assertEquals("Team is full. Please remove a Pokemon or create a new Team.", errorMessage);
-
             }
         };
 
-        BuildPokemonTeamInteractor interactor = new BuildPokemonTeamInteractor(presenter, a);
-        interactor.execute(inputData);
+        BuildPokemonTeamInteractor interactor = new BuildPokemonTeamInteractor(presenter, z);
+        interactor.addToTeam(inputData);
     }
+
+    @Test
+    public void BuildPokemonTeamTestRemovePokemon() throws IOException { //THIS REMOVES A POKEMON AT INDEX 0
+        Team t = new Team("Let's Not Meet");
+        EmptyPokemonFactory x = new EmptyPokemonFactory();
+        Pokemon a = x.create();
+        Pokemon b = x.create();
+        Pokemon c = x.create();
+        Pokemon d = x.create();
+        Pokemon e = x.create();
+        Pokemon f = x.create();
+        t.setPokemon(a, 0);
+        t.setPokemon(b, 1);
+        t.setPokemon(c, 2);
+        t.setPokemon(d, 3);
+        t.setPokemon(e, 4);
+        t.setPokemon(f, 5);
+
+        BuildPokemonTeamInputData inputData = new BuildPokemonTeamInputData(a.getName(), t, 0);
+        BuildPokemonTeamOutputBoundary successPresenter = new BuildPokemonTeamOutputBoundary() {
+            @Override
+            public void prepareSuccessView(BuildPokemonTeamOutputData outputData) {
+                assertNull(t.getPokemon(0));
+            }
+
+            @Override
+            public void prepareFailView(String errorMessage) {
+                fail("The Pokemon was not removed properly!");
+            }
+
+        };
+
+        BuildPokemonTeamInteractor interactor = new BuildPokemonTeamInteractor(successPresenter, a);
+        interactor.removeFromTeam(inputData);
+
+    }
+
 
 }
 
