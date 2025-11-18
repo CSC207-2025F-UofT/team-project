@@ -87,7 +87,7 @@ public class ChatView extends JPanel implements ActionListener, PropertyChangeLi
                 "\" a message to start a chat!</div></html>");
         initialPrompt.setFont(new Font("SansSerif", Font.ITALIC, 16));
 
-        chatDisplayPanel.add(initialPrompt); // Adds the prompt centered by GridBagLayout
+        chatDisplayPanel.add(initialPrompt);
 
         JScrollPane chatScrollPane = new JScrollPane(chatDisplayPanel);
         chatScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
@@ -167,11 +167,13 @@ public class ChatView extends JPanel implements ActionListener, PropertyChangeLi
                     bubble.setBorder(BorderFactory.createEmptyBorder(8, 10, 8, 10));
 
                     if (fromCurrentUser) {
-                        bubble.setBackground(new Color(0x95EC69)); // 自己：浅绿
+                        bubble.setBackground(new Color(0x95EC69));
+                        // green
                         bubble.setForeground(Color.BLACK);
                         row.add(bubble, BorderLayout.EAST);
                     } else {
-                        bubble.setBackground(new Color(230, 230, 230)); // 对方：灰
+                        bubble.setBackground(new Color(230, 230, 230));
+                        // black
                         bubble.setForeground(Color.BLACK);
                         row.add(bubble, BorderLayout.WEST);
                     }
