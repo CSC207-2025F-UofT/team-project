@@ -1,7 +1,7 @@
 package interface_adapter.login;
 
 import interface_adapter.ViewManagerModel;
-import interface_adapter.blank.BlankViewModel;
+import interface_adapter.homescreen.HomescreenViewModel;
 import use_case.login.LoginOutputBoundary;
 import use_case.login.LoginOutputData;
 
@@ -11,14 +11,14 @@ import use_case.login.LoginOutputData;
 public class LoginPresenter implements LoginOutputBoundary {
 
     private final LoginViewModel loginViewModel;
-    private final BlankViewModel blankViewModel;
+    private final HomescreenViewModel homescreenViewModel;
     private final ViewManagerModel viewManagerModel;
 
     public LoginPresenter(ViewManagerModel viewManagerModel,
-                          BlankViewModel blankViewModel,
+                          HomescreenViewModel homescreenViewModel,
                           LoginViewModel loginViewModel) {
         this.viewManagerModel = viewManagerModel;
-        this.blankViewModel = blankViewModel;
+        this.homescreenViewModel = homescreenViewModel;
         this.loginViewModel = loginViewModel;
     }
 
@@ -28,7 +28,7 @@ public class LoginPresenter implements LoginOutputBoundary {
         loginViewModel.firePropertyChange();
 
         // switch to the blank view
-        this.viewManagerModel.setState("blank");
+        this.viewManagerModel.setState("homescreen");
         this.viewManagerModel.firePropertyChange();
     }
 
