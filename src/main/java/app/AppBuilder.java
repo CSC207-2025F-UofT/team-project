@@ -24,6 +24,7 @@ import javax.swing.*;
 import java.awt.*;
 
 public class AppBuilder {
+    private String api_key;
     private final JPanel cardPanel = new JPanel();
     private final CardLayout cardLayout = new CardLayout();
     final UserFactory userFactory = new UserFactory();
@@ -34,8 +35,15 @@ public class AppBuilder {
     // of the classes from the data_access package
 
     // DAO version using local file storage
-    final FileUserDataAccessObject userDataAccessObject = new FileUserDataAccessObject("users.csv", userFactory);
-
+//    final FileUserDataAccessObject userDataAccessObject = new FileUserDataAccessObject("users.csv", userFactory);
+    /// TODO: Convert to external DB storage
+    /// TODO: Figure out how API key passes
+    /// TODO: For the api key pass, login output boundary should return
+    /// a api string so we can store in the app builder and pass into
+    /// other usecase's input boundary
+    /// TODO: DAO should becreaetd within each view and then passed
+    /// into the input boundary
+    /// TODO: Ensure Leaderboard DAO
     // DAO version using a shared external database
     // final DBUserDataAccessObject userDataAccessObject = new DBUserDataAccessObject(userFactory);
 
