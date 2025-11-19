@@ -6,13 +6,18 @@ public class Main {
     public static void main(String[] args) {
         AppBuilder appBuilder = new AppBuilder();
         JFrame application = appBuilder
-                .addClickingView()
-                .addClickingUseCase()
+                .addLoginView()
+                .addSignUpView()
+                .addHomepageView()
                 .addWatchlistView()
                 .addFavoritesView()
-                .addRateAndCommentView("", "")
-                .addRandCView("")
-                .addHomepageView()
+                .addClickingView()
+                .addRateAndCommentView()
+                .addRandCView()
+                .addLoginUseCase()
+                .addSignupUseCase()
+                .addCommentUseCase()
+                .addClickingUseCase()
                 .build();
 
         application.setLocationRelativeTo(null);

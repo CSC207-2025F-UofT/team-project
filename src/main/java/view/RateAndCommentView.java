@@ -1,5 +1,6 @@
 package view;
 
+import interface_adapter.clicking.ClickingViewModel;
 import interface_adapter.rate_and_comment.CommentController;
 import interface_adapter.rate_and_comment.CommentState;
 import interface_adapter.rate_and_comment.CommentViewModel;
@@ -19,6 +20,8 @@ public class RateAndCommentView extends JPanel implements ActionListener, Proper
 
     private final String viewName = "comment";
     private final CommentViewModel commentViewModel;
+    private final ClickingViewModel clickingViewModel;
+
     //TODO 设置一个方法让从上一UI跳转过来时输入username和medianame
     private String username;
     private String medianame;
@@ -30,9 +33,9 @@ public class RateAndCommentView extends JPanel implements ActionListener, Proper
 
     private CommentController commentController = null;
 
-    public RateAndCommentView(CommentViewModel commentViewModel, String un, String mn) {
-        this.username = un;
-        this.medianame = mn;
+    public RateAndCommentView(CommentViewModel commentViewModel, ClickingViewModel clickingViewModel) {
+        this.clickingViewModel = clickingViewModel;
+
         this.commentViewModel = commentViewModel;
         this.commentViewModel.addPropertyChangeListener(this);
         //TODO 注意这两个加的位置
@@ -188,6 +191,14 @@ public class RateAndCommentView extends JPanel implements ActionListener, Proper
         }
     }
 
+    private void setUsername(String un) {
+        username = un;
+    }
+
+    private void setMedianame(String mn) {
+        medianame = mn;
+    }
+
     /**
      * React to a button click that results in evt.
      *
@@ -202,6 +213,8 @@ public class RateAndCommentView extends JPanel implements ActionListener, Proper
         CommentState state = (CommentState) evt.getNewValue();
         reviewArea.setText(state.getComment());
         setRating(state.getRate());
+        setUsername(state.getUsername());
+        setMedianame(state.getMedianame());
     }
 
     public String getViewName() {

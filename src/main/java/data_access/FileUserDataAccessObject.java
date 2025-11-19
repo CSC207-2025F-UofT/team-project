@@ -5,7 +5,9 @@ import com.google.gson.reflect.TypeToken;
 import entity.Comment;
 import entity.Media;
 import entity.User;
+import use_case.login.LoginUserDataAccessInterface;
 import use_case.rate_and_comment.CommentUserDataAccessInterface;
+import use_case.signup.SignupUserDataAccessInterface;
 
 import java.io.File;
 import java.io.FileReader;
@@ -15,7 +17,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class FileUserDataAccessObject implements CommentUserDataAccessInterface {
+public class FileUserDataAccessObject implements CommentUserDataAccessInterface, SignupUserDataAccessInterface,
+        LoginUserDataAccessInterface {
 
     private final String filePath = "src/main/java/userdata/users.json";
     private final Gson gson = new Gson();
@@ -71,6 +74,7 @@ public class FileUserDataAccessObject implements CommentUserDataAccessInterface 
         }
     }
 
+    @Override
     public void createUser(String username, String password, int accountID) {
         Map<String, User> map = readFile();
         if (!map.containsKey(username)) {
@@ -82,6 +86,22 @@ public class FileUserDataAccessObject implements CommentUserDataAccessInterface 
         }
     }
 
+    @Override
+    public boolean existsByName(String username){
+        Map<String, User> map = readFile();
+        return map.containsKey(username);
+    }
+
+    @Override
+    public boolean existsByAccountID(int accountID){
+        Map<String, User> map = readFile();
+        for (User user : map.values()) {
+            if  (user.getAccountID() == accountID) {return true;}
+        }
+        return false;
+    }
+
+    @Override
     public User getUser(String username) {
         Map<String, User> map = readFile();
 

@@ -1,11 +1,26 @@
 package app;
 
+
 import data_access.ClickingDataAccessTMDb;
 import data_access.FileUserDataAccessObject;
+
+
 import entity.MediaDetailsResponse;
 import interface_adapter.RandC_success_submit.RandCSuccessViewModel;
 import interface_adapter.ViewManagerModel;
 
+import interface_adapter.login.LoginController;
+import interface_adapter.login.LoginPresenter;
+import interface_adapter.login.LoginViewModel;
+import interface_adapter.rate_and_comment.CommentController;
+import interface_adapter.rate_and_comment.CommentPresenter;
+import interface_adapter.rate_and_comment.CommentViewModel;
+import interface_adapter.signup.SignupController;
+import interface_adapter.signup.SignupPresenter;
+import interface_adapter.signup.SignupViewModel;
+import use_case.login.LoginInputBoundary;
+import use_case.login.LoginInteractor;
+import use_case.login.LoginOutputBoundary;
 import interface_adapter.browse.BrowseViewModel;
 import interface_adapter.clicking.ClickingState;
 import interface_adapter.rate_and_comment.CommentController;
@@ -18,6 +33,9 @@ import use_case.clicking.*;
 import use_case.rate_and_comment.CommentInputBoundary;
 import use_case.rate_and_comment.CommentInteractor;
 import use_case.rate_and_comment.CommentOutputBoundary;
+import use_case.signup.SignupInputBoundary;
+import use_case.signup.SignupInteractor;
+import use_case.signup.SignupOutputBoundary;
 import view.*;
 
 import javax.swing.*;
@@ -30,22 +48,46 @@ public class AppBuilder {
     ViewManager viewManager = new ViewManager(cardPanel, cardLayout, viewManagerModel);
 
     final FileUserDataAccessObject userDataAccessObject = new FileUserDataAccessObject();
-
+    //views and view models
+    private SignupView signupView;
+    private SignupViewModel signupViewModel;
+  
+    private LoginView loginView;
+    private LoginViewModel  loginViewModel;
+  
     private WatchlistView watchlistView;
     private FavoritesView favoritesView;
     private BrowseView browseView;
-    private RateAndCommentView rateAndCommentView;
     private HomepageView homepageView;
+  
+    private RateAndCommentView rateAndCommentView;
     private CommentViewModel commentViewModel;
+  
     private RandCSuccessSubmitView randCSuccessSubmitView;
     private RandCSuccessViewModel randCSuccessViewModel;
+  
     private ClickingView clickingView;
     private ClickingViewModel clickingViewModel;
+
 
     public AppBuilder() {
         cardPanel.setLayout(cardLayout);
     }
 
+    public AppBuilder addSignUpView() {
+        signupViewModel = new SignupViewModel();
+        signupView = new SignupView(signupViewModel);
+        cardPanel.add(signupView, signupView.getViewName());
+        return this;
+    }
+
+    public AppBuilder addLoginView() {
+        loginViewModel = new LoginViewModel();
+        loginView = new LoginView(loginViewModel);
+        cardPanel.add(loginView, loginView.getViewName());
+        return this;
+    }
+  
     public AppBuilder addClickingView() {
         clickingViewModel = new ClickingViewModel();
         clickingView = new ClickingView(clickingViewModel);
@@ -97,19 +139,27 @@ public class AppBuilder {
         return this;
     }
 
+    public AppBuilder addRateAndCommentView() {
+        commentViewModel = new CommentViewModel();
+        rateAndCommentView = new RateAndCommentView(commentViewModel,clickingViewModel);
+        cardPanel.add(rateAndCommentView,rateAndCommentView.getViewName());
+        return this;
+    }
+  
+    public AppBuilder addRandCView() {
+        randCSuccessViewModel = new RandCSuccessViewModel();
+        randCSuccessSubmitView = new RandCSuccessSubmitView(randCSuccessViewModel, clickingViewModel);
+        cardPanel.add(randCSuccessSubmitView, randCSuccessView.getViewName());
+        return this;
+    }
 //    public AppBuilder addBrowseView() {
 //        browseView = new BrowseView();
 //        cardPanel.add(browseView, browseView.getViewname());
 //        return this;
 //    }
 
-    public AppBuilder addRateAndCommentView(String un, String mn) {
-        commentViewModel = new CommentViewModel();
-        rateAndCommentView = new RateAndCommentView(commentViewModel, un, mn);
-        cardPanel.add(rateAndCommentView, rateAndCommentView.getViewName());
-        return this;
-    }
-
+   
+   
     public AppBuilder addHomepageView() {
         homepageView = new HomepageView();
         cardPanel.add(homepageView, homepageView.getViewName());
@@ -136,14 +186,31 @@ public class AppBuilder {
     }
 
 
-    public AppBuilder addRandCView(String movie) {
-        randCSuccessViewModel = new RandCSuccessViewModel();
-        randCSuccessSubmitView = new RandCSuccessSubmitView(movie);
-        cardPanel.add(randCSuccessSubmitView, randCSuccessViewModel.getViewName());
+     
+
+    public AppBuilder addSignupUseCase(){
+        final SignupOutputBoundary signupOutputBoundary = new SignupPresenter(viewManagerModel,
+                signupViewModel, loginViewModel);
+        final SignupInputBoundary signupInputBoundary = new SignupInteractor(userDataAccessObject,
+                signupOutputBoundary);
+
+        SignupController signupController = new SignupController(signupInputBoundary);
+        signupView.setSignupController(signupController);
         return this;
     }
 
-    public AppBuilder addCommentUseCase() {
+    public AppBuilder addLoginUseCase(){
+        final LoginOutputBoundary loginOutputBoundary = new LoginPresenter(viewManagerModel,
+                loggedinviewmodel, loginViewModel);
+        final LoginInputBoundary loginInputBoundary = new LoginInteractor(userDataAccessObject,
+                loginOutputBoundary);
+
+        LoginController loginController = new LoginController(loginInputBoundary);
+        loginView.setLoginController(loginController);
+        return this;
+    }
+
+    public AppBuilder addCommentUseCase(){
         final CommentOutputBoundary commentOutputBoundary = new CommentPresenter(commentViewModel,
                 randCSuccessViewModel, viewManagerModel);
         final CommentInputBoundary commentInputBoundary = new CommentInteractor(userDataAccessObject,

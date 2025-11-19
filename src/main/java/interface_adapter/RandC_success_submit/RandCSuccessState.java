@@ -2,7 +2,7 @@ package interface_adapter.RandC_success_submit;
 
 public class RandCSuccessState {
 
-    private String medianame;
+    private String medianame = "";
 
     public String getMedianame() {
         return medianame;
