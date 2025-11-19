@@ -13,13 +13,13 @@ public class FetchNewsPresenter implements FetchNewsOutputBoundary {
 
     private final NewsView view;
 
-    /** 保存全部新闻，翻页时用 */
+    /** save all the news for turning pages */
     private List<News> allNews = new ArrayList<>();
 
-    /** 当前页 index，从 0 开始 */
+    /** index for current page */
     private int currentPage = 0;
 
-    /** 时间格式化 */
+    /** formatting the time */
     private final DateTimeFormatter formatter =
             DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 
@@ -28,13 +28,13 @@ public class FetchNewsPresenter implements FetchNewsOutputBoundary {
     }
 
     // --------------------------
-    //   必须实现的接口方法
+    //   methods must complement
     // --------------------------
 
     @Override
     public void presentNews(List<News> newsList) {
         this.allNews = newsList;
-        this.currentPage = 0; // 新数据从第一页开始
+        this.currentPage = 0; // new data start from index 1
         updateViewModelAndRender();
     }
 
@@ -44,7 +44,7 @@ public class FetchNewsPresenter implements FetchNewsOutputBoundary {
     }
 
     // --------------------------
-    //     Presenter 额外方法：上一页 / 下一页
+    //     Presenter additional methods
     // --------------------------
 
     public void nextPage() {
@@ -62,7 +62,7 @@ public class FetchNewsPresenter implements FetchNewsOutputBoundary {
     }
 
     // --------------------------
-    //     构建 ViewModel 并更新 View
+    //     set up view model and update view
     // --------------------------
 
     private void updateViewModelAndRender() {
@@ -73,7 +73,7 @@ public class FetchNewsPresenter implements FetchNewsOutputBoundary {
         List<String> publishTimes = new ArrayList<>();
         List<String> urls = new ArrayList<>();
 
-        // 构建 3 条新闻
+        // set up 3 news for each page
         for (int i = start; i < end; i++) {
             News n = allNews.get(i);
             titles.add(n.getTitle());
@@ -81,7 +81,7 @@ public class FetchNewsPresenter implements FetchNewsOutputBoundary {
             urls.add(n.getUrl());
         }
 
-        // 不足 3 条补空
+        // when the news left is less than 3, fill it up with blank
         while (titles.size() < 3) {
             titles.add("");
             publishTimes.add("");

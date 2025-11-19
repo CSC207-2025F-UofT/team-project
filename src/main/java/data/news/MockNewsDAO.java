@@ -11,15 +11,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Mock DAO 用于单元测试
- * 读取本地 sample JSON 文件，解析成 List<News>
+ * Mock DAO is used for local test
+ * reads in sample Json data and then generate List<News>
  */
 public class MockNewsDAO implements NewsDataAccessInterface {
 
     private final String filePath;
 
     /**
-     * @param filePath 本地 sample JSON 文件路径
+     * @param filePath file path of the local sample data
      */
     public MockNewsDAO(String filePath) {
         this.filePath = filePath;
@@ -39,7 +39,7 @@ public class MockNewsDAO implements NewsDataAccessInterface {
                     String url = newsObj.get("url").getAsString();
                     String timeStr = newsObj.get("time_published").getAsString();
 
-                    // 注意你的 sample JSON 时间格式是 yyyyMMdd'T'HHmmss
+                    // adjust the time format
                     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd'T'HHmmss");
                     LocalDateTime datePublished = LocalDateTime.parse(timeStr, formatter);
 

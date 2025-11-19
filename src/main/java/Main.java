@@ -1,3 +1,4 @@
+import data.news.NewsApiDAO;
 import interface_adapters.controllers.LoginController;
 import interface_adapters.controllers.SignUpController;
 import data.DataSourceFactory;
@@ -114,24 +115,29 @@ public class Main {
         dashboardView.setVisible(true);
     }
 
-    private static void showNewsView() {
-        // 1. DAO（数据源） - 可以先用 MockNewsDAO 读本地 JSON
-        MockNewsDAO dao = new MockNewsDAO("src/main/resources/sample_news.json");
+    private static void showNewsView(){
+        // 1.Get DAO
+        NewsApiDAO newsApiDAO = new NewsApiDAO();
+        try {
+            newsApiDAO.fetchNews("");
+        } catch (NewsApiDAO.RateLimitExceededException e) {
+            System.out.println("Rate Limit Exceeded");
+        }
 
-        // 2. Presenter（负责 ViewModel）
+        // 2. Presenter
         NewsView view = new NewsView(null); // 先传 null，稍后再注入 Controller
         FetchNewsPresenter presenter = new FetchNewsPresenter(view);
 
-        // 3. Interactor（业务逻辑）
-        FetchNewsInteractor interactor = new FetchNewsInteractor(dao, presenter);
+        // 3. Interactor
+        FetchNewsInteractor interactor = new FetchNewsInteractor(newsApiDAO, presenter);
 
-        // 4. Controller（响应 View 的按钮事件）
+        // 4. Controller
         NewsController controller = new NewsController(interactor, presenter);
 
-        // 5. 将 Controller 注入 View
+        // 5. View
         view.setController(controller);
 
-        // 6. 初始加载新闻
+        // 6. Initialize the news
         controller.fetchNews();
     }
 

@@ -96,7 +96,6 @@ public class NewsView extends JFrame {
         nextButton.setEnabled(vm.hasNextPage);
     }
 
-    /** ✔ showError 集成在 View */
     public void showError(String message) {
         JOptionPane.showMessageDialog(this, message, "Error", JOptionPane.ERROR_MESSAGE);
     }
@@ -104,15 +103,9 @@ public class NewsView extends JFrame {
     public void setController(NewsController controller) {
         this.controller = controller;
 
-        // 仅在 Controller 注入时，绑定按钮事件
-        // 这样可以确保 this.controller 不为 null
         prevButton.addActionListener(e -> this.controller.goToPreviousPage());
         nextButton.addActionListener(e -> this.controller.goToNextPage());
     }
 
-    public interface Controller {
-        void goToPreviousPage();
-        void goToNextPage();
-    }
 }
 

@@ -5,10 +5,9 @@ import entity.News;
 import java.util.List;
 
 /**
- * 封装获取新闻 Use Case 的输出数据
- *
- * 成功时，newsList 非空，errorMessage 为 null
- * 失败时，newsList 为空，errorMessage 有内容
+ * when the news fetching is:
+ * successful: newsList is non-empty, and errorMessage is null
+ * failed: newsList is empty, and errorMessage has something
  */
 public class FetchNewsOutputData {
 
@@ -16,7 +15,7 @@ public class FetchNewsOutputData {
     private final String errorMessage;
 
     /**
-     * 成功构造器
+     * when succeeded
      */
     public FetchNewsOutputData(List<News> newsList) {
         this.newsList = newsList;
@@ -24,7 +23,7 @@ public class FetchNewsOutputData {
     }
 
     /**
-     * 失败构造器
+     * when failed
      */
     public FetchNewsOutputData(String errorMessage) {
         this.newsList = null;
@@ -39,7 +38,4 @@ public class FetchNewsOutputData {
         return errorMessage;
     }
 
-    public boolean isSuccess() {
-        return errorMessage == null;
-    }
 }

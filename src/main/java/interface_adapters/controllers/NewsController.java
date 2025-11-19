@@ -6,18 +6,18 @@ import use_case.fetch_news.FetchNewsInputData;
 
 public class NewsController {
 
-    private final FetchNewsInputBoundary interactor; // 调用 UseCase
-    private final FetchNewsPresenter presenter;           // 控制分页
+    private final FetchNewsInputBoundary interactor; // UseCase
+    private final FetchNewsPresenter presenter;           // for the "previous and next page"
 
     public NewsController(FetchNewsInputBoundary interactor, FetchNewsPresenter presenter) {
         this.interactor = interactor;
         this.presenter = presenter;
     }
 
-    /** 从 API / DAO 获取新闻，调用 Interactor */
+    // fetch news and then use interactor
     public void fetchNews() {
         try {
-            // 创建 InputData，如果有查询参数可以传入
+            // if we let users input data in the future, pass it in here.
             FetchNewsInputData inputData = new FetchNewsInputData();
             interactor.execute(inputData);
         } catch (Exception e) {
@@ -25,12 +25,10 @@ public class NewsController {
         }
     }
 
-    /** 上一页按钮点击 */
     public void goToPreviousPage() {
         presenter.prevPage();
     }
 
-    /** 下一页按钮点击 */
     public void goToNextPage() {
         presenter.nextPage();
     }

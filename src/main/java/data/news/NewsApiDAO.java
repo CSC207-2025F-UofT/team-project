@@ -42,7 +42,7 @@ public class NewsApiDAO implements NewsDataAccessInterface {
             String body = response.body().string();
             JsonObject json = gson.fromJson(body, JsonObject.class);
 
-            // 安全检测 API 限制
+            // test the api limit
             if (json.has("Information")) {
                 String infoText = json.get("Information").getAsString();
                 if (infoText.contains("Please subscribe to any of the premium plans")) {
@@ -50,7 +50,7 @@ public class NewsApiDAO implements NewsDataAccessInterface {
                 }
             }
 
-            // Alpha Vantage 返回的新闻数组在 "feed" 字段
+            // Alpha Vantage returns a Json, what we need is in "feed"
             JsonArray feed = json.getAsJsonArray("feed");
             if (feed != null) {
                 for (JsonElement elem : feed) {
@@ -59,7 +59,7 @@ public class NewsApiDAO implements NewsDataAccessInterface {
                     String url = newsObj.get("url").getAsString();
                     String timeStr = newsObj.get("time_published").getAsString();
 
-                    // 解析成 LocalDateTime
+                    // adjust the time format
                     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd'T'HHmmss");
                     LocalDateTime datePublished = LocalDateTime.parse(timeStr, formatter);
 
@@ -74,7 +74,7 @@ public class NewsApiDAO implements NewsDataAccessInterface {
         return newsList;
     }
 
-    // 自定义异常
+    // customize the exception.
     public static class RateLimitExceededException extends Exception {
         public RateLimitExceededException(String message) {
             super(message);
