@@ -7,12 +7,15 @@ import entity.Pokemon;
 import java.io.IOException;
 
 public class BuildPokemonTeamInteractor implements BuildPokemonTeamInputBoundary {
+    private final BuildPokemonTeamDataAccessInterface userDataAccessObject;
     private final BuildPokemonTeamOutputBoundary userPresenter;
     private final Pokemon Pokemon;
 
 
-    public BuildPokemonTeamInteractor(BuildPokemonTeamOutputBoundary buildPokemonTeamOutputBoundary,
+    public BuildPokemonTeamInteractor(BuildPokemonTeamDataAccessInterface buildPokemonTeamDataAccessInterface,
+                                      BuildPokemonTeamOutputBoundary buildPokemonTeamOutputBoundary,
                                       Pokemon Pokemon) {
+        this.userDataAccessObject = buildPokemonTeamDataAccessInterface;
         this.userPresenter = buildPokemonTeamOutputBoundary;
         this.Pokemon = Pokemon;
     }
@@ -64,8 +67,7 @@ public class BuildPokemonTeamInteractor implements BuildPokemonTeamInputBoundary
 
     @Override
     public void saveTeam(BuildPokemonTeamInputData buildPokemonTeamInputData) throws IOException {
-        final BuildPokemonTeamDataAccessObject dataAccessObject = new BuildPokemonTeamDataAccessObject();
         final Team team = buildPokemonTeamInputData.getTeam();
-        dataAccessObject.saveTeam(team);
+        userDataAccessObject.saveTeam(team);
     }
 }

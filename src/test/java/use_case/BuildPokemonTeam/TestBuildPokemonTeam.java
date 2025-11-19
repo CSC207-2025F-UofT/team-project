@@ -1,5 +1,6 @@
 package use_case.BuildPokemonTeam;
 
+import data_access.InMemoryUserDataAccessObject;
 import entity.Pokemon;
 import entity.EmptyPokemonFactory;
 import entity.Team;
@@ -33,7 +34,8 @@ public class TestBuildPokemonTeam {
 
         };
 
-        BuildPokemonTeamInteractor interactor = new BuildPokemonTeamInteractor(successPresenter, a);
+        InMemoryUserDataAccessObject userDataAccessObject = new InMemoryUserDataAccessObject();
+        BuildPokemonTeamInteractor interactor = new BuildPokemonTeamInteractor(userDataAccessObject, successPresenter, a);
         interactor.addToTeam(inputData);
 
     }
@@ -60,7 +62,8 @@ public class TestBuildPokemonTeam {
             }
         };
 
-        BuildPokemonTeamInteractor interactor = new BuildPokemonTeamInteractor(successPresenter, a);
+        InMemoryUserDataAccessObject userDataAccessObject = new InMemoryUserDataAccessObject();
+        BuildPokemonTeamInteractor interactor = new BuildPokemonTeamInteractor(userDataAccessObject, successPresenter, a);
         interactor.addToTeam(inputData);
     }
 
@@ -95,7 +98,8 @@ public class TestBuildPokemonTeam {
             }
         };
 
-        BuildPokemonTeamInteractor interactor = new BuildPokemonTeamInteractor(presenter, z);
+        InMemoryUserDataAccessObject userDataAccessObject = new InMemoryUserDataAccessObject();
+        BuildPokemonTeamInteractor interactor = new BuildPokemonTeamInteractor(userDataAccessObject, presenter, z);
         interactor.addToTeam(inputData);
     }
 
@@ -130,7 +134,8 @@ public class TestBuildPokemonTeam {
 
         };
 
-        BuildPokemonTeamInteractor interactor = new BuildPokemonTeamInteractor(successPresenter, a);
+        InMemoryUserDataAccessObject userDataAccessObject = new InMemoryUserDataAccessObject();
+        BuildPokemonTeamInteractor interactor = new BuildPokemonTeamInteractor(userDataAccessObject, successPresenter, a);
         interactor.removeFromTeam(inputData);
 
     }
