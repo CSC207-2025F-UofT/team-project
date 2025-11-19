@@ -6,7 +6,7 @@ import java.util.Date;
 public class Milestone {
     private String title;
     private ArrayList<Task> tasks;
-    private Date duedate;
+    private String duedate;
 
     public Milestone(String title) {
         this.title = title;

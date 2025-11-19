@@ -3,7 +3,7 @@ package com.studyarc.use_case.track_plan;
 //use case Interactor for tracking a plan
 // To do next:
 // 1. Finish Implementing show plans on the view ✅
-// 2. implement dataaccesstool to get plans from a user.
+// 2. implement dataaccesstool to get plans from a user.(Later after Saturday)
 
 
 import com.studyarc.entity.StudyPlan;
