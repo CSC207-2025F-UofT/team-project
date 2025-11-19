@@ -99,6 +99,7 @@ public class FileUserDataAccessObject implements CommentUserDataAccessInterface,
         return false;
     }
 
+    @Override
     public User getUser(String username) {
         Map<String, User> map = readFile();
 
