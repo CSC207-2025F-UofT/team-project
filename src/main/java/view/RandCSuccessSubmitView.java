@@ -2,7 +2,10 @@ package view;
 
 import interface_adapter.RandC_success_submit.RandCSuccessState;
 import interface_adapter.RandC_success_submit.RandCSuccessViewModel;
+import interface_adapter.ViewManagerModel;
+import interface_adapter.clicking.ClickingState;
 import interface_adapter.clicking.ClickingViewModel;
+import interface_adapter.home.HomeViewModel;
 import interface_adapter.rate_and_comment.CommentState;
 
 import javax.swing.*;
@@ -15,15 +18,21 @@ import java.beans.PropertyChangeListener;
 public class RandCSuccessSubmitView extends JPanel implements PropertyChangeListener {
     private String movieName;
     private JButton returnButton;
+    private JButton homeButton;
     private JLabel messageLabel;
+    private ViewManagerModel viewManagerModel;
     private RandCSuccessViewModel randCSuccessViewModel;
     private ClickingViewModel clickingViewModel;
+    private HomeViewModel homeViewModel;
     private String viewname = "RandC";
 
     // 构造函数：从外部传入电影名
-    public RandCSuccessSubmitView(RandCSuccessViewModel randCSuccessViewModel, ClickingViewModel clickingViewModel) {
+    public RandCSuccessSubmitView(ViewManagerModel viewManagerModel, RandCSuccessViewModel randCSuccessViewModel,
+                                  ClickingViewModel clickingViewModel, HomeViewModel homeViewModel) {
+        this.viewManagerModel = viewManagerModel;
         this.randCSuccessViewModel = randCSuccessViewModel;
         this.clickingViewModel = clickingViewModel;
+        this.homeViewModel = homeViewModel;
         initUI();
     }
 
@@ -41,7 +50,7 @@ public class RandCSuccessSubmitView extends JPanel implements PropertyChangeList
         messageLabel.setForeground(new Color(40, 40, 40));
         add(messageLabel, BorderLayout.CENTER);
 
-        // Return 按钮
+        // Return 按钮，返回clicking电影界面
         returnButton = new JButton("Return");
         returnButton.setFont(new Font("SansSerif", Font.BOLD, 14));
         returnButton.setBackground(new Color(70, 130, 180));
@@ -56,21 +65,41 @@ public class RandCSuccessSubmitView extends JPanel implements PropertyChangeList
                 //清空此界面及对应的viewmodel
                 randCSuccessViewModel.setState(new RandCSuccessState());
                 randCSuccessViewModel.firePropertyChange();
-                // TODO: 切换回主界面，例如：
+                // TODO: 切换回clicking界面, 注意确保clicking界面原有数据还在
+                viewManagerModel.setState(clickingViewModel.getViewName());
+                viewManagerModel.firePropertyChange();
 
+            }
+        });
+        // Home Button, 跳转到主页
+        homeButton = new JButton("Home");
+        homeButton.setFont(new Font("SansSerif", Font.BOLD, 14));
+        homeButton.setBackground(new Color(70, 130, 180));
+        homeButton.setForeground(Color.WHITE);
+        homeButton.setFocusPainted(false);
+        homeButton.setPreferredSize(new Dimension(100, 40));
 
-                JOptionPane.showMessageDialog(
-                        RandCSuccessSubmitView.this,
-                        "Return button clicked (you can switch UI here).",
-                        "Info",
-                        JOptionPane.INFORMATION_MESSAGE
-                );
+        homeButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                //清空viewmodel和对应view
+                randCSuccessViewModel.setState(new RandCSuccessState());
+                randCSuccessViewModel.firePropertyChange();
+                //清空clicking view
+                clickingViewModel.setState(new ClickingState());
+                clickingViewModel.firePropertyChange();
+                //切换到homeview
+                viewManagerModel.setState(homeViewModel.getViewName());
+                viewManagerModel.firePropertyChange();
+                //TODO清除clickingpage
+
             }
         });
 
         JPanel bottomPanel = new JPanel();
         bottomPanel.setBackground(new Color(245, 245, 245));
         bottomPanel.add(returnButton);
+        bottomPanel.add(homeButton);
         add(bottomPanel, BorderLayout.SOUTH);
     }
 

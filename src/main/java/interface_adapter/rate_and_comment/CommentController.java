@@ -15,13 +15,12 @@ public class CommentController {
 
     /**
      * Executes the rate and comment Use Case.
-     * @param username the username of the user
      * @param medianame the name of the movie that the user is rating
      * @param comment the comment of the user
      * @param rate the rate that the user give
      */
-    public void execute(String username, String medianame, String comment, int rate) {
-        final CommentInputData commentInputData = new CommentInputData(rate, comment, username, medianame);
+    public void execute(String medianame, String comment, int rate) {
+        final CommentInputData commentInputData = new CommentInputData(rate, comment, medianame);
 
         commentUseCaseInteractor.execute(commentInputData);
     }
