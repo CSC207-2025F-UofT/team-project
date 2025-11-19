@@ -7,14 +7,14 @@ public class MediaDetailsResponse {
     public String overview;
     public String language;
     public String posterUrl;
-    public int year;
+    public int releaseYear;
     public double rating;
     public List<String> genres;
-    public MediaDetailsResponse(String title, int year, String language,
+    public MediaDetailsResponse(String title, int releaseYear, String language,
                                 double rating, List<String> genres, String overview,
                                 String posterUrl) {
         this.title = title;
-        this.year = year;
+        this.releaseYear = releaseYear;
         this.language = language;
         this.rating = rating;
         this.genres = genres;
@@ -22,14 +22,10 @@ public class MediaDetailsResponse {
         this.posterUrl = posterUrl;
     }
 
-    // Getter 方法
     public String getTitle() {
         return title;
     }
 
-    public int getYear() {
-        return year;
-    }
 
     public String getLanguage() {
         return language;
@@ -49,5 +45,9 @@ public class MediaDetailsResponse {
 
     public String getPosterUrl() {
         return posterUrl;
+    }
+
+    public int getReleaseYear() {
+        return releaseYear;
     }
 }
