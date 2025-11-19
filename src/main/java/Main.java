@@ -1,3 +1,19 @@
+import data.news.NewsApiDAO;
+import interface_adapters.controllers.LoginController;
+import interface_adapters.controllers.SignUpController;
+import data.DataSourceFactory;
+import data.JdbcUserRepository;
+import data.SchemaInitializer;
+import data.usecase5.InMemoryPortfolioRepository;
+import data.usecase5.InMemoryPriceHistoryRepository;
+import interface_adapters.presenters.FetchNewsPresenter;
+import interface_adapters.use_case5.Presenter;
+import interface_adapters.controllers.PortfolioController;
+import interface_adapters.use_case5.PortfolioViewModel;
+import data.AlphaVantageAPI;
+import interface_adapters.controllers.StockSearchController;
+import use_case.stocksearch.StockSearchInteractor;
+import ui.*;
 import controllers.*;
 import data.*;
 import data.usecase5.InMemoryPortfolioRepository;
@@ -8,6 +24,10 @@ import ui.DashboardView;
 import use_case.login.LoginInteractor;
 import use_case.portfolio.PortfolioInteractor;
 import use_case.signup.SignUpInteractor;
+import data.news.MockNewsDAO;
+import use_case.fetch_news.*;
+import interface_adapters.controllers.NewsController;
+import ui.NewsView;
 import use_case.stocksearch.StockSearchInteractor;
 
 import javax.sql.DataSource;
@@ -102,4 +122,90 @@ public class Main {
         currentFrame = dashboardView;
         dashboardView.setVisible(true);
     }
+
+    private static void showNewsView(){
+        // 1.Get DAO
+        NewsApiDAO newsApiDAO = new NewsApiDAO();
+        try {
+            newsApiDAO.fetchNews("");
+        } catch (NewsApiDAO.RateLimitExceededException e) {
+            System.out.println("Rate Limit Exceeded");
+        }
+
+        // 2. Presenter
+        NewsView view = new NewsView(null); // 先传 null，稍后再注入 Controller
+        FetchNewsPresenter presenter = new FetchNewsPresenter(view);
+
+        // 3. Interactor
+        FetchNewsInteractor interactor = new FetchNewsInteractor(newsApiDAO, presenter);
+
+        // 4. Controller
+        NewsController controller = new NewsController(interactor, presenter);
+
+        // 5. View
+        view.setController(controller);
+
+        // 6. Initialize the news
+        controller.fetchNews();
+    }
+
+    private static void showPortfolioView() {
+        // Use Case 5: Portfolio performance diagnostics
+        if (currentFrame != null) currentFrame.dispose();
+
+        // 1. create ViewModel
+        PortfolioViewModel viewModel = new PortfolioViewModel();
+
+        // 2. create Presenter（implement PortfolioOutputBoundary）
+        Presenter presenter = new Presenter(viewModel);
+
+        // 3. create Interactor（implement PortfolioInputBoundary）
+        PortfolioInputBoundary interactor = new PortfolioInteractor(
+                new InMemoryPortfolioRepository(),
+                new InMemoryPriceHistoryRepository(),
+                presenter
+        );
+
+        // 4. create Controller（dependent on InputBoundary + ViewModel）
+        PortfolioController controller = new PortfolioController(interactor, viewModel);
+
+        // 5. create View（dependent on Controller + username + dashboard）
+        PortfolioView view = new PortfolioView(
+                controller,
+                currentUsername,
+                Main::showDashboardView
+        );
+
+        currentFrame = view;
+        view.setVisible(true);
+    }
+
+    private static void showInvestmentView() {
+        // ToDo
+    }
+
+    private static void showStockPricesView() {
+        if (currentFrame != null) currentFrame.dispose();
+
+        AlphaVantageAPI api = new AlphaVantageAPI();
+        StockSearchInteractor interactor = new StockSearchInteractor(api);
+        StockSearchController controller = new StockSearchController(interactor);
+
+        StockSearchView view = new StockSearchView(controller,
+                currentUsername,
+                Main::showDashboardView
+        );
+
+        currentFrame = view;
+        view.setVisible(true);
+    }
+
+    private static void showTrendsView() {
+        // ToDo
+    }
+
+    private static void showExpensesView() {
+        // ToDo
+    }
+}
 }
