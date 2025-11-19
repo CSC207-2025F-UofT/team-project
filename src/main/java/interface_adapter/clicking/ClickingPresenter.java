@@ -9,12 +9,11 @@ public class ClickingPresenter implements ClickingOutputBoundary {
 
     private final ClickingViewModel clickingViewModel;
     private final ViewManagerModel viewManagerModel;
-    private final CommentViewModel commentViewModel;
 
-    public ClickingPresenter(ClickingViewModel vm, ViewManagerModel vmm, CommentViewModel commentViewModel) {
+
+    public ClickingPresenter(ClickingViewModel vm, ViewManagerModel vmm) {
         this.clickingViewModel = vm;
         this.viewManagerModel = vmm;
-        this.commentViewModel = commentViewModel;
     }
 
     @Override

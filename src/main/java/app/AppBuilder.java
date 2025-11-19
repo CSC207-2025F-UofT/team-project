@@ -89,7 +89,7 @@ public class AppBuilder {
   
     public AppBuilder addClickingView() {
         clickingViewModel = new ClickingViewModel();
-        clickingView = new ClickingView(clickingViewModel);
+        clickingView = new ClickingView(clickingViewModel,commentViewModel,viewManagerModel);
         cardPanel.add(clickingView, clickingView.getViewName());
 
         ClickingDataAccessInterface dataAccess = new ClickingDataAccessTMDb();
@@ -117,7 +117,7 @@ public class AppBuilder {
         final ClickingDataAccessInterface clickingDataAccess = new ClickingDataAccessTMDb();
 
         final ClickingOutputBoundary clickingPresenter = new ClickingPresenter(
-                clickingViewModel, viewManagerModel, commentViewModel);
+                clickingViewModel, viewManagerModel);
         final ClickingInputBoundary clickingInteractor = new ClickingInteractor(
                 clickingPresenter, clickingDataAccess);
 
