@@ -44,3 +44,4 @@ public class ClickingPresenter implements ClickingOutputBoundary {
         viewManagerModel.firePropertyChange();
     }
 }
+
