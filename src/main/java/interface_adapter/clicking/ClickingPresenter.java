@@ -19,7 +19,7 @@ public class ClickingPresenter implements ClickingOutputBoundary {
 
     @Override
     public void prepareSuccessView(ClickingOutputData outputData) {
-        ClickingState state = viewModel.getState();
+        ClickingState state = clickingViewModel.getState();
         state.setErrorMessage("");
         state.setTitle(outputData.getTitle());
         state.setYear(outputData.getReleaseYear());
@@ -37,9 +37,9 @@ public class ClickingPresenter implements ClickingOutputBoundary {
 
     @Override
     public void prepareFailureView(String errorMessage) {
-        ClickingState state = viewModel.getState();
+        ClickingState state = clickingViewModel.getState();
         state.setErrorMessage(errorMessage);
-        viewModel.firePropertyChange();
+        clickingViewModel.firePropertyChange();
 
         viewManagerModel.setState(clickingViewModel.viewName);
         viewManagerModel.firePropertyChange();
