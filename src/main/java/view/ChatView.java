@@ -46,16 +46,16 @@ public class ChatView extends JPanel implements ActionListener, PropertyChangeLi
         this.setLayout(new BorderLayout());
 
         // Keep the current username updated.
-        this.viewManagerModel.addPropertyChangeListener(
-                e -> this.currentChatId = e.getNewValue().toString()
-        );
+        //this.viewManagerModel.addPropertyChangeListener(
+        //        e -> this.currentChatId = e.getNewValue().toString()
+        //);
 
-        this.loggedInViewModel.addPropertyChangeListener(
-                e -> {
-                    System.out.println();
-                    this.currentUserId = ((LoggedInState) e.getNewValue()).getUsername();
-                }
-        );
+        //this.loggedInViewModel.addPropertyChangeListener(
+        //        e -> {
+        //            System.out.println();
+        //            this.currentUserId = ((LoggedInState) e.getNewValue()).getUsername();
+        //        }
+        //);
 
         // Top Bar (Chat Partner and Exit/Back Button)
         JPanel topBar = new JPanel(new BorderLayout());
