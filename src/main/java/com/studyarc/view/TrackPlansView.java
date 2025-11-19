@@ -6,12 +6,9 @@ import com.studyarc.entity.Task;
 import com.studyarc.interface_adapter.delete_plan.DeletePlanController;
 import com.studyarc.interface_adapter.track_plan.TrackPlanState;
 import com.studyarc.interface_adapter.track_plan.TrackPlanViewModel;
-import com.studyarc.interface_adapter.ui_sidebar.SidebarViewModel;
-import com.studyarc.use_case.delete_plan.DeletePlanInputData;
+import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -23,36 +20,58 @@ import java.util.Date;
 import java.util.HashMap;
 
 public class TrackPlansView extends JPanel implements PropertyChangeListener, ActionListener {
+    private static TrackPlansView instance;
+
     final String viewname = "track plan";
     final BorderLayout borderLayout = new BorderLayout();
 
     final JPanel trackPlansPanel;
-    final JPanel TitlePanel;
+    final JPanel titlePanel;
     final JLabel title = new JLabel("MY PLANS");
+    private final JButton saveButton = new JButton("Save");
 
     private final TrackPlanViewModel trackPlanViewModel;
     private DeletePlanController deletePlanController = null;
 
-    public  HashMap<JButton, StudyPlan> buttonToPlanMap;
+    private HashMap<JButton, StudyPlan> buttonToPlanMap;
 
-    public TrackPlansView(TrackPlanViewModel trackPlanViewModel) {
+    public static TrackPlansView getInstance(TrackPlanViewModel trackPlanViewModel) {
+        if (instance == null) {
+            instance = new TrackPlansView(trackPlanViewModel);
+        }
+        return instance;
+    }
+
+    private TrackPlansView(TrackPlanViewModel trackPlanViewModel) {
         this.buttonToPlanMap = new HashMap<>();
         this.trackPlanViewModel = trackPlanViewModel;
         this.trackPlanViewModel.addPropertyChangeListener(this);
         this.setLayout(borderLayout);
 
-        TitlePanel = new JPanel();
-        title.setFont(new Font("SansSerif", Font.BOLD, 24));
-        TitlePanel.add(title);
+        titlePanel = SetTitlePanel();
         trackPlansPanel = new JPanel();
 
         trackPlansPanel.setLayout(new BoxLayout(trackPlansPanel, BoxLayout.Y_AXIS));
         JScrollPane jScrollPane = new JScrollPane(this.trackPlansPanel);
         jScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
 
-        this.add(TitlePanel, BorderLayout.NORTH);
+        this.add(titlePanel, BorderLayout.NORTH);
         this.add(jScrollPane, BorderLayout.CENTER);
 
+    }
+
+    @NotNull
+    private JPanel SetTitlePanel() {
+        final JPanel titlePanel;
+        titlePanel = new JPanel();
+        title.setFont(new Font("SansSerif", Font.BOLD, 24));
+
+        titlePanel.setLayout(new BorderLayout());
+        titlePanel.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
+
+        titlePanel.add(title, BorderLayout.CENTER);
+        titlePanel.add(saveButton, BorderLayout.EAST);
+        return titlePanel;
     }
 
 
@@ -68,11 +87,13 @@ public class TrackPlansView extends JPanel implements PropertyChangeListener, Ac
 //        } else {
 //            this.showPlansinView(current_Plans);
 //        }
-        this.showPlansinView(Test_Plans);
+        System.out.println(current_Plans.size());
+        this.showPlansinView(current_Plans);
     }
 
     private void showPlansinView(ArrayList<StudyPlan> plans) {
-
+        this.buttonToPlanMap = new HashMap<>();
+        this.trackPlansPanel.removeAll();
         if (plans == null || plans.isEmpty()) {
             trackPlansPanel.add(new JLabel("You have no plans yet."));
         } else {
@@ -82,12 +103,20 @@ public class TrackPlansView extends JPanel implements PropertyChangeListener, Ac
                 trackPlansPanel.add(Box.createVerticalStrut(15)); // space between plans
             }
         }
+        trackPlansPanel.repaint();
+        trackPlansPanel.revalidate();
 
 
     }
 
     private JPanel createPlanPanel(StudyPlan plan) {
-        JPanel planPanel = new JPanel();
+        JPanel planPanel = new JPanel() {
+            @Override
+            public Dimension getMaximumSize() {
+                Dimension size = getPreferredSize();
+                return new Dimension(Integer.MAX_VALUE, size.height);
+            }
+        };
         planPanel.setLayout(new BorderLayout());
         planPanel.setBorder(BorderFactory.createLineBorder(Color.BLACK));
 
@@ -99,7 +128,6 @@ public class TrackPlansView extends JPanel implements PropertyChangeListener, Ac
         planTitleTextField.setText(plan.getTitle());
         planLabel.setFont(planLabel.getFont().deriveFont(Font.BOLD, 16f));
 
-        JButton saveButton = new JButton("Save");
         JButton deleteButton = new JButton("❌");
 
         deleteButton.addActionListener(this);
@@ -109,7 +137,6 @@ public class TrackPlansView extends JPanel implements PropertyChangeListener, Ac
         headPanel.add(planLabel);
         headPanel.add(planTitleTextField);
         headPanel.add(deleteButton);
-        headPanel.add(saveButton);
 //        headPanel.add(planLabel, BorderLayout.WEST);
 //        headPanel.add(deleteButton, BorderLayout.EAST);
 //        headPanel.add(planTitleTextField, BorderLayout.NORTH);
@@ -203,6 +230,8 @@ public class TrackPlansView extends JPanel implements PropertyChangeListener, Ac
 
         planPanel.add(headPanel, BorderLayout.NORTH);
         planPanel.add(milestonesPanel, BorderLayout.CENTER);
+
+
         return planPanel;
     }
 
@@ -308,12 +337,17 @@ public class TrackPlansView extends JPanel implements PropertyChangeListener, Ac
 
     }
 
+    public void setDeletePlanController(DeletePlanController deletePlanController) {
+        this.deletePlanController = deletePlanController;
+    }
+
     // Delete button triggers here
     @Override
     public void actionPerformed(ActionEvent e) {
         JButton button = (JButton) e.getSource();
         StudyPlan plan = this.buttonToPlanMap.get(button);
-//        this.deletePlanController.execute(plan);
         System.out.println("Trying to delete: " + plan.getTitle());
+        this.deletePlanController.execute(plan);
+
     }
 }

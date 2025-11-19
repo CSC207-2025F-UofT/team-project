@@ -10,6 +10,7 @@ public class Main {
                 .addMilestoneTasksPanel()
                 .addTrackPlanView()
                 .addTrackPlanUsecase()
+                .addDeletePlanUsecase()
                 .addSidebarUseCase()
                 .addMilestoneTasksUseCase()
                 .build();

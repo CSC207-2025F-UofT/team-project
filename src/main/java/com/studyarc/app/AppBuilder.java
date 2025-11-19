@@ -6,6 +6,8 @@ import java.awt.*;
 import com.studyarc.data_access.DatabaseAccess;
 import com.studyarc.data_access.MilestoneTasksDatatAccessObject;
 import com.studyarc.interface_adapter.ViewManagerModel;
+import com.studyarc.interface_adapter.delete_plan.DeletePlanController;
+import com.studyarc.interface_adapter.delete_plan.DeletePlanPresenter;
 import com.studyarc.interface_adapter.job_postings.JobPostingsController;
 import com.studyarc.interface_adapter.job_postings.JobPostingsPresenter;
 import com.studyarc.interface_adapter.job_postings.JobPostingsViewModel;
@@ -18,6 +20,9 @@ import com.studyarc.interface_adapter.track_plan.TrackPlanViewModel;
 import com.studyarc.interface_adapter.ui_sidebar.SidebarController;
 import com.studyarc.interface_adapter.ui_sidebar.SidebarPresenter;
 import com.studyarc.interface_adapter.ui_sidebar.SidebarViewModel;
+import com.studyarc.use_case.delete_plan.DeletePlanInputBoundary;
+import com.studyarc.use_case.delete_plan.DeletePlanInteractor;
+import com.studyarc.use_case.delete_plan.DeletePlanOutputBoundary;
 import com.studyarc.use_case.job_postings.JobPostingsInputBoundary;
 import com.studyarc.use_case.job_postings.JobPostingsInteractor;
 import com.studyarc.use_case.job_postings.JobPostingsOutputBoundary;
@@ -70,11 +75,10 @@ public class AppBuilder {
         overallPanel.add(sidePanelView, BorderLayout.WEST);
         return this;
     }
-    
+
     public AppBuilder addTrackPlanView() {
         this.trackPlanViewModel = new TrackPlanViewModel();
-        this.trackPlansView = new TrackPlansView(trackPlanViewModel);
-
+        this.trackPlansView = TrackPlansView.getInstance(trackPlanViewModel);
         cardPanel.add(trackPlansView, trackPlansView.getViewname());
 
         return this;
@@ -82,11 +86,18 @@ public class AppBuilder {
 
     public AppBuilder addTrackPlanUsecase() {
         TrackPlanOutputBoundary presenter = new TrackPlanPresenter(trackPlanViewModel, viewManagerModel);
-        TrackPlanDataAccessinterface dataaccess = new TrackPlanDataAccessTool();
+        TrackPlanDataAccessinterface dataaccess = new DatabaseAccess();//Siwtch to DataAccess later
 
         TrackPlanInputBoundary interactor = new TrackPlanInteractor(presenter, dataaccess);
         TrackPlanController trackPlanController = new TrackPlanController(interactor);
         sidePanelView.setTrackPlanController(trackPlanController);
+        return this;
+    }
+
+    public AppBuilder addDeletePlanUsecase() {
+        DeletePlanOutputBoundary presenter = new DeletePlanPresenter(this.trackPlanViewModel, this.viewManagerModel);
+        DeletePlanInputBoundary interactor = new DeletePlanInteractor(presenter, new DatabaseAccess());
+        trackPlansView.setDeletePlanController(new DeletePlanController(interactor));
         return this;
     }
 

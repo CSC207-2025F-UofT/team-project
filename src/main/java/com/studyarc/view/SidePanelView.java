@@ -72,7 +72,7 @@ public class SidePanelView extends JPanel implements ActionListener, PropertyCha
         myPlans.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-
+                //entered for a randomusername for test, need to change later
                 trackPlanController.execute("qyz");
                 sidebarController.switchToTrackPlan();
 
