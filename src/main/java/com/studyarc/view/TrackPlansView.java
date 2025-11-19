@@ -3,8 +3,11 @@ package com.studyarc.view;
 import com.studyarc.entity.Milestone;
 import com.studyarc.entity.StudyPlan;
 import com.studyarc.entity.Task;
+import com.studyarc.interface_adapter.delete_plan.DeletePlanController;
 import com.studyarc.interface_adapter.track_plan.TrackPlanState;
 import com.studyarc.interface_adapter.track_plan.TrackPlanViewModel;
+import com.studyarc.interface_adapter.ui_sidebar.SidebarViewModel;
+import com.studyarc.use_case.delete_plan.DeletePlanInputData;
 
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
@@ -19,17 +22,21 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 
-public class TrackPlansView extends JPanel implements PropertyChangeListener {
+public class TrackPlansView extends JPanel implements PropertyChangeListener, ActionListener {
     final String viewname = "track plan";
     final BorderLayout borderLayout = new BorderLayout();
 
     final JPanel trackPlansPanel;
     final JPanel TitlePanel;
     final JLabel title = new JLabel("MY PLANS");
-    private final TrackPlanViewModel trackPlanViewModel;
 
+    private final TrackPlanViewModel trackPlanViewModel;
+    private DeletePlanController deletePlanController = null;
+
+    public  HashMap<JButton, StudyPlan> buttonToPlanMap;
 
     public TrackPlansView(TrackPlanViewModel trackPlanViewModel) {
+        this.buttonToPlanMap = new HashMap<>();
         this.trackPlanViewModel = trackPlanViewModel;
         this.trackPlanViewModel.addPropertyChangeListener(this);
         this.setLayout(borderLayout);
@@ -65,7 +72,6 @@ public class TrackPlansView extends JPanel implements PropertyChangeListener {
     }
 
     private void showPlansinView(ArrayList<StudyPlan> plans) {
-        trackPlansPanel.removeAll();
 
         if (plans == null || plans.isEmpty()) {
             trackPlansPanel.add(new JLabel("You have no plans yet."));
@@ -76,8 +82,7 @@ public class TrackPlansView extends JPanel implements PropertyChangeListener {
                 trackPlansPanel.add(Box.createVerticalStrut(15)); // space between plans
             }
         }
-        trackPlansPanel.revalidate();
-        trackPlansPanel.repaint();
+
 
     }
 
@@ -94,8 +99,12 @@ public class TrackPlansView extends JPanel implements PropertyChangeListener {
         planTitleTextField.setText(plan.getTitle());
         planLabel.setFont(planLabel.getFont().deriveFont(Font.BOLD, 16f));
 
-        JButton deleteButton = new JButton("❌");
         JButton saveButton = new JButton("Save");
+        JButton deleteButton = new JButton("❌");
+
+        deleteButton.addActionListener(this);
+
+        this.buttonToPlanMap.put(deleteButton, plan);
 
         headPanel.add(planLabel);
         headPanel.add(planTitleTextField);
@@ -246,19 +255,65 @@ public class TrackPlansView extends JPanel implements PropertyChangeListener {
         plan3.getMilestones().add(p3m1);
         plan3.getMilestones().add(p3m2);
 
+        // plan 4
+        StudyPlan plan4 = new StudyPlan("Plan 4", new ArrayList<>());
 
-        //add all 3 plans to plans
+        Milestone p4m1 = new Milestone("Milestone 1");
+        p3m1.getTasks().add(new Task("Do step1", new Date()));
+        p3m1.getTasks().add(new Task("Do step2", new Date()));
+
+        Milestone p4m2 = new Milestone("Milestone 2");
+        p3m2.getTasks().add(new Task("Do step1", new Date()));
+        p3m2.getTasks().add(new Task("Do step2", new Date()));
+
+        plan4.getMilestones().add(p4m1);
+        plan4.getMilestones().add(p4m2);
+        // Plan 5
+        StudyPlan plan5 = new StudyPlan("Plan 5", new ArrayList<>());
+
+        Milestone p5m1 = new Milestone("Milestone 1");
+        p5m1.getTasks().add(new Task("Do step1", new Date()));
+        p5m1.getTasks().add(new Task("Do step2", new Date()));
+
+        Milestone p5m2 = new Milestone("Milestone 2");
+        p5m2.getTasks().add(new Task("Do step1", new Date()));
+        p5m2.getTasks().add(new Task("Do step2", new Date()));
+
+        plan5.getMilestones().add(p5m1);
+        plan5.getMilestones().add(p5m2);
+
+        //plan 6
+        StudyPlan plan6 = new StudyPlan("Plan 6", new ArrayList<>());
+
+        Milestone p6m1 = new Milestone("Milestone 1");
+        p6m1.getTasks().add(new Task("Do step1", new Date()));
+        p6m1.getTasks().add(new Task("Do step2", new Date()));
+
+        Milestone p6m2 = new Milestone("Milestone 2");
+        p6m2.getTasks().add(new Task("Do step1", new Date()));
+        p6m2.getTasks().add(new Task("Do step2", new Date()));
+
+        plan6.getMilestones().add(p6m1);
+        plan6.getMilestones().add(p6m2);
+
+        //add all plans to plans
         plans.add(plan1);
         plans.add(plan2);
         plans.add(plan3);
-        plans.add(plan3);
-        plans.add(plan3);
-        plans.add(plan3);
+        plans.add(plan4);
+        plans.add(plan5);
+        plans.add(plan6);
 
         return plans;
 
     }
 
-
-
+    // Delete button triggers here
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        JButton button = (JButton) e.getSource();
+        StudyPlan plan = this.buttonToPlanMap.get(button);
+//        this.deletePlanController.execute(plan);
+        System.out.println("Trying to delete: " + plan.getTitle());
+    }
 }

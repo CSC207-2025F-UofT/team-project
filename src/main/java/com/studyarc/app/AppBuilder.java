@@ -146,7 +146,7 @@ public class AppBuilder {
 
 
     public JFrame build() {
-        final JFrame application = new JFrame("Code Example");
+        final JFrame application = new JFrame("Study Arc");
         application.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         application.add(overallPanel);
         application.setMinimumSize(new Dimension(1000, 800));

@@ -27,7 +27,7 @@ public class SidebarPresenter implements SidebarOutputBoundary {
     public void switchToJobBoard() {
         viewManagerModel.setState(jobPostingsViewModel.getViewName());
         viewManagerModel.firePropertyChange();
-        System.out.println("viewManagerModel.firePropertyChange for job board: " + jobPostingsViewModel.getViewName());
+
     }
 
     @Override
