@@ -13,6 +13,7 @@ import interface_adapter.logout.LogoutController;
 import interface_adapter.logout.LogoutPresenter;
 import interface_adapter.messaging.view_history.ViewChatHistoryController;
 import interface_adapter.messaging.view_history.ViewChatHistoryPresenter;
+import interface_adapter.repo.InMemoryMessageRepository;
 import interface_adapter.signup.SignupController;
 import interface_adapter.signup.SignupPresenter;
 import interface_adapter.signup.SignupViewModel;
@@ -62,6 +63,11 @@ import use_case.change_username.ChangeUsernameInteractor;
 import use_case.change_username.ChangeUsernameOutputBoundary;
 import use_case.change_username.ChangeUsernameUserDataAccessInterface;
 
+import com.google.cloud.firestore.Firestore;
+import data_access.FirebaseClientProvider;
+import interface_adapter.repo.FirebaseMessageRepository;
+import use_case.ports.MessageRepository;
+
 import javax.swing.*;
 import java.awt.*;
 
@@ -73,8 +79,7 @@ public class AppBuilder {
             new interface_adapter.repo.InMemoryChatRepository();
 
     // MessageRepository
-    private final use_case.ports.MessageRepository messageRepository =
-            new interface_adapter.repo.InMemoryMessageRepository();
+    private final MessageRepository messageRepository;
 
     // UserRepository
     private final use_case.ports.UserRepository userRepository =
@@ -116,6 +121,19 @@ public class AppBuilder {
 
     public AppBuilder() {
         cardPanel.setLayout(cardLayout);
+
+        MessageRepository repo;
+        try {
+            com.google.cloud.firestore.Firestore db =
+                    data_access.FirebaseClientProvider.getFirestore();
+            repo = new interface_adapter.repo.FirebaseMessageRepository(db);
+            System.out.println("Using FirebaseMessageRepository");
+        } catch (Exception e) {
+            e.printStackTrace();
+            repo = new interface_adapter.repo.InMemoryMessageRepository();
+            System.out.println("Fallback to InMemoryMessageRepository");
+        }
+        this.messageRepository = repo;
 
         // Use repo to store
         goc.chat.entity.User me =
@@ -322,7 +340,7 @@ public class AppBuilder {
 
 
         // view
-        chatView = new ChatView(viewManagerModel, sendMessageController, viewChatHistoryController);
+        chatView = new ChatView(viewManagerModel, loggedInViewModel, sendMessageController, viewChatHistoryController);
         chatViewModel.addPropertyChangeListener(chatView);
         cardPanel.add(chatView, chatView.getViewName());
 
