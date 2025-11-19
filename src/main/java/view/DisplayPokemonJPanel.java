@@ -23,10 +23,10 @@ public class DisplayPokemonJPanel extends JPanel {
         this.add(spriteLabel);
         this.add(pokemonInfo);
     }
-    public void setPokemon(Pokemon pokemon) {
+    public void setPokemon(Pokemon pokemon, int iconWidth, int iconHeight) {
         try {
             URL spriteURL = new URL(pokemon.getSprite());
-            Image sprite = (new ImageIcon(spriteURL).getImage()).getScaledInstance(384, 384, Image.SCALE_DEFAULT);
+            Image sprite = (new ImageIcon(spriteURL).getImage()).getScaledInstance(iconWidth, iconHeight, Image.SCALE_DEFAULT);
 
             spriteLabel.setIcon(new ImageIcon(sprite));
             spriteLabel.setBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY));
@@ -43,6 +43,13 @@ public class DisplayPokemonJPanel extends JPanel {
         } catch (MalformedURLException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public void clearPokemon() {
+        this.spriteLabel.setIcon(null);
+        this.pokemonInfo.removeAll();
+        this.pokemonInfo.revalidate();
+        this.pokemonInfo.repaint();
     }
 
     @NotNull

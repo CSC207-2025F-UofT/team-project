@@ -21,7 +21,7 @@ public class TeamBuilderView extends JPanel implements ActionListener, PropertyC
     private final JTextField teamNameInputField = new JTextField(15);
     private TeamBuilderController teamBuilderController = null;
 
-    private final JPanel teamDisplayPanel = new JPanel();
+    private final DisplayTeamJPanel teamDisplayPanel = new DisplayTeamJPanel();
 
     private final JButton saveButton;
 

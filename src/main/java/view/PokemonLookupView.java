@@ -83,7 +83,7 @@ public class PokemonLookupView extends JPanel implements ActionListener, Propert
         final PokemonLookupState currentState = pokemonLookupViewModel.getState();
         try {
             pokemonLookupController.execute(currentState.getPokemonName());
-            displayPokemon.setPokemon(currentState.getDisplayPokemon());
+            displayPokemon.setPokemon(currentState.getDisplayPokemon(), 384, 384);
 
         } catch (IOException | PokemonLookupInputBoundary.PokemonNotFoundException e) {
             JOptionPane.showMessageDialog(null, "Not a valid Pokemon Name");

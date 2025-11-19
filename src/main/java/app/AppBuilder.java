@@ -82,7 +82,7 @@ public class AppBuilder {
 
         application.add(cardPanel);
 
-        viewManagerModel.setState(pokemonLookupView.getViewName());
+        viewManagerModel.setState(teamBuilderView.getViewName());
 
         return application;
     }
