@@ -20,6 +20,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Random;
 
 public class TrackPlansView extends JPanel implements PropertyChangeListener, ActionListener, DocumentListener {
     private static TrackPlansView instance;
@@ -166,14 +167,13 @@ public class TrackPlansView extends JPanel implements PropertyChangeListener, Ac
 
             // MilestoneHeadPanel setup
             JPanel milestoneHeader = new JPanel(new FlowLayout(FlowLayout.LEFT));
-            JButton upButton = new JButton("Hide");
-            JButton downButton = new JButton("Show");
+            JButton upButton = new JButton("▲");
+            JButton downButton = new JButton("▼");
             JLabel milestoneLabel = new JLabel("milestone " + (i + 1) + " : " + m.getTitle());
 
-            milestoneHeader.add(upButton);
             milestoneHeader.add(downButton);
+            milestoneHeader.add(upButton);
             milestoneHeader.add(milestoneLabel);
-
 
             // SubTask Panel for each Milestone
             JPanel tasksPanel = new JPanel();
@@ -187,10 +187,11 @@ public class TrackPlansView extends JPanel implements PropertyChangeListener, Ac
                 JLabel taskLabel = new JLabel("Task " + (j + 1) + ": " + t.getName() + "    ");
 
                 String d = t.getDuedate();
-
                 JLabel dueLabel = new JLabel("Due: " + d + "   ");
 
                 JComboBox statusComboBox = new JComboBox(TaskStatus);
+                statusComboBox.setSelectedItem(t.getStatus());
+
                 statusComboBox.addActionListener(new ActionListener() {
                     @Override
                     public void actionPerformed(ActionEvent e) {
@@ -201,7 +202,6 @@ public class TrackPlansView extends JPanel implements PropertyChangeListener, Ac
                 taskRow.add(taskLabel);
                 taskRow.add(dueLabel);
                 taskRow.add(statusComboBox);
-
                 tasksPanel.add(taskRow);
             }
 
@@ -243,20 +243,25 @@ public class TrackPlansView extends JPanel implements PropertyChangeListener, Ac
         return viewname;
     }
 
-    private ArrayList<StudyPlan> generateTestPlans() {
+    public ArrayList<StudyPlan> generateTestPlans() {
         ArrayList<StudyPlan> plans = new ArrayList<>();
 
         // Plan 1
         StudyPlan plan1 = new StudyPlan("Plan 1", new ArrayList<>());
 
         Milestone p1m1 = new Milestone("Milestone 1");
+
+        //Temp Date, change it later;
         String date = "MM/DD/YYYY";
-        p1m1.getTasks().add(new Task("Do step1", date));
-        p1m1.getTasks().add(new Task("Do step2", date));
+        String[] taskstatus = {"Not Started", "In Progress", "Completed"};
+        System.out.println(taskstatus[new Random().nextInt(3)]);
+        Task doStep1 = new Task("Do step1", date, taskstatus[new Random().nextInt(3)]);
+        p1m1.getTasks().add(doStep1);
+        p1m1.getTasks().add(new Task("Do step2", date, taskstatus[new Random().nextInt(3)]));
 
         Milestone p1m2 = new Milestone("Milesone 2");
-        p1m2.getTasks().add(new Task("Do step1", date));
-        p1m2.getTasks().add(new Task("Do step2", date));
+        p1m2.getTasks().add(doStep1);
+        p1m2.getTasks().add(new Task("Do step2", date, taskstatus[new Random().nextInt(3)]));
 
         plan1.getMilestones().add(p1m1);
         plan1.getMilestones().add(p1m2);
@@ -265,12 +270,12 @@ public class TrackPlansView extends JPanel implements PropertyChangeListener, Ac
         StudyPlan plan2 = new StudyPlan("Plan 2", new ArrayList<>());
 
         Milestone p2m1 = new Milestone("Milestone 1");
-        p2m1.getTasks().add(new Task("Do step1", date));
-        p2m1.getTasks().add(new Task("Do step2", date));
+        p2m1.getTasks().add(doStep1);
+        p2m1.getTasks().add(new Task("Do step2", date, taskstatus[new Random().nextInt(3)]));
 
         Milestone p2m2 = new Milestone("Milestone 2");
-        p2m2.getTasks().add(new Task("Do step1", date));
-        p2m2.getTasks().add(new Task("Do step2", date));
+        p2m2.getTasks().add(doStep1);
+        p2m2.getTasks().add(new Task("Do step2", date, taskstatus[new Random().nextInt(3)]));
 
         plan2.getMilestones().add(p2m1);
         plan2.getMilestones().add(p2m2);
@@ -279,12 +284,12 @@ public class TrackPlansView extends JPanel implements PropertyChangeListener, Ac
         StudyPlan plan3 = new StudyPlan("Plan 3", new ArrayList<>());
 
         Milestone p3m1 = new Milestone("Milestone 1");
-        p3m1.getTasks().add(new Task("Do step1", date));
-        p3m1.getTasks().add(new Task("Do step2", date));
+        p3m1.getTasks().add(doStep1);
+        p3m1.getTasks().add(new Task("Do step2", date, taskstatus[new Random().nextInt(3)]));
 
         Milestone p3m2 = new Milestone("Milestone 2");
-        p3m2.getTasks().add(new Task("Do step1", date));
-        p3m2.getTasks().add(new Task("Do step2", date));
+        p3m2.getTasks().add(doStep1);
+        p3m2.getTasks().add(new Task("Do step2", date, taskstatus[new Random().nextInt(3)]));
 
         plan3.getMilestones().add(p3m1);
         plan3.getMilestones().add(p3m2);
@@ -293,12 +298,12 @@ public class TrackPlansView extends JPanel implements PropertyChangeListener, Ac
         StudyPlan plan4 = new StudyPlan("Plan 4", new ArrayList<>());
 
         Milestone p4m1 = new Milestone("Milestone 1");
-        p3m1.getTasks().add(new Task("Do step1", date));
-        p3m1.getTasks().add(new Task("Do step2", date));
+        p4m1.getTasks().add(doStep1);
+        p4m1.getTasks().add(new Task("Do step2", date, taskstatus[new Random().nextInt(3)]));
 
         Milestone p4m2 = new Milestone("Milestone 2");
-        p3m2.getTasks().add(new Task("Do step1", date));
-        p3m2.getTasks().add(new Task("Do step2", date));
+        p4m2.getTasks().add(doStep1);
+        p4m2.getTasks().add(new Task("Do step2", date, taskstatus[new Random().nextInt(3)]));
 
         plan4.getMilestones().add(p4m1);
         plan4.getMilestones().add(p4m2);
@@ -306,12 +311,12 @@ public class TrackPlansView extends JPanel implements PropertyChangeListener, Ac
         StudyPlan plan5 = new StudyPlan("Plan 5", new ArrayList<>());
 
         Milestone p5m1 = new Milestone("Milestone 1");
-        p5m1.getTasks().add(new Task("Do step1", date));
-        p5m1.getTasks().add(new Task("Do step2", date));
+        p5m1.getTasks().add(doStep1);
+        p5m1.getTasks().add(new Task("Do step2", date, taskstatus[new Random().nextInt(3)]));
 
         Milestone p5m2 = new Milestone("Milestone 2");
-        p5m2.getTasks().add(new Task("Do step1", date));
-        p5m2.getTasks().add(new Task("Do step2", date));
+        p5m2.getTasks().add(doStep1);
+        p5m2.getTasks().add(new Task("Do step2", date, taskstatus[new Random().nextInt(3)]));
 
         plan5.getMilestones().add(p5m1);
         plan5.getMilestones().add(p5m2);
@@ -320,12 +325,12 @@ public class TrackPlansView extends JPanel implements PropertyChangeListener, Ac
         StudyPlan plan6 = new StudyPlan("Plan 6", new ArrayList<>());
 
         Milestone p6m1 = new Milestone("Milestone 1");
-        p6m1.getTasks().add(new Task("Do step1", date));
-        p6m1.getTasks().add(new Task("Do step2", date));
+        p6m1.getTasks().add(doStep1);
+        p6m1.getTasks().add(new Task("Do step2", date, taskstatus[new Random().nextInt(3)]));
 
         Milestone p6m2 = new Milestone("Milestone 2");
-        p6m2.getTasks().add(new Task("Do step1", date));
-        p6m2.getTasks().add(new Task("Do step2", date));
+        p6m2.getTasks().add(doStep1);
+        p6m2.getTasks().add(new Task("Do step2", date, taskstatus[new Random().nextInt(3)]));
 
         plan6.getMilestones().add(p6m1);
         plan6.getMilestones().add(p6m2);

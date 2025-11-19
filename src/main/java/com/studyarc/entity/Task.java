@@ -1,16 +1,14 @@
 package com.studyarc.entity;
 
-import java.util.Date;
-
 public class Task {
     private String name;
     private String duedate;
     private String status;
 
-    public Task(String name, String duedate) {
+    public Task(String name, String duedate, String status) {
         this.name = name;
         this.duedate = duedate;
-        this.status = "Not Started" ;
+        this.status = status;
     }
 
     public String getName() {
@@ -30,7 +28,7 @@ public class Task {
     }
 
     public String getStatus() {
-        return status;
+        return this.status;
     }
 
     public void setStatus(String status) {
