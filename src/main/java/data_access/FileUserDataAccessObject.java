@@ -23,6 +23,7 @@ public class FileUserDataAccessObject implements CommentUserDataAccessInterface,
     private final String filePath = "src/main/java/userdata/users.json";
     private final Gson gson = new Gson();
     private final Type mapType = new TypeToken<Map<String, User>>(){}.getType();
+    private String currentUser;
 
 
     // Do not want to look at all users. only one
@@ -72,6 +73,16 @@ public class FileUserDataAccessObject implements CommentUserDataAccessInterface,
             System.err.println("Error writing file:");
             e.printStackTrace();
         }
+    }
+
+    @Override
+    public void setCurrentUser(String username){
+        this.currentUser = username;
+    }
+
+    @Override
+    public String getCurrentUser(){
+        return this.currentUser;
     }
 
     @Override

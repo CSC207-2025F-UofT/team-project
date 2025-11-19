@@ -140,14 +140,15 @@ public class AppBuilder {
 
     public AppBuilder addRateAndCommentView() {
         commentViewModel = new CommentViewModel();
-        rateAndCommentView = new RateAndCommentView(commentViewModel,clickingViewModel);
+        rateAndCommentView = new RateAndCommentView(viewManagerModel,commentViewModel,clickingViewModel);
         cardPanel.add(rateAndCommentView,rateAndCommentView.getViewName());
         return this;
     }
   
     public AppBuilder addRandCView() {
         randCSuccessViewModel = new RandCSuccessViewModel();
-        randCSuccessSubmitView = new RandCSuccessSubmitView(randCSuccessViewModel, clickingViewModel);
+        randCSuccessSubmitView = new RandCSuccessSubmitView(viewManagerModel, randCSuccessViewModel, clickingViewModel,
+                homeViewModel);
         cardPanel.add(randCSuccessSubmitView, randCSuccessSubmitView.getViewName());
         return this;
     }

@@ -17,7 +17,7 @@ public class CommentInteractor implements CommentInputBoundary{
 
     @Override
     public void execute(CommentInputData commentInputData) {
-        final String username = commentInputData.getUsername();
+        final String username = userDataAccessObject.getCurrentUser();
         final String medianame = commentInputData.getMedianame();
         final String comment = commentInputData.getComment();
         final int rate = commentInputData.getRate();

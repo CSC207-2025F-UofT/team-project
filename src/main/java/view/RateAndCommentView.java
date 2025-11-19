@@ -1,5 +1,6 @@
 package view;
 
+import interface_adapter.ViewManagerModel;
 import interface_adapter.clicking.ClickingViewModel;
 import interface_adapter.rate_and_comment.CommentController;
 import interface_adapter.rate_and_comment.CommentState;
@@ -21,9 +22,10 @@ public class RateAndCommentView extends JPanel implements ActionListener, Proper
     private final String viewName = "comment";
     private final CommentViewModel commentViewModel;
     private final ClickingViewModel clickingViewModel;
+    private final ViewManagerModel viewManagerModel;
 
     //TODO 设置一个方法让从上一UI跳转过来时输入username和medianame
-    private String username;
+
     private String medianame;
     private int rating = 0; // 当前评分
     private JLabel[] stars = new JLabel[5];
@@ -33,14 +35,15 @@ public class RateAndCommentView extends JPanel implements ActionListener, Proper
 
     private CommentController commentController = null;
 
-    public RateAndCommentView(CommentViewModel commentViewModel, ClickingViewModel clickingViewModel) {
+    public RateAndCommentView(ViewManagerModel viewManagerModel, CommentViewModel commentViewModel,
+                              ClickingViewModel clickingViewModel) {
         this.clickingViewModel = clickingViewModel;
-
+        this.viewManagerModel = viewManagerModel;
         this.commentViewModel = commentViewModel;
         this.commentViewModel.addPropertyChangeListener(this);
         //TODO 注意这两个加的位置
         //this.commentViewModel.getState().setMedianame(medianame);
-        //this.commentViewModel.getState().setUsername(username);
+
 
         setLayout(new BorderLayout(10, 10));
         setBackground(Color.LIGHT_GRAY);
@@ -130,7 +133,7 @@ public class RateAndCommentView extends JPanel implements ActionListener, Proper
                         } else {
                             //final CommentState currentState = commentViewModel.getState();
 
-                            commentController.execute(username, medianame, reviewArea.getText(), rating);// 写完controller改写此处execute
+                            commentController.execute(medianame, reviewArea.getText(), rating);// 写完controller改写此处execute
                             //清除评论和打分
                             //setRating(0);
                             //reviewArea.setText("");
@@ -148,13 +151,15 @@ public class RateAndCommentView extends JPanel implements ActionListener, Proper
         returnButton.addActionListener(e -> {
             // 清空评分
             setRating(0);
-            highlightStars(0);
+            setMedianame("");
             // 清空评论框
             reviewArea.setText("");
             //清空viewmodel
             commentViewModel.setState(new CommentState());
 
             // TODO: 跳转到其他UI（此处先弹提示）
+            viewManagerModel.setState(clickingViewModel.getViewName());
+            viewManagerModel.firePropertyChange();
             JOptionPane.showMessageDialog(
                     this,
                     "Return clicked — clearing input and switching to another UI.",
@@ -191,9 +196,6 @@ public class RateAndCommentView extends JPanel implements ActionListener, Proper
         }
     }
 
-    private void setUsername(String un) {
-        username = un;
-    }
 
     private void setMedianame(String mn) {
         medianame = mn;
@@ -213,7 +215,6 @@ public class RateAndCommentView extends JPanel implements ActionListener, Proper
         CommentState state = (CommentState) evt.getNewValue();
         reviewArea.setText(state.getComment());
         setRating(state.getRate());
-        setUsername(state.getUsername());
         setMedianame(state.getMedianame());
     }
 
