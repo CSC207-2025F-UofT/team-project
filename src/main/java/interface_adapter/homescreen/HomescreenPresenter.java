@@ -17,7 +17,7 @@ public class HomescreenPresenter implements HomescreenOutputBoundary {
     public void prepareSuccessView(HomescreenOutputData outputData) {
         //navigate to the target view (when views exist)
         System.out.println("Would navigate to: " + outputData.getViewToNavigateTo());
-        //uncommen t when views exist:
+        //uncomment when views exist:
         // viewManagerModel.setState(outputData.getViewToNavigateTo());
         // viewManagerModel.firePropertyChanged();
     }
@@ -26,7 +26,7 @@ public class HomescreenPresenter implements HomescreenOutputBoundary {
     public void prepareFailView(String error) {
         HomescreenState state = viewModel.getState();
         state.setErrorMessage(error);
-        viewModel.firePropertyChanged();
+        viewModel.firePropertyChange();
         System.out.println("Error: " + error);
     }
 }
