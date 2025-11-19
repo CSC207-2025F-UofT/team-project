@@ -1,14 +1,22 @@
 package app;
 
+import data_access.BuildPokemonTeamDataAccessObject;
 import entity.EmptyPokemonFactory;
 import interface_adapter.ViewManagerModel;
 import interface_adapter.pokemon_lookup.PokemonLookupController;
 import interface_adapter.pokemon_lookup.PokemonLookupPresenter;
 import interface_adapter.pokemon_lookup.PokemonLookupViewModel;
+import interface_adapter.team_builder.TeamBuilderController;
+import interface_adapter.team_builder.TeamBuilderPresenter;
+import interface_adapter.team_builder.TeamBuilderViewModel;
+import use_case.BuildPokemonTeam.BuildPokemonTeamInputBoundary;
+import use_case.BuildPokemonTeam.BuildPokemonTeamInteractor;
+import use_case.BuildPokemonTeam.BuildPokemonTeamOutputBoundary;
 import use_case.PokemonLookup.PokemonLookupInputBoundary;
 import use_case.PokemonLookup.PokemonLookupInteractor;
 import use_case.PokemonLookup.PokemonLookupOutputBoundary;
 import view.PokemonLookupView;
+import view.TeamBuilderView;
 import view.ViewManager;
 
 import javax.swing.*;
@@ -22,10 +30,13 @@ public class AppBuilder {
     ViewManager viewManager = new ViewManager(cardPanel, cardLayout, viewManagerModel);
 
     // this dont exist yet
-    // final DataAccessObject = new blah
+     final BuildPokemonTeamDataAccessObject buildPokemonTeamDataAccessObject = new BuildPokemonTeamDataAccessObject();
 
     private PokemonLookupView pokemonLookupView;
     private PokemonLookupViewModel pokemonLookupViewModel;
+
+    private TeamBuilderView teamBuilderView;
+    private TeamBuilderViewModel teamBuilderViewModel;
 
     public AppBuilder() {
         cardPanel.setLayout(cardLayout);
@@ -45,6 +56,23 @@ public class AppBuilder {
                 new PokemonLookupInteractor(pokemonLookupOutputBoundary, EmptyPokemonFactory.create());
         PokemonLookupController controller = new PokemonLookupController(pokemonLookupInteractor);
         pokemonLookupView.setPokemonLookupController(controller);
+        return this;
+    }
+
+    public AppBuilder addTeamBuilderView() {
+        teamBuilderViewModel = new TeamBuilderViewModel();
+        teamBuilderView = new TeamBuilderView(teamBuilderViewModel);
+        cardPanel.add(teamBuilderView, teamBuilderView.getName());
+        return this;
+    }
+
+    public AppBuilder addTeamBuilderUseCase() {
+        final BuildPokemonTeamOutputBoundary  buildPokemonTeamOutputBoundary = new TeamBuilderPresenter(
+                teamBuilderViewModel, viewManagerModel);
+        final BuildPokemonTeamInputBoundary buildPokemonTeamInteractor =
+                new BuildPokemonTeamInteractor(buildPokemonTeamDataAccessObject, buildPokemonTeamOutputBoundary, EmptyPokemonFactory.create());
+        TeamBuilderController controller = new  TeamBuilderController(buildPokemonTeamInteractor);
+        teamBuilderView.setTeamBuilderController(controller);
         return this;
     }
 
