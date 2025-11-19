@@ -9,6 +9,7 @@ import entity.MediaDetailsResponse;
 import interface_adapter.RandC_success_submit.RandCSuccessViewModel;
 import interface_adapter.ViewManagerModel;
 
+import interface_adapter.home.HomeViewModel;
 import interface_adapter.login.LoginController;
 import interface_adapter.login.LoginPresenter;
 import interface_adapter.login.LoginViewModel;
@@ -21,11 +22,7 @@ import interface_adapter.signup.SignupViewModel;
 import use_case.login.LoginInputBoundary;
 import use_case.login.LoginInteractor;
 import use_case.login.LoginOutputBoundary;
-import interface_adapter.browse.BrowseViewModel;
 import interface_adapter.clicking.ClickingState;
-import interface_adapter.rate_and_comment.CommentController;
-import interface_adapter.rate_and_comment.CommentPresenter;
-import interface_adapter.rate_and_comment.CommentViewModel;
 import interface_adapter.clicking.ClickingPresenter;
 import interface_adapter.clicking.ClickingController;
 import interface_adapter.clicking.ClickingViewModel;
@@ -58,7 +55,9 @@ public class AppBuilder {
     private WatchlistView watchlistView;
     private FavoritesView favoritesView;
     private BrowseView browseView;
+
     private HomepageView homepageView;
+    private HomeViewModel homeViewModel;
   
     private RateAndCommentView rateAndCommentView;
     private CommentViewModel commentViewModel;
@@ -161,7 +160,8 @@ public class AppBuilder {
    
    
     public AppBuilder addHomepageView() {
-        homepageView = new HomepageView();
+        homeViewModel = new HomeViewModel();
+        homepageView = new HomepageView(homeViewModel);
         cardPanel.add(homepageView, homepageView.getViewName());
 
         // Use the actual getViewName() for the two existing views.
@@ -201,7 +201,7 @@ public class AppBuilder {
 
     public AppBuilder addLoginUseCase(){
         final LoginOutputBoundary loginOutputBoundary = new LoginPresenter(viewManagerModel,
-                loggedinviewmodel, loginViewModel);
+                homeViewModel, loginViewModel);
         final LoginInputBoundary loginInputBoundary = new LoginInteractor(userDataAccessObject,
                 loginOutputBoundary);
 
