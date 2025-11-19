@@ -18,6 +18,7 @@ public class RandCSuccessSubmitView extends JPanel implements PropertyChangeList
     private JLabel messageLabel;
     private RandCSuccessViewModel randCSuccessViewModel;
     private ClickingViewModel clickingViewModel;
+    private String viewname = "RandC";
 
     // 构造函数：从外部传入电影名
     public RandCSuccessSubmitView(RandCSuccessViewModel randCSuccessViewModel, ClickingViewModel clickingViewModel) {
@@ -78,6 +79,10 @@ public class RandCSuccessSubmitView extends JPanel implements PropertyChangeList
         RandCSuccessState state = (RandCSuccessState) evt.getNewValue();
         movieName = state.getMedianame();
 
+    }
+
+    public String getViewName() {
+        return this.viewname;
     }
 
     // 测试运行

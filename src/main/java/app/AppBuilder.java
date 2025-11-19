@@ -118,7 +118,7 @@ public class AppBuilder {
         final ClickingDataAccessInterface clickingDataAccess = new ClickingDataAccessTMDb();
 
         final ClickingOutputBoundary clickingPresenter = new ClickingPresenter(
-                clickingViewModel, viewManagerModel);
+                clickingViewModel, viewManagerModel, commentViewModel);
         final ClickingInputBoundary clickingInteractor = new ClickingInteractor(
                 clickingPresenter, clickingDataAccess);
 
@@ -149,7 +149,7 @@ public class AppBuilder {
     public AppBuilder addRandCView() {
         randCSuccessViewModel = new RandCSuccessViewModel();
         randCSuccessSubmitView = new RandCSuccessSubmitView(randCSuccessViewModel, clickingViewModel);
-        cardPanel.add(randCSuccessSubmitView, randCSuccessView.getViewName());
+        cardPanel.add(randCSuccessSubmitView, randCSuccessSubmitView.getViewName());
         return this;
     }
 //    public AppBuilder addBrowseView() {
