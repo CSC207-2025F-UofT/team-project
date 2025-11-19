@@ -1,18 +1,20 @@
 package entity;
 
-import java.util.List;
+import java.util.HashSet;
 
 public class Type {
     private String name;
     private int id;
-    private List<String> strengths;
-    private List<String> weaknesses;
+    private HashSet<String> strengths;
+    private HashSet<String> weaknesses;
+    private HashSet<String> resistances;
 
-    public Type(String name, int id, List<String> strengths, List<String> weaknesses) {
+    public Type(String name, int id, HashSet<String> strengths, HashSet<String> weaknesses, HashSet<String> resistances) {
         this.name = name;
         this.id = id;
         this.strengths = strengths;
         this.weaknesses = weaknesses;
+        this.resistances = resistances;
     }
 
     public String getName() {
@@ -23,11 +25,20 @@ public class Type {
         return id;
     }
 
-    public List<String> getStrengths() {
+    public HashSet<String> getStrengths() {
         return strengths;
     }
 
-    public List<String> getWeaknesses() {
+    public HashSet<String> getWeaknesses() {
         return weaknesses;
+    }
+
+    public HashSet<String> getResistances() {
+        return resistances;
+    }
+
+    @Override
+    public String toString() {
+        return name;
     }
 }
