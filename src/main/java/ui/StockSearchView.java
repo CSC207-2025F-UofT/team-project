@@ -1,7 +1,7 @@
 package ui;
 
 import data.AlphaVantageAPI;
-import interface_adapters.controllers.StockSearchController;
+import controllers.StockSearchController;
 import use_case.stocksearch.StockSearchOutputData;
 
 import javax.swing.*;
@@ -20,7 +20,6 @@ public class StockSearchView extends JFrame {
 
     private final StockSearchController controller;
     private final AlphaVantageAPI api;
-    private final Runnable onBack;
 
     // top user + back
     private final JLabel userLabel = new JLabel();
@@ -57,10 +56,8 @@ public class StockSearchView extends JFrame {
     private SwingWorker<?, ?> currentSeriesWorker;
 
     public StockSearchView(StockSearchController controller,
-                           String username,
-                           Runnable onBack) {
+                           String username) {
         this.controller = controller;
-        this.onBack = onBack;
         this.api = new AlphaVantageAPI();
 
         setTitle("FinWise — Live Stock Prices");
@@ -205,11 +202,6 @@ public class StockSearchView extends JFrame {
     }
 
     private void initListeners() {
-        backButton.addActionListener(e -> {
-            dispose();
-            if (onBack != null) onBack.run();
-        });
-
         searchField.getDocument().addDocumentListener(new DocumentListener() {
             @Override public void insertUpdate(DocumentEvent e) { onSearchTextChanged(); }
             @Override public void removeUpdate(DocumentEvent e) { onSearchTextChanged(); }

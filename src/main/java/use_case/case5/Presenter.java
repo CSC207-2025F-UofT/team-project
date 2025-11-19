@@ -1,4 +1,4 @@
-package interface_adapters.use_case5;
+package use_case.case5;
 
 import entity.usecase5.Holding;
 import entity.usecase5.PortfolioSnapshot;

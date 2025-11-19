@@ -1,14 +1,11 @@
 package ui;
 
-import interface_adapters.controllers.SignUpController;
+import controllers.SignUpController;
 import use_case.signup.SignUpOutputData;
 
 import javax.swing.*;
 import java.awt.*;
 
-/**
- * The sign-up window that allows the user to create a new account.
- */
 public class SignUpView extends JFrame {
 
     private final JTextField usernameField = new JTextField(15);
@@ -18,11 +15,11 @@ public class SignUpView extends JFrame {
 
     public SignUpView(SignUpController signUpController, Runnable showLoginView) {
         setTitle("Sign Up");
-        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        setSize(450, 250);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setSize(300, 180);
         setLocationRelativeTo(null);
 
-        JPanel panel = new JPanel(new GridLayout(3, 2, 10, 10));
+        JPanel panel = new JPanel(new GridLayout(3, 2, 5, 5));
         panel.add(new JLabel("Username:"));
         panel.add(usernameField);
         panel.add(new JLabel("Password:"));
@@ -31,10 +28,9 @@ public class SignUpView extends JFrame {
         panel.add(backToLoginButton);
         add(panel);
 
-        // ====== Sign-Up Button Action ======
         signUpButton.addActionListener(e -> {
             String username = usernameField.getText();
-            String password = new String(passwordField.getPassword()); // fixed
+            String password = new String(passwordField.getPassword());
 
             SignUpOutputData output = signUpController.signUp(username, password);
             JOptionPane.showMessageDialog(this, output.getMessage());
@@ -47,7 +43,6 @@ public class SignUpView extends JFrame {
             }
         });
 
-        // ====== Back to Login Button Action ======
         backToLoginButton.addActionListener(e -> {
             showLoginView.run();
             dispose();

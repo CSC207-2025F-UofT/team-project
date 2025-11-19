@@ -1,9 +1,9 @@
 package ui;
 
-import interface_adapters.controllers.PortfolioController;
-import interface_adapters.use_case5.PortfolioViewModel;
-import interface_adapters.use_case5.HoldingRow;
-import interface_adapters.use_case5.SnapshotRow;
+import controllers.PortfolioController;
+import use_case.case5.PortfolioViewModel;
+import use_case.case5.HoldingRow;
+import use_case.case5.SnapshotRow;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
@@ -23,11 +23,9 @@ public class PortfolioView extends JFrame {
     /**
      * @param controller the controller that triggers the portfolio analysis use case
      * @param username   the currently logged-in user whose portfolio is analyzed
-     * @param onBack     callback to navigate back to the previous screen (e.g., Dashboard)
      */
     public PortfolioView(PortfolioController controller,
-                         String username,
-                         Runnable onBack) {
+                         String username) {
 
         setTitle("Portfolio Analysis");
         setSize(800, 600);
@@ -85,10 +83,6 @@ public class PortfolioView extends JFrame {
         bottomPanel.add(messageLabel, BorderLayout.WEST);
 
         JButton backButton = new JButton("Back");
-        backButton.addActionListener(e -> {
-            onBack.run(); // go back to dashboard or previous view
-            dispose();    // close this window
-        });
         bottomPanel.add(backButton, BorderLayout.EAST);
 
         mainPanel.add(bottomPanel, BorderLayout.SOUTH);

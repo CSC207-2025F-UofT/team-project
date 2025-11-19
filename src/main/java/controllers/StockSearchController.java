@@ -1,4 +1,4 @@
-package interface_adapters.controllers;
+package controllers;
 
 import use_case.stocksearch.StockSearchInputData;
 import use_case.stocksearch.StockSearchInteractor;

@@ -14,14 +14,21 @@ import data.AlphaVantageAPI;
 import interface_adapters.controllers.StockSearchController;
 import use_case.stocksearch.StockSearchInteractor;
 import ui.*;
+import controllers.*;
+import data.*;
+import data.usecase5.InMemoryPortfolioRepository;
+import data.usecase5.InMemoryPriceHistoryRepository;
+import ui.LoginView;
+import ui.SignUpView;
+import ui.DashboardView;
 import use_case.login.LoginInteractor;
-import use_case.portfolio.PortfolioInputBoundary;
 import use_case.portfolio.PortfolioInteractor;
 import use_case.signup.SignUpInteractor;
 import data.news.MockNewsDAO;
 import use_case.fetch_news.*;
 import interface_adapters.controllers.NewsController;
 import ui.NewsView;
+import use_case.stocksearch.StockSearchInteractor;
 
 import javax.sql.DataSource;
 import javax.swing.*;
@@ -29,40 +36,45 @@ import javax.swing.*;
 public class Main {
 
     private static DataSource dataSource;
-    private static JdbcUserRepository userRepository;
+    private static RegisteredUserRepository userRepository;
+    private static RegisteredExpenseRepository expenseRepository;
+    private static InMemoryPortfolioRepository portfolioRepo;
+    private static InMemoryPriceHistoryRepository priceHistoryRepo;
 
     private static SignUpController signUpController;
     private static LoginController loginController;
+    private static DashboardController dashboardController;
+    private static StockSearchController stockSearchController;
+    private static PortfolioController portfolioController;
 
     private static JFrame currentFrame;
-    private static String currentUsername; // add a new global variable
-
-    // New Add
-    public static String getCurrentUsername() {
-        return currentUsername;
-    }
-
-    // New Add
-    private static void handleLoginSuccess(String username) {
-        currentUsername = username;   // record the current username
-        showDashboardView();          // open dashboard page
-    }
-
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
             // Setup database
             dataSource = DataSourceFactory.sqlite("app.db");
-            SchemaInitializer.ensureSchema(dataSource);
-            userRepository = new JdbcUserRepository(dataSource);
+            TableInitializer.ensureSchema(dataSource);
+            userRepository = new RegisteredUserRepository(dataSource);
+            expenseRepository = new RegisteredExpenseRepository(dataSource);
 
             // Create interactors
             SignUpInteractor signUpInteractor = new SignUpInteractor(userRepository);
             LoginInteractor loginInteractor = new LoginInteractor(userRepository);
 
+            // Stocks API call
+            AlphaVantageAPI api = new AlphaVantageAPI();
+            StockSearchInteractor stockSearchInteractor = new StockSearchInteractor(api);
+
+            portfolioRepo = new InMemoryPortfolioRepository();
+            priceHistoryRepo = new InMemoryPriceHistoryRepository();
+            //portfolioInteractor = new PortfolioInteractor(portfolioRepo, priceHistoryRepo, )
+
             // Create controllers
             signUpController = new SignUpController(signUpInteractor);
             loginController = new LoginController(loginInteractor);
+            dashboardController = new DashboardController();
+            stockSearchController = new StockSearchController(stockSearchInteractor);
+           // portfolioController = new PortfolioController()
 
             // Start application on the login screen
             showLoginView();
@@ -71,13 +83,12 @@ public class Main {
 
     /** Displays the login window */
     private static void showLoginView() {
-        // Close any open frame first
         if (currentFrame != null) currentFrame.dispose();
 
         LoginView loginView = new LoginView(
                 loginController,
-                Main::showSignUpView,       // callback switch to sign up
-                Main::handleLoginSuccess    // callback open dashboard after login success
+                Main::showSignUpView,         // Runnable
+                Main::showDashboardView       // Consumer<String>
         );
 
         currentFrame = loginView;
@@ -90,25 +101,22 @@ public class Main {
 
         SignUpView signUpView = new SignUpView(
                 signUpController,
-                Main::showLoginView    // callback to switch back
+                Main::showLoginView // callback to switch back
         );
 
         currentFrame = signUpView;
         signUpView.setVisible(true);
     }
 
-    /** Displays the dashboard window after login */
-    private static void showDashboardView() {
+    private static void showDashboardView(String username) {
         if (currentFrame != null) currentFrame.dispose();
 
         DashboardView dashboardView = new DashboardView(
-                Main::showLoginView,         // Logout
-                Main::showExpensesView,      // Track Expenses
-                Main::showTrendsView,        // Financial Trends
-                Main::showStockPricesView,   // Stock Prices
-                Main::showInvestmentView,    // Simulated Investment
-                Main::showPortfolioView,     // Portfolio Analysis
-                Main::showNewsView           // Market News
+                dashboardController,
+                stockSearchController,
+                Main::showLoginView,   // callback to login screen
+                username,              // show welcome message
+                expenseRepository
         );
 
         currentFrame = dashboardView;
@@ -199,4 +207,5 @@ public class Main {
     private static void showExpensesView() {
         // ToDo
     }
+}
 }

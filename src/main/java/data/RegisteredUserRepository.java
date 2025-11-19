@@ -6,10 +6,10 @@ import javax.sql.DataSource;
 import java.sql.*;
 import java.util.Optional;
 
-public class JdbcUserRepository implements UserRepository {
+public class RegisteredUserRepository implements UserRepository {
     private final DataSource dataSource;
 
-    public JdbcUserRepository(DataSource dataSource) {
+    public RegisteredUserRepository(DataSource dataSource) {
         this.dataSource = dataSource;
     }
 
