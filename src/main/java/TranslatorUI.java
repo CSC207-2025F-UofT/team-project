@@ -21,8 +21,8 @@ public class TranslatorUI extends JFrame {
 
     // Configuration for Google Cloud Translation API
 
-    private static final String GOOGLE_API_KEY = "AIzaSyDBiXSSL6z57ri4AJXgKC_Wam_T_va0XB8";
-
+    private static final String apiKeyName = "GOOGLE_API_KEY";
+    private static final String apiKey = System.getenv(apiKeyName);
     private static final String TRANSLATE_API_BASE_URL = "https://translation.googleapis.com/language/translate/v2";
 
     public static final List<String> SUPPORTED_LANGUAGES = List.of(
@@ -162,7 +162,7 @@ public class TranslatorUI extends JFrame {
                     "%s?target=%s&key=%s&q=%s",
                     TRANSLATE_API_BASE_URL,
                     targetLang,
-                    GOOGLE_API_KEY,
+                    apiKey,
                     encodedText
             );
 
