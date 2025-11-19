@@ -2,57 +2,61 @@ package view;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.List;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 
-public class ViewEventListView extends JPanel {
+public class ViewEventListView extends JPanel implements PropertyChangeListener {
 
-    public static final String VIEW_NAME = "view_event_list";
+    public final String viewName = "event lists";
+    // Implement View Models and Controllers here
 
-    // Header: shows which list we're looking at, e.g. "List: My Favourites"
-    private final JLabel listTitleLabel = new JLabel("List:");
-
-    // Center: list of event names
-    private final DefaultListModel<String> eventListModel = new DefaultListModel<>();
-    private final JList<String> eventList = new JList<>(eventListModel);
-
-    // Bottom: back button to go back to EventListView
-    private final JButton backButton = new JButton("Back");
+    // Swing components
+    private final JButton createListButton;
+    private final JPanel eventsPanel;
+    private final JButton masterViewButton;
+    private final JButton backButton;
 
     public ViewEventListView() {
-        setLayout(new BorderLayout());
+        // Instantiate the View Models and Controllers here
+        this.setLayout(new BorderLayout());
 
-        // Header
-        JPanel headerPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        headerPanel.add(listTitleLabel);
-        add(headerPanel, BorderLayout.NORTH);
+        JPanel topPanel = new JPanel();
+        createListButton = new JButton("Create List");
+        createListButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent evt) {
+                System.out.println("button pressed");
+            }
+        });
 
-        // Events
-        JScrollPane scrollPane = new JScrollPane(eventList);
+        topPanel.add(createListButton);
+        add(topPanel, BorderLayout.NORTH);
+
+
+        eventsPanel = new JPanel();
+        eventsPanel.setLayout(new BoxLayout(eventsPanel, BoxLayout.Y_AXIS));
+        JPanel masterListPanel = new JPanel();
+        masterListPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
+        JLabel masterLabel = new JLabel("Master List");
+        masterViewButton = new JButton("View");
+
+        masterListPanel.add(masterLabel);
+        masterListPanel.add(masterViewButton);
+        masterListPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
+        eventsPanel.add(masterListPanel);
+
+        JScrollPane scrollPane = new JScrollPane(eventsPanel);
         add(scrollPane, BorderLayout.CENTER);
 
-        // Back Button
-        JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        JPanel bottomPanel = new JPanel();
+        backButton = new JButton("Back");
         bottomPanel.add(backButton);
-        add(bottomPanel, BorderLayout.SOUTH);
-    }
+        add(backButton, BorderLayout.SOUTH);
 
-    // Methods for interface adapter
-    public String getViewName() {
-        return VIEW_NAME;
     }
+    @Override
+    public void propertyChange(PropertyChangeEvent evt) {
 
-    public JButton getBackButton() {
-        return backButton;
-    }
-
-    // Text for title
-    public void setListName(String listName) {
-        listTitleLabel.setText("List: " + listName);
-    }
-
-    // View events in the Created List
-    public void setEventNames(List<String> names) {
-        eventListModel.clear();
-        eventListModel.addAll(names);
     }
 }
