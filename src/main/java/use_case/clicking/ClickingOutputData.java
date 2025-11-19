@@ -1,24 +1,53 @@
 package use_case.clicking;
 
+import java.util.List;
+
 public class ClickingOutputData {
-    public String title;
-    public int releaseYear;
-    public String language;
-    public double rating;
-    public String genres;
-    public String overview;
-    public String posterUrl;
-    public String errorMessage;
 
+    private final String title;
+    private final String overview;
+    private final String language;
+    private final String posterUrl;
+    private final int releaseYear;
+    private final double rating;
+    private final List<String> genres;
 
-    public ClickingOutputData(String title, int releaseYear, String language, double rating, String genres,
-                              String overview, String posterUrl) {
+    public ClickingOutputData(String title, String overview, String language,
+                              double rating, int releaseYear, String posterUrl, List<String> genres) {
         this.title = title;
-        this.releaseYear = releaseYear;
+        this.overview = overview;
         this.language = language;
         this.rating = rating;
-        this.genres = genres;
-        this.overview = overview;
+        this.releaseYear = releaseYear;
         this.posterUrl = posterUrl;
+        this.genres = genres;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public String getOverview() {
+        return overview;
+    }
+
+    public String getLanguage() {
+        return language;
+    }
+
+    public String getPosterUrl() {
+        return posterUrl;
+    }
+
+    public int getReleaseYear() {
+        return releaseYear;
+    }
+
+    public double getRating() {
+        return rating;
+    }
+
+    public List<String> getGenres() {
+        return genres;
     }
 }

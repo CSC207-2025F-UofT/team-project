@@ -13,18 +13,18 @@ public class ClickingInteractor implements ClickingInputBoundary{
     public void execute(ClickingInputData inputData) {
         MediaDetailsResponse media = repository.fetchDetailsById(inputData.getMediaId());
         if (media == null) {
-            presenter.prepareFailureView("Media not found.");
+            presenter.prepareFailureView("Media not found. Please try again.");
             return;
         }
 
         ClickingOutputData outputData = new ClickingOutputData(
                 media.getTitle(),
-                media.getYear(),
+                media.getOverview(),
                 media.getLanguage(),
                 media.getRating(),
-                String.join(", ", media.getGenres()),
-                media.getOverview(),
-                media.getPosterUrl()
+                media.getReleaseYear(),
+                media.getPosterUrl(),
+                media.getGenres()
         );
         presenter.prepareSuccessView(outputData);
 
