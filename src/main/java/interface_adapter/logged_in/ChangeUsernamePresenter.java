@@ -21,7 +21,7 @@ public class ChangeUsernamePresenter implements ChangeUsernameOutputBoundary {
         loggedInState.setUsernameError(null);
 
         // Notify views (LoggedInView and AccountDetailsView) of the successful username change
-        loggedInViewModel.firePropertyChanged("username");
+        loggedInViewModel.firePropertyChange("username");
     }
 
     @Override
@@ -31,6 +31,6 @@ public class ChangeUsernamePresenter implements ChangeUsernameOutputBoundary {
         loggedInState.setUsernameError(error);
 
         // Notify views to display the error
-        loggedInViewModel.firePropertyChanged("username");
+        loggedInViewModel.firePropertyChange("username");
     }
 }
