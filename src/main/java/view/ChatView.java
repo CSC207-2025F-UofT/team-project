@@ -40,6 +40,11 @@ public class ChatView extends JPanel implements ActionListener, PropertyChangeLi
         this.viewChatHistoryController = viewChatHistoryController;
         this.setLayout(new BorderLayout());
 
+        // Keep the current username updated.
+        this.viewManagerModel.addPropertyChangeListener(
+                e -> this.currentUserId = e.getNewValue().toString()
+        );
+
         // Top Bar (Chat Partner and Exit/Back Button)
         JPanel topBar = new JPanel(new BorderLayout());
         topBar.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
@@ -161,6 +166,8 @@ public class ChatView extends JPanel implements ActionListener, PropertyChangeLi
                 for (ChatMessageDto msg : messages) {
                     boolean fromCurrentUser =
                             msg.getSenderUserId().equals(currentUserId);
+
+                    System.out.println("sender: " +  msg.getSenderUserId() + " current user id: " + currentUserId + " current chat id: " + currentChatId);
 
                     JPanel row = new JPanel(new BorderLayout());
                     row.setOpaque(false);

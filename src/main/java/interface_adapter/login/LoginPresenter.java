@@ -15,9 +15,11 @@ public class LoginPresenter implements LoginOutputBoundary {
     private final LoggedInViewModel loggedInViewModel;
     private final ViewManagerModel viewManagerModel;
 
-    public LoginPresenter(ViewManagerModel viewManagerModel,
-                          LoggedInViewModel loggedInViewModel,
-                          LoginViewModel loginViewModel) {
+    public LoginPresenter(
+            ViewManagerModel viewManagerModel,
+            LoggedInViewModel loggedInViewModel,
+            LoginViewModel loginViewModel
+    ) {
         this.viewManagerModel = viewManagerModel;
         this.loggedInViewModel = loggedInViewModel;
         this.loginViewModel = loginViewModel;
@@ -36,6 +38,7 @@ public class LoginPresenter implements LoginOutputBoundary {
         loggedInViewModel.firePropertyChanged("state");
 
         // Switch to the logged-in view
+
         viewManagerModel.setState(loggedInViewModel.getViewName());
         viewManagerModel.firePropertyChange();
     }
