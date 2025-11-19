@@ -340,7 +340,7 @@ public class AppBuilder {
 
 
         // view
-        chatView = new ChatView(viewManagerModel, sendMessageController, viewChatHistoryController);
+        chatView = new ChatView(viewManagerModel, loggedInViewModel, sendMessageController, viewChatHistoryController);
         chatViewModel.addPropertyChangeListener(chatView);
         cardPanel.add(chatView, chatView.getViewName());
 
