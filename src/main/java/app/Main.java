@@ -11,7 +11,7 @@ public class Main {
                 .addSignupView()
                 .addLoggedInView()
                 .addAccountDetailsView()
-                .addChatView()
+                .addChatUseCase()
                 .addSearchUserView()
                 .addSignupUseCase()
                 .addLoginUseCase()

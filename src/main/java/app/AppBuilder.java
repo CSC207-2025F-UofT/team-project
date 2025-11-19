@@ -11,6 +11,8 @@ import interface_adapter.login.LoginPresenter;
 import interface_adapter.login.LoginViewModel;
 import interface_adapter.logout.LogoutController;
 import interface_adapter.logout.LogoutPresenter;
+import interface_adapter.messaging.view_history.ViewChatHistoryController;
+import interface_adapter.messaging.view_history.ViewChatHistoryPresenter;
 import interface_adapter.signup.SignupController;
 import interface_adapter.signup.SignupPresenter;
 import interface_adapter.signup.SignupViewModel;
@@ -18,6 +20,16 @@ import interface_adapter.signup.SignupViewModel;
 import interface_adapter.user_search.SearchUserController;
 import interface_adapter.user_search.SearchUserPresenter;
 import interface_adapter.user_search.SearchUserViewModel;
+import interface_adapter.messaging.send_m.SendMessageController;
+import interface_adapter.messaging.send_m.SendMessagePresenter;
+import use_case.messaging.send_m.SendMessageInputBoundary;
+import use_case.messaging.send_m.SendMessageOutputBoundary;
+import use_case.messaging.send_m.SendMessageInteractor;
+import interface_adapter.messaging.send_m.ChatViewModel;
+
+import use_case.messaging.view_history.ViewChatHistoryInputBoundary;
+import use_case.messaging.view_history.ViewChatHistoryInteractor;
+import use_case.messaging.view_history.ViewChatHistoryOutputBoundary;
 import use_case.search_user.SearchUserInputBoundary;
 import use_case.search_user.SearchUserInteractor;
 import use_case.search_user.SearchUserOutputBoundary;
@@ -56,6 +68,18 @@ import java.awt.*;
 public class AppBuilder {
     private final JPanel cardPanel = new JPanel();
     private final CardLayout cardLayout = new CardLayout();
+    // ChatRepository
+    private final use_case.ports.ChatRepository chatRepository =
+            new interface_adapter.repo.InMemoryChatRepository();
+
+    // MessageRepository
+    private final use_case.ports.MessageRepository messageRepository =
+            new interface_adapter.repo.InMemoryMessageRepository();
+
+    // UserRepository
+    private final use_case.ports.UserRepository userRepository =
+            new interface_adapter.repo.InMemoryUserRepository();
+
     final UserFactory userFactory = new UserFactory();
     final ViewManagerModel viewManagerModel = new ViewManagerModel();
     ViewManager viewManager = new ViewManager(cardPanel, cardLayout, viewManagerModel);
@@ -83,8 +107,26 @@ public class AppBuilder {
     private final SearchUserViewModel searchUserViewModel = new SearchUserViewModel();
     private SearchUserView searchUserView;
 
+    // Field for send message
+    private final ChatViewModel chatViewModel = new ChatViewModel();
+    private ViewChatHistoryController viewChatHistoryController;
+
+    private final String messagingUserId;
+    private final String messagingChatId;
+
     public AppBuilder() {
         cardPanel.setLayout(cardLayout);
+
+        // Use repo to store
+        goc.chat.entity.User me =
+                new goc.chat.entity.User("user-1", "demo", "demo@example.com", "hash");
+        me = userRepository.save(me);
+        messagingUserId = me.getId();
+
+        entity.Chat c = new entity.Chat("chat-1");
+        c.addParticipant(messagingUserId);
+        c = chatRepository.save(c);
+        messagingChatId = c.getId();
     }
 
     public AppBuilder addWelcomeView() {
@@ -189,12 +231,6 @@ public class AppBuilder {
         return application;
     }
 
-    public AppBuilder addChatView() {
-        chatView = new ChatView(viewManagerModel);
-        cardPanel.add(chatView, chatView.getViewName());
-        return this;
-    }
-
     public AppBuilder addAccountDetailsView() {
         accountDetailsView = new AccountDetailsView(viewManagerModel, loggedInViewModel);
         cardPanel.add(accountDetailsView, accountDetailsView.getViewName());
@@ -250,6 +286,47 @@ public class AppBuilder {
         if (this.searchUserView != null) {
             this.searchUserView.setUserSearchController(searchUserController);
         }
+
+        return this;
+    }
+
+    public AppBuilder addChatUseCase() {
+        SendMessageController sendMessageController;
+        // Presenter send and history
+        SendMessageOutputBoundary sendMessagePresenter =
+                new SendMessagePresenter(chatViewModel, viewManagerModel);
+
+        ViewChatHistoryOutputBoundary viewHistoryPresenter =
+                new ViewChatHistoryPresenter(chatViewModel, viewManagerModel);
+
+        // Interactor
+        SendMessageInputBoundary sendMessageInteractor =
+                new SendMessageInteractor(
+                        chatRepository,
+                        messageRepository,
+                        userRepository,
+                        sendMessagePresenter
+                );
+
+        ViewChatHistoryInputBoundary viewHistoryInteractor =
+                new ViewChatHistoryInteractor(
+                        chatRepository,
+                        messageRepository,
+                        userRepository,
+                        viewHistoryPresenter
+                );
+
+        // Controller
+        viewChatHistoryController = new ViewChatHistoryController(viewHistoryInteractor);
+        sendMessageController = new SendMessageController(sendMessageInteractor);
+
+
+        // view
+        chatView = new ChatView(viewManagerModel, sendMessageController, viewChatHistoryController);
+        chatViewModel.addPropertyChangeListener(chatView);
+        cardPanel.add(chatView, chatView.getViewName());
+
+        chatView.setChatContext(messagingChatId, messagingUserId, "hi");
 
         return this;
     }
