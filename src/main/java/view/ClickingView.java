@@ -1,15 +1,22 @@
 package view;
 
+import interface_adapter.ViewManagerModel;
 import interface_adapter.clicking.ClickingState;
 import interface_adapter.clicking.ClickingViewModel;
+import interface_adapter.rate_and_comment.CommentState;
+import interface_adapter.rate_and_comment.CommentViewModel;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
 public class ClickingView extends JPanel implements PropertyChangeListener {
     private final ClickingViewModel viewModel;
+    private final CommentViewModel commentViewModel;
+    private final ViewManagerModel viewManagerModel;
     private interface_adapter.clicking.ClickingController controller;
 
     private JLabel errorLabel = new JLabel();
@@ -24,9 +31,11 @@ public class ClickingView extends JPanel implements PropertyChangeListener {
 
     private final String viewName = "clicking";
 
-    public ClickingView(ClickingViewModel viewModel) {
+    public ClickingView(ClickingViewModel viewModel, CommentViewModel comment, ViewManagerModel viewManager) {
         this.viewModel = viewModel;
         this.viewModel.addPropertyChangeListener(this);
+        this.commentViewModel = comment;
+        this.viewManagerModel = viewManager;
 
         setLayout(new BorderLayout());
         setBackground(Color.WHITE);
@@ -70,7 +79,20 @@ public class ClickingView extends JPanel implements PropertyChangeListener {
         buttonPanel.add(rateButton);
         bottomPanel.add(buttonPanel, BorderLayout.SOUTH);
         add(bottomPanel, BorderLayout.SOUTH);
+
+        rateButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                CommentState state = commentViewModel.getState();
+                state.setMedianame(titleLabel.getText());
+                commentViewModel.setState(state);
+                commentViewModel.firePropertyChange();
+                viewManagerModel.setState(commentViewModel.getViewName());
+                viewManagerModel.firePropertyChange();
+            }
+        });
     }
+
 
     public void updateView() {
         ClickingState state = viewModel.getState();
@@ -120,6 +142,7 @@ public class ClickingView extends JPanel implements PropertyChangeListener {
             posterLabel.setText("No poster");
         }
     }
+
     public void propertyChange(PropertyChangeEvent evt) {
         updateView();
     }
@@ -127,14 +150,15 @@ public class ClickingView extends JPanel implements PropertyChangeListener {
     public String getViewName() {
         return viewName;
     }
+
     public void setClickingController(interface_adapter.clicking.ClickingController controller) {
         this.controller = controller;
     }
+}
 
 //    public ClickingViewModel getViewModel() {
 //        return viewModel;
 //    }
-}
 
 
 
