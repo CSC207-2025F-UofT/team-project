@@ -31,7 +31,7 @@ public class ClickingPresenter implements ClickingOutputBoundary {
 
 
 
-        viewManagerModel.setState(clickingViewModel.viewName);
+        viewManagerModel.setState(clickingViewModel.getViewName());
         viewManagerModel.firePropertyChange();
     }
 
@@ -41,7 +41,7 @@ public class ClickingPresenter implements ClickingOutputBoundary {
         state.setErrorMessage(errorMessage);
         clickingViewModel.firePropertyChange();
 
-        viewManagerModel.setState(clickingViewModel.viewName);
+        viewManagerModel.setState(clickingViewModel.getViewName());
         viewManagerModel.firePropertyChange();
     }
 }

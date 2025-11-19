@@ -20,6 +20,7 @@ public class ClickingView extends JPanel implements PropertyChangeListener {
     private JLabel yearLabel = new JLabel();
     private JLabel ratingLabel = new JLabel();
     private JLabel genresLabel = new JLabel();
+    private JButton rateButton = new JButton("Rate and Comment");
 
     private final String viewName = "clicking";
 
@@ -55,12 +56,20 @@ public class ClickingView extends JPanel implements PropertyChangeListener {
         centerPanel.add(scroll);
         add(centerPanel, BorderLayout.CENTER);
 
+        JPanel bottomPanel = new JPanel(new BorderLayout());
         JPanel detailPanel = new JPanel(new GridLayout(4, 1));
         detailPanel.add(yearLabel);
         detailPanel.add(ratingLabel);
         detailPanel.add(languageLabel);
         detailPanel.add(genresLabel);
-        add(detailPanel, BorderLayout.SOUTH);
+        bottomPanel.add(detailPanel, BorderLayout.CENTER);
+
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        rateButton.setFont(new Font("Arial", Font.BOLD, 16));
+        rateButton.setPreferredSize(new Dimension(200, 40));
+        buttonPanel.add(rateButton);
+        bottomPanel.add(buttonPanel, BorderLayout.SOUTH);
+        add(bottomPanel, BorderLayout.SOUTH);
     }
 
     public void updateView() {
