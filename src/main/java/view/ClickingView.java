@@ -31,11 +31,11 @@ public class ClickingView extends JPanel implements PropertyChangeListener {
 
     private final String viewName = "clicking";
 
-    public ClickingView(ClickingViewModel viewModel, CommentViewModel commentViewModel, ViewManagerModel viewManagerModel) {
+    public ClickingView(ClickingViewModel viewModel, CommentViewModel comment, ViewManagerModel viewManager) {
         this.viewModel = viewModel;
         this.viewModel.addPropertyChangeListener(this);
-        this.commentViewModel = commentViewModel;
-        this.viewManagerModel = viewManagerModel;
+        this.commentViewModel = comment;
+        this.viewManagerModel = viewManager;
 
         setLayout(new BorderLayout());
         setBackground(Color.WHITE);
