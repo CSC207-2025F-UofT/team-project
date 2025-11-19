@@ -12,6 +12,7 @@ public class Main {
                 .addFavoritesView()
                 .addRateAndCommentView("", "")
                 .addRandCView("")
+                .addHomepageView()
                 .build();
 
         application.setLocationRelativeTo(null);

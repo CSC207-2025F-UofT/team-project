@@ -6,6 +6,7 @@ import entity.MediaDetailsResponse;
 import interface_adapter.RandC_success_submit.RandCSuccessViewModel;
 import interface_adapter.ViewManagerModel;
 
+import interface_adapter.browse.BrowseViewModel;
 import interface_adapter.clicking.ClickingState;
 import interface_adapter.rate_and_comment.CommentController;
 import interface_adapter.rate_and_comment.CommentPresenter;
@@ -32,7 +33,9 @@ public class AppBuilder {
 
     private WatchlistView watchlistView;
     private FavoritesView favoritesView;
+    private BrowseView browseView;
     private RateAndCommentView rateAndCommentView;
+    private HomepageView homepageView;
     private CommentViewModel commentViewModel;
     private RandCSuccessSubmitView randCSuccessSubmitView;
     private RandCSuccessViewModel randCSuccessViewModel;
@@ -94,12 +97,44 @@ public class AppBuilder {
         return this;
     }
 
+//    public AppBuilder addBrowseView() {
+//        browseView = new BrowseView();
+//        cardPanel.add(browseView, browseView.getViewname());
+//        return this;
+//    }
+
     public AppBuilder addRateAndCommentView(String un, String mn) {
         commentViewModel = new CommentViewModel();
         rateAndCommentView = new RateAndCommentView(commentViewModel, un, mn);
         cardPanel.add(rateAndCommentView, rateAndCommentView.getViewName());
         return this;
     }
+
+    public AppBuilder addHomepageView() {
+        homepageView = new HomepageView();
+        cardPanel.add(homepageView, homepageView.getViewName());
+
+        // Use the actual getViewName() for the two existing views.
+        // For browse: you said it's "in progress" so either add a browse view
+        // or use homepageView.getViewName() as a placeholder.
+        homepageView.setBrowseButtonListener(e -> {
+            viewManagerModel.setState("BROWSE");
+        });
+
+        // These two will use the actual view names (safer than hard-coded strings)
+        homepageView.setWatchlistButtonListener(e -> {
+            viewManagerModel.setState(watchlistView.getViewName());
+            viewManagerModel.firePropertyChange();
+        });
+
+        homepageView.setFavoritesButtonListener(e -> {
+            viewManagerModel.setState(favoritesView.getViewName());
+            viewManagerModel.firePropertyChange();
+        });
+
+        return this;
+    }
+
 
     public AppBuilder addRandCView(String movie) {
         randCSuccessViewModel = new RandCSuccessViewModel();
@@ -120,7 +155,7 @@ public class AppBuilder {
     }
 
     public JFrame build() {
-        final JFrame application = new JFrame("Watchlist");
+        final JFrame application = new JFrame("Homepage");
         application.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
         application.add(cardPanel);
