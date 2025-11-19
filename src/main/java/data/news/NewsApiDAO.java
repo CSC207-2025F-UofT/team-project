@@ -60,7 +60,8 @@ public class NewsApiDAO implements NewsDataAccessInterface {
                     String timeStr = newsObj.get("time_published").getAsString();
 
                     // 解析成 LocalDateTime
-                    LocalDateTime datePublished = LocalDateTime.parse(timeStr, DateTimeFormatter.ISO_DATE_TIME);
+                    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd'T'HHmmss");
+                    LocalDateTime datePublished = LocalDateTime.parse(timeStr, formatter);
 
                     newsList.add(new News(title, url, datePublished));
                 }
