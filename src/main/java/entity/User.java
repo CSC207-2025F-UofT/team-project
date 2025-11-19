@@ -6,8 +6,8 @@ public class User implements FavoriteList, Watchlist {
     private String username;
     private String password;
     private final int accountID;
-    private final ArrayList<Media> favorites;
-    private final ArrayList<Media> watchlist;
+    private final ArrayList<Integer> favorites;
+    private final ArrayList<Integer> watchlist;
     private ArrayList<Comment> comments = new ArrayList<>();
 
     public User(String username, String password, int accountID) {
@@ -21,28 +21,28 @@ public class User implements FavoriteList, Watchlist {
     public String getUsername() {return username;}
     public String getPassword() {return password;}
     public int getAccountID() {return accountID;}
-    public ArrayList<Media> getFavorites() {return favorites;}
-    public ArrayList<Media> getWatchlist() {return watchlist;}
+    public ArrayList<Integer> getFavorites() {return favorites;}
+    public ArrayList<Integer> getWatchlist() {return watchlist;}
     public ArrayList<Comment> getComments() {return comments;}
 
     @Override
-    public void addFavorite(Media media) {
-        favorites.add(media);
+    public void addFavorite(int refnumber) {
+        favorites.add(refnumber);
     }
 
     @Override
-    public void removeFavorite(Media media) {
-        favorites.remove(media);
+    public void removeFavorite(int refnumber) {
+        favorites.remove(refnumber);
     }
 
     @Override
-    public void addWatchlist(Media media) {
-        watchlist.add(media);
+    public void addWatchlist(int refnumber) {
+        watchlist.add(refnumber);
     }
 
     @Override
-    public void removeWatchList(Media media) {
-        watchlist.remove(media);
+    public void removeWatchList(int refnumber) {
+        watchlist.remove(refnumber);
     }
 
 

@@ -8,17 +8,18 @@ public class Main {
         JFrame application = appBuilder
                 .addLoginView()
                 .addSignUpView()
+                .addHomepageView()
                 .addWatchlistView()
                 .addFavoritesView()
+                .addClickingView()
                 .addRateAndCommentView()
                 .addRandCView()
                 .addLoginUseCase()
                 .addSignupUseCase()
                 .addCommentUseCase()
+                .addClickingUseCase()
                 .build();
 
-        application.pack();
         application.setLocationRelativeTo(null);
-        application.setVisible(true);
     }
 }

@@ -11,7 +11,7 @@ public abstract class Media {
         this.genreIDs = genreIDs;
     }
 
-    public int getReferenceNumber() {
+    public int  getReferenceNumber() {
         return referenceNumber;
     }
 }
