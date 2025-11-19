@@ -5,11 +5,16 @@ import interface_adapter.repo.InMemoryMessageRepository;
 import interface_adapter.repo.InMemoryUserRepository;
 
 import use_case.messaging.ChatMessageDto;
-import use_case.messaging.SendMessageInteractor;
-import use_case.messaging.ViewChatHistoryInputData;
-import use_case.messaging.ViewChatHistoryInteractor;
-import use_case.messaging.ViewChatHistoryOutputBoundary;
-import use_case.messaging.ViewChatHistoryOutputData;
+
+import use_case.messaging.send_m.SendMessageInputBoundary;
+import use_case.messaging.send_m.SendMessageInputData;
+import use_case.messaging.send_m.SendMessageInteractor;
+import use_case.messaging.send_m.SendMessageOutputBoundary;
+import use_case.messaging.send_m.SendMessageOutputData;
+import use_case.messaging.view_history.ViewChatHistoryInputData;
+import use_case.messaging.view_history.ViewChatHistoryInteractor;
+import use_case.messaging.view_history.ViewChatHistoryOutputBoundary;
+import use_case.messaging.view_history.ViewChatHistoryOutputData;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -35,7 +40,7 @@ public class ChatBox extends JFrame implements ViewChatHistoryOutputBoundary {
     private final InMemoryUserRepository userRepository;
 
     // Use cases
-    private final SendMessageInteractor sendMessageInteractor;
+    private final SendMessageInputBoundary sendMessageInteractor;
     private final ViewChatHistoryInteractor viewChatHistoryInteractor;
 
     // UI
@@ -89,8 +94,28 @@ public class ChatBox extends JFrame implements ViewChatHistoryOutputBoundary {
         c.addParticipant(botUserId);
         chatRepository.save(c);                   // re-save with both participants
 
-        // --- use case wiring
-        sendMessageInteractor = new SendMessageInteractor(messageRepository);
+        // --- use case wiring: SendMessage
+        SendMessageOutputBoundary sendPresenter = new SendMessageOutputBoundary() {
+            @Override
+            public void prepareSuccessView(SendMessageOutputData outputData) {
+                // nothing
+            }
+
+            @Override
+            public void prepareFailView(String errorMessage) {
+                JOptionPane.showMessageDialog(
+                        ChatBox.this,
+                        errorMessage,
+                        "Send Message Error",
+                        JOptionPane.ERROR_MESSAGE
+                );
+            }
+        };
+
+        sendMessageInteractor =
+                new SendMessageInteractor(chatRepository, messageRepository, userRepository, sendPresenter);
+
+        // --- use case wiring: ViewChatHistory
         viewChatHistoryInteractor =
                 new ViewChatHistoryInteractor(chatRepository, messageRepository, userRepository, this);
 
@@ -143,7 +168,12 @@ public class ChatBox extends JFrame implements ViewChatHistoryOutputBoundary {
         if (text.isEmpty()) return;
 
         // send my message
-        sendMessageInteractor.execute(currentChatId, currentUserId, text);
+        SendMessageInputData myInput = new SendMessageInputData(
+                currentChatId,
+                currentUserId,
+                text
+        );
+        sendMessageInteractor.execute(myInput);
         inputField.setText("");
 
         loadChatHistory();
@@ -153,7 +183,12 @@ public class ChatBox extends JFrame implements ViewChatHistoryOutputBoundary {
         javax.swing.Timer t = new javax.swing.Timer(2000, ev -> {
             ((javax.swing.Timer) ev.getSource()).stop();
             String reply = autoReply(text);
-            sendMessageInteractor.execute(currentChatId, botUserId, reply);
+            SendMessageInputData botInput = new SendMessageInputData(
+                    currentChatId,
+                    botUserId,
+                    reply
+            );
+            sendMessageInteractor.execute(botInput);
 
             // Mark all of *my* messages up to now as "Read"
             lastBotReplyTime = java.time.Instant.now();
