@@ -132,6 +132,21 @@ public class LoggedInView extends JPanel implements ActionListener, PropertyChan
             final LoggedInState state = (LoggedInState) evt.getNewValue();
             usernameLabel.setText(state.getUsername());
         }
+        else if (evt.getPropertyName().equals("username")) {
+            final LoggedInState state = (LoggedInState) evt.getNewValue();
+
+            if (state.getUsernameError() == null) {
+                JOptionPane.showMessageDialog(this,
+                        "Username successfully updated to " + state.getUsername());
+                usernameLabel.setText(state.getUsername());  // Update label too
+            }
+            else {
+                JOptionPane.showMessageDialog(this,
+                        state.getUsernameError(),
+                        "Username Change Failed",
+                        JOptionPane.ERROR_MESSAGE);
+            }
+        }
 
         else if (evt.getPropertyName().equals("password")) {
             final LoggedInState state = (LoggedInState) evt.getNewValue();

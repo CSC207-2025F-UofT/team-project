@@ -35,7 +35,7 @@ public class LoginPresenter implements LoginOutputBoundary {
 
         // Update the ViewModel and notify listeners
         loggedInViewModel.setState(loggedInState);
-        loggedInViewModel.firePropertyChanged("state");
+        loggedInViewModel.firePropertyChange("state");
 
         // Switch to the logged-in view
 

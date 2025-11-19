@@ -22,7 +22,7 @@ public class LoggedInViewModel extends ViewModel<LoggedInState> {
      * This is used for specific state updates (like "username" or "password").
      * @param propertyName The name of the property that changed.
      */
-    public void firePropertyChanged(String propertyName) {
+    public void firePropertyChange(String propertyName) {
         support.firePropertyChange(propertyName, null, this.getState());
     }
 
