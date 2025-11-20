@@ -81,7 +81,7 @@ public class ViewChatHistoryInteractor implements ViewChatHistoryInputBoundary {
      * Helper: username
      */
     private String resolveSenderName(String senderUserId) {
-        Optional<User> userOpt = userRepository.findByEmail(senderUserId);
+        Optional<User> userOpt = userRepository.findByUsername(senderUserId);
         return userOpt.map(User::getName).orElse("Unknown");
     }
 }

@@ -41,7 +41,7 @@ public class SendMessageInteractor implements SendMessageInputBoundary {
             return;
         }
 
-        Optional<User> senderOpt = userRepository.findByEmail(senderId);
+        Optional<User> senderOpt = userRepository.findByUsername(senderId);
         if (senderOpt.isEmpty()) {
             presenter.prepareFailView("Sender not found: " + senderId);
             return;

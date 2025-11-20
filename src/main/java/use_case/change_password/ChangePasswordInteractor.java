@@ -26,7 +26,6 @@ public class ChangePasswordInteractor implements ChangePasswordInputBoundary {
         }
         else {
             final User user = userFactory.create(
-                    changePasswordInputData.getEmail(),
                     changePasswordInputData.getUsername(),
                     changePasswordInputData.getPassword()
             );

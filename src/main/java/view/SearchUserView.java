@@ -18,7 +18,7 @@ import interface_adapter.user_search.SearchUserState;
 import use_case.ports.ChatRepository;
 import use_case.ports.UserRepository;
 import entity.Chat;
-import goc.chat.entity.User;
+import entity.User;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -193,7 +193,7 @@ public class SearchUserView extends JPanel implements ActionListener, PropertyCh
             return;
         }
 
-        String currentUserId = currentUserOpt.get().getId();
+        String currentUserId = currentUserOpt.get().getName();
 
         // Find the target user
         Optional<User> targetUserOpt = userRepository.findByUsername(username);
@@ -205,7 +205,7 @@ public class SearchUserView extends JPanel implements ActionListener, PropertyCh
             return;
         }
 
-        String targetUserId = targetUserOpt.get().getId();
+        String targetUserId = targetUserOpt.get().getName();
 
         // Find existing chat or create new one
         String chatId = findOrCreateChat(currentUserId, targetUserId);
@@ -340,7 +340,7 @@ public class SearchUserView extends JPanel implements ActionListener, PropertyCh
                 return;
             }
 
-            String currentUserId = currentUserOpt.get().getId();
+            String currentUserId = currentUserOpt.get().getName();
 
             createGroupChatController.execute(currentUserId, usernames, groupName.trim());
         } else {

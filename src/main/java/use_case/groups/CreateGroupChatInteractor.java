@@ -1,7 +1,7 @@
 package use_case.groups;
 
 import entity.Chat;
-import goc.chat.entity.User;
+import entity.User;
 import use_case.ports.ChatRepository;
 import use_case.ports.UserRepository;
 
@@ -71,7 +71,7 @@ public class CreateGroupChatInteractor implements CreateGroupChatInputBoundary {
             }
 
             // Verify creator exists
-            Optional<User> creatorOpt = userRepository.findById(inputData.getCreatorUserId());
+            Optional<User> creatorOpt = userRepository.findByUsername(inputData.getCreatorUserId());
             if (creatorOpt.isEmpty()) {
                 CreateGroupChatOutputData outputData = new CreateGroupChatOutputData(
                         null, null, null, false,
@@ -96,7 +96,7 @@ public class CreateGroupChatInteractor implements CreateGroupChatInputBoundary {
                     return;
                 }
 
-                String userId = userOpt.get().getId();
+                String userId = userOpt.get().getName();
                 if (!participantIds.contains(userId)) {
                     participantIds.add(userId);
                 }

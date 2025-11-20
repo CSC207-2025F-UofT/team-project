@@ -80,9 +80,9 @@ public class ChatBox extends JFrame implements ViewChatHistoryOutputBoundary {
 
         // --- seed a current user and capture the actual saved id
         final UserFactory userFactory = new UserFactory();
-        User me = userFactory.create("user-1", "demo", "demo@example.com");
+        User me = userFactory.create("user-1", "demo");
         me = userRepository.save(me);             // ensure stored & id resolved
-        currentUserId = me.getEmail();
+        currentUserId = me.getName();
 
         // --- seed a chat and make sure current user is a participant
         entity.Chat c = new entity.Chat("chat-1"); // if your Chat auto-ids, that's fine
@@ -91,9 +91,9 @@ public class ChatBox extends JFrame implements ViewChatHistoryOutputBoundary {
         currentChatId = c.getId();                // always use id from saved entity
 
         // --- seed a "bot" user and add it to the same chat
-        User bot = userFactory.create("user-2", "bot", "bot@example.com");
+        User bot = userFactory.create("user-2", "bot");
         bot = userRepository.save(bot);
-        botUserId = bot.getEmail();
+        botUserId = bot.getName();
         c.addParticipant(botUserId);
         chatRepository.save(c);                   // re-save with both participants
 

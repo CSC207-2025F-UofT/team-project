@@ -1,6 +1,6 @@
 package app;
 
-import data_access.DBUserDataAccessObject;
+import data_access.FireBaseUserDataAccessObject;
 import entity.UserFactory;
 import entity.User;
 import interface_adapter.ViewManagerModel;
@@ -14,7 +14,6 @@ import interface_adapter.logout.LogoutController;
 import interface_adapter.logout.LogoutPresenter;
 import interface_adapter.messaging.view_history.ViewChatHistoryController;
 import interface_adapter.messaging.view_history.ViewChatHistoryPresenter;
-import interface_adapter.repo.InMemoryMessageRepository;
 import interface_adapter.signup.SignupController;
 import interface_adapter.signup.SignupPresenter;
 import interface_adapter.signup.SignupViewModel;
@@ -57,16 +56,7 @@ import view.WelcomeView;
 import view.SearchUserView;
 import view.ChatView;
 import view.AccountDetailsView;
-import interface_adapter.logged_in.ChangeUsernameController;
-import interface_adapter.logged_in.ChangeUsernamePresenter;
-import use_case.change_username.ChangeUsernameInputBoundary;
-import use_case.change_username.ChangeUsernameInteractor;
-import use_case.change_username.ChangeUsernameOutputBoundary;
-import use_case.change_username.ChangeUsernameUserDataAccessInterface;
 
-import com.google.cloud.firestore.Firestore;
-import data_access.FirebaseClientProvider;
-import interface_adapter.repo.FirebaseMessageRepository;
 import use_case.ports.MessageRepository;
 
 import javax.swing.*;
@@ -94,7 +84,11 @@ public class AppBuilder {
     // of the classes from the data_access package
 
     // DAO version using a shared external database
-    final DBUserDataAccessObject userDataAccessObject = new DBUserDataAccessObject(userFactory);
+    static final String serviceAccountKeyPath = "src/main/resources/serviceAccountKey.json";
+    final FireBaseUserDataAccessObject userDataAccessObject = new FireBaseUserDataAccessObject(
+            serviceAccountKeyPath,
+            userFactory
+    );
 
     private SignupView signupView;
     private SignupViewModel signupViewModel;
@@ -134,9 +128,9 @@ public class AppBuilder {
         this.messageRepository = repo;
 
         // Use repo to store
-        User me = userFactory.create("user-1", "demo", "demo@example.com");
+        User me = userFactory.create("user-1", "demo");
         me = userRepository.save(me);
-        messagingUserId = me.getEmail();
+        messagingUserId = me.getName();
 
         entity.Chat c = new entity.Chat("chat-1");
         c.addParticipant(messagingUserId);
@@ -252,33 +246,14 @@ public class AppBuilder {
         return this;
     }
 
-    public AppBuilder addChangeUsernameUseCase() {
-        final ChangeUsernameOutputBoundary changeUsernameOutputBoundary =
-                new ChangeUsernamePresenter(loggedInViewModel, viewManagerModel);
-
-        final ChangeUsernameInputBoundary changeUsernameInteractor =
-                new ChangeUsernameInteractor(
-                        (ChangeUsernameUserDataAccessInterface) userDataAccessObject,
-                        changeUsernameOutputBoundary,
-                        userFactory
-                );
-
-        ChangeUsernameController changeUsernameController = new ChangeUsernameController(changeUsernameInteractor);
-
-        if (accountDetailsView != null) {
-            accountDetailsView.setChangeUsernameController(changeUsernameController);
-        }
-
-        return this;
-    }
 
     /**
      * Adds the Search User View to the application and instantiates it correctly.
      * @return this builder
      */
     public AppBuilder addSearchUserView() {
-        this.searchUserView = new SearchUserView(viewManagerModel, searchUserViewModel, chatView);
-        cardPanel.add(searchUserView, searchUserView.getViewName());
+        //this.searchUserView = new SearchUserView(viewManagerModel, searchUserViewModel, chatView);
+        //cardPanel.add(searchUserView, searchUserView.getViewName());
         return this;
     }
 
@@ -341,7 +316,7 @@ public class AppBuilder {
         chatViewModel.addPropertyChangeListener(chatView);
         cardPanel.add(chatView, chatView.getViewName());
 
-        chatView.setChatContext(messagingChatId, messagingUserId, "hi");
+        chatView.setChatContext(messagingChatId, messagingUserId, "hi", false);
 
         return this;
     }

@@ -4,8 +4,6 @@ package interface_adapter.logged_in;
  * The State information representing the logged-in user.
  */
 public class LoggedInState {
-    private String email = "";
-    private String emailError = null;
 
     private String username = "";
     private String usernameError = null;
@@ -14,15 +12,9 @@ public class LoggedInState {
     private String passwordError;
 
     public LoggedInState(LoggedInState copy) {
-        email = copy.email;
         username = copy.username;
         password = copy.password;
         passwordError = copy.passwordError;
-    }
-    public String getEmailError() { return emailError; }
-
-    public void setEmailError(String emailError) {
-        this.emailError = emailError;
     }
 
     public String getUsernameError() {
@@ -37,8 +29,6 @@ public class LoggedInState {
     public LoggedInState() {
 
     }
-
-    public String getEmail() { return email; }
 
     public String getUsername() {
         return username;
