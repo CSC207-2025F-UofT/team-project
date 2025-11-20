@@ -20,6 +20,7 @@ public class StockSearchView extends JFrame {
 
     private final StockSearchController controller;
     private final AlphaVantageAPI api;
+    private final String username;
 
     // top user
     private final JLabel userLabel = new JLabel();
@@ -58,6 +59,7 @@ public class StockSearchView extends JFrame {
                            String username) {
         this.controller = controller;
         this.api = new AlphaVantageAPI();
+        this.username = username;
 
         setTitle("FinWise — Live Stock Prices");
         setSize(1000, 700);
@@ -69,6 +71,61 @@ public class StockSearchView extends JFrame {
         showEmptyState();
     }
 
+    //overloaded constructor
+    public StockSearchView(StockSearchController controller,
+                           String username,
+                           String initialSymbol) {
+        this(controller, username);
+
+        if (initialSymbol == null || initialSymbol.isEmpty()) {
+            return;
+        }
+
+        statusLabel.setText("Loading " + initialSymbol + " from watchlist...");
+
+        // Run the search in the background, then select the matching result
+        SwingWorker<StockSearchOutputData, Void> worker = new SwingWorker<>() {
+            @Override
+            protected StockSearchOutputData doInBackground() {
+                return controller.search(initialSymbol);
+            }
+
+            @Override
+            protected void done() {
+                try {
+                    StockSearchOutputData output = get();
+
+                    if (!output.isSuccess() || output.getResults() == null || output.getResults().isEmpty()) {
+                        statusLabel.setText("No data found for " + initialSymbol);
+                        return;
+                    }
+
+                    // Try to find an exact symbol match, otherwise use the first result
+                    AlphaVantageAPI.StockSearchResult selected = output.getResults().get(0);
+                    for (AlphaVantageAPI.StockSearchResult r : output.getResults()) {
+                        if (r.getSymbol().equalsIgnoreCase(initialSymbol)) {
+                            selected = r;
+                            break;
+                        }
+                    }
+
+                    // Use the same path as when the user selects a suggestion:
+                    selectSuggestion(selected);
+
+                } catch (Exception e) {
+                    statusLabel.setText("Failed to load " + initialSymbol + ": " + e.getMessage());
+                    JOptionPane.showMessageDialog(
+                            StockSearchView.this,
+                            "Failed to load " + initialSymbol + ": " + e.getMessage(),
+                            "Error",
+                            JOptionPane.ERROR_MESSAGE
+                    );
+                }
+            }
+        };
+
+        worker.execute();
+    }
 
     private void initUI(String username) {
         JPanel topBar = new JPanel(new BorderLayout());
@@ -230,10 +287,34 @@ public class StockSearchView extends JFrame {
         });
 
         watchButton.addActionListener(e -> {
-            if ("♡".equals(watchButton.getText())) {
-                watchButton.setText("♥");
-            } else {
-                watchButton.setText("♡");
+            if (currentSelectedResult == null || currentSymbol == null || currentSymbol.isEmpty()) {
+                return; // nothing selected
+            }
+
+            // new state = toggled from current text
+            boolean newWatched = "♡".equals(watchButton.getText());
+
+            try {
+                controller.setWatched(
+                        username,
+                        currentSymbol,
+                        currentSelectedResult.getName(),
+                        currentSelectedResult.getExchange(),
+                        newWatched
+                );
+                // only update UI if DB operation succeeded
+                watchButton.setText(newWatched ? "♥" : "♡");
+                statusLabel.setText(newWatched
+                        ? "Added to watchlist."
+                        : "Removed from watchlist.");
+            } catch (Exception ex) {
+                // if DB fails, show error and don't change button text
+                JOptionPane.showMessageDialog(
+                        StockSearchView.this,
+                        "Failed to update watchlist: " + ex.getMessage(),
+                        "Error",
+                        JOptionPane.ERROR_MESSAGE
+                );
             }
         });
     }
@@ -356,6 +437,8 @@ public class StockSearchView extends JFrame {
 
                     currentSymbol = result.getSymbol();
 
+                    updateWatchButtonState();
+
                     String range = getSelectedRangeOrDefault();
                     fetchAndRenderSeries(currentSymbol, range);
 
@@ -375,6 +458,23 @@ public class StockSearchView extends JFrame {
         };
 
         currentQuoteWorker.execute();
+    }
+
+    private void updateWatchButtonState() {
+        // Defensive: only if we have both user + symbol
+        if (username == null || username.isEmpty() || currentSymbol == null || currentSymbol.isEmpty()) {
+            watchButton.setText("♡");
+            return;
+        }
+
+        // Ask controller if this stock is already watched
+        boolean watched = controller.isWatched(username, currentSymbol);
+
+        if (watched) {
+            watchButton.setText("♥");
+        } else {
+            watchButton.setText("♡");
+        }
     }
 
     private String getSelectedRangeOrDefault() {

@@ -23,6 +23,19 @@ public class TableInitializer {
             amount      REAL NOT NULL
         );
         CREATE INDEX IF NOT EXISTS idx_expenses_username ON expenses(username);
+        
+        /*watchlist table */
+        CREATE TABLE IF NOT EXISTS watched_stocks (
+            id          INTEGER PRIMARY KEY AUTOINCREMENT,
+            username    TEXT NOT NULL,
+            symbol      TEXT NOT NULL,
+            name        TEXT,
+            exchange    TEXT,
+            created_at  TEXT NOT NULL DEFAULT (datetime('now')),
+            UNIQUE(username, symbol)          -- one row per user+symbol
+        );
+        CREATE INDEX IF NOT EXISTS idx_watchlist_username
+            ON watched_stocks(username);
         """;
 
     public static void ensureSchema(DataSource dataSource) {
