@@ -4,6 +4,7 @@ import data_access.FireBaseUserDataAccessObject; // Corrected class name
 import data_access.FileUserDataAccessObject;
 import entity.UserFactory;
 import interface_adapter.ViewManagerModel;
+import interface_adapter.groupchat.*;
 import interface_adapter.logged_in.ChangePasswordController;
 import interface_adapter.logged_in.ChangePasswordPresenter;
 import interface_adapter.logged_in.LoggedInViewModel;
@@ -22,6 +23,7 @@ import interface_adapter.user_search.SearchUserPresenter;
 import interface_adapter.user_search.SearchUserViewModel;
 import interface_adapter.messaging.send_m.SendMessageController;
 import interface_adapter.messaging.send_m.SendMessagePresenter;
+import use_case.groups.*;
 import use_case.messaging.send_m.SendMessageInputBoundary;
 import use_case.messaging.send_m.SendMessageOutputBoundary;
 import use_case.messaging.send_m.SendMessageInteractor;
@@ -47,14 +49,7 @@ import use_case.logout.LogoutOutputBoundary;
 import use_case.signup.SignupInputBoundary;
 import use_case.signup.SignupInteractor;
 import use_case.signup.SignupOutputBoundary;
-import view.LoggedInView;
-import view.LoginView;
-import view.SignupView;
-import view.ViewManager;
-import view.WelcomeView;
-import view.SearchUserView;
-import view.ChatView;
-import view.AccountDetailsView;
+import view.*;
 import interface_adapter.logged_in.ChangeUsernameController;
 import interface_adapter.logged_in.ChangeUsernamePresenter;
 import use_case.change_username.ChangeUsernameInputBoundary;
@@ -68,6 +63,9 @@ import use_case.logout.LogoutUserDataAccessInterface;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
 
 public class AppBuilder {
     private final JPanel cardPanel = new JPanel();
@@ -116,9 +114,14 @@ public class AppBuilder {
     private final SearchUserViewModel searchUserViewModel = new SearchUserViewModel();
     private SearchUserView searchUserView;
 
+    private final GroupChatViewModel groupChatViewModel = new GroupChatViewModel();
+    private ChatSettingView chatSettingView;
+
     // Field for send message
     private final ChatViewModel chatViewModel = new ChatViewModel();
     private ViewChatHistoryController viewChatHistoryController;
+
+    private CreateGroupChatController createGroupChatController;
 
     private final String messagingUserId;
     private final String messagingChatId;
@@ -146,6 +149,20 @@ public class AppBuilder {
         me = userRepository.save(me);
         messagingUserId = me.getId();
 
+        // Get or create the demo user for messaging
+        Optional<goc.chat.entity.User> demoUserOpt = userRepository.findByUsername("demo");
+        if (demoUserOpt.isPresent()) {
+            messagingUserId = demoUserOpt.get().getId();
+        } else {
+            // If demo user doesn't exist in CSV, create it
+            goc.chat.entity.User me = new goc.chat.entity.User(
+                    "user-1", "demo", "demo@example.com", "hash"
+            );
+            me = userRepository.save(me);
+            messagingUserId = me.getId();
+        }
+
+        // Create initial chat
         entity.Chat c = new entity.Chat("chat-1");
         c.addParticipant(messagingUserId);
         c = chatRepository.save(c);
@@ -292,7 +309,14 @@ public class AppBuilder {
      * @return this builder
      */
     public AppBuilder addSearchUserView() {
-        this.searchUserView = new SearchUserView(viewManagerModel, searchUserViewModel, chatView);
+        this.searchUserView = new SearchUserView(
+                viewManagerModel,
+                searchUserViewModel,
+                chatView,              // Make sure chatView exists (call addChatUseCase first)
+                groupChatViewModel,     // Pass the groupChatViewModel
+                chatRepository,
+                userRepository
+        );
         cardPanel.add(searchUserView, searchUserView.getViewName());
         return this;
     }
@@ -351,13 +375,63 @@ public class AppBuilder {
         viewChatHistoryController = new ViewChatHistoryController(viewHistoryInteractor);
         sendMessageController = new SendMessageController(sendMessageInteractor);
 
-
-        // view
-        chatView = new ChatView(viewManagerModel, sendMessageController, viewChatHistoryController);
+        // view - 4 parameters: viewManagerModel, loggedInViewModel, sendMessageController, viewChatHistoryController
+        chatView = new ChatView(viewManagerModel, loggedInViewModel, sendMessageController, viewChatHistoryController);
         chatViewModel.addPropertyChangeListener(chatView);
         cardPanel.add(chatView, chatView.getViewName());
 
-        chatView.setChatContext(messagingChatId, messagingUserId, "hi");
+        chatView.setChatContext(messagingChatId, messagingUserId, "hi", false);
+
+        return this;
+    }
+
+    public AppBuilder addChatSettingView() {
+        this.chatSettingView = new ChatSettingView(viewManagerModel);
+        cardPanel.add(chatSettingView, chatSettingView.getViewName());
+        return this;
+    }
+
+    public AppBuilder addChangeGroupNameUseCase() {
+        final ChangeGroupNameOutputBoundary outputBoundary =
+                new ChangeGroupNamePresenter(groupChatViewModel);
+
+        final ChangeGroupNameInputBoundary interactor =
+                new RenameGroupChatInteractor(
+                        chatRepository,
+                        outputBoundary
+                );
+
+        final ChangeGroupNameController controller =
+                new ChangeGroupNameController(interactor);
+
+        // Wire controller to the view
+        if (this.chatSettingView != null) {
+            this.chatSettingView.setChangeGroupNameController(controller);
+        }
+
+        return this;
+    }
+
+    public AppBuilder addCreateGroupChatUseCase() {
+        // Output Boundary
+        final CreateGroupChatOutputBoundary outputBoundary =
+                new CreateGroupChatPresenter(groupChatViewModel, viewManagerModel);
+
+        // Interactor
+        final CreateGroupChatInputBoundary interactor =
+                new CreateGroupChatInteractor(
+                        chatRepository,
+                        userRepository,
+                        outputBoundary
+                );
+
+        // Controller
+        createGroupChatController = new CreateGroupChatController(interactor);
+
+        // Wire controller to SearchUserView
+        if (searchUserView != null) {
+            searchUserView.setCreateGroupChatController(createGroupChatController);
+        }
 
         return this;
     }

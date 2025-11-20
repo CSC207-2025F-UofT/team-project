@@ -18,7 +18,7 @@ public class ChatMessageDto {
                           String senderUserId,
                           String senderName,
                           String content,
-                          Instant timestamp) {
+                          Instant timestamp ) {
 
         this.messageId = messageId;
         this.senderUserId = senderUserId;
@@ -44,4 +44,6 @@ public class ChatMessageDto {
     public Instant getTimestamp() {
         return timestamp;
     }
+
+
 }
