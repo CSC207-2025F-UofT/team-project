@@ -8,7 +8,7 @@ public class SignupInputData {
     public SignupInputData(String username, String password, String repeatPassword) {
         this.username = username;
         this.password = password;
-        this.repeatPassword = password;
+        this.repeatPassword = repeatPassword;
     }
     public String getUsername() {
         return username;
