@@ -24,6 +24,20 @@ public class User {
         this.privateNotes = privateNotes;
     }
 
+    public User(String username, String password, Instant createdAt, List<Visit> visits, List<Note> privateNotes) {
+        if ("".equals(username)) {
+            throw new IllegalArgumentException("Username cannot be empty");
+        }
+        if ("".equals(password)) {
+            throw new IllegalArgumentException("Password cannot be empty");
+        }
+        this.username = username;
+        this.password = password;
+        this.createdAt = createdAt;
+        this.visits = visits;
+        this.privateNotes = privateNotes;
+    }
+
     public String getUsername() {
         return username;
     }

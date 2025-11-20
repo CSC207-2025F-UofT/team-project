@@ -13,8 +13,7 @@ import java.util.Map;
 /**
  * DAO for user data implemented using a File to persist the data.
  */
-public class FileUserDataAccessObject implements LoginUserDataAccessInterface,
-        SignupUserDataAccessInterface {
+public class FileUserDataAccessObject implements UserDataAccessInterface {
 
     private static final String HEADER = "username,password";
 
