@@ -75,6 +75,7 @@ public class MainMenuFrame extends JFrame {
 
         betHistoryBtn.addActionListener(e -> {
             new BetHistoryFrame(user, this);
+            this.dispose();
         });
 
         depositBtn.addActionListener(e -> {
@@ -84,10 +85,12 @@ public class MainMenuFrame extends JFrame {
 
         sportBetBtn.addActionListener(e -> {
             new SportbetFrame(user, this);
+            this.dispose();
         });
 
         minesBtn.addActionListener(e -> {
             new MinesView(user);
+            this.dispose();
         });
 
         logoutBtn.addActionListener(e -> {
