@@ -107,8 +107,6 @@ public class AppBuilder {
 
     private CreateGroupChatController createGroupChatController;
 
-    private final String messagingUserId;
-    private final String messagingChatId;
 
     public AppBuilder() {
         cardPanel.setLayout(cardLayout);
@@ -125,25 +123,6 @@ public class AppBuilder {
             );
             userRepository.save(inMemoryUser);
         }
-
-        // Get or create the demo user for messaging
-        Optional<goc.chat.entity.User> demoUserOpt = userRepository.findByUsername("demo");
-        if (demoUserOpt.isPresent()) {
-            messagingUserId = demoUserOpt.get().getId();
-        } else {
-            // If demo user doesn't exist in CSV, create it
-            goc.chat.entity.User me = new goc.chat.entity.User(
-                    "user-1", "demo", "demo@example.com", "hash"
-            );
-            me = userRepository.save(me);
-            messagingUserId = me.getId();
-        }
-
-        // Create initial chat
-        entity.Chat c = new entity.Chat("chat-1");
-        c.addParticipant(messagingUserId);
-        c = chatRepository.save(c);
-        messagingChatId = c.getId();
     }
 
     public AppBuilder addWelcomeView() {
@@ -282,10 +261,11 @@ public class AppBuilder {
         this.searchUserView = new SearchUserView(
                 viewManagerModel,
                 searchUserViewModel,
-                chatView,              // Make sure chatView exists (call addChatUseCase first)
-                groupChatViewModel,     // Pass the groupChatViewModel
+                chatView,
+                groupChatViewModel,
                 chatRepository,
-                userRepository
+                userRepository,
+                loggedInViewModel
         );
         cardPanel.add(searchUserView, searchUserView.getViewName());
         return this;
@@ -349,14 +329,17 @@ public class AppBuilder {
         chatViewModel.addPropertyChangeListener(chatView);
         cardPanel.add(chatView, chatView.getViewName());
 
-        chatView.setChatContext(messagingChatId, messagingUserId, "hi", false);
-
         return this;
     }
 
     public AppBuilder addChatSettingView() {
         this.chatSettingView = new ChatSettingView(viewManagerModel);
         cardPanel.add(chatSettingView, chatSettingView.getViewName());
+
+        if (this.chatView != null) {
+            this.chatView.setChatSettingView(chatSettingView);
+        }
+
         return this;
     }
 
