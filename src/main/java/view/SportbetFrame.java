@@ -27,6 +27,10 @@ public class SportbetFrame extends JFrame {
         JTextField amountField = new JTextField(10);
 
         JButton placeBetButton = new JButton("Place Bet");
+        JButton backButton = new JButton("Go Back");
+        backButton.addActionListener(e -> {
+            new MainMenuFrame(user);
+        });
 
         placeBetButton.addActionListener(e -> {
             Sportbet selected = betsList.getSelectedValue();
@@ -45,17 +49,22 @@ public class SportbetFrame extends JFrame {
                 JOptionPane.showMessageDialog(this, "Enter a valid integer amount.");
                 return;
             }
-            user.addBet(selected);
-            user.viewBets();
-
-            JOptionPane.showMessageDialog(this,
-                    "Bet placed: " + selected.toString() + " for $" + amount);
+            if(user.checkwithdraw(amount)){
+                user.addBet(selected,amount);
+                user.viewBets();
+                JOptionPane.showMessageDialog(this,
+                        "Bet placed: " + selected.toString() + " for $" + amount);
+            }
+            else{
+                JOptionPane.showMessageDialog(this,"Please enter an amount lower than your current balance.");
+            }
         });
 
         JPanel bottomPanel = new JPanel(new FlowLayout());
         bottomPanel.add(new JLabel("Amount:"));
         bottomPanel.add(amountField);
         bottomPanel.add(placeBetButton);
+        bottomPanel.add(backButton);
 
         add(bottomPanel, BorderLayout.SOUTH);
         setVisible(true);

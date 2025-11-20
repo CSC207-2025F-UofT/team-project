@@ -21,22 +21,27 @@ public class User {
 
     public String getUsername() { return username; }
     public double getBalance() { return balance; }
-    public int getTotalBets() { return totalBets; }
+    public int getBets() { return totalBets; }
     public int getGamesPlayed() { return gamesPlayed; }
     public String getPasswordHash() { return passwordHash; }
+    public ArrayList<Sportbet> getSbs(){ return sbs; }
 
     // Optional business logic
     public void deposit(double amount) {
         this.balance += amount;
     }
-
+    public boolean checkwithdraw(double amount){
+        return balance > amount;
+    }
     public void withdraw(double amount) {
         this.balance -= amount;
     }
 
-    public void addBet(Sportbet sb) {
+    public void addBet(Sportbet sb, double betamount) {
+        withdraw(betamount);
         sbs.add(sb);
         this.totalBets++;
+
     }
 
     public void viewBets(){

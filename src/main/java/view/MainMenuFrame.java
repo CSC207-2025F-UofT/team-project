@@ -1,11 +1,20 @@
 package view;
 
 import entity.User;
+import interface_adapter.Profile.ProfileController;
+import interface_adapter.Profile.ProfilePresenter;
+import interface_adapter.Profile.ProfileViewModel;
+import use_case.profile.ProfileInteractor;
+import data_access.InMemoryUserDataAccess;
+import data_access.UserDataAccessInterface;
 
 import javax.swing.*;
 import java.awt.*;
 
 public class MainMenuFrame extends JFrame {
+
+    private final ProfilePresenter profilePresenter;
+    private final ProfileController profileController;
 
     public MainMenuFrame(User user) {
         setTitle("BET366 Main Menu");
@@ -15,6 +24,16 @@ public class MainMenuFrame extends JFrame {
         getContentPane().setBackground(Color.WHITE);
         setLayout(new BorderLayout());
 
+        // ====== Clean Architecture Wiring for Profile ======
+        UserDataAccessInterface userDAO = new InMemoryUserDataAccess();
+        userDAO.save(user);  // 必须保存，否则 interactor 找不到 User
+
+        profilePresenter = new ProfilePresenter();
+        ProfileInteractor interactor = new ProfileInteractor(userDAO, profilePresenter);
+        profileController = new ProfileController(interactor);
+
+        // ====== UI Layout ======
+
         JLabel title = new JLabel("Welcome to BET366", SwingConstants.CENTER);
         title.setFont(new Font("Arial", Font.BOLD, 50));
         title.setForeground(Color.BLACK);
@@ -23,11 +42,10 @@ public class MainMenuFrame extends JFrame {
         JPanel panel = new JPanel(new GridLayout(6, 1, 15, 15));
         panel.setOpaque(false);
 
-        JButton profileBtn = createMenuButton("interface_adapter/Profile");
+        JButton profileBtn = createMenuButton("Profile");
         JButton betHistoryBtn = createMenuButton("View Bet History");
         JButton sportBetBtn = createMenuButton("Sport Bet");
-        JButton minesBtn = createMenuButton("Play Mines");
-        JButton blackjackBtn = createMenuButton("Play Blackjack");
+        JButton minesBtn = createMenuButton("Play Bet Games");
         JButton depositBtn = createMenuButton("Deposit / Withdraw");
         JButton logoutBtn = createMenuButton("Logout");
 
@@ -35,7 +53,6 @@ public class MainMenuFrame extends JFrame {
         betRow.setOpaque(false);
         betRow.add(sportBetBtn);
         betRow.add(minesBtn);
-        betRow.add(blackjackBtn);
 
         panel.add(profileBtn);
         panel.add(betHistoryBtn);
@@ -46,9 +63,18 @@ public class MainMenuFrame extends JFrame {
         add(title, BorderLayout.NORTH);
         add(panel, BorderLayout.CENTER);
 
+        // ====== PROFILE BUTTON (Clean Architecture) ======
         profileBtn.addActionListener(e -> {
-            new ProfileFrame(user, this);
+            profileController.loadProfile(user.getUsername());
+            ProfileViewModel vm = profilePresenter.getViewModel();
+            new ProfileFrame(vm, this);
             setVisible(false);
+        });
+
+        // ====== Keep Original Functions ======
+
+        betHistoryBtn.addActionListener(e -> {
+            new BetHistoryFrame(user, this);
         });
 
         depositBtn.addActionListener(e -> {
@@ -64,8 +90,9 @@ public class MainMenuFrame extends JFrame {
             new MinesView(user);
         });
 
-        blackjackBtn.addActionListener(e -> {
-            new BlackjackView(user);
+        logoutBtn.addActionListener(e -> {
+            JOptionPane.showMessageDialog(this, "Logged Out!");
+            dispose();
         });
 
         setVisible(true);
