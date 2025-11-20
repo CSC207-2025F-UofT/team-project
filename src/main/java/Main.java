@@ -51,6 +51,12 @@ public class Main {
             AlphaVantageAPI api = new AlphaVantageAPI();
             StockSearchInteractor stockSearchInteractor = new StockSearchInteractor(api);
 
+            WatchlistRepository watchlistRepository =
+                    new JdbcWatchlistRepository(dataSource);
+
+            stockSearchController =
+                    new StockSearchController(stockSearchInteractor, watchlistRepository);
+
             portfolioRepo = new InMemoryPortfolioRepository();
             priceHistoryRepo = new InMemoryPriceHistoryRepository();
             //portfolioInteractor = new PortfolioInteractor(portfolioRepo, priceHistoryRepo, )
@@ -59,7 +65,6 @@ public class Main {
             signUpController = new SignUpController(signUpInteractor);
             loginController = new LoginController(loginInteractor);
             dashboardController = new DashboardController();
-            stockSearchController = new StockSearchController(stockSearchInteractor);
            // portfolioController = new PortfolioController()
 
             // Start application on the login screen
@@ -176,9 +181,17 @@ public class Main {
 
         AlphaVantageAPI api = new AlphaVantageAPI();
         StockSearchInteractor interactor = new StockSearchInteractor(api);
-        StockSearchController controller = new StockSearchController(interactor);
 
-        StockSearchView view = new StockSearchView(controller,
+        // Use a watchlist repository so the stock search controller
+        // has access to persisted watched stocks.
+        WatchlistRepository watchlistRepository =
+                new JdbcWatchlistRepository(dataSource);
+
+        StockSearchController controller =
+                new StockSearchController(interactor, watchlistRepository);
+
+        StockSearchView view = new StockSearchView(
+                controller,
                 currentUsername
         );
 
