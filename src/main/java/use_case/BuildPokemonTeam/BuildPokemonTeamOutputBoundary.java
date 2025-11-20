@@ -18,6 +18,7 @@ public interface BuildPokemonTeamOutputBoundary {
 
     /**
      * Switches to PokemonLookup View
+     * @param index the index of the Pokemon we are trying to change
      */
     void switchToPokemonLookupView(int index);
 }

@@ -51,7 +51,7 @@ public class AppBuilder {
 
     public AppBuilder addPokemonLookupUseCase() {
         final PokemonLookupOutputBoundary pokemonLookupOutputBoundary = new PokemonLookupPresenter(
-                pokemonLookupViewModel, viewManagerModel);
+                pokemonLookupViewModel, teamBuilderViewModel, viewManagerModel);
         final PokemonLookupInputBoundary pokemonLookupInteractor =
                 new PokemonLookupInteractor(pokemonLookupOutputBoundary, EmptyPokemonFactory.create());
         PokemonLookupController controller = new PokemonLookupController(pokemonLookupInteractor);

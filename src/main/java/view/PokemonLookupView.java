@@ -1,5 +1,6 @@
 package view;
 
+import entity.Pokemon;
 import interface_adapter.pokemon_lookup.PokemonLookupController;
 import interface_adapter.pokemon_lookup.PokemonLookupState;
 import interface_adapter.pokemon_lookup.PokemonLookupViewModel;
@@ -26,6 +27,7 @@ public class PokemonLookupView extends JPanel implements ActionListener, Propert
     private PokemonLookupController pokemonLookupController = null;
 
     private final JButton search;
+    private final JButton saveToTeam;
     private final DisplayPokemonJPanel displayPokemon = new DisplayPokemonJPanel();
 
     public PokemonLookupView(PokemonLookupViewModel pokemonLookupViewModel) {
@@ -43,6 +45,8 @@ public class PokemonLookupView extends JPanel implements ActionListener, Propert
         final JPanel buttons = new JPanel();
         search = new JButton(PokemonLookupViewModel.SEARCH_BUTTON_LABEL);
         buttons.add(search);
+        saveToTeam = new JButton(PokemonLookupViewModel.SAVE_TO_TEAM_LABEL);
+        buttons.add(saveToTeam);
 
         pokemonNameInfo.add(buttons);
 
@@ -55,6 +59,24 @@ public class PokemonLookupView extends JPanel implements ActionListener, Propert
                     }
                 }
         );
+
+        saveToTeam.addActionListener(
+                new ActionListener() {
+                    public void actionPerformed(ActionEvent evt) {
+                        if (evt.getSource().equals(saveToTeam)) {
+                            PokemonLookupState currentState = pokemonLookupViewModel.getState();
+                            Pokemon currentPokemon = currentState.getDisplayPokemon();
+                            if (currentPokemon != null) {
+                                pokemonLookupController.switchToTeamBuilderView(currentState.getIndex(), currentPokemon);
+                            }
+                            else {
+                                JOptionPane.showMessageDialog(null, "No pokemon to add.");
+                            }
+                        }
+                    }
+                }
+        );
+
         pokemonNameInputField.addKeyListener(
                 new KeyListener() {
                     @Override

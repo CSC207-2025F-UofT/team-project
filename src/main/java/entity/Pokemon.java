@@ -46,6 +46,21 @@ public class Pokemon {
                     '}';
         }
 
+        public Pokemon getCopy() {
+            return new Pokemon(
+                    name,
+                    type1,
+                    type2,
+                    stats,
+                    abilities,
+                    hidden,
+                    moves,
+                    egggroup,
+                    pokedexes,
+                    sprite
+            );
+        }
+
         // Getters and Setters
         public String getName() {
             return name;

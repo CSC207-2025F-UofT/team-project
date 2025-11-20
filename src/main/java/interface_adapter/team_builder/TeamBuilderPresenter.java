@@ -1,6 +1,7 @@
 package interface_adapter.team_builder;
 
 import interface_adapter.ViewManagerModel;
+import interface_adapter.pokemon_lookup.PokemonLookupState;
 import interface_adapter.pokemon_lookup.PokemonLookupViewModel;
 import use_case.BuildPokemonTeam.BuildPokemonTeamOutputBoundary;
 import use_case.BuildPokemonTeam.BuildPokemonTeamOutputData;
@@ -37,7 +38,10 @@ public class TeamBuilderPresenter implements BuildPokemonTeamOutputBoundary {
 
     @Override
     public void switchToPokemonLookupView(int index) {
+        PokemonLookupState state = pokemonLookupViewModel.getState();
+        state.setIndex(index);
         viewManagerModel.setState(pokemonLookupViewModel.getViewName());
         viewManagerModel.firePropertyChange();
+        pokemonLookupViewModel.firePropertyChange();
     }
 }

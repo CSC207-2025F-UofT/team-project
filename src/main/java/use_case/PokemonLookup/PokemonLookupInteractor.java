@@ -196,6 +196,12 @@ public class PokemonLookupInteractor implements PokemonLookupInputBoundary {
 
         }
     }
+
+    @Override
+    public void switchToTeamBuilderView(int index, Pokemon pokemon) {
+        userPresenter.switchToTeamBuilderView(index,pokemon);
+    }
+
     private Type getType(int typeID, OkHttpClient client) throws IOException {
         Request request = new Request.Builder()
                 .url("https://pokeapi.co/api/v2/type/" + typeID)

@@ -42,6 +42,8 @@ public class DisplayPokemonJPanel extends JPanel {
 
         } catch (MalformedURLException e) {
             throw new RuntimeException(e);
+        } catch (NullPointerException e) {
+            clearPokemon();
         }
     }
 
