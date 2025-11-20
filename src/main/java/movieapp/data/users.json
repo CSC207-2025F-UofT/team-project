@@ -1,0 +1,26 @@
+[
+    {
+        "password": "1234",
+        "ratings": [{
+            "movie": 502356,
+            "rating": 3
+        }],
+        "watchlist": [
+            502356,
+            76600
+        ],
+        "username": "Luke"
+    },
+    {
+        "password": "abcd",
+        "ratings": [],
+        "watchlist": [],
+        "username": "max"
+    },
+    {
+        "password": "pass123",
+        "ratings": {},
+        "watchlist": [102],
+        "username": "alice"
+    }
+]
