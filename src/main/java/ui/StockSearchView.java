@@ -76,10 +76,55 @@ public class StockSearchView extends JFrame {
                            String username,
                            String initialSymbol) {
         this(controller, username);
-        if (initialSymbol != null && !initialSymbol.isEmpty()) {
-            searchField.setText(initialSymbol);
-            onSearchTextChanged();
+
+        if (initialSymbol == null || initialSymbol.isEmpty()) {
+            return;
         }
+
+        statusLabel.setText("Loading " + initialSymbol + " from watchlist...");
+
+        // Run the search in the background, then select the matching result
+        SwingWorker<StockSearchOutputData, Void> worker = new SwingWorker<>() {
+            @Override
+            protected StockSearchOutputData doInBackground() {
+                return controller.search(initialSymbol);
+            }
+
+            @Override
+            protected void done() {
+                try {
+                    StockSearchOutputData output = get();
+
+                    if (!output.isSuccess() || output.getResults() == null || output.getResults().isEmpty()) {
+                        statusLabel.setText("No data found for " + initialSymbol);
+                        return;
+                    }
+
+                    // Try to find an exact symbol match, otherwise use the first result
+                    AlphaVantageAPI.StockSearchResult selected = output.getResults().get(0);
+                    for (AlphaVantageAPI.StockSearchResult r : output.getResults()) {
+                        if (r.getSymbol().equalsIgnoreCase(initialSymbol)) {
+                            selected = r;
+                            break;
+                        }
+                    }
+
+                    // Use the same path as when the user selects a suggestion:
+                    selectSuggestion(selected);
+
+                } catch (Exception e) {
+                    statusLabel.setText("Failed to load " + initialSymbol + ": " + e.getMessage());
+                    JOptionPane.showMessageDialog(
+                            StockSearchView.this,
+                            "Failed to load " + initialSymbol + ": " + e.getMessage(),
+                            "Error",
+                            JOptionPane.ERROR_MESSAGE
+                    );
+                }
+            }
+        };
+
+        worker.execute();
     }
 
     private void initUI(String username) {
