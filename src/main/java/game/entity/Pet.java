@@ -1,8 +1,7 @@
 package game.entity;
 
-/**
- * The class representing a Pet within the game.
- */
+import game.Constants;
+
 public class Pet {
     /**
      * petType == 'Dog' || petType == 'Cat'
@@ -24,15 +23,17 @@ public class Pet {
     int sellingPrice;
     boolean deployStatus;
 
+    private String name;
+
 
 
     public Pet(String petType, String petBreed) {
         this.petType = petType;
         this.petBreed = petBreed;
         // call to visual database to get appropriate url
-        this.affectionXP = 0;
-        this.affectionLevel = 1;
-        this.energyLevel = 100;
+        this.affectionXP = Constants.INITIAL_AFFECTION_XP;
+        this.affectionLevel = Constants.INITIAL_AFFECTION_LEVEL;
+        this.energyLevel = Constants.INITIAL_ENERGY_LEVEL;
         // call to info database to get clicking speed
         this.sellingPrice = 25;
         this.deployStatus = false;
@@ -56,5 +57,13 @@ public class Pet {
 
     public void deployPet() {
         this.deployStatus = true;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getName() {
+        return this.name;
     }
 }
