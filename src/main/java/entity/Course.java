@@ -5,6 +5,7 @@ import java.util.List;
 public class Course {
     private String courseName;
     private String courseCode;
+    private String latePenalty;
     private List<User> instructors;
     private List<User> students;
     private List<Assignment> assignments;
