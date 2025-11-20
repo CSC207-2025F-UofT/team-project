@@ -18,10 +18,18 @@ public class MenuView extends JPanel implements ActionListener, PropertyChangeLi
     private final String viewName = "menu";
     private final MenuViewModel menuViewModel;
 
-    private final JLabel averageRatingField = new JLabel("0");
+    // Star Rate UI Items
+    private final JLabel averageRatingField = new JLabel("Average Rating: 0");
     private StarRateController starRateController = null;
     private final JButton rate;
     private final JRadioButton star1, star2, star3, star4, star5;
+
+    // Restaurant Information UI Items
+    private final JLabel restaurantName;
+    private final JLabel address;
+    private final JList<String> menuItems = new JList<>();
+    private final JScrollPane scrollPane = new JScrollPane(menuItems);
+
 
     public MenuView(MenuViewModel menuViewModel){
         this.menuViewModel = menuViewModel;
@@ -29,7 +37,9 @@ public class MenuView extends JPanel implements ActionListener, PropertyChangeLi
 
         final JLabel title = new JLabel("Restaurant Menu");
         title.setAlignmentX(Component.CENTER_ALIGNMENT);
+        averageRatingField.setAlignmentX(Component.CENTER_ALIGNMENT);
 
+        // Initialize the new buttons and add them into a JPanel
         final JPanel buttons = new JPanel();
         rate = new JButton("Rate"); star1 = new JRadioButton("1"); star2 = new JRadioButton("2");
         star3 = new JRadioButton("3"); star4 = new JRadioButton("4"); star5 = new JRadioButton("5");
@@ -37,6 +47,11 @@ public class MenuView extends JPanel implements ActionListener, PropertyChangeLi
         group.add(star1); group.add(star2); group.add(star3); group.add(star4); group.add(star5);
 
         buttons.add(star1); buttons.add(star2); buttons.add(star3); buttons.add(star4); buttons.add(star5);
+
+        // Initialize the Restaurant information
+        final JPanel restaurantInfo = new JPanel();
+        restaurantName = new JLabel("Restaurant Name"); address = new JLabel("Address");
+        restaurantInfo.add(restaurantName); restaurantInfo.add(address);
 
         rate.addActionListener(
                 new ActionListener(){
@@ -75,10 +90,8 @@ public class MenuView extends JPanel implements ActionListener, PropertyChangeLi
         );
 
         this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
-        this.add(title);
-        this.add(buttons);
-        this.add(averageRatingField);
-        this.add(rate);
+        this.add(title); this.add(restaurantInfo); this.add(scrollPane); this.add(buttons);
+        this.add(averageRatingField); this.add(rate);
 
     }
 
@@ -94,7 +107,9 @@ public class MenuView extends JPanel implements ActionListener, PropertyChangeLi
     }
 
     private void setFields(MenuState state) {
-        averageRatingField.setText(String.valueOf(state.getRating()));
+        averageRatingField.setText("Average Rating: "+String.valueOf(state.getRating()));
+        restaurantName.setText(state.getName());
+        address.setText(state.getAddress());
     }
     public String getViewName() {
         return viewName;
