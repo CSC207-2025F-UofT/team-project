@@ -128,7 +128,7 @@ public class AppBuilder {
 
         // 1. Initialize Firebase DAO
         // The serviceAccountKey.json file is used for Firebase Admin SDK initialization.
-        String serviceAccountKeyPath = "src/main/resources/serviceAccountKey.json";
+        String serviceAccountKeyPath = "src/main/resources/serviceAccountKeyUsers.json";
         this.concreteUserDAO = new FireBaseUserDataAccessObject(serviceAccountKeyPath, userFactory);
 
         // 2. Assign the concrete DAO instance to all required interfaces
