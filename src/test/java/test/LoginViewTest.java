@@ -1,41 +1,82 @@
 package test;
 
+import entity.UserFactory;
 import interface_adapter.ViewManagerModel;
+
 import interface_adapter.login.LoginController;
 import interface_adapter.login.LoginPresenter;
 import interface_adapter.login.LoginViewModel;
+
+import interface_adapter.signup.SignupController;
+import interface_adapter.signup.SignupPresenter;
+import interface_adapter.signup.SignupViewModel;
+
 import interface_adapter.loggedin.LoggedInViewModel;
+
 import use_case.login.LoginInteractor;
+import use_case.signup.SignupInteractor;
+
 import view.LoginView;
+import view.SignupView;
 
 import javax.swing.*;
+import java.awt.*;
 
-class LoginGUIMain {
+public class LoginViewTest {
 
     public static void main(String[] args) {
 
+        InMemoryUserDataAccess userDAO = new InMemoryUserDataAccess();
+        UserFactory userFactory = new UserFactory();
+
         ViewManagerModel viewManager = new ViewManagerModel();
+        LoginViewModel loginVM = new LoginViewModel();
+        SignupViewModel signupVM = new SignupViewModel();
+        LoggedInViewModel loggedInVM = new LoggedInViewModel();
 
-        LoginViewModel loginViewModel = new LoginViewModel();
-        LoggedInViewModel loggedInViewModel = new LoggedInViewModel();
+        LoginPresenter loginPresenter =
+                new LoginPresenter(viewManager, loggedInVM, loginVM, signupVM);
 
-        InMemoryUserDataAccess dao = new InMemoryUserDataAccess();
+        SignupPresenter signupPresenter =
+                new SignupPresenter(viewManager, signupVM, loginVM);
 
-        LoginPresenter presenter =
-                new LoginPresenter(viewManager, loggedInViewModel, loginViewModel);
+        LoginInteractor loginInteractor =
+                new LoginInteractor(userDAO, loginPresenter);
 
-        LoginInteractor interactor =
-                new LoginInteractor(dao, presenter);
+        SignupInteractor signupInteractor =
+                new SignupInteractor(userDAO, signupPresenter, userFactory);
 
-        LoginController controller = new LoginController(interactor);
+        LoginController loginController =
+                new LoginController(loginInteractor);
 
-        LoginView loginView = new LoginView(loginViewModel);
-        loginView.setLoginController(controller);
+        SignupController signupController =
+                new SignupController(signupInteractor);
 
-        JFrame frame = new JFrame("Login Test");
+        LoginView loginView = new LoginView(loginVM);
+        loginView.setLoginController(loginController);
+
+        SignupView signupView = new SignupView(signupVM);
+        signupView.setSignupController(signupController);
+
+        JFrame frame = new JFrame("App Test");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setContentPane(loginView);
-        frame.pack();
+        frame.setSize(450, 350);
+
+        JPanel cards = new JPanel(new CardLayout());
+        cards.add(loginView, loginView.getViewName());
+        cards.add(signupView, signupView.getViewName());
+
+        frame.setContentPane(cards);
         frame.setVisible(true);
+
+        viewManager.addPropertyChangeListener(evt -> {
+            String viewName = (String) evt.getNewValue();
+            CardLayout layout = (CardLayout) cards.getLayout();
+            layout.show(cards, viewName);
+            System.out.println("Switched to view: " + viewName);
+        });
+
+        viewManager.setState(loginView.getViewName());
+        viewManager.firePropertyChange();
     }
 }
