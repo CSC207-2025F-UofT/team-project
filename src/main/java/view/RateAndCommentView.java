@@ -131,9 +131,12 @@ public class RateAndCommentView extends JPanel implements ActionListener, Proper
                                     JOptionPane.INFORMATION_MESSAGE
                             );
                         } else {
-                            //final CommentState currentState = commentViewModel.getState();
+//                            final CommentState currentState = commentViewModel.getState();
+//                            int rate = currentState.getRate();
+//                            String commentText = currentState.getComment();
+//                            String media = currentState.getMedianame();
+                            commentController.execute(medianame,reviewArea.getText(), rating);
 
-                            commentController.execute(medianame, reviewArea.getText(), rating);// 写完controller改写此处execute
                             //清除评论和打分
                             //setRating(0);
                             //reviewArea.setText("");
@@ -160,12 +163,7 @@ public class RateAndCommentView extends JPanel implements ActionListener, Proper
             // TODO: 跳转到其他UI（此处先弹提示）
             viewManagerModel.setState(clickingViewModel.getViewName());
             viewManagerModel.firePropertyChange();
-            JOptionPane.showMessageDialog(
-                    this,
-                    "Return clicked — clearing input and switching to another UI.",
-                    "Info",
-                    JOptionPane.INFORMATION_MESSAGE
-            );
+
         });
 
         JPanel bottomPanel = new JPanel();
@@ -216,6 +214,7 @@ public class RateAndCommentView extends JPanel implements ActionListener, Proper
         reviewArea.setText(state.getComment());
         setRating(state.getRate());
         setMedianame(state.getMedianame());
+
     }
 
     public String getViewName() {

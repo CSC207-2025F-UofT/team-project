@@ -5,6 +5,7 @@ import interface_adapter.RandC_success_submit.RandCSuccessViewModel;
 import interface_adapter.ViewManagerModel;
 import interface_adapter.clicking.ClickingState;
 import interface_adapter.clicking.ClickingViewModel;
+import interface_adapter.home.HomeState;
 import interface_adapter.home.HomeViewModel;
 import interface_adapter.rate_and_comment.CommentState;
 
@@ -33,6 +34,7 @@ public class RandCSuccessSubmitView extends JPanel implements PropertyChangeList
         this.randCSuccessViewModel = randCSuccessViewModel;
         this.clickingViewModel = clickingViewModel;
         this.homeViewModel = homeViewModel;
+        this.randCSuccessViewModel.addPropertyChangeListener(this);
         initUI();
     }
 
@@ -41,6 +43,7 @@ public class RandCSuccessSubmitView extends JPanel implements PropertyChangeList
         setBackground(new Color(245, 245, 245));
 
         // 提示文字
+
         messageLabel = new JLabel(
                 "<html><div style='text-align:center;'>You have submitted the rate and comment for<br>"
                         + "<b>\"" + movieName + "\"</b> successfully.</div></html>",
@@ -107,7 +110,10 @@ public class RandCSuccessSubmitView extends JPanel implements PropertyChangeList
     public void propertyChange(PropertyChangeEvent evt) {
         RandCSuccessState state = (RandCSuccessState) evt.getNewValue();
         movieName = state.getMedianame();
-
+        messageLabel.setText(
+                "<html><div style='text-align:center;'>You have submitted the rate and comment for<br>"
+                        + "<b>\"" + movieName + "\"</b> successfully.</div></html>"
+        );
     }
 
     public String getViewName() {
