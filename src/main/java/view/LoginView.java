@@ -29,6 +29,8 @@ public class LoginView extends JPanel implements ActionListener, PropertyChangeL
 
     private final JButton logIn;
     private final JButton cancel;
+    private final JButton toSignup;
+
     private LoginController loginController = null;
 
     public LoginView(LoginViewModel loginViewModel) {
@@ -45,28 +47,45 @@ public class LoginView extends JPanel implements ActionListener, PropertyChangeL
                 new JLabel("Password"), passwordInputField);
 
         final JPanel buttons = new JPanel();
+
         logIn = new JButton("log in");
         buttons.add(logIn);
+
+        toSignup = new JButton("Go to Sign up");
+        buttons.add(toSignup);
+
         cancel = new JButton("cancel");
         buttons.add(cancel);
 
-        logIn.addActionListener(
-                new ActionListener() {
-                    public void actionPerformed(ActionEvent evt) {
-                        if (evt.getSource().equals(logIn)) {
-                            final LoginState currentState = loginViewModel.getState();
 
-                            loginController.execute(
-                                    currentState.getUsername(),
-                                    currentState.getPassword()
-                            );
-                        }
-                    }
+        // --- LOGIN BUTTON ---
+        logIn.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent evt) {
+                if (evt.getSource().equals(logIn)) {
+                    final LoginState currentState = loginViewModel.getState();
+
+                    loginController.execute(
+                            currentState.getUsername(),
+                            currentState.getPassword()
+                    );
                 }
-        );
+            }
+        });
 
+        // --- CANCEL BUTTON ---
         cancel.addActionListener(this);
 
+        // --- TOSIGNUP BUTTON ---
+        toSignup.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                loginController.switchToSignupView();
+            }
+        });
+
+
+        // Username field updates LoginState.username
         usernameInputField.getDocument().addDocumentListener(new DocumentListener() {
 
             private void documentListenerHelper() {
@@ -93,6 +112,7 @@ public class LoginView extends JPanel implements ActionListener, PropertyChangeL
 
         this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 
+        // Password field updates LoginState.password
         passwordInputField.getDocument().addDocumentListener(new DocumentListener() {
 
             private void documentListenerHelper() {
@@ -126,10 +146,25 @@ public class LoginView extends JPanel implements ActionListener, PropertyChangeL
 
     /**
      * React to a button click that results in evt.
-     * @param evt the ActionEvent to react to
+     * Currently only the Cancel button is wired to this listener.
      */
+    @Override
     public void actionPerformed(ActionEvent evt) {
-        System.out.println("Click " + evt.getActionCommand());
+        if (evt.getSource() == cancel) {
+            JFrame frame = (JFrame) SwingUtilities.getWindowAncestor(this);
+
+            int result = JOptionPane.showConfirmDialog(
+                    frame,
+                    "You are leaving the program now.",
+                    "Confirm Exit",
+                    JOptionPane.OK_CANCEL_OPTION,
+                    JOptionPane.WARNING_MESSAGE
+            );
+
+            if (result == JOptionPane.OK_OPTION) {
+                System.exit(0);
+            }
+        }
     }
 
     @Override
