@@ -1,5 +1,6 @@
 package view;
 
+import interface_adapter.ViewManagerModel;
 import interface_adapter.login.LoginController;
 import interface_adapter.login.LoginState;
 import interface_adapter.login.LoginViewModel;
@@ -12,10 +13,11 @@ import java.awt.event.KeyListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
-public class LoginView extends JPanel implements ActionListener, PropertyChangeListener {
+public class LoginView extends JPanel implements PropertyChangeListener {
     private final String viewName = "log in";
     private final LoginViewModel loginViewModel;
     private final LoginController loginController;
+    private final ViewManagerModel viewManagerModel;
 
     private final JTextField usernameField = new JTextField(15);
     private final JPasswordField passwordField = new JPasswordField(15);
@@ -23,9 +25,10 @@ public class LoginView extends JPanel implements ActionListener, PropertyChangeL
     private final JButton login;
     private final JButton signUp;
 
-    public LoginView(LoginViewModel loginViewModel, LoginController loginController) {
+    public LoginView(LoginViewModel loginViewModel, LoginController loginController, ViewManagerModel viewManagerModel) {
         this.loginViewModel = loginViewModel;
         this.loginController = loginController;
+        this.viewManagerModel = viewManagerModel;
         loginViewModel.addPropertyChangeListener(this);
 
         JLabel title = new JLabel("Log in");
@@ -42,7 +45,7 @@ public class LoginView extends JPanel implements ActionListener, PropertyChangeL
         JPanel buttonPanel = new JPanel();
         login = new JButton("Log in");
         buttonPanel.add(login);
-        signUp = new JButton("Cancel");
+        signUp = new JButton("Sign up");
         buttonPanel.add(signUp);
 
         login.addActionListener(
@@ -64,7 +67,9 @@ public class LoginView extends JPanel implements ActionListener, PropertyChangeL
                 new ActionListener() {
                     @Override
                     public void actionPerformed(ActionEvent e) {
-                        // I need this to direct to the signup view
+                        viewManagerModel.setState("sign up");
+                        viewManagerModel.firePropertyChanged();
+
                     }
                 }
         );
@@ -115,11 +120,6 @@ public class LoginView extends JPanel implements ActionListener, PropertyChangeL
         this.add(buttonPanel);
     }
 
-
-
-    public void actionPerformed(ActionEvent e) {
-        System.out.println("This doesnt really do anything yet");
-    }
 
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
