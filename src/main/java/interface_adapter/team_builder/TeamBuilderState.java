@@ -6,7 +6,7 @@ public class TeamBuilderState {
     private String teamName = "";
     private String teamNameError;
 
-    private Team team;
+    private Team team = new Team("Team 1");
 
     public String getTeamName() {
         return teamName;

@@ -32,8 +32,6 @@ public class TeamBuilderView extends JPanel implements ActionListener, PropertyC
         this.teamBuilderViewModel = teamBuilderViewModel;
         this.teamBuilderViewModel.addPropertyChangeListener(this);
 
-        this.teamBuilderViewModel.getState().setTeam(new Team("Team 1"));
-
         this.viewName = teamBuilderViewModel.getViewName();
 
         final JLabel title = new JLabel(TeamBuilderViewModel.TITLE_LABEL);
@@ -48,17 +46,17 @@ public class TeamBuilderView extends JPanel implements ActionListener, PropertyC
 
         teamDisplayPanel.setLayout(new GridLayout(3, 2, 5, 5));
 
-        DisplayPokemonJPanel teamSlot0 = new DisplayPokemonJPanel();
+        DisplayPokemonInTeamJPanel teamSlot0 = new DisplayPokemonInTeamJPanel();
         teamDisplayPanel.add(teamSlot0);
-        DisplayPokemonJPanel teamSlot1 = new DisplayPokemonJPanel();
+        DisplayPokemonInTeamJPanel teamSlot1 = new DisplayPokemonInTeamJPanel();
         teamDisplayPanel.add(teamSlot1);
-        DisplayPokemonJPanel teamSlot2 = new DisplayPokemonJPanel();
+        DisplayPokemonInTeamJPanel teamSlot2 = new DisplayPokemonInTeamJPanel();
         teamDisplayPanel.add(teamSlot2);
-        DisplayPokemonJPanel teamSlot3 = new DisplayPokemonJPanel();
+        DisplayPokemonInTeamJPanel teamSlot3 = new DisplayPokemonInTeamJPanel();
         teamDisplayPanel.add(teamSlot3);
-        DisplayPokemonJPanel teamSlot4 = new DisplayPokemonJPanel();
+        DisplayPokemonInTeamJPanel teamSlot4 = new DisplayPokemonInTeamJPanel();
         teamDisplayPanel.add(teamSlot4);
-        DisplayPokemonJPanel teamSlot5 = new DisplayPokemonJPanel();
+        DisplayPokemonInTeamJPanel teamSlot5 = new DisplayPokemonInTeamJPanel();
         teamDisplayPanel.add(teamSlot5);
 
         setTeamSlotBorders();
@@ -92,11 +90,11 @@ public class TeamBuilderView extends JPanel implements ActionListener, PropertyC
     }
 
     private void updateSlotDisplays() {
-        for(int i = 0; i < teamDisplayPanel.getComponentCount(); i++) {
-            DisplayPokemonJPanel component = (DisplayPokemonJPanel) teamDisplayPanel.getComponent(i);
+        for (int i = 0; i < teamDisplayPanel.getComponentCount(); i++) {
+            DisplayPokemonInTeamJPanel component = (DisplayPokemonInTeamJPanel) teamDisplayPanel.getComponent(i);
             Team team = teamBuilderViewModel.getState().getTeam();
             if (team != null) {
-                component.setPokemon(team.getPokemon(i), 94, 94);
+                component.setPokemon(team.getPokemon(i), 150, 150);
             }
         }
         teamDisplayPanel.revalidate();
@@ -104,31 +102,39 @@ public class TeamBuilderView extends JPanel implements ActionListener, PropertyC
     }
 
     private void addTeamSlotMouseListeners() {
-        for(int i = 0; i < teamDisplayPanel.getComponentCount(); i++) {
+        for (int i = 0; i < teamDisplayPanel.getComponentCount(); i++) {
             final int index = i;
             JPanel component = (JPanel) teamDisplayPanel.getComponent(i);
             component.addMouseListener(
-                    new  MouseListener() {
+                    new MouseListener() {
                         @Override
-                        public void mouseClicked(MouseEvent e) {}
+                        public void mouseClicked(MouseEvent e) {
+                        }
+
                         @Override
                         public void mousePressed(MouseEvent evt) {
                             teamBuilderController.switchToPokemonLookupView(index);
                             System.out.println("Pokemon Slot " + index + " clicked");
                         }
+
                         @Override
-                        public void mouseReleased(MouseEvent e) {}
+                        public void mouseReleased(MouseEvent e) {
+                        }
+
                         @Override
-                        public void mouseEntered(MouseEvent e) {}
+                        public void mouseEntered(MouseEvent e) {
+                        }
+
                         @Override
-                        public void mouseExited(MouseEvent e) {}
+                        public void mouseExited(MouseEvent e) {
+                        }
                     }
             );
         }
     }
 
     private void setTeamSlotBorders() {
-        for(int i = 0; i < teamDisplayPanel.getComponentCount(); i++) {
+        for (int i = 0; i < teamDisplayPanel.getComponentCount(); i++) {
             JPanel component = (JPanel) teamDisplayPanel.getComponent(i);
             component.setBorder(BorderFactory.createLineBorder(Color.GRAY));
         }
