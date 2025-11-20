@@ -42,7 +42,7 @@ public class DashboardView extends JFrame {
         this.username = username;
         this.expenseRepository = expenseRepository;
 
-        setTitle("Dashboard");
+        setTitle("FinWise");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(800, 500);
         setLocationRelativeTo(null);

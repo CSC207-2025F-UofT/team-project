@@ -51,7 +51,7 @@ public class StockSearchView extends JFrame {
         this.api = new AlphaVantageAPI();
         this.username = username;
 
-        setTitle("FinWise — Live Stock Prices");
+        setTitle("Live Stock Prices");
         setSize(1000, 700);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
@@ -117,11 +117,6 @@ public class StockSearchView extends JFrame {
     }
 
     private void initUI(String username) {
-        JPanel topBar = new JPanel(new BorderLayout());
-        JPanel leftTop = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        userLabel.setText("Logged in as: " + username);
-        leftTop.add(userLabel);
-        topBar.add(leftTop, BorderLayout.WEST);
         JPanel searchCard = new JPanel();
         searchCard.setLayout(new BoxLayout(searchCard, BoxLayout.Y_AXIS));
         searchCard.setBorder(BorderFactory.createEmptyBorder(12, 12, 12, 12));
@@ -199,7 +194,6 @@ public class StockSearchView extends JFrame {
         statusBar.setBorder(BorderFactory.createEmptyBorder(4, 12, 4, 12));
         statusBar.add(statusLabel, BorderLayout.WEST);
         setLayout(new BorderLayout());
-        add(topBar, BorderLayout.NORTH);
         add(new JScrollPane(centerPanel), BorderLayout.CENTER);
         add(statusBar, BorderLayout.SOUTH);
     }
