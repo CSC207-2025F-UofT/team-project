@@ -16,10 +16,10 @@ public class HomescreenPresenter implements HomescreenOutputBoundary {
     @Override
     public void prepareSuccessView(HomescreenOutputData outputData) {
         //navigate to the target view (when views exist)
-        System.out.println("Would navigate to: " + outputData.getViewToNavigateTo());
+        System.out.println("Navigated to: " + outputData.getViewToNavigateTo());
         //uncomment when views exist:
-        // viewManagerModel.setState(outputData.getViewToNavigateTo());
-        // viewManagerModel.firePropertyChanged();
+        viewManagerModel.setState(outputData.getViewToNavigateTo());
+        viewManagerModel.firePropertyChange();
     }
 
     @Override

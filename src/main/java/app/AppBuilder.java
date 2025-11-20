@@ -1,22 +1,26 @@
 package app;
 
 import data_access.FileUserDataAccessObject;
+import data_access.JsonLandmarkDataAccessObject;
 import entity.UserFactory;
 import interface_adapter.ViewManagerModel;
-import interface_adapter.blank.BlankViewModel;
+import interface_adapter.browselandmarks.BrowseLandmarksController;
+import interface_adapter.browselandmarks.BrowseLandmarksPresenter;
+import interface_adapter.browselandmarks.BrowseLandmarksViewModel;
 import interface_adapter.login.LoginController;
 import interface_adapter.login.LoginPresenter;
 import interface_adapter.login.LoginViewModel;
 import interface_adapter.signup.SignupController;
 import interface_adapter.signup.SignupPresenter;
 import interface_adapter.signup.SignupViewModel;
+import use_case.browselandmarks.BrowseLandmarksInteractor;
 import use_case.login.LoginInputBoundary;
 import use_case.login.LoginInteractor;
 import use_case.login.LoginOutputBoundary;
 import use_case.signup.SignupInputBoundary;
 import use_case.signup.SignupInteractor;
 import use_case.signup.SignupOutputBoundary;
-import view.BlankView;
+import view.BrowseLandmarksView;
 import view.LoginView;
 import view.SignupView;
 import view.ViewManager;
@@ -50,12 +54,17 @@ public class AppBuilder {
     // Views & ViewModels
     private LoginViewModel loginViewModel;
     private LoginView loginView;
-    private BlankViewModel blankViewModel;
-    private BlankView blankView;
+    private BrowseLandmarksViewModel browseLandmarksViewModel;
+    private BrowseLandmarksView browseLandmarksView;
     private SignupViewModel signupViewModel;
     private SignupView signupView;
     private HomescreenViewModel homescreenViewModel;
     private HomescreenView homescreenView;
+
+    private BrowseLandmarksPresenter browseLandmarksPresenter;
+    private JsonLandmarkDataAccessObject landmarkDAO;
+    private BrowseLandmarksInteractor browseLandmarksInteractor;
+    private BrowseLandmarksController browseLandmarksController;
 
     public AppBuilder() {
         cardPanel.setLayout(cardLayout);
@@ -77,9 +86,13 @@ public class AppBuilder {
     }
 
     public AppBuilder addBlankView() {
-        blankViewModel = new BlankViewModel();
-        blankView = new BlankView(blankViewModel);
-        cardPanel.add(blankView, blankView.getViewName());
+        browseLandmarksViewModel = new BrowseLandmarksViewModel();
+        browseLandmarksPresenter = new BrowseLandmarksPresenter(browseLandmarksViewModel);
+        landmarkDAO = new JsonLandmarkDataAccessObject("minimal_landmarks.json");
+        browseLandmarksInteractor = new BrowseLandmarksInteractor(landmarkDAO, browseLandmarksPresenter);
+        browseLandmarksController =  new BrowseLandmarksController(browseLandmarksInteractor);
+        browseLandmarksView = new BrowseLandmarksView(browseLandmarksViewModel, browseLandmarksController, viewManagerModel);
+        cardPanel.add(browseLandmarksView, browseLandmarksView.getViewName());
         return this;
     }
 
