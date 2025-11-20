@@ -1,7 +1,7 @@
 package app;
 
 import data_access.FileUserDataAccessObject;
-import data_access.JsonFileLandmarkDataAccessObject;
+import data_access.JsonLandmarkDataAccessObject;
 import data_access.LandmarkDataAccessInterface;
 import data_access.UserDataAccessInterface;
 import entity.UserFactory;
@@ -57,7 +57,7 @@ public class AppBuilder {
     private final ViewManager viewManager =
             new ViewManager(cardPanel, cardLayout, viewManagerModel);
 
-    private LandmarkDataAccessInterface landmarkDAO = new JsonFileLandmarkDataAccessObject("minimal_landmarks.json");
+    private LandmarkDataAccessInterface landmarkDAO = new JsonLandmarkDataAccessObject("minimal_landmarks.json");
 
     private final UserDataAccessInterface userDataAccessObject =
             new FileUserDataAccessObject("users.json", userFactory, landmarkDAO);
