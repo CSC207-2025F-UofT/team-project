@@ -104,6 +104,9 @@ public class AccountDetailsView extends JPanel implements ActionListener, Proper
             logoutController.execute();
         } else if (evt.getSource().equals(changePasswordButton) && changePasswordController != null) {
 
+            // Get the user's email
+            final String userEmail = loggedInViewModel.getState().getEmail();
+
             // Get the current username
             final String currentUsername = loggedInViewModel.getState().getUsername();
 
@@ -117,6 +120,7 @@ public class AccountDetailsView extends JPanel implements ActionListener, Proper
             // Execute the use case if a password was entered
             if (newPassword != null) {
                 changePasswordController.execute(
+                        userEmail,
                         currentUsername,
                         newPassword
                 );

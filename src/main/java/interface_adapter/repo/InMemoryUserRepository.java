@@ -1,6 +1,6 @@
 package interface_adapter.repo;
 
-import goc.chat.entity.User;
+import entity.User;
 import use_case.ports.UserRepository;
 
 import java.util.HashMap;
@@ -12,11 +12,6 @@ public class InMemoryUserRepository implements UserRepository {
     private final Map<String, User> users = new HashMap<>();
 
     @Override
-    public Optional<User> findById(String id) {
-        return Optional.ofNullable(users.get(id));
-    }
-
-    @Override
     public Optional<User> findByEmail(String email) {
         return users.values().stream()
                 .filter(u -> u.getEmail().equalsIgnoreCase(email))
@@ -25,7 +20,7 @@ public class InMemoryUserRepository implements UserRepository {
 
     @Override
     public User save(User user) {
-        users.put(user.getId(), user);
+        users.put(user.getEmail(), user);
         return user;
     }
 }

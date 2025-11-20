@@ -15,11 +15,12 @@ public class ChangePasswordController {
 
     /**
      * Executes the Change Password Use Case.
+     * @param email the email of the user
      * @param password the new password
      * @param username the user whose password to change
      */
-    public void execute(String password, String username) {
-        final ChangePasswordInputData changePasswordInputData = new ChangePasswordInputData(username, password);
+    public void execute(String email, String password, String username) {
+        final ChangePasswordInputData changePasswordInputData = new ChangePasswordInputData(email, password,username);
 
         userChangePasswordUseCaseInteractor.execute(changePasswordInputData);
     }

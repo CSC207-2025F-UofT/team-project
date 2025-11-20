@@ -1,7 +1,8 @@
 package app;
 
-import data_access.FileUserDataAccessObject;
+import data_access.DBUserDataAccessObject;
 import entity.UserFactory;
+import entity.User;
 import interface_adapter.ViewManagerModel;
 import interface_adapter.logged_in.ChangePasswordController;
 import interface_adapter.logged_in.ChangePasswordPresenter;
@@ -92,11 +93,8 @@ public class AppBuilder {
     // set which data access implementation to use, can be any
     // of the classes from the data_access package
 
-    // DAO version using local file storage
-    final FileUserDataAccessObject userDataAccessObject = new FileUserDataAccessObject("users.csv", userFactory);
-
     // DAO version using a shared external database
-    // final DBUserDataAccessObject userDataAccessObject = new DBUserDataAccessObject(userFactory);
+    final DBUserDataAccessObject userDataAccessObject = new DBUserDataAccessObject(userFactory);
 
     private SignupView signupView;
     private SignupViewModel signupViewModel;
@@ -136,10 +134,9 @@ public class AppBuilder {
         this.messageRepository = repo;
 
         // Use repo to store
-        goc.chat.entity.User me =
-                new goc.chat.entity.User("user-1", "demo", "demo@example.com", "hash");
+        User me = userFactory.create("user-1", "demo", "demo@example.com");
         me = userRepository.save(me);
-        messagingUserId = me.getId();
+        messagingUserId = me.getEmail();
 
         entity.Chat c = new entity.Chat("chat-1");
         c.addParticipant(messagingUserId);

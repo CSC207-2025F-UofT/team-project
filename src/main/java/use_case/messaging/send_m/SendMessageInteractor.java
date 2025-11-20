@@ -2,7 +2,7 @@ package use_case.messaging.send_m;
 
 import entity.Chat;
 import entity.Message;
-import goc.chat.entity.User;
+import entity.User;
 import use_case.messaging.ChatMessageDto;
 import use_case.ports.ChatRepository;
 import use_case.ports.MessageRepository;
@@ -41,7 +41,7 @@ public class SendMessageInteractor implements SendMessageInputBoundary {
             return;
         }
 
-        Optional<User> senderOpt = userRepository.findById(senderId);
+        Optional<User> senderOpt = userRepository.findByEmail(senderId);
         if (senderOpt.isEmpty()) {
             presenter.prepareFailView("Sender not found: " + senderId);
             return;
@@ -57,7 +57,7 @@ public class SendMessageInteractor implements SendMessageInputBoundary {
 
         Message saved = messageRepository.save(message);
 
-        String senderName = senderOpt.get().getUsername();
+        String senderName = senderOpt.get().getName();
         ChatMessageDto dto = new ChatMessageDto(
                 saved.getId(),
                 saved.getSenderUserId(),
