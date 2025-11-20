@@ -1,4 +1,4 @@
-// src/java/data_access/JsonLandmarkDataAccessObject.java
+// src/java/data_access/JsonFileLandmarkDataAccessObject.java
 package data_access;
 
 import entity.Landmark;
@@ -14,11 +14,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
-public class JsonLandmarkDataAccessObject implements LandmarkDataAccessInterface {
+public class JsonFileLandmarkDataAccessObject implements LandmarkDataAccessInterface {
 
     private final String filePath;   // absolute or relative path
 
-    public JsonLandmarkDataAccessObject(String filePath) {
+    public JsonFileLandmarkDataAccessObject(String filePath) {
         this.filePath = filePath;   // e.g. "minimal_landmarks.json"
     }
 
@@ -59,5 +59,19 @@ public class JsonLandmarkDataAccessObject implements LandmarkDataAccessInterface
         }
 
         return result;
+    }
+
+    @Override
+    public boolean existsByName(String landmarkName) {
+        if (landmarkName == null) {
+            return false;
+        }
+
+        for (Landmark lm : getLandmarks()) {
+            if (lm.getLandmarkName().equalsIgnoreCase(landmarkName)) {
+                return true;
+            }
+        }
+        return false;
     }
 }

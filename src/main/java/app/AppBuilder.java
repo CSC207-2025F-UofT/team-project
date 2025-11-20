@@ -1,7 +1,7 @@
 package app;
 
 import data_access.FileUserDataAccessObject;
-import data_access.JsonLandmarkDataAccessObject;
+import data_access.JsonFileLandmarkDataAccessObject;
 import entity.UserFactory;
 import interface_adapter.ViewManagerModel;
 import interface_adapter.browselandmarks.BrowseLandmarksController;
@@ -62,7 +62,7 @@ public class AppBuilder {
     private HomescreenView homescreenView;
 
     private BrowseLandmarksPresenter browseLandmarksPresenter;
-    private JsonLandmarkDataAccessObject landmarkDAO;
+    private JsonFileLandmarkDataAccessObject landmarkDAO;
     private BrowseLandmarksInteractor browseLandmarksInteractor;
     private BrowseLandmarksController browseLandmarksController;
 
@@ -88,7 +88,7 @@ public class AppBuilder {
     public AppBuilder addBrowseLandmarksView() {
         browseLandmarksViewModel = new BrowseLandmarksViewModel();
         browseLandmarksPresenter = new BrowseLandmarksPresenter(browseLandmarksViewModel);
-        landmarkDAO = new JsonLandmarkDataAccessObject("minimal_landmarks.json");
+        landmarkDAO = new JsonFileLandmarkDataAccessObject("minimal_landmarks.json");
         browseLandmarksInteractor = new BrowseLandmarksInteractor(landmarkDAO, browseLandmarksPresenter);
         browseLandmarksController =  new BrowseLandmarksController(browseLandmarksInteractor);
         browseLandmarksView = new BrowseLandmarksView(browseLandmarksViewModel, browseLandmarksController, viewManagerModel);
