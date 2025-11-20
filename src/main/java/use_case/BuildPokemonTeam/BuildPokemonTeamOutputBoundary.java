@@ -15,4 +15,9 @@ public interface BuildPokemonTeamOutputBoundary {
      * @param errorMessage the explanation of the failure
      */
     void prepareFailView(String errorMessage);
+
+    /**
+     * Switches to PokemonLookup View
+     */
+    void switchToPokemonLookupView(int index);
 }

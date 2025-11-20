@@ -45,7 +45,7 @@ public class AppBuilder {
     public AppBuilder addPokemonLookupView() {
         pokemonLookupViewModel = new PokemonLookupViewModel();
         pokemonLookupView = new PokemonLookupView(pokemonLookupViewModel);
-        cardPanel.add(pokemonLookupView, pokemonLookupView.getName());
+        cardPanel.add(pokemonLookupView, pokemonLookupView.getViewName());
         return this;
     }
 
@@ -62,13 +62,13 @@ public class AppBuilder {
     public AppBuilder addTeamBuilderView() {
         teamBuilderViewModel = new TeamBuilderViewModel();
         teamBuilderView = new TeamBuilderView(teamBuilderViewModel);
-        cardPanel.add(teamBuilderView, teamBuilderView.getName());
+        cardPanel.add(teamBuilderView, teamBuilderView.getViewName());
         return this;
     }
 
     public AppBuilder addTeamBuilderUseCase() {
         final BuildPokemonTeamOutputBoundary  buildPokemonTeamOutputBoundary = new TeamBuilderPresenter(
-                teamBuilderViewModel, viewManagerModel);
+                teamBuilderViewModel, pokemonLookupViewModel, viewManagerModel);
         final BuildPokemonTeamInputBoundary buildPokemonTeamInteractor =
                 new BuildPokemonTeamInteractor(buildPokemonTeamDataAccessObject, buildPokemonTeamOutputBoundary, EmptyPokemonFactory.create());
         TeamBuilderController controller = new  TeamBuilderController(buildPokemonTeamInteractor);

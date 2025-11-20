@@ -36,4 +36,8 @@ public class TeamBuilderController {
         userTeamBuilderUseCaseInteractor.saveTeam(buildPokemonTeamInputData);
     }
 
+    public void switchToPokemonLookupView(int index) {
+        userTeamBuilderUseCaseInteractor.switchToPokemonLookupView(index);
+    }
+
 }

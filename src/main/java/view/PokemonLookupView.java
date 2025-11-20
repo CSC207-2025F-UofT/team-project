@@ -19,7 +19,7 @@ import java.io.IOException;
 
 public class PokemonLookupView extends JPanel implements ActionListener, PropertyChangeListener {
 
-    private final String viewName = "PokemonLookupView";
+    private final String viewName;
     private final PokemonLookupViewModel pokemonLookupViewModel;
 
     private final JTextField pokemonNameInputField = new JTextField(15);
@@ -31,6 +31,8 @@ public class PokemonLookupView extends JPanel implements ActionListener, Propert
     public PokemonLookupView(PokemonLookupViewModel pokemonLookupViewModel) {
         this.pokemonLookupViewModel = pokemonLookupViewModel;
         this.pokemonLookupViewModel.addPropertyChangeListener(this);
+
+        this.viewName = pokemonLookupViewModel.getViewName();
 
         final JLabel title = new JLabel(PokemonLookupViewModel.TITLE_LABEL);
         title.setAlignmentX(Component.CENTER_ALIGNMENT);
