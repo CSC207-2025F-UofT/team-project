@@ -240,8 +240,8 @@ public class AppBuilder {
 
 
         SwingUtilities.invokeLater(() -> {
-            if (clickingView != null) {
-                viewManagerModel.setState(clickingView.getViewName());
+            if (rateAndCommentView != null) {
+                viewManagerModel.setState(rateAndCommentView.getViewName());
                 viewManagerModel.firePropertyChange();
             }
         });
