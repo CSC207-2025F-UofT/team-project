@@ -74,4 +74,15 @@ public class JsonFileLandmarkDataAccessObject implements LandmarkDataAccessInter
         }
         return false;
     }
+
+    @Override
+    public Landmark findByName(String name) {
+        for (Landmark lm : getLandmarks()) {
+            if (lm.getLandmarkName().equalsIgnoreCase(name)) {
+                return lm;
+            }
+        }
+        throw new RuntimeException("Landmark not found: " + name);
+    }
+
 }
