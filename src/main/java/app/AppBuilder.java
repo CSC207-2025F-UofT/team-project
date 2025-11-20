@@ -49,12 +49,12 @@ public class AppBuilder {
     private final ViewManager viewManager = new ViewManager(cardPanel, cardLayout, viewManagerModel);
 
     // DAO version using local csv file storage
-//    private final UserDataAccessInterface userDataAccessObject =
-//            new FileUserDataAccessObject("users.csv", userFactory);
+    private final UserDataAccessInterface userDataAccessObject =
+            new FileUserDataAccessObject("users.csv", userFactory);
 
     // DAO version using local json file storage
-    private final UserDataAccessInterface userDataAccessObject =
-            new JSONFileUserDataAccessObject("users.json");
+//    private final UserDataAccessInterface userDataAccessObject =
+//            new JSONFileUserDataAccessObject("users.json");
 
     // Views & ViewModels
     private LoginViewModel loginViewModel;
