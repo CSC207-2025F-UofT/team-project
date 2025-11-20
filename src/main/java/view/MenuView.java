@@ -46,7 +46,10 @@ public class MenuView extends JPanel implements ActionListener, PropertyChangeLi
 
         // Initialize the new buttons and add them into a JPanel
         final JPanel buttons = new JPanel();
-        rate = new JButton("Rate"); star1 = new JRadioButton("1"); star2 = new JRadioButton("2");
+        rate = new JButton("Rate");
+        rate.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        star1 = new JRadioButton("1"); star2 = new JRadioButton("2");
         star3 = new JRadioButton("3"); star4 = new JRadioButton("4"); star5 = new JRadioButton("5");
         final ButtonGroup group = new ButtonGroup();
         group.add(star1); group.add(star2); group.add(star3); group.add(star4); group.add(star5);
