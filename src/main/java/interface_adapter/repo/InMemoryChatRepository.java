@@ -3,23 +3,25 @@ package interface_adapter.repo;
 import entity.Chat;
 import use_case.ports.ChatRepository;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 public class InMemoryChatRepository implements ChatRepository {
 
     private final Map<String, Chat> chats = new HashMap<>();
 
     @Override
-    public Optional<Chat> findById(String id) {
-        return Optional.ofNullable(chats.get(id));
-    }
-
-    @Override
     public Chat save(Chat chat) {
         chats.put(chat.getId(), chat);
         return chat;
     }
-}
 
+    @Override
+    public Optional<Chat> findById(String chatId) {
+        return Optional.ofNullable(chats.get(chatId));
+    }
+
+    @Override
+    public java.util.List<Chat> findAll() {
+        return new java.util.ArrayList<>(chats.values());
+    }
+}

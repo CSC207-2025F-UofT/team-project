@@ -283,7 +283,9 @@ public class AppBuilder {
                 viewManagerModel,
                 searchUserViewModel,
                 chatView,              // Make sure chatView exists (call addChatUseCase first)
-                groupChatViewModel     // Pass the groupChatViewModel
+                groupChatViewModel,     // Pass the groupChatViewModel
+                chatRepository,
+                userRepository
         );
         cardPanel.add(searchUserView, searchUserView.getViewName());
         return this;

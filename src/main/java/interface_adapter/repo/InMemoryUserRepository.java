@@ -1,5 +1,6 @@
 package interface_adapter.repo;
 
+import entity.Chat;
 import goc.chat.entity.User;
 import use_case.ports.UserRepository;
 import use_case.search_user.SearchUserDataAccessInterface;  // Add this import

@@ -23,4 +23,3 @@ public class Chat {
     public void addMessage(String messageId) { messageIds.add(messageId); }
     public void setGroupName(String groupName) {this.groupName = groupName; }
 }
-

@@ -14,6 +14,12 @@ import interface_adapter.groupchat.GroupChatViewModel;
 import interface_adapter.user_search.SearchUserController;
 import interface_adapter.user_search.SearchUserViewModel;
 import interface_adapter.user_search.SearchUserState;
+import use_case.ports.ChatRepository;
+import use_case.ports.UserRepository;
+import entity.Chat;
+import goc.chat.entity.User;
+import java.util.Optional;
+import java.util.UUID;
 
 import java.util.List;
 
@@ -25,6 +31,8 @@ public class SearchUserView extends JPanel implements ActionListener, PropertyCh
     private final SearchUserViewModel searchUserViewModel;
     private final GroupChatViewModel groupChatViewModel;  // Fixed: added semicolon
     private final ChatView chatView;
+    private final ChatRepository chatRepository;
+    private final UserRepository userRepository;
 
     private SearchUserController searchUserController;
     private CreateGroupChatController createGroupChatController;
@@ -41,7 +49,8 @@ public class SearchUserView extends JPanel implements ActionListener, PropertyCh
 
 
     public SearchUserView(ViewManagerModel viewManagerModel, SearchUserViewModel searchUserViewModel,
-                          ChatView chatView, GroupChatViewModel groupChatViewModel) {
+                          ChatView chatView, GroupChatViewModel groupChatViewModel,
+                          ChatRepository chatRepository, UserRepository userRepository) {
 
         this.viewManagerModel = viewManagerModel;
         this.searchUserViewModel = searchUserViewModel;
@@ -49,6 +58,8 @@ public class SearchUserView extends JPanel implements ActionListener, PropertyCh
         this.chatView = chatView;
         this.searchUserViewModel.addPropertyChangeListener(this);
         this.groupChatViewModel.addPropertyChangeListener(this);
+        this.chatRepository = chatRepository;
+        this.userRepository = userRepository;
 
         this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
         this.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
@@ -166,14 +177,52 @@ public class SearchUserView extends JPanel implements ActionListener, PropertyCh
     }
 
     private void startIndividualChat(String username) {
-        // Set the chat partner in the ChatView before navigating
-        if (chatView != null) {
-            chatView.setChatPartner(username);
+        String currentUserId = "user-1"; // TODO: Get from session
+
+        // Find the target user
+        Optional<User> targetUserOpt = userRepository.findByUsername(username);
+        if (targetUserOpt.isEmpty()) {
+            JOptionPane.showMessageDialog(this,
+                    "User not found: " + username,
+                    "Error",
+                    JOptionPane.ERROR_MESSAGE);
+            return;
         }
 
-        // Navigate to the ChatView
+        String targetUserId = targetUserOpt.get().getId();
+
+        // Find existing chat or create new one
+        String chatId = findOrCreateChat(currentUserId, targetUserId);
+
+        // Set the chat context with the unique chat ID
+        if (chatView != null) {
+            chatView.setChatContext(chatId, currentUserId, username, false);
+        }
+
+        // Navigate to chat view
         viewManagerModel.setState("chat");
         viewManagerModel.firePropertyChange();
+    }
+
+    private String findOrCreateChat(String userId1, String userId2) {
+        // Find existing chat with both participants (and only these two)
+        java.util.List<Chat> allChats = chatRepository.findAll();
+
+        for (Chat chat : allChats) {
+            java.util.List<String> participants = chat.getParticipantUserIds();  // Changed from getParticipants()
+            if (participants.size() == 2 &&
+                    participants.contains(userId1) &&
+                    participants.contains(userId2)) {
+                return chat.getId();
+            }
+        }
+
+        // No existing chat found, create new one
+        Chat newChat = new Chat(UUID.randomUUID().toString());
+        newChat.addParticipant(userId1);
+        newChat.addParticipant(userId2);
+        Chat saved = chatRepository.save(newChat);
+        return saved.getId();
     }
 
     @Override
