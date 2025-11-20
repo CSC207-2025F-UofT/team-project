@@ -2,6 +2,7 @@ package app;
 
 import data_access.FileUserDataAccessObject;
 import data_access.JsonFileLandmarkDataAccessObject;
+import data_access.*;
 import entity.UserFactory;
 import interface_adapter.ViewManagerModel;
 import interface_adapter.browselandmarks.BrowseLandmarksController;
@@ -47,9 +48,13 @@ public class AppBuilder {
     private final ViewManagerModel viewManagerModel = new ViewManagerModel();
     private final ViewManager viewManager = new ViewManager(cardPanel, cardLayout, viewManagerModel);
 
-    // DAO version using local file storage
-    private final FileUserDataAccessObject userDataAccessObject =
-            new FileUserDataAccessObject("users.csv", userFactory);
+    // DAO version using local csv file storage
+//    private final UserDataAccessInterface userDataAccessObject =
+//            new FileUserDataAccessObject("users.csv", userFactory);
+
+    // DAO version using local json file storage
+    private final UserDataAccessInterface userDataAccessObject =
+            new JSONFileUserDataAccessObject("users.json");
 
     // Views & ViewModels
     private LoginViewModel loginViewModel;
