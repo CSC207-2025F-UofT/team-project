@@ -30,6 +30,11 @@ public class MenuView extends JPanel implements ActionListener, PropertyChangeLi
     private final JList<String> menuItems = new JList<>();
     private final JScrollPane scrollPane = new JScrollPane(menuItems);
 
+    // Use case 3 - menu search
+    private interface_adaptor.Menu.MenuSearchController menuSearchController;
+    private final JTextField searchField = new JTextField(15);
+    private final JButton searchButton = new JButton("Search");
+
 
     public MenuView(MenuViewModel menuViewModel){
         this.menuViewModel = menuViewModel;
@@ -76,7 +81,7 @@ public class MenuView extends JPanel implements ActionListener, PropertyChangeLi
                         final MenuState currentState = menuViewModel.getState();
 
                         // Important to remove this!!!
-                        currentState.setRestaurant("1012301023102301023");
+
 
                         try {
                             starRateController.execute(userInputRating, currentState.getRestaurantId());
@@ -89,9 +94,35 @@ public class MenuView extends JPanel implements ActionListener, PropertyChangeLi
                 }
         );
 
+        searchButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent evt) {
+                if (menuSearchController == null) {
+                    System.out.println("menuSearchController is null");
+                    return;
+                }
+                MenuState currState = menuViewModel.getState();
+                String restaurantID = currState.getRestaurantId();
+                String query = searchField.getText();
+                System.out.println("Search clicked, restaurantId=" + restaurantID + ", query=" + query);
+                menuSearchController.execute(restaurantID, query);
+            }
+        });
+
+        // Search panel (Use case 3)
+        final JPanel searchPanel = new JPanel();
+        searchPanel.add(new JLabel("Search item:"));
+        searchPanel.add(searchField);
+        searchPanel.add(searchButton);
+
         this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
-        this.add(title); this.add(restaurantInfo); this.add(scrollPane); this.add(buttons);
-        this.add(averageRatingField); this.add(rate);
+        this.add(title);
+        this.add(restaurantInfo);
+        this.add(searchPanel);
+        this.add(scrollPane);
+        this.add(buttons);
+        this.add(averageRatingField);
+        this.add(rate);
 
     }
 
@@ -110,10 +141,28 @@ public class MenuView extends JPanel implements ActionListener, PropertyChangeLi
         averageRatingField.setText("Average Rating: "+String.valueOf(state.getRating()));
         restaurantName.setText(state.getName());
         address.setText(state.getAddress());
+
+        java.util.ArrayList<entity.MenuItem> menu = state.getMenuList();
+        DefaultListModel<String> listModel = new DefaultListModel<>();
+
+        if (menu != null) {
+            for (entity.MenuItem item : menu) {
+                listModel.addElement(item.getName() + " - $" + item.getPrice()
+                + " | " + item.getDescription());
+            }
+        }
+        menuItems.setModel(listModel);
     }
     public String getViewName() {
         return viewName;
     }
 
     public void setStarRateController(StarRateController rateController){this.starRateController = rateController;}
+
+    public void setMenuSearchController(interface_adaptor.Menu.MenuSearchController menuSearchController) {
+        this.menuSearchController = menuSearchController;
+    }
+
 }
+
+
