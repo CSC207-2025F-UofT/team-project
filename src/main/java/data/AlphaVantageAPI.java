@@ -11,9 +11,11 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 
 public class AlphaVantageAPI {
-    private static final String API_KEY = "9P17BCLZ42787NSY";
+    private static final String API_KEY = "KKRO8T6G0YMWYGRT";
     // alternative : JTSZQWNFASUDRTW5 (hhc)
     // daily limit : 25
     private static final String BASE_URL = "https://www.alphavantage.co/query";
@@ -131,11 +133,11 @@ public class AlphaVantageAPI {
             case "1D":
                 function = "TIME_SERIES_INTRADAY&interval=5min";
                 break;
-            case "1W":
+            case "5D":
             case "1M":
                 function = "TIME_SERIES_DAILY";
                 break;
-            case "3M":
+            case "6M":
             case "1Y":
                 function = "TIME_SERIES_WEEKLY";
                 break;
@@ -180,8 +182,49 @@ public class AlphaVantageAPI {
             for (Map.Entry<String, com.google.gson.JsonElement> entry : timeSeries.entrySet()) {
                 String date = entry.getKey();
                 JsonObject values = entry.getValue().getAsJsonObject();
+
+                double open  = Double.parseDouble(values.get("1. open").getAsString());
+                double high  = Double.parseDouble(values.get("2. high").getAsString());
+                double low   = Double.parseDouble(values.get("3. low").getAsString());
                 double close = Double.parseDouble(values.get("4. close").getAsString());
-                data.add(new StockPriceData(date, close));
+
+                data.add(new StockPriceData(date, close, high, low));
+            }
+
+            // Filter by interval length (except for intraday 1D which uses timestamps)
+            if (!"1D".equals(interval)) {
+                LocalDate today = LocalDate.now();
+                LocalDate cutoff = null;
+
+                switch (interval) {
+                    case "5D":
+                        // 5 trading days ≈ last 7 calendar days
+                        cutoff = today.minusDays(7);
+                        break;
+                    case "1M":
+                        cutoff = today.minusMonths(1);
+                        break;
+                    case "6M":
+                        cutoff = today.minusMonths(6);
+                        break;
+                    case "1Y":
+                        cutoff = today.minusYears(1);
+                        break;
+                    case "5Y":
+                        cutoff = today.minusYears(5);
+                        break;
+                    default:
+                        break;
+                }
+
+                if (cutoff != null) {
+                    final LocalDate cutoffDate = cutoff;
+                    final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+                    data.removeIf(p -> {
+                        LocalDate pointDate = LocalDate.parse(p.getDate(), formatter);
+                        return pointDate.isBefore(cutoffDate);
+                    });
+                }
             }
 
             // Sort by date ascending
@@ -263,14 +306,35 @@ public class AlphaVantageAPI {
 
     public static class StockPriceData {
         private final String date;
-        private final double price;
+        private final double close;
+        private final double high;
+        private final double low;
 
-        public StockPriceData(String date, double price) {
+        /**
+         * Full constructor using close, high, and low.
+         */
+        public StockPriceData(String date, double close, double high, double low) {
             this.date = date;
-            this.price = price;
+            this.close = close;
+            this.high = high;
+            this.low = low;
+        }
+
+        /**
+         * Backward-compatible constructor that only specifies close.
+         * High/low default to the close price.
+         */
+        public StockPriceData(String date, double close) {
+            this(date, close, close, close);
         }
 
         public String getDate() { return date; }
-        public double getPrice() { return price; }
+
+        /** Close price (used as the plotted value in the line chart). */
+        public double getPrice() { return close; }
+
+        public double getClose() { return close; }
+        public double getHigh() { return high; }
+        public double getLow()  { return low; }
     }
 }
