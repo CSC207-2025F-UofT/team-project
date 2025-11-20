@@ -1,17 +1,18 @@
 package entity;
 
+import java.sql.Array;
+import java.util.ArrayList;
 import java.util.List;
 
 public class User {
     private final String username;
     private String password;
-    private final List<EventList> eventLists;
+    private final List<EventList> eventLists = new ArrayList<>();
     private final EventList masterList = new EventList("master_list", "Master List");
 
-    public User(String username, String firstName, String lastName, String password, List<EventList> eventLists) {
+    public User(String username, String password) {
         this.username = username;
         this.password = password;
-        this.eventLists = eventLists;
     }
 
     // Getters

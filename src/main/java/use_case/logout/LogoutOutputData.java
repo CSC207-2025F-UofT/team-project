@@ -1,12 +1,12 @@
 package use_case.logout;
 
-public class LogoutOutputData {
-    private final String username;
+import entity.User;
 
-    public LogoutOutputData(String username) {
-        this.username = username;
+public class LogoutOutputData {
+    private final User user;
+
+    public LogoutOutputData(User user) {
+        this.user = user;
     }
-    public String getUsername() {
-        return username;
-    }
+    public User getUser() {return user;}
 }

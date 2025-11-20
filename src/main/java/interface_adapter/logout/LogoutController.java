@@ -4,12 +4,12 @@ import use_case.logout.LogoutInputBoundary;
 import use_case.logout.LogoutInputData;
 
 public class LogoutController {
-    private LogoutInputBoundary logoutInteractor;
+    private final LogoutInputBoundary logoutInteractor;
 
     public LogoutController(LogoutInputBoundary logoutInteractor) {
         this.logoutInteractor = logoutInteractor;
     }
-    public void execute(LogoutInputData input){
-        logoutInteractor.execute(input);
+    public void execute(String username){
+        logoutInteractor.execute(new LogoutInputData(username));
     }
 }

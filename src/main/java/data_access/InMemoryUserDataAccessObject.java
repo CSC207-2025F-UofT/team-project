@@ -1,7 +1,10 @@
 package data_access;
 
 import entity.User;
-public class InMemoryUserDataAccessObject {
+import use_case.login.LoginSessionDataAccessInterface;
+import use_case.logout.LogoutSessionDataAccessInterface;
+
+public class InMemoryUserDataAccessObject implements LoginSessionDataAccessInterface, LogoutSessionDataAccessInterface {
 
     private User currentUser;
 
