@@ -20,7 +20,7 @@ public class BrowseLandmarksInteractor implements BrowseLandmarksInputBoundary {
 
     @Override
     public void loadLandmarks() {
-        List<Landmark> landmarks = landmarkDAO.loadAllLandmarks();
+        List<Landmark> landmarks = landmarkDAO.getLandmarks();
 
         List<BrowseLandmarksOutputData.LandmarkDTO> dtos = landmarks.stream()
                 .map(l -> new BrowseLandmarksOutputData.LandmarkDTO(

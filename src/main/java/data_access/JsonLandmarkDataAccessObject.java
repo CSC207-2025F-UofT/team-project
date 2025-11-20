@@ -23,7 +23,7 @@ public class JsonLandmarkDataAccessObject implements LandmarkDataAccessInterface
     }
 
     @Override
-    public List<Landmark> loadAllLandmarks() {
+    public List<Landmark> getLandmarks() {
         List<Landmark> result = new ArrayList<>();
 
         try (InputStream is = new FileInputStream(filePath)) {

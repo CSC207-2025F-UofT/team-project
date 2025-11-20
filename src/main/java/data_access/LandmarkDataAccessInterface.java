@@ -6,5 +6,5 @@ import entity.Landmark;
 import java.util.List;
 
 public interface LandmarkDataAccessInterface {
-    List<Landmark> loadAllLandmarks();
+    List<Landmark> getLandmarks();
 }
