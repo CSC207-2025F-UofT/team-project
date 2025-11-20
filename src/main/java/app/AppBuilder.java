@@ -344,8 +344,8 @@ public class AppBuilder {
         viewChatHistoryController = new ViewChatHistoryController(viewHistoryInteractor);
         sendMessageController = new SendMessageController(sendMessageInteractor);
 
-        // view
-        chatView = new ChatView(viewManagerModel, sendMessageController, viewChatHistoryController);
+        // view - 4 parameters: viewManagerModel, loggedInViewModel, sendMessageController, viewChatHistoryController
+        chatView = new ChatView(viewManagerModel, loggedInViewModel, sendMessageController, viewChatHistoryController);
         chatViewModel.addPropertyChangeListener(chatView);
         cardPanel.add(chatView, chatView.getViewName());
 
