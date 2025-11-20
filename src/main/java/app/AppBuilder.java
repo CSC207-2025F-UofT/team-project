@@ -230,7 +230,7 @@ public class AppBuilder {
     }
 
     public JFrame build() {
-        final JFrame application = new JFrame("Homepage");
+        final JFrame application = new JFrame("Movie App");
         application.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
         application.add(cardPanel);
@@ -240,8 +240,8 @@ public class AppBuilder {
 
 
         SwingUtilities.invokeLater(() -> {
-            if (rateAndCommentView != null) {
-                viewManagerModel.setState(rateAndCommentView.getViewName());
+            if (clickingView != null) {
+                viewManagerModel.setState(clickingView.getViewName());
                 viewManagerModel.firePropertyChange();
             }
         });
