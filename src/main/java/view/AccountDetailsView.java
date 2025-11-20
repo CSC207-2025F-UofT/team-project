@@ -13,8 +13,6 @@ import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
-import interface_adapter.logged_in.ChangeUsernameController;
-
 /**
  * The View for displaying Account Details, allowing password changes, and handling the Logout functionality.
  */
@@ -25,11 +23,9 @@ public class AccountDetailsView extends JPanel implements ActionListener, Proper
     private final LoggedInViewModel loggedInViewModel;
     private LogoutController logoutController;
     private ChangePasswordController changePasswordController;
-    private ChangeUsernameController changeUsernameController;
 
     // Components
     private final JButton logoutButton;
-    private final JButton changeUsernameButton;
     private final JButton changePasswordButton;
     private final JLabel usernameLabel;
     private final JPanel topBar;
@@ -70,17 +66,12 @@ public class AccountDetailsView extends JPanel implements ActionListener, Proper
         usernameLabel.setFont(new Font("SansSerif", Font.PLAIN, 20));
         usernameLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-        changeUsernameButton = new JButton("Change Username");
-        changeUsernameButton.setAlignmentX(Component.CENTER_ALIGNMENT);
-        changeUsernameButton.addActionListener(this);
-
         changePasswordButton = new JButton("Change Password");
         changePasswordButton.setAlignmentX(Component.CENTER_ALIGNMENT);
         changePasswordButton.addActionListener(this);
 
         contentPanel.add(usernameLabel);
         contentPanel.add(Box.createVerticalStrut(20));
-        contentPanel.add(changeUsernameButton);
         contentPanel.add(Box.createVerticalStrut(10));
         contentPanel.add(changePasswordButton);
         contentPanel.add(Box.createVerticalGlue());
@@ -102,7 +93,8 @@ public class AccountDetailsView extends JPanel implements ActionListener, Proper
     public void actionPerformed(ActionEvent evt) {
         if (evt.getSource().equals(logoutButton) && logoutController != null) {
             logoutController.execute();
-        } else if (evt.getSource().equals(changePasswordButton) && changePasswordController != null) {
+        }
+        else if (evt.getSource().equals(changePasswordButton) && changePasswordController != null) {
 
             // Get the current username
             final String currentUsername = loggedInViewModel.getState().getUsername();
@@ -119,21 +111,6 @@ public class AccountDetailsView extends JPanel implements ActionListener, Proper
                 changePasswordController.execute(
                         currentUsername,
                         newPassword
-                );
-            }
-        } else if (evt.getSource().equals(changeUsernameButton) && changeUsernameController != null) {
-            final String currentUsername = loggedInViewModel.getState().getUsername();
-
-            String newUsername = JOptionPane.showInputDialog(this,
-                    "Enter new username:",
-                    "Change Username",
-                    JOptionPane.PLAIN_MESSAGE
-            );
-
-            if (newUsername != null) {
-                changeUsernameController.execute(
-                        currentUsername,
-                        newUsername
                 );
             }
         }
@@ -162,9 +139,5 @@ public class AccountDetailsView extends JPanel implements ActionListener, Proper
 
     public void setChangePasswordController(ChangePasswordController changePasswordController) {
         this.changePasswordController = changePasswordController;
-    }
-
-    public void setChangeUsernameController(ChangeUsernameController changeUsernameController) {
-        this.changeUsernameController = changeUsernameController;
     }
 }

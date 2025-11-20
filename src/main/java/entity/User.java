@@ -6,13 +6,13 @@ package entity;
 public class User {
 
     private final String name;
-    private final String password;
+    private String password;
 
     /**
      * Creates a new user with the given non-empty name and non-empty password.
      * @param name the username
      * @param password the password
-     * @throws IllegalArgumentException if the password or name are empty
+     * @throws IllegalArgumentException if the email, password, or name are empty
      */
     public User(String name, String password) {
         if ("".equals(name)) {
@@ -25,12 +25,17 @@ public class User {
         this.password = password;
     }
 
+
     public String getName() {
-        return name;
+        return this.name;
     }
 
     public String getPassword() {
-        return password;
+        return this.password;
+    }
+
+    public void setPassword(String passwordHash) {
+        this.password = passwordHash;
     }
 
 }

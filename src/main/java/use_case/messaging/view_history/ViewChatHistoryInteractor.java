@@ -2,7 +2,7 @@ package use_case.messaging.view_history;
 
 import entity.Chat;
 import entity.Message;
-import goc.chat.entity.User;
+import entity.User;
 import use_case.messaging.ChatMessageDto;
 import use_case.ports.ChatRepository;
 import use_case.ports.MessageRepository;
@@ -81,8 +81,8 @@ public class ViewChatHistoryInteractor implements ViewChatHistoryInputBoundary {
      * Helper: username
      */
     private String resolveSenderName(String senderUserId) {
-        Optional<User> userOpt = userRepository.findById(senderUserId);
-        return userOpt.map(User::getUsername).orElse("Unknown");
+        Optional<User> userOpt = userRepository.findByUsername(senderUserId);
+        return userOpt.map(User::getName).orElse("Unknown");
     }
 }
 

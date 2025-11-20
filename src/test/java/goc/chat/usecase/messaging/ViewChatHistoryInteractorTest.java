@@ -2,7 +2,8 @@ package goc.chat.usecase.messaging;
 
 import entity.Chat;
 import entity.Message;
-import goc.chat.entity.User;
+import entity.UserFactory;
+import entity.User;
 import interface_adapter.repo.InMemoryChatRepository;
 import interface_adapter.repo.InMemoryMessageRepository;
 import interface_adapter.repo.InMemoryUserRepository;
@@ -58,8 +59,9 @@ public class ViewChatHistoryInteractorTest {
         chatRepo.save(chat);
 
         // 2. create users
-        User alice = new User("u1", "Alice", "alice@example.com", "hash");
-        User bob   = new User("u2", "Bob",   "bob@example.com",   "hash");
+        UserFactory userFactory = new UserFactory();
+        User alice = userFactory.create("u1", "Alice", "alice@example.com");
+        User bob   = userFactory.create("u2", "Bob",   "bob@example.com");
         userRepo.save(alice);
         userRepo.save(bob);
 

@@ -9,7 +9,6 @@ import com.google.firebase.cloud.FirestoreClient;
 import entity.User;
 import entity.UserFactory;
 import use_case.change_password.ChangePasswordUserDataAccessInterface;
-import use_case.change_username.ChangeUsernameUserDataAccessInterface;
 import use_case.login.LoginUserDataAccessInterface;
 import use_case.logout.LogoutUserDataAccessInterface;
 import use_case.search_user.SearchUserDataAccessInterface;
@@ -31,7 +30,6 @@ public class FireBaseUserDataAccessObject implements SignupUserDataAccessInterfa
         LoginUserDataAccessInterface,
         ChangePasswordUserDataAccessInterface,
         LogoutUserDataAccessInterface,
-        ChangeUsernameUserDataAccessInterface,
         SearchUserDataAccessInterface {
 
     // Inner class to represent the structure of a user document in Firestore
@@ -97,7 +95,7 @@ public class FireBaseUserDataAccessObject implements SignupUserDataAccessInterfa
      */
     @Override
     public void save(User user) {
-        // Prepare the data to be saved (only password, username is the Document ID)
+        // Prepare the data to be saved (username and password, email is the Document ID)
         UserDocument documentData = new UserDocument(user.getPassword());
 
         // Get a reference to the document using the username as the ID
@@ -131,6 +129,7 @@ public class FireBaseUserDataAccessObject implements SignupUserDataAccessInterfa
                 // Map the document to the UserDocument class
                 UserDocument doc = document.toObject(UserDocument.class);
                 // Create the final User entity using the factory
+                assert doc != null;
                 return userFactory.create(identifier, doc.getPassword());
             } else {
                 return null; // User not found
@@ -141,14 +140,15 @@ public class FireBaseUserDataAccessObject implements SignupUserDataAccessInterfa
         }
     }
 
+
     /**
      * Checks if a user with the given username exists in Firestore.
-     * @param identifier The username to check.
+     * @param name The username to check.
      * @return true if the user exists, false otherwise.
      */
     @Override
-    public boolean existsByName(String identifier) {
-        return get(identifier) != null;
+    public boolean existsByName(String name) {
+        return get(name) != null;
     }
 
     /**
@@ -170,39 +170,6 @@ public class FireBaseUserDataAccessObject implements SignupUserDataAccessInterfa
         } catch (InterruptedException | ExecutionException e) {
             System.err.println("ERROR changing password for user " + user.getName() + ": " + e.getMessage());
             throw new RuntimeException("Database error during changePassword operation.", e);
-        }
-    }
-
-    /**
-     * Changes a user's username by deleting the old document and creating a new one.
-     * Note: Firestore does not support direct renaming of documents, so a delete-and-recreate is necessary.
-     * @param oldUsername The current username.
-     * @param newUsername The new desired username.
-     */
-    @Override
-    public void changeUsername(String oldUsername, String newUsername) {
-        // 1. Get the old user data
-        User oldUser = get(oldUsername);
-        if (oldUser == null) {
-            // User does not exist, nothing to change
-            return;
-        }
-
-        // 2. Create the new User entity
-        User newUser = userFactory.create(newUsername, oldUser.getPassword());
-
-        // 3. Save the new user (create new document)
-        save(newUser);
-
-        // 4. Delete the old document
-        DocumentReference oldDocRef = db.collection(COLLECTION_NAME).document(oldUsername);
-        ApiFuture<WriteResult> deleteFuture = oldDocRef.delete();
-
-        try {
-            deleteFuture.get(); // Wait for delete to complete
-        } catch (InterruptedException | ExecutionException e) {
-            // Log the error but proceed, as the new user is saved (the old one remains in DB until rules are enforced)
-            System.err.println("WARNING: Failed to delete old document for user " + oldUsername + ". New user " + newUsername + " is saved. Error: " + e.getMessage());
         }
     }
 

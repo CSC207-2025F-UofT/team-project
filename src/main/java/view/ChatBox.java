@@ -1,5 +1,7 @@
 package view;
 
+import entity.UserFactory;
+import entity.User;
 import interface_adapter.repo.InMemoryChatRepository;
 import interface_adapter.repo.InMemoryMessageRepository;
 import interface_adapter.repo.InMemoryUserRepository;
@@ -77,9 +79,10 @@ public class ChatBox extends JFrame implements ViewChatHistoryOutputBoundary {
         userRepository = new InMemoryUserRepository();
 
         // --- seed a current user and capture the actual saved id
-        goc.chat.entity.User me = new goc.chat.entity.User("user-1", "demo", "demo@example.com", "hash");
+        final UserFactory userFactory = new UserFactory();
+        User me = userFactory.create("user-1", "demo");
         me = userRepository.save(me);             // ensure stored & id resolved
-        currentUserId = me.getId();
+        currentUserId = me.getName();
 
         // --- seed a chat and make sure current user is a participant
         entity.Chat c = new entity.Chat("chat-1"); // if your Chat auto-ids, that's fine
@@ -88,9 +91,9 @@ public class ChatBox extends JFrame implements ViewChatHistoryOutputBoundary {
         currentChatId = c.getId();                // always use id from saved entity
 
         // --- seed a "bot" user and add it to the same chat
-        goc.chat.entity.User bot = new goc.chat.entity.User("user-2", "bot", "bot@example.com", "hash");
+        User bot = userFactory.create("user-2", "bot");
         bot = userRepository.save(bot);
-        botUserId = bot.getId();
+        botUserId = bot.getName();
         c.addParticipant(botUserId);
         chatRepository.save(c);                   // re-save with both participants
 
