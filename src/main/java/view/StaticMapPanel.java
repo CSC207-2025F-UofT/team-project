@@ -33,7 +33,7 @@ public class StaticMapPanel extends JPanel {
     // fixed campus view
     private final double centerLat = 43.6620;
     private final double centerLng = -79.3955;
-    private final int zoom = 17;
+    private final int zoom = 15;
 
     public interface MarkerClickListener {
         void onMarkerClicked(String name);

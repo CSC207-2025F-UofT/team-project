@@ -85,7 +85,7 @@ public class AppBuilder {
         return this;
     }
 
-    public AppBuilder addBlankView() {
+    public AppBuilder addBrowseLandmarksView() {
         browseLandmarksViewModel = new BrowseLandmarksViewModel();
         browseLandmarksPresenter = new BrowseLandmarksPresenter(browseLandmarksViewModel);
         landmarkDAO = new JsonLandmarkDataAccessObject("minimal_landmarks.json");
@@ -127,7 +127,7 @@ public class AppBuilder {
     // new method for homescreen use case
     public AppBuilder addHomescreenUseCase() {
         final HomescreenOutputBoundary homescreenOutputBoundary =
-                new HomescreenPresenter(homescreenViewModel, viewManagerModel);
+                new HomescreenPresenter(homescreenViewModel, viewManagerModel, browseLandmarksViewModel);
 
         final HomescreenInputBoundary homescreenInteractor =
                 new HomescreenInteractor(homescreenOutputBoundary);

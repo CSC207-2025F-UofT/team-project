@@ -48,6 +48,11 @@ public class HomescreenView extends JPanel implements PropertyChangeListener {
         backButton.setForeground(Color.BLUE);
         backButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
         bottomPanel.add(backButton);
+        backButton.addActionListener(e -> {
+            viewManagerModel.setState("log in");
+            viewManagerModel.firePropertyChange();
+        });
+
 
         //(centre panel)- main content area (split left/right)
         JPanel centerPanel = new JPanel(new GridLayout(1, 2));

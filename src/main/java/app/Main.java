@@ -6,12 +6,12 @@ public class Main {
     public static void main(String[] args) {
         AppBuilder appBuilder = new AppBuilder();
         JFrame application = appBuilder
+                .addBrowseLandmarksView()
+                .addHomescreenView()
                 .addLoginView()
-                .addBlankView()
                 .addSignupView()
                 .addLoginUseCase()
                 .addSignupUseCase()
-                .addHomescreenView()
                 .addHomescreenUseCase()
                 .build();
 

@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class BrowseLandmarksState {
+    private String username = "";
 
     public static class LandmarkVM {
         public String name;
@@ -20,5 +21,13 @@ public class BrowseLandmarksState {
 
     public void setLandmarks(List<LandmarkVM> landmarks) {
         this.landmarks = landmarks;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
     }
 }
