@@ -157,4 +157,8 @@ public class FileUserDataAccessObject implements SignupUserDataAccessInterface,
                 .filter(username -> username.toLowerCase().contains(lowerCaseQuery))
                 .collect(Collectors.toList());
     }
+
+    public Map<String, entity.User> getAccounts() {
+        return accounts;
+    }
 }

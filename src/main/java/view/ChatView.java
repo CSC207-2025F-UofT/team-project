@@ -22,12 +22,13 @@ public class ChatView extends JPanel implements ActionListener, PropertyChangeLi
 
     private String currentChatId;
     private String currentUserId;
-
+    private boolean isGroupChat;
 
     // Components
     private final JLabel chatPartnerLabel; // Displays the name of the user you're chatting with
     private final JTextArea messageInputField;
     private final JButton sendButton;
+    private final JButton settingButton;
 
     // Use this to display the initial prompt or history
     private final JPanel chatDisplayPanel;
@@ -68,13 +69,14 @@ public class ChatView extends JPanel implements ActionListener, PropertyChangeLi
         topBar.add(partnerInfoPanel, BorderLayout.WEST);
 
         // Right Side: Back/Exit Button (Go back to LoggedInView/Recent Chats)
-        JButton settingButton = new JButton("⛭");
+        settingButton = new JButton("⛭");  // NEW - assigns to field
         settingButton.setFont(new Font("SansSerif", Font.BOLD, 20));
 
         settingButton.addActionListener(e -> {
-            // Navigate to chat setting view (need to make)
-            System.out.println("clicked chat setting button");
+            viewManagerModel.setState("chat setting");
+            viewManagerModel.firePropertyChange();
         });
+
 
         topBar.add(settingButton, BorderLayout.EAST);
 
@@ -163,7 +165,13 @@ public class ChatView extends JPanel implements ActionListener, PropertyChangeLi
                     row.setOpaque(false);
                     row.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
 
-                    JLabel bubble = new JLabel(msg.getContent());
+                    String displayText = msg.getContent();
+                    if (isGroupChat && !fromCurrentUser) {
+                        displayText = msg.getSenderName() + ": " + msg.getContent();
+                    }
+
+                    JLabel bubble = new JLabel("<html>" + displayText + "</html>");
+
                     bubble.setOpaque(true);
                     bubble.setBorder(BorderFactory.createEmptyBorder(8, 10, 8, 10));
 
@@ -203,10 +211,15 @@ public class ChatView extends JPanel implements ActionListener, PropertyChangeLi
         this.repaint();
     }
 
-    public void setChatContext(String chatId, String currentUserId, String partnerUsername) {
+    public void setChatContext(String chatId, String currentUserId, String partnerUsername, boolean isGroupChat) {
         this.currentChatId = chatId;
         this.currentUserId = currentUserId;
+        this.isGroupChat = isGroupChat;
         setChatPartner(partnerUsername);
+
+        // Show/hide settings button based on chat type
+        settingButton.setVisible(isGroupChat);
+
         viewChatHistoryController.execute(chatId);
     }
 }
