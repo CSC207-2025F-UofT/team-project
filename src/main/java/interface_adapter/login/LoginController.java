@@ -12,10 +12,14 @@ public class LoginController {
         this.loginUseCaseInteractor = loginUseCaseInteractor;
     }
 
+
     public void execute(String username, String password) {
         final LoginInputData loginInputData = new LoginInputData(
                 username, password);
 
         loginUseCaseInteractor.execute(loginInputData);
     }
+    public void switchToSignupView() {loginUseCaseInteractor.switchToSignupView();
+    }
+
 }
