@@ -67,7 +67,7 @@ public class AppBuilder {
     private HomescreenView homescreenView;
 
     private BrowseLandmarksPresenter browseLandmarksPresenter;
-    private JsonFileLandmarkDataAccessObject landmarkDAO;
+    private LandmarkDataAccessInterface landmarkDAO;
     private BrowseLandmarksInteractor browseLandmarksInteractor;
     private BrowseLandmarksController browseLandmarksController;
 
