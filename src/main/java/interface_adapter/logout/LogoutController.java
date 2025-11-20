@@ -9,7 +9,7 @@ public class LogoutController {
     public LogoutController(LogoutInputBoundary logoutInteractor) {
         this.logoutInteractor = logoutInteractor;
     }
-    public void execute(String username){
-        logoutInteractor.execute(new LogoutInputData(username));
+    public void execute(){
+        logoutInteractor.execute(new LogoutInputData());
     }
 }

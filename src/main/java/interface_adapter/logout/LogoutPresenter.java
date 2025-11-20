@@ -24,6 +24,6 @@ public class LogoutPresenter implements LogoutOutputBoundary {
 
     @Override
     public void prepareFailView(String errorMessage) {
-
+        // We assume logout can not really fail, so we don't need to do anything here'
     }
 }

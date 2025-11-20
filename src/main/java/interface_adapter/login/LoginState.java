@@ -1,8 +1,8 @@
 package interface_adapter.login;
 
 public class LoginState {
-    public String username;
-    public String password;
+    private String username;
+    private String password;
     private String errorMessage = "";
 
     public String getUsername() {

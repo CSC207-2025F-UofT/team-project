@@ -2,7 +2,7 @@ package use_case.signup;
 
 import entity.User;
 
-public class SignupInteractor {
+public class SignupInteractor implements SignupInputBoundary{
     public final SignupDataAccessInterface signUpDataAccessObject;
     private final SignupOutputBoundary signupPresenter;
     public SignupInteractor(SignupDataAccessInterface signupDataAccessInterface, SignupOutputBoundary signupOutputBoundary) {

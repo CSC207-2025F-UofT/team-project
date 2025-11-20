@@ -7,6 +7,4 @@ public interface LoginUserDataAccessInterface {
     boolean existsByUsername(String username);
 
     User getByUsername(String username);
-
-    void setCurrentUser(User user);
 }
