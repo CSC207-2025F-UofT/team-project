@@ -5,6 +5,8 @@ import use_case.stocksearch.StockSearchInputData;
 import use_case.stocksearch.StockSearchInteractor;
 import use_case.stocksearch.StockSearchOutputData;
 
+import java.util.List;
+
 /**
  * Controller for stock search and watchlist actions.
  * Delegates search to the StockSearchInteractor and watch/unwatch
@@ -49,5 +51,9 @@ public class StockSearchController {
         } else {
             watchlistRepository.removeWatched(username, symbol);
         }
+    }
+
+    public List<String> getWatchedSymbols(String username) {
+        return watchlistRepository.findSymbolsByUsername(username);
     }
 }

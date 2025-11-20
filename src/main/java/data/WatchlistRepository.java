@@ -1,5 +1,7 @@
 package data;
 
+import java.util.List;
+
 public interface WatchlistRepository {
 
     boolean isWatched(String username, String symbol);
@@ -10,4 +12,7 @@ public interface WatchlistRepository {
                     String exchange);
 
     void removeWatched(String username, String symbol);
+
+    // list all watched stocks
+    List<String> findSymbolsByUsername(String username);
 }

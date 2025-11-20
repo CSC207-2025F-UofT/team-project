@@ -71,6 +71,16 @@ public class StockSearchView extends JFrame {
         showEmptyState();
     }
 
+    //overloaded constructor
+    public StockSearchView(StockSearchController controller,
+                           String username,
+                           String initialSymbol) {
+        this(controller, username);
+        if (initialSymbol != null && !initialSymbol.isEmpty()) {
+            searchField.setText(initialSymbol);
+            onSearchTextChanged();
+        }
+    }
 
     private void initUI(String username) {
         JPanel topBar = new JPanel(new BorderLayout());

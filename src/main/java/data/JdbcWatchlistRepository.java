@@ -5,6 +5,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * JDBC implementation of the watchlist repository using the `watched_stocks` table.
@@ -79,5 +81,33 @@ public class JdbcWatchlistRepository implements WatchlistRepository {
             throw new RuntimeException("Failed to remove watched stock for user=" + username
                     + " symbol=" + symbol, e);
         }
+    }
+
+    @Override
+    public List<String> findSymbolsByUsername(String username) {
+        final String sql =
+                "SELECT symbol FROM watched_stocks " +
+                        "WHERE username = ? " +
+                        "ORDER BY created_at DESC";
+
+        List<String> symbols = new ArrayList<>();
+
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, username);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    symbols.add(rs.getString("symbol"));
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(
+                    "Failed to load watched symbols for user=" + username, e
+            );
+        }
+
+        return symbols;
     }
 }

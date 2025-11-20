@@ -7,9 +7,13 @@ import interface_adapters.controllers.StockSearchController;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.Dimension;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
 public class DashboardView extends JFrame {
 
+    private final JList<String> watchedList = new JList<>(new DefaultListModel<>());
     private final DashboardController dashController;
     private final StockSearchController stockController;
 //    private final PortfolioController portfolioController;
@@ -40,7 +44,7 @@ public class DashboardView extends JFrame {
 
         setTitle("Dashboard");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setSize(500, 350);
+        setSize(800, 500);
         setLocationRelativeTo(null);
 
         // Top bar with greeting + logout
@@ -71,11 +75,11 @@ public class DashboardView extends JFrame {
                     // Create NewsController similar to Main.showNewsView()
                     data.news.NewsApiDAO newsApiDAO = new data.news.NewsApiDAO();
                     ui.NewsView newsView = new ui.NewsView(null);
-                    interface_adapters.presenters.FetchNewsPresenter presenter = 
+                    interface_adapters.presenters.FetchNewsPresenter presenter =
                         new interface_adapters.presenters.FetchNewsPresenter(newsView);
-                    use_case.fetch_news.FetchNewsInteractor interactor = 
+                    use_case.fetch_news.FetchNewsInteractor interactor =
                         new use_case.fetch_news.FetchNewsInteractor(newsApiDAO, presenter);
-                    interface_adapters.controllers.NewsController newsController = 
+                    interface_adapters.controllers.NewsController newsController =
                         new interface_adapters.controllers.NewsController(interactor, presenter);
                     newsView.setController(newsController);
                     newsController.fetchNews();
@@ -93,6 +97,22 @@ public class DashboardView extends JFrame {
             tabs.setSelectedIndex(HOME_TAB);
         });
 
+        // When user double-clicks a watched symbol, open the StockSearchView
+        watchedList.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (e.getClickCount() == 2) { // double-click
+                    String symbol = watchedList.getSelectedValue();
+                    if (symbol != null && !symbol.isEmpty()) {
+                        SwingUtilities.invokeLater(() ->
+                                new StockSearchView(stockController, username, symbol)
+                                        .setVisible(true)
+                        );
+                    }
+                }
+            }
+        });
+
         // Layout
         setLayout(new BorderLayout(8, 8));
         add(topBar, BorderLayout.NORTH);
@@ -100,7 +120,9 @@ public class DashboardView extends JFrame {
     }
 
     private JPanel buildHomePanel() {
-        JPanel p = new JPanel(new BorderLayout());
+        JPanel p = new JPanel(new BorderLayout(8, 8));
+
+        // Left/center: info text
         JTextArea info = new JTextArea("""
                 This is your Dashboard Home.
 
@@ -108,10 +130,33 @@ public class DashboardView extends JFrame {
                 • News    → opens the News window
                 • Tracker → opens the Tracker window
                 • Stock   → opens the Stock window
+
+                On the right, you can see your watched stocks.
+                Double-click one to open its details.
                 """);
         info.setEditable(false);
         info.setMargin(new Insets(8, 8, 8, 8));
         p.add(info, BorderLayout.CENTER);
+
+        // Right: watched stocks list
+        JPanel watchPanel = new JPanel(new BorderLayout());
+        watchPanel.setBorder(BorderFactory.createTitledBorder("Watched stocks"));
+
+        // Populate the list from the controller
+        DefaultListModel<String> model = (DefaultListModel<String>) watchedList.getModel();
+        model.clear();
+        for (String symbol : stockController.getWatchedSymbols(username)) {
+            model.addElement(symbol);
+        }
+
+        watchedList.setVisibleRowCount(10);
+
+        JScrollPane scrollPane = new JScrollPane(watchedList);
+        watchPanel.add(scrollPane, BorderLayout.CENTER);
+
+        watchPanel.setPreferredSize(new Dimension(getWidth() / 5, getHeight()));
+        p.add(watchPanel, BorderLayout.EAST);
+
         return p;
     }
 
