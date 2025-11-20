@@ -16,17 +16,16 @@ public class HomescreenInteractor implements HomescreenInputBoundary {
 
         // Don't navigate anywhere yet since views don't exist
         // When you create the views, you'll uncomment this:
-        /*
         String targetView = "";
         switch (action) {
-            case "browse_landmarks":
-                targetView = "landmarks";
+            case "browse landmarks":
+                targetView = "browse landmarks";
                 break;
-            case "plan_route":
-                targetView = "route";
+            case "plan a route":
+                targetView = "plan a route";
                 break;
-            case "my_progress":
-                targetView = "progress";
+            case "my progress":
+                targetView = "my progress";
                 break;
             default:
                 presenter.prepareFailView("Unknown action: " + action);
@@ -35,6 +34,5 @@ public class HomescreenInteractor implements HomescreenInputBoundary {
 
         HomescreenOutputData outputData = new HomescreenOutputData(targetView, true);
         presenter.prepareSuccessView(outputData);
-        */
     }
 }

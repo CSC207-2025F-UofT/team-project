@@ -1,12 +1,12 @@
 package interface_adapter.homescreen;
 
-public class HomescreenState {
+public class HomeScreenState {
     private String username = "";
     private String errorMessage = null;
 
-    public HomescreenState() {}
+    public HomeScreenState() {}
 
-    public HomescreenState(HomescreenState copy) {
+    public HomeScreenState(HomeScreenState copy) {
         this.username = copy.username;
         this.errorMessage = copy.errorMessage;
     }

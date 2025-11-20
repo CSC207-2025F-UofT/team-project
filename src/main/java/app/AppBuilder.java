@@ -1,22 +1,27 @@
 package app;
 
+import data_access.FileUserDataAccessObject;
+import data_access.JsonFileLandmarkDataAccessObject;
 import data_access.*;
 import entity.UserFactory;
 import interface_adapter.ViewManagerModel;
-import interface_adapter.blank.BlankViewModel;
+import interface_adapter.browselandmarks.BrowseLandmarksController;
+import interface_adapter.browselandmarks.BrowseLandmarksPresenter;
+import interface_adapter.browselandmarks.BrowseLandmarksViewModel;
 import interface_adapter.login.LoginController;
 import interface_adapter.login.LoginPresenter;
 import interface_adapter.login.LoginViewModel;
 import interface_adapter.signup.SignupController;
 import interface_adapter.signup.SignupPresenter;
 import interface_adapter.signup.SignupViewModel;
+import use_case.browselandmarks.BrowseLandmarksInteractor;
 import use_case.login.LoginInputBoundary;
 import use_case.login.LoginInteractor;
 import use_case.login.LoginOutputBoundary;
 import use_case.signup.SignupInputBoundary;
 import use_case.signup.SignupInteractor;
 import use_case.signup.SignupOutputBoundary;
-import view.BlankView;
+import view.BrowseLandmarksView;
 import view.LoginView;
 import view.SignupView;
 import view.ViewManager;
@@ -44,22 +49,27 @@ public class AppBuilder {
     private final ViewManager viewManager = new ViewManager(cardPanel, cardLayout, viewManagerModel);
 
     // DAO version using local csv file storage
-//    private final UserDataAccessInterface userDataAccessObject =
-//            new FileUserDataAccessObject("users.csv", userFactory);
+    private final UserDataAccessInterface userDataAccessObject =
+            new FileUserDataAccessObject("users.csv", userFactory);
 
     // DAO version using local json file storage
-    private final UserDataAccessInterface userDataAccessObject =
-            new JSONFileUserDataAccessObject("users.json");
+//    private final UserDataAccessInterface userDataAccessObject =
+//            new JSONFileUserDataAccessObject("users.json");
 
     // Views & ViewModels
     private LoginViewModel loginViewModel;
     private LoginView loginView;
-    private BlankViewModel blankViewModel;
-    private BlankView blankView;
+    private BrowseLandmarksViewModel browseLandmarksViewModel;
+    private BrowseLandmarksView browseLandmarksView;
     private SignupViewModel signupViewModel;
     private SignupView signupView;
     private HomescreenViewModel homescreenViewModel;
     private HomescreenView homescreenView;
+
+    private BrowseLandmarksPresenter browseLandmarksPresenter;
+    private LandmarkDataAccessInterface landmarkDAO;
+    private BrowseLandmarksInteractor browseLandmarksInteractor;
+    private BrowseLandmarksController browseLandmarksController;
 
     public AppBuilder() {
         cardPanel.setLayout(cardLayout);
@@ -80,10 +90,14 @@ public class AppBuilder {
         return this;
     }
 
-    public AppBuilder addBlankView() {
-        blankViewModel = new BlankViewModel();
-        blankView = new BlankView(blankViewModel);
-        cardPanel.add(blankView, blankView.getViewName());
+    public AppBuilder addBrowseLandmarksView() {
+        browseLandmarksViewModel = new BrowseLandmarksViewModel();
+        browseLandmarksPresenter = new BrowseLandmarksPresenter(browseLandmarksViewModel);
+        landmarkDAO = new JsonFileLandmarkDataAccessObject("minimal_landmarks.json");
+        browseLandmarksInteractor = new BrowseLandmarksInteractor(landmarkDAO, browseLandmarksPresenter);
+        browseLandmarksController =  new BrowseLandmarksController(browseLandmarksInteractor);
+        browseLandmarksView = new BrowseLandmarksView(browseLandmarksViewModel, browseLandmarksController, viewManagerModel);
+        cardPanel.add(browseLandmarksView, browseLandmarksView.getViewName());
         return this;
     }
 
@@ -118,7 +132,7 @@ public class AppBuilder {
     // new method for homescreen use case
     public AppBuilder addHomescreenUseCase() {
         final HomescreenOutputBoundary homescreenOutputBoundary =
-                new HomescreenPresenter(homescreenViewModel, viewManagerModel);
+                new HomescreenPresenter(homescreenViewModel, viewManagerModel, browseLandmarksViewModel);
 
         final HomescreenInputBoundary homescreenInteractor =
                 new HomescreenInteractor(homescreenOutputBoundary);

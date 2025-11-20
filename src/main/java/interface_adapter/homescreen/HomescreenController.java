@@ -12,19 +12,19 @@ public class HomescreenController {
 
     public void browseLandmarks() {
         System.out.println("Browse Landmarks button clicked");
-        HomescreenInputData inputData = new HomescreenInputData("browse_landmarks");
+        HomescreenInputData inputData = new HomescreenInputData("browse landmarks");
         interactor.execute(inputData);
     }
 
     public void planRoute() {
         System.out.println("Plan Route button clicked");
-        HomescreenInputData inputData = new HomescreenInputData("plan_route");
+        HomescreenInputData inputData = new HomescreenInputData("plan a route");
         interactor.execute(inputData);
     }
 
     public void viewProgress() {
         System.out.println("My Progress button clicked");
-        HomescreenInputData inputData = new HomescreenInputData("my_progress");
+        HomescreenInputData inputData = new HomescreenInputData("my progress");
         interactor.execute(inputData);
     }
 }

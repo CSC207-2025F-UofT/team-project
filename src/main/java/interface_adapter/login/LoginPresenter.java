@@ -1,6 +1,7 @@
 package interface_adapter.login;
 
 import interface_adapter.ViewManagerModel;
+import interface_adapter.homescreen.HomeScreenState;
 import interface_adapter.homescreen.HomescreenViewModel;
 import use_case.login.LoginOutputBoundary;
 import use_case.login.LoginOutputData;
@@ -24,10 +25,14 @@ public class LoginPresenter implements LoginOutputBoundary {
 
     @Override
     public void prepareSuccessView(LoginOutputData response) {
+        HomeScreenState hsState = homescreenViewModel.getState();
+        hsState.setUsername(response.getUsername());   // <── store user here
+        homescreenViewModel.setState(hsState);
+        homescreenViewModel.firePropertyChange();
+
         loginViewModel.setState(new LoginState());
         loginViewModel.firePropertyChange();
 
-        // switch to the blank view
         this.viewManagerModel.setState("homescreen");
         this.viewManagerModel.firePropertyChange();
     }
