@@ -3,28 +3,28 @@ package game.entity;
 import java.util.*;
 
 public class User {
-        public int coinCount;
+        private int coinCount;
         private int clickBonus;
         private int clickBonusTime;
         private List<Pet> PetInventory= new ArrayList<>();
         private List<Item> itemsList = new ArrayList<>();
         private int unlockedSlots;
-        final private int INITIAL_COINS = 100;
-        final private int INITIAL_CLICKBONUS = 1;
-        final private int INITIAL_CLICKBONUSINCREASE = 1;
+        private String userID;
+        private static final int INITIAL_COINS = 100;
+        private static final int INITIAL_CLICKBONUS = 1;
+        private static final int INITIAL_CLICKBONUSINCREASE = 1;
 
         public User() {
             this.coinCount = INITIAL_COINS;
             this.clickBonus = INITIAL_CLICKBONUS;
             this.clickBonusTime = 1;
             this.unlockedSlots = 2;
+            // initialize unique user ID
         }
 
         public boolean coinCheck(int price) {
-            if (this.coinCount >= price) {
-                return true;
-            }
-            return false;
+            return this.coinCount >= price;
+
         }
 
         private void buy(int price){
@@ -66,6 +66,22 @@ public class User {
         }
         public void addToItemList(Item item) {
             this.itemsList.add(item);
+        }
+
+        public void addCoins(int coins) {
+            this.coinCount += coins;
+        }
+
+        public void subtractCoins(int coins) {
+            this.coinCount -= coins;
+        }
+
+        public int getClickBonus(){
+            return this.clickBonus;
+        }
+
+        public int getCoinCount(){
+            return this.coinCount;
         }
 
 

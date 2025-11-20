@@ -1,17 +1,22 @@
 package game.entity;
 
+/**
+ * The class representing a Pet within the game.
+ */
 public class Pet {
-    // petType == 'Dog' || petType == 'Cat'
-    // petBreed is a valid breed of Dog (if applicable) or Cat (if applicable)
-    // visualURL is a valid URL
-    // affectionLevel >= 0
-    // energyLevel >= 0
-    // clickingSpeed >= 0
-    // sellingPrice >= 0
+    /**
+     * petType == 'Dog' || petType == 'Cat'
+     * petBreed is a valid breed of Dog (if applicable) or Cat (if applicable)
+     * visualURL is a valid URL
+     * affectionLevel >= 0
+     * energyLevel >= 0
+     * clickingSpeed >= 0
+     * sellingPrice >= 0
+     */
 
     final String petType;
     final String petBreed;
-    // final String visualURL;
+//  final String visualURL;
     int affectionXP;
     int affectionLevel;
     int energyLevel;
@@ -29,7 +34,7 @@ public class Pet {
         this.affectionLevel = 1;
         this.energyLevel = 100;
         // call to info database to get clicking speed
-        // call to info database to get selling price
+        this.sellingPrice = 25;
         this.deployStatus = false;
     }
 
