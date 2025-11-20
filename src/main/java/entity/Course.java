@@ -5,8 +5,8 @@ import java.util.List;
 public class Course {
     private String courseName;
     private String courseCode;
-    private List<Instructor> instructors;
-    private List<Student> students;
+    private List<User> instructors;
+    private List<User> students;
     private List<Assignment> assignments;
 
     public Course(String courseName, String courseCode) {
@@ -22,11 +22,11 @@ public class Course {
         return courseCode;
     }
 
-    public List<Instructor> getInstructors() {
+    public List<User> getInstructors() {
         return instructors;
     }
 
-    public List<Student> getStudents() {
+    public List<User> getStudents() {
         return students;
     }
 
