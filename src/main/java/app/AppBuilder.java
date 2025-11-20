@@ -1,7 +1,6 @@
 package app;
 
 import data_access.*;
-import entity.Landmark;
 import entity.UserFactory;
 import interface_adapter.ViewManagerModel;
 import interface_adapter.blank.BlankViewModel;
@@ -51,10 +50,6 @@ public class AppBuilder {
     // DAO version using local json file storage
     private final UserDataAccessInterface userDataAccessObject =
             new JSONFileUserDataAccessObject("users.json");
-
-    // DAO for landmark
-    private final LandmarkDataAccessInterface landmarkDataAccessObject =
-            new JSONFileLandmarkDataAccessObject("minimal_landmarks.json");
 
     // Views & ViewModels
     private LoginViewModel loginViewModel;
