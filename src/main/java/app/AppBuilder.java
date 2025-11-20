@@ -123,8 +123,6 @@ public class AppBuilder {
 
     private CreateGroupChatController createGroupChatController;
 
-    private final String messagingUserId;
-    private final String messagingChatId;
 
     public AppBuilder() {
         cardPanel.setLayout(cardLayout);
@@ -312,10 +310,11 @@ public class AppBuilder {
         this.searchUserView = new SearchUserView(
                 viewManagerModel,
                 searchUserViewModel,
-                chatView,              // Make sure chatView exists (call addChatUseCase first)
-                groupChatViewModel,     // Pass the groupChatViewModel
+                chatView,
+                groupChatViewModel,
                 chatRepository,
-                userRepository
+                userRepository,
+                loggedInViewModel
         );
         cardPanel.add(searchUserView, searchUserView.getViewName());
         return this;
@@ -380,14 +379,17 @@ public class AppBuilder {
         chatViewModel.addPropertyChangeListener(chatView);
         cardPanel.add(chatView, chatView.getViewName());
 
-        chatView.setChatContext(messagingChatId, messagingUserId, "hi", false);
-
         return this;
     }
 
     public AppBuilder addChatSettingView() {
         this.chatSettingView = new ChatSettingView(viewManagerModel);
         cardPanel.add(chatSettingView, chatSettingView.getViewName());
+
+        if (this.chatView != null) {
+            this.chatView.setChatSettingView(chatSettingView);
+        }
+
         return this;
     }
 

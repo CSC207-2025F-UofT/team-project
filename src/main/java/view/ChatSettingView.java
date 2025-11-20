@@ -10,7 +10,7 @@ import java.awt.event.ActionListener;
 
 public class ChatSettingView extends JPanel implements ActionListener {
 
-    public final String viewName = "chat setting";  // Changed from "chat settings" to match ChatView
+    public final String viewName = "chat setting";
 
     private final ViewManagerModel viewManagerModel;
 
@@ -19,9 +19,10 @@ public class ChatSettingView extends JPanel implements ActionListener {
     private final JButton addUserButton;
     private final JButton removeUserButton;
 
-    private ChangeGroupNameController changeGroupNameController;  // Removed 'final'
+    private ChangeGroupNameController changeGroupNameController;
+    private String currentChatId;
 
-    public ChatSettingView(ViewManagerModel viewManagerModel) {  // Removed controller from constructor
+    public ChatSettingView(ViewManagerModel viewManagerModel) {
         this.viewManagerModel = viewManagerModel;
 
         this.setLayout(new BorderLayout());
@@ -73,41 +74,69 @@ public class ChatSettingView extends JPanel implements ActionListener {
     @Override
     public void actionPerformed(ActionEvent evt) {
         if (evt.getSource().equals(changeGroupNameButton)) {
-            if (changeGroupNameController != null) {  // Add null check
-                String newName = JOptionPane.showInputDialog(this, "Enter new group name:");
-                if (newName != null && !newName.trim().isEmpty()) {
-                    System.out.println("Rename group to: " + newName);
-                    // TODO: replace "group123" with your actual selected group ID
-                    changeGroupNameController.execute("chat-1", newName);  // Use actual chat ID
-                }
-            } else {
+            if (changeGroupNameController == null) {
                 JOptionPane.showMessageDialog(this,
                         "Controller not initialized",
                         "Error",
                         JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            if (currentChatId == null) {
+                JOptionPane.showMessageDialog(this,
+                        "No chat selected",
+                        "Error",
+                        JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            String newName = JOptionPane.showInputDialog(this,
+                    "Enter new group name:",
+                    "Change Group Name",
+                    JOptionPane.PLAIN_MESSAGE);
+
+            // Check if user cancelled
+            if (newName == null) {
+                return;
+            }
+
+            // Check if name is empty
+            if (newName.trim().isEmpty()) {
+                JOptionPane.showMessageDialog(this,
+                        "Group name cannot be empty",
+                        "Error",
+                        JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            changeGroupNameController.execute(currentChatId, newName.trim());
+        }
+        else if (evt.getSource().equals(addUserButton)) {
+            String user = JOptionPane.showInputDialog(this, "Enter username to add:");
+            if (user != null && !user.trim().isEmpty()) {
+                System.out.println("Add user: " + user);
+                // TODO: call controller
             }
         }
-//        else if (evt.getSource().equals(addUserButton)) {
-//            String user = JOptionPane.showInputDialog(this, "Enter username to add:");
-//            if (user != null && !user.trim().isEmpty()) {
-//                System.out.println("Add user: " + user);
-//                // TODO: call controller
-//            }
-//        }
-//        else if (evt.getSource().equals(removeUserButton)) {
-//            String user = JOptionPane.showInputDialog(this, "Enter username to remove:");
-//            if (user != null && !user.trim().isEmpty()) {
-//                System.out.println("Remove user: " + user);
-//                // TODO: call controller
-//            }
-//        }
+        else if (evt.getSource().equals(removeUserButton)) {
+            String user = JOptionPane.showInputDialog(this, "Enter username to remove:");
+            if (user != null && !user.trim().isEmpty()) {
+                System.out.println("Remove user: " + user);
+                // TODO: call controller
+            }
+        }
     }
 
     public String getViewName() {
         return viewName;
     }
 
-    // Add this setter method
+    // Setter for the chat ID
+    public void setChatId(String chatId) {
+        this.currentChatId = chatId;
+    }
+
+    // Setter for the controller
     public void setChangeGroupNameController(ChangeGroupNameController controller) {
         this.changeGroupNameController = controller;
     }

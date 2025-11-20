@@ -28,6 +28,8 @@ public class ChatView extends JPanel implements ActionListener, PropertyChangeLi
     private String currentUserId;
     private boolean isGroupChat;
 
+    private ChatSettingView chatSettingView;
+
     // Components
     private final JLabel chatPartnerLabel; // Displays the name of the user you're chatting with
     private final JTextArea messageInputField;
@@ -90,6 +92,10 @@ public class ChatView extends JPanel implements ActionListener, PropertyChangeLi
         settingButton.setFont(new Font("SansSerif", Font.BOLD, 20));
 
         settingButton.addActionListener(e -> {
+            // Pass the current chat ID to settings view before navigating
+            if (chatSettingView != null) {
+                chatSettingView.setChatId(currentChatId);
+            }
             viewManagerModel.setState("chat setting");
             viewManagerModel.firePropertyChange();
         });
@@ -240,5 +246,13 @@ public class ChatView extends JPanel implements ActionListener, PropertyChangeLi
         settingButton.setVisible(isGroupChat);
 
         viewChatHistoryController.execute(chatId);
+    }
+
+    public void setChatId(String chatId) {
+        this.currentChatId = chatId;
+    }
+
+    public void setChatSettingView(ChatSettingView chatSettingView) {
+        this.chatSettingView = chatSettingView;
     }
 }

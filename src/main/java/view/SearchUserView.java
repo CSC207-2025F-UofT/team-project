@@ -11,6 +11,7 @@ import java.beans.PropertyChangeListener;
 import interface_adapter.groupchat.CreateGroupChatController;
 import interface_adapter.groupchat.GroupChatState;
 import interface_adapter.groupchat.GroupChatViewModel;
+import interface_adapter.logged_in.LoggedInViewModel;
 import interface_adapter.user_search.SearchUserController;
 import interface_adapter.user_search.SearchUserViewModel;
 import interface_adapter.user_search.SearchUserState;
@@ -30,6 +31,7 @@ public class SearchUserView extends JPanel implements ActionListener, PropertyCh
     private final ViewManagerModel viewManagerModel;
     private final SearchUserViewModel searchUserViewModel;
     private final GroupChatViewModel groupChatViewModel;  // Fixed: added semicolon
+    private final LoggedInViewModel loggedInViewModel;
     private final ChatView chatView;
     private final ChatRepository chatRepository;
     private final UserRepository userRepository;
@@ -50,7 +52,8 @@ public class SearchUserView extends JPanel implements ActionListener, PropertyCh
 
     public SearchUserView(ViewManagerModel viewManagerModel, SearchUserViewModel searchUserViewModel,
                           ChatView chatView, GroupChatViewModel groupChatViewModel,
-                          ChatRepository chatRepository, UserRepository userRepository) {
+                          ChatRepository chatRepository, UserRepository userRepository,
+                          LoggedInViewModel loggedInViewModel) {
 
         this.viewManagerModel = viewManagerModel;
         this.searchUserViewModel = searchUserViewModel;
@@ -60,6 +63,7 @@ public class SearchUserView extends JPanel implements ActionListener, PropertyCh
         this.groupChatViewModel.addPropertyChangeListener(this);
         this.chatRepository = chatRepository;
         this.userRepository = userRepository;
+        this.loggedInViewModel = loggedInViewModel;
 
         this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
         this.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
@@ -177,7 +181,19 @@ public class SearchUserView extends JPanel implements ActionListener, PropertyCh
     }
 
     private void startIndividualChat(String username) {
-        String currentUserId = "user-1"; // TODO: Get from session
+        // Get current logged-in user from session
+        String currentUsername = loggedInViewModel.getState().getUsername();
+        Optional<User> currentUserOpt = userRepository.findByUsername(currentUsername);
+
+        if (currentUserOpt.isEmpty()) {
+            JOptionPane.showMessageDialog(this,
+                    "Session error. Please log in again.",
+                    "Error",
+                    JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        String currentUserId = currentUserOpt.get().getId();
 
         // Find the target user
         Optional<User> targetUserOpt = userRepository.findByUsername(username);
@@ -302,17 +318,29 @@ public class SearchUserView extends JPanel implements ActionListener, PropertyCh
                 "Create Group Chat",
                 JOptionPane.PLAIN_MESSAGE);
 
-        if (groupName == null || groupName.trim().isEmpty()) {
+        if (groupName == null) {
+            return;
+        }
+
+        if (groupName.trim().isEmpty()) {
             JOptionPane.showMessageDialog(this,
                     "Group name cannot be empty",
                     "Error",
                     JOptionPane.ERROR_MESSAGE);
             return;
         }
+
         if (createGroupChatController != null) {
-            // Get the current user ID (you'll need to pass this in or get it from a session)
-            // For now, using a placeholder - you should get this from your logged-in user
-            String currentUserId = "user-1"; // TODO: Get from session/logged in user
+            // Get current logged-in user from session
+            String currentUsername = loggedInViewModel.getState().getUsername();
+            Optional<User> currentUserOpt = userRepository.findByUsername(currentUsername);
+
+            if (currentUserOpt.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Session error. Please log in again.");
+                return;
+            }
+
+            String currentUserId = currentUserOpt.get().getId();
 
             createGroupChatController.execute(currentUserId, usernames, groupName.trim());
         } else {
