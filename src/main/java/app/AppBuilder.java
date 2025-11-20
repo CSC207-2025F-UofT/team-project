@@ -1,7 +1,6 @@
 package app;
 
-import data_access.FileUserDataAccessObject;
-import data_access.JsonFileLandmarkDataAccessObject;
+import data_access.JsonLandmarkDataAccessObject;
 import data_access.*;
 import entity.UserFactory;
 import interface_adapter.ViewManagerModel;
@@ -49,12 +48,12 @@ public class AppBuilder {
     private final ViewManager viewManager = new ViewManager(cardPanel, cardLayout, viewManagerModel);
 
     // DAO version using local csv file storage
-    private final UserDataAccessInterface userDataAccessObject =
-            new FileUserDataAccessObject("users.csv", userFactory);
+//    private final UserDataAccessInterface userDataAccessObject =
+//            new CsvUserDataAccessObject("users.csv", userFactory);
 
     // DAO version using local json file storage
-//    private final UserDataAccessInterface userDataAccessObject =
-//            new JSONFileUserDataAccessObject("users.json");
+    private final UserDataAccessInterface userDataAccessObject =
+            new JsonUserDataAccessObject("users.json");
 
     // Views & ViewModels
     private LoginViewModel loginViewModel;
@@ -93,7 +92,7 @@ public class AppBuilder {
     public AppBuilder addBrowseLandmarksView() {
         browseLandmarksViewModel = new BrowseLandmarksViewModel();
         browseLandmarksPresenter = new BrowseLandmarksPresenter(browseLandmarksViewModel);
-        landmarkDAO = new JsonFileLandmarkDataAccessObject("minimal_landmarks.json");
+        landmarkDAO = new JsonLandmarkDataAccessObject("minimal_landmarks.json");
         browseLandmarksInteractor = new BrowseLandmarksInteractor(landmarkDAO, browseLandmarksPresenter);
         browseLandmarksController =  new BrowseLandmarksController(browseLandmarksInteractor);
         browseLandmarksView = new BrowseLandmarksView(browseLandmarksViewModel, browseLandmarksController, viewManagerModel);

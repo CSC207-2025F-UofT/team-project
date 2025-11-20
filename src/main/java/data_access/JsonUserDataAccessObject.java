@@ -13,9 +13,9 @@ import java.util.Map;
 
 /**
  * DAO for user data implemented using a JSON file to persist the data.
- * More flexible than FileUserDataAccessObject since JSON is able to store Object data.
+ * More flexible than CsvUserDataAccessObject since JSON is able to store Object data.
  */
-public class JSONFileUserDataAccessObject implements UserDataAccessInterface {
+public class JsonUserDataAccessObject implements UserDataAccessInterface {
     private JsonNode root;
 
     private final ObjectMapper mapper = new ObjectMapper();
@@ -24,7 +24,7 @@ public class JSONFileUserDataAccessObject implements UserDataAccessInterface {
 
     private String currentUsername;
 
-    public JSONFileUserDataAccessObject(String jsonFilePath) {
+    public JsonUserDataAccessObject(String jsonFilePath) {
         // register java.time to Jackson ObjectMapper
         mapper.registerModule(new JavaTimeModule());
         mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);

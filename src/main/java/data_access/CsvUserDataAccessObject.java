@@ -2,8 +2,6 @@ package data_access;
 
 import entity.User;
 import entity.UserFactory;
-import use_case.login.LoginUserDataAccessInterface;
-import use_case.signup.SignupUserDataAccessInterface;
 
 import java.io.*;
 import java.util.HashMap;
@@ -13,7 +11,7 @@ import java.util.Map;
 /**
  * DAO for user data implemented using a File to persist the data.
  */
-public class FileUserDataAccessObject implements UserDataAccessInterface {
+public class CsvUserDataAccessObject implements UserDataAccessInterface {
 
     private static final String HEADER = "username,password";
 
@@ -29,7 +27,7 @@ public class FileUserDataAccessObject implements UserDataAccessInterface {
      * @param userFactory factory for creating user objects
      * @throws RuntimeException if there is an IOException when accessing the file
      */
-    public FileUserDataAccessObject(String csvPath, UserFactory userFactory) {
+    public CsvUserDataAccessObject(String csvPath, UserFactory userFactory) {
 
         csvFile = new File(csvPath);
         headers.put("username", 0);

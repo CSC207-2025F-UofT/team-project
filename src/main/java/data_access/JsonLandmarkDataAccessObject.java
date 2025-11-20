@@ -1,4 +1,4 @@
-// src/java/data_access/JsonFileLandmarkDataAccessObject.java
+// src/java/data_access/JsonLandmarkDataAccessObject.java
 package data_access;
 
 import entity.Landmark;
@@ -14,11 +14,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
-public class JsonFileLandmarkDataAccessObject implements LandmarkDataAccessInterface {
+public class JsonLandmarkDataAccessObject implements LandmarkDataAccessInterface {
 
     private final String filePath;   // absolute or relative path
 
-    public JsonFileLandmarkDataAccessObject(String filePath) {
+    public JsonLandmarkDataAccessObject(String filePath) {
         this.filePath = filePath;   // e.g. "minimal_landmarks.json"
     }
 
