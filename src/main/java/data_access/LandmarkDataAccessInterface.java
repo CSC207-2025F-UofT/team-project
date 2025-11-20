@@ -2,6 +2,8 @@ package data_access;
 
 import entity.Landmark;
 
+import java.util.Map;
+
 public interface LandmarkDataAccessInterface {
     /**
      * Checks if the landmark exists.
@@ -25,9 +27,8 @@ public interface LandmarkDataAccessInterface {
 //    Landmark getLandmarkById(String landmarkId);
 
     /**
-      * Get landmark based on name.
-      * @param landmarkName the landmark name
-      * @return the Landmark object represented by the landmarkName
+      * Get a map of landmarks with key being the name and value being the landmark
+      * @return the map
       */
-    Landmark getLandmarkByName(String landmarkName);
+    Map<String, Landmark> getLandmarks();
 }

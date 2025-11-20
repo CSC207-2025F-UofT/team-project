@@ -55,7 +55,7 @@ public class JSONFileLandmarkDataAccessObject implements LandmarkDataAccessInter
     }
 
     @Override
-    public Landmark getLandmarkByName(String username) {
-        return landmarks.get(username);
+    public Map<String, Landmark> getLandmarks() {
+        return landmarks;
     }
 }
