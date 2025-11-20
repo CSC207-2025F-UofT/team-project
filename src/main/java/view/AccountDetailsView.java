@@ -135,9 +135,6 @@ public class AccountDetailsView extends JPanel implements ActionListener, Proper
                         currentUsername,
                         newUsername
                 );
-            } else {
-                // display that the username
-                // Print panel that says invalid username
             }
         }
     }
