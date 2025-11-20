@@ -1,7 +1,6 @@
 package interface_adaptor.Menu;
 
 import entity.MenuItem;
-import entity.Restaurant;
 
 import java.util.ArrayList;
 
