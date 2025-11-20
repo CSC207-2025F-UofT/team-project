@@ -1,12 +1,14 @@
 package ui;
 
-import controllers.PortfolioController;
 import use_case.case5.PortfolioViewModel;
 import use_case.case5.HoldingRow;
 import use_case.case5.SnapshotRow;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
+
+import interface_adapters.controllers.PortfolioController;
+
 import java.awt.*;
 import java.util.List;
 

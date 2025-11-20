@@ -1,9 +1,11 @@
 package ui;
 
-import controllers.SignUpController;
 import use_case.signup.SignUpOutputData;
 
 import javax.swing.*;
+
+import interface_adapters.controllers.SignUpController;
+
 import java.awt.*;
 
 public class SignUpView extends JFrame {

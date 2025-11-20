@@ -1,7 +1,7 @@
 package ui;
 
 import data.AlphaVantageAPI;
-import controllers.StockSearchController;
+import interface_adapters.controllers.StockSearchController;
 import use_case.stocksearch.StockSearchOutputData;
 
 import javax.swing.*;
@@ -21,9 +21,8 @@ public class StockSearchView extends JFrame {
     private final StockSearchController controller;
     private final AlphaVantageAPI api;
 
-    // top user + back
+    // top user
     private final JLabel userLabel = new JLabel();
-    private final JButton backButton = new JButton("Back to Dashboard");
 
     // search + suggestions
     private final JTextField searchField = new JTextField();
@@ -74,15 +73,11 @@ public class StockSearchView extends JFrame {
     private void initUI(String username) {
         JPanel topBar = new JPanel(new BorderLayout());
         JPanel leftTop = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        JPanel rightTop = new JPanel(new FlowLayout(FlowLayout.RIGHT));
 
         userLabel.setText("Logged in as: " + username);
         leftTop.add(userLabel);
 
-        rightTop.add(backButton);
-
         topBar.add(leftTop, BorderLayout.WEST);
-        topBar.add(rightTop, BorderLayout.EAST);
 
         JPanel searchCard = new JPanel();
         searchCard.setLayout(new BoxLayout(searchCard, BoxLayout.Y_AXIS));

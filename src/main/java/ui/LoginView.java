@@ -1,9 +1,11 @@
 package ui;
 
-import controllers.LoginController;
 import use_case.login.LoginOutputData;
 
 import javax.swing.*;
+
+import interface_adapters.controllers.LoginController;
+
 import java.awt.*;
 
 public class LoginView extends JFrame {
