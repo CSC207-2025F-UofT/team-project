@@ -3,12 +3,12 @@ package com.studyarc.entity;
 public class Task {
     private String name;
     private String duedate;
-    private String status;
+    private String completionstatus;
 
     public Task(String name, String duedate, String status) {
         this.name = name;
         this.duedate = duedate;
-        this.status = status;
+        this.completionstatus = status;
     }
 
     public String getName() {
@@ -28,10 +28,10 @@ public class Task {
     }
 
     public String getStatus() {
-        return this.status;
+        return this.completionstatus;
     }
 
     public void setStatus(String status) {
-        this.status = status;
+        this.completionstatus = status;
     }
 }

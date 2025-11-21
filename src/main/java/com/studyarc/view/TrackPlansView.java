@@ -11,16 +11,13 @@ import org.jetbrains.annotations.NotNull;
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import javax.swing.text.Document;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Random;
+import java.util.*;
 
 public class TrackPlansView extends JPanel implements PropertyChangeListener, ActionListener, DocumentListener {
     private static TrackPlansView instance;
@@ -106,12 +103,12 @@ public class TrackPlansView extends JPanel implements PropertyChangeListener, Ac
         this.buttonToPlanMap = new HashMap<>();
         this.trackPlansPanel.removeAll();
         if (plans == null || plans.isEmpty()) {
-            trackPlansPanel.add(new JLabel("You have no plans yet."));
+            trackPlansPanel.add(new JLabel("You have no plans yet. Go create new ones!"));
         } else {
             for (StudyPlan plan : plans) {
                 JPanel planPanel = createPlanPanel(plan);
                 trackPlansPanel.add(planPanel);
-                trackPlansPanel.add(Box.createVerticalStrut(15)); // space between plans
+                trackPlansPanel.add(Box.createVerticalStrut(15));
             }
         }
         trackPlansPanel.repaint();
@@ -144,7 +141,7 @@ public class TrackPlansView extends JPanel implements PropertyChangeListener, Ac
         this.titleToPlanMap.put(planTitleTextField, plan);//Add the title textfield in the map for each plan.
 
         // Delete Button for each plan
-        JButton deleteButton = new JButton("❌");
+        JButton deleteButton = new JButton("Delete " + "❌");
         deleteButton.addActionListener(this);
         this.buttonToPlanMap.put(deleteButton, plan);//Add the delete button in the map for each plan.
 
@@ -171,39 +168,23 @@ public class TrackPlansView extends JPanel implements PropertyChangeListener, Ac
             JButton downButton = new JButton("▼");
             JLabel milestoneLabel = new JLabel("milestone " + (i + 1) + " : " + m.getTitle());
 
+            // Check if all subtasks are completed
+            JLabel milestoneCompleted = new JLabel("✅");
+            milestoneCompleted.setVisible(true);
+            for (Task subtask : m.getSubtasks()) {
+                if (subtask.getStatus().equals("Not Started") || subtask.getStatus().equals("In Progress")){
+                    milestoneCompleted.setVisible(false);
+                }
+            }
+
             milestoneHeader.add(downButton);
             milestoneHeader.add(upButton);
             milestoneHeader.add(milestoneLabel);
+            milestoneHeader.add(milestoneCompleted);
 
             // SubTask Panel for each Milestone
             JPanel tasksPanel = new JPanel();
             tasksPanel.setLayout(new BoxLayout(tasksPanel, BoxLayout.Y_AXIS));
-
-            ArrayList<Task> tasks = m.getTasks();
-            for (int j = 0; j < tasks.size(); j++) {
-                Task t = tasks.get(j);
-
-                JPanel taskRow = new JPanel(new FlowLayout(FlowLayout.LEFT));
-                JLabel taskLabel = new JLabel("Task " + (j + 1) + ": " + t.getName() + "    ");
-
-                String d = t.getDuedate();
-                JLabel dueLabel = new JLabel("Due: " + d + "   ");
-
-                JComboBox statusComboBox = new JComboBox(TaskStatus);
-                statusComboBox.setSelectedItem(t.getStatus());
-
-                statusComboBox.addActionListener(new ActionListener() {
-                    @Override
-                    public void actionPerformed(ActionEvent e) {
-                        String selectedStatus = (String) statusComboBox.getSelectedItem();
-                        System.out.println(selectedStatus);
-                    }
-                });
-                taskRow.add(taskLabel);
-                taskRow.add(dueLabel);
-                taskRow.add(statusComboBox);
-                tasksPanel.add(taskRow);
-            }
 
             upButton.addActionListener(new ActionListener() {
                 @Override
@@ -223,8 +204,38 @@ public class TrackPlansView extends JPanel implements PropertyChangeListener, Ac
                     milestonePanel.repaint();
                 }
             });
+
+            ArrayList<Task> tasks = m.getSubtasks();
+            for (int j = 0; j < tasks.size(); j++) {
+                Task t = tasks.get(j);
+
+                JPanel taskRow = new JPanel(new FlowLayout(FlowLayout.LEFT));
+                JLabel taskLabel = new JLabel("Task " + (j + 1) + ": " + t.getName() + "    ");
+                String d = t.getDuedate();
+                JLabel dueLabel = new JLabel("Due: " + d + "   ");
+
+                //Later on could change String color based on the status.
+                JLabel statusLabel = new JLabel("Status: " + t.getStatus());
+
+//                JComboBox statusComboBox = new JComboBox(TaskStatus);
+//                statusComboBox.setSelectedItem(t.getStatus());
+//
+//
+//                statusComboBox.addActionListener(new ActionListener() {
+//                    @Override
+//                    public void actionPerformed(ActionEvent e) {
+//                        String selectedStatus = (String) statusComboBox.getSelectedItem();
+//                        System.out.println(selectedStatus);
+//                    }
+//                });
+                taskRow.add(taskLabel);
+                taskRow.add(dueLabel);
+                taskRow.add(statusLabel);
+                tasksPanel.add(taskRow);
+            }
+
             // tasks are originally invisible
-            tasksPanel.setVisible(true);
+            tasksPanel.setVisible(false);
 
             milestonePanel.add(milestoneHeader);
             milestonePanel.add(tasksPanel);
@@ -256,12 +267,12 @@ public class TrackPlansView extends JPanel implements PropertyChangeListener, Ac
         String[] taskstatus = {"Not Started", "In Progress", "Completed"};
         System.out.println(taskstatus[new Random().nextInt(3)]);
         Task doStep1 = new Task("Do step1", date, taskstatus[new Random().nextInt(3)]);
-        p1m1.getTasks().add(doStep1);
-        p1m1.getTasks().add(new Task("Do step2", date, taskstatus[new Random().nextInt(3)]));
+        p1m1.getSubtasks().add(doStep1);
+        p1m1.getSubtasks().add(new Task("Do step2", date, taskstatus[new Random().nextInt(3)]));
 
         Milestone p1m2 = new Milestone("Milesone 2");
-        p1m2.getTasks().add(doStep1);
-        p1m2.getTasks().add(new Task("Do step2", date, taskstatus[new Random().nextInt(3)]));
+        p1m2.getSubtasks().add(doStep1);
+        p1m2.getSubtasks().add(new Task("Do step2", date, taskstatus[new Random().nextInt(3)]));
 
         plan1.getMilestones().add(p1m1);
         plan1.getMilestones().add(p1m2);
@@ -270,12 +281,12 @@ public class TrackPlansView extends JPanel implements PropertyChangeListener, Ac
         StudyPlan plan2 = new StudyPlan("Plan 2", new ArrayList<>());
 
         Milestone p2m1 = new Milestone("Milestone 1");
-        p2m1.getTasks().add(doStep1);
-        p2m1.getTasks().add(new Task("Do step2", date, taskstatus[new Random().nextInt(3)]));
+        p2m1.getSubtasks().add(doStep1);
+        p2m1.getSubtasks().add(new Task("Do step2", date, taskstatus[new Random().nextInt(3)]));
 
         Milestone p2m2 = new Milestone("Milestone 2");
-        p2m2.getTasks().add(doStep1);
-        p2m2.getTasks().add(new Task("Do step2", date, taskstatus[new Random().nextInt(3)]));
+        p2m2.getSubtasks().add(doStep1);
+        p2m2.getSubtasks().add(new Task("Do step2", date, taskstatus[new Random().nextInt(3)]));
 
         plan2.getMilestones().add(p2m1);
         plan2.getMilestones().add(p2m2);
@@ -284,12 +295,12 @@ public class TrackPlansView extends JPanel implements PropertyChangeListener, Ac
         StudyPlan plan3 = new StudyPlan("Plan 3", new ArrayList<>());
 
         Milestone p3m1 = new Milestone("Milestone 1");
-        p3m1.getTasks().add(doStep1);
-        p3m1.getTasks().add(new Task("Do step2", date, taskstatus[new Random().nextInt(3)]));
+        p3m1.getSubtasks().add(doStep1);
+        p3m1.getSubtasks().add(new Task("Do step2", date, taskstatus[new Random().nextInt(3)]));
 
         Milestone p3m2 = new Milestone("Milestone 2");
-        p3m2.getTasks().add(doStep1);
-        p3m2.getTasks().add(new Task("Do step2", date, taskstatus[new Random().nextInt(3)]));
+        p3m2.getSubtasks().add(doStep1);
+        p3m2.getSubtasks().add(new Task("Do step2", date, taskstatus[new Random().nextInt(3)]));
 
         plan3.getMilestones().add(p3m1);
         plan3.getMilestones().add(p3m2);
@@ -298,12 +309,12 @@ public class TrackPlansView extends JPanel implements PropertyChangeListener, Ac
         StudyPlan plan4 = new StudyPlan("Plan 4", new ArrayList<>());
 
         Milestone p4m1 = new Milestone("Milestone 1");
-        p4m1.getTasks().add(doStep1);
-        p4m1.getTasks().add(new Task("Do step2", date, taskstatus[new Random().nextInt(3)]));
+        p4m1.getSubtasks().add(doStep1);
+        p4m1.getSubtasks().add(new Task("Do step2", date, taskstatus[new Random().nextInt(3)]));
 
         Milestone p4m2 = new Milestone("Milestone 2");
-        p4m2.getTasks().add(doStep1);
-        p4m2.getTasks().add(new Task("Do step2", date, taskstatus[new Random().nextInt(3)]));
+        p4m2.getSubtasks().add(doStep1);
+        p4m2.getSubtasks().add(new Task("Do step2", date, taskstatus[new Random().nextInt(3)]));
 
         plan4.getMilestones().add(p4m1);
         plan4.getMilestones().add(p4m2);
@@ -311,12 +322,12 @@ public class TrackPlansView extends JPanel implements PropertyChangeListener, Ac
         StudyPlan plan5 = new StudyPlan("Plan 5", new ArrayList<>());
 
         Milestone p5m1 = new Milestone("Milestone 1");
-        p5m1.getTasks().add(doStep1);
-        p5m1.getTasks().add(new Task("Do step2", date, taskstatus[new Random().nextInt(3)]));
+        p5m1.getSubtasks().add(doStep1);
+        p5m1.getSubtasks().add(new Task("Do step2", date, taskstatus[new Random().nextInt(3)]));
 
         Milestone p5m2 = new Milestone("Milestone 2");
-        p5m2.getTasks().add(doStep1);
-        p5m2.getTasks().add(new Task("Do step2", date, taskstatus[new Random().nextInt(3)]));
+        p5m2.getSubtasks().add(doStep1);
+        p5m2.getSubtasks().add(new Task("Do step2", date, taskstatus[new Random().nextInt(3)]));
 
         plan5.getMilestones().add(p5m1);
         plan5.getMilestones().add(p5m2);
@@ -325,12 +336,12 @@ public class TrackPlansView extends JPanel implements PropertyChangeListener, Ac
         StudyPlan plan6 = new StudyPlan("Plan 6", new ArrayList<>());
 
         Milestone p6m1 = new Milestone("Milestone 1");
-        p6m1.getTasks().add(doStep1);
-        p6m1.getTasks().add(new Task("Do step2", date, taskstatus[new Random().nextInt(3)]));
+        p6m1.getSubtasks().add(doStep1);
+        p6m1.getSubtasks().add(new Task("Do step2", date, taskstatus[new Random().nextInt(3)]));
 
         Milestone p6m2 = new Milestone("Milestone 2");
-        p6m2.getTasks().add(doStep1);
-        p6m2.getTasks().add(new Task("Do step2", date, taskstatus[new Random().nextInt(3)]));
+        p6m2.getSubtasks().add(doStep1);
+        p6m2.getSubtasks().add(new Task("Do step2", date, taskstatus[new Random().nextInt(3)]));
 
         plan6.getMilestones().add(p6m1);
         plan6.getMilestones().add(p6m2);
@@ -357,28 +368,64 @@ public class TrackPlansView extends JPanel implements PropertyChangeListener, Ac
         JButton button = (JButton) e.getSource();
         if (this.buttonToPlanMap.containsKey(button)) {
             StudyPlan plan = this.buttonToPlanMap.get(button);
-            System.out.println("Trying to delete: " + plan.getTitle());
             this.deletePlanController.execute(plan);
         } else {
-
             System.out.println("click save button");
+            handleSavingEvent(e);
+        }
+    }
+
+    private void handleSavingEvent(ActionEvent e) {
+        TrackPlanState state = trackPlanViewModel.getState();
+        ArrayList<StudyPlan> currentPlansInView = state.getStudyPlans();
+        Set<String> planTitles = new HashSet<>();
+        for (StudyPlan plan : currentPlansInView) {
+            if (plan.getTitle().strip().isEmpty()){
+                JOptionPane.showMessageDialog(this, "Empty Plan Title! Not allowed!😡😡");
+                System.out.println("Empty Plan Title! Not allowed!");
+                return;
+            }
+            planTitles.add(plan.getTitle());
+        }
+        if (planTitles.size() == currentPlansInView.size()) {
+            System.out.println("All Plans have different names, good to save!");
+        } else {
+            JOptionPane.showMessageDialog(this, "StudyPlans CAN NOT have the same title😡😡");
+            System.out.println("There are some repetitive names in Plans, fail to save");
         }
     }
 
 
-// DocumentListener for the plan title input field
+    // DocumentListener for the plan title input field
     @Override
     public void insertUpdate(DocumentEvent e) {
+        handleTypingEvent(e);
         System.out.println("insert");
+
     }
 
     @Override
     public void removeUpdate(DocumentEvent e) {
+        handleTypingEvent(e);
         System.out.println("remove");
     }
 
     @Override
     public void changedUpdate(DocumentEvent e) {
+        handleTypingEvent(e);
         System.out.println("changed");
+    }
+
+    private void handleTypingEvent(DocumentEvent e) {
+        Document doc = e.getDocument();
+        Set<JTextField> textFields = titleToPlanMap.keySet();
+        for (JTextField textField : textFields) {
+            if (textField.getDocument() == doc) {
+                System.out.println("Find the field of the Plan!");
+                titleToPlanMap.get(textField).setTitle(textField.getText());
+                System.out.println(titleToPlanMap.get(textField).getTitle());
+                break;
+            }
+        }
     }
 }
