@@ -4,15 +4,13 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e8f37d7d-e497-4269-85ef-a78d9eb08446" name="Changes" comment="fixing errors with sportsbet, dispose bethistoryframe on go back">
-    <list default="true" id="e8f37d7d-e497-4269-85ef-a78d9eb08446" name="Changes" comment="organization and renaming"/>
-      <change afterPath="$PROJECT_DIR$/odds.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/use_case/GameSelectInteractor.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/use_case/GameSelectOutputBoundary.java" afterDir="false" />
+    <list default="true" id="e8f37d7d-e497-4269-85ef-a78d9eb08446" name="Changes" comment="walletUI balance now interacts with userbalance">
       <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/odds.txt" beforeDir="false" afterPath="$PROJECT_DIR$/odds.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/entity/Sportbet.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/entity/Sportbet.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/view/BetHistoryFrame.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/view/BetHistoryFrame.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/view/WalletUI.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/view/WalletUI.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/view/SportbetFrame.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/view/SportbetFrame.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -44,7 +42,7 @@
   <component name="GithubPullRequestsUISettings">{
   &quot;selectedUrlAndAccountId&quot;: {
     &quot;url&quot;: &quot;https://github.com/wi11iam42/team-project.git&quot;,
-    &quot;accountId&quot;: &quot;116a6b68-e6d8-4194-8361-957d5c2f01af&quot;
+    &quot;accountId&quot;: &quot;24a04282-7586-45bc-b545-c1384e2fffd9&quot;
   }
 }</component>
   <component name="ProblemsViewState">
@@ -58,24 +56,24 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "Application.AlternativeMain.executor": "Run",
-    "Application.Main.executor": "Run",
-    "Application.MinesView.executor": "Run",
-    "Application.blackjackview.executor": "Run",
-    "Application.minesview.executor": "Run",
-    "ModuleVcsDetector.initialDetectionPerformed": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "SONARLINT_PRECOMMIT_ANALYSIS": "true",
-    "git-widget-placeholder": "issei",
-    "ignore.virus.scanning.warn.message": "true",
-    "kotlin-language-version-configured": "true",
-    "node.js.selected.package.tslint": "(autodetect)"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Application.AlternativeMain.executor&quot;: &quot;Run&quot;,
+    &quot;Application.Main.executor&quot;: &quot;Run&quot;,
+    &quot;Application.MinesView.executor&quot;: &quot;Run&quot;,
+    &quot;Application.blackjackview.executor&quot;: &quot;Run&quot;,
+    &quot;Application.minesview.executor&quot;: &quot;Run&quot;,
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;SONARLINT_PRECOMMIT_ANALYSIS&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;#27 on issei&quot;,
+    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;
   }
-}]]></component>
+}</component>
   <component name="RunManager">
     <configuration default="true" type="JetRunConfigurationType">
       <module name="team-project" />

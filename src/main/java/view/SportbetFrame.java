@@ -82,6 +82,7 @@ public class SportbetFrame extends JFrame {
             }
             if(user.checkwithdraw(amount)){
                 user.addBet(selected,amount);
+                selected.setStatus("Bet Placed");
                 user.viewBets();
                 JOptionPane.showMessageDialog(this,
                         "Bet placed: " + selected.toString() + " for $" + amount);
