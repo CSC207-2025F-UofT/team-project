@@ -5,5 +5,5 @@ package game.interface_adapter;
  * is currently active. An initial state of "" is used.
  */
 public class ViewManagerModel {
-    
+
 }
