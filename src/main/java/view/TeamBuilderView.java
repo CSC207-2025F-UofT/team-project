@@ -46,17 +46,17 @@ public class TeamBuilderView extends JPanel implements ActionListener, PropertyC
 
         teamDisplayPanel.setLayout(new GridLayout(3, 2, 5, 5));
 
-        DisplayPokemonInTeamJPanel teamSlot0 = new DisplayPokemonInTeamJPanel();
+        JPanel teamSlot0 = new DisplayPokemonInTeamJPanel();
         teamDisplayPanel.add(teamSlot0);
-        DisplayPokemonInTeamJPanel teamSlot1 = new DisplayPokemonInTeamJPanel();
+        JPanel teamSlot1 = new DisplayPokemonInTeamJPanel();
         teamDisplayPanel.add(teamSlot1);
-        DisplayPokemonInTeamJPanel teamSlot2 = new DisplayPokemonInTeamJPanel();
+        JPanel teamSlot2 = new DisplayPokemonInTeamJPanel();
         teamDisplayPanel.add(teamSlot2);
-        DisplayPokemonInTeamJPanel teamSlot3 = new DisplayPokemonInTeamJPanel();
+        JPanel teamSlot3 = new DisplayPokemonInTeamJPanel();
         teamDisplayPanel.add(teamSlot3);
-        DisplayPokemonInTeamJPanel teamSlot4 = new DisplayPokemonInTeamJPanel();
+        JPanel teamSlot4 = new DisplayPokemonInTeamJPanel();
         teamDisplayPanel.add(teamSlot4);
-        DisplayPokemonInTeamJPanel teamSlot5 = new DisplayPokemonInTeamJPanel();
+        JPanel teamSlot5 = new DisplayPokemonInTeamJPanel();
         teamDisplayPanel.add(teamSlot5);
 
         setTeamSlotBorders();
@@ -123,10 +123,12 @@ public class TeamBuilderView extends JPanel implements ActionListener, PropertyC
 
                         @Override
                         public void mouseEntered(MouseEvent e) {
+                            component.setBorder(BorderFactory.createLineBorder(Color.red));
                         }
 
                         @Override
                         public void mouseExited(MouseEvent e) {
+                            component.setBorder(BorderFactory.createLineBorder(Color.black));
                         }
                     }
             );
