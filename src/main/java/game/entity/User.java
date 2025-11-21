@@ -9,7 +9,7 @@ import java.util.*;
     */
 
 public class User {
-        public int coinCount;
+        private int coinCount;
         private int clickBonus;
         private int clickBonusTime;//helper for counting the times of upgrades
         private int unlockedSlots;

@@ -1,4 +1,7 @@
 package game.entity;
+import game.Constants.java;
+
+import game.Constants;
 
 import game.Constants;
 
@@ -6,17 +9,19 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class Pet {
-    // petType == 'Dog' || petType == 'Cat'
-    // petBreed is a valid breed of Dog (if applicable) or Cat (if applicable)
-    // visualURL is a valid URL
-    // affectionLevel >= 0
-    // energyLevel >= 0
-    // clickingSpeed >= 0
-    // sellingPrice >= 0
+    /**
+     * petType == 'Dog' || petType == 'Cat'
+     * petBreed is a valid breed of Dog (if applicable) or Cat (if applicable)
+     * visualURL is a valid URL
+     * affectionLevel >= 0
+     * energyLevel >= 0
+     * clickingSpeed >= 0
+     * sellingPrice >= 0
+     */
 
     final String petType;
     final String petBreed;
-    // final String visualURL;
+//  final String visualURL;
     int affectionXP;
     int affectionLevel;
     int energyLevel;
