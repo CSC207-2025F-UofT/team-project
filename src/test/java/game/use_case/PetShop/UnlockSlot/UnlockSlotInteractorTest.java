@@ -96,7 +96,7 @@ public class UnlockSlotInteractorTest {
         interactor.execute(new UnlockSlotInputData());
         assertTrue(outputBoundary.lastOutputData.isSuccess());
         assertEquals(1000-storeCurrentPrice, dataAccess.getUser().coinCount);
-        assertEquals(3, dataAccess.getUser().getUnlockedSlots());
+        assertEquals(Constants.INITIAL_SLOTS+1, dataAccess.getUser().getUnlockedSlots());
 
         int storeCurrentCoin = dataAccess.getUser().coinCount;
         storeCurrentPrice = dataAccess.getUser().getCurrentUnlockSlotPrice();
