@@ -22,26 +22,25 @@ import use_case.spending_report.GenerateReportController;
 
 public class SpendingReportViewModel extends JFrame {
     private final JComboBox<String> monthDropdown;
-    private JComboBox<String> chartTypeDropdown;
+    private final JComboBox<String> chartTypeDropdown;
     private final JPanel chartPanelContainer;
     private GenerateReportController controller;
     private final int userId = 1;
 
-    public SpendingReportViewModel() { // Remove controller from constructor
-        // UI setup
+    public SpendingReportViewModel() {
         setTitle("Monthly Spending Report");
         setSize(900, 600);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new BorderLayout());
 
-        // Dropdown at the top
         JPanel topPanel = new JPanel();
         monthDropdown = new JComboBox<>(new String[]{
             "January 2025", "February 2025", "March 2025", "April 2025",
             "May 2025", "June 2025", "July 2025", "August 2025",
             "September 2025", "October 2025", "November 2025"
         });
-        JComboBox<String> chartTypeDropdown = new JComboBox<>(new String[]{
+
+        chartTypeDropdown = new JComboBox<>(new String[]{
             "Bar Chart", "Pie Chart"
         });
 
@@ -60,6 +59,13 @@ public class SpendingReportViewModel extends JFrame {
                 controller.onGenerateReportClicked(userId, selectedMonth);
             } else {
                 System.err.println("Controller not set yet!");
+            }
+        });
+
+        chartTypeDropdown.addActionListener((ActionEvent e) -> {
+            if (controller != null) {
+                String selectedMonth = (String) monthDropdown.getSelectedItem();
+                controller.onGenerateReportClicked(userId, selectedMonth);
             }
         });
     }

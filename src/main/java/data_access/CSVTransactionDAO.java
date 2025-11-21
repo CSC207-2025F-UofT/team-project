@@ -69,13 +69,27 @@ public class CSVTransactionDAO implements TransactionDataAccess {
     
     @Override
     public List<Transaction> getTransactions(int userId, String month) {
+        System.out.println("=== Getting transactions for: " + month + " ==="); // testing
         List<Transaction> filteredTransactions = new ArrayList<>();
         String targetMonthYear = convertToYearMonth(month);
+        System.out.println("Looking for month format: " + targetMonthYear); // testing
         
         for (Transaction transaction : transactions) {
-            String transactionMonthYear = convertToYearMonth(transaction.getMonthYear());
+            String transactionDate = transaction.getDate().toString(); // format: YYYY-MM-DD
+            String transactionMonthYear = transactionDate.substring(0, 7); // get YYYY-MM
+        
             if (targetMonthYear.equals(transactionMonthYear)) {
                 filteredTransactions.add(transaction);
+            }
+        }
+
+        System.out.println("Found " + filteredTransactions.size() + " transactions for " + month); // testing
+        
+        if (filteredTransactions.isEmpty()) { // testing
+            System.out.println("No transactions found for " + month + ". Available months in data:");
+            for (Transaction t : transactions) {
+                String date = t.getDateString();
+                System.out.println("  - " + date + " | " + t.getCategory());
             }
         }
         
@@ -88,12 +102,18 @@ public class CSVTransactionDAO implements TransactionDataAccess {
         String year = parts[1];
         
         java.util.Map<String, String> monthMap = new java.util.HashMap<>();
-        monthMap.put("Jan", "01"); monthMap.put("Feb", "02"); 
-        monthMap.put("Mar", "03"); monthMap.put("Apr", "04");
-        monthMap.put("May", "05"); monthMap.put("Jun", "06");
-        monthMap.put("Jul", "07"); monthMap.put("Aug", "08");
-        monthMap.put("Sep", "09"); monthMap.put("Oct", "10");
-        monthMap.put("Nov", "11"); monthMap.put("Dec", "12");
+        monthMap.put("January", "01"); 
+        monthMap.put("February", "02"); 
+        monthMap.put("March", "03"); 
+        monthMap.put("April", "04");
+        monthMap.put("May", "05"); 
+        monthMap.put("June", "06");
+        monthMap.put("July", "07"); 
+        monthMap.put("August", "08");
+        monthMap.put("September", "09"); 
+        monthMap.put("October", "10");
+        monthMap.put("November", "11"); 
+        monthMap.put("December", "12");
         
         return year + "-" + monthMap.get(monthName);
     }
