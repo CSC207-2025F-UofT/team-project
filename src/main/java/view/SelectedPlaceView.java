@@ -5,10 +5,19 @@ import interface_adapter.selectedplace.SelectedPlaceController;
 import interface_adapter.selectedplace.SelectedPlaceState;
 import interface_adapter.selectedplace.SelectedPlaceViewModel;
 
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
+import org.json.JSONArray;
+import org.json.JSONObject;
+
 import javax.swing.*;
 import java.awt.*;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.nio.charset.StandardCharsets;
 
 public class SelectedPlaceView extends JPanel implements PropertyChangeListener {
 
@@ -25,8 +34,16 @@ public class SelectedPlaceView extends JPanel implements PropertyChangeListener 
     private JLabel hoursLabel;
     private JLabel imageLabel;
 
-    // NEW: keep reference so we can style/disable it
     private JButton checkInButton;
+
+    // ====== GOOGLE PLACES CONFIG ======
+    private static final String PLACES_API_KEY = "AIzaSyCk9bPskLw7eUI-_Y9G6tW8eDAE-iXI8Ms";
+    private static final MediaType JSON
+            = MediaType.parse("application/json; charset=utf-8");
+    private final OkHttpClient httpClient = new OkHttpClient();
+
+    // keep a reference to the current worker so we can cancel if needed
+    private SwingWorker<ImageIcon, Void> currentPhotoWorker;
 
     public SelectedPlaceView(SelectedPlaceViewModel viewModel,
                              ViewManagerModel viewManagerModel) {
@@ -89,29 +106,23 @@ public class SelectedPlaceView extends JPanel implements PropertyChangeListener 
         checkInButton = createBigButton("Check In");
         JButton notesButton = createBigButton("Notes");
 
-        // Check In: call controller once, then turn green + disable
         checkInButton.addActionListener(e -> {
             if (!checkInButton.isEnabled()) {
-                return; // already clicked
+                return;
             }
-
             if (controller != null) {
                 controller.checkIn();
             }
-
-            // visual change to green & disabled
             checkInButton.setBackground(new Color(0, 180, 0));
             checkInButton.setForeground(Color.WHITE);
             checkInButton.setBorder(BorderFactory.createLineBorder(new Color(0, 140, 0), 2));
             checkInButton.setEnabled(false);
         });
 
-        // Notes: still just delegates to controller
         notesButton.addActionListener(e -> {
             if (controller != null) controller.notes();
         });
 
-        // center vertically
         leftPanel.add(Box.createVerticalGlue());
         leftPanel.add(checkInButton);
         leftPanel.add(Box.createRigidArea(new Dimension(0, 30)));
@@ -127,9 +138,8 @@ public class SelectedPlaceView extends JPanel implements PropertyChangeListener 
         imageLabel = new JLabel();
         imageLabel.setPreferredSize(new Dimension(600, 300));
         imageLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
-        ImageIcon img = new ImageIcon("src/main/resources/placeholder_landmark.jpg");
-        Image scaled = img.getImage().getScaledInstance(600, 300, Image.SCALE_SMOOTH);
-        imageLabel.setIcon(new ImageIcon(scaled));
+        // start with placeholder
+        setPlaceholderImage();
 
         landmarkNameLabel = new JLabel("Landmark Name");
         landmarkNameLabel.setFont(new Font("Arial", Font.BOLD, 24));
@@ -197,7 +207,7 @@ public class SelectedPlaceView extends JPanel implements PropertyChangeListener 
         addressLabel.setText(state.getAddress());
         hoursLabel.setText("Hours: " + state.getOpenHours());
 
-        // whenever a new place is loaded, reset Check In button appearance
+        // reset Check In button appearance
         if (checkInButton != null) {
             checkInButton.setEnabled(true);
             checkInButton.setBackground(Color.WHITE);
@@ -206,9 +216,135 @@ public class SelectedPlaceView extends JPanel implements PropertyChangeListener 
                     BorderFactory.createLineBorder(new Color(0, 102, 204), 2)
             );
         }
+
+        // load photo for this landmark name
+        loadPhotoForLandmarkAsync(state.getLandmarkName());
     }
 
     public String getViewName() {
         return viewName;
+    }
+
+    // ================== PHOTO LOADING ==================
+
+    private void setPlaceholderImage() {
+        ImageIcon img = new ImageIcon("src/main/resources/placeholder_landmark.jpg");
+        Image scaled = img.getImage().getScaledInstance(600, 300, Image.SCALE_SMOOTH);
+        imageLabel.setIcon(new ImageIcon(scaled));
+    }
+
+    private void loadPhotoForLandmarkAsync(String landmarkName) {
+        if (landmarkName == null || landmarkName.isBlank()) {
+            setPlaceholderImage();
+            return;
+        }
+
+        // cancel previous worker if still running
+        if (currentPhotoWorker != null && !currentPhotoWorker.isDone()) {
+            currentPhotoWorker.cancel(true);
+        }
+
+        currentPhotoWorker = new SwingWorker<>() {
+            @Override
+            protected ImageIcon doInBackground() throws Exception {
+                try {
+                    String photoName = findPhotoNameForPlace(landmarkName);
+                    if (photoName == null) {
+                        return null;
+                    }
+                    return fetchPhotoIcon(photoName);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    return null;
+                }
+            }
+
+            @Override
+            protected void done() {
+                if (isCancelled()) return;
+                try {
+                    ImageIcon icon = get();
+                    if (icon != null) {
+                        imageLabel.setIcon(icon);
+                    } else {
+                        setPlaceholderImage();
+                    }
+                    revalidate();
+                    repaint();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    setPlaceholderImage();
+                }
+            }
+        };
+
+        currentPhotoWorker.execute();
+    }
+
+    /**
+     * Uses Places Text Search (New) to find a place and return first photo name.
+     */
+    private String findPhotoNameForPlace(String textQuery) throws Exception {
+        // POST https://places.googleapis.com/v1/places:searchText
+        String url = "https://places.googleapis.com/v1/places:searchText";
+
+        JSONObject bodyJson = new JSONObject();
+        bodyJson.put("textQuery", textQuery);
+        bodyJson.put("maxResultCount", 1);
+
+        RequestBody body = RequestBody.create(bodyJson.toString(), JSON);
+
+        Request request = new Request.Builder()
+                .url(url)
+                .post(body)
+                .addHeader("Content-Type", "application/json")
+                .addHeader("X-Goog-Api-Key", PLACES_API_KEY)
+                .addHeader("X-Goog-FieldMask", "places.photos") // only need photos
+                .build();
+
+        try (Response response = httpClient.newCall(request).execute()) {
+            if (!response.isSuccessful() || response.body() == null) {
+                return null;
+            }
+            String resp = response.body().string();
+            JSONObject json = new JSONObject(resp);
+            JSONArray places = json.optJSONArray("places");
+            if (places == null || places.length() == 0) {
+                return null;
+            }
+            JSONObject place = places.getJSONObject(0);
+            JSONArray photos = place.optJSONArray("photos");
+            if (photos == null || photos.length() == 0) {
+                return null;
+            }
+            JSONObject photo = photos.getJSONObject(0);
+            return photo.optString("name", null); // e.g. "places/PLACE_ID/photos/PHOTO_RESOURCE"
+        }
+    }
+
+    /**
+     * Uses Place Photos (New) to download the actual image for a given photo name.
+     */
+    private ImageIcon fetchPhotoIcon(String photoName) throws Exception {
+        // GET https://places.googleapis.com/v1/NAME/media?maxHeightPx=300&maxWidthPx=600&key=API_KEY
+        String url = "https://places.googleapis.com/v1/"
+                + photoName
+                + "/media?maxHeightPx=300&maxWidthPx=600&key="
+                + PLACES_API_KEY;
+
+        Request request = new Request.Builder()
+                .url(url)
+                .get()
+                .build();
+
+        try (Response response = httpClient.newCall(request).execute()) {
+            if (!response.isSuccessful() || response.body() == null) {
+                return null;
+            }
+            byte[] bytes = response.body().bytes();
+            ImageIcon icon = new ImageIcon(bytes);
+            Image scaled = icon.getImage().getScaledInstance(600, 300, Image.SCALE_SMOOTH);
+            return new ImageIcon(scaled);
+        }
     }
 }
