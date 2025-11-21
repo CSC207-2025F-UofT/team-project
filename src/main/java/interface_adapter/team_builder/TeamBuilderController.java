@@ -31,8 +31,8 @@ public class TeamBuilderController {
         userTeamBuilderUseCaseInteractor.removeFromTeam(buildPokemonTeamInputData);
     }
 
-    public void saveTeam(String name, Team team) throws IOException {
-        final BuildPokemonTeamInputData buildPokemonTeamInputData = new BuildPokemonTeamInputData(name, team);
+    public void saveTeam(Team team) throws IOException {
+        final BuildPokemonTeamInputData buildPokemonTeamInputData = new BuildPokemonTeamInputData(team.getTeamName(), team);
         userTeamBuilderUseCaseInteractor.saveTeam(buildPokemonTeamInputData);
     }
 

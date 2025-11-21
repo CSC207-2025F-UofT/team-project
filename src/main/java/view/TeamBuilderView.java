@@ -37,12 +37,10 @@ public class TeamBuilderView extends JPanel implements ActionListener, PropertyC
         final JLabel title = new JLabel(TeamBuilderViewModel.TITLE_LABEL);
         title.setAlignmentX(CENTER_ALIGNMENT);
 
+        teamNameInputField.setText(teamBuilderViewModel.getState().getTeam().getTeamName());
         final LabelTextPanel teamNameInfo = new LabelTextPanel(
                 new JLabel(TeamBuilderViewModel.TEAM_NAME_LABEL), teamNameInputField);
 
-        final JPanel buttons = new JPanel();
-        saveButton = new JButton(TeamBuilderViewModel.SAVE_BUTTON_LABEL);
-        buttons.add(saveButton);
 
         teamDisplayPanel.setLayout(new GridLayout(3, 2, 5, 5));
 
@@ -63,13 +61,17 @@ public class TeamBuilderView extends JPanel implements ActionListener, PropertyC
         addTeamSlotMouseListeners();
         updateSlotDisplays();
 
+        final JPanel buttons = new JPanel();
+        saveButton = new JButton(TeamBuilderViewModel.SAVE_BUTTON_LABEL);
+        buttons.add(saveButton);
+
         saveButton.addActionListener(
                 new ActionListener() {
                     public void actionPerformed(ActionEvent evt) {
                         if (evt.getSource().equals(saveButton)) {
                             final TeamBuilderState currentState = teamBuilderViewModel.getState();
                             try {
-                                teamBuilderController.saveTeam(currentState.getTeamName(), currentState.getTeam());
+                                teamBuilderController.saveTeam(currentState.getTeam());
                             } catch (IOException e) {
                                 JOptionPane.showMessageDialog(null, "Error saving team");
                             }
@@ -147,7 +149,7 @@ public class TeamBuilderView extends JPanel implements ActionListener, PropertyC
 
             private void documentListenerHelper() {
                 final TeamBuilderState currentState = teamBuilderViewModel.getState();
-                currentState.setTeamName(teamNameInputField.getText());
+                currentState.getTeam().setTeamName(teamNameInputField.getText());
                 teamBuilderViewModel.setState(currentState);
             }
 
