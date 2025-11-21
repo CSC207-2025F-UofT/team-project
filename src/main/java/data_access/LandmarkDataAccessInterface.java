@@ -19,4 +19,5 @@ public interface LandmarkDataAccessInterface {
      * @return True if the landmark associated with the name exists, false otherwise
      */
     boolean existsByName(String landmarkName);
+    Landmark findByName(String name);
 }

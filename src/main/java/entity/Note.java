@@ -16,6 +16,19 @@ public class Note {
         this.createdAt = Instant.now();
         this.updatedAt = this.createdAt;
     }
+
+    public Note(String noteId,
+                Landmark landmark,
+                String content,
+                Instant createdAt,
+                Instant updatedAt) {
+        this.noteId = noteId;
+        this.landmark = landmark;
+        this.content = content;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
+    }
+
     public String getNoteId() {
         return noteId;
     }

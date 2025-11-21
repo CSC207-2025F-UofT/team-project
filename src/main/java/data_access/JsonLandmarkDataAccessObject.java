@@ -41,12 +41,9 @@ public class JsonLandmarkDataAccessObject implements LandmarkDataAccessInterface
                 String name = o.getString("name");
                 double lat = o.getDouble("latitude");
                 double lng = o.getDouble("longitude");
-
                 // optional id, fallback if missing
                 String id = o.has("id") ? o.getString("id") : name.replace(" ", "_").toLowerCase();
-
                 Location loc = new Location(lat, lng);
-
                 // Your constructor requires LandmarkInfo so create a dummy one
                 LandmarkInfo info = new LandmarkInfo(" ", " ", " ", " ");
 
@@ -74,4 +71,15 @@ public class JsonLandmarkDataAccessObject implements LandmarkDataAccessInterface
         }
         return false;
     }
+
+    @Override
+    public Landmark findByName(String name) {
+        for (Landmark lm : getLandmarks()) {
+            if (lm.getLandmarkName().equalsIgnoreCase(name)) {
+                return lm;
+            }
+        }
+        throw new RuntimeException("Landmark not found: " + name);
+    }
+
 }
