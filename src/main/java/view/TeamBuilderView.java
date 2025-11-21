@@ -27,6 +27,17 @@ public class TeamBuilderView extends JPanel implements ActionListener, PropertyC
 
     private final JButton saveButton;
 
+    private final JPanel pokemonActionPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 0, 70));
+    private final JButton buttonAdd = new JButton("Add");
+    private final JButton buttonRemove = new JButton("Remove");
+    public JPanel[] teamSlots = new JPanel[6];
+    private int currentSlotIndex = -1;
+
+
+
+
+
+
     public TeamBuilderView(TeamBuilderViewModel teamBuilderViewModel) {
 
         this.teamBuilderViewModel = teamBuilderViewModel;
@@ -44,6 +55,17 @@ public class TeamBuilderView extends JPanel implements ActionListener, PropertyC
 
         teamDisplayPanel.setLayout(new GridLayout(3, 2, 5, 5));
 
+//        teamSlot0.setLayout(new FlowLayout(FlowLayout.CENTER, 0, 0));
+//        teamSlot0.revalidate();
+//        teamSlot0.repaint();
+
+        pokemonActionPanel.add(buttonAdd);
+        pokemonActionPanel.add(buttonRemove);
+        buttonAdd.setVisible(false);
+        buttonRemove.setVisible(false);
+
+
+
         JPanel teamSlot0 = new DisplayPokemonInTeamJPanel();
         teamDisplayPanel.add(teamSlot0);
         JPanel teamSlot1 = new DisplayPokemonInTeamJPanel();
@@ -56,6 +78,15 @@ public class TeamBuilderView extends JPanel implements ActionListener, PropertyC
         teamDisplayPanel.add(teamSlot4);
         JPanel teamSlot5 = new DisplayPokemonInTeamJPanel();
         teamDisplayPanel.add(teamSlot5);
+
+        teamSlots[0] = teamSlot0;
+        teamSlots[1] = teamSlot1;
+        teamSlots[2] = teamSlot2;
+        teamSlots[3] = teamSlot3;
+        teamSlots[4] = teamSlot4;
+        teamSlots[5] = teamSlot5;
+
+
 
         setTeamSlotBorders();
         addTeamSlotMouseListeners();
@@ -80,6 +111,38 @@ public class TeamBuilderView extends JPanel implements ActionListener, PropertyC
                     }
                 }
         );
+        buttonAdd.addActionListener(
+                new ActionListener() {
+                    public void actionPerformed(ActionEvent evt) {
+                        TeamBuilderState currentState = teamBuilderViewModel.getState();
+                        try {
+                            teamBuilderController.removeFromTeam("", currentState.getTeam(), currentSlotIndex);
+                            teamBuilderController.switchToPokemonLookupView(currentSlotIndex);
+                            buttonAdd.setVisible(false);
+                            buttonRemove.setVisible(false);
+                            updateSlotDisplays();
+                        } catch (IOException e) {
+                            throw new RuntimeException(e);
+                        }
+                    }
+                }
+        );
+        buttonRemove.addActionListener(
+                new ActionListener() {
+                    public void actionPerformed(ActionEvent evt) {
+                        TeamBuilderState currentState = teamBuilderViewModel.getState();
+                        try {
+                            teamBuilderController.removeFromTeam("", currentState.getTeam(), currentSlotIndex);
+                            buttonAdd.setVisible(false);
+                            buttonRemove.setVisible(false);
+                            updateSlotDisplays();
+                        } catch (IOException e) {
+                            throw new RuntimeException(e);
+                        }
+                    }
+                }
+        );
+
 
         addTeamNameListener();
 
@@ -109,12 +172,30 @@ public class TeamBuilderView extends JPanel implements ActionListener, PropertyC
             JPanel component = (JPanel) teamDisplayPanel.getComponent(i);
             component.addMouseListener(
                     new MouseListener() {
+
                         @Override
                         public void mouseClicked(MouseEvent e) {
                         }
 
                         @Override
                         public void mousePressed(MouseEvent evt) {
+                            final TeamBuilderState currentState = teamBuilderViewModel.getState();
+                            currentSlotIndex = index;
+                            if (currentState.getTeam().getPokemon(index) != null){
+                                    JPanel currentScreen = teamSlots[index];
+
+//                                    currentScreen.removeAll();
+                                    currentScreen.add(pokemonActionPanel);
+                                    buttonAdd.setVisible(true);
+                                    buttonRemove.setVisible(true);
+                                    currentScreen.revalidate();
+                                    currentScreen.repaint();
+
+                                    return;
+                            }
+
+                            buttonAdd.setVisible(false);
+                            buttonRemove.setVisible(false);
                             teamBuilderController.switchToPokemonLookupView(index);
                             System.out.println("Pokemon Slot " + index + " clicked");
                         }
@@ -186,4 +267,18 @@ public class TeamBuilderView extends JPanel implements ActionListener, PropertyC
     public void propertyChange(PropertyChangeEvent evt) {
         updateSlotDisplays();
     }
+
+    public void addPokemonActionListener(ActionListener actionListener) {
+        System.out.println("add button was hit");
+        buttonAdd.addActionListener(actionListener);
+    }
+
+    public void removePokemonActionListener(ActionListener actionListener) {
+        System.out.println("remove button was hit");
+        buttonRemove.addActionListener(actionListener);
+    }
+
+
+
+
 }
