@@ -5,6 +5,11 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="e8f37d7d-e497-4269-85ef-a78d9eb08446" name="Changes" comment="fixing errors with sportsbet, dispose bethistoryframe on go back">
+    <list default="true" id="e8f37d7d-e497-4269-85ef-a78d9eb08446" name="Changes" comment="organization and renaming"/>
+      <change afterPath="$PROJECT_DIR$/odds.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/use_case/GameSelectInteractor.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/use_case/GameSelectOutputBoundary.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/view/BetHistoryFrame.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/view/BetHistoryFrame.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/view/WalletUI.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/view/WalletUI.java" afterDir="false" />
