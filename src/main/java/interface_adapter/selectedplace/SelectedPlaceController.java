@@ -35,6 +35,12 @@ public class SelectedPlaceController {
     }
 
     public void notes() {
-        System.out.println("[CONTROLLER] Notes clicked"); // real use case later
+        if (lastUsername == null || lastLandmarkName == null) {
+            System.out.println("[CONTROLLER] Notes clicked but no place selected yet");
+            return;
+        }
+
+        SelectedPlaceInputData input = new SelectedPlaceInputData(lastUsername, lastLandmarkName);
+        interactor.notes(input);
     }
 }

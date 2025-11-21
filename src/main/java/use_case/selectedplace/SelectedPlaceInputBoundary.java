@@ -5,4 +5,6 @@ public interface SelectedPlaceInputBoundary {
 
     // NEW
     void checkIn(SelectedPlaceInputData inputData);
+
+    void notes(SelectedPlaceInputData inputData);
 }
