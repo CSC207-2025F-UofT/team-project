@@ -1,4 +1,4 @@
-# all questions are taken from or inspired by the CSC207 Quizzes on Quercus
+# all questions are taken from or inspired by the CSC207 Materials and Quizzes on Quercus
 # the format is as follows
 # quizId; questionId; questionText
 
@@ -26,13 +26,13 @@
 4; C; int; false
 4; D; char; false
 
-5; 105; In Java, what does public static void main(String[] args) represent?
-5; A; The starting point of the program; true
-5; B; The constructor; false
-5; C; A comment; false
-5; D; A special variable declaration; false
+5; 105; What is the main purpose of the Java Virtual Machine (JVM)?
+5; A; To execute Java bytecode on any platform; true
+5; B; To compile Java code into machine code; false
+5; C; To store Java class definitions; false
+5; D; To delete unused variables; false
 
-6; 106; If int x = 10, what is the output of the code System.out.println(x / 3);?
+6; 106; If int x = 10, what is the output of the code System.out.println(x / 3)?
 6; A; 3.33; false
 6; B; 3; true
 6; C; 3.0; false
