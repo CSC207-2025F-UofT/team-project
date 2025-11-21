@@ -1,9 +1,8 @@
 package game.entity;
 import game.Constants.java;
 
-/**
- * The class representing a Pet within the game.
- */
+import game.Constants;
+
 public class Pet {
     /**
      * petType == 'Dog' || petType == 'Cat'
@@ -24,6 +23,8 @@ public class Pet {
     int clickingSpeed;
     int sellingPrice;
     boolean deployStatus;
+
+    private String name;
 
 
 
@@ -57,5 +58,13 @@ public class Pet {
 
     public void deployPet() {
         this.deployStatus = true;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getName() {
+        return this.name;
     }
 }
