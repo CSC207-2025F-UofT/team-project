@@ -5,18 +5,21 @@ public final class Quiz {
     private final Question question;
     private boolean completed;
     private Integer userAnswerOptionId; // null until user selects something
+    private Boolean answeredCorrectly;  // null until quiz is submitted
 
     public Quiz(int quizId, Question question) {
         this.quizId = quizId;
         this.question = question;
         this.completed = false;
         this.userAnswerOptionId = null;
+        this.answeredCorrectly = null;
     }
 
     public int getQuizId() { return quizId; }
     public Question getQuestion() { return question; }
     public boolean isCompleted() { return completed; }
     public Integer getUserAnswerOptionId() { return userAnswerOptionId; }
+    public Boolean getAnsweredCorrectly() { return answeredCorrectly; }
 
     // when user selects answer option
     public void recordAnswer(int optionId) {
@@ -34,6 +37,7 @@ public final class Quiz {
 
         boolean correct = (userAnswerOptionId == question.getCorrectOptionId());
         completed = true;
+        answeredCorrectly = correct;
 
         return correct
                 ? QuizResult.correct("Correct Answer")
