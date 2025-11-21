@@ -1,6 +1,6 @@
 package app;
 
-import data_access.FileUserDataAccessObject;
+import data_access.JsonUserDataAccessObject;
 import data_access.JsonLandmarkDataAccessObject;
 import data_access.LandmarkDataAccessInterface;
 import data_access.UserDataAccessInterface;
@@ -60,7 +60,7 @@ public class AppBuilder {
     private LandmarkDataAccessInterface landmarkDAO = new JsonLandmarkDataAccessObject("minimal_landmarks.json");
 
     private final UserDataAccessInterface userDataAccessObject =
-            new FileUserDataAccessObject("users.json", userFactory, landmarkDAO);
+            new JsonUserDataAccessObject("users.json", userFactory, landmarkDAO);
 
     // ---- view models & views ----
     private LoginViewModel loginViewModel;

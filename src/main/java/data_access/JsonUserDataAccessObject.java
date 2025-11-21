@@ -1,81 +1,231 @@
 package data_access;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;  // IMPORT THIS
-import entity.User;
+import entity.*;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.time.Instant;
+import java.util.*;
 
-/**
- * DAO for user data implemented using a JSON file to persist the data.
- * More flexible than CsvUserDataAccessObject since JSON is able to store Object data.
- */
 public class JsonUserDataAccessObject implements UserDataAccessInterface {
-    private JsonNode root;
 
-    private final ObjectMapper mapper = new ObjectMapper();
-    private final File file;
+    private final File jsonFile;
     private final Map<String, User> accounts = new HashMap<>();
+    private final UserFactory userFactory;
+
+    // NEW: optional Landmark DAO
+    private final LandmarkDataAccessInterface landmarkDAO;
 
     private String currentUsername;
 
-    public JsonUserDataAccessObject(String jsonFilePath) {
-        // register java.time to Jackson ObjectMapper
-        mapper.registerModule(new JavaTimeModule());
-        mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+    /**
+     * Original constructor — kept for compatibility.
+     * Uses no Landmark DAO (falls back to stub landmarks).
+     */
+    public JsonUserDataAccessObject(String csvPath, UserFactory userFactory) {
+        this(csvPath, userFactory, null);
+    }
 
-        this.file = new File(jsonFilePath);
+    /**
+     * NEW constructor that also receives a Landmark DAO.
+     */
+    public JsonUserDataAccessObject(String csvPath,
+                                    UserFactory userFactory,
+                                    LandmarkDataAccessInterface landmarkDAO) {
+        this.jsonFile = new File(csvPath);
+        this.userFactory = userFactory;
+        this.landmarkDAO = landmarkDAO;
+
+        if (!jsonFile.exists() || jsonFile.length() == 0) {
+            saveAll();
+        } else {
+            loadAll();
+        }
+    }
+
+    /** ============================ LOAD ============================ **/
+    private void loadAll() {
         try {
-            File parent = file.getParentFile();
-            if (parent != null) {
-                parent.mkdirs();
+            String content = Files.readString(jsonFile.toPath(), StandardCharsets.UTF_8).trim();
+            if (content.isEmpty()) {
+                return; // nothing to load
             }
 
-            // Try to read and parse
-            if (file.exists() && file.length() > 0) {
-                try {
-                    this.root = mapper.readTree(file);
+            JSONArray arr = new JSONArray(content);
+            for (int i = 0; i < arr.length(); i++) {
+                JSONObject obj = arr.getJSONObject(i);
 
-                    if (root.isArray()) {
-                        for (JsonNode node : root) {
-                            User user = mapper.treeToValue(node, User.class);
-                            accounts.put(user.getUsername(), user);
+                String username = obj.getString("username");
+                String password = obj.getString("password");
+
+                Instant createdAt = obj.has("createdAt")
+                        ? Instant.parse(obj.getString("createdAt"))
+                        : Instant.now();
+
+                // =============== LOAD VISITS ===============
+                List<Visit> visits = new ArrayList<>();
+                if (obj.has("visits")) {
+                    JSONArray vArr = obj.getJSONArray("visits");
+
+                    for (int j = 0; j < vArr.length(); j++) {
+                        JSONObject vObj = vArr.getJSONObject(j);
+
+                        String visitId = vObj.getString("visitId");
+                        String landmarkName = vObj.getString("landmarkName");
+                        Instant visitedAt = Instant.parse(vObj.getString("visitedAt"));
+
+                        Landmark landmark;
+                        if (landmarkDAO != null) {
+                            try {
+                                landmark = landmarkDAO.findByName(landmarkName);
+                            } catch (RuntimeException ex) {
+                                // Fallback to stub if not found
+                                landmark = new Landmark(
+                                        landmarkName,
+                                        landmarkName,
+                                        null,
+                                        new LandmarkInfo("", "", "", ""),
+                                        0
+                                );
+                            }
+                        } else {
+                            // No DAO injected -> stub
+                            landmark = new Landmark(
+                                    landmarkName,
+                                    landmarkName,
+                                    null,
+                                    new LandmarkInfo("", "", "", ""),
+                                    0
+                            );
                         }
-                    }
-                    else {
-                        // Not an array - reset
-                        resetFile();
+
+                        Visit visit = new Visit(visitId, landmark, visitedAt);
+                        visits.add(visit);
                     }
                 }
-                catch (Exception e) {
-                    // Corrupted - reset
-                    System.err.println("Corrupted JSON detected, resetting file");
-                    resetFile();
+
+                // =============== LOAD PRIVATE NOTES ===============
+                List<Note> privateNotes = new ArrayList<>();
+                if (obj.has("privateNotes")) {
+                    JSONArray nArr = obj.getJSONArray("privateNotes");
+
+                    for (int j = 0; j < nArr.length(); j++) {
+                        JSONObject nObj = nArr.getJSONObject(j);
+
+                        String noteId = nObj.getString("noteId");
+                        String content_note = nObj.getString("content");
+                        String landmarkName = nObj.getString("landmarkName");
+
+                        Instant createdAtNote = Instant.parse(nObj.getString("createdAt"));
+                        Instant updatedAtNote = Instant.parse(nObj.getString("updatedAt"));
+
+                        Landmark landmark;
+                        if (landmarkDAO != null) {
+                            try {
+                                landmark = landmarkDAO.findByName(landmarkName);
+                            } catch (RuntimeException ex) {
+                                landmark = new Landmark(
+                                        landmarkName,
+                                        landmarkName,
+                                        null,
+                                        new LandmarkInfo("", "", "", ""),
+                                        0
+                                );
+                            }
+                        } else {
+                            landmark = new Landmark(
+                                    landmarkName,
+                                    landmarkName,
+                                    null,
+                                    new LandmarkInfo("", "", "", ""),
+                                    0
+                            );
+                        }
+
+                        Note note = new Note(
+                                noteId,
+                                landmark,
+                                content_note,
+                                createdAtNote,
+                                updatedAtNote
+                        );
+                        privateNotes.add(note);
+                    }
                 }
+
+                // CREATE FULL USER OBJECT
+                User user = userFactory.create(
+                        username,
+                        password,
+                        createdAt,
+                        visits,
+                        privateNotes
+                );
+
+                accounts.put(username, user);
             }
-            else {
-                // Empty or missing - initialize
-                resetFile();
-            }
-        }
-        catch (IOException e) {
-            throw new RuntimeException("Failed to initialize JSON file", e);
+
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to read users JSON file", e);
+        } catch (Exception e) {
+            throw new RuntimeException("Malformed JSON in users file", e);
         }
     }
 
-    private void resetFile() throws IOException {
-        mapper.writeValue(file, new Object[0]);
-        this.root = mapper.readTree(file);
+    /** ============================ SAVE ============================ **/
+    private void saveAll() {
+        try {
+            JSONArray arr = new JSONArray();
+
+            for (User user : accounts.values()) {
+                JSONObject obj = new JSONObject();
+                obj.put("username", user.getUsername());
+                obj.put("password", user.getPassword());
+                obj.put("createdAt", user.getCreatedAt().toString());
+
+                // --- VISITS ---
+                JSONArray visitsArr = new JSONArray();
+                for (Visit v : user.getVisits()) {
+                    JSONObject vObj = new JSONObject();
+                    vObj.put("visitId", v.getVisitId());
+                    vObj.put("landmarkName", v.getLandmark().getLandmarkName());
+                    vObj.put("visitedAt", v.getVisitedAt().toString());
+                    visitsArr.put(vObj);
+                }
+                obj.put("visits", visitsArr);
+
+                // --- PRIVATE NOTES ---
+                JSONArray notesArr = new JSONArray();
+                for (Note n : user.getPrivateNotes()) {
+                    JSONObject nObj = new JSONObject();
+                    nObj.put("noteId", n.getNoteId());
+                    nObj.put("landmarkName", n.getLandmark().getLandmarkName());
+                    nObj.put("content", n.getContent());
+                    nObj.put("createdAt", n.getCreatedAt().toString());
+                    nObj.put("updatedAt", n.getUpdatedAt().toString());
+                    notesArr.put(nObj);
+                }
+                obj.put("privateNotes", notesArr);
+
+                arr.put(obj);
+            }
+
+            Files.writeString(jsonFile.toPath(), arr.toString(4), StandardCharsets.UTF_8);
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to write users JSON file", e);
+        }
     }
+
+    // === UserDataAccessInterface methods (names unchanged) ===
 
     @Override
-    public boolean existsByName(String username) {
-        return accounts.containsKey(username);
+    public void save(User user) {
+        accounts.put(user.getUsername(), user);
+        saveAll();
     }
 
     @Override
@@ -94,12 +244,7 @@ public class JsonUserDataAccessObject implements UserDataAccessInterface {
     }
 
     @Override
-    public void save(User user) {
-        accounts.put(user.getUsername(), user);
-        try {
-            mapper.writerWithDefaultPrettyPrinter().writeValue(file, accounts.values());
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to save user data", e);
-        }
+    public boolean existsByName(String identifier) {
+        return accounts.containsKey(identifier);
     }
 }
