@@ -18,6 +18,7 @@ public class BetHistoryFrame extends JFrame {
 
         backButton.addActionListener(e -> {
             new MainMenuFrame(user);
+            dispose();
         });
 
         StringBuilder sb = new StringBuilder();
