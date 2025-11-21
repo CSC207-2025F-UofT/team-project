@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class QuizzesReader {
-    public void loadQuizzes(InMemoryQuizRepository repo) {
+    public void loadQuizzes(InMemoryQuizDataAccessObject repo) {
         try {
             BufferedReader reader = new BufferedReader(
                     new InputStreamReader(

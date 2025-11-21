@@ -1,6 +1,6 @@
 package quiz_system.app;
 
-import quiz_system.data_access.InMemoryQuizRepository;
+import quiz_system.data_access.InMemoryQuizDataAccessObject;
 import quiz_system.data_access.QuizzesReader;
 import quiz_system.interface_adapters.QuizController;
 import quiz_system.interface_adapters.QuizPresenter;
@@ -16,7 +16,7 @@ public class QuizMain {
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
             // load quizzes from quizzes.txt file
-            InMemoryQuizRepository repo = new InMemoryQuizRepository();
+            InMemoryQuizDataAccessObject repo = new InMemoryQuizDataAccessObject();
             new QuizzesReader().loadQuizzes(repo);
 
             // use cases

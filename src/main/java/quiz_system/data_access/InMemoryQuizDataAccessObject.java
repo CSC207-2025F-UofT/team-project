@@ -1,12 +1,12 @@
 package quiz_system.data_access;
 
-import quiz_system.usecase.QuizRepository;
+import quiz_system.usecase.QuizDataAccessInterface;
 import quiz_system.entity.Quiz;
 
 import java.util.HashMap;
 import java.util.Map;
 
-public class InMemoryQuizRepository implements QuizRepository{
+public class InMemoryQuizDataAccessObject implements QuizDataAccessInterface {
     private final Map<Integer, Quiz> store = new HashMap<>();
 
     @Override

@@ -5,10 +5,10 @@ import quiz_system.entity.QuizResult;
 
 public final class SubmitQuizInteractor implements SubmitQuizInputBoundary {
 
-    private final QuizRepository repository;
+    private final QuizDataAccessInterface repository;
     private final SubmitQuizOutputBoundary presenter;
 
-    public SubmitQuizInteractor(QuizRepository repository, SubmitQuizOutputBoundary presenter) {
+    public SubmitQuizInteractor(QuizDataAccessInterface repository, SubmitQuizOutputBoundary presenter) {
         this.repository = repository;
         this.presenter = presenter;
     }

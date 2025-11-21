@@ -4,7 +4,7 @@ import quiz_system.entity.AnswerOption;
 import quiz_system.entity.Quiz;
 import quiz_system.interface_adapters.QuizController;
 import quiz_system.interface_adapters.QuizViewModel;
-import quiz_system.usecase.QuizRepository;
+import quiz_system.usecase.QuizDataAccessInterface;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -13,7 +13,7 @@ import java.awt.event.ActionEvent;
 
 public class QuizView extends JFrame {
 
-    private final QuizRepository repo;
+    private final QuizDataAccessInterface repo;
     private final QuizController controller;
     private final QuizViewModel vm;
 
@@ -25,7 +25,7 @@ public class QuizView extends JFrame {
 
     private int currentQuizId;
 
-    public QuizView(QuizRepository repo, QuizController controller, QuizViewModel vm) {
+    public QuizView(QuizDataAccessInterface repo, QuizController controller, QuizViewModel vm) {
         this.repo = repo;
         this.controller = controller;
         this.vm = vm;
