@@ -47,6 +47,11 @@ public class SelectedPlaceInteractor implements SelectedPlaceInputBoundary {
 
     @Override
     public void checkIn(SelectedPlaceInputData inputData) {
-        //to be implemented
+        // to be implemented
+    }
+
+    @Override
+    public void notes(SelectedPlaceInputData inputData) {
+        // to be implemented
     }
 }
