@@ -7,6 +7,7 @@ import quiz_system.interface_adapters.QuizViewModel;
 import quiz_system.usecase.QuizRepository;
 
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 
@@ -31,35 +32,51 @@ public class QuizView extends JFrame {
 
         setTitle("Quiz System");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setSize(520, 320);
+        setSize(560, 360);
         setLocationRelativeTo(null);
-        setLayout(new BorderLayout(10, 10));
+        setLayout(new BorderLayout());
+
+        // main panel (with padding around everything)
+        JPanel mainPanel = new JPanel(new BorderLayout(0, 15));
+        mainPanel.setBorder(new EmptyBorder(20, 24, 20, 24));
+        add(mainPanel, BorderLayout.CENTER);
 
         // question
-        JPanel questionPanel = new JPanel(new BorderLayout());
-        questionLabel.setFont(new Font("SansSerif", Font.BOLD, 16));
+        JPanel questionPanel = new JPanel(new BorderLayout(0, 12));
+        questionPanel.setOpaque(false);
+        questionLabel.setFont(new Font("SansSerif", Font.BOLD, 18));
+        questionLabel.setVerticalAlignment(SwingConstants.TOP);
         questionPanel.add(questionLabel, BorderLayout.NORTH);
 
         // options
-        JPanel optionsPanel = new JPanel(new GridLayout(4, 1, 6, 6));
+        JPanel optionsPanel = new JPanel(new GridLayout(4, 1, 8, 8));
+        optionsPanel.setOpaque(false);
         for (int i = 0; i < 4; i++) {
             optionButtons[i] = new JRadioButton();
             optionButtons[i].setFocusPainted(false);
+            optionButtons[i].setFont(new Font("SansSerif", Font.PLAIN, 14));
             optionGroup.add(optionButtons[i]);
             optionsPanel.add(optionButtons[i]);
         }
         questionPanel.add(optionsPanel, BorderLayout.CENTER);
 
-        // submit and feedback
-        JPanel bottomPanel = new JPanel(new BorderLayout(6, 6));
+        // submit and feedback msg
+        JPanel bottomPanel = new JPanel(new BorderLayout(0, 8));
+        bottomPanel.setOpaque(false);
+        bottomPanel.setBorder(new EmptyBorder(10, 0, 0, 0));
+
         submitButton.addActionListener(this::handleSubmit);
+        submitButton.setFont(new Font("SansSerif", Font.BOLD, 14));
+        submitButton.setPreferredSize(new Dimension(0, 36));
+
         feedbackLabel.setFont(new Font("SansSerif", Font.BOLD, 14));
         feedbackLabel.setHorizontalAlignment(SwingConstants.CENTER);
+
         bottomPanel.add(submitButton, BorderLayout.CENTER);
         bottomPanel.add(feedbackLabel, BorderLayout.SOUTH);
 
-        add(questionPanel, BorderLayout.CENTER);
-        add(bottomPanel, BorderLayout.SOUTH);
+        mainPanel.add(questionPanel, BorderLayout.CENTER);
+        mainPanel.add(bottomPanel, BorderLayout.SOUTH);
     }
 
     public void loadQuiz(int quizId) {
@@ -69,14 +86,16 @@ public class QuizView extends JFrame {
             return;
         }
 
-        questionLabel.setText("<html><body style='width:470px;'>" +
-                quiz.getQuestion().getText() + "</body></html>");
+        questionLabel.setText("<html><body style='width:400px; text-align:left;'>" +
+                quiz.getQuestion().getText() +
+                "</body></html>");
 
-        // texts of each option
         var opts = quiz.getQuestion().getOptions();
         for (int i = 0; i < 4 && i < opts.size(); i++) {
             AnswerOption opt = opts.get(i);
-            optionButtons[i].setText(opt.getText());
+            optionButtons[i].setText("<html><body style='width:400px;'>" +
+                    opt.getText() +
+                    "</body></html>");
             optionButtons[i].setSelected(false);
         }
         optionGroup.clearSelection();
@@ -106,16 +125,16 @@ public class QuizView extends JFrame {
         JFrame feedbackFrame = new JFrame();
         feedbackFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         feedbackFrame.setSize(300, 150);
-        feedbackFrame.setLocationRelativeTo(this); // center to main window
+        feedbackFrame.setLocationRelativeTo(this);
 
         JLabel messageLabel = new JLabel(vm.feedbackMessage, SwingConstants.CENTER);
         messageLabel.setFont(new Font("SansSerif", Font.BOLD, 16));
         feedbackFrame.add(messageLabel);
         feedbackFrame.setVisible(true);
 
-        // close original quiz window automatically for incorrect answer
+        // close original quiz window automatically
         if ("INCORRECT".equals(vm.status) || "CORRECT".equals(vm.status)) {
-            this.dispose(); //get rid of quiz window
+            this.dispose();
         }
     }
 }
