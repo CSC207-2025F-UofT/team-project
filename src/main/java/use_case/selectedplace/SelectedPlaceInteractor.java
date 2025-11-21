@@ -47,45 +47,6 @@ public class SelectedPlaceInteractor implements SelectedPlaceInputBoundary {
 
     @Override
     public void checkIn(SelectedPlaceInputData inputData) {
-        String username = inputData.getUsername();
-        String landmarkName = inputData.getLandmarkName();
-
-        // 1. get user
-        User user = userDAO.get(username);
-        if (user == null) {
-            System.out.println("[INTERACTOR] Cannot check in: user not found " + username);
-            return;
-        }
-
-        // 2. get landmark
-        Landmark landmark = landmarkDAO.findByName(landmarkName);
-        if (landmark == null) {
-            System.out.println("[INTERACTOR] Cannot check in: landmark not found " + landmarkName);
-            return;
-        }
-
-        // 3. append visit
-        List<Visit> visits = user.getVisits();
-        if (visits == null) {
-            System.out.println("[INTERACTOR] User visits list is null; cannot record visit.");
-        } else {
-            visits.add(new Visit(landmark));
-            System.out.println("[INTERACTOR] Added visit for user " + username +
-                    " at landmark " + landmarkName);
-        }
-
-        // 4. save updated user (overwrites existing entry)
-        userDAO.save(user);
-
-        // 5. Optionally re-present the same place data so the view stays in sync
-        LandmarkInfo info = landmark.getLandmarkInfo();
-        SelectedPlaceOutputData output = new SelectedPlaceOutputData(
-                username,
-                landmark.getLandmarkName(),
-                info.getDescription(),
-                info.getAddress(),
-                info.getOpenHours()
-        );
-        presenter.presentPlace(output);
+        //to be implemented
     }
 }
