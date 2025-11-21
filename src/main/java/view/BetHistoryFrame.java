@@ -15,20 +15,23 @@ public class BetHistoryFrame extends JFrame {
         JTextArea area = new JTextArea();
         area.setEditable(false);
         JButton backButton = new JButton("Go Back");
+        // ---- JLIST INSTEAD OF TEXT AREA ----
+        DefaultListModel<Sportbet> model = new DefaultListModel<>();
+        for (Sportbet b : user.getSbs()) {
+            model.addElement(b);
+        }
+
+        JList<Sportbet> betList = new JList<>(model);
+        betList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        betList.setVisibleRowCount(-1);
+
+        add(new JScrollPane(betList), BorderLayout.CENTER);
 
         backButton.addActionListener(e -> {
             new MainMenuFrame(user);
             dispose();
         });
 
-        StringBuilder sb = new StringBuilder();
-        for (Sportbet b : user.getSbs()) {
-            sb.append(b.toString()).append("\n");
-        }
-
-        area.setText(sb.toString());
-
-        add(new JScrollPane(area), BorderLayout.CENTER);
 
         JPanel bottomPanel = new JPanel(new FlowLayout());
         bottomPanel.add(backButton);

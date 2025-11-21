@@ -4,9 +4,10 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e8f37d7d-e497-4269-85ef-a78d9eb08446" name="Changes" comment="fixing workspace.xml">
+    <list default="true" id="e8f37d7d-e497-4269-85ef-a78d9eb08446" name="Changes" comment="fixing errors with sportsbet, dispose bethistoryframe on go back">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/view/SportbetFrame.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/view/SportbetFrame.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/view/BetHistoryFrame.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/view/BetHistoryFrame.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/view/WalletUI.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/view/WalletUI.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -163,7 +164,15 @@
       <option name="project" value="LOCAL" />
       <updated>1763750496823</updated>
     </task>
-    <option name="localTasksCounter" value="10" />
+    <task id="LOCAL-00010" summary="fixing errors with sportsbet, dispose bethistoryframe on go back">
+      <option name="closed" value="true" />
+      <created>1763751039043</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1763751039043</updated>
+    </task>
+    <option name="localTasksCounter" value="11" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -184,6 +193,7 @@
     <MESSAGE value="mines UI added" />
     <MESSAGE value="commit3_bill" />
     <MESSAGE value="Change The home page." />
-    <option name="LAST_COMMIT_MESSAGE" value="Change The home page." />
+    <MESSAGE value="fixing errors with sportsbet, dispose bethistoryframe on go back" />
+    <option name="LAST_COMMIT_MESSAGE" value="fixing errors with sportsbet, dispose bethistoryframe on go back" />
   </component>
 </project>
