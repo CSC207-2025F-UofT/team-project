@@ -1,4 +1,5 @@
 package game.entity;
+import game.Constants.java;
 
 /**
  * The class representing a Pet within the game.
@@ -30,11 +31,11 @@ public class Pet {
         this.petType = petType;
         this.petBreed = petBreed;
         // call to visual database to get appropriate url
-        this.affectionXP = 0;
-        this.affectionLevel = 1;
-        this.energyLevel = 100;
+        this.affectionXP = Constants.INITIAL_AFFECTION_XP;
+        this.affectionLevel = Constants.INITIAL_AFFECTION_LEVEL;
+        this.energyLevel = Constants.INITIAL_ENERGY_LEVEL;
         // call to info database to get clicking speed
-        this.sellingPrice = 25;
+        this.sellingPrice = Constants.SELLING_BASE_PRICE;
         this.deployStatus = false;
     }
 
