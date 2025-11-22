@@ -136,12 +136,34 @@ public class AppBuilder {
     public AppBuilder addWatchlistView() {
         watchlistView = new WatchlistView();
         cardPanel.add(watchlistView, watchlistView.getViewName());
+
+        watchlistView.setswitchtofavButtonListener(e -> {
+            viewManagerModel.setState(favoritesView.getViewName());
+            viewManagerModel.firePropertyChange();
+        });
+
+        watchlistView.sethomeButtonListener(e -> {
+            viewManagerModel.setState(homepageView.getViewName());
+            viewManagerModel.firePropertyChange();
+        });
+
         return this;
     }
 
     public AppBuilder addFavoritesView() {
         favoritesView = new FavoritesView();
         cardPanel.add(favoritesView, favoritesView.getViewName());
+
+        favoritesView.setswitchtowatchButtonListener(e -> {
+            viewManagerModel.setState(watchlistView.getViewName());
+            viewManagerModel.firePropertyChange();
+        });
+
+        favoritesView.sethomeButtonListener(e -> {
+            viewManagerModel.setState(homepageView.getViewName());
+            viewManagerModel.firePropertyChange();
+        });
+
         return this;
     }
 
@@ -165,8 +187,6 @@ public class AppBuilder {
 //        return this;
 //    }
 
-   
-   
     public AppBuilder addHomepageView() {
 
         homepageView = new HomepageView(homeViewModel);
