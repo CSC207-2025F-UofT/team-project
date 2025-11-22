@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 public class Milestone {
     private String name;
-    private final ArrayList<Task> subtasks;
+    private ArrayList<Task> subtasks;
     private String dueDate;
 
     public Milestone(String title) {
