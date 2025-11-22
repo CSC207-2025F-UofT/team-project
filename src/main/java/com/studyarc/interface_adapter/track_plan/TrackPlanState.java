@@ -8,6 +8,7 @@ public class TrackPlanState {
     private ArrayList<StudyPlan> studyPlans;
     private String Username = "";
 
+
     public ArrayList<StudyPlan> getStudyPlans() {
         return this.studyPlans;
     }
@@ -24,3 +25,4 @@ public class TrackPlanState {
         Username = username;
     }
 }
+

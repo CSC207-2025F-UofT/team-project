@@ -31,13 +31,13 @@ public class TrackPlanInteractor implements TrackPlanInputBoundary {
 
         TrackPlanOutputData trackPlanOutputData = new TrackPlanOutputData(username, listofplans);
         presenter.prepareShowPlans(trackPlanOutputData);
-//        if (listofplans.isEmpty()) {
-//            System.out.println("interactor executes for emptyplans");
-//            presenter.parepareShowRedirect(trackPlanOutputData);
-//        } else {
-//            System.out.println("interactor executes");
-//            presenter.prepareShowPlans(trackPlanOutputData);
-//        }
+        if (listofplans.isEmpty()) {
+            System.out.println("interactor executes for emptyplans");
+            presenter.parepareShowRedirect();
+        } else {
+            System.out.println("interactor executes");
+            presenter.prepareShowPlans(trackPlanOutputData);
+        }
 
 
     }
