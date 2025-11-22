@@ -1,20 +1,19 @@
 package use_case.spending_report;
-import entity.SpendingReportViewModel;
 
 public class GenerateReportPresenter implements GenerateReportOutputBoundary {
-    private final SpendingReportViewModel viewModel;
+    private final SpendingReportView view;
 
-    public GenerateReportPresenter(SpendingReportViewModel viewModel) {
-        this.viewModel = viewModel;
+    public GenerateReportPresenter(SpendingReportView view) {
+        this.view = view;
     }
 
     @Override
     public void presentReport(GenerateReportOutput outputData) {
         if (outputData.isSuccess()) {
-            viewModel.displayChart(outputData.getReport().getCategoryBreakdown(), 
+            view.displayChart(outputData.getReport().getCategoryBreakdown(), 
                                  outputData.getReport().getMonth());
         } else {
-            viewModel.displayChart(null, "");
+            view.displayChart(null, "");
         }
     }
 }

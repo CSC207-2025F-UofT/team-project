@@ -1,13 +1,13 @@
 package use_case.spending_report;
 
 public class GenerateReportController {
-    private final GenerateReportInputBoundary interactor;
+    private final GenerateReportInteractor interactor;
 
-    public GenerateReportController(GenerateReportInputBoundary interactor) {
+    public GenerateReportController(GenerateReportInteractor interactor) {
         this.interactor = interactor;
     }
 
-    public void onGenerateReportClicked(int userId, String month) {
+    public void generateReport(int userId, String month) {
         GenerateReportInput inputData = new GenerateReportInput(userId, month);
         interactor.execute(inputData);
     }
