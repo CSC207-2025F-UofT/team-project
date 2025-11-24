@@ -17,7 +17,7 @@ import java.util.List;
 public class InMemoryRoomDataAccessObject implements
         AddMovieRoomDataAccessInterface,
         RemoveMovieRoomDataAccessInterface {
-    private final Room room = Room.create("","");
+    private final Room room = new Room("","");
 
     public boolean isHost() {
         return true;

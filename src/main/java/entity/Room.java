@@ -26,10 +26,6 @@ public class Room {
         this.hostId = hostId;
     }
 
-    public static Room create(String code, String hostId) {
-        return new Room(code, hostId);
-    }
-
     public String getCode() {
         return code;
     }

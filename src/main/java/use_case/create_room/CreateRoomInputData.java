@@ -13,11 +13,7 @@ public class CreateRoomInputData {
         this.hostId = hostId;
     }
 
-    public String getHostName() {
-        return hostName;
-    }
+    public String getHostName() { return hostName; }
 
-    public String getHostId() {
-        return hostId;
-    }
+    public String getHostId() { return hostId; }
 }

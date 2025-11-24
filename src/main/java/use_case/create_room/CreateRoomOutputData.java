@@ -18,8 +18,11 @@ public class CreateRoomOutputData {
     }
 
     public String getRoomCode() { return roomCode; }
+
     public String getHostToken() { return hostToken; }
+
     public String getHostName() { return hostName; }
+
     public String getHostId() { return hostId; }
 }
 
