@@ -1,7 +1,7 @@
-package data_access;
-
-import entity.UserFactory;
-
-public class FileUserDataAccessObject {
-
-}
+//package data_access;
+//
+//import entity.UserFactory;
+//
+//public class FileUserDataAccessObject {
+//
+//}
