@@ -1,0 +1,21 @@
+date,category,amount,description
+2025-11-01,Food,45.50,Grocery store
+2025-11-05,Transport,35.00,Gas station
+2025-11-10,Entertainment,29.99,Movie tickets
+2025-11-15,Food,68.75,Restaurant
+2025-11-20,Utilities,120.00,Electricity bill
+2025-11-25,Shopping,89.99,Clothing store
+2025-09-01,Food,32.40,Coffee shop
+2025-09-10,Transport,55.00,Car maintenance
+2025-10-05,Entertainment,45.00,Concert tickets
+2025-01-15,Food,75.25,Supermarket
+2025-02-20,Transport,42.50,Public transit
+2025-03-10,Entertainment,60.00,Sports event
+2025-04-05,Utilities,95.00,Phone bill
+2025-05-12,Shopping,150.75,Electronics
+2025-06-18,Food,88.90,Restaurant
+2025-07-22,Transport,38.00,Taxi
+2025-08-30,Entertainment,25.50,Streaming service
+2025-10-15,Shopping,200.00,Furniture
+2025-02-05,Utilities,110.25,Internet
+2025-05-20,Food,55.60,Takeout
