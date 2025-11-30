@@ -1,0 +1,114 @@
+package view;
+
+import interface_adapter.Dashboard.DashboardViewModel;
+import interface_adapter.logged_in.ChangePasswordController;
+import interface_adapter.logged_in.LoggedInState;
+import interface_adapter.logged_in.LoggedInViewModel;
+import interface_adapter.logout.LogoutController;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+
+/**
+ * The View for when the user is logged into the program.
+ * It acts as the container for the full Dashboard interface.
+ */
+public class LoggedInView extends JPanel implements ActionListener, PropertyChangeListener {
+
+    public final String viewName = "logged in";
+    private final LoggedInViewModel loggedInViewModel;
+    private final DashboardViewModel dashboardViewModel;
+
+    private DashboardView dashboard = null;
+    private JFrame applicationFrame = null;
+
+    private ChangePasswordController changePasswordController = null;
+    private LogoutController logoutController = null;
+
+    /**
+     * Updated Constructor to accept both required ViewModels.
+     * @param loggedInViewModel The ViewModel for authentication state.
+     * @param dashboardViewModel The ViewModel containing data for the HomePanel.
+     */
+    public LoggedInView(LoggedInViewModel loggedInViewModel, DashboardViewModel dashboardViewModel) {
+        this.loggedInViewModel = loggedInViewModel;
+        this.dashboardViewModel = dashboardViewModel;
+        this.loggedInViewModel.addPropertyChangeListener(this);
+        this.setLayout(new BorderLayout());
+        this.add(new JLabel("Loading Dashboard...", SwingConstants.CENTER), BorderLayout.CENTER);
+    }
+
+    /**
+     * Injects the main application frame and finalizes the view setup
+     * by creating and displaying the DashboardView.
+     */
+    public void setApplicationFrame(JFrame applicationFrame) {
+        if (this.dashboard != null) {
+            return;
+        }
+
+        this.applicationFrame = applicationFrame;
+
+        this.dashboard = new DashboardView(this.applicationFrame, this.dashboardViewModel);
+
+        this.removeAll();
+        this.add(dashboard, BorderLayout.CENTER);
+        this.revalidate();
+        this.repaint();
+
+        if (changePasswordController != null) {
+            dashboard.setChangePasswordController(changePasswordController);
+        }
+        if (logoutController != null) {
+            dashboard.setLogoutController(logoutController);
+        }
+
+        propertyChange(new PropertyChangeEvent(this, "state", null, loggedInViewModel.getState()));
+
+        if (this.applicationFrame != null) {
+            this.applicationFrame.setExtendedState(JFrame.MAXIMIZED_BOTH);
+            this.applicationFrame.setVisible(true);
+            this.applicationFrame.revalidate();
+        }
+    }
+
+    /**
+     * React to a button click. All action logic is now inside DashboardView.
+     */
+    public void actionPerformed(ActionEvent evt) {
+        System.out.println("Click from LoggedInView container: " + evt.getActionCommand());
+    }
+
+    @Override
+    public void propertyChange(PropertyChangeEvent evt) {
+        if (evt.getPropertyName().equals("state")) {
+            final LoggedInState state = (LoggedInState) evt.getNewValue();
+
+            if (dashboard != null) {
+                dashboard.updateUsername(state.getUsername());
+            }
+        }
+    }
+
+    public String getViewName() {
+        return viewName;
+    }
+
+    public void setChangePasswordController(ChangePasswordController changePasswordController) {
+        this.changePasswordController = changePasswordController;
+        if (dashboard != null) {
+            dashboard.setChangePasswordController(changePasswordController);
+        }
+    }
+
+    public void setLogoutController(LogoutController logoutController) {
+        this.logoutController = logoutController;
+        if (dashboard != null) {
+            dashboard.setLogoutController(logoutController);
+        }
+    }
+}
