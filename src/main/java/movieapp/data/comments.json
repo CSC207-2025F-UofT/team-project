@@ -1,0 +1,54 @@
+[
+    {
+        "replies": [
+            "2",
+            "994edeb9-be46-4a22-b287-e88f600d52d6"
+        ],
+        "commentID": "1",
+        "movieID": 640146,
+        "text": "Good movie",
+        "username": "max"
+    },
+    {
+        "replies": ["0a0b2c75-cddc-4a91-af75-cca85c9234de"],
+        "commentID": "2",
+        "movieID": 640146,
+        "text": "I agree",
+        "username": "Luke"
+    },
+    {
+        "replies": ["r001"],
+        "commentID": "cmt001",
+        "movieID": 101,
+        "text": "This movie is great!",
+        "username": "alice"
+    },
+    {
+        "replies": [],
+        "commentID": "cmt002",
+        "movieID": 101,
+        "text": "I disagree!",
+        "username": "bob"
+    },
+    {
+        "replies": [],
+        "commentID": "r001",
+        "movieID": 101,
+        "text": "I agree with Alice!",
+        "username": "charlie"
+    },
+    {
+        "replies": [],
+        "commentID": "994edeb9-be46-4a22-b287-e88f600d52d6",
+        "movieID": 640146,
+        "text": "i agree too",
+        "username": "max"
+    },
+    {
+        "replies": [],
+        "commentID": "0a0b2c75-cddc-4a91-af75-cca85c9234de",
+        "movieID": 640146,
+        "text": "yah",
+        "username": "max"
+    }
+]

@@ -1,0 +1,34 @@
+[
+    {
+        "password": "1234",
+        "ratings": {
+            "502356": 3
+        },
+        "watchlist": [
+            502356,
+            76600
+        ],
+        "username": "Luke"
+    },
+    {
+        "password": "abcd",
+        "ratings": {},
+        "watchlist": [
+            1033462,
+            967941
+        ],
+        "username": "max"
+    },
+    {
+        "password": "pass123",
+        "ratings": {},
+        "watchlist": [102],
+        "username": "alice"
+    },
+    {
+        "password": "password123",
+        "ratings": {},
+        "watchlist": [],
+        "username": "testuser"
+    }
+]
