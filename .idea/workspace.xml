@@ -4,42 +4,10 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="b50313f8-1e33-41e4-88d3-e829184e5d9f" name="Changes" comment="implement usecase in files">
-      <change afterPath="$PROJECT_DIR$/src/main/java/data_access/RoutingDataAccessObject.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/interface_adapter/generate_route/GenerateRouteController.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/interface_adapter/generate_route/GenerateRoutePresenter.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/interface_adapter/generate_route/GenerateRouteState.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/interface_adapter/generate_route/GenerateRouteViewModel.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/use_case/generate_route/GenerateRouteInputBoundary.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/use_case/generate_route/GenerateRouteInputData.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/use_case/generate_route/GenerateRouteInteractor.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/use_case/generate_route/GenerateRouteOutputBoundary.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/use_case/generate_route/GenerateRouteOutputData.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/use_case/generate_route/GenerateRouteRoutingDataAccessInterface.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/view/RoutePainter.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/app/AppBuilder.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/app/AppBuilder.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/app/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/app/Main.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/data_access/FileStopListDAO.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/data_access/OSMDataAccessObject.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/data_access/OSMDataAccessObject.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/interface_adapter/save_stops/SaveStopsController.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/interface_adapter/save_stops/SaveStopsPresenter.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/interface_adapter/search/SearchPresenter.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/interface_adapter/search/SearchPresenter.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/interface_adapter/search/SearchState.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/interface_adapter/search/SearchState.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/interface_adapter/suggestion/SuggestionController.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/interface_adapter/suggestion/SuggestionPresenter.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/use_case/save_stops/SaveStopsDataAccessInterface.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/use_case/save_stops/SaveStopsInputBoundary.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/use_case/save_stops/SaveStopsInputData.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/use_case/save_stops/SaveStopsInteractor.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/use_case/save_stops/SaveStopsOutputBoundary.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/use_case/search/SearchDataAccessInterface.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/use_case/search/SearchDataAccessInterface.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/use_case/suggestion/SuggestionInputBoundary.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/use_case/suggestion/SuggestionInputData.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/use_case/suggestion/SuggestionInteractor.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/use_case/suggestion/SuggestionOutputBoundary.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/use_case/suggestion/SuggestionOutputData.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/view/MapPanel.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/view/MapPanel.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/view/SearchView.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/view/SearchView.java" afterDir="false" />
+    <list default="true" id="b50313f8-1e33-41e4-88d3-e829184e5d9f" name="Changes" comment="Pushed GenerateRoute use_case along with its corresponding interfaces, map_panels.">
+      <change afterPath="$PROJECT_DIR$/src/test/java/use_case/generate_route/GenerateRouteInteractorTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/use_case/generate_route/GenerateRouteInteractor.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/use_case/generate_route/GenerateRouteInteractor.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -57,7 +25,7 @@
   <component name="Git.Settings">
     <option name="RECENT_BRANCH_BY_REPOSITORY">
       <map>
-        <entry key="$PROJECT_DIR$" value="main" />
+        <entry key="$PROJECT_DIR$" value="Generate_routing-Remove_marker-Search" />
       </map>
     </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -91,10 +59,11 @@
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
     "Application.Main.executor": "Run",
+    "JUnit.GenerateRouteInteractorTest.executor": "Coverage",
     "JUnit.LocationTest.executor": "Run",
     "JUnit.OSMDataAccessObjectTest.executor": "Run",
     "JUnit.OSMDataAccessObjectTest.testGetReturnsCorrectLocation.executor": "Run",
-    "JUnit.SearchInteractorTest.executor": "Run",
+    "JUnit.SearchInteractorTest.executor": "Coverage",
     "JUnit.SearchViewModelTest.executor": "Run",
     "ModuleVcsDetector.initialDetectionPerformed": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
@@ -102,7 +71,7 @@
     "RunOnceActivity.git.unshallow": "true",
     "SONARLINT_PRECOMMIT_ANALYSIS": "true",
     "com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1": "true",
-    "git-widget-placeholder": "Generate__routing-Remove__marker-Search",
+    "git-widget-placeholder": "Search->Remove__marker->Generate__routing",
     "junie.onboarding.icon.badge.shown": "true",
     "kotlin-language-version-configured": "true",
     "last_opened_file_path": "/Users/yizhao/Documents/UT courses/CSC207/team-project",
@@ -132,7 +101,7 @@
       <recent name="interface_adapter.search" />
     </key>
   </component>
-  <component name="RunManager" selected="Application.Main">
+  <component name="RunManager">
     <configuration name="Main" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
       <option name="ALTERNATIVE_JRE_PATH" value="openjdk-25" />
       <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="true" />
@@ -250,7 +219,7 @@
       <workItem from="1760675806708" duration="275000" />
       <workItem from="1760743573745" duration="343000" />
       <workItem from="1760987551082" duration="6000" />
-      <workItem from="1764580758562" duration="2160000" />
+      <workItem from="1764580758562" duration="5074000" />
     </task>
     <task id="LOCAL-00001" summary="gitignore">
       <option name="closed" value="true" />
@@ -276,7 +245,15 @@
       <option name="project" value="LOCAL" />
       <updated>1764548819840</updated>
     </task>
-    <option name="localTasksCounter" value="4" />
+    <task id="LOCAL-00004" summary="Pushed GenerateRoute use_case along with its corresponding interfaces, map_panels.">
+      <option name="closed" value="true" />
+      <created>1764583125852</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1764583125852</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -297,6 +274,15 @@
     <MESSAGE value="gitignore" />
     <MESSAGE value="Business logic" />
     <MESSAGE value="implement usecase in files" />
-    <option name="LAST_COMMIT_MESSAGE" value="implement usecase in files" />
+    <MESSAGE value="Pushed GenerateRoute use_case along with its corresponding interfaces, map_panels." />
+    <option name="LAST_COMMIT_MESSAGE" value="Pushed GenerateRoute use_case along with its corresponding interfaces, map_panels." />
+  </component>
+  <component name="com.intellij.coverage.CoverageDataManagerImpl">
+    <SUITE FILE_PATH="coverage/team_project$SearchInteractorTest.ic" NAME="SearchInteractorTest Coverage Results" MODIFIED="1764585239233" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true">
+      <FILTER>use_case.search.*</FILTER>
+    </SUITE>
+    <SUITE FILE_PATH="coverage/team_project$GenerateRouteInteractorTest.ic" NAME="GenerateRouteInteractorTest Coverage Results" MODIFIED="1764586387659" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true">
+      <FILTER>use_case.generate_route.*</FILTER>
+    </SUITE>
   </component>
 </project>

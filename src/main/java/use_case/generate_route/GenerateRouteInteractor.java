@@ -46,10 +46,6 @@ public class GenerateRouteInteractor implements GenerateRouteInputBoundary {
             }
         }
 
-        if (segments.isEmpty()) {
-            generateRoutePresenter.prepareFailView("No route found.");
-        } else {
-            generateRoutePresenter.prepareSuccessView(new GenerateRouteOutputData(segments));
-        }
+        generateRoutePresenter.prepareSuccessView(new GenerateRouteOutputData(segments));
     }
 }
