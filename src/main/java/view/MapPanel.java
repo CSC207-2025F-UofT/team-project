@@ -9,6 +9,16 @@ import javax.swing.event.MouseInputListener;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import org.jxmapviewer.painter.CompoundPainter;
+import java.util.Arrays;
+import java.util.List;
+import java.util.function.Consumer;
+import view.RoutePainter;
+import java.util.HashSet;
+import java.util.Set;
+import org.jxmapviewer.viewer.WaypointPainter;
+import org.jxmapviewer.viewer.Waypoint;
+import org.jxmapviewer.viewer.DefaultWaypoint;
 
 /**
  * MapPanel
@@ -22,7 +32,6 @@ public class MapPanel extends JPanel {
     /* ================================================================
      *                   CONFIGURATION CONSTANTS
      * ================================================================ */
-
     private static final int MAX_ZOOM = 20;
 
     // Trackpad zoom characteristics
@@ -39,6 +48,12 @@ public class MapPanel extends JPanel {
     /* ================================================================
      *                   INSTANCE FIELDS
      * ================================================================ */
+
+    // Felix
+    private final Set<Waypoint> waypoints = new HashSet<>();
+    private final WaypointPainter<Waypoint> waypointPainter = new WaypointPainter<>();
+    private RoutePainter routePainter;
+    private final CompoundPainter<JXMapViewer> compoundPainter = new CompoundPainter<>();
 
     /** The JXMapViewer instance that renders the OSM map. */
     private final JXMapViewer mapViewer;
@@ -85,6 +100,12 @@ public class MapPanel extends JPanel {
         mapViewer.setAddressLocation(new GeoPosition(43.6532, -79.3832));
         mapViewer.setZoom(5);
 
+        // Add for routing
+        waypointPainter.setWaypoints(waypoints);
+        routePainter = new RoutePainter(null);
+        compoundPainter.setPainters(Arrays.asList(routePainter, waypointPainter));
+        mapViewer.setOverlayPainter(compoundPainter);
+
         // Remove default wheel zoom
         removeDefaultWheelListeners();
 
@@ -103,6 +124,23 @@ public class MapPanel extends JPanel {
         enableDragPanning();
 
         add(mapViewer, BorderLayout.CENTER);
+    }
+
+    public void setRouteSegments(List<List<GeoPosition>> segments) {
+        this.routePainter = new RoutePainter(null); // 或者复用并清空
+        this.routePainter.setSegments(segments);
+        // 重新设置 painters 列表以确保更新
+        compoundPainter.setPainters(Arrays.asList(routePainter, waypointPainter));
+        mapViewer.repaint();
+    }
+
+    public void setStops(List<GeoPosition> stops) {
+        waypoints.clear();
+        for (GeoPosition pos : stops) {
+            waypoints.add(new DefaultWaypoint(pos));
+        }
+        waypointPainter.setWaypoints(waypoints);
+        mapViewer.repaint();
     }
 
     /* ================================================================

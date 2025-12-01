@@ -33,8 +33,6 @@ public class SearchPresenter implements SearchOutputBoundary {
         searchState.setLatitude(response.getLatitude());
         searchState.setLongitude(response.getLongitude());
         searchState.setLocationName(response.getLocationName());
-        searchState.setSuggestions(List.of());
-        searchState.setSuggestionError(null);
 
         searchViewModel.setState(searchState);
         searchViewModel.firePropertyChange();
@@ -44,7 +42,6 @@ public class SearchPresenter implements SearchOutputBoundary {
     public void prepareFailView(String error) {
         final SearchState searchState = new SearchState(searchViewModel.getState());
         searchState.setSearchError(error);
-        searchState.setSuggestionError(null);
         searchViewModel.setState(searchState);
         searchViewModel.firePropertyChange();
     }

@@ -13,8 +13,6 @@ public class SearchState {
     private List<String> stopNames = new ArrayList<>();
     private List<GeoPosition> stops = new ArrayList<>();
     private String errorMessage;
-    private List<String> suggestions = new ArrayList<>();
-    private String suggestionError;
 
     public SearchState() {}
 
@@ -26,8 +24,6 @@ public class SearchState {
         this.stopNames = new ArrayList<>(copy.getStopNames());
         this.stops = new ArrayList<>(copy.getStops());
         this.errorMessage = copy.getErrorMessage();
-        this.suggestions = new ArrayList<>(copy.getSuggestions());
-        this.suggestionError = copy.getSuggestionError();
     }
 
     public double getLatitude() {
@@ -85,21 +81,5 @@ public class SearchState {
 
     public void setErrorMessage(String errorMessage) {
         this.errorMessage = errorMessage;
-    }
-
-    public List<String> getSuggestions() {
-        return new ArrayList<>(suggestions);
-    }
-
-    public void setSuggestions(List<String> suggestions) {
-        this.suggestions = new ArrayList<>(suggestions);
-    }
-
-    public String getSuggestionError() {
-        return suggestionError;
-    }
-
-    public void setSuggestionError(String suggestionError) {
-        this.suggestionError = suggestionError;
     }
 }
