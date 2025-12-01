@@ -1,0 +1,24 @@
+package data_access;
+
+import entities.User;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.List;
+import java.util.ArrayList;
+
+
+public class InMemoryUserDataAccessObject implements UserDataAccessInterface {
+    private final Map<String, User> users = new HashMap<>();
+    public boolean existsByUsername(String username){
+        return users.containsKey(username);
+    }
+    public User getUser(String username){
+        return users.get(username);
+    }
+    public void save(User user){
+        users.put(user.getUsername(), user);
+    }
+    public List<User> getAllUsers() {
+        return new ArrayList<>(users.values());
+    }
+}
