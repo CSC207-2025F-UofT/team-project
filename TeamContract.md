@@ -18,39 +18,41 @@ This contract sets out shared expectations and commitments for how our team will
 
 ### Communication
 
-* Which platform will you use for communication outside of class, when required for work on your course project? (Examples: Text message, Discord, WeChat, etc.)
+* Which platform will you use for communication outside of class, when required for work on your course project? (Examples: Text message, Discord, WeChat, etc.) Instagram, we have a group chat with everyone in it
 
-* Each teammate agrees to respond to messages in at most how long? 1 day? 2 days? Some other amount of time? 
+* Each teammate agrees to respond to messages in at most how long? 1 day? 2 days? Some other amount of time? We are all relativly active on instagram so at most 1 day for each of us to at least respond.
 
-* What things should a teammate notify you about? (Examples: if they think they won't be able to meet a deadline, if they have to miss lecture, etc.)
+* What things should a teammate notify you about? (Examples: if they think they won't be able to meet a deadline, if they have to miss lecture, etc.) A teammate should notify you about anything that could effect either their work or the group grade, or if they need any sort of help. Exmaples of this include if they wont be able to miss a deadline, or if they are struggling with their part of the work, or they need to collaborate and use others work for theirs.
 
 * Respectful and inclusive behaviour are necessary for smooth and productive communication. What are some respectful and inclusive behaviours you expect when communicating with each other during lectures, labs, or outside of class? (Examples: Actively listening to each team members ideas, giving everyone a chance to meaningfully contribute, etc.)
-
----
-
-### [Other Categories of norms and expectations go here]
-
-* Based on your previous teamwork experiences, what other behaviours do you agree upon as a team?
-    - some examples of possible additional team norms and expectations are included in the sample team contract in case your team needs some help getting ideas for what else you want to include.
-
+Actively listen without interrupting, 
+Let everyone share their ideas, 
+Be polite and avoid disrespectful language, 
+Give constructive feedback, not personal attacks, 
+Include quieter people in discussions, 
+Stay open to different perspectives, 
 ---
 
 ## Decision Making
 
-* How will decisions about your team project be made? (Examples: By majority vote, by unanimous vote, etc.)
+Through a voting process and group discussions, we will determine what decisions will be implemented. This will be in the form of a unanimous vote. 
 
 ---
 ## Conflict resolution
 
-* How will your team resolve conflicts? (Example: by listening to each other's side of the issue and attempting to reach a compromise. By consulting a TA or instructor as a team, if a resolution has not yet been reached.)
+We will resolve conflicts by listening to each other's points of view and coming up with a compromise or solution between us. If we are unable to resolve conflicts on our own, we will consult a TA or instructor to mediate the conflict and reach a solution. 
 
 ---
 
 ## Accountability
 
-* Reliability and accountability are also important aspects of teamwork. What are the responsibilities of each team member? (Example: completing their share of the work in a timely manner, seeking assistance from teammates/TAs/instructors when required, etc.)
+Each team member will be expected to complete their share of the work on time and will update the other team members if anything comes up that will prevent them from finishing work on time. 
 
 ---
+
+## Time Management
+
+Team members are expected to work to reach agreed deadlines so that work can be completed in a timely manner, especially if one member's code relies on another's code. 
 
 ---
 
@@ -58,4 +60,7 @@ By signing below, we acknowledge that we have read, discussed, and agreed to the
 
 Team Member Signatures:
 
-(type names here)
+Cade Sylvester
+Garry Sverlov
+Michael War
+Adam Fan
