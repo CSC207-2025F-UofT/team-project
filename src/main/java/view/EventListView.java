@@ -1,0 +1,227 @@
+package view;
+
+import java.awt.BorderLayout;
+import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.GridLayout;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+
+import javax.swing.Box;
+import javax.swing.BoxLayout;
+import javax.swing.JButton;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.border.EmptyBorder;
+
+import entity.Event;
+import entity.EventList;
+import interface_adapter.ViewManagerModel;
+import interface_adapter.display_event.DisplayEventController;
+import interface_adapter.display_event_list.DisplayEventListController;
+import interface_adapter.display_event_list.DisplayEventListState;
+import interface_adapter.display_event_list.DisplayEventListViewModel;
+import interface_adapter.remove_event_from_list.RemoveEventFromListController;
+
+/**
+ * The View for the Display Event List Use Case.
+ */
+public class EventListView extends JPanel implements PropertyChangeListener {
+    private final String viewName = "event list";
+
+    private final DisplayEventListViewModel displayEventListViewModel;
+    private DisplayEventListController displayEventListController;
+    private DisplayEventController displayEventController;
+    private final ViewManagerModel viewManagerModel;
+    private RemoveEventFromListController removeEventFromListController;
+
+    // Swing Components
+    private final JPanel eventsPanel;
+    private final JButton backButton;
+    private final JLabel titleLabel;
+
+    private EventList currentEventList;
+
+    public EventListView(DisplayEventListViewModel displayEventViewModel,
+                         ViewManagerModel viewManagerModel) {
+
+        this.displayEventListViewModel = displayEventViewModel;
+        this.viewManagerModel = viewManagerModel;
+
+        this.displayEventListViewModel.addPropertyChangeListener(this);
+
+        this.setLayout(new BorderLayout());
+        this.setBackground(ViewStyle.WINDOW_BACKGROUND);
+
+        // Top panel
+        final JPanel topPanel = ViewStyle.createSectionPanel(new BorderLayout());
+
+        titleLabel = new JLabel("Event List");
+        ViewStyle.applyTitleStyle(titleLabel);
+
+        topPanel.add(titleLabel, BorderLayout.WEST);
+        add(topPanel, BorderLayout.NORTH);
+
+        // Center panel
+        eventsPanel = new JPanel();
+        eventsPanel.setLayout(new BoxLayout(eventsPanel, BoxLayout.Y_AXIS));
+        eventsPanel.setBackground(ViewStyle.WINDOW_BACKGROUND);
+        eventsPanel.setBorder(new EmptyBorder(0, 20, 0, 20));
+
+        final JScrollPane scrollPane = new JScrollPane(eventsPanel);
+        ViewStyle.applyScrollPaneStyle(scrollPane);
+        add(scrollPane, BorderLayout.CENTER);
+
+        // Bottom panel
+        final JPanel bottomPanel = ViewStyle.createSectionPanel(new FlowLayout(FlowLayout.RIGHT));
+        backButton = new JButton("Back to Lists");
+        ViewStyle.applyButtonStyle(backButton);
+
+        bottomPanel.add(backButton);
+        add(bottomPanel, BorderLayout.SOUTH);
+
+        // Listeners
+        backButton.addActionListener(e -> {
+            if (viewManagerModel != null) {
+                viewManagerModel.setState("event lists");
+                viewManagerModel.firePropertyChanged();
+            }
+        });
+    }
+
+    public void setDisplayEventListController(DisplayEventListController displayEventListController) {
+        this.displayEventListController = displayEventListController;
+    }
+
+    public void setDisplayEventController(DisplayEventController displayEventController) {
+        this.displayEventController = displayEventController;
+    }
+
+    public void setRemoveEventFromListController(RemoveEventFromListController removeEventFromListController) {
+        this.removeEventFromListController = removeEventFromListController;
+    }
+
+    @Override
+    public void propertyChange(PropertyChangeEvent evt) {
+        if (evt.getPropertyName().equals("refresh") || evt.getPropertyName().equals("state")) {
+
+            final DisplayEventListState state;
+            if (evt.getNewValue() instanceof DisplayEventListState) {
+                state = (DisplayEventListState) evt.getNewValue();
+            } else {
+                state = displayEventListViewModel.getState();
+            }
+
+            this.currentEventList = state.getEventList();
+
+            if (this.currentEventList != null) {
+                titleLabel.setText(this.currentEventList.getName());
+                rebuildEventRows();
+            }
+        }
+    }
+
+    private void rebuildEventRows() {
+        eventsPanel.removeAll();
+
+        eventsPanel.add(Box.createVerticalStrut(10));
+
+        if (this.currentEventList.getEvents().isEmpty()) {
+            final JLabel noEvents = new JLabel("No events in this list.");
+            ViewStyle.applyLabelStyle(noEvents);
+            noEvents.setAlignmentX(Component.LEFT_ALIGNMENT);
+            final JPanel msgPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+            msgPanel.setOpaque(false);
+            msgPanel.add(noEvents);
+            eventsPanel.add(msgPanel);
+        }
+        else {
+            for (Event event : this.currentEventList.getEvents()) {
+                final JPanel eventRow = createEventCard(event);
+                eventsPanel.add(eventRow);
+                eventsPanel.add(Box.createVerticalStrut(15));
+            }
+        }
+
+        eventsPanel.add(Box.createVerticalGlue());
+        eventsPanel.revalidate();
+        eventsPanel.repaint();
+    }
+
+    private JPanel createEventCard(Event event) {
+        final JPanel card = ViewStyle.createCardPanel();
+        card.setLayout(new BorderLayout());
+        card.setMaximumSize(new Dimension(Integer.MAX_VALUE, 80));
+
+        // Event name and date
+        final JPanel infoPanel = new JPanel(new GridLayout(2, 1));
+        infoPanel.setOpaque(false);
+
+        final JLabel nameLabel = new JLabel(event.getName());
+        ViewStyle.applyHeaderStyle(nameLabel);
+
+        final JLabel dateLabel = new JLabel(event.getDate() != null ? event.getDate().toString() : "TBD");
+        ViewStyle.applyMetaLabelStyle(dateLabel);
+
+        infoPanel.add(nameLabel);
+        infoPanel.add(dateLabel);
+
+        card.add(infoPanel, BorderLayout.WEST);
+
+        // Buttons
+        final JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        buttonPanel.setOpaque(false);
+
+        // View Button
+        final JButton viewButton = new JButton("View");
+        ViewStyle.applyButtonStyle(viewButton);
+        viewButton.addActionListener(e -> displayEventController.execute(event));
+        buttonPanel.add(viewButton);
+
+        // Secondary Button
+        final boolean isMasterList = currentEventList != null &&
+                "master_list".equalsIgnoreCase(currentEventList.getId());
+
+        if (isMasterList) {
+            // Attended blocked out button
+            final JButton attendedButton = new JButton("Attended");
+            ViewStyle.applyButtonStyle(attendedButton);
+            attendedButton.setEnabled(false);
+            buttonPanel.add(attendedButton);
+        }
+        else {
+            // Remove button
+            final JButton removeButton = new JButton("Remove");
+            ViewStyle.applyButtonStyle(removeButton);
+            removeButton.setForeground(ViewStyle.ERROR_COLOR);
+
+            removeButton.addActionListener(e -> {
+                if (currentEventList != null && removeEventFromListController != null) {
+                    final int confirm = JOptionPane.showConfirmDialog(
+                            this,
+                            "Remove '" + event.getName() + "' from this list?",
+                            "Remove Event",
+                            JOptionPane.YES_NO_OPTION
+                    );
+
+                    if (confirm == JOptionPane.YES_OPTION) {
+                        removeEventFromListController.execute(event, currentEventList);
+                        displayEventListController.execute(currentEventList.getId());
+                    }
+                }
+            });
+            buttonPanel.add(removeButton);
+        }
+
+        card.add(buttonPanel, BorderLayout.EAST);
+
+        return card;
+    }
+
+    public String getViewName() {
+        return this.viewName;
+    }
+}

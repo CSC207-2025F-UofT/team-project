@@ -1,13 +1,54 @@
-# Team Project
+# Music Festival Companion
 
-Please keep this up-to-date with information about your project throughout the term.
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/c07c23e4-daf1-447e-8c31-6527c004d254" height="260" style="max-width:30%;">
 
-The readme should include information such as:
-- a summary of what your application is all about
-- a list of the user stories, along with who is responsible for each one
-- information about the API(s) that your project uses 
-- screenshots or animations demonstrating current functionality
+  <img src="https://github.com/user-attachments/assets/b4fc3d68-c33e-472e-b613-849e38263c4f" height="260" style="max-width:30%;">
 
-By keeping this README up-to-date,
-your team will find it easier to prepare for the final presentation
-at the end of the term.
+  <img src="https://github.com/user-attachments/assets/6985f167-a3b7-4ffb-aef1-ad711f06bc00" height="260" style="max-width:15%;">
+</p>
+
+---
+
+
+## 1. Group Members
+
+| Name                   | GitHub username |
+|:-----------------------|:----------------|
+| **Abdullah Algothami** | `abudi511`      |
+| **Amir Diba**          | `Amir8-5`       |
+| **Cheuk-Fung Lau**     | `cflau31666`      |
+| **Yifu Liang**         | `JeffLia06`     |
+| **Fan Peng**           | `pengfan200455` |
+| **Hugo Ye**            | `hugo-ye`       |
+
+---
+
+## 2. Application Summary
+**Music Festival Companion** is a comprehensive event management application designed to streamline the live music experience. It empowers users to discover music events through robust search and filter criteria, organize their concert itinerary into custom lists, and track upcoming shows with automated notifications.
+
+Whether searching by artist, genre, or price, the application serves as a central hub for users to curate their personal music journey from discovery to attendance.
+
+---
+
+## 3. User Stories
+
+1. I want to search for events by artist, genre, venue location, and date so that I can easily find concerts that match my specific tastes and schedule. **Amir**
+2. I want to sort my search results alphabetically, by date, by location, or by price, so that I can prioritize the most relevant options. **Hugo**
+3. I want to view detailed information about an event and access a direct link to purchase tickets, so that I can make informed decisions and secure my spot quickly. **Abdullah**
+4. I want to be able to "favorite" events I am going to attend to a main "Wishlist" with a single click, so that I don't lose track of potential concerts I want to attend. **Abdullah**
+5. I want to create custom-named lists (and delete them if necessary), so that I can categorize events (e.g., "Date Night options"). **Cheuk-Fung**
+6. I want to add specific events to my custom lists and remove them if I change my mind, so my itinerary is always up to date. **Yifu**
+7. I want to receive reminders about upcoming events whenever I open the app, so that I remember to attend. **Yifu**
+8. I want to create secure accounts for myself, my friends, and my family, and log in with a password, so that my saved events and lists are private and accessible only to me. **Hugo**
+
+---
+
+## 4. API Integration
+
+### Ticketmaster Discovery API
+The project utilizes the Ticketmaster Discovery API, an interface that provides access to a global inventory of live events.
+
+This API enables the application to search and retrieve real-time data for concerts, sports games, arts, and theater productions. By leveraging this external service, the application can offer users up-to-date schedules, venue details, and ticketing information from all over the world.
+
+---
