@@ -17,7 +17,7 @@ at the end of the term.
 # User Stories
 User story 1: As a visitor, I want to view a list of pets available for adoption. -- Angelica
 
-User story 2: As a visitor, I want to filter pets by type of animal, age and (possibly) size. -- Angelica
+User story 2: As a visitor, I want to filter pets by type of animal, age and (possibly) size. -- N/A
 
 User story 3: As a user, I want to create an account and login -- Sixuan
 
