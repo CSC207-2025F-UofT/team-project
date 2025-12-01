@@ -1,0 +1,12 @@
+package use_case.signUp;
+
+/**
+ * Input boundary for SignUp usecase, used in interactor
+ */
+public interface SignUpInputBoundary {
+    /**
+     * Execute the signup usecase.
+     * @param signupInputData the input data
+     */
+    void execute(SignUpInputData signupInputData);
+}
