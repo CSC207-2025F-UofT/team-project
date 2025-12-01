@@ -79,11 +79,22 @@ public class PetListView extends RightContentTemplate implements PropertyChangeL
         card.add(img, BorderLayout.WEST);
         card.add(info, BorderLayout.CENTER);
 
+        //making the card clickable for the detailed view
+        card.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
+            public void mouseClicked(java.awt.event.MouseEvent e) {
+                showDetails(pet);
+            }
+        });
+
         return card;
     }
 
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
         refreshList();
+    }
+    private void showDetails(Pet pet) {
+        new PetDetailView(pet);
     }
 }

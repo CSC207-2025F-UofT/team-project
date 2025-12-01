@@ -11,6 +11,17 @@
         "username": "user1"
     },
     {
+        "password": "pass11",
+        "address": "Address 11",
+        "idType": "DRIVERS_LICENSE",
+        "phoneNumber": 11,
+        "name": "User 11",
+        "id": 11,
+        "userType": "user",
+        "email": "user11@example.com",
+        "username": "user11"
+    },
+    {
         "password": "pass2",
         "address": "Address 2",
         "idType": "PASSPORT",
@@ -22,48 +33,92 @@
         "username": "user2"
     },
     {
-        "password": "pass3",
-        "address": "Address 3",
-        "idType": "PHOTO_CARD",
-        "phoneNumber": 3,
-        "name": "User 3",
-        "id": 3,
-        "userType": "user",
-        "email": "user3@example.com",
-        "username": "user3"
-    },
-    {
-        "password": "pass4",
-        "address": "Address 4",
-        "idType": "DRIVERS_LICENSE",
-        "phoneNumber": 4,
-        "name": "User 4",
-        "id": 4,
-        "userType": "user",
-        "email": "user4@example.com",
-        "username": "user4"
-    },
-    {
-        "password": "pass5",
-        "address": "Address 5",
-        "idType": "DRIVERS_LICENSE",
-        "phoneNumber": 5,
-        "name": "User 5",
-        "id": 5,
-        "userType": "user",
-        "email": "user5@example.com",
-        "username": "user5"
-    },
-    {
-        "password": "pass6",
-        "address": "Address 6",
+        "password": "pass10",
+        "address": "Address 10",
         "idType": "PASSPORT",
-        "phoneNumber": 6,
-        "name": "User 6",
-        "id": 6,
+        "phoneNumber": 10,
+        "name": "User 10",
+        "id": 10,
         "userType": "user",
-        "email": "user6@example.com",
-        "username": "user6"
+        "email": "user10@example.com",
+        "username": "user10"
+    },
+    {
+        "password": "pass20",
+        "address": "Address 20",
+        "idType": "DRIVERS_LICENSE",
+        "phoneNumber": 20,
+        "name": "User 20",
+        "id": 20,
+        "userType": "user",
+        "email": "user20@example.com",
+        "username": "user20"
+    },
+    {
+        "password": "pass0",
+        "address": "Address 011111111",
+        "idType": "PHOTO_CARD",
+        "phoneNumber": 0,
+        "name": "User 01111",
+        "id": 21,
+        "userType": "admin",
+        "email": "user011111@example.com",
+        "username": "user0"
+    },
+    {
+        "password": "pass15",
+        "address": "Address 15",
+        "idType": "PHOTO_CARD",
+        "phoneNumber": 15,
+        "name": "User 15",
+        "id": 15,
+        "userType": "user",
+        "email": "user15@example.com",
+        "username": "user15"
+    },
+    {
+        "password": "pass14",
+        "address": "Address 14",
+        "idType": "PHOTO_CARD",
+        "phoneNumber": 14,
+        "name": "User 14",
+        "id": 14,
+        "userType": "user",
+        "email": "user14@example.com",
+        "username": "user14"
+    },
+    {
+        "password": "pass13",
+        "address": "Address 13",
+        "idType": "PASSPORT",
+        "phoneNumber": 13,
+        "name": "User 13",
+        "id": 13,
+        "userType": "user",
+        "email": "user13@example.com",
+        "username": "user13"
+    },
+    {
+        "password": "pass12",
+        "address": "Address 12",
+        "idType": "DRIVERS_LICENSE",
+        "phoneNumber": 12,
+        "name": "User 12",
+        "id": 12,
+        "userType": "user",
+        "email": "user12@example.com",
+        "username": "user12"
+    },
+    {
+        "password": "pass9",
+        "address": "Address 9",
+        "idType": "PASSPORT",
+        "phoneNumber": 9,
+        "name": "User 9",
+        "id": 9,
+        "userType": "user",
+        "email": "user9@example.com",
+        "username": "user9"
     },
     {
         "password": "pass7",
@@ -88,114 +143,48 @@
         "username": "user8"
     },
     {
-        "password": "pass9",
-        "address": "Address 9",
-        "idType": "PASSPORT",
-        "phoneNumber": 9,
-        "name": "User 9",
-        "id": 9,
-        "userType": "user",
-        "email": "user9@example.com",
-        "username": "user9"
-    },
-    {
-        "password": "pass10",
-        "address": "Address 10",
-        "idType": "PASSPORT",
-        "phoneNumber": 10,
-        "name": "User 10",
-        "id": 10,
-        "userType": "user",
-        "email": "user10@example.com",
-        "username": "user10"
-    },
-    {
-        "password": "pass11",
-        "address": "Address 11",
+        "password": "pass5",
+        "address": "Address 5",
         "idType": "DRIVERS_LICENSE",
-        "phoneNumber": 11,
-        "name": "User 11",
-        "id": 11,
+        "phoneNumber": 5,
+        "name": "User 5",
+        "id": 5,
         "userType": "user",
-        "email": "user11@example.com",
-        "username": "user11"
+        "email": "user5@example.com",
+        "username": "user5"
     },
     {
-        "password": "pass12",
-        "address": "Address 12",
-        "idType": "DRIVERS_LICENSE",
-        "phoneNumber": 12,
-        "name": "User 12",
-        "id": 12,
-        "userType": "user",
-        "email": "user12@example.com",
-        "username": "user12"
-    },
-    {
-        "password": "pass13",
-        "address": "Address 13",
+        "password": "pass6",
+        "address": "Address 6",
         "idType": "PASSPORT",
-        "phoneNumber": 13,
-        "name": "User 13",
-        "id": 13,
+        "phoneNumber": 6,
+        "name": "User 6",
+        "id": 6,
         "userType": "user",
-        "email": "user13@example.com",
-        "username": "user13"
+        "email": "user6@example.com",
+        "username": "user6"
     },
     {
-        "password": "pass14",
-        "address": "Address 14",
+        "password": "pass3",
+        "address": "Address 3",
         "idType": "PHOTO_CARD",
-        "phoneNumber": 14,
-        "name": "User 14",
-        "id": 14,
+        "phoneNumber": 3,
+        "name": "User 3",
+        "id": 3,
         "userType": "user",
-        "email": "user14@example.com",
-        "username": "user14"
+        "email": "user3@example.com",
+        "username": "user3"
     },
     {
-        "password": "pass15",
-        "address": "Address 15",
-        "idType": "PHOTO_CARD",
-        "phoneNumber": 15,
-        "name": "User 15",
-        "id": 15,
-        "userType": "user",
-        "email": "user15@example.com",
-        "username": "user15"
-    },
-    {
-        "password": "pass16",
-        "address": "Address 16",
-        "idType": "PHOTO_CARD",
-        "phoneNumber": 16,
-        "name": "User 16",
-        "id": 16,
-        "userType": "user",
-        "email": "user16@example.com",
-        "username": "user16"
-    },
-    {
-        "password": "pass17",
-        "address": "Address 17",
+        "password": "pass4",
+        "address": "Address 4",
         "idType": "DRIVERS_LICENSE",
-        "phoneNumber": 17,
-        "name": "User 17",
-        "id": 17,
+        "phoneNumber": 4,
+        "name": "User 4",
+        "id": 4,
         "userType": "user",
-        "email": "user17@example.com",
-        "username": "user17"
-    },
-    {
-        "password": "pass18",
-        "address": "Address 18",
-        "idType": "PHOTO_CARD",
-        "phoneNumber": 18,
-        "name": "User 18",
-        "id": 18,
-        "userType": "user",
-        "email": "user18@example.com",
-        "username": "user18"
+        "email": "user4@example.com",
+        "username": "user4"
     },
     {
         "password": "pass19",
@@ -209,25 +198,47 @@
         "username": "user19"
     },
     {
-        "password": "pass20",
-        "address": "Address 20",
-        "idType": "DRIVERS_LICENSE",
-        "phoneNumber": 20,
-        "name": "User 20",
-        "id": 20,
+        "password": "pass18",
+        "address": "Address 18",
+        "idType": "PHOTO_CARD",
+        "phoneNumber": 18,
+        "name": "User 18",
+        "id": 18,
         "userType": "user",
-        "email": "user20@example.com",
-        "username": "user20"
+        "email": "user18@example.com",
+        "username": "user18"
     },
     {
-        "password": "pass0",
-        "address": "Address 011111111",
+        "password": "pass17",
+        "address": "Address 17",
+        "idType": "DRIVERS_LICENSE",
+        "phoneNumber": 17,
+        "name": "User 17",
+        "id": 17,
+        "userType": "user",
+        "email": "user17@example.com",
+        "username": "user17"
+    },
+    {
+        "password": "pass16",
+        "address": "Address 16",
+        "idType": "PHOTO_CARD",
+        "phoneNumber": 16,
+        "name": "User 16",
+        "id": 16,
+        "userType": "user",
+        "email": "user16@example.com",
+        "username": "user16"
+    },
+    {
+        "password": "pozzuoli",
+        "address": "",
         "idType": "PHOTO_CARD",
         "phoneNumber": 0,
-        "name": "User 01111",
-        "id": 21,
-        "userType": "admin",
-        "email": "user011111@example.com",
-        "username": "user0"
+        "name": "ang",
+        "id": 22,
+        "userType": "user",
+        "email": "",
+        "username": "ang"
     }
 ]
