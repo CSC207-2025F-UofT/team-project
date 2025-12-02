@@ -8,6 +8,7 @@ target/
 .idea/jarRepositories.xml
 .idea/compiler.xml
 .idea/libraries/
+.idea/
 *.iws
 *.iml
 *.ipr
@@ -36,3 +37,9 @@ build/
 
 ### Mac OS ###
 .DS_Store
+
+### For testing filesystem io ###
+/sandbox/
+
+### Node.js ###
+node_modules
