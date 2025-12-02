@@ -1,0 +1,732 @@
+{
+    "University Of Toronto Faculty Of Law": {
+        "latitude": 43.66571125,
+        "name": "University Of Toronto Faculty Of Law",
+        "longitude": -79.39391493948722
+    },
+    "Claude T. Bissell Building, Faculty of Information (iSchool)": {
+        "latitude": 43.6653024724462,
+        "name": "Claude T. Bissell Building, Faculty of Information (iSchool)",
+        "longitude": -79.39910317166486
+    },
+    "Woodsworth College Residence": {
+        "latitude": 43.66755920011266,
+        "name": "Woodsworth College Residence",
+        "longitude": -79.39947522215851
+    },
+    "Engineering & Computer Science Library": {
+        "latitude": 43.66006781052987,
+        "name": "Engineering & Computer Science Library",
+        "longitude": -79.39463215203212
+    },
+    "McLennan Physical Laboratories": {
+        "latitude": 43.660563098178244,
+        "name": "McLennan Physical Laboratories",
+        "longitude": -79.39808152596025
+    },
+    "Anthropology Building": {
+        "latitude": 43.659939598344515,
+        "name": "Anthropology Building",
+        "longitude": -79.39851522445679
+    },
+    "Regis College": {
+        "latitude": 43.66425050083629,
+        "name": "Regis College",
+        "longitude": -79.39009583025631
+    },
+    "Rotman School of Management, Executive Programs": {
+        "latitude": 43.65965045,
+        "name": "Rotman School of Management, Executive Programs",
+        "longitude": -79.39151282999998
+    },
+    "North Borden Building": {
+        "latitude": 43.660345410314136,
+        "name": "North Borden Building",
+        "longitude": -79.40010153569985
+    },
+    "Athletic Centre": {
+        "latitude": 43.66248699305214,
+        "name": "Athletic Centre",
+        "longitude": -79.40065676565847
+    },
+    "Odette Hall": {
+        "latitude": 43.66604004488632,
+        "name": "Odette Hall",
+        "longitude": -79.38849449157715
+    },
+    "Teefy Hall": {
+        "latitude": 43.665299046033205,
+        "name": "Teefy Hall",
+        "longitude": -79.39113842105318
+    },
+    "Dean\u2019s House": {
+        "latitude": 43.660137,
+        "name": "Dean\u2019s House",
+        "longitude": -79.397055
+    },
+    "Emmanuel College": {
+        "latitude": 43.66667790603012,
+        "name": "Emmanuel College",
+        "longitude": -79.39305917125454
+    },
+    "GSU Pub": {
+        "latitude": 43.660646319899,
+        "name": "GSU Pub",
+        "longitude": -79.4003266167117
+    },
+    "School Of Graduate Studies": {
+        "latitude": 43.662019718468166,
+        "name": "School Of Graduate Studies",
+        "longitude": -79.39677715301514
+    },
+    "Robarts Library": {
+        "latitude": 43.66476405772461,
+        "name": "Robarts Library",
+        "longitude": -79.39918347488572
+    },
+    "Rowell Jackman Hall": {
+        "latitude": 43.667443562545174,
+        "name": "Rowell Jackman Hall",
+        "longitude": -79.39081055940753
+    },
+    "Wallberg Memorial Building": {
+        "latitude": 43.65913,
+        "name": "Wallberg Memorial Building",
+        "longitude": -79.395355
+    },
+    "Multi Faith Centre": {
+        "latitude": 43.66060260263165,
+        "name": "Multi Faith Centre",
+        "longitude": -79.40102373436456
+    },
+    "Bahen Centre for Information Technology": {
+        "latitude": 43.65945411785797,
+        "name": "Bahen Centre for Information Technology",
+        "longitude": -79.39812396540144
+    },
+    "E.J. Pratt Library": {
+        "latitude": 43.6663183220165,
+        "name": "E.J. Pratt Library",
+        "longitude": -79.39143813785805
+    },
+    "University of Toronto": {
+        "latitude": 43.6624934706167,
+        "name": "University of Toronto",
+        "longitude": -79.39521976633822
+    },
+    "Scace Walk": {
+        "latitude": 43.664478,
+        "name": "Scace Walk",
+        "longitude": -79.395816
+    },
+    "Knox College": {
+        "latitude": 43.66156100180724,
+        "name": "Knox College",
+        "longitude": -79.3965281937063
+    },
+    "Massey College": {
+        "latitude": 43.66478328004153,
+        "name": "Massey College",
+        "longitude": -79.39749185693668
+    },
+    "Graduate Students' Union": {
+        "latitude": 43.66066001022562,
+        "name": "Graduate Students' Union",
+        "longitude": -79.40034341846817
+    },
+    "Faculty of Medicine": {
+        "latitude": 43.66124,
+        "name": "Faculty of Medicine",
+        "longitude": -79.39349
+    },
+    "Loretto College": {
+        "latitude": 43.66718003318799,
+        "name": "Loretto College",
+        "longitude": -79.38941408345855
+    },
+    "Sorbara Hall": {
+        "latitude": 43.66589764988159,
+        "name": "Sorbara Hall",
+        "longitude": -79.38902647510541
+    },
+    "Sussex Court": {
+        "latitude": 43.66496931382733,
+        "name": "Sussex Court",
+        "longitude": -79.40102553342473
+    },
+    "University of Toronto Students' Union": {
+        "latitude": 43.6631382087546,
+        "name": "University of Toronto Students' Union",
+        "longitude": -79.39478651629062
+    },
+    "Back Campus": {
+        "latitude": 43.663934864066654,
+        "name": "Back Campus",
+        "longitude": -79.39622033016312
+    },
+    "Department of Sociology": {
+        "latitude": 43.66642989376033,
+        "name": "Department of Sociology",
+        "longitude": -79.40343751677705
+    },
+    "Woodsworth College Registrar": {
+        "latitude": 43.666614355252946,
+        "name": "Woodsworth College Registrar",
+        "longitude": -79.39888000488281
+    },
+    "Physical Geography Building": {
+        "latitude": 43.660745,
+        "name": "Physical Geography Building",
+        "longitude": -79.396483
+    },
+    "Understudy Café at Gerstein": {
+        "latitude": 43.662308053867875,
+        "name": "Understudy Café at Gerstein",
+        "longitude": -79.39409796741381
+    },
+    "Isabel Bader Theatre": {
+        "latitude": 43.66732927030892,
+        "name": "Isabel Bader Theatre",
+        "longitude": -79.39260350506324
+    },
+    "Annesley Hall": {
+        "latitude": 43.66771639489241,
+        "name": "Annesley Hall",
+        "longitude": -79.39323663711548
+    },
+    "Lash Miller Chemical Laboratories": {
+        "latitude": 43.66174406740121,
+        "name": "Lash Miller Chemical Laboratories",
+        "longitude": -79.39811147616597
+    },
+    "Factor-Inwentash Faculty of Social Work": {
+        "latitude": 43.668166531892474,
+        "name": "Factor-Inwentash Faculty of Social Work",
+        "longitude": -79.39774032037217
+    },
+    "New College Summer Residence": {
+        "latitude": 43.66209974857563,
+        "name": "New College Summer Residence",
+        "longitude": -79.40029438867711
+    },
+    "Faculty Of Arts And Science": {
+        "latitude": 43.662554,
+        "name": "Faculty Of Arts And Science",
+        "longitude": -79.398223
+    },
+    "Faculty of Dentistry Building": {
+        "latitude": 43.655087,
+        "name": "Faculty of Dentistry Building",
+        "longitude": -79.38568
+    },
+    "OISE University of Toronto": {
+        "latitude": 43.66805786785778,
+        "name": "OISE University of Toronto",
+        "longitude": -79.39900875091553
+    },
+    "Myhal Centre For Engineering Innovation & Entrepreneurship": {
+        "latitude": 43.660648,
+        "name": "Myhal Centre For Engineering Innovation & Entrepreneurship",
+        "longitude": -79.39664
+    },
+    "Facilities & Services": {
+        "latitude": 43.658388,
+        "name": "Facilities & Services",
+        "longitude": -79.392806
+    },
+    "Hart House": {
+        "latitude": 43.66363538943488,
+        "name": "Hart House",
+        "longitude": -79.39430165703845
+    },
+    "Varsity Arena": {
+        "latitude": 43.666971356224934,
+        "name": "Varsity Arena",
+        "longitude": -79.3970775604248
+    },
+    "Hart House Gym": {
+        "latitude": 43.66417202442517,
+        "name": "Hart House Gym",
+        "longitude": -79.39488839857401
+    },
+    "J. Robert S. Prichard Alumni House": {
+        "latitude": 43.66217103922526,
+        "name": "J. Robert S. Prichard Alumni House",
+        "longitude": -79.39649158499341
+    },
+    "Philosopher's Walk": {
+        "latitude": 43.666893747498605,
+        "name": "Philosopher's Walk",
+        "longitude": -79.39559698104858
+    },
+    "Cardinal Flahiff Building": {
+        "latitude": 43.665468091652336,
+        "name": "Cardinal Flahiff Building",
+        "longitude": -79.38795160967035
+    },
+    "Civil Engineering Common Room": {
+        "latitude": 43.659948310906394,
+        "name": "Civil Engineering Common Room",
+        "longitude": -79.39540118805523
+    },
+    "Toronto Time": {
+        "latitude": 43.660596,
+        "name": "Toronto Time",
+        "longitude": -79.394853
+    },
+    "D.L. Pratt Building": {
+        "latitude": 43.65960106330899,
+        "name": "D.L. Pratt Building",
+        "longitude": -79.39510747412668
+    },
+    "Haultain Building": {
+        "latitude": 43.6597690784452,
+        "name": "Haultain Building",
+        "longitude": -79.39344206833319
+    },
+    "School of Continuing Studies": {
+        "latitude": 43.666962239187505,
+        "name": "School of Continuing Studies",
+        "longitude": -79.39958680934897
+    },
+    "South Borden Building": {
+        "latitude": 43.660076205743444,
+        "name": "South Borden Building",
+        "longitude": -79.39972114572811
+    },
+    "Admissions and Awards Office": {
+        "latitude": 43.66804234640151,
+        "name": "Admissions and Awards Office",
+        "longitude": -79.40016210079193
+    },
+    "ECE Common Room": {
+        "latitude": 43.65990855122966,
+        "name": "ECE Common Room",
+        "longitude": -79.39514636993408
+    },
+    "Translational Research Program": {
+        "latitude": 43.658691,
+        "name": "Translational Research Program",
+        "longitude": -79.393073
+    },
+    "Wallberg Building": {
+        "latitude": 43.65937772096322,
+        "name": "Wallberg Building",
+        "longitude": -79.39573654241308
+    },
+    "Terrence Donnelly Centre for Cellular and Biomolecular Research": {
+        "latitude": 43.660170044030096,
+        "name": "Terrence Donnelly Centre for Cellular and Biomolecular Research",
+        "longitude": -79.39312655071836
+    },
+    "Toronto School of Theology": {
+        "latitude": 43.663910935868905,
+        "name": "Toronto School of Theology",
+        "longitude": -79.39073463604602
+    },
+    "Wetmore Hall, New College": {
+        "latitude": 43.662146005298034,
+        "name": "Wetmore Hall, New College",
+        "longitude": -79.40032041642496
+    },
+    "Macmillan Theatre": {
+        "latitude": 43.66650634335078,
+        "name": "Macmillan Theatre",
+        "longitude": -79.39450893441568
+    },
+    "The Daniels Faculty of Architecture, Landscape and Design": {
+        "latitude": 43.658508808404555,
+        "name": "The Daniels Faculty of Architecture, Landscape and Design",
+        "longitude": -79.39834236924852
+    },
+    "Edward Johnson Building, Faculty of Music": {
+        "latitude": 43.666490445492464,
+        "name": "Edward Johnson Building, Faculty of Music",
+        "longitude": -79.39452653413565
+    },
+    "Medical Sciences Building": {
+        "latitude": 43.66136154313333,
+        "name": "Medical Sciences Building",
+        "longitude": -79.39390043371505
+    },
+    "St. Hildas College": {
+        "latitude": 43.665752533110904,
+        "name": "St. Hildas College",
+        "longitude": -79.39803549331911
+    },
+    "Student Family Housing": {
+        "latitude": 43.66900895109041,
+        "name": "Student Family Housing",
+        "longitude": -79.38750443259805
+    },
+    "Fennel Organic Eatery": {
+        "latitude": 43.666901,
+        "name": "Fennel Organic Eatery",
+        "longitude": -79.40332
+    },
+    "Lassonde Mining Building": {
+        "latitude": 43.65947302902235,
+        "name": "Lassonde Mining Building",
+        "longitude": -79.39389189150326
+    },
+    "Wymilwood Cafe": {
+        "latitude": 43.66714091674785,
+        "name": "Wymilwood Cafe",
+        "longitude": -79.3927952783192
+    },
+    "Hart House Circle Park": {
+        "latitude": 43.663129,
+        "name": "Hart House Circle Park",
+        "longitude": -79.394133
+    },
+    "Astronomy and Astrophysics Building": {
+        "latitude": 43.66059977543999,
+        "name": "Astronomy and Astrophysics Building",
+        "longitude": -79.39799086499734
+    },
+    "Rotman South": {
+        "latitude": 43.65954518365018,
+        "name": "Rotman South",
+        "longitude": -79.39189051218551
+    },
+    "Convocation Hall Stop": {
+        "latitude": 43.660747,
+        "name": "Convocation Hall Stop",
+        "longitude": -79.394648
+    },
+    "Sid's Southside Cafe": {
+        "latitude": 43.66201648509592,
+        "name": "Sid's Southside Cafe",
+        "longitude": -79.39850649514088
+    },
+    "Gerald Larkin Building": {
+        "latitude": 43.66562060149829,
+        "name": "Gerald Larkin Building",
+        "longitude": -79.39700647985724
+    },
+    "Sandford Fleming Building": {
+        "latitude": 43.659885189171504,
+        "name": "Sandford Fleming Building",
+        "longitude": -79.39471764776886
+    },
+    "Northrop Frye Hall": {
+        "latitude": 43.666262051343,
+        "name": "Northrop Frye Hall",
+        "longitude": -79.39237744629823
+    },
+    "Leslie L. Dan Pharmacy Building": {
+        "latitude": 43.659962612228355,
+        "name": "Leslie L. Dan Pharmacy Building",
+        "longitude": -79.39132860411358
+    },
+    "Elmsley Hall": {
+        "latitude": 43.66668601423891,
+        "name": "Elmsley Hall",
+        "longitude": -79.39012581892176
+    },
+    "Margaret Addison Hall": {
+        "latitude": 43.66807245721994,
+        "name": "Margaret Addison Hall",
+        "longitude": -79.39258172079202
+    },
+    "Innis Green": {
+        "latitude": 43.66542671859977,
+        "name": "Innis Green",
+        "longitude": -79.39959028140169
+    },
+    "Main Entrance": {
+        "latitude": 43.659252,
+        "name": "Main Entrance",
+        "longitude": -79.39388
+    },
+    "University of Toronto Earth Sciences": {
+        "latitude": 43.660598782828586,
+        "name": "University of Toronto Earth Sciences",
+        "longitude": -79.39657217420937
+    },
+    "Med Sci Cafeteria": {
+        "latitude": 43.660259819542816,
+        "name": "Med Sci Cafeteria",
+        "longitude": -79.39297670479313
+    },
+    "Knox college chapel": {
+        "latitude": 43.661347,
+        "name": "Knox college chapel",
+        "longitude": -79.395981
+    },
+    "Fitzgerald Building": {
+        "latitude": 43.660061097243045,
+        "name": "Fitzgerald Building",
+        "longitude": -79.39212725823434
+    },
+    "Earth Sciences Centre": {
+        "latitude": 43.660598309528176,
+        "name": "Earth Sciences Centre",
+        "longitude": -79.39961374914161
+    },
+    "Brennan Hall and Sorbara Auditorium": {
+        "latitude": 43.666624380904715,
+        "name": "Brennan Hall and Sorbara Auditorium",
+        "longitude": -79.38986770419339
+    },
+    "Muzzo Family Alumni Hall": {
+        "latitude": 43.665031918938716,
+        "name": "Muzzo Family Alumni Hall",
+        "longitude": -79.39028825787874
+    },
+    "1 Spadina Crescent": {
+        "latitude": 43.65972154562629,
+        "name": "1 Spadina Crescent",
+        "longitude": -79.4010997207904
+    },
+    "Engineering Communications Room": {
+        "latitude": 43.66013295974964,
+        "name": "Engineering Communications Room",
+        "longitude": -79.39463265871429
+    },
+    "University of Toronto Engineering Society": {
+        "latitude": 43.660097244179,
+        "name": "University of Toronto Engineering Society",
+        "longitude": -79.39464374612372
+    },
+    "Whitney Hall": {
+        "latitude": 43.66363221460056,
+        "name": "Whitney Hall",
+        "longitude": -79.39773315003826
+    },
+    "Galbraith Building": {
+        "latitude": 43.659914148279775,
+        "name": "Galbraith Building",
+        "longitude": -79.39599492936729
+    },
+    "Sir Daniel Wilson Residence": {
+        "latitude": 43.66219272474773,
+        "name": "Sir Daniel Wilson Residence",
+        "longitude": -79.39672689089515
+    },
+    "Front Campus": {
+        "latitude": 43.66192155165447,
+        "name": "Front Campus",
+        "longitude": -79.39497787016175
+    },
+    "Jackman Humanities Building": {
+        "latitude": 43.66764726215954,
+        "name": "Jackman Humanities Building",
+        "longitude": -79.39989617037081
+    },
+    "Bancroft Building": {
+        "latitude": 43.660796151636504,
+        "name": "Bancroft Building",
+        "longitude": -79.3997276285605
+    },
+    "45 Willcocks, New College": {
+        "latitude": 43.66131669333881,
+        "name": "45 Willcocks, New College",
+        "longitude": -79.40114602493607
+    },
+    "Max Gluskin House": {
+        "latitude": 43.665998642487324,
+        "name": "Max Gluskin House",
+        "longitude": -79.40012573925036
+    },
+    "Donald G. Ivey Library": {
+        "latitude": 43.662056759260395,
+        "name": "Donald G. Ivey Library",
+        "longitude": -79.4004549110371
+    },
+    "Koffler House": {
+        "latitude": 43.66059165832059,
+        "name": "Koffler House",
+        "longitude": -79.40082815209796
+    },
+    "New College": {
+        "latitude": 43.6618,
+        "name": "New College",
+        "longitude": -79.39938
+    },
+    "Andrew From Common Room": {
+        "latitude": 43.659522,
+        "name": "Andrew From Common Room",
+        "longitude": -79.393903
+    },
+    "William Doo Auditorium": {
+        "latitude": 43.660981,
+        "name": "William Doo Auditorium",
+        "longitude": -79.40086
+    },
+    "Gerstein Science Information Centre": {
+        "latitude": 43.662377749003014,
+        "name": "Gerstein Science Information Centre",
+        "longitude": -79.39400615576646
+    },
+    "Innis College": {
+        "latitude": 43.665555973466255,
+        "name": "Innis College",
+        "longitude": -79.39929750646667
+    },
+    "Sidney Smith Hall": {
+        "latitude": 43.66258359953375,
+        "name": "Sidney Smith Hall",
+        "longitude": -79.39858797539718
+    },
+    "Best Institute": {
+        "latitude": 43.660409308489015,
+        "name": "Best Institute",
+        "longitude": -79.38941231620524
+    },
+    "Sigma Chi Fraternity - University of Toronto-Ryerson": {
+        "latitude": 43.6636096935177,
+        "name": "Sigma Chi Fraternity - University of Toronto-Ryerson",
+        "longitude": -79.40035716173605
+    },
+    "exams4sure.net": {
+        "latitude": 43.66132894030034,
+        "name": "exams4sure.net",
+        "longitude": -79.39596176147461
+    },
+    "Inforum": {
+        "latitude": 43.66504663019888,
+        "name": "Inforum",
+        "longitude": -79.39939498901367
+    },
+    "Health Sciences Building": {
+        "latitude": 43.65919475605909,
+        "name": "Health Sciences Building",
+        "longitude": -79.39319750667362
+    },
+    "Carr Hall": {
+        "latitude": 43.66514187109434,
+        "name": "Carr Hall",
+        "longitude": -79.39045750310162
+    },
+    "Canadiana Gallery": {
+        "latitude": 43.66181736620239,
+        "name": "Canadiana Gallery",
+        "longitude": -79.39177818392034
+    },
+    "College One": {
+        "latitude": 43.657877,
+        "name": "College One",
+        "longitude": -79.399469
+    },
+    "Convocation Hall": {
+        "latitude": 43.66082829233904,
+        "name": "Convocation Hall",
+        "longitude": -79.39524545662506
+    },
+    "Trinity College": {
+        "latitude": 43.665329264407056,
+        "name": "Trinity College",
+        "longitude": -79.39567606876632
+    },
+    "Simcoe Hall": {
+        "latitude": 43.66101101815138,
+        "name": "Simcoe Hall",
+        "longitude": -79.39583899239886
+    },
+    "Wycliffe College": {
+        "latitude": 43.664428,
+        "name": "Wycliffe College",
+        "longitude": -79.39512287
+    },
+    "Hart House Theatre": {
+        "latitude": 43.66357134217992,
+        "name": "Hart House Theatre",
+        "longitude": -79.3946163990837
+    },
+    "Rotman School of Management": {
+        "latitude": 43.6647972002443,
+        "name": "Rotman School of Management",
+        "longitude": -79.39857565702448
+    },
+    "Soldiers' Tower": {
+        "latitude": 43.663494311674455,
+        "name": "Soldiers' Tower",
+        "longitude": -79.39516478990888
+    },
+    "Rotman Business Information Centre": {
+        "latitude": 43.66529096850397,
+        "name": "Rotman Business Information Centre",
+        "longitude": -79.39862273864476
+    },
+    "poul": {
+        "fsq_id": "576d0a23498e1428dbecf5c8",
+        "name": "poul",
+        "error": "Missing latitude or longitude from API response."
+    },
+    "Lillian Massey Building": {
+        "latitude": 43.66873684217897,
+        "name": "Lillian Massey Building",
+        "longitude": -79.39380136609779
+    },
+    "Rotman Finance Lab": {
+        "latitude": 43.665232896705035,
+        "name": "Rotman Finance Lab",
+        "longitude": -79.39857959747314
+    },
+    "Clara Benson Building": {
+        "latitude": 43.66311330602211,
+        "name": "Clara Benson Building",
+        "longitude": -79.39988241128911
+    },
+    "Noranda Earth Sciences Library": {
+        "latitude": 43.6608244343692,
+        "name": "Noranda Earth Sciences Library",
+        "longitude": -79.39960956573486
+    },
+    "University of Toronto (Faculty of Dentistry)": {
+        "latitude": 43.656275927966504,
+        "name": "University of Toronto (Faculty of Dentistry)",
+        "longitude": -79.38705682754517
+    },
+    "Jackman Law Building": {
+        "latitude": 43.6661,
+        "name": "Jackman Law Building",
+        "longitude": -79.39403
+    },
+    "Cima Past Papers": {
+        "latitude": 43.66132894030034,
+        "name": "Cima Past Papers",
+        "longitude": -79.39596176147461
+    },
+    "Burwash Hall (Upper Burwash)": {
+        "latitude": 43.66716421355399,
+        "name": "Burwash Hall (Upper Burwash)",
+        "longitude": -79.3913878366134
+    },
+    "Mechanical Engineering Building": {
+        "latitude": 43.659757859472634,
+        "name": "Mechanical Engineering Building",
+        "longitude": -79.39416681202145
+    },
+    "George Ignatieff Theatre": {
+        "latitude": 43.66583558704518,
+        "name": "George Ignatieff Theatre",
+        "longitude": -79.39734763115273
+    },
+    "McMurrich Building": {
+        "latitude": 43.66103725672479,
+        "name": "McMurrich Building",
+        "longitude": -79.39295037332427
+    },
+    "Tanz Neuroscience Building": {
+        "latitude": 43.6603247889222,
+        "name": "Tanz Neuroscience Building",
+        "longitude": -79.39230700564543
+    },
+    "King's College Circle": {
+        "latitude": 43.66166090311657,
+        "name": "King's College Circle",
+        "longitude": -79.39485142418128
+    },
+    "Woodsworth College": {
+        "latitude": 43.66640305812397,
+        "name": "Woodsworth College",
+        "longitude": -79.39879450983403
+    },
+    "Munk School of Global Affairs": {
+        "latitude": 43.66462772711352,
+        "name": "Munk School of Global Affairs",
+        "longitude": -79.39676521061617
+    }
+}
