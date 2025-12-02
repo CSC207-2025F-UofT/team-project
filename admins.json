@@ -1,0 +1,242 @@
+[
+    {
+        "firstName": "Admin First1",
+        "lastName": "Admin Last1",
+        "password": "adminpass1",
+        "id": 1,
+        "email": "admin1@pet.com",
+        "username": "admin1"
+    },
+    {
+        "firstName": "Admin First2",
+        "lastName": "Admin Last2",
+        "password": "adminpass2",
+        "id": 2,
+        "email": "admin2@pet.com",
+        "username": "admin2"
+    },
+    {
+        "firstName": "Admin First3",
+        "lastName": "Admin Last3",
+        "password": "adminpass3",
+        "id": 3,
+        "email": "admin3@pet.com",
+        "username": "admin3"
+    },
+    {
+        "firstName": "Admin First4",
+        "lastName": "Admin Last4",
+        "password": "adminpass4",
+        "id": 4,
+        "email": "admin4@pet.com",
+        "username": "admin4"
+    },
+    {
+        "firstName": "Admin First5",
+        "lastName": "Admin Last5",
+        "password": "adminpass5",
+        "id": 5,
+        "email": "admin5@pet.com",
+        "username": "admin5"
+    },
+    {
+        "firstName": "Admin First6",
+        "lastName": "Admin Last6",
+        "password": "adminpass6",
+        "id": 6,
+        "email": "admin6@pet.com",
+        "username": "admin6"
+    },
+    {
+        "firstName": "Admin First7",
+        "lastName": "Admin Last7",
+        "password": "adminpass7",
+        "id": 7,
+        "email": "admin7@pet.com",
+        "username": "admin7"
+    },
+    {
+        "firstName": "Admin First8",
+        "lastName": "Admin Last8",
+        "password": "adminpass8",
+        "id": 8,
+        "email": "admin8@pet.com",
+        "username": "admin8"
+    },
+    {
+        "firstName": "Admin First9",
+        "lastName": "Admin Last9",
+        "password": "adminpass9",
+        "id": 9,
+        "email": "admin9@pet.com",
+        "username": "admin9"
+    },
+    {
+        "firstName": "Admin First10",
+        "lastName": "Admin Last10",
+        "password": "adminpass10",
+        "id": 10,
+        "email": "admin10@pet.com",
+        "username": "admin10"
+    },
+    {
+        "firstName": "Admin First11",
+        "lastName": "Admin Last11",
+        "password": "adminpass11",
+        "id": 11,
+        "email": "admin11@pet.com",
+        "username": "admin11"
+    },
+    {
+        "firstName": "Admin First12",
+        "lastName": "Admin Last12",
+        "password": "adminpass12",
+        "id": 12,
+        "email": "admin12@pet.com",
+        "username": "admin12"
+    },
+    {
+        "firstName": "Admin First13",
+        "lastName": "Admin Last13",
+        "password": "adminpass13",
+        "id": 13,
+        "email": "admin13@pet.com",
+        "username": "admin13"
+    },
+    {
+        "firstName": "Admin First14",
+        "lastName": "Admin Last14",
+        "password": "adminpass14",
+        "id": 14,
+        "email": "admin14@pet.com",
+        "username": "admin14"
+    },
+    {
+        "firstName": "Admin First15",
+        "lastName": "Admin Last15",
+        "password": "adminpass15",
+        "id": 15,
+        "email": "admin15@pet.com",
+        "username": "admin15"
+    },
+    {
+        "firstName": "Admin First16",
+        "lastName": "Admin Last16",
+        "password": "adminpass16",
+        "id": 16,
+        "email": "admin16@pet.com",
+        "username": "admin16"
+    },
+    {
+        "firstName": "Admin First17",
+        "lastName": "Admin Last17",
+        "password": "adminpass17",
+        "id": 17,
+        "email": "admin17@pet.com",
+        "username": "admin17"
+    },
+    {
+        "firstName": "Admin First18",
+        "lastName": "Admin Last18",
+        "password": "adminpass18",
+        "id": 18,
+        "email": "admin18@pet.com",
+        "username": "admin18"
+    },
+    {
+        "firstName": "Admin First19",
+        "lastName": "Admin Last19",
+        "password": "adminpass19",
+        "id": 19,
+        "email": "admin19@pet.com",
+        "username": "admin19"
+    },
+    {
+        "firstName": "Admin First20",
+        "lastName": "Admin Last20",
+        "password": "adminpass20",
+        "id": 20,
+        "email": "admin20@pet.com",
+        "username": "admin20"
+    },
+    {
+        "firstName": "Admin First21",
+        "lastName": "Admin Last21",
+        "password": "adminpass21",
+        "id": 21,
+        "email": "admin21@pet.com",
+        "username": "admin21"
+    },
+    {
+        "firstName": "Admin First22",
+        "lastName": "Admin Last22",
+        "password": "adminpass22",
+        "id": 22,
+        "email": "admin22@pet.com",
+        "username": "admin22"
+    },
+    {
+        "firstName": "Admin First23",
+        "lastName": "Admin Last23",
+        "password": "adminpass23",
+        "id": 23,
+        "email": "admin23@pet.com",
+        "username": "admin23"
+    },
+    {
+        "firstName": "Admin First24",
+        "lastName": "Admin Last24",
+        "password": "adminpass24",
+        "id": 24,
+        "email": "admin24@pet.com",
+        "username": "admin24"
+    },
+    {
+        "firstName": "Admin First25",
+        "lastName": "Admin Last25",
+        "password": "adminpass25",
+        "id": 25,
+        "email": "admin25@pet.com",
+        "username": "admin25"
+    },
+    {
+        "firstName": "Admin First26",
+        "lastName": "Admin Last26",
+        "password": "adminpass26",
+        "id": 26,
+        "email": "admin26@pet.com",
+        "username": "admin26"
+    },
+    {
+        "firstName": "Admin First27",
+        "lastName": "Admin Last27",
+        "password": "adminpass27",
+        "id": 27,
+        "email": "admin27@pet.com",
+        "username": "admin27"
+    },
+    {
+        "firstName": "Admin First28",
+        "lastName": "Admin Last28",
+        "password": "adminpass28",
+        "id": 28,
+        "email": "admin28@pet.com",
+        "username": "admin28"
+    },
+    {
+        "firstName": "Admin First29",
+        "lastName": "Admin Last29",
+        "password": "adminpass29",
+        "id": 29,
+        "email": "admin29@pet.com",
+        "username": "admin29"
+    },
+    {
+        "firstName": "Admin First30",
+        "lastName": "Admin Last30",
+        "password": "adminpass30",
+        "id": 30,
+        "email": "admin30@pet.com",
+        "username": "admin30"
+    }
+]
