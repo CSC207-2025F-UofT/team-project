@@ -1,5 +1,16 @@
 # Team Project
 
+## Team Members
+
+- Winston Feng
+- Dohyeon Nam
+- Shiven Aggarwal
+- Raees Kabir
+- Denis Mathew Fat Shin Li Ping Kam
+- Navdeep-Singh Gill
+
+
+
 Please keep this up-to-date with information about your project throughout the term.
 
 The readme should include information such as:
