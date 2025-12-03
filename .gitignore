@@ -36,3 +36,9 @@ build/
 
 ### Mac OS ###
 .DS_Store
+
+### user files should never be uploaded/updated remotely ###
+users.*
+
+### diagram
+*.puml
