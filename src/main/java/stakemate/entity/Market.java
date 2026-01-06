@@ -1,0 +1,31 @@
+package stakemate.entity;
+
+public class Market {
+    private final String id;
+    private final String matchId;
+    private final String name;
+    private final MarketStatus status;
+
+    public Market(final String id, final String matchId, final String name, final MarketStatus status) {
+        this.id = id;
+        this.matchId = matchId;
+        this.name = name;
+        this.status = status;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public String getMatchId() {
+        return matchId;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public MarketStatus getStatus() {
+        return status;
+    }
+}
