@@ -1,0 +1,123 @@
+# all questions are taken from or inspired by the CSC207 Materials and Quizzes on Quercus
+# the format is as follows
+# quizId; questionId; questionText
+
+1; 101; Java is considered what type of programming language?
+1; A; A hybrid language; true
+1; B; A compiled language; false
+1; C; An interpreted language; false
+1; D; A scripting language; false
+
+2; 102; Select the correct order (top to bottom) of the layered computer architecture.
+2; A; OS, hardware, JVM, Java program; false
+2; B; Java program, JVM, OS, hardware; true
+2; C; application, hardware, OS; false
+2; D; Java program, OS, hardware; false
+
+3; 103; Which of the following statements is correct?
+3; A; Every type in Java is mutable; false
+3; B; All primitive types and class types are immutable; false
+3; C; All primitive types are immutable, there are mutable class types and immutable class types; true
+3; D; All primitive types are immutable, all class types are mutable; false
+
+4; 104; Which of the following types is a reference type?
+4; A; double; false
+4; B; String; true
+4; C; int; false
+4; D; char; false
+
+5; 105; What is the main purpose of the Java Virtual Machine (JVM)?
+5; A; To execute Java bytecode on any platform; true
+5; B; To compile Java code into machine code; false
+5; C; To store Java class definitions; false
+5; D; To delete unused variables; false
+
+6; 106; If int x = 10, what is the output of the code System.out.println(x / 3)?
+6; A; 3.33; false
+6; B; 3; true
+6; C; 3.0; false
+6; D; a compilation error; false
+
+7; 107; What command is used to stage changes in Git?
+7; A; git checkout; false
+7; B; git commit; false
+7; C; git add; true
+7; D; git push; false
+
+8; 108; What is the purpose of the git clone command?
+8; A; To create a new repository; false
+8; B; To create a new branch; false
+8; C; To copy an existing repository to a local machine; true
+8; D; To delete a branch; false
+
+9; 109; Why is version control beneficial for software development?
+9; A; It speeds up the compilation process; false
+9; B; It automatically fixes bugs; false
+9; C; It improves code readability; false
+9; D; It allows tracking changes and facilitates collaboration; true
+
+10; 110; What does the git status command do?
+10; A; Shows the current state of the working directory and staging area; true
+10; B; Shows the history of commits; false
+10; C; Resets the repository to a previous state; false
+10; D; Displays the differences between commit; false
+
+11; 111; In terms of coupling and cohesion, what is the goal in software design?
+11; A; high coupling and high cohesion; false
+11; B; low coupling and low cohesion; false
+11; C; high coupling and low cohesion; false
+11; D; low coupling and high cohesion; true
+
+12; 112; Which of the following best describes the SRP?
+12; A; A class should only contain one method to ensure simplicity; false
+12; B; A class should have only one reason to change; true
+12; C; A class should only perform one task, such as either reading input or displaying output; false
+12; D; A class should only be used by one other class to reduce dependencies; false
+
+13; 113; The Open/Closed Principle states that software entities should be...
+13; A; Open for modification, closed for extension; false
+13; B; Open for both modification and extension; false
+13; C; Closed for both modification and extension; false
+13; D; Closed for modification, open for extension; true
+
+14; 114; Which of the following best describes the Liskov Substitution Principle?
+14; A; A subclass should be usable anywhere its superclass is expected, without causing errors; true
+14; B; Subclasses should override all methods of their superclass; false
+14; C; A class should only implement interfaces it actually uses; false
+14; D; High-level modules should not depend on low-level modules; false
+
+15; 115; The Dependency Inversion Principle suggests that...
+15; A; High-level modules should depend on low-level modules; false
+15; B; Abstractions should depend on details; false
+15; C; Both high-level and low-level modules should depend on abstractions; true
+15; D; Low-level modules should depend on high-level modules; false
+
+16; 116; Which SOLID principle addresses the issue of designing interfaces that are too large and general?
+16; A; Interface Segregation Principle; true
+16; B; Single Responsibility Principle; false
+16; C; Liskov Substitution Principle; false
+16; D; Dependency Inversion Principle; false
+
+17; 117; Which of the following would be the highest-level policy?
+17; A; How data is stored in a database used by the system; false
+17; B; User interface components; false
+17; C; Framework and driver configurations; false
+17; D; Application business rules; true
+
+18; 118; What is the Dependency Rule in the Clean Architecture?
+18; A; All other layers must depend directly on the Entities layer; false
+18; B; Dependencies should point inwards towards higher-level policies; true
+18; C; Each class may only depend on exactly one other class; false
+18; D; Dependencies should point outwards towards lower-level policies; false
+
+19; 119; Which SOLID principle is most closely related to the Dependency Rule in the Clean Architecture?
+19; A; LSP; false
+19; B; DIP; true
+19; C; OCP; false
+19; D; SRP; false
+
+20; 120; What is the role of the innermost layer of the Clean Architecture?
+20; A; To interact with external data sources and services; false
+20; B; To manage the application's infrastructure and configuration; false
+20; C; To define the core business rules of the domain; true
+20; D; To handle user input and output; false
