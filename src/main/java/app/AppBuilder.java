@@ -1,0 +1,546 @@
+package app;
+
+import javax.swing.*;
+import java.awt.*;
+import java.net.URI;
+
+import data_access.*;
+import interface_adapter.ProfileViewModel;
+import interface_adapter.ViewManagerModel;
+import interface_adapter.cancel_account.CancelAccountController;
+import interface_adapter.cancel_account.CancelAccountPresenter;
+import interface_adapter.cancel_account.CancelAccountViewModel;
+import interface_adapter.create_listing.CreateListingController;
+import interface_adapter.create_listing.CreateListingPresenter;
+import interface_adapter.create_listing.CreateListingViewModel;
+import interface_adapter.delete_listing.DeleteListingController;
+import interface_adapter.delete_listing.DeleteListingPresenter;
+import interface_adapter.edit_listing.EditListingController;
+import interface_adapter.edit_listing.EditListingPresenter;
+import interface_adapter.filter.FilterListingsController;
+import interface_adapter.logged_in.LoggedInViewModel;
+import interface_adapter.login.LoginController;
+import interface_adapter.login.LoginPresenter;
+import interface_adapter.login.LoginViewModel;
+import interface_adapter.search_listings.SearchListingController;
+import interface_adapter.search_listings.SearchListingPresenter;
+import interface_adapter.search_listings.SearchListingViewModel;
+import interface_adapter.signup.SignupController;
+import interface_adapter.signup.SignupPresenter;
+import interface_adapter.signup.SignupViewModel;
+import interface_adapter.save_favorite.SaveFavoriteController;
+import interface_adapter.save_favorite.SaveFavoritePresenter;
+import interface_adapter.save_favorite.SaveFavoriteViewModel;
+import interface_adapter.check_favorite.CheckFavoriteController;
+import interface_adapter.check_favorite.CheckFavoritePresenter;
+import interface_adapter.check_favorite.CheckFavoriteViewModel;
+import interface_adapter.messaging.MessageController;
+import interface_adapter.messaging.MessageViewModel;
+import interface_adapter.messaging.MessagePresenter;
+
+import use_case.cancel_account.CancelAccountInputBoundary;
+import use_case.cancel_account.CancelAccountInteractor;
+import use_case.cancel_account.CancelAccountOutputBoundary;
+import use_case.create_listing.CreateListingInputBoundary;
+import use_case.create_listing.CreateListingInteractor;
+import use_case.create_listing.CreateListingOutputBoundary;
+import use_case.delete_listing.DeleteListingInputBoundary;
+import use_case.delete_listing.DeleteListingInteractor;
+import use_case.delete_listing.DeleteListingOutputBoundary;
+import use_case.edit_listing.EditListingInputBoundary;
+import use_case.edit_listing.EditListingInteractor;
+import use_case.edit_listing.EditListingOutputBoundary;
+import use_case.filter.DistanceService;
+import use_case.filter.FilterListingsInputBoundary;
+import use_case.filter.FilterListingsInteractor;
+import use_case.filter.FilterListingsOutputBoundary;
+import use_case.login.LoginInputBoundary;
+import use_case.login.LoginInteractor;
+import use_case.login.LoginOutputBoundary;
+import use_case.search_listings.SearchListingInputBoundary;
+import use_case.search_listings.SearchListingInteractor;
+import use_case.search_listings.SearchListingOutputBoundary;
+import use_case.signup.SignupInputBoundary;
+import use_case.signup.SignupInteractor;
+import use_case.signup.SignupOutputBoundary;
+import use_case.save_favorite.SaveFavoriteInputBoundary;
+import use_case.save_favorite.SaveFavoriteInteractor;
+import use_case.save_favorite.SaveFavoriteOutputBoundary;
+import use_case.check_favorite.CheckFavoriteInputBoundary;
+import use_case.check_favorite.CheckFavoriteInteractor;
+import use_case.check_favorite.CheckFavoriteOutputBoundary;
+import use_case.messaging.SendMessageInputBoundary;
+import use_case.messaging.SendMessageInteractor;
+import use_case.messaging.SendMessageOutputBoundary;
+
+import view.*;
+import websocket.ChatClient;
+import websocket.ChatServer;
+import websocket.MessageHandler;
+import view.LoggedInView;
+import view.LoginView;
+import view.SignupView;
+import view.CheckFavoriteView;
+import view.ViewManager;
+import interface_adapter.listing_detail.ListingDetailViewModel;
+import interface_adapter.comment.CommentViewModel;
+import interface_adapter.comment.CommentController;
+
+/**
+ * AppBuilder with complete Conversations + WebSocket integration
+ */
+public class AppBuilder {
+    private final JPanel cardPanel = new JPanel();
+    private final CardLayout cardLayout = new CardLayout();
+
+    final ViewManagerModel viewManagerModel = ViewManagerModel.getInstance();
+    ViewManager viewManager = new ViewManager(cardPanel, cardLayout, viewManagerModel);
+
+    // Singleton instance for accessing from presenters
+    private static AppBuilder instance;
+
+    // Data access objects
+    public final InMemoryUserDataAccessObject userDataAccessObject = new InMemoryUserDataAccessObject();
+    public final InMemoryListingDataAccessObject listingDataAccessObject = new InMemoryListingDataAccessObject();
+
+    // MongoDB DAOs
+    private MongoDBMessageDAO mongoMessageDAO;
+    private MongoDBUserDAO mongoUserDAO;
+    private MongoDBListingDAO mongoListingDAO;
+    private MongoDBCommentDAO mongoCommentDAO;
+
+    // WebSocket
+    private ChatServer chatServer;
+    private ChatClient chatClient;
+
+    private SignupView signupView;
+    private SignupViewModel signupViewModel;
+    private LoginViewModel loginViewModel;
+    private LoggedInViewModel loggedInViewModel;
+    private SearchListingViewModel searchListingViewModel;
+    private SaveFavoriteViewModel saveFavoriteViewModel;
+    private CheckFavoriteViewModel checkFavoriteViewModel;
+    private MessageViewModel messageViewModel;
+    private LoggedInView loggedInView;
+    private LoginView loginView;
+    private CheckFavoriteView checkFavoriteView;
+    private ProfileViewModel profileViewModel;
+    private ProfileView profileView;
+    private CreateListingView createListingView;
+    private CreateListingViewModel createListingViewModel;
+    private ListingDetailViewModel listingDetailViewModel;
+    private CommentViewModel commentViewModel;
+    private ListingDetailView listingDetailView;
+    private ConversationsView conversationsView;
+    private EditListingView editListingView;
+    private CancelAccountViewModel cancelAccountViewModel;
+    private CancelAccountView cancelAccountView;
+
+    // Controllers that will be created in use case methods
+    private SearchListingController searchController;
+    private FilterListingsController filterController;
+    private SaveFavoriteController saveController;
+    private CheckFavoriteController checkController;
+    private MessageController messageController;
+
+    private String currentUsername;
+
+    public AppBuilder() {
+        cardPanel.setLayout(cardLayout);
+        userDataAccessObject.setListingDataAccessObject(listingDataAccessObject);
+
+        // Set singleton instance
+        instance = this;
+
+        // Initialize MongoDB DAOs
+        try {
+            mongoMessageDAO = new MongoDBMessageDAO();
+            mongoUserDAO = new MongoDBUserDAO();
+            mongoListingDAO = new MongoDBListingDAO();
+            mongoCommentDAO = new MongoDBCommentDAO();
+            System.out.println("✅ MongoDB DAOs initialized");
+        } catch (Exception e) {
+            System.err.println("❌ Failed to initialize MongoDB: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Get the singleton instance of AppBuilder
+     */
+    public static AppBuilder getInstance() {
+        return instance;
+    }
+
+    public AppBuilder addSignupView() {
+        signupViewModel = new SignupViewModel();
+        signupView = new SignupView(signupViewModel);
+        cardPanel.add(signupView, signupView.getViewName());
+        return this;
+    }
+
+    public AppBuilder addLoginView() {
+        loginViewModel = new LoginViewModel();
+        loginView = new LoginView(loginViewModel);
+        cardPanel.add(loginView, loginView.getViewName());
+        return this;
+    }
+
+    public AppBuilder addLoggedInView() {
+        loggedInViewModel = LoggedInViewModel.getInstance();
+        searchListingViewModel = new SearchListingViewModel();
+        saveFavoriteViewModel = new SaveFavoriteViewModel();
+        checkFavoriteViewModel = new CheckFavoriteViewModel();
+
+        // Note: Controllers will be injected by use case methods
+        // Create the logged in view (controllers will be set later)
+        loggedInView = new LoggedInView(
+                loggedInViewModel,
+                searchListingViewModel,
+                null,  // searchController - added later
+                null,  // filterController - added later
+                null,  // saveController - added later
+                null,  // checkController - added later
+                viewManagerModel
+        );
+        cardPanel.add(loggedInView, loggedInView.getViewName());
+        return this;
+    }
+
+    public AppBuilder addCheckFavoriteView() {
+        if (checkFavoriteViewModel == null) {
+            checkFavoriteViewModel = new CheckFavoriteViewModel();
+        }
+
+        checkFavoriteView = new CheckFavoriteView(
+                checkFavoriteViewModel,
+                viewManagerModel,
+                checkController,     // must be initialized first
+                saveController,      // must be initialized first
+                loggedInViewModel    // must be initialized first
+        );
+        cardPanel.add(checkFavoriteView, checkFavoriteView.getViewName());
+        return this;
+    }
+
+    public AppBuilder addProfileView() {
+        profileViewModel = new ProfileViewModel();
+        profileView = new ProfileView(profileViewModel, viewManagerModel, null, null);
+        profileView.setCreateListingView(createListingView);
+        cardPanel.add(profileView, profileView.getViewName());
+        return this;
+    }
+
+    public AppBuilder addCreateListingView() {
+        createListingViewModel = new CreateListingViewModel();
+        createListingView = new CreateListingView(createListingViewModel, viewManagerModel);
+
+        JScrollPane scrollPane = new JScrollPane(
+                createListingView,
+                JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
+                JScrollPane.HORIZONTAL_SCROLLBAR_NEVER
+        );
+
+        cardPanel.add(scrollPane, createListingView.getViewName());
+        if (profileView != null) {
+            profileView.setCreateListingView(createListingView);
+        }
+        return this;
+    }
+
+    public AppBuilder addEditListingView() {
+        editListingView = new EditListingView(createListingViewModel);
+
+        JScrollPane scroll = new JScrollPane(editListingView,
+                JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
+                JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+
+        cardPanel.add(scroll, editListingView.getViewName());
+
+        if (profileView != null) {
+            profileView.setEditListingView(editListingView);
+        }
+
+        return this;
+    }
+
+    public AppBuilder addConversationsView(String username) {
+        this.currentUsername = username;
+
+        if (mongoMessageDAO != null && mongoUserDAO != null) {
+            // Create WebSocket client for this user
+            try {
+                URI serverUri = new URI("ws://localhost:" + Config.getWebSocketPort());
+                chatClient = new ChatClient(serverUri, username);
+                chatClient.connect();
+
+                // Wait for connection
+                Thread.sleep(500);
+
+                System.out.println("✅ WebSocket client connected for user: " + username);
+            } catch (Exception e) {
+                System.err.println("❌ Failed to connect WebSocket client: " + e.getMessage());
+            }
+
+            conversationsView = new ConversationsView(
+                    username,
+                    viewManagerModel,
+                    mongoMessageDAO,
+                    mongoUserDAO,
+                    messageController,
+                    chatClient
+            );
+            cardPanel.add(conversationsView, "conversations");
+            System.out.println("✅ Conversations view added for user: " + username);
+        } else {
+            System.err.println("❌ Cannot add conversations view - MongoDB DAOs not initialized");
+        }
+
+        return this;
+    }
+
+    public AppBuilder addCancelAccountView() {
+        cancelAccountViewModel = new CancelAccountViewModel();
+        cancelAccountView = new CancelAccountView(cancelAccountViewModel);
+        cardPanel.add(cancelAccountView, cancelAccountView.getViewName());
+        return this;
+    }
+
+    public AppBuilder addSignupUseCase() {
+        final SignupOutputBoundary signupOutputBoundary = new SignupPresenter(viewManagerModel,
+                signupViewModel, loginViewModel);
+        final SignupInputBoundary userSignupInteractor = new SignupInteractor(
+                mongoUserDAO, signupOutputBoundary);
+
+        SignupController controller = new SignupController(userSignupInteractor);
+        signupView.setSignupController(controller);
+        return this;
+    }
+
+    public AppBuilder addLoginUseCase() {
+        final LoginOutputBoundary loginOutputBoundary = new LoginPresenter(viewManagerModel,
+                loggedInViewModel, loginViewModel, signupViewModel);
+        final LoginInputBoundary loginInteractor = new LoginInteractor(
+                mongoUserDAO, loginOutputBoundary);
+
+        LoginController loginController = new LoginController(loginInteractor);
+        loginView.setLoginController(loginController);
+        return this;
+    }
+
+    public AppBuilder addCancelAccountUseCase() {
+        final CancelAccountOutputBoundary cancelAccountOutputBoundary = new CancelAccountPresenter(cancelAccountViewModel,
+                loginViewModel,viewManagerModel,profileViewModel);
+        final CancelAccountInputBoundary cancelAccountInteractor = new CancelAccountInteractor(
+                mongoUserDAO,cancelAccountOutputBoundary);
+
+        CancelAccountController cancelAccountController = new CancelAccountController(cancelAccountInteractor);
+        cancelAccountView.setCancelAccountController(cancelAccountController);
+        return this;
+    }
+
+    public AppBuilder addSearchListingUseCase() {
+        // Create search use case
+        SearchListingOutputBoundary searchPresenter =
+                new SearchListingPresenter(searchListingViewModel);
+        SearchListingInputBoundary searchInteractor =
+                new SearchListingInteractor(mongoListingDAO, searchPresenter);
+        searchController = new SearchListingController(searchInteractor);
+
+        // Create filter use case
+        DistanceService distanceService = new GoogleDistanceService();
+        FilterListingsOutputBoundary filterPresenter =
+                new interface_adapter.filter.FilterListingsPresenter(searchListingViewModel);
+        FilterListingsInputBoundary filterInteractor =
+                new FilterListingsInteractor(mongoListingDAO, distanceService, filterPresenter);
+        filterController = new FilterListingsController(filterInteractor);
+
+        return this;
+    }
+
+    public AppBuilder addSaveFavoriteUseCase() {
+        // Create save favorite use case
+        SaveFavoriteOutputBoundary savePresenter =
+                new SaveFavoritePresenter(saveFavoriteViewModel);
+        SaveFavoriteInputBoundary saveInteractor =
+                new SaveFavoriteInteractor(mongoUserDAO, savePresenter);
+        saveController = new SaveFavoriteController(saveInteractor);
+
+        return this;
+    }
+
+    public AppBuilder addCheckFavoriteUseCase() {
+        CheckFavoriteOutputBoundary checkPresenter =
+                new CheckFavoritePresenter(viewManagerModel, checkFavoriteViewModel);
+
+        // Use userDataAccessObject, which now implements CheckFavoriteDataAccessInterface
+        CheckFavoriteInputBoundary checkInteractor =
+                new CheckFavoriteInteractor(mongoUserDAO, checkPresenter);
+
+        checkController = new CheckFavoriteController(checkInteractor);
+        return this;
+    }
+
+    public AppBuilder addCreateListingUseCase() {
+        final CreateListingOutputBoundary createListingPresenter =
+                new CreateListingPresenter(
+                        createListingViewModel,
+                        profileViewModel,
+                        viewManagerModel
+                );
+        final CreateListingInputBoundary createListingInteractor =
+                new CreateListingInteractor(mongoListingDAO, createListingPresenter);
+
+        final CreateListingController createListingController =
+                new CreateListingController(createListingInteractor, loggedInViewModel);
+
+        createListingView.setCreateListingController(createListingController);
+        return this;
+    }
+
+    public AppBuilder addListingDetailViewAndCommentUseCase() {
+        listingDetailViewModel = ListingDetailViewModel.getInstance();
+        commentViewModel = new CommentViewModel();
+
+        CommentController commentController = CommentUseCaseFactory.create(viewManagerModel, commentViewModel,mongoCommentDAO);
+
+        listingDetailView = new ListingDetailView(
+                listingDetailViewModel,
+                commentController,
+                commentViewModel
+        );
+
+        cardPanel.add(listingDetailView, ListingDetailViewModel.VIEW_NAME);
+
+        return this;
+    }
+
+    public AppBuilder addMessagingUseCase() {
+        if (mongoMessageDAO != null) {
+            messageViewModel = new MessageViewModel();
+            SendMessageOutputBoundary messagePresenter = new MessagePresenter(messageViewModel);
+            SendMessageInputBoundary messageInteractor =
+                    new SendMessageInteractor(mongoMessageDAO, messagePresenter);
+            messageController = new MessageController(messageInteractor);
+
+            System.out.println("✅ Messaging use case initialized");
+        }
+        return this;
+    }
+
+    public AppBuilder addDeleteListingUseCase() {
+        DeleteListingOutputBoundary presenter = new DeleteListingPresenter(profileViewModel, viewManagerModel);
+        DeleteListingInputBoundary interactor = new DeleteListingInteractor(mongoListingDAO, presenter);
+        DeleteListingController deleteListingController = new DeleteListingController(interactor);
+        profileView.setDeleteListingController(deleteListingController);
+        return this;
+    }
+
+    public AppBuilder addEditListingUseCase() {
+        if (editListingView == null) {
+            addEditListingView();
+        }
+        EditListingOutputBoundary presenter = new EditListingPresenter(profileViewModel, viewManagerModel);
+        EditListingInputBoundary interactor = new EditListingInteractor(mongoListingDAO, presenter);
+        EditListingController controller = new EditListingController(interactor);
+        editListingView.setEditListingController(controller);
+        return this;
+    }
+
+    public AppBuilder startWebSocketServer() {
+        if (mongoMessageDAO == null) {
+            System.err.println("❌ Cannot start WebSocket server: MongoDB not initialized");
+            return this;
+        }
+
+        try {
+            MessageHandler messageHandler = (from, to, listingId, content) -> {
+                SendMessageInputBoundary interactor =
+                        new SendMessageInteractor(mongoMessageDAO, new MessagePresenter(new MessageViewModel()));
+
+                use_case.messaging.SendMessageInputData inputData =
+                        new use_case.messaging.SendMessageInputData(from, to, listingId, content);
+
+                use_case.messaging.SendMessageOutputData result = interactor.execute(inputData);
+                return result.getMessage();
+            };
+
+            chatServer = new ChatServer(Config.getWebSocketPort(), messageHandler);
+            chatServer.start();
+
+            System.out.println("✅ WebSocket server started on port " + Config.getWebSocketPort());
+
+            // Add shutdown hook
+            Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+                try {
+                    if (chatServer != null) {
+                        chatServer.stop(1000);
+                        System.out.println("✅ WebSocket server stopped");
+                    }
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }));
+
+        } catch (Exception e) {
+            System.err.println("❌ Failed to start WebSocket server: " + e.getMessage());
+            e.printStackTrace();
+        }
+
+        return this;
+    }
+
+    public AppBuilder rebuildLoggedInView() {
+        // Now recreate LoggedInView with all the controllers
+        cardPanel.remove(loggedInView);
+        loggedInView = new LoggedInView(
+                loggedInViewModel,
+                searchListingViewModel,
+                searchController,
+                filterController,
+                saveController,
+                checkController,
+                viewManagerModel
+        );
+        cardPanel.add(loggedInView, loggedInView.getViewName());
+
+        return this;
+    }
+
+    /**
+     * Adds conversations view dynamically after user logs in.
+     * Call this method after successful login to initialize WebSocket client.
+     */
+    public void initializeConversationsForUser(String username) {
+        // Remove existing conversations view if any
+        for (Component comp : cardPanel.getComponents()) {
+            if (comp instanceof ConversationsView) {
+                cardPanel.remove(comp);
+                break;
+            }
+        }
+
+        // Close existing chat client if any
+        if (chatClient != null && chatClient.isOpen()) {
+            chatClient.close();
+        }
+
+        // Add new conversations view with WebSocket client
+        addConversationsView(username);
+
+        System.out.println("✅ Conversations initialized for user: " + username);
+    }
+
+
+    public JFrame build() {
+        final JFrame application = new JFrame("Airbnb Listing Browser");
+        application.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+
+        application.add(cardPanel);
+
+        viewManagerModel.setState(loginView.getViewName());
+        viewManagerModel.firePropertyChange();
+
+        return application;
+    }
+}
