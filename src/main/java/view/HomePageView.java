@@ -1,0 +1,75 @@
+package view;
+
+import interfaceadapter.gamerule.GameRuleController;
+import interfaceadapter.gamerule.GameRuleViewModel;
+import interfaceadapter.startnewgame.StartNewGameController;
+import interfaceadapter.startnewgame.StartNewGameViewModel;
+
+import javax.swing.*;
+import java.awt.*;
+
+public class HomePageView extends JPanel {
+
+    private final JButton startNewGame;
+    private final JButton gameRule;
+    private final JLabel errorLabel;
+    private StartNewGameController startNewGameController;
+
+    public HomePageView(StartNewGameViewModel startNewGameViewModel,
+                        StartNewGameController startNewGameController,
+                        GameRuleController gameRuleController,
+                        GameRuleViewModel gameRuleViewModel) {
+
+        this.startNewGameController = startNewGameController;
+
+        final JLabel title = new JLabel("Home Page");
+        title.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        this.setLayout(new GridBagLayout());
+        final GridBagConstraints gbc = new GridBagConstraints();
+
+        final JPanel buttons = new JPanel();
+        this.gameRule = new JButton("？");
+        buttons.add(gameRule);
+        this.startNewGame = new JButton("Start New Game");
+        buttons.add(startNewGame);
+
+        errorLabel = new JLabel("", SwingConstants.CENTER);
+        errorLabel.setForeground(Color.RED);
+        errorLabel.setVisible(false);
+
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.insets = new Insets(0, 0, 10, 0);
+        this.add(buttons, gbc);
+
+        gbc.gridy = 1;
+        gbc.insets = new Insets(0, 0, 0, 0);
+        this.add(errorLabel, gbc);
+
+        startNewGame.addActionListener(event -> {
+            errorLabel.setVisible(false);
+            errorLabel.setText("");
+            this.startNewGameController.execute();
+        });
+
+        gameRule.addActionListener(event -> {
+            gameRuleController.execute();
+            System.out.println(gameRuleViewModel.getGameRules());
+            JOptionPane.showMessageDialog(this, gameRuleViewModel.getGameRules(),
+                    "Game Rules", JOptionPane.INFORMATION_MESSAGE);
+        });
+    }
+
+    public void showError(String message) {
+        errorLabel.setText(message);
+        errorLabel.setVisible(true);
+        this.revalidate();
+        this.repaint();
+    }
+
+    public void setController(StartNewGameController controller) {
+        this.startNewGameController = controller;
+    }
+}
+
