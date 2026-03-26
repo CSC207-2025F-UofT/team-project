@@ -1,0 +1,243 @@
+package app;
+
+import java.awt.*;
+
+import javax.swing.*;
+
+import data_access.InMemoryGameDataAccessObject;
+import entity.ClickableObjectFactory;
+import entity.NonPlayableCharacterFactory;
+import entity.PlayerFactory;
+import entity.SceneFactory;
+import interface_adapter.AppContext;
+import interface_adapter.ViewManagerModel;
+import interface_adapter.collect_item.CollectItemController;
+import interface_adapter.collect_item.CollectItemPresenter;
+import interface_adapter.game.GameViewModel;
+import interface_adapter.load.LoadPresenter;
+import interface_adapter.main_menu.MainMenuController;
+import interface_adapter.main_menu.MainMenuPresenter;
+import interface_adapter.main_menu.MainMenuViewModel;
+import interface_adapter.pause_menu.PauseController;
+import interface_adapter.pause_menu.PauseMenuPresenter;
+import interface_adapter.pause_menu.PauseMenuViewModel;
+import interface_adapter.pause_menu.ResumeController;
+import interface_adapter.pause_menu.ResumePresenter;
+import interface_adapter.question.QuestionController;
+import interface_adapter.question.QuestionPresenter;
+import interface_adapter.save.SaveController;
+import interface_adapter.save.SavePresenter;
+import use_case.collect_item.CollectItemInteractor;
+import use_case.load.LoadInputBoundary;
+import use_case.load.LoadInteractor;
+import use_case.load.LoadOutputBoundary;
+import use_case.pause.PauseInputBoundary;
+import use_case.pause.PauseInteractor;
+import use_case.pause.PauseOutputBoundary;
+import use_case.question.QuestionDataAccessInterface;
+import use_case.question.QuestionInputBoundary;
+import use_case.question.QuestionInteractor;
+import use_case.resume.ResumeInputBoundary;
+import use_case.resume.ResumeInteractor;
+import use_case.resume.ResumeOutputBoundary;
+import use_case.save.SaveInputBoundary;
+import use_case.save.SaveInteractor;
+import use_case.save.SaveOutputBoundary;
+import use_case.switch_to_game.SwitchToGameViewInputBoundary;
+import use_case.switch_to_game.SwitchToGameViewInteractor;
+import use_case.switch_to_game.SwitchToGameViewOutputBoundary;
+import view.GameView;
+import view.MainMenuView;
+import view.PauseMenuView;
+import view.ViewManager;
+
+public class AppBuilder {
+    private final ViewManagerModel viewManagerModel = new ViewManagerModel();
+    // Create initial game data
+    private final SceneFactory sceneFactory = new SceneFactory();
+    private final PlayerFactory playerFactory = new PlayerFactory();
+    private final ClickableObjectFactory clickableObjectFactory = new ClickableObjectFactory();
+    private final NonPlayableCharacterFactory npcFactory = new NonPlayableCharacterFactory();
+    private final InMemoryGameDataAccessObject gameDataAccessObject = new InMemoryGameDataAccessObject(sceneFactory,
+            clickableObjectFactory, npcFactory, playerFactory);
+    private final JPanel cardPanel = new JPanel();
+    private final CardLayout cardLayout = new CardLayout();
+    private final ViewManager viewManager = new ViewManager(cardPanel, cardLayout, viewManagerModel);
+    private MainMenuView mainMenuView;
+    private MainMenuViewModel mainMenuViewModel;
+    private GameViewModel gameViewModel;
+    private GameView gameView;
+
+    public AppBuilder() {
+        cardPanel.setLayout(cardLayout);
+    }
+
+    public AppBuilder addMainMenuView() {
+        mainMenuViewModel = new MainMenuViewModel();
+        mainMenuView = new MainMenuView(mainMenuViewModel);
+        cardPanel.add(mainMenuView, mainMenuView.getViewName());
+        return this;
+    }
+
+    public AppBuilder addGameView() {
+        gameViewModel = new GameViewModel();
+        gameView = new GameView(gameViewModel);
+        final CollectItemPresenter collectPresenter =
+                new CollectItemPresenter(gameViewModel, viewManagerModel);
+
+        final CollectItemInteractor collectInteractor =
+                new CollectItemInteractor(gameDataAccessObject, collectPresenter);
+
+        final CollectItemController collectController =
+                new CollectItemController(collectInteractor);
+
+        gameView.setCollectItemController(collectController);
+
+        cardPanel.add(gameView, gameView.getViewName());
+        return this;
+    }
+
+    public AppBuilder addSwitchToGameUseCase() {
+        final SwitchToGameViewOutputBoundary switchOutputBoundary =
+                new MainMenuPresenter(viewManagerModel, gameViewModel);
+        final SwitchToGameViewInputBoundary switchInteractor =
+                new SwitchToGameViewInteractor(gameDataAccessObject, switchOutputBoundary);
+
+        final LoadOutputBoundary loadPresenter = new LoadPresenter(mainMenuViewModel, viewManagerModel, gameViewModel);
+        final LoadInputBoundary loadInteractor = new LoadInteractor(gameDataAccessObject, loadPresenter);
+
+        final MainMenuController controller = new MainMenuController(switchInteractor, loadInteractor,
+                gameDataAccessObject);
+        mainMenuView.setMainMenuController(controller);
+        return this;
+    }
+
+    public AppBuilder addClickButtonUseCase() {
+        // 1) Build click rules for objects by name
+        final java.util.Map<String, use_case.game.ClickRule> rules = new java.util.HashMap<>();
+
+        // Example mappings (adjust names to your real objects/scenes)
+        rules.put("Object1", new use_case.game.ClickRule.Builder()
+                .type(use_case.game.ClickActionType.CHANGE_SCENE)
+                .targetScene("Scene1")
+                .build());
+
+        rules.put("Object2", new use_case.game.ClickRule.Builder()
+                .type(use_case.game.ClickActionType.CHANGE_SCENE)
+                .targetScene("Scene2")
+                .build());
+
+        // Collect and then change to Scene2, with a message
+        rules.put("Object3", new use_case.game.ClickRule.Builder()
+                .type(use_case.game.ClickActionType.COLLECT)             // only collect
+                .message("You collected Object 3!")        // optional message
+                .removeOnCollect(true)                     // remove from scene
+                .build());
+
+        // 2) Create GameManager
+        final use_case.game.GameManager manager = new use_case.game.GameManager(rules);
+
+        // 3) Standard presenter & interactor, but pass manager
+        final use_case.game.GameOutputBoundary gameOutputBoundary =
+                new interface_adapter.game.GamePresenter(gameViewModel,viewManagerModel);
+        final use_case.game.GameInputBoundary clickButtonInteractor =
+                new use_case.game.GameInteractor(gameDataAccessObject, gameOutputBoundary);
+        final use_case.dialogue.DialogueOutputBoundary dialogueOutputBoundary =
+                new interface_adapter.dialogue.DialoguePresenter(gameViewModel);
+        final use_case.dialogue.DialogueInputBoundary dialogueInputBoundary =
+                new use_case.dialogue.DialogueInteractor(gameDataAccessObject, dialogueOutputBoundary);
+
+        // 4) Controller wiring
+        final interface_adapter.game.GameController gameController =
+                new interface_adapter.game.GameController(clickButtonInteractor);
+        final interface_adapter.dialogue.DialogueController dialogueController =
+                new interface_adapter.dialogue.DialogueController(dialogueInputBoundary);
+        gameView.setGameController(gameController);
+        gameView.setDialogueController(dialogueController);
+        return this;
+    }
+
+    public AppBuilder addSaveUseCase() {
+        final SaveOutputBoundary savePresenter = new SavePresenter(viewManagerModel, mainMenuViewModel);
+        final SaveInputBoundary saveInteractor = new SaveInteractor(gameDataAccessObject, savePresenter);
+        final SaveController saveController = new SaveController(saveInteractor);
+        gameView.setSaveController(saveController);
+        return this;
+    }
+
+    public AppBuilder addQuestionUseCase(QuestionDataAccessInterface riddledao) {
+        final QuestionPresenter questionPresenter =
+                new QuestionPresenter(mainMenuViewModel, viewManagerModel, gameViewModel, gameDataAccessObject);
+
+        // Interactor: talks to API DAO + presenter
+        final QuestionInputBoundary questionInteractor =
+                new QuestionInteractor(riddledao, questionPresenter);
+
+        // Controller: called by UI button
+        final QuestionController questionController =
+                new QuestionController(questionInteractor);
+
+        gameView.setQuestionController(questionController);
+
+        return this;
+    }
+
+    public AppBuilder addPauseMenu() {
+
+        // ---- Pause ----
+        final PauseMenuViewModel pauseMenuViewModel = new PauseMenuViewModel();
+        final PauseOutputBoundary pausePresenter =
+                new PauseMenuPresenter(viewManagerModel, pauseMenuViewModel);
+        final PauseInputBoundary pauseInteractor =
+                new PauseInteractor(pausePresenter);
+        final PauseController pauseController =
+                new PauseController(pauseInteractor);
+
+        // ---- Resume ----
+        final ResumeOutputBoundary resumePresenter =
+                new ResumePresenter(viewManagerModel);
+        final ResumeInputBoundary resumeInteractor =
+                new ResumeInteractor(resumePresenter);
+        final ResumeController resumeController =
+                new ResumeController(resumeInteractor);
+
+        // ---- Save inside Pause Menu ----
+        final SaveOutputBoundary savePresenter =
+                new SavePresenter(viewManagerModel, mainMenuViewModel);
+        final SaveInputBoundary saveInteractor =
+                new SaveInteractor(gameDataAccessObject, savePresenter);
+        final SaveController saveController =
+                new SaveController(saveInteractor);
+
+        // ---- Construct Pause Menu View ----
+        final PauseMenuView pauseView = new PauseMenuView(resumeController, saveController);
+
+        cardPanel.add(pauseView, "pause_menu");
+
+        // Inject into GameView (so Pause button works)
+        gameView.setPauseController(pauseController);
+
+        return this;
+    }
+
+    public JFrame build() {
+        final JFrame application = new JFrame("Point and Click Game");
+        application.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+
+        application.add(cardPanel);
+        application.setPreferredSize(new Dimension(800, 600));
+        application.setResizable(false);
+
+        viewManagerModel.setState(mainMenuView.getViewName());
+        viewManagerModel.firePropertyChange();
+        AppContext.setGameDAO(gameDataAccessObject);
+
+        return application;
+    }
+
+    // In AppBuilder.java
+    public InMemoryGameDataAccessObject getGameDataAccessObject() {
+        return gameDataAccessObject;
+    }
+
+}
