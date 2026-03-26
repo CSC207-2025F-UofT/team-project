@@ -8,6 +8,14 @@ target/
 .idea/jarRepositories.xml
 .idea/compiler.xml
 .idea/libraries/
+.idea/encodings.xml
+.idea/misc.xml
+.idea/vcs.xml
+.idea/workspace.xml
+<<<<<<< HEAD
+=======
+.idea/checkstyle-idea.xml
+>>>>>>> main
 *.iws
 *.iml
 *.ipr
