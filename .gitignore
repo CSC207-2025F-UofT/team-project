@@ -8,9 +8,14 @@ target/
 .idea/jarRepositories.xml
 .idea/compiler.xml
 .idea/libraries/
+.idea/misc.xml
 *.iws
 *.iml
 *.ipr
+
+### API Configs###
+/src/java/Generator/DataAccess/OpenRouteServiceConfig
+/src/java/Generator/DataAccess/GeoapifyConfig
 
 ### Eclipse ###
 .apt_generated
@@ -36,3 +41,7 @@ build/
 
 ### Mac OS ###
 .DS_Store
+
+### Data Files ###
+selectedPreferences.csv
+saved_timetable.csv
