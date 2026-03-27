@@ -1,0 +1,10 @@
+@startuml spending_report_sequence_diagram
+actor User
+User -> SpendingReportView: Select chart type
+SpendingReportView -> GenerateReportController: generateReport(username)
+GenerateReportController -> GenerateReportInteractor: execute(inputData)
+GenerateReportInteractor -> CSVTransactionDAO: getTransactions(username)
+CSVTransactionDAO --> GenerateReportInteractor: List<Transaction>
+GenerateReportInteractor -> GenerateReportPresenter: presentReport(outputData)
+GenerateReportPresenter -> SpendingReportView: displayChart(categoryData)
+@enduml
