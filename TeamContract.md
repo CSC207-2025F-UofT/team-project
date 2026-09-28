@@ -1,4 +1,4 @@
-# Team Contract
+# Team Contract Modified v2
 
 **Your team is free to revise this contract as your team wishes; we have scaffolded it with a recommended structure similar to the provided sample on Quercus.**
 
@@ -59,3 +59,4 @@ By signing below, we acknowledge that we have read, discussed, and agreed to the
 Team Member Signatures:
 
 (type names here)
+HH
