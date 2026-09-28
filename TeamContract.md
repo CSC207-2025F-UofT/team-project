@@ -73,4 +73,4 @@ By signing below, we acknowledge that we have read, discussed, and agreed to the
 
 Team Member Signatures:
 
-Arjun Mehandiratta, Dion Machado, Michael Bayato
+Arjun Mehandiratta, Dion Machado, Michael Bayato, Saihaan Selim
