@@ -18,37 +18,77 @@ This contract sets out shared expectations and commitments for how our team will
 
 ### Communication
 
-* Which platform will you use for communication outside of class, when required for work on your course project? (Examples: Text message, Discord, WeChat, etc.)
+* We will use **WeChat** for communication outside class and GitHub issues and pull requests to track project tasks and review code.
 
-* Each teammate agrees to respond to messages in at most how long? 1 day? 2 days? Some other amount of time? 
+* Each member will respond to team messages within 24 hours. If more time is needed to answer a question, they will acknowledge the message first.
 
-* What things should a teammate notify you about? (Examples: if they think they won't be able to meet a deadline, if they have to miss lecture, etc.)
+* Members will notify the team as soon as possible if they expect to miss a meeting, class activity, or deadline.
 
-* Respectful and inclusive behaviour are necessary for smooth and productive communication. What are some respectful and inclusive behaviours you expect when communicating with each other during lectures, labs, or outside of class? (Examples: Actively listening to each team members ideas, giving everyone a chance to meaningfully contribute, etc.)
+* We will listen actively, respect different perspectives, and give every member an opportunity to contribute.
 
+* Feedback will focus on ideas and work rather than personal criticism.
 ---
 
-### [Other Categories of norms and expectations go here]
+### Participation and Preparation
 
-* Based on your previous teamwork experiences, what other behaviours do you agree upon as a team?
-    - some examples of possible additional team norms and expectations are included in the sample team contract in case your team needs some help getting ideas for what else you want to include.
+* Each member will complete required individual preparation before class and contribute to readiness assurance tests and team activities.
 
+* Members will attend agreed meetings on time and arrive prepared to discuss their progress.
+
+* If a member cannot attend a meeting, they will provide an update beforehand and review any decisions afterward.
+---
+
+### Work Distribution and Deadlines
+---
+
+* We will divide tasks fairly, considering their difficulty, the time required, and each member’s availability.
+
+* Every task will have a clearly identified owner and an agreed deadline.
+
+* We will aim to complete work at least 48 hours before submission deadlines to allow time for review and integration.
+
+* Members who encounter difficulties will ask for help early so the team can adjust its plan.
+---
+
+### Code Quality and Collaboration
+
+* We will use separate branches for project changes and submit pull requests before merging into main.
+
+* At least one other team member will review each pull request before it is merged.
+
+* Members will check that their changes work and that relevant tests pass.
+
+* We will write clear commit messages and keep task progress visible on GitHub.
+
+* We will follow course policies on academic integrity and the use of external resources and AI tools.
 ---
 
 ## Decision Making
 
-* How will decisions about your team project be made? (Examples: By majority vote, by unanimous vote, etc.)
+* We will discuss important decisions and try to reach consensus.
+
+* If consensus cannot be reached after everyone has had an opportunity to speak, we will use a majority vote. 
+
+* Changes to this contract require agreement from all members.
 
 ---
 ## Conflict resolution
 
-* How will your team resolve conflicts? (Example: by listening to each other's side of the issue and attempting to reach a compromise. By consulting a TA or instructor as a team, if a resolution has not yet been reached.)
+* We will raise concerns promptly and respectfully. 
+
+* Members involved will explain their perspectives, listen to one another, and work toward a practical compromise. 
+
+* If the issue remains unresolved, we will consult a TA or instructor for guidance.
 
 ---
 
 ## Accountability
 
-* Reliability and accountability are also important aspects of teamwork. What are the responsibilities of each team member? (Example: completing their share of the work in a timely manner, seeking assistance from teammates/TAs/instructors when required, etc.)
+* Each member is responsible for completing their assigned work, communicating progress honestly, and seeking assistance when needed. 
+
+* If a commitment is missed, the team will discuss the cause and agree on a revised deadline or redistribution of tasks. 
+
+* Repeated missed commitments will be documented and discussed with a TA or instructor if necessary.
 
 ---
 
@@ -58,4 +98,5 @@ By signing below, we acknowledge that we have read, discussed, and agreed to the
 
 Team Member Signatures:
 
-(type names here)
+Zean Du
+Yilin Hou
