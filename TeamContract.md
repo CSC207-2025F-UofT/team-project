@@ -18,32 +18,44 @@ This contract sets out shared expectations and commitments for how our team will
 
 ### Communication
 
-* Which platform will you use for communication outside of class, when required for work on your course project? (Examples: Text message, Discord, WeChat, etc.)
-
+* Which platform will you use for communication outside of class, when required for work on your course project?
+  * We will use Discord
+  * Secondary git notifications and email
 * Each teammate agrees to respond to messages in at most how long? 1 day? 2 days? Some other amount of time? 
-
+  * Within 48 hours
 * What things should a teammate notify you about? (Examples: if they think they won't be able to meet a deadline, if they have to miss lecture, etc.)
-
+  * If not able to make it to lecture
+  * If not able to make it to scheduled lab time
+  * If not able to make out of school schedule team meeting
+  * Notify others if changes made into repo sections not assigned to you
 * Respectful and inclusive behaviour are necessary for smooth and productive communication. What are some respectful and inclusive behaviours you expect when communicating with each other during lectures, labs, or outside of class? (Examples: Actively listening to each team members ideas, giving everyone a chance to meaningfully contribute, etc.)
-
+  * Making time to be available to actively listen to one another on:
+    * Brainstorming ideas
+    * Implementation discussions
+    * Lecture/Lab concepts
+    * Daily life
+  
 ---
 
 ### [Other Categories of norms and expectations go here]
 
 * Based on your previous teamwork experiences, what other behaviours do you agree upon as a team?
     - some examples of possible additional team norms and expectations are included in the sample team contract in case your team needs some help getting ideas for what else you want to include.
-
+git h
 ---
 
 ## Decision Making
 
 * How will decisions about your team project be made? (Examples: By majority vote, by unanimous vote, etc.)
-
+  * Decisions will be headed by our team leader Yara and majority vote in case there are different views.
 ---
 ## Conflict resolution
 
 * How will your team resolve conflicts? (Example: by listening to each other's side of the issue and attempting to reach a compromise. By consulting a TA or instructor as a team, if a resolution has not yet been reached.)
-
+  * Each side must actively listen to the other side's perspective and try to understand first.
+  * Attempt to reach a compromise once everyone has a clear picture of all differing perspectives
+  * Escalate to TA for support if required
+  * If all else fails, as a team, go to instructor office hours for guidance
 ---
 
 ## Accountability
@@ -58,4 +70,10 @@ By signing below, we acknowledge that we have read, discussed, and agreed to the
 
 Team Member Signatures:
 
-(type names here)
+Ellie Mamykin
+
+Charles Shen
+
+Yara Megahed
+
+Kobi Liu
