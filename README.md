@@ -3,9 +3,9 @@
 ## Team Information
 ### Team Members
 - Pauline Nguyen
-  - GitHub:
-  - Email:
-  - Message for Your Futures Self:
+  - GitHub: https://github.com/papql 
+  - Email: pauline.nguyen@mail.utoronto.ca
+  - Message for Your Future Self: We better get molly tea when we are done!
     
 - Lucy Liu
   - GitHub:
@@ -33,17 +33,19 @@
   - Message for Your Futures Self:
 ---
 ## Project Description
-Linked Out is a side quest app (journalling, progress, etc) 
+Turn everyday life into an adventure with Linked Out, a gamified productivity app that encourages users to explore new interests, step outside their comfort zones, and take on exciting side quests! From earning XP and leveling up to capturing memories and tracking accomplishments, Linked Out makes trying new things feel like a game.
 
 ### Domain
-Productivity
+Productivity & Entertainment
 
 [Project description]
 ---
+
 ## User Stories
+### We will remove this later but here is a template for how you can write your user stories: As a [kind of user] I want to [accomplish a goal] so that [I receive some benefit] -Pauline
 ### User Story 1: <Profile>
 ### User Story 2: <Progress>
-### User Story 3: <Journal>
+### User Story 3: As a user, I want to document my completed side quests through journal entries and photos (either taken with my camera or uploaded from my gallery) so that I can look back on my experiences, relive fun memories, and celebrate my achievements.
 ### User Story 4: <Map>
 ### User Story 5: <Recommendations Quests>
 ### User Story 6: <Defaults/Adding Quests>
