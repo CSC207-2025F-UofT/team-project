@@ -18,14 +18,13 @@ This contract sets out shared expectations and commitments for how our team will
 
 ### Communication
 
-* Which platform will you use for communication outside of class, when required for work on your course project? (Examples: Text message, Discord, WeChat, etc.)
+* WhatsApp will be the form of communication outside of class when required for work on a course project.
 
-* Each teammate agrees to respond to messages in at most how long? 1 day? 2 days? Some other amount of time? 
+* All teammates agree to respond to messages within 24 hours within the group chat, although additional time is permitted in extenuating circumstances like sickness or injury.
 
-* What things should a teammate notify you about? (Examples: if they think they won't be able to meet a deadline, if they have to miss lecture, etc.)
+* Teammates should notify eachother if they are going to miss lecture, tutorials or any group work sessions appointed.
 
-* Respectful and inclusive behaviour are necessary for smooth and productive communication. What are some respectful and inclusive behaviours you expect when communicating with each other during lectures, labs, or outside of class? (Examples: Actively listening to each team members ideas, giving everyone a chance to meaningfully contribute, etc.)
-
+* Team members agree to be respectful in conversation and listen to other's peoples ideas without immediate dismissal.
 ---
 
 ### [Other Categories of norms and expectations go here]
@@ -37,18 +36,29 @@ This contract sets out shared expectations and commitments for how our team will
 
 ## Decision Making
 
-* How will decisions about your team project be made? (Examples: By majority vote, by unanimous vote, etc.)
+* Decisions will be made by concensus by vote and discussion. This is applied to decisions that heavily affect the scope of the project or any deliverables. There are no vetoes.
 
----
 ## Conflict resolution
 
-* How will your team resolve conflicts? (Example: by listening to each other's side of the issue and attempting to reach a compromise. By consulting a TA or instructor as a team, if a resolution has not yet been reached.)
+* Major disagreements will be settled on the advice of a TA. Minor disagreements will be resolved by a match of Catan or Rock Paper Scissors.
 
 ---
 
 ## Accountability
 
 * Reliability and accountability are also important aspects of teamwork. What are the responsibilities of each team member? (Example: completing their share of the work in a timely manner, seeking assistance from teammates/TAs/instructors when required, etc.)
+
+* Team members are expected to complete their assigned tasks within the deadline and to a reasonable level of quality.
+
+* Team members are expected to support eachother and not reject requests from assistance from other people.
+
+* Team members are expected to be nice.
+
+* Any team member in violation of this agreement is both accepting of the consquences of a lower grade on the project and must pay $100 CAD (not including tax) to a charity that provides technology access to Ghanian children. An example of such is listed below.
+
+* All team members are expected to act in good faith and provide honest and fair peer evaluations.
+
+https://www.globalgiving.org/projects/friends-of-grow-ghana/
 
 ---
 
@@ -58,4 +68,8 @@ By signing below, we acknowledge that we have read, discussed, and agreed to the
 
 Team Member Signatures:
 
-(type names here)
+Arthur Xu
+<<<<<<< HEAD
+Tam Ho :D
+Kaden Calvert
+Finn Huang
