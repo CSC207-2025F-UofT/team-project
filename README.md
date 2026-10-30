@@ -13,8 +13,8 @@
   - Message for Your Futures Self:
     
 - Joon Park
-  - GitHub:
-  - Email:
+  - GitHub: https://github.com/kdaster
+  - Email: jooner.park@mail.utoronto.ca
   - Message for Your Futures Self:
     
 - Serena Ganbaatar
@@ -47,7 +47,7 @@ Productivity & Entertainment
 ### User Story 2: <Progress>
 ### User Story 3: As a user, I want to document my completed side quests through journal entries and photos (either taken with my camera or uploaded from my gallery) so that I can look back on my experiences, relive fun memories, and celebrate my achievements.
 ### User Story 4: <Map>
-### User Story 5: <Recommendations Quests>
+### User Story 5: <Recommendations Quests> As a user, I want to receive a list of recommended side quests so that I can choose side quests I am interested in.
 ### User Story 6: <Defaults/Adding Quests>
 ---
 ## Use Cases
