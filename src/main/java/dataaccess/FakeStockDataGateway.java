@@ -15,6 +15,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -51,9 +52,36 @@ public class FakeStockDataGateway implements StockDataGateway {
     }
   }
 
+  /**
+   * {@inheritDoc}
+   *
+   * <p>Searches only the recorded tickers, ignoring case. An exact ticker comes first, then
+   * tickers starting with the query, then companies whose name contains it. A blank query
+   * matches nothing.
+   */
   @Override
   public List<Stock> search(String query) throws StockDataUnavailableException {
-    throw new UnsupportedOperationException("Not implemented yet");
+    String wanted = query.trim().toUpperCase(Locale.ROOT);
+    if (wanted.isEmpty()) {
+      return List.of();
+    }
+    List<Stock> exactTicker = new ArrayList<>();
+    List<Stock> tickerStart = new ArrayList<>();
+    List<Stock> nameContains = new ArrayList<>();
+    for (String ticker : TICKERS) {
+      Stock stock = profiles.get(ticker).stock();
+      if (ticker.equals(wanted)) {
+        exactTicker.add(stock);
+      } else if (ticker.startsWith(wanted)) {
+        tickerStart.add(stock);
+      } else if (stock.name().toUpperCase(Locale.ROOT).contains(wanted)) {
+        nameContains.add(stock);
+      }
+    }
+    List<Stock> results = new ArrayList<>(exactTicker);
+    results.addAll(tickerStart);
+    results.addAll(nameContains);
+    return List.copyOf(results);
   }
 
   @Override

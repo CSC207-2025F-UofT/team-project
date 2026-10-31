@@ -238,6 +238,56 @@ class FakeStockDataGatewayTest {
   }
 
   @Test
+  void search_exactTicker_returnsThatStock() throws StockDataUnavailableException {
+    // Action
+    List<Stock> results = gateway.search("AAPL");
+
+    // Assertion
+    assertEquals(List.of(new Stock("AAPL", "Apple Inc.", "NASDAQ")), results);
+  }
+
+  @Test
+  void search_lowercaseWithSpaces_ignoresCaseAndSpaces() throws StockDataUnavailableException {
+    // Action
+    List<Stock> results = gateway.search("  aapl ");
+
+    // Assertion
+    assertEquals(List.of(new Stock("AAPL", "Apple Inc.", "NASDAQ")), results);
+  }
+
+  @Test
+  void search_partOfCompanyName_findsByName() throws StockDataUnavailableException {
+    // Action
+    List<Stock> results = gateway.search("apple");
+
+    // Assertion
+    assertEquals(List.of(new Stock("AAPL", "Apple Inc.", "NASDAQ")), results);
+  }
+
+  @Test
+  void search_tickerStartAndNameMatches_listsTickerMatchesFirst()
+      throws StockDataUnavailableException {
+    // Action: NVDA starts with N; the other four have an N in their name
+    List<Stock> results = gateway.search("n");
+
+    // Assertion
+    assertEquals(5, results.size());
+    assertEquals("NVDA", results.get(0).ticker());
+  }
+
+  @Test
+  void search_noMatch_returnsEmptyList() throws StockDataUnavailableException {
+    // Action / Assertion
+    assertTrue(gateway.search("xyzq").isEmpty());
+  }
+
+  @Test
+  void search_blankQuery_returnsEmptyList() throws StockDataUnavailableException {
+    // Action / Assertion
+    assertTrue(gateway.search("   ").isEmpty());
+  }
+
+  @Test
   void exchangeName_nasdaqTiers_becomeNasdaq() {
     // Action / Assertion
     assertEquals("NASDAQ", FakeStockDataGateway.exchangeName("NASDAQ NMS - GLOBAL MARKET"));
