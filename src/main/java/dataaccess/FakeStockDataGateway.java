@@ -33,6 +33,7 @@ public class FakeStockDataGateway implements StockDataGateway {
   private static final String DATA_DIR = "/fake-stock-data/";
 
   private final Map<String, Quote> quotes = new HashMap<>();
+  private final Map<String, CompanyProfile> profiles = new HashMap<>();
 
   /**
    * Creates the gateway and loads the recorded data for every ticker in {@link #TICKERS}.
@@ -42,6 +43,7 @@ public class FakeStockDataGateway implements StockDataGateway {
   public FakeStockDataGateway() {
     for (String ticker : TICKERS) {
       quotes.put(ticker, parseQuote(ticker, readJson(ticker + "-quote.json")));
+      profiles.put(ticker, parseProfile(readJson(ticker + "-profile.json")));
     }
   }
 
@@ -81,7 +83,11 @@ public class FakeStockDataGateway implements StockDataGateway {
 
   @Override
   public CompanyProfile getProfile(String ticker) throws StockDataUnavailableException {
-    throw new UnsupportedOperationException("Not implemented yet");
+    CompanyProfile profile = profiles.get(ticker);
+    if (profile == null) {
+      throw new StockDataUnavailableException("No profile for ticker: " + ticker);
+    }
+    return profile;
   }
 
   @Override
@@ -100,6 +106,36 @@ public class FakeStockDataGateway implements StockDataGateway {
         money(json, "l"),
         money(json, "pc"),
         Instant.ofEpochSecond(json.getLong("t")));
+  }
+
+  /** Converts a Finnhub {@code /stock/profile2} response. */
+  private static CompanyProfile parseProfile(JSONObject json) {
+    Stock stock =
+        new Stock(
+            json.getString("ticker"),
+            json.getString("name"),
+            exchangeName(json.getString("exchange")));
+    // Finnhub gives the market cap in millions of dollars
+    BigDecimal marketCap =
+        new BigDecimal(json.get("marketCapitalization").toString()).movePointRight(6);
+    return new CompanyProfile(
+        stock,
+        json.optString("finnhubIndustry", ""),
+        Money.of(marketCap.setScale(2, RoundingMode.HALF_EVEN).toPlainString()));
+  }
+
+  /**
+   * Shortens Finnhub's exchange name to the one users know, for example {@code "NASDAQ NMS -
+   * GLOBAL MARKET"} to {@code "NASDAQ"}. Names it doesn't recognize are kept as they are.
+   */
+  static String exchangeName(String finnhubExchange) {
+    if (finnhubExchange.startsWith("NASDAQ")) {
+      return "NASDAQ";
+    }
+    if (finnhubExchange.startsWith("NEW YORK STOCK EXCHANGE")) {
+      return "NYSE";
+    }
+    return finnhubExchange;
   }
 
   /**

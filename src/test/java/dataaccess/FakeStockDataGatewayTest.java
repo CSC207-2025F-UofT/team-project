@@ -3,8 +3,10 @@ package dataaccess;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import entity.CompanyProfile;
 import entity.Money;
 import entity.Quote;
+import entity.Stock;
 import java.time.Instant;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -122,5 +124,60 @@ class FakeStockDataGatewayTest {
     // Action / Assertion
     assertThrows(IllegalArgumentException.class, () -> gateway.setPrice("AAPL", Money.ZERO));
     assertEquals(before, gateway.getQuote("AAPL"));
+  }
+
+  @Test
+  void getProfile_knownTicker_returnsRecordedProfile() throws StockDataUnavailableException {
+    // Action
+    CompanyProfile profile = gateway.getProfile("AAPL");
+
+    // Assertion: values from AAPL-profile.json, recorded on 2026-10-31
+    assertEquals(new Stock("AAPL", "Apple Inc.", "NASDAQ"), profile.stock());
+    assertEquals("Technology", profile.industry());
+  }
+
+  @Test
+  void getProfile_marketCapInMillions_convertsToDollars() throws StockDataUnavailableException {
+    // Action: the recorded market cap is 5029592.198492898 (millions)
+    CompanyProfile profile = gateway.getProfile("AAPL");
+
+    // Assertion
+    assertEquals(Money.of("5029592198492.90"), profile.marketCap());
+  }
+
+  @Test
+  void getProfile_everyRecordedTicker_returnsProfile() throws StockDataUnavailableException {
+    for (String ticker : FakeStockDataGateway.TICKERS) {
+      // Action
+      CompanyProfile profile = gateway.getProfile(ticker);
+
+      // Assertion
+      assertEquals(ticker, profile.stock().ticker());
+    }
+  }
+
+  @Test
+  void getProfile_unknownTicker_throws() {
+    // Action / Assertion
+    assertThrows(StockDataUnavailableException.class, () -> gateway.getProfile("XYZQ"));
+  }
+
+  @Test
+  void exchangeName_nasdaqTiers_becomeNasdaq() {
+    // Action / Assertion
+    assertEquals("NASDAQ", FakeStockDataGateway.exchangeName("NASDAQ NMS - GLOBAL MARKET"));
+    assertEquals("NASDAQ", FakeStockDataGateway.exchangeName("NASDAQ NMS - GLOBAL SELECT"));
+  }
+
+  @Test
+  void exchangeName_newYorkStockExchange_becomesNyse() {
+    // Action / Assertion
+    assertEquals("NYSE", FakeStockDataGateway.exchangeName("NEW YORK STOCK EXCHANGE, INC."));
+  }
+
+  @Test
+  void exchangeName_unknownExchange_isKept() {
+    // Action / Assertion
+    assertEquals("NYSE ARCA", FakeStockDataGateway.exchangeName("NYSE ARCA"));
   }
 }
