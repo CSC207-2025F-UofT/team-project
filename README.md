@@ -70,8 +70,30 @@ order fills), so polling must batch symbols and stay well under that budget.
 - If Finnhub fails or returns 429, quotes come from **Twelve Data `/quote`**, which works on the
   free plan.
 - If Twelve Data is out of credits, charts show the **last cached history**.
-- If both providers are down, offline demo mode (SCRUM-43) serves the recorded JSON in
-  `src/test/resources/api/`.
+- If both providers are down, offline demo mode (SCRUM-43) uses `FakeStockDataGateway` and its
+  recorded data (below).
+
+### Stock data in the code (SCRUM-21)
+
+Use cases get all stock data through
+[`usecase.shared.StockDataGateway`](src/main/java/usecase/shared/StockDataGateway.java):
+`search`, `getQuote`, `getProfile` and `getDailyHistory`. Each one throws the checked
+`StockDataUnavailableException` when data can't be fetched, so every interactor has to handle it.
+
+[`dataaccess.FakeStockDataGateway`](src/main/java/dataaccess/FakeStockDataGateway.java) serves real
+recorded responses for **AAPL, MSFT, GOOGL, AMZN and NVDA**: quote, profile and one year of daily
+history (2025-10-20 to 2026-10-30). Call `setPrice(ticker, price)` in a test to move a price; it
+also sets the day's high and low to that price, so limit order fills depend only on the price you
+chose.
+
+The fake's data is in [`src/main/resources/fake-stock-data/`](src/main/resources/fake-stock-data/),
+not in `src/test/resources/api/` as the Technical Design (p. 15) says. Main resources are
+available to the running app as well as to tests, which offline mode needs. To re-record or add
+tickers (one Twelve Data credit per ticker, at most 8 a minute):
+
+```bash
+java spike/MarketDataSpike.java fake AAPL MSFT GOOGL AMZN NVDA
+```
 
 API keys are read from `config.properties` in the project root (git-ignored, never committed).
 
@@ -97,6 +119,9 @@ Offline demo mode: _to be added (SCRUM-43)._
 
 - Every change goes through a pull request into `main`, with one approval and a passing build.
 - Branch names start with the Jira key, e.g. `SCRUM-19-ledger-entities`, so they link to the ticket.
+- Packages follow the Technical Design's layers without underscores, because Google Checkstyle
+  rejects them: `entity`, `usecase`, `interfaceadapter`, `dataaccess`, `view`. Interfaces shared by
+  several use cases (such as `StockDataGateway`) go in `usecase.shared`.
 - Money is stored as integer cents; never use `double` or `REAL` for money. Every movement of cash is a
   journal entry; [`docs/ledger.md`](docs/ledger.md) explains debits, credits and the ledger classes.
 
@@ -110,7 +135,7 @@ Offline demo mode: _to be added (SCRUM-43)._
 - Model actions as types (records and enums, e.g. `Side.BUY`, `OrderType.LIMIT`), never as strings that need parsing.
 - Name tests after behaviour: `action_condition_expectedResult`, e.g. `placeOrder_zeroQuantity_presentsErrorAndSavesNothing`.
 - Test both the success path and each failure path of every interactor.
-- Tests must not call the real stock APIs; use the fake gateway and the recorded JSON in `src/test/resources/api/`.
+- Tests must not call the real stock APIs; use `FakeStockDataGateway`. Provider parsing tests (SCRUM-31) can use the recorded JSON in `src/main/resources/fake-stock-data/` and `src/test/resources/api/`.
 
 ## Wireframes
 
