@@ -57,6 +57,19 @@ class QuoteTest {
   }
 
   @Test
+  void changePercent_veryLargePrices_doesNotOverflow() {
+    // Inputs: cents times 100 is beyond the range of a long here
+    Money previousClose = Money.of("1000000000000000.00");
+    Money price = Money.of("2000000000000000.00");
+
+    // Action
+    Quote quote = new Quote("AAPL", price, price, price, price, previousClose, TIME);
+
+    // Assertion
+    assertEquals(new BigDecimal("100.00"), quote.changePercent());
+  }
+
+  @Test
   void constructor_highBelowLow_throws() {
     // Inputs
     Money high = Money.of("340.00");

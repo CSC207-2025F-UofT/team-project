@@ -69,7 +69,9 @@ public record Quote(
    *     for example {@code 1.48} for a 1.48% rise or {@code -0.16} for a 0.16% fall
    */
   public BigDecimal changePercent() {
-    return BigDecimal.valueOf(change().toCents() * 100)
+    // Multiply as a BigDecimal: a long times 100 would overflow for very large prices
+    return BigDecimal.valueOf(change().toCents())
+        .movePointRight(2)
         .divide(BigDecimal.valueOf(previousClose.toCents()), 2, RoundingMode.HALF_EVEN);
   }
 
