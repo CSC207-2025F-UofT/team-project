@@ -19,8 +19,8 @@ import java.util.Locale;
 import java.util.Map;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import usecase.StockDataGateway;
-import usecase.StockDataUnavailableException;
+import usecase.shared.StockDataGateway;
+import usecase.shared.StockDataUnavailableException;
 
 /**
  * A stock data gateway that serves real responses recorded from Finnhub and Twelve Data, so

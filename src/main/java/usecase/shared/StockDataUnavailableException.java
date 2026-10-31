@@ -1,4 +1,4 @@
-package usecase;
+package usecase.shared;
 
 /**
  * Thrown when stock data can't be fetched: the data service is down or out of requests, the

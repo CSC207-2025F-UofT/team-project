@@ -14,7 +14,7 @@ import java.time.LocalDate;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import usecase.StockDataUnavailableException;
+import usecase.shared.StockDataUnavailableException;
 
 class FakeStockDataGatewayTest {
 

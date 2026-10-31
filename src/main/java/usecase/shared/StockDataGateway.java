@@ -1,4 +1,4 @@
-package usecase;
+package usecase.shared;
 
 import entity.CompanyProfile;
 import entity.PricePoint;
