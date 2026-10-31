@@ -60,4 +60,67 @@ class FakeStockDataGatewayTest {
     // Action / Assertion
     assertThrows(StockDataUnavailableException.class, () -> gateway.getQuote("XYZQ"));
   }
+
+  @Test
+  void setPrice_knownTicker_changesPriceHighAndLow() throws StockDataUnavailableException {
+    // Inputs
+    Money newPrice = Money.of("300.00");
+
+    // Action
+    gateway.setPrice("AAPL", newPrice);
+
+    // Assertion
+    Quote quote = gateway.getQuote("AAPL");
+    assertEquals(newPrice, quote.price());
+    assertEquals(newPrice, quote.high());
+    assertEquals(newPrice, quote.low());
+  }
+
+  @Test
+  void setPrice_knownTicker_keepsOpenPreviousCloseAndTime()
+      throws StockDataUnavailableException {
+    // Inputs
+    Quote before = gateway.getQuote("AAPL");
+
+    // Action
+    gateway.setPrice("AAPL", Money.of("300.00"));
+
+    // Assertion
+    Quote after = gateway.getQuote("AAPL");
+    assertEquals(before.open(), after.open());
+    assertEquals(before.previousClose(), after.previousClose());
+    assertEquals(before.time(), after.time());
+    assertEquals(Money.of("-48.91"), after.change());
+  }
+
+  @Test
+  void setPrice_oneTicker_leavesOtherTickersUnchanged() throws StockDataUnavailableException {
+    // Inputs
+    Quote msftBefore = gateway.getQuote("MSFT");
+
+    // Action
+    gateway.setPrice("AAPL", Money.of("300.00"));
+
+    // Assertion
+    assertEquals(msftBefore, gateway.getQuote("MSFT"));
+  }
+
+  @Test
+  void setPrice_unknownTicker_throws() {
+    // Inputs
+    Money price = Money.of("300.00");
+
+    // Action / Assertion
+    assertThrows(IllegalArgumentException.class, () -> gateway.setPrice("XYZQ", price));
+  }
+
+  @Test
+  void setPrice_zeroPrice_throwsAndKeepsOldQuote() throws StockDataUnavailableException {
+    // Inputs
+    Quote before = gateway.getQuote("AAPL");
+
+    // Action / Assertion
+    assertThrows(IllegalArgumentException.class, () -> gateway.setPrice("AAPL", Money.ZERO));
+    assertEquals(before, gateway.getQuote("AAPL"));
+  }
 }

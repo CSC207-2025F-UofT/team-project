@@ -59,6 +59,26 @@ public class FakeStockDataGateway implements StockDataGateway {
     return quote;
   }
 
+  /**
+   * Moves a stock's price, for tests. The day's high and low are both set to the new price, so
+   * a limit order's fill depends only on the price the test chose and not on the recorded
+   * range. The open, previous close and time are unchanged.
+   *
+   * @param ticker one of {@link #TICKERS}
+   * @param price the new price; greater than zero
+   * @throws IllegalArgumentException if {@code ticker} has no recorded data or {@code price} is
+   *     not greater than zero
+   */
+  public void setPrice(String ticker, Money price) {
+    Quote old = quotes.get(ticker);
+    if (old == null) {
+      throw new IllegalArgumentException("No recorded data for ticker: " + ticker);
+    }
+    quotes.put(
+        ticker,
+        new Quote(ticker, price, old.open(), price, price, old.previousClose(), old.time()));
+  }
+
   @Override
   public CompanyProfile getProfile(String ticker) throws StockDataUnavailableException {
     throw new UnsupportedOperationException("Not implemented yet");
