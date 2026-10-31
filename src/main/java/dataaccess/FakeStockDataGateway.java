@@ -12,9 +12,11 @@ import java.math.RoundingMode;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.json.JSONArray;
 import org.json.JSONObject;
 import usecase.StockDataGateway;
 import usecase.StockDataUnavailableException;
@@ -34,6 +36,7 @@ public class FakeStockDataGateway implements StockDataGateway {
 
   private final Map<String, Quote> quotes = new HashMap<>();
   private final Map<String, CompanyProfile> profiles = new HashMap<>();
+  private final Map<String, List<PricePoint>> histories = new HashMap<>();
 
   /**
    * Creates the gateway and loads the recorded data for every ticker in {@link #TICKERS}.
@@ -44,6 +47,7 @@ public class FakeStockDataGateway implements StockDataGateway {
     for (String ticker : TICKERS) {
       quotes.put(ticker, parseQuote(ticker, readJson(ticker + "-quote.json")));
       profiles.put(ticker, parseProfile(readJson(ticker + "-profile.json")));
+      histories.put(ticker, parseHistory(readJson(ticker + "-history.json")));
     }
   }
 
@@ -90,10 +94,31 @@ public class FakeStockDataGateway implements StockDataGateway {
     return profile;
   }
 
+  /**
+   * {@inheritDoc}
+   *
+   * <p>The recorded history covers 2025-10-20 to 2026-10-30, so days outside that range are
+   * missing from the result.
+   *
+   * @throws IllegalArgumentException if {@code to} is before {@code from}
+   */
   @Override
   public List<PricePoint> getDailyHistory(String ticker, LocalDate from, LocalDate to)
       throws StockDataUnavailableException {
-    throw new UnsupportedOperationException("Not implemented yet");
+    if (to.isBefore(from)) {
+      throw new IllegalArgumentException("End date " + to + " is before start date " + from);
+    }
+    List<PricePoint> history = histories.get(ticker);
+    if (history == null) {
+      throw new StockDataUnavailableException("No history for ticker: " + ticker);
+    }
+    List<PricePoint> inRange = new ArrayList<>();
+    for (PricePoint point : history) {
+      if (!point.date().isBefore(from) && !point.date().isAfter(to)) {
+        inRange.add(point);
+      }
+    }
+    return List.copyOf(inRange);
   }
 
   /** Converts a Finnhub {@code /quote} response. */
@@ -122,6 +147,27 @@ public class FakeStockDataGateway implements StockDataGateway {
         stock,
         json.optString("finnhubIndustry", ""),
         Money.of(marketCap.setScale(2, RoundingMode.HALF_EVEN).toPlainString()));
+  }
+
+  /**
+   * Converts a Twelve Data {@code /time_series} response, which lists days newest first, into
+   * points oldest first.
+   */
+  private static List<PricePoint> parseHistory(JSONObject json) {
+    JSONArray values = json.getJSONArray("values");
+    List<PricePoint> points = new ArrayList<>();
+    for (int i = values.length() - 1; i >= 0; i--) {
+      JSONObject day = values.getJSONObject(i);
+      points.add(
+          new PricePoint(
+              LocalDate.parse(day.getString("datetime")),
+              money(day, "open"),
+              money(day, "high"),
+              money(day, "low"),
+              money(day, "close"),
+              Long.parseLong(day.getString("volume"))));
+    }
+    return points;
   }
 
   /**

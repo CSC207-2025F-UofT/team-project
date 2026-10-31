@@ -2,12 +2,16 @@ package dataaccess;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import entity.CompanyProfile;
 import entity.Money;
+import entity.PricePoint;
 import entity.Quote;
 import entity.Stock;
 import java.time.Instant;
+import java.time.LocalDate;
+import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import usecase.StockDataUnavailableException;
@@ -160,6 +164,77 @@ class FakeStockDataGatewayTest {
   void getProfile_unknownTicker_throws() {
     // Action / Assertion
     assertThrows(StockDataUnavailableException.class, () -> gateway.getProfile("XYZQ"));
+  }
+
+  @Test
+  void getDailyHistory_oneWeek_returnsTradingDaysOldestFirst()
+      throws StockDataUnavailableException {
+    // Action: Saturday 2026-10-24 to Friday 2026-10-30
+    List<PricePoint> history =
+        gateway.getDailyHistory("AAPL", LocalDate.of(2026, 10, 24), LocalDate.of(2026, 10, 30));
+
+    // Assertion: Monday to Friday, weekend skipped
+    assertEquals(5, history.size());
+    assertEquals(LocalDate.of(2026, 10, 26), history.get(0).date());
+    assertEquals(LocalDate.of(2026, 10, 30), history.get(4).date());
+  }
+
+  @Test
+  void getDailyHistory_singleDay_returnsRecordedValues() throws StockDataUnavailableException {
+    // Inputs
+    LocalDate day = LocalDate.of(2026, 10, 29);
+
+    // Action: from and to are the same day, so both ends must be included
+    List<PricePoint> history = gateway.getDailyHistory("AAPL", day, day);
+
+    // Assertion: values from AAPL-history.json, rounded to cents
+    assertEquals(
+        List.of(new PricePoint(day, Money.of("348.00"), Money.of("351.43"), Money.of("347.30"),
+            Money.of("348.91"), 42_582_100L)),
+        history);
+  }
+
+  @Test
+  void getDailyHistory_oneYear_everyRecordedTickerHasData()
+      throws StockDataUnavailableException {
+    for (String ticker : FakeStockDataGateway.TICKERS) {
+      // Action
+      List<PricePoint> history =
+          gateway.getDailyHistory(ticker, LocalDate.of(2025, 10, 31), LocalDate.of(2026, 10, 30));
+
+      // Assertion: the recorded year has 251 trading days
+      assertEquals(251, history.size(), ticker);
+    }
+  }
+
+  @Test
+  void getDailyHistory_weekendOnly_returnsEmptyList() throws StockDataUnavailableException {
+    // Action
+    List<PricePoint> history =
+        gateway.getDailyHistory("AAPL", LocalDate.of(2026, 10, 24), LocalDate.of(2026, 10, 25));
+
+    // Assertion
+    assertTrue(history.isEmpty());
+  }
+
+  @Test
+  void getDailyHistory_endBeforeStart_throws() {
+    // Inputs
+    LocalDate from = LocalDate.of(2026, 10, 30);
+    LocalDate to = LocalDate.of(2026, 10, 1);
+
+    // Action / Assertion
+    assertThrows(IllegalArgumentException.class, () -> gateway.getDailyHistory("AAPL", from, to));
+  }
+
+  @Test
+  void getDailyHistory_unknownTicker_throws() {
+    // Inputs
+    LocalDate day = LocalDate.of(2026, 10, 29);
+
+    // Action / Assertion
+    assertThrows(StockDataUnavailableException.class,
+        () -> gateway.getDailyHistory("XYZQ", day, day));
   }
 
   @Test
