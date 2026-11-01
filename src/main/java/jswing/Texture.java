@@ -3,29 +3,35 @@ package jswing;
 import file.FileManager;
 
 import javax.swing.*;
-import java.util.List;
+import java.util.*;
 
 public class Texture {
 
     private List<JLabel> textures;
-    private int tickCount = 0;
-    private int maxTick;
+    private List<Integer> durations;
 
-    /**
-     * initialize textures according to the texture path.
-     * @param texturePath a path relative to resources/textures that specifies where a list of textures are stored.
-     */
+    private int tickCount = 0;
+    private int currentFrame = 0;
+
     public Texture(String texturePath) {
-        this.textures = FileManager.getListTexture(texturePath);
-        this.maxTick = textures.size() - 1;
+        Map<JLabel, Integer> loaded =
+                FileManager.getListTexture(texturePath);
+
+        this.textures = new ArrayList<>(loaded.keySet());
+        this.durations = new ArrayList<>(loaded.values());
     }
 
     public void tick() {
-        this.tickCount = (tickCount + 1) % maxTick;
+        tickCount++;
+
+        if (tickCount >= durations.get(currentFrame)) {
+            tickCount = 0;
+            currentFrame = (currentFrame + 1) % textures.size();
+        }
     }
 
     public JLabel getContent() {
-        return textures.get(tickCount);
+        return textures.get(currentFrame);
     }
 
     public int getWidth() {
