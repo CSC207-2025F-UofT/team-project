@@ -12,11 +12,11 @@ When a user opens Sweater Weather, the system retrieves current temperature and 
 Users can set their top style vibes (e.g., Streetwear, Vintage, Minimalist) and generate either a personalized outfit based on their preferences or a randomized outfit. If a selected style category has fewer than two valid items, the system alerts the user that it cannot style the outfit and provides an alternative suggestion. Users can save outfits for future days, request a regeneration with specific changes, or manage their wardrobe items (adding apparel with image uploads, categories, materials, and colors). All closet state and user preferences are persisted locally in a JSON file format.
  
 # User Stories
-User Story 1 (Wardrobe Management & Import): As a user, I want to add new clothing items with images, categories, colors, materials, and style tags so that I can maintain a digital inventory of my closet.
+User Story 1 (Wardrobe Management & Import): As a user, I want to add new clothing items with images, colors, materials, and style tags so that I can maintain a digital inventory of my closet.
 
-User Story 2 (Weather-Driven Outfit Recommendation): As a user, I want Sweater Weather to automatically check my local weather and recommend an outfit with valid layering and warmth levels so that I dress appropriately for the day's temperature.
+User Story 2 (Weather-Driven Outfit Recommendation): As a user, I want Sweater Weather to automatically check my local weather and recommend an outfit with valid layering and warmth levels so that I dress appropriately for the day's temperature. (random feature)
 
-User Story 3 (Aesthetic & Style Preference Filtering): As a user, I want to select my favorite style vibes so that recommended outfits align with my personal aesthetic preferences.
+User Story 3 (Aesthetic & Style Preference Filtering): As a user, I want to select my favorite style vibes so that recommended outfits align with my personal aesthetic preferences. (custom feature)
 
 User Story 4 (Outfit Save & Regeneration): As a user, I want to request a new outfit generation or save a generated outfit to a favorites list so that I can plan my outfits ahead of time.
 
