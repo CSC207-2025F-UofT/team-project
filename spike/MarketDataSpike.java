@@ -9,6 +9,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
+import java.util.Arrays;
 import java.util.Properties;
 
 /**
@@ -20,6 +21,7 @@ import java.util.Properties;
  * <pre>
  *   java spike/MarketDataSpike.java          # call every endpoint, save AAPL responses
  *   java spike/MarketDataSpike.java limits   # burst requests to find the real rate limits
+ *   java spike/MarketDataSpike.java fake AAPL MSFT   # record data for FakeStockDataGateway
  * </pre>
  */
 public class MarketDataSpike {
@@ -27,6 +29,7 @@ public class MarketDataSpike {
   private static final String FINNHUB = "https://finnhub.io/api/v1";
   private static final String TWELVE_DATA = "https://api.twelvedata.com";
   private static final Path RECORD_DIR = Path.of("src/test/resources/api");
+  private static final Path FAKE_DATA_DIR = Path.of("src/main/resources/fake-stock-data");
   private static final String[] SYMBOLS = {"AAPL", "MSFT"};
 
   private final HttpClient client =
@@ -51,6 +54,8 @@ public class MarketDataSpike {
     if (args.length > 0 && args[0].equals("limits")) {
       spike.measureFinnhubLimit();
       spike.measureTwelveDataLimit();
+    } else if (args.length > 0 && args[0].equals("fake")) {
+      spike.recordFakeData(Arrays.copyOfRange(args, 1, args.length));
     } else {
       spike.callEveryEndpoint();
     }
@@ -85,6 +90,36 @@ public class MarketDataSpike {
         endpoint, response.statusCode(), body.length(), ok ? "OK" : "FAILED", "", preview);
     if (ok && symbol.equals("AAPL") && !endpoint.equals("finnhub-candle")) {
       Files.writeString(RECORD_DIR.resolve(endpoint + "-AAPL.json"), body + "\n");
+    }
+  }
+
+  /**
+   * Saves the quote, profile and one year of daily history for each ticker, which is everything
+   * FakeStockDataGateway serves. Costs one Twelve Data credit per ticker, so record at most 8 at
+   * a time.
+   */
+  private void recordFakeData(String[] tickers) throws IOException, InterruptedException {
+    Files.createDirectories(FAKE_DATA_DIR);
+    for (String ticker : tickers) {
+      System.out.println("== " + ticker + " ==");
+      save(ticker, "quote", finnhub("/quote?symbol=" + ticker));
+      save(ticker, "profile", finnhub("/stock/profile2?symbol=" + ticker));
+      save(
+          ticker,
+          "history",
+          twelveData("/time_series?symbol=" + ticker + "&interval=1day&outputsize=260"));
+    }
+  }
+
+  private void save(String ticker, String kind, HttpResponse<String> response)
+      throws IOException {
+    String body = response.body();
+    boolean ok = response.statusCode() == 200 && !isTwelveDataError(body) && body.length() > 2;
+    System.out.printf(
+        "  %-8s HTTP %d  %6d bytes  %s%n",
+        kind, response.statusCode(), body.length(), ok ? "saved" : "FAILED " + body);
+    if (ok) {
+      Files.writeString(FAKE_DATA_DIR.resolve(ticker + "-" + kind + ".json"), body + "\n");
     }
   }
 
