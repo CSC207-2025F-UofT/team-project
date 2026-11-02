@@ -8,9 +8,9 @@
   - Message for Your Future Self: We better get molly tea when we are done!
     
 - Lucy Liu
-  - GitHub:
-  - Email:
-  - Message for Your Futures Self:
+  - GitHub: https://github.com/NOVAx1216-coder
+  - Email: lucymeichen.liu@mail.utoronto.ca
+  - Message for Your Futures Self: Locked in and Linked Out!
     
 - Joon Park
   - GitHub: https://github.com/kdaster
