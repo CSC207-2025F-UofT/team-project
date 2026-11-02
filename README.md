@@ -43,7 +43,7 @@ Productivity & Entertainment
 
 ## User Stories
 ### We will remove this later but here is a template for how you can write your user stories: As a [kind of user] I want to [accomplish a goal] so that [I receive some benefit] -Pauline
-### User Story 1: <Profile>
+### User Story 1: As a user, I want to set up my personal info (username, profile picture) and check out my current level so that I can visually personalize my account page.
 ### User Story 2: <Progress>
 ### User Story 3: As a user, I want to document my completed side quests through journal entries and photos (either taken with my camera or uploaded from my gallery) so that I can look back on my experiences, relive fun memories, and celebrate my achievements.
 ### User Story 4: <Map>
