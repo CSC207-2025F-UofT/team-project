@@ -48,6 +48,7 @@ Every endpoint we need returned data for AAPL and MSFT. One real response per en
 | Symbol search (`/search`) | Finnhub | Works |
 | Company profile (`/stock/profile2`) | Finnhub | Works |
 | Daily candles (`/stock/candle`) | Finnhub | **HTTP 403**, not on the free plan |
+| US symbol list (`/stock/symbol?exchange=US`) | Finnhub | Works: 31,112 symbols with exchange codes, about 7 MB (checked 2026-10-31) |
 | Daily time series (`/time_series`) | Twelve Data | Works |
 | Quote (`/quote`) | Twelve Data | Works (used as the fallback) |
 
@@ -80,11 +81,24 @@ Use cases get all stock data through
 `search`, `getQuote`, `getProfile` and `getDailyHistory`. Each one throws the checked
 `StockDataUnavailableException` when data can't be fetched, so every interactor has to handle it.
 
+**Search results need an exchange, which Finnhub's `/search` doesn't return.** The Finnhub gateway
+(SCRUM-31) gets it from Finnhub's US symbol list, `/stock/symbol?exchange=US`: one free call that
+returned all 31,112 US symbols with their exchange code (`XNAS` = NASDAQ, `XNYS` = NYSE) on
+2026-10-31. It's about 7 MB, so fetch it at most once a day and cache it. Results not in the list
+are foreign listings (such as `603020.SS`) and should be dropped. Never call `/stock/profile2` once
+per search result: one search for "apple" returned 11 results, which would use up the quote budget.
+
 [`dataaccess.FakeStockDataGateway`](src/main/java/dataaccess/FakeStockDataGateway.java) serves real
 recorded responses for **AAPL, MSFT, GOOGL, AMZN and NVDA**: quote, profile and one year of daily
 history (2025-10-20 to 2026-10-30). Call `setPrice(ticker, price)` in a test to move a price; it
 also sets the day's high and low to that price, so limit order fills depend only on the price you
 chose.
+
+**Offline mode (SCRUM-43) must fix the clock to the last recorded day.** The recorded history stops
+at `FakeStockDataGateway.LAST_RECORDED_DAY` (2026-10-30). Anything that works out dates from
+today, like the chart's 1M, 6M and 1Y ranges, must use a `Clock` fixed to that day when running on
+the fake. With the real date, the 1M chart is already partly empty and goes fully empty after
+2026-11-30, the 6M chart after 2027-04-30 and the 1Y chart after 2027-10-30.
 
 The fake's data is in [`src/main/resources/fake-stock-data/`](src/main/resources/fake-stock-data/),
 not in `src/test/resources/api/` as the Technical Design (p. 15) says. Main resources are
@@ -94,6 +108,12 @@ tickers (one Twelve Data credit per ticker, at most 8 a minute):
 ```bash
 java spike/MarketDataSpike.java fake AAPL MSFT GOOGL AMZN NVDA
 ```
+
+- **Adding a ticker:** also add it to `FakeStockDataGateway.TICKERS`, or the fake won't load it.
+- **Re-recording:** the new data has new prices and dates, so the build fails until you update the
+  values `FakeStockDataGatewayTest` checks (for example AAPL's price, quote time and the number of
+  trading days), `FIRST_RECORDED_DAY` and `LAST_RECORDED_DAY` in the fake, and the dates in this
+  section.
 
 API keys are read from `config.properties` in the project root (git-ignored, never committed).
 
