@@ -20,7 +20,7 @@ User Story 3 (Aesthetic & Style Preference Filtering): As a user, I want to sele
 
 User Story 4 (Outfit Save & Regeneration): As a user, I want to request a new outfit generation or save a generated outfit to a favorites list so that I can plan my outfits ahead of time.
 
-User Story 5 (Closet Inventory Visualizer): As a user, I want to view a visual grid of all items in my wardrobe filtered by category (tops, bottoms, shoes) so that I can inspect my available clothes easily.
+User Story 5 (Closet Inventory Visualizer): As a user, I want to view a visual grid of all items in my wardrobe filtered by category (tops, bottoms, shoes) so that I can inspect my available clothes easily. (just a list of tops, bottoms, shoes..., most worn outfit)
 
 # API Usage
 OpenWeatherMap API
