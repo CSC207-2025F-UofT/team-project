@@ -37,13 +37,13 @@
 
 ## Use Cases
 
-### Use Case 1
+### for user story handling planting, growing, and harvesting plants:
 
-### Use Case 2
+### for user story handling growing, raising, and processing livestock:
 
-### Use Case 3
+### for user story handling trading resources with other players:
 
-(Add additional use cases as needed.)
+### for user story handling weather on the farm
 
 ---
 
