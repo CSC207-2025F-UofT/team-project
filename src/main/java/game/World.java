@@ -39,7 +39,7 @@ public class World implements Serializable {
 
         this.player = new Player("samplePlayer", view);
         this.sceneLayers = List.of(
-                new Scene(List.of(player.stateManager.curretnActionState)),
+                new Scene(List.of(player.stateManager.currentActionState)),
                 new Scene(new HashSet<>(player.stateManager.statusStates.keySet()))
         );
         this.entities = Set.of(player);

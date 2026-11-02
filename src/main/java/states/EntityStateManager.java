@@ -12,13 +12,13 @@ public class EntityStateManager implements Serializable {
     public final Set<StatusState> currentStatusStates = new HashSet<>();
 
     public final Set<ActionState> actionStates = new HashSet<>();
-    public ActionState curretnActionState;
+    public ActionState currentActionState;
 
     private Entity entity;
 
     public EntityStateManager(Entity entity) {
         this.entity = entity;
-        this.curretnActionState = new RestState(entity);
+        this.currentActionState = new RestState(entity);
         register();
     }
 
@@ -37,7 +37,7 @@ public class EntityStateManager implements Serializable {
         for (StatusState state : statusStates.keySet()) {
             state.loadTexture(texturePath);
         }
-        curretnActionState.loadTexture(texturePath);
+        currentActionState.loadTexture(texturePath);
     }
 
     public void tick() {
@@ -55,7 +55,7 @@ public class EntityStateManager implements Serializable {
             }
         }
 
-        curretnActionState.tick();
+        currentActionState.tick();
     }
 
     public void applyStatus() {
