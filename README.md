@@ -2,9 +2,13 @@
 ## Team Information
 ### Team Members 
 Ginni Arun Kumar
+
 Sofiia Maksyuta
+
 Zahraa Badran
+
 Rie Campbell
+
 Carmen Teng
 
 ## Project Description
@@ -37,7 +41,7 @@ As a user, I want to request a new outfit generation or save a generated outfit 
 As a user, I want to view a visual grid of all items in my wardrobe filtered by category (tops, bottoms, shoes) so that I can inspect my available clothes easily. (just a list of tops, bottoms, shoes..., most worn outfit)
 
 ## API Usage
-**API Name:*** OpenWeatherMap API
+**API Name:** OpenWeatherMap API
 **Documentation:*** [OpenWeatherMap API Documentation](https://openweathermap.org/current)
 
 **How it is used in the program:** Sweater Weather uses the OpenWeatherMap API to fetch live weather conditions and current temperatures based on a target city or geographic coordinate. The returned temperature data is mapped to a required warmth scale (ranging from cold -10°C to warm 10°C+) inside an API Gateway adapter, which converts the JSON response into a domain WeatherData entity.
