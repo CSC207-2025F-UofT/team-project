@@ -3,6 +3,7 @@ package jswing;
 import game.gameModel.Renderable;
 
 import javax.swing.*;
+import java.awt.*;
 
 /**
  * responsible for redrawing GameState panel according to a provided World object
@@ -10,12 +11,13 @@ import javax.swing.*;
 public class Renderer {
 
     private JPanel panel;
+    private Camera camera = new Camera();
 
     public Renderer (JPanel panel) {
         this.panel = panel;
     }
 
-    public void render(Iterable<? extends Renderable> renderables) {
+    public void render(Iterable<? extends Renderable> renderables, int playerX, int playerY) {
         panel.removeAll();
 
         for (Renderable renderable : renderables) {
@@ -24,20 +26,39 @@ public class Renderer {
             int width = renderable.getWidth();
             int height = renderable.getHeight();
 
-            // Originally, setBounds(x, y, width, height) uses x and y to represent the top-left
-            // corner of the component.
-            // However, Renderable.getX() and getY() represent the bottom-center point of the picture.
-            // The following conversion transforms the bottom-center coordinates provided by Renderable
-            // into the top-left coordinates required by setBounds().
+            // Apply transformation to coordinates through camera
+            camera.transform(playerX, playerY, renderable.getX(), renderable.getY(),
+                    renderable.getWidth(), renderable.getHeight());
             component.setBounds(
-                    renderable.getX() - width / 2,
-                    renderable.getY() - height,
+                    camera.x,
+                    camera.y,
                     width,
                     height
             );
 
             panel.add(component);
         }
+
+        // TEMP: Camera transformation test
+        int debugSize = 32;
+
+        camera.transform(
+                playerX, playerY,
+                0, 0,
+                debugSize, debugSize
+        );
+
+        JLabel debugMarker = new JLabel();
+        debugMarker.setOpaque(true);
+        debugMarker.setBackground(Color.RED);
+        debugMarker.setBounds(
+                camera.x,
+                camera.y,
+                debugSize,
+                debugSize
+        );
+
+        panel.add(debugMarker);
 
         panel.revalidate();
         panel.repaint();

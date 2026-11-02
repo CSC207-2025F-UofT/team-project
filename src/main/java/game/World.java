@@ -59,8 +59,10 @@ public class World implements Serializable {
                 this.pause = true;
             }
             case "+w", "-w", "+a", "-a", "+s", "-s", "+d", "-d" : {
-                CommandProcessor.handle(command);
+                CommandProcessor.handleDirection(command);
             }
+            default :
+                CommandProcessor.handle(command);
         }
         player.handleCommand();
     }
@@ -76,6 +78,10 @@ public class World implements Serializable {
         for (Entity entity : entities) {
             entity.loadTexture();
         }
+    }
+
+    public Player getPlayer() {
+        return player;
     }
 
     public static void main(String[] args) {

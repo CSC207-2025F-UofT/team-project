@@ -1,6 +1,7 @@
 package states;
 
 import game.gameModel.Entity;
+import game.gameModel.Player;
 
 import java.io.Serializable;
 import java.util.*;
@@ -25,7 +26,6 @@ public class EntityStateManager implements Serializable {
     private void register() {
         actionStates.addAll(Set.of(
                 new RestState(entity),
-                new WalkingState(entity),
                 new RunningState(entity)
         ));
         statusStates.putAll(Map.of(
@@ -62,6 +62,10 @@ public class EntityStateManager implements Serializable {
         for (StatusState status : currentStatusStates) {
             status.apply();
         }
+    }
+
+    public void handleCommand(Player.PlayerCommand command) {
+        currentActionState = currentActionState.handleCommand(command);
     }
 
 
