@@ -18,9 +18,9 @@
   - Message for Your Futures Self:
     
 - Serena Ganbaatar
-  - GitHub:
-  - Email:
-  - Message for Your Futures Self:
+  - GitHub: https://github.com/serena-gb
+  - Email: saruul.ganbaatar@mail.utoronto.ca
+  - Message for Your Futures Self: This too shall pass.
     
 - Issac Wan
   - GitHub:
