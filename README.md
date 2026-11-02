@@ -24,6 +24,6 @@ User Story 5 (Closet Inventory Visualizer): As a user, I want to view a visual g
 
 # API Usage
 OpenWeatherMap API
-Documentation Link: OpenWeatherMap Current Weather Data API Documentation
+[OpenWeatherMap API Documentation](https://openweathermap.org/current)
 
 Usage in Project: Sweater Weather uses the OpenWeatherMap API to fetch live weather conditions and current temperatures based on a target city or geographic coordinate. The returned temperature data is mapped to a required warmth scale (ranging from cold -10°C to warm 10°C+) inside an API Gateway adapter, which converts the JSON response into a domain WeatherData entity.
