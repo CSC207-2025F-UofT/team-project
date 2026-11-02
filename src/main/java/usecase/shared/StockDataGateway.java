@@ -17,6 +17,11 @@ public interface StockDataGateway {
   /**
    * Finds US stocks whose ticker or company name matches the query.
    *
+   * <p>Every result includes its exchange. Implementations must not spend one request per
+   * result to find it, because that would use up the rate limit quotes need; the Finnhub
+   * implementation looks it up in Finnhub's list of US symbols, fetched at most once a day (see
+   * the README).
+   *
    * @param query what the user typed, for example {@code "apple"} or {@code "AAPL"}
    * @return the matching stocks, best match first; empty if nothing matches
    * @throws StockDataUnavailableException if the search couldn't be done
