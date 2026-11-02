@@ -202,3 +202,13 @@ As a student, I want to be able to have a suggested prioritization of today's ta
 8. The system would always select every overdue task above the three selected tasks, without counting overdue tasks toward the limit of three.
 9. Internally, the system would provide suggested daily workload per task in hours per day, overdue warnings, and any applicable public-holiday warnings.
 10. The system would keep recalculating and recalculate prioritization from current task data whenever the view is "opened" or "refreshed".
+
+## Use Cases
+### Story 1
+
+### Story 2
+
+### Story 3
+
+### Story 4
+
