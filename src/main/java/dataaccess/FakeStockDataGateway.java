@@ -27,11 +27,22 @@ import usecase.shared.StockDataUnavailableException;
  * tests and the app can run without calling the real services. The recorded files are in
  * {@code src/main/resources/fake-stock-data/}; {@code spike/MarketDataSpike.java} re-records
  * them.
+ *
+ * <p>The recorded history stops at {@link #LAST_RECORDED_DAY}. Anything that works out dates
+ * from today, such as the chart's 1M, 6M and 1Y ranges, must use a {@code Clock} fixed to that
+ * day when running on this fake (in offline mode too), or its results come back partly or
+ * entirely empty.
  */
 public class FakeStockDataGateway implements StockDataGateway {
 
   /** The tickers that have recorded data. */
   public static final List<String> TICKERS = List.of("AAPL", "MSFT", "GOOGL", "AMZN", "NVDA");
+
+  /** The first day of recorded history. */
+  public static final LocalDate FIRST_RECORDED_DAY = LocalDate.of(2025, 10, 20);
+
+  /** The last day of recorded history, which is also the day the quotes are from. */
+  public static final LocalDate LAST_RECORDED_DAY = LocalDate.of(2026, 10, 30);
 
   private static final String DATA_DIR = "/fake-stock-data/";
 
@@ -125,8 +136,8 @@ public class FakeStockDataGateway implements StockDataGateway {
   /**
    * {@inheritDoc}
    *
-   * <p>The recorded history covers 2025-10-20 to 2026-10-30, so days outside that range are
-   * missing from the result.
+   * <p>The recorded history covers {@link #FIRST_RECORDED_DAY} to {@link #LAST_RECORDED_DAY},
+   * so days outside that range are missing from the result.
    *
    * @throws IllegalArgumentException if {@code to} is before {@code from}
    */

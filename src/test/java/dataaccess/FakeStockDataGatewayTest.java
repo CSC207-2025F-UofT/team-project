@@ -195,6 +195,21 @@ class FakeStockDataGatewayTest {
   }
 
   @Test
+  void getDailyHistory_recordedRange_matchesFirstAndLastRecordedDay()
+      throws StockDataUnavailableException {
+    for (String ticker : FakeStockDataGateway.TICKERS) {
+      // Action
+      List<PricePoint> history = gateway.getDailyHistory(ticker,
+          FakeStockDataGateway.FIRST_RECORDED_DAY, FakeStockDataGateway.LAST_RECORDED_DAY);
+
+      // Assertion: fails after re-recording until the constants are updated
+      assertEquals(FakeStockDataGateway.FIRST_RECORDED_DAY, history.get(0).date(), ticker);
+      assertEquals(FakeStockDataGateway.LAST_RECORDED_DAY,
+          history.get(history.size() - 1).date(), ticker);
+    }
+  }
+
+  @Test
   void getDailyHistory_oneYear_everyRecordedTickerHasData()
       throws StockDataUnavailableException {
     for (String ticker : FakeStockDataGateway.TICKERS) {
