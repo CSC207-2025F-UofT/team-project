@@ -38,6 +38,50 @@
 ## Use Cases
 
 ### for user story handling planting, growing, and harvesting plants:
+Use Case 1.1
+- Name: Plant a Crop
+- Primary actor: Player
+- Precondition: The player has at least one empty plot and at least one seed in the backpack.
+- Trigger: The player clicks an empty plot.
+- Main success scenario:
+    1. Player clicks an empty plot.
+    2. System shows the seeds in the backpack.
+    3. Player chooses a seed.
+    4. System plants the seed in the plot and removes one seed from the backpack.
+    5. System shows the plot as planted.
+- Extensions:
+    - 2a. The backpack has no seeds, so the system tells the player.
+    - 3a. Player cancels, so the plot stays empty.
+- Success outcome: The plot contains a growing crop, and the backpack has one fewer seed.
+
+Use Case 1.2
+- Name: Tend a Crop
+- Primary actor: Player
+- Precondition: The plot has a planted crop that has not been tended.
+- Trigger: The player clicks a planted plot.
+- Main success scenario:
+    1. Player clicks a planted plot.
+    2. System checks the current weather.
+    3. System offers to water the crop (weather is Clear).
+    4. Player chooses to water.
+    5. System marks the crop as tended and shows the updated plot.
+- Extensions:
+    - 3a. Weather is Rain, so the system offers to fertilize instead of water. Continue at step 4.
+    - 4a. Player cancels, so the crop stays untended.
+- Success outcome: The crop is marked as tended and ready to harvest.
+
+Use Case 1.3
+- Name: Harvest a Crop
+- Primary actor: Player
+- Precondition: The plot has a tended crop.
+- Trigger: The player clicks a tended plot.
+- Main success scenario:
+    1. Player clicks a tended plot.
+    2. System removes the crop from the plot and adds the harvested crop to the backpack.
+    3. System shows the plot as empty.
+- Extensions:
+    - 1a. The crop has not been tended, so the system tells the player it is not ready.
+- Success outcome: The plot is empty and the backpack has the harvested crop.
 
 ### for user story handling growing, raising, and processing livestock:
 
