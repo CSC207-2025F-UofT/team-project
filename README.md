@@ -89,6 +89,36 @@ Use Case 1.3
 
 ### for user story handling weather on the farm
 
+Use case 4.1
+- Name: Choose city 
+- Primary Actor: Player
+- Preconditions: There is a newly opened game.
+- Trigger: The player starts the game.
+- Main Success Scenario: 
+  1. Player opens a new game.
+  2. System provides a list of cities to choose from.
+  3. Player selects their preferred city.
+  4. System pulls the historical weather from the chosen city using the API.
+  5. System calculates and records the chances of each weather pattern occurring.
+  6. System opens the game screen
+- Extensions: 
+- Success Outcome: The chances of each weather pattern occurring is recorded for the rest of
+the session. 
+
+Use case 4.2
+- Name: Change weather
+- Primary Actor: System
+- Preconditions: There is an active game and a record of weather pattern chances exists
+- Trigger: It has been 5 minutes since the game started or the weather last changed
+- Main Success Scenario:
+ 1. System confirms that it has been 5 minutes since the game started or the weather last changed
+ 2. System generates the weather from the weather pattern chances
+ 3. System updates weather on the game screen
+ 4. System updates actions options based on the weather
+ 5. System starts a new timer for the next weather change
+- Extensions:
+- Success Outcome: The weather displayed on the screen and the actions affected by it are updated. 
+
 ---
 
 ## Minimal Viable Product (MVP)
@@ -116,13 +146,14 @@ Use Case 1.3
 
 ## API Usage
 
-**API Name:**
+**API Name:** weatherapi - JAVA
 
-**Documentation:** [Link]
+**Documentation:** 
 
-The program retrieves data of the current weather in Toronto and updates the user interface accordingly.
-If it is sunny in Toronto, all activities will be available to do for the player.
-If it is rainy in Toronto, trading and planting will be temporarily disabled for the player.
+**How it is used in the program:** When starting a new game, the user chooses a city to place 
+the farm in. The system then calculates the chance of each weather pattern occurring in that city
+based on the actual city's historical weather, which will be used to determine the weather pattern
+for the rest of the game session. 
 
 ---
 
