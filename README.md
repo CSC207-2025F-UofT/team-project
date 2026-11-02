@@ -92,4 +92,5 @@ Productivity & Entertainment
 [Instructions for running the program.]
 ---
 ## Notes
-[Any add]
+Why We Chose The Name "Linked Out":
+
