@@ -5,11 +5,15 @@ import game.gameModel.Entity;
 import game.gameModel.Player;
 import game.gameModel.Renderable;
 import game.gameModel.Scene;
+import jswing.WindowManager;
+import terrain.OverworldTerrain;
+import terrainscene.TerrainScene;
 
 import java.io.Serializable;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 public class World implements Serializable {
@@ -24,6 +28,13 @@ public class World implements Serializable {
 
     //TODO temporary
     private int tickCount = 0;
+
+    //TODO use this world's own seed once World can provide it as a long
+    private static final long TERRAIN_SEED = 42L;
+
+    /** Terrain tiles around the player; rebuilt from the seed, so never saved. */
+    private transient TerrainScene terrainScene;
+    private transient Scene terrainLayer;
 
     public World(String seed) {
         this.seed = seed;
@@ -46,11 +57,24 @@ public class World implements Serializable {
     }
 
     Iterable<Renderable> render() {
-        return () -> StreamSupport.stream(sceneLayers.spliterator(), false)
+        updateTerrainLayer();
+        // The terrain layer goes last: the renderer's first sprites end up on top, so terrain is underneath.
+        return () -> Stream.concat(StreamSupport.stream(sceneLayers.spliterator(), false), Stream.of(terrainLayer))
                 .flatMap(scene -> StreamSupport.stream(
                                 scene.getContent().spliterator(), false)
                         .map(renderable -> (Renderable) renderable))
                 .iterator();
+    }
+
+    /** Creates the terrain layer on first use (also after loading a save) and centres it on the player. */
+    private void updateTerrainLayer() {
+        if (terrainScene == null) {
+            terrainScene = TerrainScene.withPlaceholderTiles(
+                    OverworldTerrain.fromSeed(TERRAIN_SEED),
+                    WindowManager.FRAME_WIDTH, WindowManager.FRAME_HEIGHT);
+            terrainLayer = new Scene(terrainScene);
+        }
+        terrainScene.update(player.coordinate[0], player.coordinate[1]);
     }
 
     public void takeCommand(String command) {
