@@ -1,18 +1,71 @@
 package states;
 
+import game.gameModel.Entity;
+
 import java.io.Serializable;
 import java.util.*;
 
 public class EntityStateManager implements Serializable {
     private static final long serialVersionUID = 1L;
 
-    public EntityState rest = new EntityState("rest");
-    public EntityState walking = new EntityState("walking");
+    public final Map<StatusState, Integer> statusStates = new HashMap<>();
+    public final Set<StatusState> currentStatusStates = new HashSet<>();
 
-    public List<EntityState> entityStates = new ArrayList<>();
-    {
-        entityStates.add(rest);
-        entityStates.add(walking);
+    public final Set<ActionState> actionStates = new HashSet<>();
+    public ActionState curretnActionState;
+
+    private Entity entity;
+
+    public EntityStateManager(Entity entity) {
+        this.entity = entity;
+        this.curretnActionState = new RestState(entity);
+        register();
     }
+
+    private void register() {
+        actionStates.addAll(Set.of(
+                new RestState(entity),
+                new WalkingState(entity),
+                new RunningState(entity)
+        ));
+        statusStates.putAll(Map.of(
+                //TODO status states
+        ));
+    }
+
+    public void loadTexture(String texturePath) {
+        for (StatusState state : statusStates.keySet()) {
+            state.loadTexture(texturePath);
+        }
+        curretnActionState.loadTexture(texturePath);
+    }
+
+    public void tick() {
+        int tickCount;
+        for (StatusState status : statusStates.keySet()) {
+            tickCount = statusStates.get(status) - 1;
+            if (tickCount > 0) {
+                statusStates.put(status, tickCount);
+                status.tick();
+            }
+            else {
+                statusStates.put(status, 0);
+                currentStatusStates.remove(status);
+                status.resetTickCount();
+            }
+        }
+
+        curretnActionState.tick();
+    }
+
+    public void applyStatus() {
+        for (StatusState status : currentStatusStates) {
+            status.apply();
+        }
+    }
+
+
+
+
 
 }

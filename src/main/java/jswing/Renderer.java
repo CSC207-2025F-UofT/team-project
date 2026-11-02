@@ -15,22 +15,30 @@ public class Renderer {
         this.panel = panel;
     }
 
-    public void render(Iterable<Renderable> renderables) {
+    public void render(Iterable<? extends Renderable> renderables) {
         panel.removeAll();
 
         for (Renderable renderable : renderables) {
-            //TODO change to Graphics2D in order to support double coordinates
             JLabel component = renderable.getTexture().getContent();
 
+            int width = renderable.getWidth();
+            int height = renderable.getHeight();
+
+            // Originally, setBounds(x, y, width, height) uses x and y to represent the top-left
+            // corner of the component.
+            // However, Renderable.getX() and getY() represent the bottom-center point of the picture.
+            // The following conversion transforms the bottom-center coordinates provided by Renderable
+            // into the top-left coordinates required by setBounds().
             component.setBounds(
-                    renderable.getX(),
-                    renderable.getY(),
-                    renderable.getWidth(),
-                    renderable.getHeight()
+                    renderable.getX() - width / 2,
+                    renderable.getY() - height,
+                    width,
+                    height
             );
 
             panel.add(component);
         }
+
         panel.revalidate();
         panel.repaint();
     }

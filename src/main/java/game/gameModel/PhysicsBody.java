@@ -3,11 +3,16 @@ package game.gameModel;
 import game.GameController;
 import testpackage.Test;
 
+import java.io.Serializable;
 import java.util.Arrays;
 
-public class PhysicsBody {
+public class PhysicsBody implements Serializable {
+    private static final long serialVersionUID = 1L;
 
-    protected double[] coordinate, velocity, acceleration;
+    public double[] coordinate, velocity, acceleration;
+
+    private double velocityMultiplier = 1;
+    private double velocityBias = 0;
 
     public PhysicsBody() {
         this.coordinate = new double[]{0.0, 0.0};
@@ -20,12 +25,17 @@ public class PhysicsBody {
      */
     public void tick() {
         double time = GameController.FRAME_TIME;
-
+        double p, v, a;
         for (int i = 0; i < 2; i++) {
-            coordinate[i] += velocity[i] * time
-                    + 0.5 * acceleration[i] * time * time;
+            p = coordinate[i];
+            v = velocity[i];
+            a = acceleration[i];
+            p += (v * velocityMultiplier + velocityBias) * time
+                    + 0.5 * a * time * time;
 
-            velocity[i] += acceleration[i] * time;
+            v += a * time;
+            coordinate[i] = p;
+            velocity[i] = v;
         }
     }
 }

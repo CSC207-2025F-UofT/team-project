@@ -7,8 +7,10 @@ import game.gameModel.Renderable;
 import game.gameModel.Scene;
 
 import java.io.Serializable;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.StreamSupport;
 
 public class World implements Serializable {
     private static final long serialVersionUID = 1L;
@@ -37,14 +39,17 @@ public class World implements Serializable {
 
         this.player = new Player("samplePlayer", view);
         this.sceneLayers = List.of(
-                new Scene(Set.of(player))
+                new Scene(List.of(player.stateManager.curretnActionState)),
+                new Scene(new HashSet<>(player.stateManager.statusStates.keySet()))
         );
         this.entities = Set.of(player);
     }
 
     Iterable<Renderable> render() {
-        return () -> sceneLayers.stream()
-                .flatMap(scene -> scene.getContent().stream())
+        return () -> StreamSupport.stream(sceneLayers.spliterator(), false)
+                .flatMap(scene -> StreamSupport.stream(
+                                scene.getContent().spliterator(), false)
+                        .map(renderable -> (Renderable) renderable))
                 .iterator();
     }
 
