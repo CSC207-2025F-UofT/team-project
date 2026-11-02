@@ -21,9 +21,7 @@ public class Player extends Entity {
 
     @Override
     public void loadTexture() {
-        for (EntityState state : stateManager.entityStates) {
-            state.loadTexture(view + "/player");
-        }
+        stateManager.loadTexture(view + "/player");
     }
 
     public void handleCommand() {
@@ -42,7 +40,7 @@ public class Player extends Entity {
 
     public void tick() {
         super.tick();
-//        Test.print(Arrays.toString(coordinate));
+        stateManager.tick();
     }
 
 

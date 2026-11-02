@@ -2,7 +2,6 @@ package game;
 
 import file.FileManager;
 import states.PanelStateController;
-import states.State;
 import states.StateManager;
 import system.InputBuffer;
 
