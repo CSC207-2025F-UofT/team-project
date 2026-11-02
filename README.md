@@ -29,9 +29,9 @@
 
 ### As a player, I want to grow, raise, and process livestock for my farm. 
 
-### As a player, I want to trade resources with other players. 
+### As a player, I want to trade resources with NPCs. 
 
-### As a player, I want to create and set up my farm, which can adapt to environmental changes. 
+### As a player, I want to know what activities I can do under certain weather conditions. 
 
 ---
 
@@ -51,13 +51,13 @@
 
 | Team Member | MVP Use Case |
 
-|-------------|--------------|
+| Tiffany | Use Case 1 |
 
-| Name | Use Case |
+| Bella | Use Case 2 |
 
-| Name | Use Case |
+| Angela | Use Case 3 |
 
-| Name | Use Case |
+| Kaho | Use Case 4 |
 
 ---
 
