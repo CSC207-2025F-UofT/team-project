@@ -76,9 +76,9 @@
 
 **Documentation:** [Link]
 
-**How it is
-
-used in the program:**
+The program retrieves data of the current weather in Toronto and updates the user interface accordingly.
+If it is sunny in Toronto, all activities will be available to do for the player.
+If it is rainy in Toronto, trading and planting will be temporarily disabled for the player.
 
 ---
 
