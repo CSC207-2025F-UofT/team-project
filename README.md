@@ -23,9 +23,9 @@
   - Message for Your Futures Self: This too shall pass.
     
 - Issac Wan
-  - GitHub:
-  - Email:
-  - Message for Your Futures Self:
+  - GitHub: https://github.com/isaacwan-dev
+  - Email: isaac.wan@mail.utoronto.ca
+  - Message for Your Futures Self: We can do this
     
 - Daniel Park
   - GitHub:
@@ -48,7 +48,7 @@ Productivity & Entertainment
 ### User Story 3: As a user, I want to document my completed side quests through journal entries and photos (either taken with my camera or uploaded from my gallery) so that I can look back on my experiences, relive fun memories, and celebrate my achievements.
 ### User Story 4: <Map>
 ### User Story 5: <Recommendations Quests> As a user, I want to receive a list of recommended side quests so that I can choose side quests I am interested in.
-### User Story 6: <Defaults/Adding Quests>
+### User Story 6: <Defaults/Adding Quests> As a user, I want to be able to log a side quest I completed as an entry in the app for other people to see, as well as browse a collection of default side quests to complete.
 ---
 ## Use Cases
 ### Use Case 1: <Profile>
@@ -65,7 +65,7 @@ Productivity & Entertainment
 | Lucy | Use Case |
 | Joon | Use Case |
 | Serena | Use Case |
-| Issac | Use Case |
+| Issac | Use Case 6: Create Side Quests |
 | Daniel | Use Case |
 
 ---
