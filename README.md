@@ -28,11 +28,19 @@ Social
 
 ### User Story 1
 
+As a lonely employee I want to know which of my coworkers share interests with me
+
 ### User Story 2
+
+As an employee working in a specific department, I want to meet co-workers from other departments
 
 ### User Story 3
 
-(Add additional user stories as needed.)
+As a remote employee, I want to connect with my colleagues digitally to feel more included in my workplace
+
+### User Story 4
+
+As a manager, I want to prevent workers in direct power imbalances from being friends, to avoid conflict of interests.
 
 ---
 
