@@ -62,4 +62,4 @@ Keep this README current with agreed features, ownership, API choices, setup ins
 - **GitHub Repository:** [CSC207 Team Project](https://github.com/Toooooooooony/team-project)
 - **CSC207 Project Expectations:** [University of Toronto — Project Expectations](https://q.utoronto.ca/courses/444184/pages/project-expectations)
 
-Background
+Overview
