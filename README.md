@@ -42,6 +42,14 @@ As a remote employee, I want to connect with my colleagues digitally to feel mor
 
 As a manager, I want to prevent workers in direct power imbalances from being friends, to avoid conflict of interests.
 
+### User Story 5
+
+As an organization, I want to facilitate collaboration between employees in order to increase productivity
+
+### User Story 6
+
+As an organization, I want to prevent external users from accessing our Tinder to keep our platform relevant
+
 ---
 
 ## Use Cases
