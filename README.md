@@ -1,5 +1,7 @@
 # Project Name
 
+Coworker Tinder
+
 ## Team Information
 
 ### Team Members
@@ -16,7 +18,9 @@
 
 ### Domain
 
-[Project description]
+Social
+
+[Project Description]
 
 ---
 
