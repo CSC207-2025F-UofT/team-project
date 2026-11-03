@@ -1,13 +1,4 @@
 # Team Contract
-
-**Your team is free to revise this contract as your team wishes; we have scaffolded it with a recommended structure similar to the provided sample on Quercus.**
-
-After you reflect on past teamwork experiences and brainstorm a list of actions required for a positive teamwork experience, answer these questions. 
-
-Once you have all agreed on the contents of the team contract, make a PR to merge your team contract into the main branch of your team's repo on GitHub.
-
-**Please remember to remove any of the initial instruction text when your team finalizes your team contract; it should resemble the provided sample once complete, but with details specific to the expectations and norms agreed to by your entire team.**
-
 ---
 ## Purpose of this Contract
 
@@ -18,44 +9,51 @@ This contract sets out shared expectations and commitments for how our team will
 
 ### Communication
 
-* Which platform will you use for communication outside of class, when required for work on your course project? (Examples: Text message, Discord, WeChat, etc.)
+* We will communicate through a Discord group chat and Instagram. Communications will primarily be through Instagram, but if needed conversations will be redirected to Discord for code sharing/troubleshooting.
 
-* Each teammate agrees to respond to messages in at most how long? 1 day? 2 days? Some other amount of time? 
+* Each teammate agrees to respond to messages in at most 1 business day (business days being weekdays).
 
-* What things should a teammate notify you about? (Examples: if they think they won't be able to meet a deadline, if they have to miss lecture, etc.)
+* Teammates should notify other teammates if they think they won't be able to meet a deadline, if they have to miss lectures/tutorials (labs), and for clarifications/if they are facing issues with the project.
 
-* Respectful and inclusive behaviour are necessary for smooth and productive communication. What are some respectful and inclusive behaviours you expect when communicating with each other during lectures, labs, or outside of class? (Examples: Actively listening to each team members ideas, giving everyone a chance to meaningfully contribute, etc.)
-
----
-
-### [Other Categories of norms and expectations go here]
-
-* Based on your previous teamwork experiences, what other behaviours do you agree upon as a team?
-    - some examples of possible additional team norms and expectations are included in the sample team contract in case your team needs some help getting ideas for what else you want to include.
+* Make sure every team member has a chance to give their opinions on discussion topics. Everybody should sign off on major decisions before they are made.
 
 ---
 
 ## Decision Making
 
-* How will decisions about your team project be made? (Examples: By majority vote, by unanimous vote, etc.)
+* Decisions will be made through a combination of majority vote and compromise. If a team member disagrees with a decision, we will attempt to find a compromise.
+* Tiebreakers will be done through rock paper scissors for 2 groups, and spinning an unweighted wheel for more groups.
 
 ---
 ## Conflict resolution
 
-* How will your team resolve conflicts? (Example: by listening to each other's side of the issue and attempting to reach a compromise. By consulting a TA or instructor as a team, if a resolution has not yet been reached.)
+* Conflicts will be resolved in the same manner as breaking tiebreakers in the decision making section above.
+* If we cannot come to an agreement within 3 business days, we will involve a TA as soon as possible.
 
 ---
 
 ## Accountability
 
-* Reliability and accountability are also important aspects of teamwork. What are the responsibilities of each team member? (Example: completing their share of the work in a timely manner, seeking assistance from teammates/TAs/instructors when required, etc.)
+* It is each team member's responsibility to complete their work within a day of their assigned deadline. If the work is not done, someone else is allowed to take that deadline from you.
+* If you miss your assigned deadlines 3 times in a row without prior communication, we will bring the issue up to a TA.
+* If you miss a tutorial, you are still responsible for completing your share of the work.
+* DO NOT edit directly in the main branch. Always make a branch for your respective issue, and always make a PR that is approved by at least 2 other members.
+* It is your responsibility to write tests for your work.
+* If you are assigned a PR for review, you must review it within a week. If you are unable to do so, please inform the group chat as soon as possible.
 
 ---
 
 ---
 
 By signing below, we acknowledge that we have read, discussed, and agreed to these terms. We understand that this contract is binding for the duration of the course and may be revised with the agreement of all team members.
+Changes to this document will be made through a new branch + PR that must be reviewed by all other team members as proof of agreement.
 
 Team Member Signatures:
 
-(type names here)
+Margaret Du
+
+Maria Shamshurina
+
+Janica Krznaric
+
+Roy Chen
