@@ -1,20 +1,93 @@
-# Team Project
+# Project Name (WIP)
 
-Please keep this up-to-date with information about your project throughout the term.
+## Team Information
 
-The readme should include information such as:
-- a summary of what your application is all about
-- a list of the user stories, along with who is responsible for each one
-- information about the API(s) that your project uses 
-- screenshots or animations demonstrating current functionality
+### Team Members
 
-By keeping this README up-to-date,
-your team will find it easier to prepare for the final presentation
-at the end of the term.
+- Andrei Berzin
+- Preston Cai
+- Sebastian Cooper-Giannotta
+- Tymofiy Spektor
 
-# User Stories
+---
 
-1. As a user, I want to be able to precisely control the actions of individual and groups of units | Tymofiy
-2. As a user, I want to be able to build and design custom maps | Preston
-3. As a user, I want to be able to pause, save and load a battle | Sebastian
-4. As a user, I want to be able to select different difficulty levels for the opposing team | Andrey
+## Project Description
+
+### Domain
+
+[Project description]
+
+---
+
+## User Stories
+
+### User Story 1
+### User Story 2
+### User Story 3
+### User Story 4
+
+---
+
+## Use Cases
+
+### Use Case 1
+As a user, I want to automatically generate my travel history by uploading photos, while being able to edit it manually.
+
+### Use Case 2
+As a user, I want to visualize my travel history and photos in an interactive map and timeline, as well as see relevant analytics.
+
+### Use Case 3
+As a user, I want to plan future trips and their itineraries, and minimize the distance I travel.
+
+### Use Case 4
+As a user, I want the ability to save my travel history, photos and plans locally and export them as a portable archive.
+
+---
+
+## Minimal Viable Product (MVP)
+| Team Member | MVP Use Case |
+|-------------|--------------|
+| Sebastian | Use Case 1 |
+| Tymofiy | Use Case 2 |
+| Preston | Use Case 3 |
+| Andrei | Use Case 4 |
+
+---
+
+## Entities
+
+### Entity 1
+
+### Entity 2
+
+---
+
+## API Usage
+
+### OpenStreetMap
+- **Documentation:** [Link](https://wiki.openstreetmap.org/wiki/API)
+- **Usage:** Handles reverse-geocoding to resolve location names and information from latitude and longitude metadata in travel photos.
+
+### Google Cloud Vision API
+- **Documentation:** [Link](https://docs.cloud.google.com/vision/docs)
+- **Usage:** Provides visual landmark detection for travel photos that are missing location metadata.
+
+### OpenRouteService
+- **Documentation:** [Link](https://giscience.github.io/openrouteservice/api-reference/)
+- **Usage:** Facilitates road-network routing and path optimization for trip planning.
+
+---
+
+## Design Diagrams
+### UML Class Diagram
+### Sequence Diagrams
+
+---
+
+## How to Run
+[Instructions for running the program.]
+
+---
+
+## Notes
+[Any additional project information.]
