@@ -36,7 +36,7 @@
 Turn everyday life into an adventure with Linked Out, a gamified productivity app that encourages users to explore new interests, step outside their comfort zones, and take on exciting side quests! From earning XP and leveling up to capturing memories and tracking accomplishments, Linked Out makes trying new things feel like a game.
 
 ### Domain
-Productivity & Entertainment
+Side Quest App focused on Productivity & Entertainment
 
 [Project description]
 ---
