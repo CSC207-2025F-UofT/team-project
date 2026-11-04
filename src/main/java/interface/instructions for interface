@@ -1,0 +1,2 @@
+every folder here needs to have controller, presenter, state and model
+ex. SaveOutfitController, SaveOutfitPresenter, SaveOutfitState, SaveOutfitModel
