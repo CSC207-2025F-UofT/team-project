@@ -184,6 +184,46 @@ As a student, I want to be able to have a suggested prioritization of today's ta
 ## Use Cases
 ### Story 1
 
+#### Name
+
+- Create a new academic task.
+
+#### Primary actor
+
+- The user creating an academic task.
+
+#### Preconditions
+
+- The application is open, and the user has access to the task creation interface.
+
+#### Trigger
+
+- The user chooses to create a new academic task.
+
+#### Success outcome
+
+- A new academic task is successfully created, saved locally, and made available in the Monitoring View.
+
+#### Main success scenario
+
+1. The user requests to create a new academic task.
+2. The system displays the task creation form.
+3. The user enters the task title, description, and deadline.
+4. The user optionally enters the estimated number of hours required to complete the task. If unspecified, the system defaults to 10 hours.
+5. The user optionally selects a difficulty level. If unspecified, the system defaults to Average.
+6. The user submits the task information.
+7. The system validates the entered information.
+8. The system assigns the task a unique identifier and initializes its completion progress to 0%.
+9. The system saves the new task locally using JSON or SQLite.
+10. The system confirms that the task has been successfully created.
+
+#### Extensions
+
+- If the task title, description, or deadline is invalid or missing, the system displays an error message and prevents the task from being saved.
+- If the estimated number of hours is not a positive number, or the completion rate percentage is not a positive number between 0 and 100, the system displays an error message and requests a valid value.
+- If the difficulty level is not Easy, Average, or Difficult, the system rejects the invalid value.
+- If the user cancels task creation, the system does not save the task.
+
 ### Story 2
 
 ### Story 3
