@@ -23,7 +23,7 @@ This contract sets out shared expectations and commitments for how our team will
 * (WHEN TO RESPOND) 2 days when we are not near a deadline. ASAP when close to a deadline
 
 * (WHAT TO WRITE IN GC)Teammates should communicate about when they are missing lectures/tutorials, when they are setting up meetings, if unsure about someone's code (that they will be using), if they can't make a deadline, when they need help, or in an instance where they feel they need to communicate with the team immediately. We should also push our code to main after people have review the code. We should also add comments to the code.
-
+git 
 * (RESPECT GUIDELINES) Actively listening to each team members ideas, giving everyone a chance to meaningfully contribute, do work on time, be transparent about your work, be quiet during class, stay on topic, generally respect, having conversations if something arrises.
 
 ---
