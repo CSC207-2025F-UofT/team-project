@@ -61,7 +61,6 @@ public class Account {
         this.balance = balance;
         this.currency = currency;
 
-
         this.createdIPAddress = InetAddress.getLocalHost().getHostAddress();
         this.createdCountry = Locale.getDefault().getDisplayCountry();
         this.createdAt = LocalDateTime.now();
