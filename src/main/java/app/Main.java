@@ -8,6 +8,17 @@ import javax.swing.JFrame;
 
 public class Main {
     public static void main(String[] args) {
-//        JFrame app = new AppBuilder();
+//        AppBuilder appBuilder = new AppBuilder();
+//        JFrame application = appBuilder
+//                .addAddClothingView()
+//                .addGenerateOutfitView()
+//                .addSaveOutfitView()
+//                .addSetStyleView()
+//                .addViewClosetView()
+//                .build();
+//        application.pack();
+//        application.setLocationRelativeTo(null);
+//        application.setVisible(true);
+
     }
 }
