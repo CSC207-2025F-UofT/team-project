@@ -85,6 +85,37 @@ Use Case 1.3
 
 ### for user story handling growing, raising, and processing livestock:
 
+Use Case 2.0
+- Name: Add Livestock to a Pen
+- Primary actor: Player
+- Precondition: Selected livestock pen is empty and Player has 20 coins
+- Trigger: The player clicks an empty pen.
+- Main success scenario:
+  1. Player clicks an empty livestock pen.
+  2. System shows available animal choices
+  3. Player chooses an animal
+  4. System shows the pen occupied with a baby animal
+- Extensions:
+  - The Player does not have >= 20 coins, so the system tells the player and the pen remains empty.
+  - Player cancels, so the pen remains empty
+- Success outcome: The pen contains a baby animal, and the Player has 20 coins fewer.
+
+Use Case 2.1
+- Name: Grow Livestock Up
+- Primary actor: Player
+- Precondition: The pen contains a baby animal, and the player has food item in backpack.
+- Trigger: The player clicks a baby animal in a pen
+- Main success scenario:
+  1. Player clicks an occupied pen with baby animal in it
+  2. System offers the option to feed the animal.
+  3. Player chooses to feed the animal.
+  4. System removes one unit of feed from the backpack.
+  5. the animal in the pen is now an adult version
+- Extensions:
+  - No feed is available, so the system tells the player and the animal remains a baby.
+  - Player cancels, so the animal remains a baby.
+- Success outcome: The animal is now an adult
+
 ### for user story handling trading resources with NPCs:
 
 Use Case 3.1
