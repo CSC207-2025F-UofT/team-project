@@ -22,25 +22,64 @@
 ## User Stories
 
 ### User Story 1
+As a user, I want to generate my travel history by uploading photos so that I can automatically record location history without manual entry.
+
 ### User Story 2
+As a user, I want to visualize my travels on an interactive map so that I can explore my past and planned trips geographically.
+
 ### User Story 3
+As a user, I want to sort, categorize, and view analytics regarding my travel history in order to understand my patterns and preferences.
+
 ### User Story 4
+As a user, I want to plan and optimize future trip itineraries in order to reduce overall cost and travel time.
 
 ---
 
 ## Use Cases
 
 ### Use Case 1
-As a user, I want to automatically generate my travel history by uploading photos, while being able to edit it manually.
+- **Name:** Import Photo Collection
+- **Primary actor:** User uploading their photos
+- **Preconditions:** A data directory has been configured by the user.
+- **Trigger:** The user clicks the upload button and selects the photos they want to upload.
+- **Success outcome:** The photos are imported and a success message is displayed.
+- **Main success scenario:**
+  1. The user selects the photos they want to upload.
+  2. The system begins ingesting the photos and reading their metadata.
+  3. The system displays upload progress and statistics, including a counter for photos with invalid metadata.
+  4. The system displays a success message after all the photos are imported.
+
+- **Extensions:**
+  - **1.** The user-selected photo path is invalid.
+    1. The system explains that the selected path was invalid.
+    2. The use case ends.
 
 ### Use Case 2
-As a user, I want to visualize my travel history and photos in an interactive map and timeline, as well as see relevant analytics.
+- **Name:** Explore Travel Map
+- **Primary actor:** User viewing the map
+- **Preconditions:** The user has selected a data directory.
+- **Trigger:** The user clicks on the map tab.
+- **Success outcome:**
+- **Main success scenario:**
+- **Extensions:**
 
 ### Use Case 3
-As a user, I want to plan future trips and their itineraries, and minimize the distance I travel.
+- **Name:** Analyze Travel History
+- **Primary actor:** User viewing the analytics
+- **Preconditions:** The user has selected a data directory with at least one recorded location.
+- **Trigger:** The user clicks on the analytics tab.
+- **Success outcome:**
+- **Main success scenario:**
+- **Extensions:**
 
 ### Use Case 4
-As a user, I want the ability to save my travel history, photos and plans locally and export them as a portable archive.
+- **Name:** Plan Future Trips
+- **Primary actor:** User planning a new trip
+- **Preconditions:** A data directory has been configured by the user.
+- **Trigger:** The user asks the system to create a new trip itinerary.
+- **Success outcome:**
+- **Main success scenario:**
+- **Extensions:**
 
 ---
 
@@ -71,10 +110,6 @@ As a user, I want the ability to save my travel history, photos and plans locall
 ### Google Cloud Vision API
 - **Documentation:** [Link](https://docs.cloud.google.com/vision/docs)
 - **Usage:** Provides visual landmark detection for travel photos that are missing location metadata.
-
-### OpenRouteService
-- **Documentation:** [Link](https://giscience.github.io/openrouteservice/api-reference/)
-- **Usage:** Facilitates road-network routing and path optimization for trip planning.
 
 ---
 
