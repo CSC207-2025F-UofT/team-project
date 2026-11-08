@@ -1,0 +1,76 @@
+@startuml
+skinparam dpi 150
+
+package "Entities" {
+  class Location {
+    - latitude : double
+    - longitude : double
+    - landmark : String
+    - city : String
+    - county: String
+    - state: String
+    - country : String
+
+    + getDistanceFrom(other : Location) : double
+    + getDisplayString() : String
+  }
+
+  class Photo implements "Comparable<Photo>" {
+    - id : String
+    - location : Location
+    - time : LocalDateTime
+
+    + compareTo(other : Photo) : int
+  }
+
+  class TripArchive {
+    - id : String
+    - name : String
+    - startTime : LocalDateTime
+    - endTime : LocalDateTime
+    - isLocked : boolean
+    - photoIds : List<String>
+  }
+
+  class Waypoint {
+    - name : String
+    - notes : String
+    - location : Location
+    - stayDuration : Duration
+  }
+
+  enum TravelMethod {
+    WALK
+    BIKE
+    DRIVE
+    TRAIN
+    FLIGHT
+  }
+
+  class Path {
+    - startPoint : Waypoint
+    - endPoint : Waypoint
+    - travelMethod : TravelMethod
+    - travelDuration : Duration
+  }
+
+  class TripPlan {
+    - id : String
+    - name : String
+    - waypoints : List<Waypoint>
+    - paths : List<Path>
+    - startTime : LocalDateTime
+
+    + getTotalDistance() : double
+    + getTotalDuration() : Duration
+  }
+
+  Photo o--> Location
+  Waypoint o--> Location
+  Path o--> Waypoint
+  Path o--> TravelMethod
+  TripPlan o--> Waypoint
+  TripPlan o--> Path
+}
+
+@enduml
