@@ -33,30 +33,33 @@
   - Message for Your Futures Self:
 ---
 ## Project Description
-Turn everyday life into an adventure with Linked Out, a gamified productivity app that encourages users to explore new interests, step outside their comfort zones, and take on exciting side quests! From earning XP and leveling up to capturing memories and tracking accomplishments, Linked Out makes trying new things feel like a game.
-
 ### Domain
 Productivity & Entertainment
 
-[Project description]
+Turn everyday life into an adventure with Linked Out, a gamified productivity app that encourages users to explore new interests, step outside their comfort zones, and take on exciting side quests! From earning XP and leveling up to capturing memories and tracking accomplishments, Linked Out makes trying new things feel like a game.
+
 ---
 
 ## User Stories
-### We will remove this later but here is a template for how you can write your user stories: As a [kind of user] I want to [accomplish a goal] so that [I receive some benefit] -Pauline
-### User Story 1: As a user, I want to set up my personal info (username, profile picture) and check out my current level so that I can visually personalize my account page.
-### User Story 2: <Progress>
-### User Story 3: As a user, I want to document my completed side quests through journal entries and photos (either taken with my camera or uploaded from my gallery) so that I can look back on my experiences, relive fun memories, and celebrate my achievements.
-### User Story 4: <Map>
-### User Story 5: <Recommendations Quests> As a user, I want to receive a list of recommended side quests so that I can choose side quests I am interested in.
-### User Story 6: <Defaults/Adding Quests> As a user, I want to be able to log a side quest I completed as an entry in the app for other people to see, as well as browse a collection of default side quests to complete.
+
+We will remove this later but here is a template for how you can write your user stories: As a [kind of user] I want to [accomplish a goal] so that [I receive some benefit] -Pauline
+
+* **User Story 1**: As a user, I want to set up my personal info (username, profile picture) and check out my current level so that I can visually personalize my account page.
+* **User Story 2**: <Progress>
+* **User Story 3**: As a user, I want to document my completed side quests through journal entries and photos (either taken with my camera or uploaded from my gallery) so that I can look back on my experiences, relive fun memories, and celebrate my achievements.
+* **User Story 4**: As a user, I want to be able to see nearby side quests.
+* **User Story 5**: As a user, I want to receive a list of recommended side quests so that I can choose side quests I am interested in.
+* **User Story 6**: As a user, I want to be able to log a side quest I completed as an entry in the app for other people to see, as well as browse a collection of default side quests to complete.
+
 ---
 ## Use Cases
-### Use Case 1: <Profile>
-### Use Case 2: <Progress>
-### Use Case 3: <Journal>
-### Use Case 4: <Map>
-### Use Case 5: <Recommendations Quests>
-### Use Case 6: <Defaults/Adding Quests>
+* **Use Case 1**: <Profile>
+* **Use Case 2**: <Progress>
+* **Use Case 3**: <Journal>
+* **Use Case 4**: Open Map tab, select side quest pins that open up that particular quests page.
+* **Use Case 5**: <Recommendations Quests>
+* **Use Case 6**: <Defaults/Adding Quests>
+
 ---
 ## Minimal Viable Product (MVP)
 | Team Member | MVP Use Case |
@@ -64,7 +67,7 @@ Productivity & Entertainment
 | Pauline | Use Case |
 | Lucy | Use Case |
 | Joon | Use Case |
-| Serena | Use Case |
+| Serena | Use case 4: Open Map tab, select side quest pins that open up that particular quests page. |
 | Issac | Use Case 6: Create Side Quests |
 | Daniel | Use Case |
 
@@ -72,7 +75,8 @@ Productivity & Entertainment
 ## Entities
 ### Entity 1: <Quest Entity>
 ### Entity 2: <Profile/Person Entity>
-### Entity 3
+### Entity 3: 
+
 ---
 ## API Usage
 **API Name:**
