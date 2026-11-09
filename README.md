@@ -29,7 +29,7 @@
 ### User Story 4
 
 ### User Story 5
- 
+ As a chess player, I want to see statistics about my games, such as time control, most used openings and win rates per color, so I can find patterns in my strengths and weaknesses and find areas of improvement. 
 ---
 
 ## Use Cases
