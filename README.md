@@ -55,13 +55,47 @@ as a researcher, I would like to be able to access data from individuals to do a
 
 ---
 ## Use Cases
-### Use Case 1
+### Use Case 1: Signup
+1. the user inputs the username they want.
+2. the user is given a prompt "I am a researcher". When ticked, the new account gets the role "researcher"
+3. if the username doesn't exist, create an account with that username and assign a role to that account (user or researcher)
+4. the system says "Hello new {Role}"
 
-### Use Case 2
+### Use Case 2: Login
+1. the user enters a username
+2. if the username already exists, the user gets logged in to the account witht at username
+3. the system says "Hello {username}"
 
-### Use Case 3
+### Use Case 3: SaveData
+1. user completes a test
+2. the date, mood, productivity, test type,  test score gets saved in the database
+3. if the input in incomplete, the system alerts the user
+4. if saving is successful, the system outputs "Saving complete!"
 
-(Add additional use cases as needed.)
+### Use Case 4: GetData
+1. the user chooses the dates they want to see their data
+2. if there is no data on one (or more) dates the user selected, the sytem alerts the user
+3. if all dates are valid, the data for those dates are shown.
+### Use Case 5
+
+### Use Case 6: UserAddsProductivity
+1. User clicks on the "Add Mood" button on app
+2. User is presented with a screen saying "What day do you wish to log your mood for -- please enter date as day/month/year (e.g. 02/01/2000 for January 2nd, 2000)"
+3. User enters the date
+4. If there is an error in the format of the date, they wll be asked to try again
+5. Once they have successfully entered a valid date, the user will be presented with a question: "on a scale of 0 - 10, how productive did you feel on [date] where 10 is extremely productive, and 0 is not productive at all."
+6. If the number they give falls outside the range or is not a valid number, catch that and ask again.
+7. User is presented with a screen that says "you have successfully logged a [rating] productivity rating for [date]"
+### Use Case 7: UserAddsMood
+1. User clicks on the "Add Mood" button on app
+2. User is presented with a screen saying "What day do you wish to log your mood for -- please enter date as day/month/year (e.g. 02/01/2000 for January 2nd, 2000)"
+3. User enters the date
+4. If there is an error in the format of the date, they wll be asked to try again
+5. Once they have successfully entered a valid date, the user will be presented with a question: "please select the mood that best describes how you felt on [date] from this list: {happy, sad, angry, anxious, calm, tired, excited}"
+5. If they enter a word that is not one of those then they will be asked to try again
+6. Otherwise, they are presented with the screen "you have successfully logged the mood [their mood] for [date]"
+7. They are returned to the home screen
+   (Add additional use cases as needed.)
 ---
 ## Minimal Viable Product (MVP)
 | Team Member | MVP Use Case |
