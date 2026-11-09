@@ -43,7 +43,7 @@ Side Quest App focused on Productivity & Entertainment
 
 ## User Stories
 ### We will remove this later but here is a template for how you can write your user stories: As a [kind of user] I want to [accomplish a goal] so that [I receive some benefit] -Pauline
-### User Story 1: As a user, I want to set up my personal info (username, profile picture) and check out my current level so that I can visually personalize my account page.
+### User Story 1: As a user, I want to login and set up my personal info (username, profile picture) and check out my current level so that I can visually personalize my account page.
 ### User Story 2: <Progress>
 ### User Story 3: As a user, I want to document my completed side quests through journal entries and photos (either taken with my camera or uploaded from my gallery) so that I can look back on my experiences, relive fun memories, and celebrate my achievements.
 ### User Story 4: <Map>
@@ -51,7 +51,7 @@ Side Quest App focused on Productivity & Entertainment
 ### User Story 6: <Defaults/Adding Quests> As a user, I want to be able to log a side quest I completed as an entry in the app for other people to see, as well as browse a collection of default side quests to complete.
 ---
 ## Use Cases
-### Use Case 1: <Profile>
+### Use Case 1: LogIn, SetUsername, SetProfilePicture, CheckLevel
 ### Use Case 2: <Progress>
 ### Use Case 3: <Journal>
 ### Use Case 4: <Map>
@@ -62,7 +62,7 @@ Side Quest App focused on Productivity & Entertainment
 | Team Member | MVP Use Case |
 |-------------|--------------|
 | Pauline | Use Case |
-| Lucy | Use Case |
+| Lucy | Use Case 1: LogIn, SetUsername |
 | Joon | Use Case |
 | Serena | Use Case |
 | Issac | Use Case 6: Create Side Quests |
@@ -71,7 +71,7 @@ Side Quest App focused on Productivity & Entertainment
 ---
 ## Entities
 ### Entity 1: <Quest Entity>
-### Entity 2: <Profile/Person Entity>
+### Entity 2: <Profile/Person Entity> User
 ### Entity 3
 ---
 ## API Usage
