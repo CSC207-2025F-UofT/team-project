@@ -5,21 +5,22 @@ of 2
 # Project Name
 ## Team Information
 ### Team Members
-- Name
-- Name
-- Name
-- Name
-- Name
-- Name
+- Andrew Zhang
+- Saiesh Rampersad
+- Yuehan Gao
+- Andrei Akopian
+- Jean Huang
 ---
 ## Project Description
-### Domain
+### Game
 [Project description]
 ---
 ## User Stories
-### User Story 1
-### User Story 2
-### User Story 3
+### User Story 1: As a player I want to be able to sign up and create an account and log in to my account to save my setting and history
+### User Story 2: As a player I want to see my match history to see how well I am playing, and review the games move by move
+### User Story 3: As a player I want to be able to play against my friend sitting next to me to spend time with them
+### User Story 4: As a player I want to be able to play against a computer to have fun and get better at the game
+### User Story 5: As a beginner player, I want to interact with a tutorial, so I can learn how to play the game
 (Add additional user stories as needed.)
 ---
 ## Use Cases
