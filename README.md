@@ -16,7 +16,7 @@ at the end of the term.
 ## Team Information
 ### Team Members
 - Yuxiang Yuan
-- Xinjia Shen 
+- Xinjia Shen
 - Zhenbin An
 - Lanxin Fu
 
