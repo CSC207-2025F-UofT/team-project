@@ -44,7 +44,7 @@ Side Quest App focused on Productivity & Entertainment
 ## User Stories
 ### We will remove this later but here is a template for how you can write your user stories: As a [kind of user] I want to [accomplish a goal] so that [I receive some benefit] -Pauline
 ### User Story 1: As a user, I want to login and set up my personal info (username, profile picture) and check out my current level so that I can visually personalize my account page.
-### User Story 2: <Progress>
+### User Story 2: As a user, I want to accept side quests and track them on a dashboard, marking each one completed or abandoned and earning XP when I finish, so that I can see my progress and feel accomplished as my history grows.
 ### User Story 3: As a user, I want to document my completed side quests through journal entries and photos (either taken with my camera or uploaded from my gallery) so that I can look back on my experiences, relive fun memories, and celebrate my achievements.
 ### User Story 4: <Map>
 ### User Story 5: <Recommendations Quests> As a user, I want to receive a list of recommended side quests so that I can choose side quests I am interested in.
@@ -53,6 +53,57 @@ Side Quest App focused on Productivity & Entertainment
 ## Use Cases
 ### Use Case 1: LogIn, SetUsername, SetProfilePicture, CheckLevel
 ### Use Case 2: <Progress>
+Lead: Daniel
+Use Case 2.1: Accept Quest (Lead: Daniel) [MVP]
+
+Main flow:
+User clicks "Do this quest" on a quest (from the quest catalogue, recommendations, or a map pin).
+System asks "Would you like to do this side quest?" and the user confirms.
+System records the quest as PENDING for this user, with the current time as the start time.
+System shows "Quest accepted!" and the quest appears under Pending on the dashboard.
+
+Alternative flows:
+The quest is already pending for this user: system shows "You're already doing this quest."
+The user has already completed this quest: system shows "You've already completed this quest."
+The quest doesn't exist: system shows an error.
+The user cancels at step 2: nothing happens.
+
+Complete Quest
+
+Main flow:
+User clicks "Complete" on a pending quest in the dashboard.
+System checks that at least 10 minutes have passed since the quest was accepted and that the user has completed fewer than 5 quests today.
+System marks the quest COMPLETED and adds its XP to the user.
+System shows "+50 XP!" (and "Level up!" if the user's level went up).
+System asks "Would you like to journal this?", which opens the journal entry (Use Case 3.x).
+
+Alternative flows:
+Less than 10 minutes since accepting: system shows "Too soon! Wait N more minutes before completing."
+5 quests already completed today: system shows "You've hit today's limit of 5 quests. Come back tomorrow!"
+The quest is not pending (already completed or abandoned): system shows an error.
+The quest has been deleted: system shows "This quest no longer exists."
+
+In every alternative flow, nothing is saved and no XP is given.
+
+Abandon Quest
+
+Main flow:
+User clicks "Abandon" on a pending quest.
+System asks "Are you sure? You won't get XP for this quest." and the user confirms.
+System marks the quest ABANDONED and moves it to the Abandoned list.
+
+Alternative flows:
+The quest is not pending: system shows an error.
+The user cancels at step 2: nothing happens.
+Use Case 2.4: View Dashboard (Lead: Daniel) [MVP]
+
+Main flow:
+User opens the Dashboard tab (it also refreshes after any of Use Cases 2.1 to 2.3).
+System shows the user's quests in three lists, Pending, Completed, and Abandoned, newest first. Each row shows the title, theme, XP, and date.
+System shows a summary: number of quests completed and total XP earned from quests.
+
+Alternative flows:
+The user has no quests: system shows "No quests yet!" with a button to the recommendations.
 ### Use Case 3: Create a Journal Entry
 Lead: Pauline Nguyen <br>
 Primary actor: App user <br>
