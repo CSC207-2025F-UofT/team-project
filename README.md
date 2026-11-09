@@ -53,8 +53,8 @@ We will remove this later but here is a template for how you can write your user
 
 ---
 ## Use Cases
-* **Use Case 1**: LogIn, SetUsername, SetProfilePicture, CheckLevel
-* **Use Case 2**: <Progress>
+### Use Case 1: LogIn, SetUsername, SetProfilePicture, CheckLevel
+### Use Case 2: Progress
 Lead: Daniel
 2.1 Accept Quest
 
@@ -107,7 +107,8 @@ System shows a summary: number of quests completed and total XP earned from ques
 
 Alternative flows:
 The user has no quests: system shows "No quests yet!" with a button to the recommendations.
-* **Use Case 3**: Create a Journal Entry
+
+### Use Case 3: Create a Journal Entry
 Lead: Pauline Nguyen <br>
 Primary actor: App user <br>
 Goal: Save a journal entry containing a written reflection and optional photos, associated with a selected quest.
@@ -137,9 +138,10 @@ Failure postcondition:No new journal entry is saved. <br>
 Features that can be added later: <br>
 1. Editing and deleting existing entries.
 2. Searching or filtering entries.
-* **Use Case 4**: Open Map tab, select side quest pins that open up that particular quests page.
-* **Use Case 5**: <Recommendations Quests>
-* **Use Case 6**: <Defaults/Adding Quests>
+
+### Use Case 4: Open Map tab, select side quest pins that open up that particular quests page.
+### Use Case 5: <Recommendations Quests>
+### Use Case 6: <Defaults/Adding Quests>
 
 ---
 ## Minimal Viable Product (MVP)
@@ -151,7 +153,7 @@ Features that can be added later: <br>
 | Joon | Use Case |
 | Serena | Use case 4: Open Map tab, select side quest pins that open up that particular quests page. |
 | Issac | Use Case 6: Create Side Quests |
-| Daniel | 
+| Daniel |
 2.1 Accept Quest	Daniel	MVP
 2.2 Complete Quest	Daniel	MVP
 2.3 Abandon Quest	Daniel	MVP
