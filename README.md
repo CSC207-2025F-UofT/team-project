@@ -13,15 +13,12 @@ your team will find it easier to prepare for the final presentation
 at the end of the term.
 
 # Project Name
+- SpellBook
 
 ## Team Information
+- 
 
 ### Team Members
-
-- Name
-
-- Name
-
 - Name
 
 - Name
@@ -33,11 +30,11 @@ at the end of the term.
 ---
 
 ## Project Description
+A wave based game where the user can draw patterns to cast spells onto waves of enemies. Throughout the game, the user can get upgrades and get more spells through chests, to fight more difficult enemies until all the waves are defeated, or the user loses all their life. 
 
 ### Domain
 
-[Project description]
-
+Game, RPG, Single Player, Offline, Rougelike
 ---
 
 ## User Stories
