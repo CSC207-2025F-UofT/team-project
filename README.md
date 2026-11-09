@@ -204,7 +204,7 @@ Use case 4.2
 
 | Team Member | MVP Use Case |
 
-| Tiffany | Use Case 1 |
+| Tiffany | 1.1 Plant a Crop, 1.2 Tend a Crop, 1.3 Harvest a Crop |
 
 | Bella | Use Case 2 |
 
@@ -216,8 +216,23 @@ Use case 4.2
 
 ## Entities
 
-### Entity 1
-### Entity 2
+### Plot
+- Instance variables:
+  - state: EMPTY, PLANTED, or TENDED
+  - crop: the Crop planted here (none when EMPTY)
+- Methods:
+  - isEmpty(): boolean
+  - plant(crop): sets crop and state to PLANTED
+  - tend(): sets state to TENDED (only allowed when PLANTED)
+  - harvest(): returns the crop and resets the plot to EMPTY (only allowed when TENDED)
+  
+### Crop
+- Instance variables:
+  - name: String
+- Methods:
+  - getName(): String
+
+### Entities
 
 (Add additional entities as needed.)
 
