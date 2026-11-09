@@ -54,7 +54,7 @@ Side Quest App focused on Productivity & Entertainment
 ### Use Case 1: LogIn, SetUsername, SetProfilePicture, CheckLevel
 ### Use Case 2: <Progress>
 Lead: Daniel
-Use Case 2.1: Accept Quest (Lead: Daniel) [MVP]
+2.1 Accept Quest
 
 Main flow:
 User clicks "Do this quest" on a quest (from the quest catalogue, recommendations, or a map pin).
@@ -68,7 +68,7 @@ The user has already completed this quest: system shows "You've already complete
 The quest doesn't exist: system shows an error.
 The user cancels at step 2: nothing happens.
 
-Complete Quest
+2.2 Complete Quest
 
 Main flow:
 User clicks "Complete" on a pending quest in the dashboard.
@@ -85,7 +85,7 @@ The quest has been deleted: system shows "This quest no longer exists."
 
 In every alternative flow, nothing is saved and no XP is given.
 
-Abandon Quest
+2.3 Abandon Quest
 
 Main flow:
 User clicks "Abandon" on a pending quest.
@@ -95,7 +95,8 @@ System marks the quest ABANDONED and moves it to the Abandoned list.
 Alternative flows:
 The quest is not pending: system shows an error.
 The user cancels at step 2: nothing happens.
-Use Case 2.4: View Dashboard (Lead: Daniel) [MVP]
+
+2.4 View Dashboard 
 
 Main flow:
 User opens the Dashboard tab (it also refreshes after any of Use Cases 2.1 to 2.3).
