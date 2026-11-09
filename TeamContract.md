@@ -43,7 +43,8 @@ This contract sets out shared expectations and commitments for how our team will
 ## Conflict resolution
 
 * How will your team resolve conflicts? (Example: by listening to each other's side of the issue and attempting to reach a compromise. By consulting a TA or instructor as a team, if a resolution has not yet been reached.)
-
+Our team will resolve conflicts together and try and find a solution that works for everyone. If we are unable to find a solution, we will have to find a compromise that works for everyone, and that everyone is ok with. 
+If we still are unable to find a resolution, we can go and consult a TA/professor. 
 ---
 
 ## Accountability
