@@ -149,11 +149,23 @@ Features that can be added later: <br>
 | Joon | Use Case |
 | Serena | Use Case |
 | Issac | Use Case 6: Create Side Quests |
-| Daniel | Use Case |
+| Daniel | 2.1 Accept Quest	Daniel	MVP
+2.2 Complete Quest	Daniel	MVP
+2.3 Abandon Quest	Daniel	MVP
+2.4 View Dashboard	Daniel	MVP
+2.5 Star / Unstar Theme	Daniel	Later |
 
 ---
 ## Entities
 ### Entity 1: <Quest Entity>
+UserQuest (Daniel): one user's progress on one quest.
+Instance variables: username: String, questId: String, status: QuestStatus, startedAt: LocalDateTime, completedAt: LocalDateTime (null unless completed), abandonedAt: LocalDateTime (null unless abandoned)
+Constant: MIN_MINUTES_BEFORE_COMPLETE = 10
+Methods: getters, isPending(), meetsMinimumTime(now), minutesUntilCompletable(now), complete(now), abandon(now). complete and abandon throw IllegalStateException if the quest isn't pending.
+
+QuestStatus (Daniel): enum PENDING, COMPLETED, ABANDONED. Status only moves PENDING → COMPLETED or PENDING → ABANDONED.
+
+Full design for this part (classes per layer, data flow, teammate touchpoints): docs/DASHBOARD.md
 ### Entity 2: <Profile/Person Entity> User
 ### Entity 3
 ---
