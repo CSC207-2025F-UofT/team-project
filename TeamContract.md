@@ -10,14 +10,15 @@ This contract sets out shared expectations and commitments for how our team will
 
 ### Communication
 
-* Which platform will you use for communication outside of class, when required for work on your course project? (Examples: Text message, Discord, WeChat, etc.)
-
-* Each teammate agrees to respond to messages in at most how long? 1 day? 2 days? Some other amount of time? 
-
-* What things should a teammate notify you about? (Examples: if they think they won't be able to meet a deadline, if they have to miss lecture, etc.)
-
-* Respectful and inclusive behaviour are necessary for smooth and productive communication. What are some respectful and inclusive behaviours you expect when communicating with each other during lectures, labs, or outside of class? (Examples: Actively listening to each team members ideas, giving everyone a chance to meaningfully contribute, etc.)
-
+- We will use Discord outside of class to communicate.
+- We will agree to respond to messages within 1 day.
+- We will agree to notify each other about circumstances that may affect our abilities individually and as a team to progress on the project, such as:
+  - Being unable to attend tutorial.
+  - Difficulties completing individually-assigned tasks.
+  - In the case where one task depends on another being finished first, letting the leader of the first task know.
+- We will adopt the following respectful and inclusive behaviors when communicating with each other:
+  - Listening to each other's ideas and offering feedback and discussion if needed, instead of directly dismissing them.
+  - All communication will remain respectful, professional, and constructive.
 
 ---
 ## Attendance and Participation
@@ -37,7 +38,8 @@ This contract sets out shared expectations and commitments for how our team will
 ## Conflict resolution
 
 * How will your team resolve conflicts? (Example: by listening to each other's side of the issue and attempting to reach a compromise. By consulting a TA or instructor as a team, if a resolution has not yet been reached.)
-
+Our team will resolve conflicts together and try and find a solution that works for everyone. If we are unable to find a solution, we will have to find a compromise that works for everyone, and that everyone is ok with. 
+If we still are unable to find a resolution, we can go and consult a TA/professor. 
 ---
 
 ## Accountability
