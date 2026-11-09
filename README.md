@@ -149,7 +149,8 @@ Features that can be added later: <br>
 | Joon | Use Case |
 | Serena | Use Case |
 | Issac | Use Case 6: Create Side Quests |
-| Daniel | 2.1 Accept Quest	Daniel	MVP
+| Daniel | 
+2.1 Accept Quest	Daniel	MVP
 2.2 Complete Quest	Daniel	MVP
 2.3 Abandon Quest	Daniel	MVP
 2.4 View Dashboard	Daniel	MVP
