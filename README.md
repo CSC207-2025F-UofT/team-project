@@ -28,9 +28,9 @@
   - Message for Your Futures Self: We can do this
     
 - Daniel Park
-  - GitHub:
-  - Email:
-  - Message for Your Futures Self:
+  - GitHub: https://github.com/dannysauce25
+  - Email: daniell.park@mail.utoronto.ca
+  - Message for Your Futures Self: we got dis shi
 ---
 ## Project Description
 Turn everyday life into an adventure with Linked Out, a gamified productivity app that encourages users to explore new interests, step outside their comfort zones, and take on exciting side quests! From earning XP and leveling up to capturing memories and tracking accomplishments, Linked Out makes trying new things feel like a game.
