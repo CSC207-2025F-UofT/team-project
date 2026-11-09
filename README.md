@@ -38,7 +38,9 @@
 
 ### Use Case 3
 
-(Add additional use cases as needed.)
+### Use Case 4
+
+### Use Case 5
  
 ---
 
@@ -46,9 +48,11 @@
 
 | Team Member | MVP Use Case |
 |-------------|--------------|
-| Name        | Use Case     |
-| Name        | Use Case     |
-| Name        | Use Case     |
+| Enoch Wang  | Use Case     |
+| Caleb Chang | Use Case     |
+| Ryan Chan   | Use Case     |
+| Levi He     | Use Case     |
+| Samuele Bonardi | Use Case     |
  
 ---
 
