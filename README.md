@@ -66,10 +66,14 @@ As a user, I want to edit past trips by splitting existing trips into several on
 ### Use Case 3
 - **Name:** Analyze Travel History
 - **Primary actor:** User viewing the analytics
-- **Preconditions:** The user has selected a data directory with at least one recorded location.
+- **Preconditions:**: A travel project (archive) has been opened.
 - **Trigger:** The user clicks on the analytics tab.
-- **Success outcome:**
+- **Success outcome: A tab opens up with options to analyze trips.
 - **Main success scenario:**
+  1. User select a trip from a dropdown menu, and it creates visualizations such as
+  time elapsed, date ranges, all locations, famous landmarks, favourite photos
+  2. User can choose analytics by country, year, etc. and see more summative
+  information such as number of cities visited, number of trips, selected photos, etc.
 - **Extensions:**
 
 ### Use Case 4
@@ -100,10 +104,16 @@ As a user, I want to edit past trips by splitting existing trips into several on
 
 ## Entities
 
-### Entity 1
+### Trip
+Represents a past trip, with metadata such as places (cities) in chronological order, 
+datetime, landmarks, photo ids, blog_paths, etc.
 
-### Entity 2
+### Location
+Represents a specific location, including longitude/latitude, location name (such
+as Bahen center), city, state/province, country, etc.
 
+### Photo
+Represents a photo and its associated data such as datetime captured and location.
 ---
 
 ## API Usage
