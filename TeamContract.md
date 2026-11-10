@@ -75,5 +75,3 @@ By signing below, we acknowledge that we have read, discussed, and agreed to the
 --- With exception of: If you don't know how to do something, all teammates have looked and given attempts and all failed, AI may be used but specifically outlined that it was used.
 
 Team Member Signatures: Charlie Neale, Caleb Gawthroupe, Kevin Liu, Jacob Chislett, Eric Wu
-
-(type names here)
