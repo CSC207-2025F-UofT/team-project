@@ -31,6 +31,8 @@ As a bioinformatics student, I want to keep track of papers I had read and sort 
 As a student reading papers, I want to save link and/or pdf in a structured manner so I can see them later.
 ### User Story 4
 As a student researcher, I want to visualize papers sharing a particular idea like a specific gene.
+### User Story 5
+As a lab member, I want to be able to leave comments on research papers so that other lab members cab read and discuss on each others' thoughts.
 (Add additional user stories as needed.)
 
 ---
