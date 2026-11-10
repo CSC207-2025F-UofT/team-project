@@ -3,30 +3,28 @@
 ## Team Information
 
 ### Team Members
-- Name
-- Name
-- Name
-- Name
-- Name
-- Name
+- Sheng-Chieh Huang
+- Shaorui Wu
+- Shuhan Yuan
+- Alexander Michael Abesteh
 
 ---
 
 ## Project Description
 
-### Domain
+### Domain: Data Analyses Visualizer
 
-[Project description]
+A Data Analyses Visualizer that takes in .json or .csv files as input data, do some magic, and visualize it using the appropriate plots/graphs.
 
 ---
 
 ## User Stories
 
-### User Story 1
+### As a user, I want to import data in .json or .csv files by dragging-and-dropping on to some workspace to begin analysing the data.
 
-### User Story 2
+### As a user, I want to have different shapes and colour that represents certain categories to better understand my data.
 
-### User Story 3
+### User Story 3, I want to save my cleaned dataset and charts so I can revisit or share my analysis later
 
 (Add additional user stories as needed.)
 
