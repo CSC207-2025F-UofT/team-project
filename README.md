@@ -8,40 +8,51 @@
 ---
 ## Project Description
 ### Domain: Education
-A flashcard app that allows creating flashcards decks, with questions and answers. These flashcards can be used 
-in a study/quiz mode to look at the questions and double check answers. The flashcard decks can be saved for future
-use and edited as needed. Flashcard decks can be searched for to find which ones are needed.
+A flashcard application that allows users to create, manage and organize flashcard decks, with questions and answers. 
+These flashcards can be used in a study/quiz mode to look at the questions and double check answers. The flashcard decks
+can be imported and exported through CSV files to support sharing and external editing. Flashcard decks can be searched 
+for to find which ones are needed.
+
 ---
 ## User Stories
 ### User Story 1
-As a user, I want to create, edit, delete flashcard decks and flashcards and so that I can keep my flashcards organized by class, course, or however I may need to group them
+As a user, I want to create, edit, delete, and save flashcard decks and flashcards so that I can keep my flashcards organized by class, course, or personal preference.
 ### User Story 2
-As a user, I want to view (study/quiz mode) flashcard decks and flashcards so that I study and look at the flashcards that I’ve created
+As a user, I want to view and study flashcard decks in study or quiz mode so that I can review and test my knowledge.
 ### User Story 3
-As a user, I want to search different decks and flashcards so that I can find specific decks and flashcards easier
+As a user, I want to search different decks and flashcards so that I can find specific study materials.
 ### User Story 4
-As a user, I want to import and export flashcards from .csv files so that I can send flashcards to other people or mass-create cards in other editorsUser Story 4
+As a user, I want to import and export flashcards using CSV files so that I can send flashcards to other people or create cards using external spreadsheet editors
+
 (Add additional user stories as needed.)
 ---
 ## Use Cases
 ### Use Case 1
-Create a flash card
+Create Deck
 ### Use Case 2
-Edit a flash card
+Edit Deck
 ### Use Case 3
-Delete a flash card
+Delete Deck
 ### Use Case 4
-Open a deck of flashcards
+Save Deck
 ### Use Case 5
-Flip the flashcard
+Create Flashcard
 ### Use Case 6
-Switch flashcards
+Edit Flashcard
 ### Use Case 7
-Search for a deck
+Delete Flashcard
 ### Use Case 8
-Save/export a deck
+View Deck and Flashcards
 ### Use Case 9
-Load/import a deck
+Study Flashcards
+### Use Case 10
+Quiz Flashcards
+### Use Case 11
+Search Decks
+### Use Case 12
+Import Flashcards from CSV
+### Use Case 13
+Export Flashcards to CSV
 
 (Add additional use cases as needed.)
 ---
@@ -54,11 +65,10 @@ Load/import a deck
 ---
 ## Entities
 ### Entity 1
-flashcard
+Flashcard
 ### Entity 2
-deck
-### Entity 3
-user
+Deck
+
 (Add additional entities as needed.)
 ---
 ## API Usage
