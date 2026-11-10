@@ -73,12 +73,17 @@ As a user, I want to plan and optimize future trip itineraries in order to reduc
 - **Extensions:**
 
 ### Use Case 4
-- **Name:** Plan Future Trips
-- **Primary actor:** User planning a new trip
-- **Preconditions:** A data directory has been configured by the user.
-- **Trigger:** The user asks the system to create a new trip itinerary.
-- **Success outcome:**
+- **Name:** Edit Existing Trips
+- **Primary actor:** User viewing past trips
+- **Preconditions:** User has selected a target data directory, and has at least one existing trip.
+- **Trigger:** User selects a trip (on the map or inside the trips tab) and chooses how they want to edit it .
+- **Success outcome:** If "Merge" is selected, the n selected trips are merged into one. If "Split" is selected, the chosen trip gets split into n trips based off the specified cutoffs. 
 - **Main success scenario:**
+  1. The user selects one or multiple trips.
+  2. The user selects "Split" or "Merge"
+  3. If "Split" is chosen, the user enters the desired cutoff points
+     a. The System splits the chosen trip using the cutoffs, and updates the map.
+     b. If Merge is chosen, the system merges the selected trips into one trip, and updates the map.
 - **Extensions:**
 
 ---
