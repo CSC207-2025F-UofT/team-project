@@ -105,8 +105,7 @@ As a user, I want to edit past trips by splitting existing trips into several on
 ## Entities
 
 ### Trip
-Represents a past trip, with metadata such as places (cities) in chronological order, 
-datetime, landmarks, photo ids, blog_paths, etc.
+Represents a past trip, containing start date and end date, and photo ids.
 
 ### Location
 Represents a specific location, including longitude/latitude, location name (such
