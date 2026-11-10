@@ -20,9 +20,11 @@ As a user, I want to create, edit, delete, and save flashcard decks and flashcar
 ### User Story 2
 As a user, I want to view and study flashcard decks in study or quiz mode so that I can review and test my knowledge.
 ### User Story 3
-As a user, I want to search different decks and flashcards so that I can find specific study materials.
+As a user, I want the program to organize my notes into a flashcard deck so that I can study and review my notes. (Using AI API)
 ### User Story 4
 As a user, I want to import and export flashcards using CSV files so that I can send flashcards to other people or create cards using external spreadsheet editors
+### User Story 5
+As a user, I want to search different decks and flashcards so that I can find specific study materials. (extra)
 
 (Add additional user stories as needed.)
 ---
@@ -57,11 +59,12 @@ Export Flashcards to CSV
 (Add additional use cases as needed.)
 ---
 ## Minimal Viable Product (MVP)
-| Team Member | MVP Use Case |
+| Team Member | MVP User Story/Cases |
 |-------------|--------------|
-| Name | Use Case |
-| Name | Use Case |
-| Name | Use Case |
+| Maria | User Story 1|
+| Janica | Use Story |
+| Margaret | Use Story |
+| Roy | Use Story |
 ---
 ## Entities
 ### Entity 1
