@@ -24,7 +24,7 @@ Productivity/ Acedemic Research
 ## User Stories
 
 ### User Story 1
-As a bioinformatics student, I want to find research papers about genes of interest, so that I can plan my research.
+As a bioinformatics student, I want to find research papers about genes of interest, so that I can conduct my research in an organized manner. 
 ### User Story 2
 As a bioinformatics student, I want to keep track of papers I had read and sort their relationship based on gene segments mentioned.
 ### User Story 3
@@ -32,8 +32,9 @@ As a student reading papers, I want to save link and/or pdf in a structured mann
 ### User Story 4
 As a student researcher, I want to visualize papers sharing a particular idea like a specific gene.
 ### User Story 5
-As a lab member, I want to be able to leave comments on research papers so that other lab members cab read and discuss on each others' thoughts.
-(Add additional user stories as needed.)
+As a supervisor, I want to read my lab members' notes and thoughts when reading papers to provide better feedback.
+### User Story 7
+As a researcher, I want to be able to search through my previously connotated/noted papers with keywords 
 
 ---
 
