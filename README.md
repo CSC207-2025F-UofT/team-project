@@ -12,6 +12,7 @@ A flashcard application that allows users to create, manage and organize flashca
 These flashcards can be used in a study/quiz mode to look at the questions and double check answers. The flashcard decks
 can be imported and exported through CSV files to support sharing and external editing. Flashcard decks can be searched 
 for to find which ones are needed.
+
 ---
 ## User Stories
 ### User Story 1
