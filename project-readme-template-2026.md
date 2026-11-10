@@ -24,7 +24,7 @@ Productivity/ Acedemic Research
 ## User Stories
 
 ### User Story 1
-As a bioinformatics student, I want to know how many research papers is about both gene A and gene B, so that I can plan my research.
+As a bioinformatics student, I want to find research papers about genes of interest, so that I can plan my research.
 ### User Story 2
 As a bioinformatics student, I want to keep track of papers I had read and sort their relationship based on gene segments mentioned.
 ### User Story 3
