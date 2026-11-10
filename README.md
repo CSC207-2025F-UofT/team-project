@@ -31,7 +31,7 @@ As a user, I want to visualize my travels on an interactive map so that I can ex
 As a user, I want to sort, categorize, and view analytics regarding my travel history in order to understand my patterns and preferences.
 
 ### User Story 4
-As a user, I want to plan and optimize future trip itineraries in order to reduce overall cost and travel time.
+As a user, I want to edit past trips by splitting existing trips into several ones based off certain cutoff photos, as well as merge existing trips into one.
 
 ---
 
