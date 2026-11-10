@@ -1,28 +1,26 @@
 # Project Name
 
-Coworker Tinder
+Coffee with Coworkers
 
 ## Team Information
 
 ### Team Members
-- Name
-- Name
-- Name
-- Name
-- Name
-- Name
+- Shreya Rajesh
+- Jasmine Chen
+- Ellicia Mak
+- Jack Tang
 
 ---
 
 ## Project Description
 
+
 ### Domain
 
 Social
 
-[Project Description]
+Many employees at large organizations struggle to make friends with/get to know their coworkers— especially when working remotely, or being newly hired. This application allows users to connect with fellow colleagues, promoting a welcoming environment and productive workplace. Connecting colleagues over shared interests and a cup of coffee!
 
----
 
 ## User Stories
 
@@ -53,14 +51,21 @@ As an organization, I want to prevent external users from accessing our Tinder t
 ---
 
 ## Use Cases
-
+Sign up
 ### Use Case 1
-
+Log In
 ### Use Case 2
-
+Join an Organization
 ### Use Case 3
-
-(Add additional use cases as needed.)
+View own Profile
+### Use Case 4
+Edit Profile
+### Use Case 5
+Match
+### Use Case 6
+View Matches
+### Use Case 7
+View Match Profile
 
 ---
 
@@ -68,9 +73,13 @@ As an organization, I want to prevent external users from accessing our Tinder t
 
 | Team Member | MVP Use Case |
 |-------------|--------------|
-| Name | Use Case |
-| Name | Use Case |
-| Name | Use Case |
+| Name | Sign Up |
+| Name | Log In |
+| Name | Edit Profile |
+| Name | View Own Profile |
+| Name | Match |
+| Name | View Matches |
+| Name | View Match Profile |
 
 ---
 
@@ -111,4 +120,4 @@ As an organization, I want to prevent external users from accessing our Tinder t
 
 ## Notes
 
-[Any additional project information.]
+- This project assumes that all users are using the app with intentions to make friends and act ethically
