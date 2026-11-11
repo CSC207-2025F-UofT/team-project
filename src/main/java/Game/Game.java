@@ -15,4 +15,7 @@ public class Game {
         board.makeMove(move, turn);
         turn = 3-turn;
     }
+    public int getWinner(){
+        return board.getWinner();
+    }
 }
