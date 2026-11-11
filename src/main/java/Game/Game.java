@@ -4,7 +4,7 @@ public class Game {
     private int turn;
     private final Board board;
 
-    public Game(boolean computer){
+    public Game(){
         board = new Board();
         turn = 1;
     }
