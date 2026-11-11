@@ -40,12 +40,15 @@ Game, RPG, Single Player, Offline, Rougelike
 ## User Stories
 
 ### User Story 1
-
+As a player, I want to be able have a character that can move, interact and get stronger so that ____
 ### User Story 2
-
+As a player, I want to be able to fight mobs (monsters) as well as traverse and explore the world so that they can progress in our game
 ### User Story 3
-
-(Add additional user stories as needed.)
+As a player, I want to be able use spells by drawing them so that I can fight enemies conveniently
+### User Story 4
+As a player, I want to be able to explore the map so I can fight new enemies, and get more rewards
+### User Story 5
+As a user, I want to be able to log in so that I can save my data across multiple devices
 
 ---
 
