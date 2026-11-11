@@ -19,7 +19,7 @@ public class RandomBot implements Bot {
       row = randomInt(0, board.BOARD_SIZE);
       column = randomInt(0, board.BOARD_SIZE);
     }
-    return new Move(row, column, this.playerid);
+    return new Move(row, column);
   }
 
   private int randomInt(int min, int max){

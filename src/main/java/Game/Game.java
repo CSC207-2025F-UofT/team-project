@@ -10,7 +10,7 @@ public class Game {
     }
 
     public void playerInput(Move move){
-        board.makeMove(move);
+        board.makeMove(move, turn);
         turn = 3-turn;
     }
 }

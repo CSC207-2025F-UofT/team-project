@@ -4,7 +4,7 @@ import Game.Move;
 import java.util.ArrayList;
 
 public class Board {
-    public final int BOARD_SIZE = 20;
+    public final int BOARD_SIZE = 15;
     public final int WIN_THRESHOLD = 5;
     private int[][] boardState;
     private int winner = 0;
@@ -37,8 +37,8 @@ public class Board {
         return boardState[row][column];
     }
 
-    public boolean makeMove(Move move){
-        if (move.player != 1 && move.player != 2){
+    public boolean makeMove(Move move, int player){
+        if (player != 1 && player != 2){
             return false;
         }
         if (!inBounds(move.row, move.column)){
@@ -47,9 +47,9 @@ public class Board {
         if (boardState[move.row][move.column] != 0){
             return false;
         }
-        boardState[move.row][move.column] = move.player;
-        if (checkWin(move.row, move.column, move.player)){
-            winner = move.player;
+        boardState[move.row][move.column] = player;
+        if (checkWin(move.row, move.column, player)){
+            winner = player;
         }
         moves.add(move);
         return true;
