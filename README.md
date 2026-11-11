@@ -19,13 +19,13 @@ at the end of the term.
 - 
 
 ### Team Members
-- Name
+- Aayaan Singal
 
-- Name
-
-- Name
-
-- Name
+- Omer Sheaffer
+  
+- Jordan
+  
+- Seran Naventhan
 
 ---
 
@@ -59,8 +59,23 @@ As a user, I want to be able to log in so that I can save my data across multipl
 ### Use Case 2
 
 ### Use Case 3
+Name: Prepare a Fireball
+Primary actor: Player
+Preconditions: The player is in an active game, the spellbook is active (listening for drawing).
+Trigger: The player begins drawing a fireball symbol in the spellbook.
+Success outcome: The game shows that the fireball is ready to cast.
+Main success scenario:
+1. The player draws and submits a fireball symbol.
+2. The game recognizes the drawing as a fireball.
+3. The game makes the fireball available to cast and tells the player it is ready.
+Extensions:
+ 2a - The drawing is not recognized
+  1. The game tells the player it did not recognize the drawing.
+  2. The failed attempt adds no fireball casts. The player can try again from step 1.
 
-(Add additional use cases as needed.)
+### Use Case 4
+
+### Use Case 5
 
 ---
 
