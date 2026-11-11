@@ -1,10 +1,14 @@
 package Game;
+import Game.Move;
+
+import java.util.ArrayList;
 
 public class Board {
     public final int BOARD_SIZE = 20;
     public final int WIN_THRESHOLD = 5;
     private int[][] boardState;
     private int winner = 0;
+    private ArrayList<Move> moves;
     /*
     0 is no player / empty tile
     >1 means there is a player move at that tile
@@ -12,6 +16,7 @@ public class Board {
 
     public Board(){
         winner = 0;
+        moves = new ArrayList<>();
         boardState = new int[BOARD_SIZE][BOARD_SIZE];
         for (int y = 0; y < BOARD_SIZE; y++) {
             for (int x = 0; x < BOARD_SIZE; x++) {
@@ -32,20 +37,21 @@ public class Board {
         return boardState[row][column];
     }
 
-    public boolean move(int player, int row, int column){
-        if (player != 1 && player != 2){
+    public boolean makeMove(Move move){
+        if (move.player != 1 && move.player != 2){
             return false;
         }
-        if (!inBounds(row,column)){
+        if (!inBounds(move.row, move.column)){
             return false;
         }
-        if (boardState[row][column] != 0){
+        if (boardState[move.row][move.column] != 0){
             return false;
         }
-        boardState[row][column] = player;
-        if (checkWin(row, column, player)){
-            winner = player;
+        boardState[move.row][move.column] = move.player;
+        if (checkWin(move.row, move.column, move.player)){
+            winner = move.player;
         }
+        moves.add(move);
         return true;
     }
 
@@ -65,7 +71,6 @@ public class Board {
         return false;
     }
 
-
     public boolean checkDirection(int row, int column, int dx, int dy, int player){
         int counter = 0;
         for(int i = -WIN_THRESHOLD; i <= WIN_THRESHOLD; i++) {
@@ -81,5 +86,9 @@ public class Board {
             }
         }
         return false;
+    }
+
+    public exportMoves() {
+        moves = new ArrayList<>();
     }
 }
