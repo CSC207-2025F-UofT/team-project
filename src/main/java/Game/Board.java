@@ -1,43 +1,82 @@
 package Game;
 
 public class Board {
-    private int[][] gameState;
+    public final int BOARD_SIZE = 20;
+    public final int WIN_THRESHOLD = 5;
+    private int[][] boardState;
+    private int winner = 0;
+    /*
+    0 is no player / empty tile
+    >1 means there is a player move at that tile
+    */
 
     public Board(){
-        gameState = new int[20][20];
+        winner = 0;
+        boardState = new int[BOARD_SIZE][BOARD_SIZE];
+        for (int y = 0; y < BOARD_SIZE; y++) {
+            for (int x = 0; x < BOARD_SIZE; x++) {
+                boardState[x][y] = 0;
+            }
+        }
     }
 
     public boolean inBounds(int row, int column){
-        return (0 <= row && row < 20 && 0 <= column && column < 20);
+        return (0 <= row && row < BOARD_SIZE && 0 <= column && column < BOARD_SIZE);
     }
-    public boolean move(int player, int row, int column){
-        if (player != 1 && player !=2){return false;}
-        if (!inBounds(row,column)){return false;}
-        if (gameState[row][column] != 0){ return false;}
 
-        gameState[row][column] = player;
+    public int getWinner(){
+        return winner;
+    }
+
+    public int getTile(int row, int column) {
+        return boardState[row][column];
+    }
+
+    public boolean move(int player, int row, int column){
+        if (player != 1 && player != 2){
+            return false;
+        }
+        if (!inBounds(row,column)){
+            return false;
+        }
+        if (boardState[row][column] != 0){
+            return false;
+        }
+        boardState[row][column] = player;
+        if (checkWin(row, column, player)){
+            winner = player;
+        }
         return true;
     }
 
+  /**
+   * @param row the players last move
+   * @param column the players last move's column
+   * @param player the player
+   * @return whether player has a winning combination with the specified tile.
+   */
     public boolean checkWin(int row, int column, int player){
-        return(checkDirection(row, column, 0, 1, player) ||
-            checkDirection(row, column, 1, 0, player) ||
-            checkDirection(row, column, 1, 1, player) ||
-            checkDirection(row, column, -1,1, player) );
+        if (checkDirection(row, column, 0, 1, player) ||
+                checkDirection(row, column, 1, 0, player) ||
+                checkDirection(row, column, 1, 1, player) ||
+                checkDirection(row, column, -1,1, player) ) {
+            return true;
+        }
+        return false;
     }
+
 
     public boolean checkDirection(int row, int column, int dx, int dy, int player){
         int counter = 0;
-        for(int i = -4; i <= 4; i++){
-            if (inBounds(row + i*dx,column + i*dy)){
-                if (gameState[row + i*dx][column + i*dy] == player){
+        for(int i = -WIN_THRESHOLD; i <= WIN_THRESHOLD; i++) {
+            if (inBounds(row + i * dx, column + i * dy)) {
+                if (boardState[row + i * dx][column + i * dy] == player) {
                     counter++;
-                }
-                else{
+                } else {
                     counter = 0;
                 }
             }
-            if (counter >= 5){
+            if (counter >= WIN_THRESHOLD) {
                 return true;
             }
         }
