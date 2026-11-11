@@ -62,6 +62,11 @@ Five in a row game, where the goal is to get 5 in a row on a 20x20 board (simila
 ---
 ## How to Run
 [Instructions for running the program.]
+
+```
+mvn install
+```
+
 ---
 ## Notes
 [Any additional project information.]

@@ -9,4 +9,7 @@ public class Move {
     this.column = column;
     this.player = player;
   }
+  public Move copy(){
+    return new Move(this.row, this.column, this.player);
+  }
 }

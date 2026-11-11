@@ -88,7 +88,14 @@ public class Board {
         return false;
     }
 
-    public exportMoves() {
-        moves = new ArrayList<>();
+  /**
+   * @return return a copy of move history (mutability safe)
+   */
+    public ArrayList<Move> getMoveHistory() {
+        ArrayList<Move> moves_copy = new ArrayList<>();
+        for (Move move : moves) {
+            moves_copy.add(move.copy());
+        }
+        return moves_copy;
     }
 }
