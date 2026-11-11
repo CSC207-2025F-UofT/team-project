@@ -13,8 +13,8 @@ public class GameInteractor implements GameInputBoundary {
         final int x = move.column;
         final int y = move.row;
         final int player = game.getTurn();
-        final int winner = game.getWinner();
         game.playerInput(move);
+        final int winner = game.getWinner();
         final GameOutputData gameOutputData = new GameOutputData(y,x,player,winner);
         gamePresenter.prepareView(gameOutputData);
 
