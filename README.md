@@ -63,7 +63,7 @@ as a researcher, I would like to be able to access data from individuals to do a
 
 ### Use Case 2: Login
 1. the user enters a username
-2. if the username already exists, the user gets logged in to the account witht at username
+2. if the username already exists, the user gets logged in to the account with at username
 3. the system says "Hello {username}"
 
 ### Use Case 3: SaveData
@@ -91,7 +91,7 @@ The program outputs buttons to access further analysis
 Extensions:
 The reason why the error occurred is outputted
 
-### Use Case 5: Outputting memory, attention, mood to productivity statistical results
+### Use Case 6: Outputting memory, attention, mood to productivity statistical results
 Primary actor: Researcher presses the button for the desired variable
 Preconditions:
 Researcher fetched the data
@@ -162,9 +162,11 @@ Success Outcome:
 ## Minimal Viable Product (MVP)
 | Team Member | MVP Use Case |
 |-------------|--------------|
-| Name | Use Case |
-| Name | Use Case |
-| Name | Use Case |
+| Kate Richardson | Use cases 7 and 8 |
+| Sophia Iannuzzi | Use Case 9 |
+| Thanika Haltrich | Use Cases 1 - 4 |
+| Zhaniya Mukhtarbek | Use Cases 5 and 6|
+| Purnima Chhetri | Use Cases 10 - 12|
 ---
 ## Entities
 CognitiveData
@@ -186,16 +188,19 @@ Methods:
 
 ---
 ## API Usage
-**API Name:**
-**Documentation:** [Link]
-**How it is used in the program:**
+**API Name:** Supabase \
+**Documentation:** [Link] \
+This api will be used as our remote database. It is a remote repository from which we can add, modify and generally access data. This is helpful for our project as it lets us share data between users.
 ---
 ## Design Diagrams
 ### UML Class Diagram
+![CSC207_UML_Diagram.jpg](../../Desktop/CSC207_UML_Diagram.jpg)
 ### Sequence Diagrams
 ---
 ## How to Run
-[Instructions for running the program.]
+The program should open to a log in page. This is where the user is asked to input their username and select if they are a researcher. Then they may press "enter". 
+From here, if the username already exists, the user is logged in to their account, otherwise a new account is created. \
+
 ---
 ## Notes
 [Any additional project information.]
