@@ -38,6 +38,18 @@ public class Trip {
         this.name = name;
     }
 
+    public String getName() {
+        return this.name;
+    }
+
+    public LocalDateTime getStartTime() {
+        return this.startTime;
+    }
+
+    public LocalDateTime getEndTime() {
+        return this.endTime;
+    }
+
     public Duration getDuration() {
         return Duration.between(startTime, endTime);
     }
