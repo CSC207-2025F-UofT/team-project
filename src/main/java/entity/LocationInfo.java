@@ -1,5 +1,8 @@
 package entity;
 
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 public class LocationInfo {
     private final String city;
     private final String county;
@@ -8,10 +11,6 @@ public class LocationInfo {
     private final String landmark;
 
     public LocationInfo(String city, String county, String state, String country, String landmark) {
-        if (city == null || county == null || state == null || country == null) {
-            // throw;
-        }
-
         this.city = city;
         this.county = county;
         this.state = state;
@@ -44,6 +43,13 @@ public class LocationInfo {
     }
 
     public String getDisplayString() {
-        return String.join(", ", city, county, state, country);
+        return Stream.of(city, county, state, country)
+            .filter(s -> s != null && !s.isBlank())
+            .collect(Collectors.joining(", "));
+    }
+
+    @Override
+    public String toString() {
+        return getDisplayString();
     }
 }
