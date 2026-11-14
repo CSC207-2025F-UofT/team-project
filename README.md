@@ -25,19 +25,39 @@ entertainment
 
 ## User Stories
 
-### As a player, I want to plant, grow, and harvest plants for my farm. 
+### 1. As a player, I want to create and log in to my account to save my progress on the game. 
 
-### As a player, I want to grow, raise, and process livestock for my farm. 
+### 2. As a player, I want to plant, grow, and harvest plants for my farm. [UPDATE: PLANT FLOWERS]
 
-### As a player, I want to trade resources with NPCs. 
+### 3. As a player, I want to grow, raise, and process livestock for my farm. [UPDATE: GROW FLOWERS]
 
-### As a player, I want to know what activities I can do under certain weather conditions. 
+### 4. As a player, I want to trade resources with NPCs. [UPDATE: HARVEST FLOWERS]
+
+ 
 
 ---
 
 ## Use Cases
 
-### for user story handling planting, growing, and harvesting plants:
+### User story 1: Login
+Use Case 1
+- Name: Log in to game
+- Primary actor: Player
+- Precondition: Game is initially loaded
+- Trigger: The player inputs username and password and clicks the "login" button
+- Main success scenario:
+  1. Player inputs username and password.
+  2. Player clicks "login" button.
+  3. System checks that an account with that information exists.
+  4. System finds user information.
+  5. System loads main page updated with user information.
+- Extension:
+  - Player inputs username and password and clicks login, but there is no user with that information so an error shows.
+  - Player inputs username and password and clicks signup, but there is already a user with the inputted username, so the system shows error message.
+  - Player inputs a unique username and password and clicks signup, so the system creates an account with that information and displays the login page again.
+- Success outcome: The main page is displayed with user information.
+
+### User story 2: Plant flower
 Use Case 1.1
 - Name: Plant a Crop
 - Primary actor: Player
@@ -83,7 +103,7 @@ Use Case 1.3
     - 1a. The crop has not been tended, so the system tells the player it is not ready.
 - Success outcome: The plot is empty and the backpack has the harvested crop.
 
-### for user story handling growing, raising, and processing livestock:
+### User Story 3: Grow flower
 
 Use Case 2.0
 - Name: Add Livestock to a Pen
@@ -166,37 +186,8 @@ inventory remain unchanged → use case returns to step 2.
 - Success Outcome: The player's inventory decreases by the sold quantity, and the balance increases by the total sale
 payment.
 
-### for user story handling weather on the farm
+### User Story 4: Harvest flower
 
-Use case 4.1
-- Name: Choose city 
-- Primary Actor: Player
-- Preconditions: There is a newly opened game.
-- Trigger: The player starts the game.
-- Main Success Scenario: 
-  1. Player opens a new game.
-  2. System provides a list of cities to choose from.
-  3. Player selects their preferred city.
-  4. System pulls the historical weather from the chosen city using the API.
-  5. System calculates and records the chances of each weather pattern occurring.
-  6. System opens the game screen
-- Extensions: 
-- Success Outcome: The chances of each weather pattern occurring is recorded for the rest of
-the session. 
-
-Use case 4.2
-- Name: Change weather
-- Primary Actor: System
-- Preconditions: There is an active game and a record of weather pattern chances exists
-- Trigger: It has been 5 minutes since the game started or the weather last changed
-- Main Success Scenario:
- 1. System confirms that it has been 5 minutes since the game started or the weather last changed
- 2. System generates the weather from the weather pattern chances
- 3. System updates weather on the game screen
- 4. System updates actions options based on the weather
- 5. System starts a new timer for the next weather change
-- Extensions:
-- Success Outcome: The weather displayed on the screen and the actions affected by it are updated. 
 
 ---
 
@@ -204,13 +195,13 @@ Use case 4.2
 
 | Team Member | MVP Use Case |
 
-| Tiffany | 1.1 Plant a Crop, 1.2 Tend a Crop, 1.3 Harvest a Crop |
+| Kaho | Use Case 1 |
 
 | Bella | Use Case 2 |
 
 | Angela | Use Case 3 |
 
-| Kaho | Use Case 4 |
+| Tiffany | Use Case 4 |
 
 ---
 
@@ -240,14 +231,11 @@ Use case 4.2
 
 ## API Usage
 
-**API Name:** weatherapi - JAVA
+**API Name:** 
 
 **Documentation:** 
 
-**How it is used in the program:** When starting a new game, the user chooses a city to place 
-the farm in. The system then calculates the chance of each weather pattern occurring in that city
-based on the actual city's historical weather, which will be used to determine the weather pattern
-for the rest of the game session. 
+**How it is used in the program:** 
 
 ---
 
@@ -267,4 +255,6 @@ for the rest of the game session.
 
 ## Notes
 
-[Any addi
+### Visual Project Outline
+![Project Outline Diagram](images/project_outline.png)
+
