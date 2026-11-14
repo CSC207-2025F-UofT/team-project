@@ -43,7 +43,7 @@ public class ModulePanel extends JPanel {
 
     JLabel title = new JLabel(module.getTitle());
     title.setForeground(Theme.ON_GREEN);
-    title.setFont(Theme.bold(title.getFont(), 20f));
+    title.setFont(Theme.bold(Theme.HEADER_SIZE));
     JPanel strip = new JPanel(new BorderLayout());
     strip.setBackground(Theme.GREEN);
     strip.setBorder(BorderFactory.createEmptyBorder(12, 20, 12, 20));
@@ -82,7 +82,7 @@ public class ModulePanel extends JPanel {
     details.setLayout(new BoxLayout(details, BoxLayout.Y_AXIS));
     details.setOpaque(false);
     JLabel due = new JLabel("Due: " + module.getDueDate());
-    due.setFont(Theme.bold(due.getFont(), 14f));
+    due.setFont(Theme.bold(Theme.BODY_SIZE));
     details.add(due);
     details.add(Box.createVerticalStrut(16));
     details.add(heading("General Overview"));
@@ -105,7 +105,7 @@ public class ModulePanel extends JPanel {
     rows.setOpaque(false);
     for (int i = 0; i < parts.size(); i++) {
       JLabel percent = new JLabel(parts.get(i).getProgress());
-      percent.setFont(Theme.bold(percent.getFont(), 13f));
+      percent.setFont(Theme.bold(Theme.BODY_SIZE));
       JPanel row = new JPanel(new BorderLayout(12, 0));
       row.setOpaque(false);
       row.add(Theme.circle(String.valueOf(i + 1), CIRCLE, 13f), BorderLayout.WEST);
@@ -127,7 +127,7 @@ public class ModulePanel extends JPanel {
 
   private static JLabel heading(String text) {
     JLabel heading = new JLabel(text);
-    heading.setFont(Theme.bold(heading.getFont(), 16f));
+    heading.setFont(Theme.bold(Theme.HEADER_SIZE));
     heading.setAlignmentX(LEFT_ALIGNMENT);
     return heading;
   }

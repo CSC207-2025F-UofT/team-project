@@ -35,7 +35,7 @@ class QuizCompletePanel extends JPanel {
     centered(Theme.circle("✓", 72, 36f));
     add(Box.createVerticalStrut(16));
     JLabel goodJob = new JLabel("Good Job!");
-    goodJob.setFont(Theme.bold(goodJob.getFont(), 24f));
+    goodJob.setFont(Theme.bold(Theme.HEADER_SIZE));
     centered(goodJob);
     add(Box.createVerticalStrut(8));
     centered(new JLabel("You completed the Pre-Procedure Quiz!"));

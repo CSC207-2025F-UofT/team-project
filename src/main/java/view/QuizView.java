@@ -201,7 +201,7 @@ public class QuizView extends JPanel implements PropertyChangeListener {
   /** "Question N", the prompt, the answer area, Check Answer and the feedback. */
   private JPanel createQuestion(int index, QuestionState question, Set<Integer> saved) {
     JLabel heading = new JLabel("Question " + (index + 1));
-    heading.setFont(Theme.bold(heading.getFont(), 20f));
+    heading.setFont(Theme.bold(Theme.HEADER_SIZE));
     JPanel top = new JPanel(new BorderLayout(0, 8));
     top.setOpaque(false);
     top.add(heading, BorderLayout.NORTH);
