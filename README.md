@@ -24,7 +24,7 @@ entertainment
 ### User Story 3:
 #### As a user of the movie finder I want to have a watchlist so that I can save movies I plan to watch later.
 ### User Story 4:
-#### As a user [type of user] I want to add favourites so that I can [some benefit]
+#### As a user of the movie finder I want to add favourites so that I can easily find and keep track of the movies I like.
 ### User Story 5:
 #### As a user [type of user] I want to see the movie posters so that I can [some benefit]
 ### User Story 6:
@@ -89,6 +89,32 @@ Extensions:
 2a. The movie is already in the user's watchlist.
 The system explains that the movie is already in the watchlist.
 The system does not add the movie again.
+
+### Use Case 4
+Use Case: Add a movie to favourites
+
+Primary actor: User who wants to save a movie as one of their favourite movies.
+
+Preconditions:
+The user is logged in.
+The user has searched for a movie and is viewing its details page.
+
+Trigger: The user clicks the "Add to Favourites" button.
+
+Success outcome: The movie is successfully added to the user's favourites list and remains there after the user logs out and logs back in.
+
+Main success scenario:
+The user clicks the "Add to Favourites" button on the movie details page.
+The system checks whether the movie is already in the user's favourites list.
+The system adds the movie to the user's favourites list and saves the changes.
+The system displays a confirmation message that the movie has been added to favourites.
+
+Extensions:
+
+2a. The movie is already in the user's favourites list.
+The system informs the user that the movie is already in their favourites.
+The system does not add the movie again.
+
 ### Use Case 6
 Use Case: Seeing past comments and movie ratings
 
@@ -109,7 +135,7 @@ Extensions:
 | Mehal Patel | Use Case #1: Search a movie|
 | Grace Manurung | Use Case #6: Comments and Ratings |
 | Syaikha Faiza Arifin | Use Case #3: Add a movie to watchlist |
-| Yuxuan Lin | Use Case |
+| Yuxuan Lin | Use Case #4: Add a movie to favourites |
 | Frank Li | Use Case |
 | Zhanyuan Su | Use Case |
 ---
