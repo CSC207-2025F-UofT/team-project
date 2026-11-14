@@ -25,4 +25,11 @@ public class GetAllDecksState {
     public void setGetAllDecksError(String getAllDecksError) {
         this.getAllDecksError = getAllDecksError;
     }
+
+    @Override
+    public String toString() {
+        return "GetAllDecksState{"
+                + "decks='" + decks + '\''
+                + '}';
+    }
 }
