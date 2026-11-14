@@ -29,6 +29,12 @@ public class GetDeckPresenter implements GetDeckOutputBoundary {
         getDeckState.setDeck(response.getName, response.getFlashcards());
         this.getDeckViewModel.notifyStateChanged();
 
+        // clear everything from the GetAllDecksViewModel's state
+        this.getAllDecksViewModel.setState(new GetAllDecksState());
+        this.getAllDecksViewModel.notifyStateChanged();
 
+        // switch to the deck view
+        this.viewManagerModel.setState(GetDeckViewModel.VIEW_NAME);
+        this.viewManagerModel.notifyViewChanged();
     }
 }
