@@ -1,6 +1,7 @@
 package interface_adapter.get_deck;
 
 import interface_adapter.ViewManagerModel;
+import interface_adapter.get_all_decks.GetAllDecksState;
 import interface_adapter.get_all_decks.GetAllDecksViewModel;
 import use_case.get_deck.GetDeckOutputBoundary;
 import use_case.get_deck.GetDeckOutputData;
@@ -26,7 +27,8 @@ public class GetDeckPresenter implements GetDeckOutputBoundary {
     public void prepareSuccessView(GetDeckOutputData response) {
         // update the GetDeckViewModel's state
         final GetDeckState getDeckState = getDeckViewModel.getState();
-        getDeckState.setDeck(response.getName, response.getFlashcards());
+        getDeckState.setDeckName(response.getName());
+        getDeckState.setFlashcards(response.getFlashcards());
         this.getDeckViewModel.notifyStateChanged();
 
         // clear everything from the GetAllDecksViewModel's state
@@ -36,5 +38,12 @@ public class GetDeckPresenter implements GetDeckOutputBoundary {
         // switch to the deck view
         this.viewManagerModel.setState(GetDeckViewModel.VIEW_NAME);
         this.viewManagerModel.notifyViewChanged();
+    }
+
+    @Override
+    public void prepareFailView(String error) {
+        final GetDeckState getDeckState = getDeckViewModel.getState();
+        getDeckState.setDeckError(error);
+        getDeckViewModel.notifyStateChanged();
     }
 }

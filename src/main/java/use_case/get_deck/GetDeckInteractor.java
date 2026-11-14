@@ -3,7 +3,6 @@ package use_case.get_deck;
 import entity.Deck;
 import entity.Flashcard;
 
-import java.sql.Array;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -30,16 +29,19 @@ public class GetDeckInteractor implements GetDeckInputBoundary{
         } else {
             Deck deck = deckDataAccessObject.getDeck(name);
 
-            ArrayList<Map<String, String>> flashcard_info = new ArrayList<>();
+            ArrayList<Map<String, String>> flashcardInfo = new ArrayList<>();
             ArrayList<Flashcard> flashcards = deck.getFlashcards();
             for (Flashcard flashcard: flashcards) {
                 Map<String, String> map = new HashMap<>();
                 map.put(flashcard.getQuestion(), flashcard.getAnswer());
-                flashcard_info.add(map);
+                flashcardInfo.add(map);
             }
 
-            final GetDeckOutputData getDeckOutputData = new GetDeckOutputData(name, flashcard_info);
+            final GetDeckOutputData getDeckOutputData = new GetDeckOutputData(name, flashcardInfo);
             getDeckPresenter.prepareSuccessView(getDeckOutputData);
         }
     }
+
+    @Override
+    public void switchToHomescreenView() { /* not yet implemented */ }
 }
