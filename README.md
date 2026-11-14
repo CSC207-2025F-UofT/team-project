@@ -53,15 +53,19 @@ As a student, I want to review my flashcards so I can remember the material.
 ### Use Case 2 
 Name: Generating flashcards
 Primary Actor: Student
+
 Preconditions: Student has text formatted correctly (with titled bolded/underlined and body for flashcard DIRECTLY underneath)
+
 Trigger: Clicking the generate button
+
 Main Success Scenario:
 1. Student goes to flashcard page
 2. Student copies and pastes text into textbox meant for where you insert flashcards
 3. Student formats accordingly 
 4. Student hits generate flashcards and program generates and shows flashcards to students 
 5. Student now has access to flashcards as needed
-6. 
+
+    
 Extensions:
 If user enters no text, message will prompt them to enter text first 
 Success outcome: Student can generate flashcards successfully
