@@ -52,6 +52,7 @@ As a student, I want to review my flashcards so I can remember the material.
 ### Use Case 1
 ### Use Case 2 
 Name: Generating flashcards
+
 Primary Actor: Student
 
 Preconditions: Student has text formatted correctly (with titled bolded/underlined and body for flashcard DIRECTLY underneath)
