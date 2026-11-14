@@ -6,7 +6,7 @@ import entity.User;
  * DataAccessObject interface for the Signup Use Case.
  */
 
-public interface SignupUserAccessInterface {
+public interface SignupUserDataAccessInterface {
 
     /**
      * Checks if the given username exists.
