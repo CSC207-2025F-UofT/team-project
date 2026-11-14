@@ -1,14 +1,12 @@
 package use_case.evaluate;
 
+import entity.MathParser;
+
 import java.util.List;
-import java.util.Set;
 
 // how the written formula ends/looks, presenter turns this into a canvas spot
 public enum FormulaShape {
     ENDS_WITH_EQUALS, RELATION, PLAIN;
-
-    private static final Set<String> RELATIONS = Set.of("=", "<", ">", "\\leq", "\\geq", "\\neq",
-            "\\approx", "\\in", "\\notin", "\\subset", "\\supseteq", "\\perp");
 
     static FormulaShape of(List<String> tokens) {
         if (!tokens.isEmpty() && "=".equals(tokens.get(tokens.size() - 1))) {
@@ -17,7 +15,7 @@ public enum FormulaShape {
         int depth = 0;
         for (String t : tokens) {
             depth += "{".equals(t) ? 1 : "}".equals(t) ? -1 : 0;
-            if (depth == 0 && RELATIONS.contains(t)) {
+            if (depth == 0 && MathParser.isRelation(t)) {
                 return RELATION;  // skips the i=1 under a sum
             }
         }
