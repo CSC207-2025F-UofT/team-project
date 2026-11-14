@@ -42,6 +42,10 @@ A feedback should be positive regardless of whether the argument is valid or inv
 * Based on your previous teamwork experiences, what other behaviours do you agree upon as a team?
     - some examples of possible additional team norms and expectations are included in the sample team contract in case your team needs some help getting ideas for what else you want to include.
 
+
+- No emotional arguments over conflicts in idea or execution,
+- Provide constructive feedback to each other
+- Ask for help amongst ourselves if run into an obstacle
 ---
 
 ## Decision Making
@@ -74,4 +78,4 @@ By signing below, we acknowledge that we have read, discussed, and agreed to the
 
 Team Member Signatures:
 
-(type names here)
+Jack Huang
