@@ -3,7 +3,7 @@ package use_case.evaluate;
 import entity.Context;
 import entity.MathLexer;
 import entity.MathParser;
-import entity.MathSyntaxException;
+import entity.MathException;
 import entity.UserFunction;
 import entity.node.Node;
 import org.junit.jupiter.api.Test;
@@ -165,7 +165,7 @@ class TokeniserCoverageTest {
             if (free.isEmpty()) {
                 node.evaluate(new Context(functions));
             }
-        } catch (MathSyntaxException e) {
+        } catch (MathException e) {
             // error msg or uncalc is fine
         } catch (RuntimeException | StackOverflowError e) {
             fail(s + " threw " + e);

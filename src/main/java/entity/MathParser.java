@@ -73,8 +73,6 @@ public final class MathParser {
                 throw new MathSyntaxException(SyntaxProblem.UNEXPECTED, peek());
             }
             return result;
-        } catch (UncalculableException e) {
-            throw e;
         } catch (MathSyntaxException e) {
             for (String token : PROSE) {
                 if (tokens.contains(token)) {
@@ -776,8 +774,8 @@ public final class MathParser {
                     plusMinusAtEnd = plusMinusCount;
                 }
             }
-        } catch (MathSyntaxException e) {
-            // bad term, the outside parse reports it
+        } catch (MathException e) {
+            // bad term (or uncalc one), the outside parse reports it
         }
         position = end;
         plusMinusCount = plusMinusAtEnd;
