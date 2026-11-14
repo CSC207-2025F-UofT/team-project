@@ -1,30 +1,46 @@
 package entity;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
 /**
  * A letter grade, with the lowest percentage that earns it.
- * The grades are declared from highest to lowest.
+ * The only instances are the constants declared in this class.
  */
-public enum LetterGrade {
-    A_PLUS("A+", 90),
-    A("A", 85),
-    A_MINUS("A-", 80),
-    B_PLUS("B+", 77),
-    B("B", 73),
-    B_MINUS("B-", 70),
-    C_PLUS("C+", 67),
-    C("C", 63),
-    C_MINUS("C-", 60),
-    D_PLUS("D+", 57),
-    D("D", 53),
-    D_MINUS("D-", 50),
-    F("F", 0);
+public final class LetterGrade {
+    public static final LetterGrade A_PLUS = new LetterGrade("A+", 90);
+    public static final LetterGrade A = new LetterGrade("A", 85);
+    public static final LetterGrade A_MINUS = new LetterGrade("A-", 80);
+    public static final LetterGrade B_PLUS = new LetterGrade("B+", 77);
+    public static final LetterGrade B = new LetterGrade("B", 73);
+    public static final LetterGrade B_MINUS = new LetterGrade("B-", 70);
+    public static final LetterGrade C_PLUS = new LetterGrade("C+", 67);
+    public static final LetterGrade C = new LetterGrade("C", 63);
+    public static final LetterGrade C_MINUS = new LetterGrade("C-", 60);
+    public static final LetterGrade D_PLUS = new LetterGrade("D+", 57);
+    public static final LetterGrade D = new LetterGrade("D", 53);
+    public static final LetterGrade D_MINUS = new LetterGrade("D-", 50);
+    public static final LetterGrade F = new LetterGrade("F", 0);
+
+    /** Every letter grade, from highest to lowest. */
+    private static final List<LetterGrade> ALL_GRADES = Collections.unmodifiableList(Arrays.asList(
+            A_PLUS, A, A_MINUS, B_PLUS, B, B_MINUS, C_PLUS, C, C_MINUS, D_PLUS, D, D_MINUS, F));
 
     private final String label;
     private final int minPercentage;
 
-    LetterGrade(String label, int minPercentage) {
+    private LetterGrade(String label, int minPercentage) {
         this.label = label;
         this.minPercentage = minPercentage;
+    }
+
+    /**
+     * Returns every letter grade, from highest to lowest.
+     * @return a read-only list of all the letter grades
+     */
+    public static List<LetterGrade> values() {
+        return ALL_GRADES;
     }
 
     /**
@@ -76,5 +92,10 @@ public enum LetterGrade {
             }
         }
         throw new IllegalArgumentException("Unknown letter grade: " + label);
+    }
+
+    @Override
+    public String toString() {
+        return label;
     }
 }

@@ -55,9 +55,9 @@ src/main/java
 │   ├── Course.java                    code, name, targetGrade, topics, assessments
 │   ├── CourseFactory.java
 │   ├── Topic.java                     name + ConfidenceLevel
-│   ├── ConfidenceLevel.java           enum GREEN, YELLOW, RED
+│   ├── ConfidenceLevel.java           constants GREEN, YELLOW, RED; fromName()
 │   ├── Assessment.java                name, mark, weight
-│   └── LetterGrade.java               enum A+..F, fromPercentage()
+│   └── LetterGrade.java               constants A+..F; fromPercentage(), fromLabel()
 ├── use_case/
 │   ├── signup/ login/ logout/ change_password/      (existing)
 │   ├── enrol_course/
