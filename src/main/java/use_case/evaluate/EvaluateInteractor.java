@@ -48,7 +48,9 @@ public class EvaluateInteractor implements EvaluateInputBoundary {
             List<String> tokens = MathLexer.tokenize(expression);
             presenter.prepareFormulaShape(FormulaShape.of(tokens));
 
-            if (!tokens.isEmpty() && tokens.get(tokens.size() - 1).equals("=")) {
+            // f(x)= keeps its = so it reads as a definition w/ no body
+            if (!tokens.isEmpty() && tokens.get(tokens.size() - 1).equals("=")
+                    && !FunctionDefiner.isDefinition(tokens)) {
                 tokens.remove(tokens.size() - 1);
             }
             if (tokens.isEmpty()) {
