@@ -1,6 +1,6 @@
 # Team Project
 
-Please keep this up-to-date with information about your project throughout the term.
+Please keep this up to date with information about your project throughout the term.
 
 The readme should include information such as:
 - a summary of what your application is all about
@@ -8,7 +8,7 @@ The readme should include information such as:
 - information about the API(s) that your project uses 
 - screenshots or animations demonstrating current functionality
 
-By keeping this README up-to-date,
+By keeping this README up to date,
 your team will find it easier to prepare for the final presentation
 at the end of the term.
 
@@ -16,7 +16,7 @@ at the end of the term.
 
 ## Project Overview
 
-Our project is a Pinterest-inspired application developed using **Java and Java Swing**. The application allows users to search for images, save and organize images into boards, customize their profiles, and receive personalized image recommendations.
+Our project is a Pinterest inspired application developed using **Java and Java Swing**. The application allows users to search for images, save and organize images into boards, customize their profiles, and receive personalized image recommendations.
 
 Unlike traditional image browsing applications, our project aims to provide recommendations based on the visual preferences of individual boards. Users can discover images that match their interests and organize them into collections.
 
