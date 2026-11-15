@@ -7,7 +7,9 @@ public class Main {
         final AppBuilder appBuilder = new AppBuilder();
         final JFrame application = appBuilder
                 .addLoginSignupView()
+                .addLoggedInView()
                 .addSignupUseCase()
+                .addLoginUseCase()
                 .build();
 
         SwingUtilities.invokeLater(() -> {
