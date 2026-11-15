@@ -9,15 +9,31 @@
 ---
 ## Project Description
 ### Domain
-[This project will be a Java Swing desktop application that helps students discover internship opportunities, 
-create/record the resume used for each application, and track application progress and deadlines.]
+This project will be a Java Swing desktop application that helps students discover internship opportunities, 
+create/record the resume used for each application, and track application progress and deadlines.
 ---
 ## User Stories
 ### User Story 1
+As a user, I want to search for internship opportunities that match my search keywords so that I can find relevant positions and spend less time browsing company websites.
+
 ### User Story 2
+As a user, I want to create or upload multiple resume versions and associate them with my saved internship 
+applications so that I can keep track of which resume I submitted to each employer.
+
 ### User Story 3
-### User Story 4: As a user, I want to search for internship opportunities that match my search keywords so that I can find relevant positions and spend less time browsing company websites.
-(Add additional user stories as needed.)
+As a user, I want to save internship opportunities, update their application statuses, and organize them by priority 
+or deadline so that I can manage my applications in one place.
+
+### User Story 4
+As a user, I want to have a hub where I can receive a visual summary of my internship application progress, including 
+the number of applications submitted over time and the number that have progressed beyond the first interview, 
+so that I can evaluate my application progress.
+
+### User Story 5
+As a user, I want to create a profile with all my qualifications so that I would be recommended internships without 
+having to search
+
+
 ---
 ## Use Cases
 ### Use Case 1
@@ -77,9 +93,10 @@ Main success scenario:
 |Yuheng Liu| Use Case |
 ---
 ## Entities
-### Entity 1
-### Entity 2
-(Add additional entities as needed.)
+- User
+- Resume
+- Application
+- Internship
 ---
 ## API Usage
 **API Name:**: Greenhouse Job Board API
