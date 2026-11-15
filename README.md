@@ -48,7 +48,7 @@ having to search
 |Emily Kim| Use Case |
 |Jerry Zhou| Use Case |
 |Austin Wu|          |
-|Lingnan Meng|          |
+|Lingnan Meng| Use Case |
 |Yuheng Liu| Use Case |
 ---
 ## Entities
