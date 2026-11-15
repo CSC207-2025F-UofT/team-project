@@ -1,4 +1,5 @@
 
+import java.io.IOException;
 import java.time.LocalDate;
 
 public class Income extends Transaction {
@@ -7,9 +8,9 @@ public class Income extends Transaction {
 
     public Income(int transactionID, double amount,
                   LocalDate date, String description,
-                  Account account, Category category) {
+                  Account account, Category category, String transactionCurrency) throws IOException {
 
-        super(transactionID, amount, date, description, account);
+        super(transactionID, amount, date, description, account, transactionCurrency);
 
         this.category = category;
     }
@@ -26,7 +27,7 @@ public class Income extends Transaction {
 
     // Add income to account balance
     @Override
-    public void execute() {
-        account.deposit(amount);
+    public void execute() throws IOException {
+        account.deposit(amount, transactionCurrency);
     }
 }

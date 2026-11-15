@@ -1,4 +1,5 @@
 
+import java.io.IOException;
 import java.time.LocalDate;
 
 public class Expense extends Transaction {
@@ -9,9 +10,9 @@ public class Expense extends Transaction {
     public Expense(int transactionID, double amount,
                    LocalDate date, String description,
                    Account account, Category category,
-                   String note) {
+                   String note, String transactionCurrency) throws IOException {
 
-        super(transactionID, amount, date, description, account);
+        super(transactionID, amount, date, description, account, transactionCurrency);
 
         this.category = category;
         this.note = note;
@@ -37,7 +38,7 @@ public class Expense extends Transaction {
 
     // Deduct expense from account balance
     @Override
-    public void execute() {
-        account.withdraw(amount);
+    public void execute() throws IOException {
+        account.withdraw(amount, transactionCurrency);
     }
 }

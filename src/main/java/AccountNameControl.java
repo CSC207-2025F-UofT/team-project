@@ -1,9 +1,9 @@
 import org.json.JSONArray;
 import java.io.IOException;
 
-public class UsernameControl extends JSONControl {
+public class AccountNameControl extends JSONControl {
 
-  public UsernameControl(String file) throws IOException {
+  public AccountNameControl(String file) throws IOException {
     super(file);
   }
 
@@ -17,6 +17,11 @@ public class UsernameControl extends JSONControl {
 
   public void addUsername(String username) throws IOException{
     returnUsernames().put(username);
+    writeContents();
+  }
+
+  public void changeUsername(int UserID, String newUsername)  throws IOException {
+    returnUsernames().put(UserID, newUsername);
     writeContents();
   }
 }

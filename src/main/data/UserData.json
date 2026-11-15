@@ -1,8 +1,10 @@
 {
-    "usernames": [],
-    "userID": [],
-    "passwords": [],
-    "createdCountry": [],
-    "createdIP": [],
-    "createdAt": []
+  "usernames": [],
+  "userID": [],
+  "passwords": [],
+  "createdCountry": [],
+  "createdIP": [],
+  "createdAt": [],
+  "emails" : [],
+  "accounts" : []
 }

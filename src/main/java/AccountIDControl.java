@@ -4,9 +4,9 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 
-public class UserIDControl extends JSONControl {
+public class AccountIDControl extends JSONControl implements Nextable {
 
-  public UserIDControl(String file) throws IOException {
+  public AccountIDControl(String file) throws IOException {
     super(file);
   }
 
@@ -14,6 +14,7 @@ public class UserIDControl extends JSONControl {
     return getContents().getJSONArray("userID");
   }
 
+  @Override
   public int nextID() throws IOException {
     if (returnUserID().toList().isEmpty()) {
       return 0;

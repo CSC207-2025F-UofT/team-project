@@ -20,10 +20,21 @@ public class AccountCreationControl extends JSONControl {
     return getContents().getJSONArray("createdAt");
   }
 
-  public void addData(String country, String IP, LocalDateTime time) throws IOException{
+  public JSONArray returnProfile() {
+    return getContents().getJSONArray("mainProfile");
+  }
+
+  public void addData(String country, String IP, LocalDateTime time, int profile) throws IOException{
     returnCreatedCountry().put(country);
     returnCreatedIP().put(IP);
     returnCreatedAt().put(time.toString());
+    returnProfile().put(profile);
+    writeContents();
+  }
+
+  public void changeMainProfile(int accountID, int newMain) throws IOException {
+    JSONArray profiles = returnProfile();
+    profiles.put(accountID, newMain);
     writeContents();
   }
 }

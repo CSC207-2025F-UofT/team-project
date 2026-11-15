@@ -15,5 +15,10 @@ public class PasswordControl extends JSONControl {
     returnPasswords().put(password);
     writeContents();
   }
+
+  public void changePassword(int userID, String newPassword) throws IOException {
+    returnPasswords().put(userID, newPassword);
+    writeContents();
+  }
 }
 
