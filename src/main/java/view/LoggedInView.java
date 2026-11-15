@@ -12,8 +12,9 @@ public class LoggedInView extends JPanel implements LoggedInViewModelListener {
     private static final int SQUARE_SIZE = 80;
 
     private final LoggedInViewModel loggedInViewModel;
-    private final JLabel username = new JLabel();
     private final JButton[][] squares = new JButton[GRID_SIZE][GRID_SIZE];
+    private final JButton galleryButton = new JButton("Gallery");
+    private final JLabel numberPlants = new JLabel("Plants in Gallery: 0", SwingConstants.CENTER);
 
     public LoggedInView(LoggedInViewModel loggedInViewModel) {
         this.loggedInViewModel = loggedInViewModel;
@@ -31,8 +32,15 @@ public class LoggedInView extends JPanel implements LoggedInViewModelListener {
                 grid.add(square);
             }
         }
-        setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
-        add(grid);
+
+        final JPanel galleryInfo = new JPanel(new GridLayout(2, 1));
+        galleryButton.addActionListener(evt -> galleryButtonClicked());
+        galleryInfo.add(galleryButton);
+        galleryInfo.add(numberPlants);
+
+        setLayout(new BorderLayout());
+        add(grid, BorderLayout.CENTER);
+        add(galleryInfo, BorderLayout.EAST);
     }
 
     /**
@@ -44,6 +52,10 @@ public class LoggedInView extends JPanel implements LoggedInViewModelListener {
         // TODO: CODE PLANT ACTIONS
     }
 
+    private void galleryButtonClicked(){
+        // TODO: CODE GALLERY
+    }
+
     @Override
     public void stateChanged() {
         final LoggedInState state = loggedInViewModel.getState();
@@ -53,4 +65,7 @@ public class LoggedInView extends JPanel implements LoggedInViewModelListener {
             ((JFrame) window).setTitle("Logged in as: " + state.getUsername());
         }
     }
+
+    // TODO: CODE PLANT COUNT
+    // changeCountLabel.setText("Plants in Gallery: " + stat.getChangeCount());
 }
