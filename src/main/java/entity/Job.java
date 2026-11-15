@@ -27,8 +27,8 @@ public class Job {
      * @param date the date
      * @param description the description
      * @param locations the locations
-     * @param salary the description
-     * @param url the locations
+     * @param salary the salary
+     * @param url the url
      */
     public Job(String title, ArrayList<String> SkillsNeeded, String company,
                String date, String description, String locations, String salary, String url) {
@@ -44,5 +44,40 @@ public class Job {
         this.url = url;
     }
 
+    public int getId() {
+        return id;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public ArrayList<String> getSkillsNeeded() {
+        return SkillsNeeded;
+    }
+
+    public String getCompany() {
+        return company;
+    }
+
+    public String getDate() {
+        return date;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public String getLocations() {
+        return locations;
+    }
+
+    public String getSalary() {
+        return salary;
+    }
+
+    public String getUrl() {
+        return url;
+    }
 
 }
