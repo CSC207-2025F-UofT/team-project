@@ -2,7 +2,7 @@ package app;
 
 import data_access.FileUserDataAccessObject;
 import entity.UserFactory;
-import interface_adapter.signup.LoginSignupViewModel;
+import interface_adapter.login_signup.LoginSignupViewModel;
 import interface_adapter.signup.SignupController;
 import interface_adapter.signup.SignupPresenter;
 import use_case.signup.SignupInputBoundary;

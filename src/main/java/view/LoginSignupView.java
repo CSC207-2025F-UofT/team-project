@@ -2,11 +2,9 @@ package view;
 
 import interface_adapter.signup.SignupController;
 import interface_adapter.signup.LoginSignupState;
-import interface_adapter.signup.LoginSignupViewModel;
-import interface_adapter.signup.LoginSignupViewModelListener;
+import interface_adapter.login_signup.LoginSignupViewModel;
+import interface_adapter.login_signup.LoginSignupViewModelListener;
 
-import javax.swing.*;
-import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import javax.swing.BoxLayout;

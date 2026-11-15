@@ -1,4 +1,4 @@
-package interface_adapter.signup;
+package interface_adapter.login_signup;
 
 /**
  * Listener for changes to the LoginSignupViewModel’s state.
