@@ -1,13 +1,12 @@
 package data_access.photo;
 
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Map;
 import java.util.Optional;
 
-import archive.ArchiveManagerInterface;
 import entity.ImageType;
 import entity.Photo;
+import data_access.StorageResolver;
 
 public class PhotoResolver {
     private static final String PHOTOS_FOLDER_NAME = "photos";
@@ -25,10 +24,10 @@ public class PhotoResolver {
         ImageType.WEBP, "webp"
     );
 
-    private final ArchiveManagerInterface archiveManager;
+    private final StorageResolver storageResolver;
 
-    public PhotoResolver(ArchiveManagerInterface archiveManager) {
-        this.archiveManager = archiveManager;
+    public PhotoResolver(StorageResolver storageResolver) {
+        this.storageResolver = storageResolver;
     }
 
     private static String getImageTypeExtension(ImageType type) {
@@ -66,7 +65,7 @@ public class PhotoResolver {
     public Path getPhotoPath(Photo photo) {
         String fileName = photo.getId() + '.' + getImageTypeExtension(photo.getType());
 
-        return archiveManager.getDirectory()
+        return storageResolver.getDirectory()
             .resolve(PHOTOS_FOLDER_NAME)
             .resolve(fileName);
     }
