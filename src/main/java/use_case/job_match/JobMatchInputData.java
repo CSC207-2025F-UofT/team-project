@@ -1,14 +1,14 @@
 package use_case.job_match;
 
 /**
- * The input data for the Change Password Use Case.
+ * The input data for the Job Match Use Case.
  */
-public class ChangePasswordInputData {
+public class JobMatchInputData {
 
     private final String password;
     private final String username;
 
-    public ChangePasswordInputData(String password, String username) {
+    public JobMatchInputData(String password, String username) {
         this.password = password;
         this.username = username;
     }
