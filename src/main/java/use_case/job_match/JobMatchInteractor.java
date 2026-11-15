@@ -1,7 +1,9 @@
 package use_case.job_match;
 
+import entity.Job;
 import entity.Student;
-import entity.StudentFactory;
+
+import java.util.ArrayList;
 
 /**
  * The Job Match Interactor.
@@ -9,29 +11,18 @@ import entity.StudentFactory;
 public class JobMatchInteractor implements JobMatchInputBoundary {
     private final JobMatchUserDataAccessInterface userDataAccessObject;
     private final JobMatchOutputBoundary userPresenter;
-    private final StudentFactory studentFactory;
 
     public JobMatchInteractor(JobMatchUserDataAccessInterface jobMatchDataAccessInterface,
-                                    JobMatchOutputBoundary jobMatchOutputBoundary,
-                                    StudentFactory studentFactory) {
+                              JobMatchOutputBoundary jobMatchOutputBoundary) {
         this.userDataAccessObject = jobMatchDataAccessInterface;
         this.userPresenter = jobMatchOutputBoundary;
-        this.studentFactory = studentFactory;
     }
 
     @Override
     public void execute(JobMatchInputData jobMatchInputData) {
-        if ("".equals(jobMatchInputData.getPassword())) {
-            userPresenter.prepareFailView("New password cannot be empty");
-        }
-        else {
-            final Student student = studentFactory.create(jobMatchInputData.getUsername(),
-                    jobMatchInputData.getPassword());
-
-            userDataAccessObject.changePassword(student);
-
-            final JobMatchOutputData jobMatchOutputData = new JobMatchOutputData(student.getName());
-            userPresenter.prepareSuccessView(jobMatchOutputData);
-        }
+        final Student student = jobMatchInputData.getStudent();
+        final ArrayList<Job> jobs = userDataAccessObject.getJobs(student);
+        final JobMatchOutputData jobMatchOutputData = new JobMatchOutputData(jobs);
+        userPresenter.prepareSuccessView(jobMatchOutputData);
     }
 }

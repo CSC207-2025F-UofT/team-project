@@ -1,6 +1,9 @@
 package use_case.job_match;
 
+import entity.Job;
 import entity.Student;
+
+import java.util.ArrayList;
 
 /**
  * The DAO interface for the Job Match Use Case.
@@ -8,8 +11,8 @@ import entity.Student;
 public interface JobMatchUserDataAccessInterface {
 
     /**
-     * Updates the system to record this user's password as part of the Job Match Use Case.
-     * @param student the user whose password is to be updated
+     * Finds jobs matching the given student's courses and skills.
+     * @param student the student whose profile is used for matching
      */
-    void changePassword(Student student);
+    ArrayList<Job> getJobs(Student student);
 }

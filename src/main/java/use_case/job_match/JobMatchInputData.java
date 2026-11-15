@@ -1,24 +1,20 @@
 package use_case.job_match;
 
+import entity.Student;
+
 /**
  * The input data for the Job Match Use Case.
  */
 public class JobMatchInputData {
 
-    private final String password;
-    private final String username;
+    private final Student student;
 
-    public JobMatchInputData(String password, String username) {
-        this.password = password;
-        this.username = username;
+    public JobMatchInputData(Student student) {
+        this.student = student;
     }
 
-    String getPassword() {
-        return password;
-    }
-
-    String getUsername() {
-        return username;
+    public Student getStudent() {
+        return student;
     }
 
 }

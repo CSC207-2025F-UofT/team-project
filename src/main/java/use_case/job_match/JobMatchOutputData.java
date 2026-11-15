@@ -1,17 +1,21 @@
 package use_case.job_match;
 
+import entity.Job;
+
+import java.util.ArrayList;
+
 /**
  * Output Data for the Job Match Use Case.
  */
 public class JobMatchOutputData {
 
-    private final String username;
+    private final ArrayList<Job> jobs;
 
-    public JobMatchOutputData(String username) {
-        this.username = username;
+    public JobMatchOutputData(ArrayList<Job> jobs) {
+        this.jobs = new ArrayList<>(jobs);
     }
 
-    public String getUsername() {
-        return username;
+    public ArrayList<Job> getJobs() {
+        return new ArrayList<>(jobs);
     }
 }
