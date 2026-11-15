@@ -3,7 +3,7 @@ package entity;
 import java.util.ArrayList;
 
 /**
- * Factory for creating CommonUser objects.
+ * Factory for creating student objects.
  */
 public class StudentFactory {
 
