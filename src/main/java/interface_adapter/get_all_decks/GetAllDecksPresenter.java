@@ -1,7 +1,6 @@
 package interface_adapter.get_all_decks;
 
 import interface_adapter.ViewManagerModel;
-import interface_adapter.get_deck.GetDeckViewModel;
 import use_case.get_all_decks.GetAllDecksOutputBoundary;
 import use_case.get_all_decks.GetAllDecksOutputData;
 
