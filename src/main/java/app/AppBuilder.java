@@ -81,6 +81,7 @@ public class AppBuilder {
 
         GetDeckController controller = new GetDeckController(getDeckInteractor);
         deckView.setGetDeckController(controller);
+        homescreenView.setGetDeckController(controller);
         return this;
     }
 
@@ -103,6 +104,6 @@ public class AppBuilder {
     public void setGUI() {
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-        } catch (Exception ignored) {}
+        } catch (Exception ignored) { }
     }
 }
