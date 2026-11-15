@@ -2,6 +2,7 @@ package view.board;
 
 import view.DrawingCanvas;
 import workspace.domain.SavedCanvas;
+import view.glass.GlassDialogs;
 import workspace.use_case.CanvasWorkspaceBoundary;
 import javax.swing.*;
 import java.awt.*;
@@ -29,23 +30,21 @@ public final class CanvasWorkspaceDialogs {
                     .map(SavedCanvas::name).findFirst().orElse("Untitled canvas");
             boolean saveAs = !existing;
             if (existing) {
-                Object[] options = {"Save", "Save As…", "Cancel"};
-                int choice = JOptionPane.showOptionDialog(parent, "Save the current editable canvas?",
-                        "Save canvas", JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE,
-                        null, options, options[0]);
+                int choice = GlassDialogs.options(parent, "Save canvas",
+                        "Save the current editable canvas?", "Save", "Save As…", "Cancel");
                 if (choice == 0) saveAs = false;
                 else if (choice == 1) saveAs = true;
                 else return;
             }
             String name = currentName;
             if (saveAs) {
-                name = JOptionPane.showInputDialog(parent, "Canvas name:", currentName);
+                name = GlassDialogs.input(parent, "Save canvas as", "Canvas name:", currentName, "Save");
                 if (name == null) return;
                 if (name.isBlank()) { message("Please provide a canvas name."); return; }
             }
             SavedCanvas saved = workspace.save(canvas.exportCanvasState(), name, saveAs);
             message("Saved: " + saved.name());
-        } catch (IOException | IllegalArgumentException ex) { message("Unable to save canvas: " + ex.getMessage()); }
+        } catch (IOException | IllegalArgumentException ex) { GlassDialogs.error(parent, "Unable to save canvas: " + ex.getMessage()); }
     }
     public void open() {
         try {
@@ -67,14 +66,13 @@ public final class CanvasWorkspaceDialogs {
             });
             JScrollPane scroll = new JScrollPane(list);
             scroll.setPreferredSize(new Dimension(380, 235));
-            int choice = JOptionPane.showConfirmDialog(parent, scroll, "Open saved canvas",
-                    JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
-            if (choice != JOptionPane.OK_OPTION || list.getSelectedValue() == null) return;
-            if (!canvas.isBlank() && JOptionPane.showConfirmDialog(parent,
+            if (!GlassDialogs.choose(parent, "Open saved canvas", scroll, "Open")
+                    || list.getSelectedValue() == null) return;
+            if (!canvas.isBlank() && !GlassDialogs.confirm(parent, "Open canvas",
                     "Opening another canvas replaces the current unsaved drawing. Continue?",
-                    "Open canvas", JOptionPane.YES_NO_OPTION) != JOptionPane.YES_OPTION) return;
+                    "Open")) return;
             canvas.restoreCanvasState(workspace.open(list.getSelectedValue().id()).state());
-        } catch (IOException e) { message("Unable to open canvas: " + e.getMessage()); }
+        } catch (IOException e) { GlassDialogs.error(parent, "Unable to open canvas: " + e.getMessage()); }
     }
     public void restoreLatestAtStartup() {
         try {
@@ -85,5 +83,5 @@ public final class CanvasWorkspaceDialogs {
             System.err.println("Unable to restore saved canvas: " + failure.getMessage());
         }
     }
-    private void message(String text) { JOptionPane.showMessageDialog(parent, text); }
+    private void message(String text) { GlassDialogs.info(parent, text); }
 }

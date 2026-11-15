@@ -6,6 +6,7 @@ import org.scilab.forge.jlatexmath.TeXIcon;
 import view.board.BoardTheme;
 import view.board.GlassBar;
 import view.board.Icons;
+import view.glass.GlassStatusPill;
 import view.stack.Fonts;
 
 import javax.swing.JComponent;
@@ -219,7 +220,7 @@ public class AnswerPopup extends JPanel {
         }
 
         private Font textFont() {
-            return problem != null ? Fonts.ui(Font.PLAIN, 13f) : Fonts.ui(Font.PLAIN, 16f);
+            return problem != null ? BoardTheme.font(13f) : Fonts.ui(Font.PLAIN, 16f);
         }
 
         private String text() {
@@ -238,7 +239,8 @@ public class AnswerPopup extends JPanel {
                 w = Math.min(MAX_TEXT, fm.stringWidth(text()));
                 h = fm.getHeight();
             }
-            return new Dimension(w + 2 * PAD_X + SHADOW, h + 2 * PAD_Y + SHADOW);
+            return new Dimension(w + 2 * PAD_X + SHADOW + (problem != null ? 21 : 0),
+                    h + 2 * PAD_Y + SHADOW);
         }
 
         @Override
@@ -248,16 +250,21 @@ public class AnswerPopup extends JPanel {
             g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
             int w = getWidth() - SHADOW;
             int h = getHeight() - SHADOW;
-            for (int i = 1; i <= SHADOW; i++) {
-                g2.setColor(new Color(15, 23, 42, 7));
-                g2.fill(new RoundRectangle2D.Double(i * 0.4, i * 0.8, w + i * 0.2, h + i * 0.2, ARC + i, ARC + i));
+            if (problem != null) {
+                GlassStatusPill.paintError(g2, w, h);
+            } else {
+                for (int i = 1; i <= SHADOW; i++) {
+                    g2.setColor(new Color(15, 23, 42, 7));
+                    g2.fill(new RoundRectangle2D.Double(i * 0.4, i * 0.8, w + i * 0.2,
+                            h + i * 0.2, ARC + i, ARC + i));
+                }
+                RoundRectangle2D shape = new RoundRectangle2D.Double(0, 0, w - 1, h - 1, ARC, ARC);
+                g2.setColor(Color.WHITE);
+                g2.fill(shape);
+                g2.setStroke(new BasicStroke(1f));
+                g2.setColor(BORDER);
+                g2.draw(shape);
             }
-            RoundRectangle2D shape = new RoundRectangle2D.Double(0, 0, w - 1, h - 1, ARC, ARC);
-            g2.setColor(Color.WHITE);
-            g2.fill(shape);
-            g2.setStroke(new BasicStroke(1f));
-            g2.setColor(BORDER);
-            g2.draw(shape);
             if (icon != null) {
                 icon.setForeground(Color.BLACK);
                 icon.paintIcon(this, g2, PAD_X, PAD_Y);
@@ -265,8 +272,9 @@ public class AnswerPopup extends JPanel {
                 g2.setFont(textFont());
                 g2.setColor(problem != null ? ERROR_TEXT : Color.DARK_GRAY);
                 FontMetrics fm = g2.getFontMetrics();
-                g2.clipRect(PAD_X, 0, w - 2 * PAD_X, h);
-                g2.drawString(text(), PAD_X, PAD_Y + fm.getAscent());
+                int textX = PAD_X + (problem != null ? 21 : 0);
+                g2.clipRect(textX, 0, Math.max(1, w - textX - PAD_X), h);
+                g2.drawString(text(), textX, PAD_Y + fm.getAscent());
             }
             g2.dispose();
         }

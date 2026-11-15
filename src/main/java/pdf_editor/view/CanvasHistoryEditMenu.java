@@ -1,6 +1,7 @@
 package pdf_editor.view;
 
 import view.DrawingCanvas;
+import view.glass.GlassDialogs;
 import javax.swing.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -19,11 +20,11 @@ public final class CanvasHistoryEditMenu {
                 JPopupMenu popup = new JPopupMenu();
                 JMenuItem edit = new JMenuItem("Edit imported formula (LaTeX)…");
                 edit.addActionListener(a -> {
-                    String formula = JOptionPane.showInputDialog(canvas, "LaTeX formula",
-                            canvas.selectedHistoryFormula());
+                    String formula = GlassDialogs.input(canvas, "Edit formula", "LaTeX formula",
+                            canvas.selectedHistoryFormula(), "Apply");
                     if (formula == null || formula.isBlank()) return;
-                    String answer = JOptionPane.showInputDialog(canvas, "Result (optional)",
-                            canvas.selectedHistoryResult());
+                    String answer = GlassDialogs.input(canvas, "Edit result", "Result (optional)",
+                            canvas.selectedHistoryResult(), "Apply");
                     if (answer == null) return;
                     BufferedImage image = render.apply(formula, answer);
                     canvas.editHistoryAsset(formula, answer, image);
