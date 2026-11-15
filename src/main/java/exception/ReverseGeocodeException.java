@@ -3,11 +3,11 @@ package exception;
 import java.lang.RuntimeException;
 
 public class ReverseGeocodeException extends RuntimeException {
-    public LocationServiceException(String message) {
+    public ReverseGeocodeException(String message) {
         super(message);
     }
 
-    public LocationServiceException(String message, Throwable cause) {
+    public ReverseGeocodeException(String message, Throwable cause) {
         super(message, cause);
     }
 }
