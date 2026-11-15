@@ -361,7 +361,7 @@ Analyze course descriptions to determine relevant skills, and match skills to di
 
 **Timetable Builder API:**
 
-**Documentation:** [https://apis.io/providers/university-of-toronto/, https://api.easi.utoronto.ca/ttb/reference-data]
+**Documentation:** [https://apis.io/providers/university-of-toronto/, https://api.easi.utoronto.ca/ttb/reference-data, https://api.easi.utoronto.ca/ttb/getCoursesByCodeAndSectionCode]
 
 **How it is used in the program:**
 To validate course title, and check description of courses.
