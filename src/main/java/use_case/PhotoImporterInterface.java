@@ -1,4 +1,4 @@
-package usecase;
+package use_case;
 
 import java.util.List;
 import java.nio.file.Path;
