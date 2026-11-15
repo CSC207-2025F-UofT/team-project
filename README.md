@@ -41,7 +41,7 @@ As a user, I want to request a new outfit generation or save a generated outfit 
 As a user, I want to view a visual grid of all items in my wardrobe filtered by category (tops, bottoms, shoes) so that I can inspect my available clothes easily. (just a list of tops, bottoms, shoes..., most worn outfit)
 
 ## Use Cases
-**Name:** Add Clothing Item
+### Use Case 1: Add Clothing Item
 **Primary Actor:** User
 **Preconditions:** ?
 **Trigger:** The user selects the "Add Item" button.
@@ -59,7 +59,7 @@ As a user, I want to view a visual grid of all items in my wardrobe filtered by 
 **Success Outcome:** The new clothing item is saved in the user's closet and is visible under the selected category.
 
 
-**Name:** Generate Random Outfit
+### Use Case 2: Generate Random Outfit
 **Primary Actor:** User
 **Preconditions:** ?
 **Trigger:** The user selects the "Randomize" button.
@@ -76,7 +76,7 @@ As a user, I want to view a visual grid of all items in my wardrobe filtered by 
 **Success Outcome:** The user sees a randomly selected, weather-appropriate outfit created from items from their closet.
 
 
-**Name:** Generate Custom Outfit
+### Use Case 3: Generate Custom Outfit
 **Primary Actor:** User
 **Preconditions:** ?
 **Trigger:** The user selects the "Custom Outfit" option.
@@ -89,7 +89,7 @@ As a user, I want to view a visual grid of all items in my wardrobe filtered by 
 **Success Outcome:** The user sees a weather-appropriate outfit from their closet that matches the preferences they selected.
 
 
-**Name:** Save Outfit
+### Use Case 3: Save Outfit
 **Primary Actor:** User
 **Preconditions:** ?
 **Trigger:** The user selects the "Save Outfit" button.
@@ -104,7 +104,7 @@ As a user, I want to view a visual grid of all items in my wardrobe filtered by 
 **Success Outcome:** The outfit appears in the user's favourites.
 
 
-**Name:** Regenerate Outfit
+### Use Case 4: Regenerate Outfit
 **Primary Actor:** User
 **Preconditions:** ?
 **Trigger:** The user selects the "Regenerate Outfit" button.
@@ -119,7 +119,7 @@ As a user, I want to view a visual grid of all items in my wardrobe filtered by 
 **Success Outcome:** The user sees a different outfit that meets the current recommendation criteria.
 
 
-**Name:** View Closet Inventory
+### Use Case 5: View Closet Inventory
 **Primary Actor:** User
 **Preconditions:** ?
 **Trigger:** The user selects the "My Closet" button.
