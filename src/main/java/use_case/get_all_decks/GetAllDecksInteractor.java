@@ -37,8 +37,5 @@ public class GetAllDecksInteractor implements GetAllDecksInputBoundary {
             getAllDecksPresenter.prepareSuccessView(getAllDecksOutputData);
         }
     }
-
-    @Override
-    public void switchToDeckView() { getAllDecksPresenter.switchToDeckView(); }
 }
 

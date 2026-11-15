@@ -16,9 +16,4 @@ public interface GetAllDecksOutputBoundary {
      * @param errorMessage the explanation of the failure
      */
     void prepareEmptyView(String errorMessage);
-
-    /**
-     * Switches to the Deck View.
-     */
-    void switchToDeckView();
 }

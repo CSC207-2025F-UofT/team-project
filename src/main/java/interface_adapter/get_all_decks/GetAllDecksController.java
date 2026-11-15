@@ -22,12 +22,4 @@ public class GetAllDecksController {
 
         getAllDecksUseCaseInteractor.execute(getAllDecksInputData);
     }
-
-    /**
-     * Executes the "switch to DeckView" Use Case.
-     */
-    public void switchToDeckView() {
-        getAllDecksUseCaseInteractor.switchToDeckView();
-    }
 }
-
