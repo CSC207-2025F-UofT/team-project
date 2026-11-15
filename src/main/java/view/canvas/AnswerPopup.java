@@ -25,7 +25,7 @@ import java.awt.geom.RoundRectangle2D;
 import java.util.function.Consumer;
 import java.util.function.LongSupplier;
 
-// glass capsule (Calculate, maybe Graph) + white card with the recognised formula
+// glass capsule (Calculate, Graph or both) + white card with the recognised formula
 public class AnswerPopup extends JPanel {
     private static final float TEX_SIZE = 22f;
     private static final int CARD_SHIFT = 24;   // card sits a bit right of the button
@@ -42,15 +42,16 @@ public class AnswerPopup extends JPanel {
     private static final Color ERROR_TEXT = new Color(185, 28, 28);
 
     private final GlassBar calcBar;   // Calculate only
+    private final GlassBar graphBar;  // Graph only
     private final GlassBar bothBar;   // Calculate + Graph
     private final GlassBar.Item calcOnly;
+    private final GlassBar.Item graphOnly;
     private final GlassBar.Item calcItem;
     private final GlassBar.Item graphItem;
     private GlassBar bar;             // the one on show, null for a problem
     private final Card card = new Card();
     private Runnable onCalculate = () -> { };
     private Runnable onGraph = () -> { };
-    private boolean graphable;
     private String latex;
     private String problem;
     private TeXIcon icon;
@@ -66,14 +67,19 @@ public class AnswerPopup extends JPanel {
         calcBar = newBar(backdrop, version);
         calcOnly = calcBar.action("Calculate", Icons::equalCircle, () -> onCalculate.run(), () -> true);
         calcBar.finish();
+        graphBar = newBar(backdrop, version);
+        graphOnly = graphBar.action("Graph", Icons::scribble, () -> onGraph.run(), () -> true);
+        graphBar.finish();
         bothBar = newBar(backdrop, version);
         calcItem = bothBar.action("Calculate", Icons::equalCircle, () -> onCalculate.run(), () -> true);
-        graphItem = bothBar.action("Graph", Icons::scribble, () -> onGraph.run(), () -> graphable);
+        graphItem = bothBar.action("Graph", Icons::scribble, () -> onGraph.run(), () -> true);
         bothBar.finish();
         add(calcBar);
+        add(graphBar);
         add(bothBar);
         add(card);
         calcBar.setVisible(false);
+        graphBar.setVisible(false);
         bothBar.setVisible(false);
         setVisible(false);
     }
@@ -86,22 +92,17 @@ public class AnswerPopup extends JPanel {
     }
 
     public void showFormula(String latex, Runnable onCalculate) {
-        show(latex, onCalculate, null, false);
+        showFormula(latex, onCalculate, null);
     }
 
-    // board popup: Graph next to Calculate, grey when the formula can't be plotted
-    public void showFormula(String latex, Runnable onCalculate, Runnable onGraph, boolean graphable) {
-        show(latex, onCalculate, onGraph, graphable);
-    }
-
-    private void show(String latex, Runnable onCalculate, Runnable onGraph, boolean graphable) {
+    // board popup: null = that button's left out, at least one of them is set
+    public void showFormula(String latex, Runnable onCalculate, Runnable onGraph) {
         this.latex = latex;
         this.problem = null;
-        this.onCalculate = onCalculate;
+        this.onCalculate = onCalculate == null ? () -> { } : onCalculate;
         this.onGraph = onGraph == null ? () -> { } : onGraph;
-        this.graphable = graphable;
         icon = typeset(latex);
-        bar = onGraph == null ? calcBar : bothBar;
+        bar = onGraph == null ? calcBar : onCalculate == null ? graphBar : bothBar;
         relayout();
     }
 
@@ -150,24 +151,16 @@ public class AnswerPopup extends JPanel {
     }
 
     boolean hasCalculate() {
-        return bar != null;
+        return bar == calcBar || bar == bothBar;
     }
 
     boolean hasGraph() {
-        return bar == bothBar;
-    }
-
-    boolean isGraphEnabled() {
-        return bar == bothBar && graphItem.isEnabled();
-    }
-
-    boolean isCalculateEnabled() {
-        return bar != null && (bar == bothBar ? calcItem : calcOnly).isEnabled();
+        return bar == graphBar || bar == bothBar;
     }
 
     void clickGraph() {
-        if (bar == bothBar) {
-            bothBar.activate(graphItem);
+        if (hasGraph()) {
+            bar.activate(bar == bothBar ? graphItem : graphOnly);
         }
     }
 
@@ -176,7 +169,7 @@ public class AnswerPopup extends JPanel {
     }
 
     void clickCalculate() {
-        if (bar != null) {
+        if (hasCalculate()) {
             bar.activate(bar == bothBar ? calcItem : calcOnly);
         }
     }
@@ -192,6 +185,7 @@ public class AnswerPopup extends JPanel {
     // the bar has a clear margin for its shadow, the card lines up with the capsule
     private void relayout() {
         calcBar.setVisible(bar == calcBar);
+        graphBar.setVisible(bar == graphBar);
         bothBar.setVisible(bar == bothBar);
         Dimension c = card.getPreferredSize();
         if (bar != null) {

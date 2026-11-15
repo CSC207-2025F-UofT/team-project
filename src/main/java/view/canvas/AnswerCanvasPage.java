@@ -29,8 +29,10 @@ import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 // answer page: pause after an "=" -> popup with the read formula -> Calculate -> answer on the canvas
@@ -60,7 +62,10 @@ public class AnswerCanvasPage extends CanvasPage {
     private PopupGraphing graphing;   // one board only: Graph in the popup
     private PopupHover hover;         // mouse on an unanswered "=" brings the popup back
     private final Map<Long, Read> reads = new HashMap<>();  // last read per formula
+    private final Map<Long, Long> defined = new HashMap<>();  // id -> revision saved as a f(x)=...
     private Predicate<String> graphable = latex -> false;
+    private Predicate<String> definitionCheck = latex -> false;
+    private Predicate<String> calculable = latex -> true;
     private final PopupGate gate = new PopupGate();
 
     // no evaluate feature, just a placeholder
@@ -136,6 +141,16 @@ public class AnswerCanvasPage extends CanvasPage {
 
     public void addBoardOverlay(JComponent overlay) {
         addCanvasOverlay(overlay);
+    }
+
+    // f(x)=... lines get saved right away, no Calculate click
+    public void setDefinitionCheck(Predicate<String> definitionCheck) {
+        this.definitionCheck = definitionCheck;
+    }
+
+    // only-graphable lines (y=3x, f(x)=x^2) drop Calculate
+    public void setCalculateCheck(Predicate<String> calculable) {
+        this.calculable = calculable;
     }
 
     // tests type ranges like the user
@@ -249,6 +264,7 @@ public class AnswerCanvasPage extends CanvasPage {
             capture = nextWaiting();
         }
         if (capture != null) {
+            readAhead();
             recognize(capture, generation);
         }
     }
@@ -284,6 +300,20 @@ public class AnswerCanvasPage extends CanvasPage {
             return;  // ink changed while we were reading it
         }
         reads.put(capture.getId(), new Read(capture.getRevision(), latex, problem));  // for hovering later
+        if (problem == null && definitionCheck.test(latex)) {
+            define(capture, latex, saved -> {
+                if (!saved) {
+                    offer(capture, gen, latex, problem);  // bad body, popup's Calculate shows why
+                } else if (gen == generation && inFront()) {
+                    offerNext(gen);
+                }
+            });
+            return;
+        }
+        offer(capture, gen, latex, problem);
+    }
+
+    private void offer(FormulaCapture capture, long gen, String latex, String problem) {
         if (gen != generation || !inFront()) {
             return;  // user moved on
         }
@@ -291,13 +321,60 @@ public class AnswerCanvasPage extends CanvasPage {
             if (hover.offered() == capture.getId()) {
                 hover.forget();  // hovered one has no "=" after all
             }
-            FormulaCapture next = nextWaiting();  // no "=" yet, quietly try the next one
-            if (next != null) {
-                recognize(next, gen);
-            }
+            offerNext(gen);  // no "=" yet, quietly try the next one
             return;
         }
         present(capture, latex, problem);
+    }
+
+    private void offerNext(long gen) {
+        FormulaCapture next = nextWaiting();
+        if (next != null) {
+            recognize(next, gen);
+        }
+    }
+
+    // read the queued ones now too, so a f(x)=... among them is saved before the newest gets Calculate
+    private void readAhead() {
+        for (long id : waiting) {
+            FormulaCapture capture = getSharedCanvas().captureForRecalculation(id);
+            Read r = reads.get(id);
+            if (capture == null || r != null && r.revision == capture.getRevision()) {
+                continue;  // answered, or read already
+            }
+            worker.recognize(() -> recognizeFormula(capture.getImage()), (latex, problem) -> {
+                if (!getSharedCanvas().isCurrent(capture.getId(), capture.getRevision())) {
+                    return;
+                }
+                reads.put(capture.getId(), new Read(capture.getRevision(), latex, problem));
+                if (problem == null && definitionCheck.test(latex)) {
+                    define(capture, latex, saved -> { });  // its popup comes later in turn
+                }
+            });
+        }
+    }
+
+    private boolean isDefined(long id, long revision) {
+        return Objects.equals(defined.get(id), revision);
+    }
+
+    // save f(x)=... quietly; saved=false means the body was bad
+    private void define(FormulaCapture capture, String latex, Consumer<Boolean> then) {
+        if (isDefined(capture.getId(), capture.getRevision())) {
+            then.accept(true);  // same ink saved already
+            return;
+        }
+        worker.calculate(latex, outcome -> {
+            if (!outcome.definition) {
+                then.accept(false);
+                return;
+            }
+            defined.put(capture.getId(), capture.getRevision());
+            ownMessage = true;
+            showMessage(outcome.result, false, DEFINED_MESSAGE_MILLIS);
+            publishFormulaOnly(capture, latex);  // saved = done, so PDF Studio gets it
+            then.accept(true);
+        });
     }
 
     private Formula formula(long id) {
@@ -313,8 +390,10 @@ public class AnswerCanvasPage extends CanvasPage {
         if (problem != null) {
             popup.showProblem(problem);
         } else if (graphing != null) {
-            popup.showFormula(latex, () -> calculate(capture, latex), () -> graph(capture, latex),
-                    graphable.test(latex));
+            boolean canGraph = graphable.test(latex);
+            boolean canCalc = !canGraph || calculable.test(latex);  // neither -> Calculate says why
+            popup.showFormula(latex, canCalc ? () -> calculate(capture, latex) : null,
+                    canGraph ? () -> graph(capture, latex) : null);
         } else {
             popup.showFormula(latex, () -> calculate(capture, latex));
         }
@@ -380,10 +459,8 @@ public class AnswerCanvasPage extends CanvasPage {
             if (getSharedCanvas().isCurrent(capture.getId(), capture.getRevision())) {
                 ownMessage = true;
                 showMessage(error, true, ERROR_MESSAGE_MILLIS);
-                // y=3x is a valid graphable relation, but the numeric evaluator
-                // rejects its two variables. A user explicitly asked to Calculate;
-                // retain the recognized formula without inventing a numerical answer.
-                if (latex != null && graphable.test(latex)) publishFormulaOnly(capture, latex);
+                // any Calculate goes to PDF Studio, errors just w/ no answer (y=3x, x+1=...)
+                publishFormulaOnly(capture, latex);
             }
         } else if (outcome.definition) {
             ownMessage = true;
@@ -469,7 +546,7 @@ public class AnswerCanvasPage extends CanvasPage {
 
         @Override
         public boolean wanted(Formula f) {
-            return gate.allows(f, latexOf(f.getId(), f.getRevision()));
+            return gate.allows(f, latexOf(f.getId(), f.getRevision()));  // saved f(x)=... too, for its Graph
         }
 
         @Override

@@ -3,9 +3,16 @@ package view.canvas;
 import data_access.InMemoryFunctionDataAccessObject;
 import view.answer.CanvasAnswer;
 import interface_adapter.MathLabViewModel;
+import interface_adapter.evaluate.DefinitionCheckController;
 import interface_adapter.evaluate.EvaluateController;
 import interface_adapter.evaluate.EvaluatePresenter;
+import interface_adapter.graph.GraphController;
+import interface_adapter.graph.GraphViewModel;
+import entity.LatexFunctionParser;
 import org.junit.jupiter.api.Test;
+import use_case.evaluate.CalculateCheckInteractor;
+import use_case.evaluate.DefinitionCheckInteractor;
+import use_case.graph_check.GraphCheckInteractor;
 import use_case.evaluate.EvaluateInteractor;
 import view.DrawingCanvas;
 
@@ -33,12 +40,14 @@ class AnswerCanvasPageTest {
     private final SharedCanvas shared = new SharedCanvas(canvas);
     private final MathLabViewModel viewModel = new MathLabViewModel();
     private AnswerCanvasPage page;
+    private final List<String> sent = new java.util.concurrent.CopyOnWriteArrayList<>();  // to PDF Studio, latex|result
 
     private void openPage() throws Exception {
         EvaluateController controller = new EvaluateController(new EvaluateInteractor(
                 new InMemoryFunctionDataAccessObject(), new EvaluatePresenter(viewModel)));
         SwingUtilities.invokeAndWait(() -> {
-            page = new AnswerCanvasPage(shared, controller, viewModel);
+            page = new AnswerCanvasPage(shared, controller, viewModel,
+                    (AnswerCanvasPage.FormulaResultSink) (id, latex, result) -> sent.add(latex + "|" + result));
             page.setPopupDelay(100);
             shared.attachTo(page);
             page.setSize(900, 560);
@@ -330,6 +339,104 @@ class AnswerCanvasPageTest {
         assertTrue(answers().isEmpty());
     }
 
+    // A f(x)=x^2+2x (50 tall), B f(2)= (30 tall) far away
+    private void defineThenCall() {
+        shared.setFormulaRecognizer(image -> image.getHeight() < 80 ? "f(2)=" : "f(x)=x^{2}+2x");
+    }
+
+    private void autoDefine() throws Exception {
+        DefinitionCheckController check = new DefinitionCheckController(new DefinitionCheckInteractor());
+        onEdt(() -> page.setDefinitionCheck(check::isDefinition));
+    }
+
+    private boolean definedShown() {
+        return !page.isMessageError() && page.currentMessage() != null && page.currentMessage().startsWith("Defined");
+    }
+
+    @Test
+    void definitionIsSavedWithoutCalculate() throws Exception {
+        defineThenCall();
+        openPage();
+        autoDefine();
+        write();
+        waitFor(this::definedShown, "the Defined message");
+        assertNull(popup(), "nothing to click");
+
+        drag(400, 300, 420, 330);
+        waitPopup("f(2)=");
+        clickCalculate();
+        waitFor(() -> answerIs("8"), "f(2)");
+    }
+
+    @Test
+    void definitionWrittenRightBeforeTheCallIsSavedFirst() throws Exception {
+        defineThenCall();
+        openPage();
+        autoDefine();
+        onEdt(() -> page.setPopupDelay(400));
+        write();                                     // f(x)=...
+        drag(400, 300, 420, 330);                    // f(2)= right after, no pause
+        waitPopup("f(2)=");
+        clickCalculate();
+        waitFor(() -> answerIs("8"), "f(2)");
+        Thread.sleep(400);
+        assertNull(popup(), "f(x) line doesn't pop up after");
+    }
+
+    @Test
+    void badDefinitionStillGetsThePopup() throws Exception {
+        shared.setFormulaRecognizer(image -> "f(x)=x+y");
+        openPage();
+        autoDefine();
+        write();
+        waitPopup("f(x)=x+y");
+        assertFalse(errorShown("f(x)"), "no error till Calculate");
+        clickCalculate();
+        waitFor(() -> errorShown("f(x) can only use x, not y"), "the error");
+    }
+
+    @Test
+    void autoSavedDefinitionGoesToPdfStudio() throws Exception {
+        shared.setFormulaRecognizer(image -> "f(x)=x^{2}+2x");
+        openPage();
+        autoDefine();
+        write();
+        waitFor(this::definedShown, "the Defined message");
+        waitFor(() -> sent.equals(List.of("f(x)=x^{2}+2x|")), "sent once, no answer");
+    }
+
+    @Test
+    void errorAfterCalculateStillGoesToPdfStudio() throws Exception {
+        shared.setFormulaRecognizer(image -> "x+1=");
+        openPage();
+        write();
+        waitPopup("x+1=");
+        clickCalculate();
+        waitFor(() -> page.isMessageError(), "the error");
+        waitFor(() -> sent.equals(List.of("x+1=|")), "sent w/ no answer");
+    }
+
+    @Test
+    void halfWrittenInkNeverGoesToPdfStudio() throws Exception {
+        shared.setFormulaRecognizer(image -> "1+");
+        openPage();
+        autoDefine();
+        write();
+        Thread.sleep(400);
+        assertNull(popup());
+        assertTrue(sent.isEmpty());
+    }
+
+    @Test
+    void definitionWithNoBodyYetWaitsQuietly() throws Exception {
+        shared.setFormulaRecognizer(image -> "f(x)=");
+        openPage();
+        autoDefine();
+        write();
+        waitPopup("f(x)=");
+        assertNull(page.currentMessage());
+    }
+
     @Test
     void undoToAnsweredStateDoesNotPopUp() throws Exception {
         AtomicInteger calls = new AtomicInteger();
@@ -601,6 +708,20 @@ class AnswerCanvasPageTest {
     }
 
     @Test
+    void savedDefinitionStillPopsUpOnHover() throws Exception {
+        shared.setFormulaRecognizer(image -> image.getWidth() > 200 ? "f(x)=2x+3x^{2}" : ".");
+        openPage();
+        autoDefine();
+        writeQuadratic();
+        waitFor(this::definedShown, "the Defined message");
+        assertNull(popup());
+        Thread.sleep(400);
+
+        hover(130, 120);                    // on the "=", Graph lives in this popup
+        waitPopup("f(x)=2x+3x^{2}");
+    }
+
+    @Test
     void hoverDoesntWaitForAStrayDotsPause() throws Exception {
         AtomicInteger dotReads = new AtomicInteger();
         shared.setFormulaRecognizer(image -> {
@@ -668,5 +789,52 @@ class AnswerCanvasPageTest {
         Thread.sleep(600);
         assertNull(popup());
         assertEquals(1, calls.get(), "never read as a pick");
+    }
+
+    // board page: real graph + calculate checks, graphing itself never runs
+    private void openBoard() throws Exception {
+        InMemoryFunctionDataAccessObject functions = new InMemoryFunctionDataAccessObject();
+        EvaluateController controller = new EvaluateController(new EvaluateInteractor(
+                functions, new EvaluatePresenter(viewModel)));
+        GraphCheckInteractor graphCheck = new GraphCheckInteractor(new LatexFunctionParser());
+        CalculateCheckInteractor calcCheck = new CalculateCheckInteractor(functions);
+        SwingUtilities.invokeAndWait(() -> {
+            page = new AnswerCanvasPage(shared, controller, viewModel, (id, latex, result) -> { },
+                    new GraphController(input -> { }), new GraphViewModel(), graphCheck::canGraph,
+                    java.awt.Color.WHITE, 0);
+            page.setCalculateCheck(calcCheck::canCalculate);
+            page.setPopupDelay(100);
+            shared.attachTo(page);
+            page.setSize(900, 560);
+            layout(page);
+        });
+    }
+
+    private void boardPopupFor(String latex) throws Exception {
+        shared.setFormulaRecognizer(image -> latex);
+        openBoard();
+        write();
+        waitPopup(latex);
+    }
+
+    @Test
+    void sumOnlyGetsCalculate() throws Exception {
+        boardPopupFor("1+1=");
+        assertTrue(popup().hasCalculate());
+        assertFalse(popup().hasGraph());
+    }
+
+    @Test
+    void lineOnlyGetsGraph() throws Exception {
+        boardPopupFor("y=3x");
+        assertFalse(popup().hasCalculate());
+        assertTrue(popup().hasGraph());
+    }
+
+    @Test
+    void flatLineGetsBoth() throws Exception {
+        boardPopupFor("y=2+3");
+        assertTrue(popup().hasCalculate());
+        assertTrue(popup().hasGraph());
     }
 }

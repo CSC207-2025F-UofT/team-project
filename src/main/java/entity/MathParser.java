@@ -46,6 +46,8 @@ public final class MathParser {
     private static final Map<String, String> MIRRORED = Map.of("\\supseteq", "\\subset", "=", "=",
             "\\neq", "\\neq", "\\approx", "\\approx", "\\perp", "\\perp", "<", ">", ">", "<",
             "\\leq", "\\geq", "\\geq", "\\leq");
+    private static final Set<String> RELATIONS = Set.of("=", "<", ">", "\\leq", "\\geq", "\\neq", "\\approx",
+            "\\in", "\\notin", "\\subset", "\\supseteq", "\\perp");
     // a bare arg like \sin 2x ends before these
     private static final List<String> NAMED_FUNCTIONS = namedFunctions();
 
@@ -71,8 +73,6 @@ public final class MathParser {
                 throw new MathSyntaxException(SyntaxProblem.UNEXPECTED, peek());
             }
             return result;
-        } catch (UncalculableException e) {
-            throw e;
         } catch (MathSyntaxException e) {
             for (String token : PROSE) {
                 if (tokens.contains(token)) {
@@ -196,13 +196,13 @@ public final class MathParser {
 
     private Node parseRelation() {
         Node first = parseSetExpression();
-        if (!isRelationOperator(peek())) {
+        if (!isRelation(peek())) {
             return first;
         }
         List<Node> operands = new ArrayList<>();
         List<String> operators = new ArrayList<>();
         operands.add(first);
-        while (isRelationOperator(peek())) {
+        while (isRelation(peek())) {
             operators.add(next());
             operands.add(parseSetExpression());
         }
@@ -774,8 +774,8 @@ public final class MathParser {
                     plusMinusAtEnd = plusMinusCount;
                 }
             }
-        } catch (MathSyntaxException e) {
-            // bad term, the outside parse reports it
+        } catch (MathException e) {
+            // bad term (or uncalc one), the outside parse reports it
         }
         position = end;
         plusMinusCount = plusMinusAtEnd;
@@ -971,12 +971,9 @@ public final class MathParser {
         return new NumberNode(value, decimals);
     }
 
-    private boolean isRelationOperator(String token) {
-        return "=".equals(token) || "<".equals(token) || ">".equals(token)
-                || "\\leq".equals(token) || "\\geq".equals(token)
-                || "\\neq".equals(token) || "\\approx".equals(token)
-                || "\\in".equals(token) || "\\perp".equals(token)
-                || "\\notin".equals(token) || "\\subset".equals(token) || "\\supseteq".equals(token);
+    // the one list of relation tokens, use case reads it too
+    public static boolean isRelation(String token) {
+        return token != null && RELATIONS.contains(token);  // peek is null at the end
     }
 
     private boolean startsValue(String token) {

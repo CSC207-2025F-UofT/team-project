@@ -264,6 +264,8 @@ class EvaluateInteractorTest {
         assertEquals("Invalid formula — x has no value", Calc.once("x+1"));
         assertEquals("Invalid formula — Too many unknowns: x, y", Calc.once("x+y=3"));
         assertEquals("Invalid formula — Nothing after \"f(x)=\"", Calc.once("f(x)=="));
+        assertEquals("Invalid formula — Nothing after \"f(x)=\"", Calc.once("f(x)="));
+        assertEquals("Invalid formula — Nothing after \"g(x,y)=\"", Calc.once("g(x,y)="));
         assertEquals("Invalid formula — f(x) can only use x, not y", Calc.once("f(x)=x+y"));
         assertEquals("x = -2 or x = 2", Calc.once("x^2=4"));
     }

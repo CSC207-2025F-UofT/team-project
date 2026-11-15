@@ -116,7 +116,7 @@ class MathParserTest {
         assertThrows(MathSyntaxException.class, () -> num("1+"));
         assertThrows(MathSyntaxException.class, () -> num("(1+2"));
         assertThrows(MathSyntaxException.class, () -> num("1+2)"));
-        assertThrows(MathSyntaxException.class, () -> num("\\text{hi}"));
+        assertThrows(UncalculableException.class, () -> num("\\text{hi}"));
         assertThrows(MathSyntaxException.class, () -> num("1.2.3"));
         assertThrows(MathSyntaxException.class, () -> num("x+1"));
         assertThrows(MathSyntaxException.class, () -> num(""));

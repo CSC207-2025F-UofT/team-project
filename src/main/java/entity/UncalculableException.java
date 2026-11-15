@@ -1,6 +1,6 @@
 package entity;
 
-public class UncalculableException extends MathSyntaxException {
+public class UncalculableException extends MathException {
     private final UncalculableReason reason;  // null = no reason given
     private final String detail;              // the function, for INVERSE_AMBIGUOUS
 
