@@ -1,3 +1,32 @@
 package interface_adapter.logged_in;
 
-public class LoggedInViewModel {}
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * The View Model for the Logged In View.
+ */
+public class LoggedInViewModel {
+
+    public static final String VIEW_NAME = "logged in";
+    private final List<LoggedInViewModelListener> listeners = new ArrayList<>();
+    private LoggedInState state = new LoggedInState();
+
+    public LoggedInState getState(){
+        return this.state;
+    }
+
+    public void setState(LoggedInState state){
+        this.state = state;
+    }
+
+    public void addListener(LoggedInViewModelListener listener){
+        listeners.add(listener);
+    }
+
+    public void notifyStateChanged(){
+        for (LoggedInViewModelListener listener : listeners){
+            listener.stateChanged();
+        }
+    }
+}
