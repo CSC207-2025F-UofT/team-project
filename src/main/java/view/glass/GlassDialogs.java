@@ -187,7 +187,9 @@ public final class GlassDialogs {
                 words.add(description, BorderLayout.CENTER);
             }
             heading.add(words, BorderLayout.CENTER);
-            add(heading, BorderLayout.NORTH);
+            if ((title != null && !title.isBlank()) || (message != null && !message.isBlank())) {
+                add(heading, BorderLayout.NORTH);
+            }
             if (extra != null) {
                 JPanel inset = new JPanel(new BorderLayout());
                 inset.setOpaque(false);

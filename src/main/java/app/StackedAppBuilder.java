@@ -171,13 +171,6 @@ public class StackedAppBuilder {
         root.registerKeyboardAction(e -> dialogs.get().saveAs(), KeyStroke.getKeyStroke(KeyEvent.VK_S, shortcut | java.awt.event.InputEvent.SHIFT_DOWN_MASK),
                 JComponent.WHEN_IN_FOCUSED_WINDOW);
 
-        // UI-only demo for the team: Ctrl/Cmd+Alt+E displays a replaceable sample error notice.
-        // Kept separate from the evaluator so no calculation error strings are hard-coded here.
-        root.registerKeyboardAction(e -> view.glass.GlassNotices.showError(
-                        board, "Can't calculate", "a has no value — write a = … first"),
-                KeyStroke.getKeyStroke(KeyEvent.VK_E, shortcut | java.awt.event.InputEvent.ALT_DOWN_MASK),
-                JComponent.WHEN_IN_FOCUSED_WINDOW);
-
         root.registerKeyboardAction(e -> board.setPdfFullscreen(false),
                 KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_IN_FOCUSED_WINDOW);
         frame.setContentPane(board);

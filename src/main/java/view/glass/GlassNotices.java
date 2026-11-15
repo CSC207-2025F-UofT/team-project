@@ -7,6 +7,7 @@ import javax.swing.JPanel;
 import javax.swing.JRootPane;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
+import java.awt.AlphaComposite;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Component;
@@ -21,7 +22,6 @@ import java.awt.event.ComponentEvent;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.RoundRectangle2D;
 import java.util.ArrayList;
-import java.util.EnumMap;
 import java.util.List;
 import java.util.Objects;
 
@@ -51,6 +51,11 @@ public final class GlassNotices {
         return show(parent, Kind.ERROR, title, message);
     }
 
+    /** All notices, including errors, auto-dismiss after two seconds unless closed sooner. */
+    public static final int DEFAULT_DURATION_MS = SUCCESS_DURATION_MS;
+    private static final int TOP = 105;
+    private static final int GAP = 8;
+
     private static NoticeHandle show(Component parent, Kind kind, String title, String message) {
         Objects.requireNonNull(kind);
         Objects.requireNonNull(message);
@@ -70,82 +75,124 @@ public final class GlassNotices {
         }
         JRootPane root = parent == null ? null : SwingUtilities.getRootPane(parent);
         if (root == null) return () -> { };
-        @SuppressWarnings("unchecked")
-        EnumMap<Kind, Displayed> perRoot = (EnumMap<Kind, Displayed>) root.getClientProperty(KEY);
-        if (perRoot == null) {
-            perRoot = new EnumMap<>(Kind.class);
-            root.putClientProperty(KEY, perRoot);
+        NoticeStack stack = (NoticeStack) root.getClientProperty(KEY);
+        if (stack == null) {
+            stack = new NoticeStack(root);
+            root.putClientProperty(KEY, stack);
         }
-        Displayed previous = perRoot.get(kind);
-        if (previous != null) previous.dismiss();
-        NoticeView view = new NoticeView(kind, title, message);
-        Displayed current = new Displayed(root, kind, view);
-        perRoot.put(kind, current);
-        view.onClose(current::dismiss);
-        root.getLayeredPane().add(view, JLayeredPane.POPUP_LAYER);
-        current.position();
-        current.installResizeListener();
-        if (kind == Kind.SUCCESS) current.startExpiry();
-        root.getLayeredPane().revalidate();
-        root.getLayeredPane().repaint();
-        return current::dismiss;
+        return stack.enqueue(kind, title, message);
+    }
+
+    /** One stack per root pane: multiple successes and errors are never silently replaced. */
+    static final class NoticeStack {
+        private final JRootPane root;
+        private final List<Displayed> active = new ArrayList<>();
+        private final List<Displayed> exiting = new ArrayList<>();
+        private final Timer animator;
+        private final ComponentAdapter resizeListener;
+
+        NoticeStack(JRootPane root) {
+            this.root = root;
+            animator = new Timer(16, event -> tick());
+            resizeListener = new ComponentAdapter() {
+                @Override public void componentResized(ComponentEvent event) { arrange(); }
+            };
+            root.getLayeredPane().addComponentListener(resizeListener);
+        }
+
+        NoticeHandle enqueue(Kind kind, String title, String message) {
+            NoticeView view = new NoticeView(kind, title, message);
+            Displayed entry = new Displayed(view);
+            view.onClose(() -> dismiss(entry));
+            root.getLayeredPane().add(view, JLayeredPane.POPUP_LAYER);
+            active.add(entry);
+            arrange();
+            entry.y = entry.destination + 16;
+            entry.opacity = 0f;
+            view.setOpacity(0f);
+            entry.expiry = new Timer(DEFAULT_DURATION_MS, event -> dismiss(entry));
+            entry.expiry.setRepeats(false);
+            entry.expiry.start();
+            animator.start();
+            return () -> {
+                if (SwingUtilities.isEventDispatchThread()) dismiss(entry);
+                else SwingUtilities.invokeLater(() -> dismiss(entry));
+            };
+        }
+
+        /** Reflow all remaining notices after any exit or window resize. */
+        void arrange() {
+            int y = TOP;
+            JLayeredPane layer = root.getLayeredPane();
+            int available = Math.max(0, layer.getWidth());
+            for (Displayed entry : active) {
+                Dimension preferred = entry.view.getPreferredSize();
+                int width = Math.min(preferred.width, Math.max(0, available - 16));
+                entry.width = width;
+                entry.x = Math.max(8, (available - width) / 2);
+                entry.destination = y;
+                y += preferred.height + GAP;
+            }
+            animator.start();
+        }
+
+        void dismiss(Displayed entry) {
+            if (!active.remove(entry)) return;
+            if (entry.expiry != null) entry.expiry.stop();
+            entry.leaving = true;
+            exiting.add(entry);
+            arrange();
+        }
+
+        /** Spring-like movement and opacity easing on the Swing EDT. No background threads. */
+        void tick() {
+            boolean moving = false;
+            for (Displayed entry : active) {
+                entry.y += (entry.destination - entry.y) * 0.27;
+                entry.opacity += (1f - entry.opacity) * 0.23f;
+                if (Math.abs(entry.destination - entry.y) < 0.6) entry.y = entry.destination;
+                if (entry.opacity > 0.985f) entry.opacity = 1f;
+                entry.render();
+                moving |= entry.y != entry.destination || entry.opacity != 1f;
+            }
+            for (int i = exiting.size() - 1; i >= 0; i--) {
+                Displayed entry = exiting.get(i);
+                entry.opacity *= 0.65f;
+                if (entry.opacity < 0.045f) {
+                    root.getLayeredPane().remove(entry.view);
+                    exiting.remove(i);
+                } else {
+                    entry.render();
+                    moving = true;
+                }
+            }
+            if (!moving) animator.stop();
+            if (active.isEmpty() && exiting.isEmpty()) {
+                animator.stop();
+                root.getLayeredPane().removeComponentListener(resizeListener);
+                if (root.getClientProperty(KEY) == this) root.putClientProperty(KEY, null);
+            }
+            root.getLayeredPane().repaint();
+        }
+
+        int activeCount() { return active.size(); }
+        List<Integer> targetPositions() {
+            return active.stream().map(entry -> entry.destination).toList();
+        }
     }
 
     private static final class Displayed {
-        final JRootPane root;
-        final Kind kind;
         final NoticeView view;
         Timer expiry;
-        ComponentAdapter resize;
-        boolean dismissed;
-
-        Displayed(JRootPane root, Kind kind, NoticeView view) {
-            this.root = root;
-            this.kind = kind;
-            this.view = view;
-        }
-
-        void position() {
-            Dimension preferred = view.getPreferredSize();
-            JLayeredPane layer = root.getLayeredPane();
-            int available = layer.getWidth();
-            int width = Math.min(preferred.width, Math.max(0, available - 16));
-            view.setBounds(Math.max(8, (available - width) / 2),
-                    kind == Kind.ERROR ? 72 : 180, width, preferred.height);
-            view.revalidate();
-            view.repaint();
-        }
-
-        void installResizeListener() {
-            resize = new ComponentAdapter() {
-                @Override public void componentResized(ComponentEvent event) { position(); }
-            };
-            root.getLayeredPane().addComponentListener(resize);
-        }
-
-        void startExpiry() {
-            expiry = new Timer(SUCCESS_DURATION_MS, event -> dismiss());
-            expiry.setRepeats(false);
-            expiry.start();
-        }
-
-        void dismiss() {
-            if (!SwingUtilities.isEventDispatchThread()) {
-                SwingUtilities.invokeLater(this::dismiss);
-                return;
-            }
-            if (dismissed) return;
-            dismissed = true;
-            if (expiry != null) expiry.stop();
-            if (resize != null) root.getLayeredPane().removeComponentListener(resize);
-            root.getLayeredPane().remove(view);
-            @SuppressWarnings("unchecked")
-            EnumMap<Kind, Displayed> registered = (EnumMap<Kind, Displayed>) root.getClientProperty(KEY);
-            if (registered != null && registered.get(kind) == this) {
-                registered.remove(kind);
-                if (registered.isEmpty()) root.putClientProperty(KEY, null);
-            }
-            root.getLayeredPane().repaint();
+        double y;
+        int x, width, destination;
+        float opacity;
+        boolean leaving;
+        Displayed(NoticeView view) { this.view = view; }
+        void render() {
+            view.setOpacity(opacity);
+            view.setBounds(x, (int) Math.round(y), width, view.getPreferredSize().height);
+            view.doLayout();
         }
     }
 
@@ -159,6 +206,18 @@ public final class GlassNotices {
         private final String message;
         private final JButton closeButton;
         private Runnable close = () -> { };
+        private float opacity = 1f;
+        void setOpacity(float alpha) {
+            opacity = Math.max(0f, Math.min(1f, alpha));
+            repaint();
+        }
+
+        @Override public void paint(Graphics graphics) {
+            Graphics2D g2 = (Graphics2D) graphics.create();
+            g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, opacity));
+            super.paint(g2);
+            g2.dispose();
+        }
 
         NoticeView(Kind kind, String title, String message) {
             super(null);

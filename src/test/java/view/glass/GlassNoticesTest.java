@@ -11,7 +11,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 /** Notifications render without a native window; caller owns title/message strings. */
 class GlassNoticesTest {
-    @Test void errorNoticeStaysUntilDismissedAndCloseButtonWorks() throws Exception {
+    @Test void errorNoticeCanBeDismissedEarlyAndCloseButtonWorks() throws Exception {
         SwingUtilities.invokeAndWait(() -> {
             var notice = new GlassNotices.NoticeView(GlassNotices.Kind.ERROR,
                     "Can't calculate", "a has no value");

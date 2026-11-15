@@ -3,7 +3,6 @@ package view.board;
 import view.DrawingCanvas;
 import interface_adapter.history.HistoryItem;
 import javax.swing.JPopupMenu;
-import javax.swing.JMenuItem;
 import java.util.function.Function;
 
 import javax.swing.JComponent;
@@ -144,22 +143,7 @@ public class BoardWindow extends JPanel implements HistoryPanel.DragHost {
 
     /** Menu choices also allow users to create a separate named version without a shortcut. */
     JPopupMenu createSaveMenu() {
-        JPopupMenu menu = new JPopupMenu();
-        menu.setBorder(javax.swing.BorderFactory.createEmptyBorder(6, 6, 6, 6));
-        menu.setBackground(Color.WHITE);
-        JMenuItem save = new JMenuItem("Save current canvas");
-        save.setName("save-current-canvas");
-        save.addActionListener(event -> saveCanvas.run());
-        JMenuItem saveAs = new JMenuItem("Save As…");
-        saveAs.setName("save-as-new-canvas");
-        saveAs.addActionListener(event -> saveAsCanvas.run());
-        for (JMenuItem item : new JMenuItem[]{save, saveAs}) {
-            item.setFont(BoardTheme.font(13f));
-            item.setBackground(Color.WHITE);
-            item.setBorder(javax.swing.BorderFactory.createEmptyBorder(8, 12, 8, 12));
-            menu.add(item);
-        }
-        return menu;
+        return new GlassSaveMenu(saveCanvas, saveAsCanvas);
     }
 
     private void showSaveChoices() {
@@ -217,17 +201,6 @@ public class BoardWindow extends JPanel implements HistoryPanel.DragHost {
     public boolean isPdfOverlay() { return pdfOverlay; }
     /** Overlay keeps the canvas at full width behind the PDF pane; split reserves its own width. */
     public void setPdfOverlay(boolean overlay) { pdfOverlay = overlay; relayout(); }
-
-    private void showPdfChoices() {
-        JPopupMenu choices = new JPopupMenu();
-        JMenuItem split = new JMenuItem("PDF · Split view (side by side)");
-        split.addActionListener(e -> { pdfOverlay = false; setPdfOpen(true); });
-        JMenuItem overlay = new JMenuItem("PDF · Overlay on canvas");
-        overlay.addActionListener(e -> { pdfOverlay = true; setPdfOpen(true); });
-        // Closing is the responsibility of the adjacent X capsule.
-        choices.add(split); choices.add(overlay);
-        choices.show(pdfBar, 0, pdfBar.getHeight());
-    }
 
     double getHistoryRatio() {
         return historyRatio;

@@ -6,7 +6,6 @@ import org.scilab.forge.jlatexmath.TeXIcon;
 import view.board.BoardTheme;
 import view.board.GlassBar;
 import view.board.Icons;
-import view.glass.GlassStatusPill;
 import view.stack.Fonts;
 
 import javax.swing.JComponent;
@@ -40,7 +39,6 @@ public class AnswerPopup extends JPanel {
     private static final int POPUP_GAP = 8;    // between formula and popup
     private static final int POPUP_LEFT = 40;  // starts a bit left of the formula's right end
     private static final Color BORDER = new Color(203, 213, 225);
-    private static final Color ERROR_TEXT = new Color(185, 28, 28);
 
     private final GlassBar calcBar;   // Calculate only
     private final GlassBar graphBar;  // Graph only
@@ -54,7 +52,6 @@ public class AnswerPopup extends JPanel {
     private Runnable onCalculate = () -> { };
     private Runnable onGraph = () -> { };
     private String latex;
-    private String problem;
     private TeXIcon icon;
 
     public AnswerPopup(Consumer<Graphics2D> backdrop) {
@@ -99,21 +96,10 @@ public class AnswerPopup extends JPanel {
     // board popup: null = that button's left out, at least one of them is set
     public void showFormula(String latex, Runnable onCalculate, Runnable onGraph) {
         this.latex = latex;
-        this.problem = null;
         this.onCalculate = onCalculate == null ? () -> { } : onCalculate;
         this.onGraph = onGraph == null ? () -> { } : onGraph;
         icon = typeset(latex);
         bar = onGraph == null ? calcBar : onCalculate == null ? graphBar : bothBar;
-        relayout();
-    }
-
-    public void showProblem(String reason) {
-        this.latex = null;
-        this.problem = reason;
-        this.onCalculate = () -> { };
-        this.onGraph = () -> { };
-        icon = null;
-        bar = null;
         relayout();
     }
 
@@ -145,10 +131,6 @@ public class AnswerPopup extends JPanel {
 
     String getLatex() {
         return latex;
-    }
-
-    String getProblem() {
-        return problem;
     }
 
     boolean hasCalculate() {
@@ -219,12 +201,10 @@ public class AnswerPopup extends JPanel {
             addMouseMotionListener(new MouseAdapter() { });
         }
 
-        private Font textFont() {
-            return problem != null ? BoardTheme.font(13f) : Fonts.ui(Font.PLAIN, 16f);
-        }
+        private Font textFont() { return Fonts.ui(Font.PLAIN, 16f); }
 
         private String text() {
-            return problem != null ? problem : latex == null ? "" : latex;
+            return latex == null ? "" : latex;
         }
 
         @Override
@@ -239,8 +219,6 @@ public class AnswerPopup extends JPanel {
                 w = Math.min(MAX_TEXT, fm.stringWidth(text()));
                 h = fm.getHeight();
             }
-            // An error uses a two-line notification card, never the old single red-text pill.
-            if (problem != null) return new Dimension(Math.max(260, Math.min(440, w + 70)), 80);
             return new Dimension(w + 2 * PAD_X + SHADOW, h + 2 * PAD_Y + SHADOW);
         }
 
@@ -251,32 +229,18 @@ public class AnswerPopup extends JPanel {
             g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
             int w = getWidth() - SHADOW;
             int h = getHeight() - SHADOW;
-            if (problem != null) {
-                GlassStatusPill.paintError(g2, w, h);
-            } else {
-                for (int i = 1; i <= SHADOW; i++) {
-                    g2.setColor(new Color(15, 23, 42, 7));
-                    g2.fill(new RoundRectangle2D.Double(i * 0.4, i * 0.8, w + i * 0.2,
-                            h + i * 0.2, ARC + i, ARC + i));
-                }
-                RoundRectangle2D shape = new RoundRectangle2D.Double(0, 0, w - 1, h - 1, ARC, ARC);
-                g2.setColor(Color.WHITE);
-                g2.fill(shape);
-                g2.setStroke(new BasicStroke(1f));
-                g2.setColor(BORDER);
-                g2.draw(shape);
+            for (int i = 1; i <= SHADOW; i++) {
+                g2.setColor(new Color(15, 23, 42, 7));
+                g2.fill(new RoundRectangle2D.Double(i * 0.4, i * 0.8, w + i * 0.2,
+                        h + i * 0.2, ARC + i, ARC + i));
             }
-            if (problem != null) {
-                // A real two-line error, matching the larger GlassNotices banner.
-                int x = 47;
-                g2.clipRect(x, 0, Math.max(1, w - x - PAD_X), h);
-                g2.setFont(BoardTheme.font(14f).deriveFont(Font.BOLD));
-                g2.setColor(new Color(35, 35, 39));
-                g2.drawString("Can't calculate", x, 29);
-                g2.setFont(textFont());
-                g2.setColor(new Color(111, 111, 117));
-                g2.drawString(text(), x, 50);
-            } else if (icon != null) {
+            RoundRectangle2D shape = new RoundRectangle2D.Double(0, 0, w - 1, h - 1, ARC, ARC);
+            g2.setColor(Color.WHITE);
+            g2.fill(shape);
+            g2.setStroke(new BasicStroke(1f));
+            g2.setColor(BORDER);
+            g2.draw(shape);
+            if (icon != null) {
                 icon.setForeground(Color.BLACK);
                 icon.paintIcon(this, g2, PAD_X, PAD_Y);
             } else {
@@ -288,5 +252,6 @@ public class AnswerPopup extends JPanel {
             }
             g2.dispose();
         }
+
     }
 }

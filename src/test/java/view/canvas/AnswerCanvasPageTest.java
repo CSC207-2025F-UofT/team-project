@@ -284,9 +284,9 @@ class AnswerCanvasPageTest {
     void recognitionProblemShowsReasonWithoutCalculate() throws Exception {
         openPage();
         writeWithEquals();
-        waitFor(() -> page.visiblePopup() != null && page.visiblePopup().getProblem() != null
-                && page.visiblePopup().getProblem().equals("Couldn't read the formula."), "the reason");
-        assertFalse(popup().hasCalculate());
+        waitFor(() -> page.currentMessage() != null && page.currentMessage().equals("Couldn't read the formula."),
+                "the reason");
+        assertNull(popup(), "legacy error popup must not appear");
         assertTrue(answers().isEmpty());
     }
 
@@ -297,9 +297,8 @@ class AnswerCanvasPageTest {
         });
         openPage();
         writeWithEquals();
-        waitFor(() -> page.visiblePopup() != null
-                && "Couldn't read the formula.".equals(page.visiblePopup().getProblem()), "plain words, no guts");
-        assertFalse(popup().hasCalculate());
+        waitFor(() -> "Couldn't read the formula.".equals(page.currentMessage()), "plain words, no guts");
+        assertNull(popup(), "legacy error popup must not appear");
     }
 
     @Test

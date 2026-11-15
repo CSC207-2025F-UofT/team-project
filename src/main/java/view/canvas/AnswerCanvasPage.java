@@ -388,7 +388,10 @@ public class AnswerCanvasPage extends CanvasPage {
 
     private void present(FormulaCapture capture, String latex, String problem) {
         if (problem != null) {
-            popup.showProblem(problem);
+            hidePopup();
+            showMessage(problem, true, ERROR_MESSAGE_MILLIS);
+            view.glass.GlassNotices.showError(this, "Can't read formula", problem);
+            return;
         } else if (graphing != null) {
             boolean canGraph = graphable.test(latex);
             boolean canCalc = !canGraph || calculable.test(latex);  // neither -> Calculate says why

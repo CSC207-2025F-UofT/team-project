@@ -4,7 +4,7 @@ import interface_adapter.history.HistoryViewModel;
 import org.junit.jupiter.api.Test;
 import view.DrawingCanvas;
 
-import javax.swing.JMenuItem;
+import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -21,9 +21,11 @@ class BoardSaveMenuTest {
                 host -> new HistoryPanel(new HistoryViewModel(), host), new JPanel(),
                 id -> false, saved::incrementAndGet, savedAs::incrementAndGet, () -> { });
         JPopupMenu menu = board.createSaveMenu();
-        assertEquals(2, menu.getComponentCount());
-        JMenuItem first = (JMenuItem) menu.getComponent(0);
-        JMenuItem second = (JMenuItem) menu.getComponent(1);
+        assertEquals(1, menu.getComponentCount());
+        javax.swing.JPanel rows = (javax.swing.JPanel) menu.getComponent(0);
+        assertEquals(2, rows.getComponentCount());
+        JButton first = (JButton) rows.getComponent(0);
+        JButton second = (JButton) rows.getComponent(1);
         assertEquals("save-current-canvas", first.getName());
         assertEquals("save-as-new-canvas", second.getName());
         first.doClick();

@@ -71,7 +71,7 @@ public final class CanvasWorkspaceDialogs {
                 return;
             }
             SavedCanvasChooser picker = new SavedCanvasChooser(documents);
-            if (!GlassDialogs.choose(parent, "Open Canvas", picker, "Open", picker::onDoubleClick)) return;
+            if (!GlassDialogs.choose(parent, "", picker, "Open", picker::onDoubleClick)) return;
             SavedCanvas chosen = picker.selected();
             if (chosen == null) return;
             if (hasUnsavedChanges()) {
