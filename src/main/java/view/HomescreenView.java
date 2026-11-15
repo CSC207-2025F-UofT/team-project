@@ -50,6 +50,9 @@ public class HomescreenView extends JPanel implements ActionListener, GetAllDeck
         this.getAllDecksViewModel = getAllDecksViewModel;
         this.getAllDecksViewModel.addListener(this);
 
+        this.centerPanel.setOpaque(false);
+        this.centerPanel.setBorder(BorderFactory.createEmptyBorder(10, 100, 10, 100));
+
         //title text
         final JLabel title = new JLabel("Select Flashcard Deck");
         title.setFont(new Font(AppTheme.FONT_NAME, Font.BOLD, AppTheme.FONT_SIZE_TITLE));

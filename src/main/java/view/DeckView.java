@@ -27,7 +27,6 @@ public class DeckView extends JPanel implements ActionListener, GetDeckViewModel
     private final DefaultListModel<DeckView.SwingDeck> deckModel = new DefaultListModel<>();
 
     private final JLabel deckName = new JLabel();
-    private final JLabel getDeckErrorField = new JLabel();
 
     private final JButton home;
     private GetDeckController getDeckController = null;
@@ -91,20 +90,26 @@ public class DeckView extends JPanel implements ActionListener, GetDeckViewModel
                 }
         );
 
-        this.setLayout(new BorderLayout(100, 14));
+        this.setLayout(new BorderLayout(14, 14));
         this.setBorder(new EmptyBorder(20, 20, 20, 20));
         this.setBackground(AppTheme.BG_COLOR);
 
         JPanel topPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 15, 15));
         topPanel.setOpaque(false);
-        topPanel.add(deckName);
 
-        JPanel toolBar = new JPanel(new GridLayout());
-        toolBar.add(home);
+        JPanel toolBar = new JPanel(new BorderLayout());
+        toolBar.setOpaque(false);
+        toolBar.add(home, BorderLayout.NORTH);
+
+        JPanel centerPanel = new JPanel(new BorderLayout(0, 14));
+        centerPanel.setOpaque(false);
+        centerPanel.add(deckName, BorderLayout.NORTH);
+        centerPanel.add(scrollPane, BorderLayout.CENTER);
 
         this.add(topPanel, BorderLayout.NORTH);
+        this.add(centerPanel, BorderLayout.CENTER);
         this.add(toolBar, BorderLayout.WEST);
-        this.add(scrollPane, BorderLayout.CENTER);
+
     }
 
     // Sets the format of each Deck in the list
@@ -132,7 +137,7 @@ public class DeckView extends JPanel implements ActionListener, GetDeckViewModel
 
             // creates line between question and answer
             questionLabel.setBorder(new CompoundBorder(
-                    new MatteBorder(0, 0, 0, 1, new Color(230, 230, 230)),
+                    new MatteBorder(0, 0, 0, 1, AppTheme.BORDER_COLOR),
                     new EmptyBorder(0, 0, 0, 12)
             ));
 
@@ -159,7 +164,7 @@ public class DeckView extends JPanel implements ActionListener, GetDeckViewModel
 
             } else {
                 cardPanel.setBackground(AppTheme.CARD_COLOR);
-                questionLabel.setFont(new Font(AppTheme.FONT_NAME, Font.PLAIN, AppTheme.FONT_SIZE));
+                questionLabel.setFont(new Font(AppTheme.FONT_NAME, Font.BOLD, AppTheme.FONT_SIZE));
                 questionLabel.setForeground(AppTheme.TEXT_PRIMARY);
                 answerLabel.setBackground(AppTheme.BG_SECONDARY);
                 answerLabel.setForeground(AppTheme.TEXT_PRIMARY);
@@ -193,17 +198,23 @@ public class DeckView extends JPanel implements ActionListener, GetDeckViewModel
 
     @Override
     public void stateChanged() {
-        deckModel.clear();
-        setFields(getDeckViewModel.getState());
-        getDeckErrorField.setText(getDeckViewModel.getState().getDeckError());
+        if (getDeckViewModel.getState().getDeckError() != null) {
+            JOptionPane.showMessageDialog(this, getDeckViewModel.getState().getDeckError());
+        } else {
+            deckModel.clear();
+            setFields(getDeckViewModel.getState());
+        }
     }
 
     private void setFields(GetDeckState state) {
         deckName.setText(state.getDeckName());
         List<Map<String, String>> list = state.getFlashcards();
-        for (Map<String,String> flashcard : list) {
-            for (Map.Entry<String,String> f : flashcard.entrySet()) {
-                deckModel.addElement(new DeckView.SwingDeck(f.getKey(), f.getValue()));
+
+        if (list != null) {
+            for (Map<String, String> flashcard : list) {
+                for (Map.Entry<String, String> f : flashcard.entrySet()) {
+                    deckModel.addElement(new DeckView.SwingDeck(f.getKey(), f.getValue()));
+                }
             }
         }
     }
