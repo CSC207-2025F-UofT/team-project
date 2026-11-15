@@ -7,8 +7,7 @@ import java.util.*;
 public class CognitiveData {
     private Date date;
     private String mood;
-    private String cogTestType;
-    private Double cogTestResult;
+    private Object[] cogTest;
     private Double productivityRating;
 
     /**
@@ -18,8 +17,7 @@ public class CognitiveData {
     private CognitiveData(CogBuilder b) {
         this.date = b.date;
         this.mood = b.mood;
-        this.cogTestType = b.cogTestType;
-        this.cogTestResult = b.cogTestResult;
+        this.cogTest = b.cogTest;
         this.productivityRating = b.productivityRating;
     }
 
@@ -28,10 +26,9 @@ public class CognitiveData {
      */
     public static class CogBuilder {
         private Date date;
-        private String mood;
-        private String cogTestType;
-        private Double cogTestResult;
-        private Double productivityRating;
+        private String mood = "none";
+        private Object[] cogTest = {1, 2};
+        private Double productivityRating = 0.0;
 
         public CogBuilder(Date date) {
             this.date = date;
@@ -42,13 +39,8 @@ public class CognitiveData {
             return this;
         }
 
-        public CogBuilder cogTestType(String cogTestType) {
-            this.cogTestType = cogTestType;
-            return this;
-        }
-
-        public CogBuilder cogTestResult(Double cogTestResult) {
-            this.cogTestResult = cogTestResult;
+        public CogBuilder cogTest(String cogTestType, Double cogTestResult) {
+            this.cogTest = new Object[]{cogTestType, cogTestResult};
             return this;
         }
 
@@ -65,14 +57,12 @@ public class CognitiveData {
 
     /**
      * Returns a Hashtable, with nested arrays, representing this CognitiveData of the format:
-     * {date : {mood, {cogTestType, cogTestResult}, productivityRating}
+     * {date : [mood, cogTest, productivityRating]}
      */
-    private Hashtable<Date, Object[]> getCogntivieResutls() {
+    public Hashtable<Date, Object[]> getCognitiveResults() {
         Hashtable<Date, Object[]> dict = new Hashtable<Date, Object[]>();
-        Object[] cogInfo = {this.cogTestType, this.cogTestResult};
-        Object[] list = {this.mood, cogInfo, this.productivityRating};
+        Object[] list = {this.mood, this.cogTest, this.productivityRating};
         dict.put(this.date, list);
-
         return dict;
     }
 
