@@ -23,6 +23,7 @@ public final class AnswerInk {
     private static final float REF = 240f;  // font size the centre lines get traced at
     private static final int PAD = 2;
     private static final double TWIG = 1.0;  // twigs up to this x pen width get cut
+    private static final int PINHOLE = 50;  // aa gaps are 1-2px, smallest real counter (e) ~1200
     private static final int CACHE_SIZE = 64;
     private static final Map<Key, Path2D> LINES = new LinkedHashMap<>(16, 0.75f, true) {
         @Override
@@ -130,7 +131,7 @@ public final class AnswerInk {
         if (b.isEmpty()) {
             return line;
         }
-        boolean[] filled = raster(outline, b, w, h);
+        boolean[] filled = Pinholes.fill(raster(outline, b, w, h), w, h, PINHOLE);
         boolean[] thin = Skeleton.thin(filled, w, h);
         boolean[] on = Skeleton.prune(thin, w, h, (int) Math.round(TWIG * thickness(filled, thin)));
         double ox = b.getX() - PAD + 0.5;
