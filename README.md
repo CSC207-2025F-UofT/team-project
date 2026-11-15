@@ -189,7 +189,7 @@ Use cases 1 and 2 don't depend on any other use case, so they are the first end-
 
 ## Interactors
 
-Each lead splits their use case into small Interactors, one per user action. Each Interactor has its own input boundary, output boundary, input/output data, data access interface, Controller and Presenter, in its own package (`use_case.<name>`, `interface_adapter.<name>`)。
+Each lead splits their use case into small Interactors, one per user action. Each Interactor has its own input boundary, output boundary, input/output data, data access interface, Controller and Presenter, in its own package (`use_case.<name>`, `interface_adapter.<name>`).
 
 | Lead | Interactors (MVP) | Data access interfaces it needs, implemented by |
 |---|---|---|
