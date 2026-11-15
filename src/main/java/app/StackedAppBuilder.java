@@ -13,6 +13,7 @@ import pdf_editor.use_case.SelectionToLibrary;
 import data_access.QuickChartGraphRenderer;
 import entity.LatexFunctionParser;
 import interface_adapter.MathLabViewModel;
+import interface_adapter.evaluate.DefinitionCheckController;
 import interface_adapter.evaluate.EvaluateController;
 import interface_adapter.evaluate.EvaluatePresenter;
 import interface_adapter.graph.GraphController;
@@ -23,6 +24,7 @@ import interface_adapter.graph_check.GraphCheckController;
 import interface_adapter.history.HistoryViewModel;
 import interface_adapter.recognize.FormulaRecognizer;
 import pdf_editor.PdfStudioLauncher;
+import use_case.evaluate.DefinitionCheckInteractor;
 import use_case.evaluate.EvaluateInteractor;
 import use_case.graph_check.GraphCheckInteractor;
 import use_case.graph_function.GraphFunctionInteractor;
@@ -81,6 +83,7 @@ public class StackedAppBuilder {
         MathLabViewModel mathViewModel = new MathLabViewModel();
         EvaluateController evaluate = new EvaluateController(new EvaluateInteractor(
                 new InMemoryFunctionDataAccessObject(), new EvaluatePresenter(mathViewModel)));
+        DefinitionCheckController definitionCheck = new DefinitionCheckController(new DefinitionCheckInteractor());
 
         // graph, graphs also go to PDF Studio like before
         GraphViewModel graphViewModel = new GraphViewModel();
@@ -121,6 +124,7 @@ public class StackedAppBuilder {
                 new SelectedInkRegistry(drawing, pdfStudio.getLibrary()));
         AnswerCanvasPage page = new AnswerCanvasPage(sharedCanvas, evaluate, mathViewModel, results,
                 graph, graphViewModel, graphCheck::canGraph, BoardTheme.CANVAS, ToolbarSpot.TOP_Y);
+        page.setDefinitionCheck(definitionCheck::isDefinition);
         sharedCanvas.attachTo(page);
         PdfPanel pdfPanel = pdfStudio.createPanel();
         // Use the live selection (lasso or whole ink), not an outdated startup screenshot.
