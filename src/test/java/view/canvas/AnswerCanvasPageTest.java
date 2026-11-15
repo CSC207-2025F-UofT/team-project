@@ -35,12 +35,14 @@ class AnswerCanvasPageTest {
     private final SharedCanvas shared = new SharedCanvas(canvas);
     private final MathLabViewModel viewModel = new MathLabViewModel();
     private AnswerCanvasPage page;
+    private final List<String> sent = new java.util.concurrent.CopyOnWriteArrayList<>();  // to PDF Studio, latex|result
 
     private void openPage() throws Exception {
         EvaluateController controller = new EvaluateController(new EvaluateInteractor(
                 new InMemoryFunctionDataAccessObject(), new EvaluatePresenter(viewModel)));
         SwingUtilities.invokeAndWait(() -> {
-            page = new AnswerCanvasPage(shared, controller, viewModel);
+            page = new AnswerCanvasPage(shared, controller, viewModel,
+                    (AnswerCanvasPage.FormulaResultSink) (id, latex, result) -> sent.add(latex + "|" + result));
             page.setPopupDelay(100);
             shared.attachTo(page);
             page.setSize(900, 560);
@@ -386,6 +388,38 @@ class AnswerCanvasPageTest {
         assertFalse(errorShown("f(x)"), "no error till Calculate");
         clickCalculate();
         waitFor(() -> errorShown("f(x) can only use x, not y"), "the error");
+    }
+
+    @Test
+    void autoSavedDefinitionGoesToPdfStudio() throws Exception {
+        shared.setFormulaRecognizer(image -> "f(x)=x^{2}+2x");
+        openPage();
+        autoDefine();
+        write();
+        waitFor(this::definedShown, "the Defined message");
+        waitFor(() -> sent.equals(List.of("f(x)=x^{2}+2x|")), "sent once, no answer");
+    }
+
+    @Test
+    void errorAfterCalculateStillGoesToPdfStudio() throws Exception {
+        shared.setFormulaRecognizer(image -> "x+1=");
+        openPage();
+        write();
+        waitPopup("x+1=");
+        clickCalculate();
+        waitFor(() -> page.isMessageError(), "the error");
+        waitFor(() -> sent.equals(List.of("x+1=|")), "sent w/ no answer");
+    }
+
+    @Test
+    void halfWrittenInkNeverGoesToPdfStudio() throws Exception {
+        shared.setFormulaRecognizer(image -> "1+");
+        openPage();
+        autoDefine();
+        write();
+        Thread.sleep(400);
+        assertNull(popup());
+        assertTrue(sent.isEmpty());
     }
 
     @Test

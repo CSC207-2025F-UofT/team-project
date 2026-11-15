@@ -366,6 +366,7 @@ public class AnswerCanvasPage extends CanvasPage {
             defined.put(capture.getId(), capture.getRevision());
             ownMessage = true;
             showMessage(outcome.result, false, DEFINED_MESSAGE_MILLIS);
+            publishFormulaOnly(capture, latex);  // saved = done, so PDF Studio gets it
             then.accept(true);
         });
     }
@@ -450,10 +451,8 @@ public class AnswerCanvasPage extends CanvasPage {
             if (getSharedCanvas().isCurrent(capture.getId(), capture.getRevision())) {
                 ownMessage = true;
                 showMessage(error, true, ERROR_MESSAGE_MILLIS);
-                // y=3x is a valid graphable relation, but the numeric evaluator
-                // rejects its two variables. A user explicitly asked to Calculate;
-                // retain the recognized formula without inventing a numerical answer.
-                if (latex != null && graphable.test(latex)) publishFormulaOnly(capture, latex);
+                // any Calculate goes to PDF Studio, errors just w/ no answer (y=3x, x+1=...)
+                publishFormulaOnly(capture, latex);
             }
         } else if (outcome.definition) {
             ownMessage = true;
