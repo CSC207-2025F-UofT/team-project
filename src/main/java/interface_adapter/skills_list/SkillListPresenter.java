@@ -9,17 +9,17 @@ import use_case.signup.SignupOutputData;
 /**
  * The Presenter for the Signup Use Case.
  */
-public class SignupPresenter implements SignupOutputBoundary {
+public class SkillListPresenter implements SignupOutputBoundary {
 
-    private final SignupViewModel signupViewModel;
+    private final SkillListViewModel skillListViewModel;
     private final LoginViewModel loginViewModel;
     private final ViewManagerModel viewManagerModel;
 
-    public SignupPresenter(ViewManagerModel viewManagerModel,
-                           SignupViewModel signupViewModel,
-                           LoginViewModel loginViewModel) {
+    public SkillListPresenter(ViewManagerModel viewManagerModel,
+                              SkillListViewModel skillListViewModel,
+                              LoginViewModel loginViewModel) {
         this.viewManagerModel = viewManagerModel;
-        this.signupViewModel = signupViewModel;
+        this.skillListViewModel = skillListViewModel;
         this.loginViewModel = loginViewModel;
     }
 
@@ -36,9 +36,9 @@ public class SignupPresenter implements SignupOutputBoundary {
 
     @Override
     public void prepareFailView(String error) {
-        final SignupState signupState = signupViewModel.getState();
-        signupState.setUsernameError(error);
-        signupViewModel.notifyStateChanged();
+        final SkillListState skillListState = skillListViewModel.getState();
+        skillListState.setUsernameError(error);
+        skillListViewModel.notifyStateChanged();
     }
 
     @Override

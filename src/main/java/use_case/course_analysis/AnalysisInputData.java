@@ -3,12 +3,12 @@ package use_case.course_analysis;
 /**
  * The input data for the Change Password Use Case.
  */
-public class ChangePasswordInputData {
+public class AnalysisInputData {
 
     private final String password;
     private final String username;
 
-    public ChangePasswordInputData(String password, String username) {
+    public AnalysisInputData(String password, String username) {
         this.password = password;
         this.username = username;
     }

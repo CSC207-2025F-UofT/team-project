@@ -6,7 +6,7 @@ import java.util.List;
 /**
  * The ViewModel for the Signup View.
  */
-public class SignupViewModel {
+public class SkillListViewModel {
 
     public static final String TITLE_LABEL = "Sign Up View";
     public static final String USERNAME_LABEL = "Choose username";
@@ -18,26 +18,26 @@ public class SignupViewModel {
 
     public static final String TO_LOGIN_BUTTON_LABEL = "Go to Login";
 
-    private final List<SignupViewModelListener> listeners = new ArrayList<>();
+    private final List<SkillListViewModelListener> listeners = new ArrayList<>();
 
     public static final String VIEW_NAME = "sign up";
 
-    private SignupState state = new SignupState();
+    private SkillListState state = new SkillListState();
 
-    public SignupState getState() {
+    public SkillListState getState() {
         return this.state;
     }
 
-    public void setState(SignupState state) {
+    public void setState(SkillListState state) {
         this.state = state;
     }
 
-    public void addListener(SignupViewModelListener listener) {
+    public void addListener(SkillListViewModelListener listener) {
         listeners.add(listener);
     }
 
     public void notifyStateChanged() {
-        for (SignupViewModelListener listener : listeners) {
+        for (SkillListViewModelListener listener : listeners) {
             listener.stateChanged();
         }
     }

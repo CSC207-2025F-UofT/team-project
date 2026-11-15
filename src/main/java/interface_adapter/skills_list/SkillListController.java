@@ -6,11 +6,11 @@ import use_case.signup.SignupInputData;
 /**
  * Controller for the Signup Use Case.
  */
-public class SignupController {
+public class SkillListController {
 
     private final SignupInputBoundary userSignupUseCaseInteractor;
 
-    public SignupController(SignupInputBoundary userSignupUseCaseInteractor) {
+    public SkillListController(SignupInputBoundary userSignupUseCaseInteractor) {
         this.userSignupUseCaseInteractor = userSignupUseCaseInteractor;
     }
 

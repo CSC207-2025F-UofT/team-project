@@ -5,7 +5,7 @@ import entity.Student;
 /**
  * The DAO interface for the Change Password Use Case.
  */
-public interface ChangePasswordUserDataAccessInterface {
+public interface AnalysisStudentDataAccessInterface {
 
     /**
      * Updates the system to record this user's password.

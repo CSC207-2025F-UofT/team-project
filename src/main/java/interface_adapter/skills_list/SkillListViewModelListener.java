@@ -1,6 +1,6 @@
 package interface_adapter.skills_list;
 
-public interface SignupViewModelListener {
+public interface SkillListViewModelListener {
 
   /**
    * The signup state was updated.
