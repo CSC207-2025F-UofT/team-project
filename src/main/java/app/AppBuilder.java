@@ -6,9 +6,16 @@ import interface_adapter.ViewManagerModel;
 import interface_adapter.get_all_decks.GetAllDecksController;
 import interface_adapter.get_all_decks.GetAllDecksPresenter;
 import interface_adapter.get_all_decks.GetAllDecksViewModel;
+import interface_adapter.get_deck.GetDeckController;
+import interface_adapter.get_deck.GetDeckPresenter;
+import interface_adapter.get_deck.GetDeckViewModel;
 import use_case.get_all_decks.GetAllDecksInputBoundary;
 import use_case.get_all_decks.GetAllDecksInteractor;
 import use_case.get_all_decks.GetAllDecksOutputBoundary;
+import use_case.get_deck.GetDeckInputBoundary;
+import use_case.get_deck.GetDeckInteractor;
+import use_case.get_deck.GetDeckOutputBoundary;
+import view.DeckView;
 import view.HomescreenView;
 import view.ViewManager;
 
@@ -30,17 +37,27 @@ public class AppBuilder {
     // DAO version using local file storage
     final MockDeckDataAccessObject deckDataAccessObject = new MockDeckDataAccessObject(deckFactory);
 
-    private HomescreenView getAllDecksView;
+    private HomescreenView homescreenView;
     private GetAllDecksViewModel getAllDecksViewModel;
+
+    private DeckView deckView;
+    private GetDeckViewModel getDeckViewModel;
 
     public AppBuilder() {
         cardPanel.setLayout(cardLayout);
     }
 
-    public AppBuilder addGetAllDecksView() {
+    public AppBuilder addHomescreenView() {
         getAllDecksViewModel = new GetAllDecksViewModel();
-        getAllDecksView = new HomescreenView(getAllDecksViewModel);
-        cardPanel.add(getAllDecksView, getAllDecksViewModel.VIEW_NAME);
+        homescreenView = new HomescreenView(getAllDecksViewModel);
+        cardPanel.add(homescreenView, getAllDecksViewModel.VIEW_NAME);
+        return this;
+    }
+
+    public AppBuilder addDeckView() {
+        getDeckViewModel = new GetDeckViewModel();
+        deckView = new DeckView(getDeckViewModel);
+        cardPanel.add(deckView, getDeckViewModel.VIEW_NAME);
         return this;
     }
 
@@ -51,7 +68,19 @@ public class AppBuilder {
                 deckDataAccessObject, getAllDecksOutputBoundary);
 
         GetAllDecksController controller = new GetAllDecksController(getAllDecksInteractor);
-        getAllDecksView.setGetAllDecksController(controller);
+        homescreenView.setGetAllDecksController(controller);
+        return this;
+    }
+
+    public AppBuilder addGetDeckUseCase() {
+        final GetDeckOutputBoundary getDeckOutputBoundary = new GetDeckPresenter(viewManagerModel,
+                getAllDecksViewModel, getDeckViewModel);
+
+        final GetDeckInputBoundary getDeckInteractor = new GetDeckInteractor(
+                deckDataAccessObject, getDeckOutputBoundary);
+
+        GetDeckController controller = new GetDeckController(getDeckInteractor);
+        deckView.setGetDeckController(controller);
         return this;
     }
 
@@ -65,7 +94,7 @@ public class AppBuilder {
         viewManagerModel.notifyViewChanged();
 
         // initial execution of GetAllDecksUseCase when program starts
-        getAllDecksView.initialExecuteGetAllDecks();
+        homescreenView.initialExecuteGetAllDecks();
 
         return application;
     }
