@@ -2,6 +2,7 @@ package data_access;
 
 import entity.User;
 import entity.UserFactory;
+import use_case.login.LoginUserDataAccessInterface;
 import use_case.signup.SignupUserDataAccessInterface;
 
 import java.io.*;
@@ -12,7 +13,7 @@ import java.util.Map;
 /**
  * DataAccessObject for user data implemented using a File to persist the data.
  */
-public class FileUserDataAccessObject implements SignupUserDataAccessInterface{
+public class FileUserDataAccessObject implements SignupUserDataAccessInterface, LoginUserDataAccessInterface {
 
     private static final String HEADER = "username,password";
     private final File csvFile;
@@ -88,5 +89,10 @@ public class FileUserDataAccessObject implements SignupUserDataAccessInterface{
     @Override
     public boolean existsByName(String name){
         return accounts.containsKey(name);
+    }
+
+    @Override
+    public User get(String username){
+        return accounts.get(username);
     }
 }
