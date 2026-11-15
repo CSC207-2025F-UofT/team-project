@@ -669,6 +669,20 @@ class AnswerCanvasPageTest {
     }
 
     @Test
+    void savedDefinitionStillPopsUpOnHover() throws Exception {
+        shared.setFormulaRecognizer(image -> image.getWidth() > 200 ? "f(x)=2x+3x^{2}" : ".");
+        openPage();
+        autoDefine();
+        writeQuadratic();
+        waitFor(this::definedShown, "the Defined message");
+        assertNull(popup());
+        Thread.sleep(400);
+
+        hover(130, 120);                    // on the "=", Graph lives in this popup
+        waitPopup("f(x)=2x+3x^{2}");
+    }
+
+    @Test
     void hoverDoesntWaitForAStrayDotsPause() throws Exception {
         AtomicInteger dotReads = new AtomicInteger();
         shared.setFormulaRecognizer(image -> {

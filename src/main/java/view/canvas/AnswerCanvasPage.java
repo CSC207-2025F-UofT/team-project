@@ -539,7 +539,7 @@ public class AnswerCanvasPage extends CanvasPage {
 
         @Override
         public boolean wanted(Formula f) {
-            return gate.allows(f, latexOf(f.getId(), f.getRevision())) && !isDefined(f.getId(), f.getRevision());
+            return gate.allows(f, latexOf(f.getId(), f.getRevision()));  // saved f(x)=... too, for its Graph
         }
 
         @Override
