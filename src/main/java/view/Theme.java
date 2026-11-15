@@ -47,14 +47,15 @@ public final class Theme {
   }
 
   /**
-   * Reads our chosen font file from src/main/resources/fonts/ and registers it with Java. If the file is
-   * missing or broken, a system font is returned instead so the app still runs.
+   * Reads our chosen font file from src/main/resources/fonts/ and 
+   * registers it with Java. If the file is missing or broken, a system
+   * font is returned instead so the app still runs.
    *
    * @param file the font file name 
    * @return the loaded font, or the fallback font
    */
   public static Font loadFont(String file) {
-   try (InputStream in = Theme.class.getResourceAsStream("/fonts/" + file)) {
+    try (InputStream in = Theme.class.getResourceAsStream("/fonts/" + file)) {
       Font font = Font.createFont(Font.TRUETYPE_FONT, in);
       GraphicsEnvironment.getLocalGraphicsEnvironment().registerFont(font);
       return font;
