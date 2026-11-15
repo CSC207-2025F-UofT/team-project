@@ -37,10 +37,4 @@ public class GetAllDecksPresenter implements GetAllDecksOutputBoundary {
         getAllDecksState.setGetAllDecksError(error);
         getAllDecksViewModel.notifyStateChanged();
     }
-
-    @Override
-    public void switchToDeckView() {
-        viewManagerModel.setState(GetDeckViewModel.VIEW_NAME);
-        viewManagerModel.notifyViewChanged();
-    }
 }

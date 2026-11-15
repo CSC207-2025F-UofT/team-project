@@ -61,9 +61,6 @@ public class GetAllDecksInteractorTest {
             public void prepareEmptyView(String error) {
                 fail("Use case failure is unexpected.");
             }
-
-            @Override
-            public void switchToDeckView() { /* not implemented yet */ }
         };
 
         GetAllDecksInputBoundary interactor = new GetAllDecksInteractor(decks, successPresenter);
@@ -86,9 +83,6 @@ public class GetAllDecksInteractorTest {
             public void prepareEmptyView(String error) {
                 assertNotNull(error);
             }
-
-            @Override
-            public void switchToDeckView() { /* not implemented yet */ }
         };
 
         GetAllDecksInputBoundary interactor = new GetAllDecksInteractor(decks, emptyPresenter);
