@@ -1,5 +1,6 @@
 package view;
 
+import interface_adapter.login.LoginController;
 import interface_adapter.signup.SignupController;
 import interface_adapter.login_signup.LoginSignupState;
 import interface_adapter.login_signup.LoginSignupViewModel;
@@ -32,6 +33,7 @@ public class LoginSignupView extends JPanel implements ActionListener, LoginSign
     private final JButton logIn;
     private final JButton signUp;
     private SignupController signupController = null;
+    private LoginController loginController = null;
 
     public LoginSignupView(LoginSignupViewModel loginSignupViewModel) {
         this.loginSignupViewModel = loginSignupViewModel;
@@ -84,9 +86,12 @@ public class LoginSignupView extends JPanel implements ActionListener, LoginSign
 
     @Override
     public void actionPerformed(ActionEvent evt) {
+        final LoginSignupState state = loginSignupViewModel.getState();
         if (evt.getSource().equals(signUp)) {
-            final LoginSignupState state = loginSignupViewModel.getState();
             signupController.execute(state.getUsername(), state.getPassword());
+        }
+        else if (evt.getSource().equals(logIn)) {
+            loginController.execute(state.getUsername(), state.getPassword());
         }
     }
 
@@ -99,6 +104,11 @@ public class LoginSignupView extends JPanel implements ActionListener, LoginSign
             state.setSignupError("");
             JOptionPane.showMessageDialog(this, error);
         }
+        if (!state.getLoginError().isEmpty()){
+            final String error = state.getLoginError();
+            state.setLoginError("");
+            JOptionPane.showMessageDialog(this, error);
+        }
     }
 
     private void setFields(LoginSignupState state) {
@@ -108,5 +118,9 @@ public class LoginSignupView extends JPanel implements ActionListener, LoginSign
 
     public void setSignupController(SignupController signupController) {
         this.signupController = signupController;
+    }
+
+    public void setLoginController(LoginController loginController) {
+        this.loginController = loginController;
     }
 }
