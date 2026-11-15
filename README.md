@@ -4,27 +4,25 @@
 
 ## Team Information
 
+### Team Name
+
+TODO
+
 ### Team Members
 
-| Member | Lead use case (tentative) |
-|---|---|
-| Zean Du | 1. Browse Recipes |
-| Shaoheng Fan | 5. Log Cooking |
-| Yilin Hou | TBD (2, 3 or 4) |
-| Shengxi Zeng | TBD (2, 3 or 4) |
-| Shuyin Hu | TBD (2, 3 or 4) |
+- Zean Du
+- Shaoheng Fan
+- Yilin Hou 
+- Shengxi Zeng
+- Shuyin Hu
 
 ---
 
-## Project Description
+## Project Domain
 
-### Domain
-
-Food & Home / Productivity
+Food & Home / Productivity / Recipe Organizer 
 
 MealMate is a desktop app that helps people decide what to cook this week and what to buy. The user keeps track of what is in the fridge, finds recipes from an online recipe database, puts them into a weekly meal plan, and gets a shopping list of only what is missing. After cooking a planned meal, the user marks it done, updates what is left in the fridge, and builds up a cooking history.
-
-**Core loop:** Fridge → Find recipes → Plan the week → Shop for what's missing → Cook and log → Fridge
 
 ---
 
@@ -51,7 +49,7 @@ As a user, I want to mark a planned meal as cooked, record which ingredients I u
 
 Each use case below is led by one member. A lead owns every View listed under their use case. Each lettered step (1a, 1b, …) is implemented as its own small use case with its own Interactor, boundaries and data access interface; see [Interactors](#interactors) for the full list.
 
-### Use Case 1: Browse Recipes (lead: Zean Du)
+### Use Case 1: Browse Recipes
 
 **Views owned:** `RecipeSearchView`, `RecipeDetailView` (includes the "Add to meal plan" day/meal picker)
 
@@ -79,7 +77,7 @@ Each use case below is led by one member. A lead owns every View listed under th
 - Alternative flows:
   - The slot already has a meal: the system says so and asks the user to pick another slot (or remove the existing meal from the Meal Plan page first).
 
-### Use Case 2: Manage Fridge (lead: TBD)
+### Use Case 2: Manage Fridge
 
 **Views owned:** `PantryView`, `AddPantryItemDialog`
 
@@ -103,7 +101,7 @@ Each use case below is led by one member. A lead owns every View listed under th
   1. The user selects an item and marks it "running low", "enough", or removes it.
   2. The list updates.
 
-### Use Case 3: Plan the Week (lead: TBD)
+### Use Case 3: Plan the Week
 
 **Views owned:** `MealPlanView` (with a side panel for the selected meal)
 
@@ -123,7 +121,7 @@ Each use case below is led by one member. A lead owns every View listed under th
   - The target slot is already filled: the system says so.
   - The meal is already cooked: it can't be moved.
 
-### Use Case 4: Shopping List (lead: TBD)
+### Use Case 4: Shopping List
 
 **Views owned:** `ShoppingListView`
 
@@ -146,8 +144,7 @@ Each use case below is led by one member. A lead owns every View listed under th
 - Alternative flows:
   - The user regenerates the list: items that are still needed keep their ticks; items no longer needed disappear.
 
-### Use Case 5: Log Cooking (lead: Shaoheng Fan)
-
+### Use Case 5: Log Cooking
 **Views owned:** `CookView`, `CookingHistoryView`, `CookingStatsView` (extension)
 
 **5a. Complete a planned meal**
@@ -192,7 +189,7 @@ Use cases 1 and 2 don't depend on any other use case, so they are the first end-
 
 ## Interactors
 
-Each lead splits their use case into small Interactors, one per user action. Each Interactor has its own input boundary, output boundary, input/output data, data access interface, Controller and Presenter, in its own package (`use_case.<name>`, `interface_adapter.<name>`), as in ca-login.
+Each lead splits their use case into small Interactors, one per user action. Each Interactor has its own input boundary, output boundary, input/output data, data access interface, Controller and Presenter, in its own package (`use_case.<name>`, `interface_adapter.<name>`)。
 
 | Lead | Interactors (MVP) | Data access interfaces it needs, implemented by |
 |---|---|---|
@@ -202,13 +199,9 @@ Each lead splits their use case into small Interactors, one per user action. Eac
 | 4 Shopping | `LoadShoppingList`, `GenerateShoppingList`, `ToggleBought` | shopping list → `FileShoppingListDataAccessObject`; meal plan, fridge (read only) |
 | 5 Cooking | `LoadUncookedMeals`, `PrepareChecklist`, `CompleteMeal`, `LoadCookingHistory` | meal plan, fridge → their DAOs; history → `FileCookingLogDataAccessObject` |
 
-Every Interactor gets at least one unit test, run against in-memory DAOs.
-
 ---
 
 ## Entities
-
-All entities are plain Java with no Swing, file or network code.
 
 ### IngredientName (value object)
 Every ingredient in the app is compared through this class, never through a raw `String`.
@@ -382,231 +375,15 @@ JSON is read and written with `org.json`, and HTTP calls use OkHttp, the same li
 
 ## Design Diagrams
 
-Drafts to check that the design holds together. They will be updated as we build.
+TODO
 
 ### UML Class Diagram
 
-Entities, plus use case 5a as one example of a full Clean Architecture slice. The other use cases follow the same shape.
-
-```plantuml
-@startuml
-package entity {
-  class IngredientName {
-    -displayName: String
-    -key: String
-    +equals(Object): boolean
-    +getDisplayName(): String
-  }
-  class RecipeIngredient {
-    -name: IngredientName
-    -measure: String
-  }
-  class Recipe {
-    -id: String
-    -name: String
-    -category: String
-    -area: String
-    -instructions: String
-    -thumbnailUrl: String
-  }
-  enum StockLevel {
-    ENOUGH
-    LOW
-  }
-  class PantryItem {
-    -name: IngredientName
-    -expiryDate: LocalDate
-    -stockLevel: StockLevel
-    +isExpired(LocalDate): boolean
-  }
-  class Pantry {
-    +add(PantryItem)
-    +remove(IngredientName)
-    +find(IngredientName): PantryItem
-    +setStockLevel(IngredientName, StockLevel)
-  }
-  enum MealType {
-    BREAKFAST
-    LUNCH
-    DINNER
-  }
-  class MealSlot {
-    -day: DayOfWeek
-    -mealType: MealType
-  }
-  class PlannedMeal {
-    -recipeId: String
-    -recipeName: String
-    -cooked: boolean
-    +markCooked()
-  }
-  class MealPlan {
-    -weekStart: LocalDate
-    +assign(MealSlot, PlannedMeal)
-    +remove(MealSlot)
-    +move(MealSlot, MealSlot)
-    +uncookedMeals(): List<PlannedMeal>
-  }
-  class ShoppingItem {
-    -name: IngredientName
-    -reason: Reason
-    -neededFor: Set<String>
-    -bought: boolean
-  }
-  class ShoppingList {
-    -weekStart: LocalDate
-    +toggleBought(IngredientName)
-  }
-  class CookingRecord {
-    -recipeId: String
-    -recipeName: String
-    -cookedOn: LocalDate
-    -weekStart: LocalDate
-  }
-
-  Recipe "1" *-- "*" RecipeIngredient
-  RecipeIngredient --> IngredientName
-  Pantry "1" *-- "*" PantryItem
-  PantryItem --> IngredientName
-  PantryItem --> StockLevel
-  MealPlan "1" *-- "0..21" PlannedMeal
-  MealPlan ..> MealSlot
-  MealSlot --> MealType
-  PlannedMeal "1" *-- "*" RecipeIngredient
-  ShoppingList "1" *-- "*" ShoppingItem
-  ShoppingItem --> IngredientName
-  CookingRecord --> MealSlot
-}
-
-package use_case.complete_meal {
-  interface CompleteMealInputBoundary {
-    +execute(CompleteMealInputData)
-  }
-  interface CompleteMealOutputBoundary {
-    +prepareSuccessView(CompleteMealOutputData)
-    +prepareFailView(String)
-  }
-  interface CompleteMealDataAccessInterface {
-    +getMealPlan(LocalDate): MealPlan
-    +saveMealPlan(MealPlan)
-    +getPantry(): Pantry
-    +savePantry(Pantry)
-    +appendRecord(CookingRecord)
-  }
-  class CompleteMealInteractor
-  CompleteMealInteractor ..|> CompleteMealInputBoundary
-  CompleteMealInteractor --> CompleteMealOutputBoundary
-  CompleteMealInteractor --> CompleteMealDataAccessInterface
-}
-
-package interface_adapter.complete_meal {
-  class CompleteMealController
-  class CompleteMealPresenter
-  class CompleteMealViewModel
-  class CompleteMealState
-  CompleteMealController --> CompleteMealInputBoundary
-  CompleteMealPresenter ..|> CompleteMealOutputBoundary
-  CompleteMealPresenter --> CompleteMealViewModel
-  CompleteMealViewModel --> CompleteMealState
-}
-
-package view {
-  class CookView
-  CookView --> CompleteMealController : "Confirm"
-  CookView --> CompleteMealViewModel
-}
-
-CompleteMealInteractor ..> MealPlan
-CompleteMealInteractor ..> Pantry
-CompleteMealInteractor ..> CookingRecord
-@enduml
-```
-
-This shows only the last step of 5a (confirming). Loading the uncooked meals and preparing the checklist are separate, smaller use cases with the same shape. The `CompleteMealDataAccessInterface` above is a placeholder: in the code it will be split so each method group is implemented by the DAO that owns that file (meal plan, pantry, cooking log).
+TODO
 
 ### Sequence Diagrams
 
-**Flow 1: Search → details → add to plan** (use cases 1a, 1b, 1c, each its own Interactor)
-
-```plantuml
-@startuml
-actor User
-participant RecipeSearchView
-participant RecipeDetailView
-participant "SearchRecipes\nController / Interactor" as Search
-participant "ViewRecipeDetail\nController / Interactor" as Detail
-participant "AddToMealPlan\nController / Interactor" as Add
-participant MealDbRecipeDAO
-participant FileMealPlanDAO
-participant "Presenters\n(one per use case)" as P
-
-User -> RecipeSearchView : type "pasta", press Search
-RecipeSearchView -> Search : execute("pasta", BY_NAME)
-Search -> MealDbRecipeDAO : searchByName("pasta")
-MealDbRecipeDAO --> Search : List<Recipe>
-Search -> P : SearchPresenter.prepareResults(...)
-P -> RecipeSearchView : (via SearchViewModel) show list
-
-User -> RecipeSearchView : select a recipe
-RecipeSearchView -> Detail : execute(recipeId)
-Detail -> MealDbRecipeDAO : getById(recipeId)
-Detail -> P : DetailPresenter.prepareDetail(...)
-P -> RecipeDetailView : (via DetailViewModel + ViewManagerModel) show details
-
-User -> RecipeDetailView : choose Wed / Dinner, press "Add to plan"
-RecipeDetailView -> Add : execute(recipeId, WED, DINNER)
-Add -> MealDbRecipeDAO : getById(recipeId)
-Add -> FileMealPlanDAO : getMealPlan(thisWeek)
-note right of FileMealPlanDAO : implements AddToMealPlanDataAccessInterface
-Add -> Add : plan.assign(slot, new PlannedMeal(recipe))
-alt slot is free
-  Add -> FileMealPlanDAO : saveMealPlan(plan)
-  Add -> P : AddPresenter.prepareSuccessView()
-else slot is taken
-  Add -> P : AddPresenter.prepareFailView("Wed dinner already planned")
-end
-@enduml
-```
-
-**Flow 2: Cook a planned meal** (use case 5a, all on the Cook page)
-
-```plantuml
-@startuml
-actor User
-participant ViewManager
-participant CookView
-participant "LoadUncookedMeals\nController / Interactor" as Load
-participant "PrepareChecklist\nController / Interactor" as Prep
-participant "CompleteMeal\nController / Interactor" as Complete
-participant "MealPlan / Pantry / CookingLog DAOs" as DAOs
-participant "Presenters\n(one per use case)" as P
-
-User -> ViewManager : press "Cook" in nav bar
-ViewManager -> CookView : onShown()
-CookView -> Load : execute(thisWeek)
-Load -> DAOs : getMealPlan(thisWeek)
-Load -> P : prepareList(uncooked meals)
-P -> CookView : (via CookViewModel) show list
-
-User -> CookView : select Wed dinner, press "I cooked this"
-CookView -> Prep : execute(thisWeek, WED_DINNER)
-Prep -> DAOs : getMealPlan(thisWeek), getPantry()
-Prep -> P : prepareChecklist(ingredients + fridge status)
-P -> CookView : (via CookViewModel) show checklist
-
-User -> CookView : garlic = used up, olive oil = running low, press Confirm
-CookView -> Complete : execute(thisWeek, WED_DINNER, choices)
-Complete -> DAOs : getMealPlan(thisWeek), getPantry()
-alt meal not cooked yet
-  Complete -> Complete : pantry.remove(garlic)\npantry.setStockLevel(olive oil, LOW)\nmeal.markCooked()
-  Complete -> DAOs : savePantry, saveMealPlan, appendRecord(new CookingRecord)
-  Complete -> P : prepareSuccessView()
-  P -> CookView : (via CookViewModel) show updated list
-else already cooked
-  Complete -> P : prepareFailView("Already cooked")
-end
-@enduml
-```
+TODO
 
 ---
 
@@ -625,9 +402,3 @@ The first run downloads the ingredient list from TheMealDB, so an internet conne
 **Known limitations (by design):**
 - The app doesn't track amounts, only whether an ingredient is there and whether it's running low (see API Usage for why).
 - If a recipe spells an ingredient in a way the catalog doesn't (e.g. "chopped tomatoes" vs "Tomatoes"), the shopping list treats it as missing. A synonym table in `IngredientName` can fix this later.
-- Only the current week is shown in the MVP.
-
-**Open questions:**
-- [ ] Who leads use cases 2, 3 and 4 (Yilin, Shengxi, Shuyin)?
-- [ ] Should "Move" stay in 3's MVP or become an extension?
-- [ ] Verify in lab: what `search.php` returns when nothing matches.
