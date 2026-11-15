@@ -19,16 +19,25 @@ public class DeckView extends JPanel implements ActionListener, GetDeckViewModel
     private final JLabel deckName = new JLabel();
     private final JLabel getDeckErrorField = new JLabel();
 
-//    private final JButton home;
+    private final JButton home;
     private GetDeckController getDeckController = null;
 
     public DeckView(GetDeckViewModel getDeckViewModel) {
-
         this.getDeckViewModel = getDeckViewModel;
         this.getDeckViewModel.addListener(this);
 
+        home = new JButton("home");
+
+        home.addActionListener(
+                new ActionListener() {
+                    public void actionPerformed(ActionEvent evt) {
+                        getDeckController.switchToHomescreenView();
+                    }
+                }
+        );
+
         this.add(deckName);
-//        this.add(home);
+        this.add(home);
     }
 
     /**

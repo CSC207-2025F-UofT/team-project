@@ -4,6 +4,7 @@ import entity.Deck;
 import entity.DeckFactory;
 import entity.Flashcard;
 import use_case.get_all_decks.GetAllDecksDataAccessInterface;
+import use_case.get_deck.GetDeckDataAccessInterface;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,7 +12,7 @@ import java.util.List;
 /**
  * DeckDataAccessObject used for testing, gives mock data
  */
-public class MockDeckDataAccessObject implements GetAllDecksDataAccessInterface {
+public class MockDeckDataAccessObject implements GetAllDecksDataAccessInterface, GetDeckDataAccessInterface {
 
     public MockDeckDataAccessObject(DeckFactory deckFactory) {}
 
@@ -59,6 +60,16 @@ public class MockDeckDataAccessObject implements GetAllDecksDataAccessInterface 
 
     public boolean isEmpty() {
         return false;
+    }
+
+    @Override
+    public boolean deckExists(String name) {
+        return true;
+    }
+
+    @Override
+    public Deck getDeck(String name) {
+        return mockDataMakeDeck("CSC207H1");
     }
 }
 
