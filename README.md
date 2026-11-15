@@ -89,7 +89,7 @@ As a user, I want to view a visual grid of all items in my wardrobe filtered by 
 **Success Outcome:** The user sees a weather-appropriate outfit from their closet that matches the preferences they selected.
 
 
-### Use Case 3: Save Outfit
+### Use Case 4: Save Outfit
 **Primary Actor:** User
 **Preconditions:** ?
 **Trigger:** The user selects the "Save Outfit" button.
@@ -104,7 +104,7 @@ As a user, I want to view a visual grid of all items in my wardrobe filtered by 
 **Success Outcome:** The outfit appears in the user's favourites.
 
 
-### Use Case 4: Regenerate Outfit
+### Use Case 5: Regenerate Outfit
 **Primary Actor:** User
 **Preconditions:** ?
 **Trigger:** The user selects the "Regenerate Outfit" button.
@@ -119,7 +119,7 @@ As a user, I want to view a visual grid of all items in my wardrobe filtered by 
 **Success Outcome:** The user sees a different outfit that meets the current recommendation criteria.
 
 
-### Use Case 5: View Closet Inventory
+### Use Case 6: View Closet Inventory
 **Primary Actor:** User
 **Preconditions:** ?
 **Trigger:** The user selects the "My Closet" button.
