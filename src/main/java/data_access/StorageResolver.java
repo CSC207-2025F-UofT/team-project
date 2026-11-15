@@ -1,8 +1,8 @@
-package archive;
+package data_access;
 
 import java.nio.file.Path;
 
-public class ArchiveManager implements ArchiveManagerInterface {
+public class StorageResolver {
     private static final String FOLDER_NAME = "journeye";
 
     private Path directory;
@@ -37,7 +37,7 @@ public class ArchiveManager implements ArchiveManagerInterface {
         return basePath.resolve(FOLDER_NAME);
     }
 
-    public ArchiveManager() {
+    public StorageResolver() {
         directory = getDefaultDirectory();
     }
 
