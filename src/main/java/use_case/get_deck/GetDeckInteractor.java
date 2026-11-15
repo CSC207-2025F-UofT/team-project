@@ -43,5 +43,5 @@ public class GetDeckInteractor implements GetDeckInputBoundary{
     }
 
     @Override
-    public void switchToHomescreenView() { /* not yet implemented */ }
+    public void switchToHomescreenView() { getDeckPresenter.switchToHomescreenView(); }
 }

@@ -46,4 +46,10 @@ public class GetDeckPresenter implements GetDeckOutputBoundary {
         getDeckState.setDeckError(error);
         getDeckViewModel.notifyStateChanged();
     }
+
+    @Override
+    public void switchToHomescreenView() {
+        viewManagerModel.setState(GetAllDecksViewModel.VIEW_NAME);
+        viewManagerModel.notifyViewChanged();
+    }
 }

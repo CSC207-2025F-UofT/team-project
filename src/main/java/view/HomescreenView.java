@@ -93,6 +93,14 @@ public class HomescreenView extends JPanel implements ActionListener, GetAllDeck
             }
         });
 
+        openButton.addActionListener(
+                new ActionListener() {
+                    public void actionPerformed(ActionEvent evt) {
+                        getAllDecksController.switchToDeckView();
+                    }
+                }
+        );
+
         // footer panel
         JPanel footerPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 0, 0));
         footerPanel.setBackground(BG_COLOR);

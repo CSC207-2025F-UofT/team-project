@@ -5,7 +5,7 @@ import entity.Deck;
 import java.util.List;
 
 /**
- * DAO interface fo
+ * DAO interface for the GetAllDecks Use Case.
  */
 public interface GetAllDecksDataAccessInterface {
 

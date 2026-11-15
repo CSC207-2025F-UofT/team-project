@@ -15,4 +15,9 @@ public interface GetDeckOutputBoundary {
      * @param errorMessage the explanation of the failure
      */
     void prepareFailView(String errorMessage);
+
+    /**
+     * Switches to the Homescreen View.
+     */
+    void switchToHomescreenView();
 }
