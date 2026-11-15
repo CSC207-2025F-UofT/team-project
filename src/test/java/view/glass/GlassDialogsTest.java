@@ -16,13 +16,14 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 /** Headless tests: verify the real glass panel without opening a native modal window. */
 class GlassDialogsTest {
     @Test
-    void saveOptionsPreserveOriginalIndexesAndOrder() {
+    void unsavedChangesUseStableThreeButtonOrder() {
         AtomicInteger answer = new AtomicInteger(-1);
-        var pane = new GlassDialogs.DialogPane("Save canvas", "Save your canvas?",
-                GlassDialogs.Tone.QUESTION, null, new String[]{"Save", "Save As…", "Cancel"}, answer::set);
+        var pane = new GlassDialogs.DialogPane("Unsaved changes", "Save before opening?",
+                GlassDialogs.Tone.WARNING, null, new String[]{"Don’t Save", "Cancel", "Save"}, answer::set);
         assertEquals(3, pane.buttons.size());
-        assertEquals("Save", pane.buttons.get(0).getText());
-        assertEquals("Save As…", pane.buttons.get(1).getText());
+        assertEquals("Don’t Save", pane.buttons.get(0).getText());
+        assertEquals("Cancel", pane.buttons.get(1).getText());
+        assertEquals("Save", pane.buttons.get(2).getText());
         pane.buttons.get(1).doClick();
         assertEquals(1, answer.get());
         pane.buttons.get(2).doClick();
@@ -69,6 +70,19 @@ class GlassDialogsTest {
         pane.paint(graphics);
         graphics.dispose();
         assertNotEquals(0, image.getRGB(30, 30) >>> 24);
+    }
+
+    @Test
+    void unicodeNamesRemainEditableWithoutQuestionMarkIcon() {
+        var field = new GlassTextField(20, "");
+        field.setText("线性代数 第三课");
+        var pane = new GlassDialogs.DialogPane("Save Canvas", "Name",
+                GlassDialogs.Tone.QUESTION, field, new String[]{"Save", "Cancel"}, ignored -> {});
+        assertEquals("线性代数 第三课", field.getText());
+        assertTrue(isDescendantOf(pane, field));
+        // No obsolete lavender '?' glyph is added at the left of the heading.
+        assertTrue(java.util.Arrays.stream(pane.getComponents())
+                .noneMatch(c -> c.getClass().getSimpleName().contains("ToneIcon")));
     }
 
     @Test

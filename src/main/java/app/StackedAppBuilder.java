@@ -147,7 +147,8 @@ public class StackedAppBuilder {
         BoardWindow board = new BoardWindow(page, drawing,
                 host -> new HistoryPanel(historyViewModel, host, historyPresenter::undoDelete),
                 pdfPanel, historyPresenter::delete,
-                () -> dialogs.get().save(), () -> dialogs.get().open());
+                () -> dialogs.get().save(), () -> dialogs.get().saveAs(),
+                () -> dialogs.get().open());
         dialogs.set(new CanvasWorkspaceDialogs(canvases, drawing, board));
         FloatingToolbar toolbar = new FloatingToolbar(drawing, board);
         board.addFloatingToolbar(toolbar.component());
@@ -165,6 +166,18 @@ public class StackedAppBuilder {
         int shortcut = Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx();
         root.registerKeyboardAction(e -> drawing.undo(), KeyStroke.getKeyStroke(KeyEvent.VK_Z, shortcut),
                 JComponent.WHEN_IN_FOCUSED_WINDOW);
+        root.registerKeyboardAction(e -> dialogs.get().save(), KeyStroke.getKeyStroke(KeyEvent.VK_S, shortcut),
+                JComponent.WHEN_IN_FOCUSED_WINDOW);
+        root.registerKeyboardAction(e -> dialogs.get().saveAs(), KeyStroke.getKeyStroke(KeyEvent.VK_S, shortcut | java.awt.event.InputEvent.SHIFT_DOWN_MASK),
+                JComponent.WHEN_IN_FOCUSED_WINDOW);
+
+        // UI-only demo for the team: Ctrl/Cmd+Alt+E displays a replaceable sample error notice.
+        // Kept separate from the evaluator so no calculation error strings are hard-coded here.
+        root.registerKeyboardAction(e -> view.glass.GlassNotices.showError(
+                        board, "Can't calculate", "a has no value — write a = … first"),
+                KeyStroke.getKeyStroke(KeyEvent.VK_E, shortcut | java.awt.event.InputEvent.ALT_DOWN_MASK),
+                JComponent.WHEN_IN_FOCUSED_WINDOW);
+
         root.registerKeyboardAction(e -> board.setPdfFullscreen(false),
                 KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_IN_FOCUSED_WINDOW);
         frame.setContentPane(board);

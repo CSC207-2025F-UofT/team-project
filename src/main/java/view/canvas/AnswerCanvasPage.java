@@ -459,6 +459,8 @@ public class AnswerCanvasPage extends CanvasPage {
             if (getSharedCanvas().isCurrent(capture.getId(), capture.getRevision())) {
                 ownMessage = true;
                 showMessage(error, true, ERROR_MESSAGE_MILLIS);
+                // Use the same non-modal error card as Save/Open failures for explicit Calculate.
+                view.glass.GlassNotices.showError(this, "Can't calculate", error);
                 // any Calculate goes to PDF Studio, errors just w/ no answer (y=3x, x+1=...)
                 publishFormulaOnly(capture, latex);
             }

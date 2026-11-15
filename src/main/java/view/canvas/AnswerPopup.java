@@ -239,8 +239,9 @@ public class AnswerPopup extends JPanel {
                 w = Math.min(MAX_TEXT, fm.stringWidth(text()));
                 h = fm.getHeight();
             }
-            return new Dimension(w + 2 * PAD_X + SHADOW + (problem != null ? 21 : 0),
-                    h + 2 * PAD_Y + SHADOW);
+            // An error uses a two-line notification card, never the old single red-text pill.
+            if (problem != null) return new Dimension(Math.max(260, Math.min(440, w + 70)), 80);
+            return new Dimension(w + 2 * PAD_X + SHADOW, h + 2 * PAD_Y + SHADOW);
         }
 
         @Override
@@ -265,16 +266,25 @@ public class AnswerPopup extends JPanel {
                 g2.setColor(BORDER);
                 g2.draw(shape);
             }
-            if (icon != null) {
+            if (problem != null) {
+                // A real two-line error, matching the larger GlassNotices banner.
+                int x = 47;
+                g2.clipRect(x, 0, Math.max(1, w - x - PAD_X), h);
+                g2.setFont(BoardTheme.font(14f).deriveFont(Font.BOLD));
+                g2.setColor(new Color(35, 35, 39));
+                g2.drawString("Can't calculate", x, 29);
+                g2.setFont(textFont());
+                g2.setColor(new Color(111, 111, 117));
+                g2.drawString(text(), x, 50);
+            } else if (icon != null) {
                 icon.setForeground(Color.BLACK);
                 icon.paintIcon(this, g2, PAD_X, PAD_Y);
             } else {
                 g2.setFont(textFont());
-                g2.setColor(problem != null ? ERROR_TEXT : Color.DARK_GRAY);
+                g2.setColor(Color.DARK_GRAY);
                 FontMetrics fm = g2.getFontMetrics();
-                int textX = PAD_X + (problem != null ? 21 : 0);
-                g2.clipRect(textX, 0, Math.max(1, w - textX - PAD_X), h);
-                g2.drawString(text(), textX, PAD_Y + fm.getAscent());
+                g2.clipRect(PAD_X, 0, Math.max(1, w - 2 * PAD_X), h);
+                g2.drawString(text(), PAD_X, PAD_Y + fm.getAscent());
             }
             g2.dispose();
         }
