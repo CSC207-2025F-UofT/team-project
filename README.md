@@ -2,35 +2,53 @@
 
 ## Project Overview
 
-Our four-person University of Toronto CSC207 team is developing a proposed Java Swing PC Build Planner inspired by PCPartPicker for Fall 2026. This desktop application is intended to help users plan PC configurations while giving the team experience with collaborative software development.
+Our four-person University of Toronto CSC207 team is developing a Java Swing application called Calorie Calculator & Meal Planner for Fall 2026.
 
-The project idea is provisional pending external API feasibility research; no API has been finalized. As of October 30, 2026, application implementation, API integration, successful Maven test execution, and other teammates' development environments have not been confirmed.
+The application aims to help users calculate the calories in their meals and generate personalized meal suggestions based on their preferred ingredients and target calorie intake.
+
+Through this project, our team will gain experience in collaborative software development, object-oriented programming, Clean Architecture, SOLID principles, and external API integration.
+
+The project is currently in the planning stage. Features, API choices, and implementation details will be finalized through team discussions and feasibility research.
 
 ## Project Objectives and Features
 
-- Browse and select PC components, including CPUs, GPUs, RAM, motherboards, storage, and power supplies.
-- Check hardware compatibility and identify potential issues.
-- Retrieve external component prices to support price comparison.
-- Save, load, and manage PC builds through persistent storage.
+The proposed application will allow users to:
+
+Search and Select Ingredients: Browse or search for ingredients and access their nutritional information.
+
+Calculate Meal Calories: Select ingredients, enter their quantities in grams, and calculate the total calories of a meal.
+
+Generate Personalized Meals: Enter preferred ingredients and a target calorie amount to receive meal suggestions that approximately match their requirements.
+
+Save and Load Meals: Save meal combinations and retrieve previously saved meals.
+
+Access Nutritional Data: Use an external API to retrieve calorie information for different ingredients.
+
+The application will be developed using Java and Swing, following CSC207 Clean Architecture and SOLID principles. Maven will manage dependencies, and JUnit will support unit testing.
 
 The planned implementation will use Java and Swing, follow CSC207 Clean Architecture and SOLID principles, and integrate at least one external API. Maven will manage dependencies, and JUnit will support unit testing. Each team member should lead one use case and contribute through feature branches and reviewed Pull Requests.
 
 ## Proposed Team Responsibilities
 
 | Proposed use case | Responsibility | Assigned member |
-| --- | --- | --- |
-| Component selection | Browse and select components for a PC build. | TBD |
-| Compatibility checker | Check selected components for compatibility and identify potential issues. | TBD |
-| External price lookup | Retrieve and display component prices from an external API. | TBD |
-| Saving/loading builds | Save, load, and manage PC builds. | TBD |
+| Ingredient Search | Search for ingredients and retrieve nutritional information. | TBD |
+| Calorie Calculator | Calculate total meal calories based on selected ingredients and quantities. | TBD |
+| Meal Generator | Generate meal suggestions based on preferred ingredients and calorie targets. | TBD |
+| Save and Load Meals | Save, retrieve, and manage meal records. | TBD |
 
 These use cases are proposed; individual ownership has not been finalized.
 
 ## External API Research
 
-API feasibility is the current priority. eBay Browse API and SerpApi are being evaluated for pricing, usage limits, accessibility, and data quality. eBay Developer registration has been initiated; account activation is pending. API testing and integration are not confirmed complete.
+The application is expected to integrate at least one external API to retrieve nutritional information.
 
-The team will confirm a practical API solution before committing to API-dependent design and may reconsider the project idea if none is suitable.
+Potential APIs include:
+
+USDA FoodData Central API: Provides nutritional information for a wide range of foods and ingredients.
+
+Open Food Facts API: Provides food product information, including nutritional values and calorie content.
+
+The team will evaluate these APIs based on accessibility, data availability, documentation, usage limits, and ease of integration with Java.
 
 ## Project Timeline and Milestones
 
@@ -47,7 +65,7 @@ The final presentation on **December 7, 2026** is the confirmed deadline. Other 
 
 ## Demonstration
 
-Add screenshots or animations here as working functionality becomes available.
+Screenshots or animations of the application will be added as working features become available.
 
 ## Project Documentation
 
