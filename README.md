@@ -83,7 +83,7 @@ SUCCESS OUTCOME: A list of skills is derived from the given list of courses.
 
 MAIN SUCCESS SCENARIO:
 
-- The user uploads a list of courses.
+- The student uploads a list of courses.
 
 - The system makes a call to a Timetable Builder API, to fetch a course description.
 
@@ -110,13 +110,13 @@ MAIN SUCCESS SCENARIO:
 
 - User goes onto job list
 
-- The system checks that the user uploaded the courses
+- The system checks that the student uploaded the courses
 
 - The system checks that the courses were turned into skills
 
 - The system ranks the jobs by which skills they have that match the job
 
-- The system presents the user with the job list
+- The system presents the student with the job list
 
 Extension (4a): No matching jobs found.
 
@@ -131,16 +131,16 @@ PRIMARY ACTOR: User looking for jobs
 PRECONDITIONS:
 - They uploaded their courses
 - The courses were turned into skills by the system.
-- The user is on the job list page
+- The student is on the job list page
 
 TRIGGER: User selects a specific job title
 
-SUCCESS OUTCOME: User is presented with the job description, including what skills are needed and what skills the user has.
+SUCCESS OUTCOME: User is presented with the job description, including what skills are needed and what skills the student has.
 
 MAIN SUCCESS SCENARIO:
 - User selects a specific job posting
 - The system finds the job description
-- The system presents the user with the description
+- The system presents the student with the description
 
 ### Use Case 3c
 NAME: See a skill list
@@ -150,16 +150,16 @@ PRIMARY ACTOR: User trying to see skills
 PRECONDITIONS:
 - They uploaded their courses
 - The courses were turned into skills by the system.
-- The user is on the job list page
+- The student is on the job list page
 
 TRIGGER: User selects a specific job title
 
-SUCCESS OUTCOME: User is presented with the job description, including what skills are needed and what skills the user has.
+SUCCESS OUTCOME: User is presented with the job description, including what skills are needed and what skills the student has.
 
 MAIN SUCCESS SCENARIO:
 - User selects a specific job posting
 - The system finds the job description
-- The system presents the user with the description
+- The system presents the student with the description
 
 ### Use Case 4a
 NAME: Create Job Group
@@ -176,11 +176,11 @@ MAIN SUCCESS SCENARIO:
 
 - User selects the “create new job group” option
 
-- System prompts the user to enter a group name
+- System prompts the student to enter a group name
 
 - User enters a name for the group
 
-- System displays the list of jobs available to the user
+- System displays the list of jobs available to the student
 
 - User selects one or more jobs to add to the group
 
@@ -206,13 +206,13 @@ MAIN SUCCESS SCENARIO:
 
 - User selects option to view their groups
 
-- System shows a list of all the groups user has
+- System shows a list of all the groups student has
 
 - User selects a group they want to view
 
 - System gets the jobs in the group
 
-- System displays them for user
+- System displays them for student
 
 ### Use Case 4c
 NAME: Add Job to Group
@@ -231,7 +231,7 @@ MAIN SUCCESS SCENARIO:
 
 - User selects “add job to group” option
 
-- System prompts user to pick a pre existing group (or multiple)
+- System prompts student to pick a pre existing group (or multiple)
 
 - User selects a group (or multiple)
 
@@ -299,7 +299,7 @@ PRIMACY ACTOR: Courses
 
 PRECONDITION: There are several courses already added in the database.
 
-TRIGGER: The user clicks a “predict” button.
+TRIGGER: The student clicks a “predict” button.
 
 MAIN SUCCESS SCENARIO:
 
@@ -326,7 +326,7 @@ MAIN SUCCESS SCENARIO:
 | Marco | Use Case 2 |
 | Jaylen | Use Case 3(a-c) |
 | Aiden | Use Case 4(a-c) |
-| Jeffrey | Use Case 5 |
+| Jeffrey | Use Case 5+6 |
 
 ---
 
@@ -334,9 +334,25 @@ MAIN SUCCESS SCENARIO:
 
 ### Entity 1
 Student
+String: name
+String: password
+List[String]: Skills
+List[String]: Course Codes
+List[Job]: list of Recommended Jobs
+
 
 ### Entity 2
 Job
+int: id
+String: title
+List[String]: Skills Needed
+String: company
+date
+String: description
+String: locations
+String: salary
+String: url
+
 
 (Add additional entities as needed.)
 
@@ -346,7 +362,7 @@ Job
 
 **Careerjet:**
 
-**Documentation:** [https://www.careerjet.com/partners/api/]
+**Documentation:** [https://www.care-erjet.com/partners/api/]
 
 **How it is used in the program:**
 Return jobs that satisfy the user's skills and  description.
@@ -361,7 +377,11 @@ Analyze course descriptions to determine relevant skills, and match skills to di
 
 **Timetable Builder API:**
 
-**Documentation:** [https://apis.io/providers/university-of-toronto/, https://api.easi.utoronto.ca/ttb/reference-data, https://api.easi.utoronto.ca/ttb/getCoursesByCodeAndSectionCode]
+**Documentation:**
+https://apis.io/providers/university-of-toronto/
+https://api.easi.utoronto.ca/ttb/reference-data
+https://api.easi.utoronto.ca/ttb/getCoursesByCodeAndSectionCode
+
 
 **How it is used in the program:**
 To validate course title, and check description of courses.
