@@ -116,6 +116,9 @@ Group 03 - BA2200
 - The nice-to-have features are highly likely to be implemented. But the MVP features are selected to ensure a high project success rate.
 - We can add more enhancement features later on.
 - Use the Markdown file in the project repository as the single source of truth.  Treat the Google Docs as old archived information.
+- User authentication features (sign-up, login, and log-off) are required for the MVP. 
+- Public holiday warnings would be based on the selected country and not at a specific province/state level. 
+- Each authenticated user should have a private task list, i.e., all accounts would ***NOT*** share the same tasks. 
 
 ---
 
@@ -205,27 +208,27 @@ As a student, I want to be able to have a suggested prioritization of today's ta
 
 ### Story 1
 
-#### Name
+#### Sub Case 1A Name
 
 - Create a new academic task.
 
-#### Primary actor
+##### Primary actor
 
 - The user creating an academic task.
 
-#### Preconditions
+##### Preconditions
 
 - The application is running, and the window for both task creation and task editing is open.
 
-#### Trigger
+##### Trigger
 
 - The user chooses to create a new academic task.
 
-#### Success outcome
+##### Success outcome
 
 - A new academic task is successfully created, saved locally, restored when the application restarts, and reflected when the Monitoring View is opened or reopened.
 
-#### Main success scenario
+##### Main success scenario
 
 1. The user requests to create a new academic task.
 2. The system displays the task creation form.
@@ -239,16 +242,48 @@ As a student, I want to be able to have a suggested prioritization of today's ta
 9. The system saves the new task locally using JSON or SQLite.
 10. The system confirms that the task has been successfully created.
 
-#### Extensions
+##### Extensions
 - If the estimated number of hours is not a positive number, or the completion rate percentage is not a number between 0 and 100 percent, inclusive, the system displays an error message and requests a valid value.
 - If the task deadline is invalid or missing, the system displays an error message and prevents the task from being saved.
 - If the user cancels task creation, the system does not save the task.
   - The system pops up a window to let the user confirm the cancellation.
   - The system discards the unsaved task to be created, and the use case ends.
 
+#### Sub Case 1B Name
+
+- Allow the user to log in to the app
+
+##### Primary actor
+
+- The user logging in. 
+
+##### Trigger
+
+- The user chooses to log in on the welcome screen instead of signing in.
+
+##### Success outcome
+
+- The user logs in successfully. 
+
+##### Main success scenario
+
+1. The user requests to log in to the app. 
+2. The system displays the login screen to the user.
+3. The user enters the username and password and clicks on the login button.
+4. The system checks the information entered by the user against the list of users stored in the system.
+5. The system confirms that the user information found matches what is in the system.
+6. The user is logged into the system. 
+7. The system sends a confirmation message that the user is now logged in.
+
+##### Extensions
+- If the username or password doesn't match, the system displays an error message. 
+- If the user cancels login, the system does not save the login information.
+  - The system pops up a window to let the user confirm the cancellation.
+  - The system discards the unsaved login information, and the use case ends.
+
 ### Story 2
 
-#### Sub Case A Name
+#### Sub Case 2A Name
 - Edit Task information and completion progress
 
 #### Primary actor
@@ -283,7 +318,7 @@ As a student, I want to be able to have a suggested prioritization of today's ta
   - The system discards the unsaved changes.
   - The saved task remains unchanged, and the use case ends.
 
-#### Sub Case B Name
+#### Sub Case 2B Name
 - Deletes the task
 
 #### Primary actor
@@ -310,6 +345,39 @@ As a student, I want to be able to have a suggested prioritization of today's ta
 - The student cancels the deletion
   - The system closes the confirmation prompt.
   - The task remains unchanged, and the use case ends.
+
+#### Sub Case 2C Name
+
+- Allow the user to sign up a new user for the app
+
+##### Primary actor
+
+- The user signing up. 
+
+##### Trigger
+
+- The user chooses to sign up on the welcome screen instead of logging in.
+
+##### Success outcome
+
+- The user signs up successfully. 
+
+##### Main success scenario
+
+1. The user requests to sign up as a new user of the app. 
+2. The system displays the sign-up screen to the user.
+3. The user enters the username and password and clicks on the sign-up button.
+4. The system checks the information entered by the user against the list of users stored in the system.
+5. The system confirms the user is not already in the system.
+6. The user information is added to the system. 
+7. The system sends a confirmation message that the user is now signed up.
+8. The system displays the login screen to the user. 
+
+##### Extensions
+- If the username already exists, the system displays an error message. 
+- If the user cancels sign-up, the system does not save the sign-up information.
+  - The system pops up a window to let the user confirm the cancellation.
+  - The system discards the unsaved sign-up information, and the use case ends.
 
 ### Story 3
 
@@ -343,7 +411,7 @@ As a student, I want to be able to have a suggested prioritization of today's ta
 
 ### Story 4
 
-#### Sub Case A Name
+#### Sub Case 4A Name
 - Turn on Monitoring View
 
 ##### Primary actor
@@ -365,7 +433,7 @@ As a student, I want to be able to have a suggested prioritization of today's ta
   - The ISO 3166-1 alpha-2 country code would be used here.
 3. The Monitoring View window is displayed and supports the functionality of the Story 3 use case through an abstract interface. 
 
-#### Sub Case B Name
+#### Sub Case 4B Name
 - Prioritizing today's tasks using the suggested daily workload.
 
 ##### Primary actor
@@ -388,10 +456,40 @@ As a student, I want to be able to have a suggested prioritization of today's ta
 5. The system selects the top three tasks (or up to three tasks, if there are fewer than three tasks), and they are already sorted in the right order to be displayed.
 6. These selected and sorted tasks are displayed in the Monitoring View according to the sorted order.
 
+#### Sub Case 4C Name
+
+- Allow the user to log off the app
+
+##### Primary actor
+
+- The user logging off. 
+
+##### Trigger
+
+- The user chooses to log off on the main app screen.
+
+##### Success outcome
+
+- The user logs off successfully. 
+
+##### Main success scenario
+
+1. The user requests to log off the app. 
+2. The system displays a confirmation window for the user to confirm.
+3. The user confirms the action.
+3. The user logs off the system. 
+4. The system displays the welcome screen to the user.
+5. The system sends a confirmation message that the user is now logged off.
+
+##### Extensions
+- If the user cancels log off, the system does not log the user off.
+  - The system pops up a window to let the user confirm the cancellation.
+  - The user remains logged in, and the use case ends.
+
 ---
 
 ## Entities
-- See the file in Entities.puml 
+- See the file in `Entities.puml`. 
 
 ---
 
@@ -405,6 +503,6 @@ Nager.Holidays
 - Detailed technical documentation [https://nagerholidays.com/scalar/#community-api-v4/description/introduction]
 
 **How it is used in the program:**
-- The program uses the Nager.Date Public Holiday API to retrieve public holiday information for Ontario, Canada. 
+- The program uses the Nager.Date Public Holiday API to retrieve public holiday information. 
 - It checks whether academic task deadlines fall on public holidays and displays holiday warnings beside affected tasks in the Monitoring View. 
 - The API results are cached to avoid repeated requests.
