@@ -3,9 +3,11 @@ package view.canvas;
 import data_access.InMemoryFunctionDataAccessObject;
 import view.answer.CanvasAnswer;
 import interface_adapter.MathLabViewModel;
+import interface_adapter.evaluate.DefinitionCheckController;
 import interface_adapter.evaluate.EvaluateController;
 import interface_adapter.evaluate.EvaluatePresenter;
 import org.junit.jupiter.api.Test;
+import use_case.evaluate.DefinitionCheckInteractor;
 import use_case.evaluate.EvaluateInteractor;
 import view.DrawingCanvas;
 
@@ -328,6 +330,72 @@ class AnswerCanvasPageTest {
         waitFor(() -> page.currentMessage() != null && page.currentMessage().startsWith("Defined"), "the message");
         assertFalse(page.isMessageError());
         assertTrue(answers().isEmpty());
+    }
+
+    // A f(x)=x^2+2x (50 tall), B f(2)= (30 tall) far away
+    private void defineThenCall() {
+        shared.setFormulaRecognizer(image -> image.getHeight() < 80 ? "f(2)=" : "f(x)=x^{2}+2x");
+    }
+
+    private void autoDefine() throws Exception {
+        DefinitionCheckController check = new DefinitionCheckController(new DefinitionCheckInteractor());
+        onEdt(() -> page.setDefinitionCheck(check::isDefinition));
+    }
+
+    private boolean definedShown() {
+        return !page.isMessageError() && page.currentMessage() != null && page.currentMessage().startsWith("Defined");
+    }
+
+    @Test
+    void definitionIsSavedWithoutCalculate() throws Exception {
+        defineThenCall();
+        openPage();
+        autoDefine();
+        write();
+        waitFor(this::definedShown, "the Defined message");
+        assertNull(popup(), "nothing to click");
+
+        drag(400, 300, 420, 330);
+        waitPopup("f(2)=");
+        clickCalculate();
+        waitFor(() -> answerIs("8"), "f(2)");
+    }
+
+    @Test
+    void definitionWrittenRightBeforeTheCallIsSavedFirst() throws Exception {
+        defineThenCall();
+        openPage();
+        autoDefine();
+        onEdt(() -> page.setPopupDelay(400));
+        write();                                     // f(x)=...
+        drag(400, 300, 420, 330);                    // f(2)= right after, no pause
+        waitPopup("f(2)=");
+        clickCalculate();
+        waitFor(() -> answerIs("8"), "f(2)");
+        Thread.sleep(400);
+        assertNull(popup(), "f(x) line doesn't pop up after");
+    }
+
+    @Test
+    void badDefinitionStillGetsThePopup() throws Exception {
+        shared.setFormulaRecognizer(image -> "f(x)=x+y");
+        openPage();
+        autoDefine();
+        write();
+        waitPopup("f(x)=x+y");
+        assertFalse(errorShown("f(x)"), "no error till Calculate");
+        clickCalculate();
+        waitFor(() -> errorShown("f(x) can only use x, not y"), "the error");
+    }
+
+    @Test
+    void definitionWithNoBodyYetWaitsQuietly() throws Exception {
+        shared.setFormulaRecognizer(image -> "f(x)=");
+        openPage();
+        autoDefine();
+        write();
+        waitPopup("f(x)=");
+        assertNull(page.currentMessage());
     }
 
     @Test
