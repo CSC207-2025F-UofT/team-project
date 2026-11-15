@@ -8,7 +8,6 @@ import java.awt.Color;
 import java.awt.Container;
 import java.awt.Dialog;
 import java.awt.FlowLayout;
-import java.awt.Font;
 import java.awt.GridLayout;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
@@ -52,7 +51,7 @@ public class DashboardView extends JPanel implements PropertyChangeListener {
     viewModel.addPropertyChangeListener(this);
 
     JLabel heading = new JLabel("Modules", SwingConstants.CENTER);
-    heading.setFont(Theme.bold(heading.getFont(), 28f));
+    heading.setFont(Theme.bold(Theme.TITLE_SIZE));
     JPanel header = new JPanel(new BorderLayout(0, 8));
     header.add(heading, BorderLayout.NORTH);
     header.add(message, BorderLayout.CENTER);
@@ -83,7 +82,7 @@ public class DashboardView extends JPanel implements PropertyChangeListener {
 
   private JPanel createCard(ModuleState module) {
     JLabel title = new JLabel(module.getTitle());
-    title.setFont(title.getFont().deriveFont(Font.BOLD, 16f));
+    title.setFont(Theme.SANS_REGULAR.deriveFont(Theme.HEADER_SIZE));
     JPanel info = new JPanel(new GridLayout(0, 1, 0, 4));
     info.setOpaque(false);
     info.add(title);
