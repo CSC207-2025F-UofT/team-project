@@ -6,8 +6,13 @@ import interface_adapter.MathLabViewModel;
 import interface_adapter.evaluate.DefinitionCheckController;
 import interface_adapter.evaluate.EvaluateController;
 import interface_adapter.evaluate.EvaluatePresenter;
+import interface_adapter.graph.GraphController;
+import interface_adapter.graph.GraphViewModel;
+import entity.LatexFunctionParser;
 import org.junit.jupiter.api.Test;
+import use_case.evaluate.CalculateCheckInteractor;
 import use_case.evaluate.DefinitionCheckInteractor;
+import use_case.graph_check.GraphCheckInteractor;
 import use_case.evaluate.EvaluateInteractor;
 import view.DrawingCanvas;
 
@@ -784,5 +789,52 @@ class AnswerCanvasPageTest {
         Thread.sleep(600);
         assertNull(popup());
         assertEquals(1, calls.get(), "never read as a pick");
+    }
+
+    // board page: real graph + calculate checks, graphing itself never runs
+    private void openBoard() throws Exception {
+        InMemoryFunctionDataAccessObject functions = new InMemoryFunctionDataAccessObject();
+        EvaluateController controller = new EvaluateController(new EvaluateInteractor(
+                functions, new EvaluatePresenter(viewModel)));
+        GraphCheckInteractor graphCheck = new GraphCheckInteractor(new LatexFunctionParser());
+        CalculateCheckInteractor calcCheck = new CalculateCheckInteractor(functions);
+        SwingUtilities.invokeAndWait(() -> {
+            page = new AnswerCanvasPage(shared, controller, viewModel, (id, latex, result) -> { },
+                    new GraphController(input -> { }), new GraphViewModel(), graphCheck::canGraph,
+                    java.awt.Color.WHITE, 0);
+            page.setCalculateCheck(calcCheck::canCalculate);
+            page.setPopupDelay(100);
+            shared.attachTo(page);
+            page.setSize(900, 560);
+            layout(page);
+        });
+    }
+
+    private void boardPopupFor(String latex) throws Exception {
+        shared.setFormulaRecognizer(image -> latex);
+        openBoard();
+        write();
+        waitPopup(latex);
+    }
+
+    @Test
+    void sumOnlyGetsCalculate() throws Exception {
+        boardPopupFor("1+1=");
+        assertTrue(popup().hasCalculate());
+        assertFalse(popup().hasGraph());
+    }
+
+    @Test
+    void lineOnlyGetsGraph() throws Exception {
+        boardPopupFor("y=3x");
+        assertFalse(popup().hasCalculate());
+        assertTrue(popup().hasGraph());
+    }
+
+    @Test
+    void flatLineGetsBoth() throws Exception {
+        boardPopupFor("y=2+3");
+        assertTrue(popup().hasCalculate());
+        assertTrue(popup().hasGraph());
     }
 }

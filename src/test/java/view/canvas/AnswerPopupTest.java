@@ -57,4 +57,32 @@ class AnswerPopupTest {
         assertTrue(small.width > 0 && small.height > 0);
         assertTrue(big.width > small.width);
     }
+
+    @Test
+    void graphOnlyHasNoCalculate() {
+        AtomicInteger graphs = new AtomicInteger();
+        popup.showFormula("y=3x", null, graphs::incrementAndGet);
+        assertFalse(popup.hasCalculate());
+        assertTrue(popup.hasGraph());
+        popup.clickGraph();
+        assertEquals(1, graphs.get());
+    }
+
+    @Test
+    void bothShowsBoth() {
+        AtomicInteger clicks = new AtomicInteger();
+        popup.showFormula("y=5", clicks::incrementAndGet, () -> clicks.addAndGet(10));
+        assertTrue(popup.hasCalculate());
+        assertTrue(popup.hasGraph());
+        popup.clickCalculate();
+        popup.clickGraph();
+        assertEquals(11, clicks.get());
+    }
+
+    @Test
+    void calculateOnlyHasNoGraph() {
+        popup.showFormula("1+1=", () -> { }, null);
+        assertTrue(popup.hasCalculate());
+        assertFalse(popup.hasGraph());
+    }
 }

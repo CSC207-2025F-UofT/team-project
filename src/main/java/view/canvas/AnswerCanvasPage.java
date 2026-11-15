@@ -65,6 +65,7 @@ public class AnswerCanvasPage extends CanvasPage {
     private final Map<Long, Long> defined = new HashMap<>();  // id -> revision saved as a f(x)=...
     private Predicate<String> graphable = latex -> false;
     private Predicate<String> definitionCheck = latex -> false;
+    private Predicate<String> calculable = latex -> true;
     private final PopupGate gate = new PopupGate();
 
     // no evaluate feature, just a placeholder
@@ -145,6 +146,11 @@ public class AnswerCanvasPage extends CanvasPage {
     // f(x)=... lines get saved right away, no Calculate click
     public void setDefinitionCheck(Predicate<String> definitionCheck) {
         this.definitionCheck = definitionCheck;
+    }
+
+    // only-graphable lines (y=3x, f(x)=x^2) drop Calculate
+    public void setCalculateCheck(Predicate<String> calculable) {
+        this.calculable = calculable;
     }
 
     // tests type ranges like the user
@@ -384,8 +390,10 @@ public class AnswerCanvasPage extends CanvasPage {
         if (problem != null) {
             popup.showProblem(problem);
         } else if (graphing != null) {
-            popup.showFormula(latex, () -> calculate(capture, latex), () -> graph(capture, latex),
-                    graphable.test(latex));
+            boolean canGraph = graphable.test(latex);
+            boolean canCalc = !canGraph || calculable.test(latex);  // neither -> Calculate says why
+            popup.showFormula(latex, canCalc ? () -> calculate(capture, latex) : null,
+                    canGraph ? () -> graph(capture, latex) : null);
         } else {
             popup.showFormula(latex, () -> calculate(capture, latex));
         }
