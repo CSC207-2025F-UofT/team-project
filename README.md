@@ -81,6 +81,73 @@ Main success scenario:
 - A keyword match indicates relevance, not verified eligibility. Users must review the employer’s requirements before applying.
   Failure guarantee:
   An unsuccessful search does not modify saved jobs, resumes, or application records.
+
+### Use Case 5: Create a Qualification Profile
+Lead: Lingnan Meng
+MVP: Yes
+Primary actor: Student
+Preconditions: The application is available, and the student does not have a saved profile.
+Trigger: The student requests to create a profile.
+Success outcome: The student's qualifications and preferences are saved, are available in later sessions, and can be used for personalized recommendations.
+
+Main success scenario
+1. The student requests to create a profile.
+2. The system requests their program, optional expected graduation year, skills, and optional internship preferences.
+3. The student supplies the information and submits it.
+4. The system checks the required information and the format of any graduation year entered. Repeated skill entries are treated as one skill.
+5. The system saves the profile and shows the saved information.
+6. The system offers personalized suggestions through P3 without requiring a separate search query.
+Extensions
+- 3a. The student cancels before submission: No profile is created.
+- 4a. The program or skills are missing, or the graduation year is invalid: The system identifies the affected information and preserves the entered values. The student corrects them and returns to step 3.
+- 5a. Saving fails: The system explains that the profile was not saved and retains the entered values for another attempt.
+- 6a. Recommendations are unavailable: The created profile remains saved. P3 handles the recommendation failure.
+
+### Use Case 6: Update a Qualification Profile
+Lead: Lingnan Meng
+MVP: Yes
+Primary actor: Student
+Preconditions: The student has a saved profile.
+Trigger: The student requests to update their qualifications or preferences.
+Success outcome: The revised profile is saved, is visible to the student, and is used for later recommendations.
+
+Main success scenario
+1. The student requests to update their profile.
+2. The system displays the currently saved qualifications and preferences.
+3. The student changes their information and submits the changes.
+4. The system checks the same profile rules used during creation.
+5. The system saves and displays the updated profile.
+6. The student can view recommendations through P3 using the updated information.
+Extensions
+- 2a. The saved profile cannot be loaded: The system explains the problem and offers another attempt; it does not present an empty profile as the saved one.
+- 3a. The student cancels: The previously saved profile remains unchanged.
+- 4a. Updated information is invalid: The system explains what needs correction and retains the edits. The previous saved version remains unchanged until valid changes are successfully saved.
+- 5a. Saving fails: The system reports the failure, retains the edits for retrying, and preserves the previous saved profile.
+
+### Use Case 7: View Personalized Internship Recommendations
+Lead: Lingnan Meng
+MVP: Yes; main use case for this feature
+Primary actor: Student
+Supporting actor: Greenhouse job-posting service
+Preconditions: The student has a saved profile that meets the profile requirements.
+Trigger: The student opens personalized recommendations, including when continuing from profile creation.
+Success outcome: The student sees suggestions based on the latest saved profile, with matching reasons and application links, without entering a manual search query.
+
+Main success scenario
+1. The student requests to view personalized recommendations.
+2. The system obtains the latest saved profile.
+3. The system obtains job postings from the supported company boards.
+4. The system identifies internship postings and applies the student's saved role, location, and work-arrangement preferences.
+5. The system identifies distinct profile skills mentioned in the remaining postings and orders postings with at least one skill match by the number of matched skills.
+6. The system displays each suggestion's title, company, location, work-arrangement information, matched skills, and application link.
+Extensions
+- 2a. The profile cannot be loaded: The system explains the problem and offers a retry. It does not label generic results as personalized recommendations.
+- 3a. All job sources fail: The system explains that recommendations are unavailable and allows a retry. It does not treat a retrieval failure as proof that there are no suitable jobs.
+- 3b. Only some company boards fail: The system continues with available postings and identifies that the results are incomplete.
+- 4a. A work arrangement is unclear: The system marks it UNKNOWN and keeps it available for review with that label.
+- 5a. No postings match: The system explains that no matches were found and offers the option to update the profile or preferences.
+Limits: Suggestions indicate keyword relevance, not verified eligibility. Unspecified requirements stay unknown. An empty result is a valid result. The MVP does not automatically submit applications.
+
 (Add additional use cases as needed.)
 ---
 ## Minimal Viable Product (MVP)
