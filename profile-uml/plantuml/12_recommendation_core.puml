@@ -1,0 +1,50 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName DejaVu Sans
+skinparam defaultFontSize 14
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam ArrowColor #42566D
+skinparam classAttributeIconSize 0
+skinparam classBackgroundColor #F5F8FC
+skinparam classBorderColor #46617C
+skinparam interfaceBackgroundColor #E8F4F1
+skinparam interfaceBorderColor #237D70
+skinparam enumBackgroundColor #FFF4DE
+skinparam sequenceParticipantBackgroundColor #EAF0F8
+skinparam sequenceParticipantBorderColor #46617C
+skinparam sequenceLifeLineBorderColor #A5B3C2
+skinparam sequenceGroupBackgroundColor #F6F8FB
+skinparam NoteBackgroundColor #FFF5DC
+skinparam NoteBorderColor #C8A555
+skinparam maxMessageSize 65
+hide footbox
+title UC7 sequence | Load profile, retrieve jobs, present matches
+participant "controller :\nRecommendationController" as C
+participant "interactor :\nRecommendationInteractor" as I
+participant "profiles : ProfileRepository\n(FileProfileDataAccess)" as R
+participant "jobs : JobSource\n(GreenhouseJobSource)" as J
+participant "output : RecommendationOutputBoundary\n(RecommendationPresenter)" as P
+C -> I : execute()
+I -> R : load()
+alt Read fails or profile is missing
+ R --> I : exception or Optional.empty()
+ I -> P : presentError(STORAGE or PROFILE_MISSING)
+else Saved profile found
+ R --> I : Optional.of(user)
+ I -> J : fetch()
+ alt All boards fail / none configured
+  J --> I : JobSourceException
+  I -> P : presentError(JOB_SOURCE)
+ else At least one board succeeds
+  J --> I : JobFetchResult(jobs, failedBoards, successCount)
+  ref over I
+   Diagram 13: matcher.rank(user, jobs)
+   returns ordered List<InternshipMatch>
+  end ref
+  note over I : Build output items from matches; copy failedBoards.
+  I -> P : presentResults(outputData)
+  note over P : Empty list is a successful no-match result.\nNonempty failedBoards adds an incomplete-results warning.
+ end
+end
+@enduml
