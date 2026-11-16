@@ -64,7 +64,7 @@ public class CheckpointView extends JPanel implements PropertyChangeListener {
     viewModel.addPropertyChangeListener(this);
     setBorder(BorderFactory.createEmptyBorder(24, 24, 24, 24));
 
-    heading.setFont(Theme.bold(heading.getFont(), 20f));
+    heading.setFont(Theme.bold(Theme.HEADER_SIZE));
     message.setForeground(Theme.RED);
     choicesPanel.setOpaque(false);
 

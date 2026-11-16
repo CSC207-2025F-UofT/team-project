@@ -21,6 +21,7 @@ import usecase.savequiz.SaveQuizInteractor;
 import usecase.submitquiz.SubmitQuizInteractor;
 import view.DashboardView;
 import view.QuizView;
+import view.Theme;
 
 /**
  * Builds the DAO, interactors, presenters, controllers and views, then opens the dashboard.
@@ -50,6 +51,7 @@ public class LabApp {
         new SaveQuizInteractor(dataAccess, new SaveQuizPresenter(quizViewModel)));
 
     SwingUtilities.invokeLater(() -> {
+      Theme.installDefaultFonts(); 
       JFrame frame = new JFrame("CHM136 Virtual Lab");
       frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
       QuizView quizView = new QuizView(quizViewModel, checkQuizController,

@@ -29,12 +29,12 @@ class HeaderBar extends JPanel {
 
     JLabel course = new JLabel("CHM136 Virtual Lab");
     course.setForeground(Theme.ON_GREEN);
-    course.setFont(Theme.bold(course.getFont(), 18f));
+    course.setFont(Theme.SANS_REGULAR.deriveFont(Theme.HEADER_SIZE));
     add(course);
 
     JLabel page = new JLabel(title, SwingConstants.CENTER);
     page.setForeground(Theme.ON_GREEN);
-    page.setFont(Theme.bold(page.getFont(), 16f));
+    page.setFont(Theme.SANS_REGULAR.deriveFont(Theme.HEADER_SIZE));
     add(page);
 
     JButton notebook = Theme.linkButton("View Lab Notebook", Theme.ON_GREEN);
