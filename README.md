@@ -40,6 +40,124 @@ As a user, I want to request a new outfit generation or save a generated outfit 
 ### User Story 5 (Closet Inventory Visualizer): 
 As a user, I want to view a visual grid of all items in my wardrobe filtered by category (tops, bottoms, shoes) so that I can inspect my available clothes easily. (just a list of tops, bottoms, shoes..., most worn outfit)
 
+
+## Use Cases
+### Use Case 1: Add Clothing Item
+**Primary Actor:** User
+**Preconditions:** The user must be on the home page.
+**Trigger:** The user selects the "Add Item" button.
+**Main Success Scenario:**
+1. The system displays the form for adding a clothing item.
+2. The user selects a category (such as Tops, Bottoms, Shoes, etc.), provides the colour, style tags, and uploads an image for the clothing item.
+3. The user submits the form.
+4. The system saves the item to the user's closet.
+**5. The system displays the new items in the closet under its category.**
+
+**Extensions:**
+- **2a.** If the user cancels, the system returns to the closet without adding an item. The use case ends.
+- **4a.** If a required field is missing or invalid, the system displays an error and lets the user correct the form and submit it again.
+
+**Success Outcome:** The new clothing item is saved in the user's closet and is visible under the selected category.
+
+
+### Use Case 2: Generate Random Outfit
+**Primary Actor:** User
+**Preconditions:** The user must be on the home page.
+**Trigger:** The user selects the "Randomize" button.
+**Main Success Scenario:**
+1. The system retrieves the current weather for the user's location.
+2. The system identifies which clothing combinations from the user's closet satisfy the current weather conditions.
+3. The system randomly selects one of the valid combinations.
+4. The system displays the clothing items in the selected outfit.
+
+**Extensions:**
+- **1a.** If no weather data is available, the system displays an error message and lets the user try again.
+- **2a.** If no such combinations exist, the system displays a message explaining why it could not generate an outfit. The use case ends.
+
+**Success Outcome:** The user sees a randomly selected, weather-appropriate outfit created from items from their closet.
+
+
+### Use Case 3: Generate Custom Outfit
+**Primary Actor:** User
+**Preconditions:** The user must be on the home page.
+**Trigger:** The user selects the "Custom Outfit" option.
+**Main Success Scenario:**
+1. The system displays the outfit preference questions. The colour dropdown displays all available colours in the user's closet, and the style dropdown displays all available styles in the user's closet.
+2. The user selects a colour for the top and bottom separately.
+3. The user selects their preferred style.
+4. The user chooses "Yes", "No", or "Either" for layering options.
+5. The user requests a custom outfit.
+6. The system uses the current local weather conditions and the user's selected preferences to generate an outfit from the user's closet.
+7. The system displays the items in the generated outfit.
+
+**Extensions:**
+- **5a.** If a preference is missing, the system treats each blank preference as **Any**, and keeps the user's other selections. 
+- **6a.** If current weather is unavailable, the system displays an error, and lets the user retry with the same preferences.
+- **6b.** If no outfit matches the selected preferences and weather conditions, the system explains that an outfit could not be created with the selected preferences and lets the user edit their choices.
+
+**Success Outcome:** The user sees a weather-appropriate outfit from their closet that matches the preferences they selected.
+
+
+### Use Case 4: Save Outfit
+**Primary Actor:** User
+**Preconditions:** A generated outfit is currently displayed.
+**Trigger:** The user selects the "Save Outfit" button.
+**Main Success Scenario:**
+1. The system checks whether the displayed outfit is already in favourites.
+2. The system adds the outfit to the user's favourites.
+3. The system confirms that the outfit was saved.
+
+**Extensions:**
+- **1a.** If the displayed outfit is already in the user's favourites, the system informs the user that it has already been saved. The use case ends.
+
+**Success Outcome:** The outfit appears in the user's favourites.
+
+
+### Use Case 5: Regenerate Outfit
+**Primary Actor:** User
+**Preconditions:** A generated outfit is currently displayed, and the criteria used to create it are available to the system.
+**Trigger:** The user selects the "Regenerate Outfit" button.
+**Main Success Scenario:**
+1. The system looks for another outfit in the user's closet satisfying the same weather and style preferences from the current recommendation.
+2. The system selects a different valid outfit.
+3. The system displays the new outfit.
+
+**Extensions:**
+- **2a.** If there is no valid outfit, the system informs the user and lets them revise their choices.
+
+**Success Outcome:** The user sees a different outfit that meets the current recommendation criteria.
+
+
+### Use Case 6: View Closet Inventory
+**Primary Actor:** User
+**Preconditions:** The user must be on the home page.
+**Trigger:** The user selects the "My Closet" button.
+**Main Success Scenario:**
+1. The system displays the items in the user's closet.
+2. The user selects a category, such as Tops, Bottoms, or Shoes.
+3. The system displays the items in the selected category.
+
+**Extensions:**
+- **1a.** If the closet is empty, the system displays a message indicating that there are no clothing items in the closet. The use case ends.
+- **3a.** If the selected category is empty, the system displays a message indicating that there are no clothing items in the selected category. The user can select another category.
+
+**Success Outcome:** The user sees the clothing items in their closet in the selected category.
+
+
+## Minimum Viable Product (MVP)
+The Sweater Weather app allows users to add and browse clothing in their digital closet and generate outfits suitable for their current local weather conditions.
+
+- **Add Clothing Item** - Ginni Arun Kumar
+- **Generate Random Outfit** - Zahraa Badran
+- **Generate Custom Outfit** - Sofiia Maksyuta
+- **Save Outfit** - Carmen Teng
+- **View Closet Inventory** - Rie Campbell
+
+
+## Future Use Cases
+- **Regenerate Outfit**
+
+
 ## API Usage
 **API Name:** OpenWeatherMap API
 **Documentation:*** [OpenWeatherMap API Documentation](https://openweathermap.org/current)
