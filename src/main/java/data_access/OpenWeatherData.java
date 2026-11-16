@@ -24,7 +24,7 @@ public class OpenWeatherData {
      * @param zipCode the zip code of the city with no spaces (e.g. M5S1A1)
      * @param countryCode the 2 letter standard country code of the city (e.g. CA)
      */
-    public void fetchCoordinates(String zipCode, String countryCode) {
+    public WeatherData fetchCoordinates(String zipCode, String countryCode) {
         final String cityInfo = zipCode + "," + countryCode;
         Request geoRequest = new Request.Builder()
                 .url(geocodeCall[0] + cityInfo + geocodeCall[1] + API_KEY)
@@ -37,8 +37,7 @@ public class OpenWeatherData {
                 JSONObject city = new JSONObject(body);
                 double lat = city.getDouble("lat");
                 double lon = city.getDouble("lon");
-
-                fetchWeather(lat, lon);
+                return fetchWeather(lat, lon);
 
             } else if (geoResponse.code() == 404) {
                 System.out.println("Invalid zip code or country code. Please try again!");
@@ -47,7 +46,7 @@ public class OpenWeatherData {
             }
         } catch (IOException e) {
             e.printStackTrace();
-        }
+        } return null;
     }
 
     /**
@@ -58,7 +57,7 @@ public class OpenWeatherData {
      * @param lat latitude of city
      * @param lon longitude of city
      */
-    private void fetchWeather(double lat, double lon) {
+    private WeatherData fetchWeather(double lat, double lon) {
         Request weatherRequest = new Request.Builder()
                 .url(weatherCall[0] + lat + weatherCall[1] + lon + weatherCall[2] +
                         API_KEY + weatherCall[3])
@@ -76,8 +75,7 @@ public class OpenWeatherData {
 
                 JSONObject temperature = city.getJSONObject("main");
                 double cityTemperature = temperature.getDouble("temp");
-                System.out.println(cityTemperature);
-                //WeatherData weatherData = new WeatherData(cityTemperature, cityCondition);
+                return new WeatherData(cityTemperature, cityCondition);
 
 
             } else if (weatherResponse.code() == 404) {
@@ -87,11 +85,15 @@ public class OpenWeatherData {
             }
         } catch (IOException e) {
             e.printStackTrace();
-        }
+        } return null;
     }
 
     public static void main(String[] args) {
         OpenWeatherData weather = new OpenWeatherData();
-        weather.fetchCoordinates("M5S1A1", "CA");
+        WeatherData today = weather.fetchCoordinates("M5S1A1", "CA");
+        System.out.println(today.getCondition());
+        System.out.println(today.getTemperature());
+        System.out.println(today.getWarmthLevels());
+
     } //this is just for me to quick test
 }
