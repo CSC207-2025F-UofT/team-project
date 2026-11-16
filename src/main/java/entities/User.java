@@ -3,8 +3,9 @@ package entities;
 /**
  * An entity representing a user's account.
  */
-public class User {
+abstract class User {
     private final String username;
+
 
     /**
      * Creates a user with non-empty username.
