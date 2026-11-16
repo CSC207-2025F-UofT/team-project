@@ -144,7 +144,7 @@ class AnswerInkTest {
 
     // every centre line px sits on the glyph ink, 1px slack for the raster
     private static void assertStaysOnInk(String text, List<TextRun> runs) {
-        Shape glyphs = runs == null ? AnswerFont.outline(text, AnswerInk.REF) : AnswerFont.outline(runs, AnswerInk.REF);
+        Shape glyphs = runs == null ? AnswerFont.outline(text, AnswerInk.REF) : RunLayout.outline(runs, AnswerInk.REF);
         Area ink = new Area(glyphs);
         ink.add(new Area(new BasicStroke(2f).createStrokedShape(glyphs)));
         double[] c = new double[6];

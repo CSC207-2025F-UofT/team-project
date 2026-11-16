@@ -2,6 +2,7 @@ package view;
 
 import interface_adapter.AnswerKind;
 import view.answer.AnswerFont;
+import view.answer.RunLayout;
 import view.answer.CanvasAnswer;
 import interface_adapter.TextRun;
 import org.junit.jupiter.api.BeforeEach;
@@ -79,8 +80,8 @@ class DrawingCanvasRunAnswerTest {
     @Test
     void raisedRunSitsHigherAndSmaller() {
         float size = 100f;
-        Rectangle2D base = AnswerFont.visualBounds(List.of(new TextRun("2", false)), size);
-        Rectangle2D up = AnswerFont.visualBounds(List.of(new TextRun("2", true)), size);
+        Rectangle2D base = RunLayout.visualBounds(List.of(new TextRun("2", false)), size);
+        Rectangle2D up = RunLayout.visualBounds(List.of(new TextRun("2", true)), size);
         assertTrue(up.getHeight() < base.getHeight() * 0.8, up + " vs " + base);
         assertTrue(up.getMaxY() < base.getMaxY() - base.getHeight() * 0.3, "lifted off the baseline");
     }

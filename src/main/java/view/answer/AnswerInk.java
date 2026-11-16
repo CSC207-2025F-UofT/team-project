@@ -125,7 +125,7 @@ public final class AnswerInk {
     // exponents traced apart, their twigs are 0.6x
     private static Path2D traceEachSize(List<TextRun> runs) {
         Path2D line = new Path2D.Double();
-        for (Map.Entry<Float, Shape> group : AnswerFont.outlinesBySize(runs, REF).entrySet()) {
+        for (Map.Entry<Float, Shape> group : RunLayout.outlinesBySize(runs, REF).entrySet()) {
             line.append(trace(group.getValue(), group.getKey()), false);
         }
         return line;
