@@ -1,0 +1,1 @@
+All entity files go here. Can split into perspective-based splits if needed.

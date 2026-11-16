@@ -1,0 +1,1 @@
+Will contain all code tied to the Seller perspective UseCase implementations.
