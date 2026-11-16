@@ -59,12 +59,14 @@ public class GlassBar extends JComponent {
     static final int ITEM_PAD_X = 16;
     static final int COMPACT_W = 48;
     static final int GRIP_W = 20;
+    private static final int SPLIT_CHEVRON_W = 24;
+    private static final int SPLIT_LABEL_PADDING = 12;
 
     private static final float BLUR_SIGMA = 0.5f;
     private static final float LENS_BAND = 14f;
     private static final float LENS_STRENGTH = 10f;
     private static final float HOVER_MAG = 1.28f;
-    private static final float HOVER_GROW_X = 16f;
+    private static final float HOVER_GROW_X = 24f;
     private static final float HOVER_GROW_Y = 8f;
     private static final float HOVER_STICK = 0.28f;
     private static final float HOVER_EDGE_BAND = 11f;
@@ -322,11 +324,6 @@ public class GlassBar extends JComponent {
         return it;
     }
 
-    /** Hairline between two independently clickable parts of one glass capsule. */
-    public void splitDivider() {
-        items.add(new Item(Kind.SEPARATOR, null, null, -1, 1));
-    }
-
     public void separator() {
         items.add(new Item(Kind.SEPARATOR, null, null, -1, 13));
     }
@@ -343,10 +340,12 @@ public class GlassBar extends JComponent {
         for (Item it : items) {
             if (it.kind == Kind.SEGMENT || it.kind == Kind.ACTION) {
                 if (compact || vertical || it.label == null) {
-                    it.w = Math.max(minWidth(it), COMPACT_W * squeeze);
+                    it.w = Math.max(minWidth(it), (it.splitGroup >= 0 && it.label == null ? SPLIT_CHEVRON_W : COMPACT_W) * squeeze);
                 } else {
                     float text = (float) font.getStringBounds(it.label, frc).getWidth();
-                    it.w = Math.max(84, ITEM_PAD_X * 2 + ICON + ICON_GAP + text);
+                    it.w = it.splitGroup >= 0
+                            ? ICON + ICON_GAP + text + SPLIT_LABEL_PADDING
+                            : Math.max(84, ITEM_PAD_X * 2 + ICON + ICON_GAP + text);
                 }
             } else {
                 it.w = Math.max(minWidth(it), it.base * squeeze);
@@ -370,7 +369,7 @@ public class GlassBar extends JComponent {
         switch (it.kind) {
             case SEGMENT:
             case ACTION:
-                return ICON + 10;
+                return it.splitGroup >= 0 && it.label == null ? SPLIT_CHEVRON_W : ICON + 10;
             case SWATCH:
                 return 20;
             case SEPARATOR:
@@ -422,9 +421,12 @@ public class GlassBar extends JComponent {
         FontRenderContext frc = new FontRenderContext(null, true, true);
         for (Item it : items) {
             if (it.kind == Kind.SEGMENT || it.kind == Kind.ACTION) {
-                x += compact || it.label == null ? COMPACT_W
+                x += compact || it.label == null ? (it.splitGroup >= 0 && it.label == null ? SPLIT_CHEVRON_W : COMPACT_W)
+                        : (it.splitGroup >= 0
+                        ? ICON + ICON_GAP + SPLIT_LABEL_PADDING
+                                + (float) font.getStringBounds(it.label, frc).getWidth()
                         : Math.max(84, ITEM_PAD_X * 2 + ICON + ICON_GAP
-                        + (float) font.getStringBounds(it.label, frc).getWidth());
+                                + (float) font.getStringBounds(it.label, frc).getWidth()));
             } else {
                 x += it.base;  // natural width, not squeezed
             }
@@ -610,7 +612,7 @@ public class GlassBar extends JComponent {
                     right = Math.max(right, other.x + other.w);
                 }
                 cx = (left + right) / 2f;
-                w = right - left + HOVER_GROW_X;
+                w = right - left + HOVER_GROW_X + 10f; // Keep icons clear of the refracting rim.
             }
             if (lensAlpha < 0.05f) {
                 lensX.x = cx;
@@ -672,13 +674,14 @@ public class GlassBar extends JComponent {
         g2.drawImage(glassCache, 0, 0, bw, bh, null);
 
         if (lensAlpha > 0.01f) {
+            long hoverSceneKey = key * 31 + (hoverItem == null ? -1 : System.identityHashCode(hoverItem));
             double ls = s * HOVER_MAG;
             RoundRectangle2D.Float lens = lensShape();
-            if (sceneCache != null && sceneKey == key) {
+            if (sceneCache != null && sceneKey == hoverSceneKey) {
                 paintHoverLens(g2, s, ls, sceneCache, 0, 0, lens);
             } else if (key == prevKey) {
                 sceneCache = renderScene(ls, (int) Math.ceil(bw * ls), (int) Math.ceil(bh * ls), 0, 0);
-                sceneKey = key;
+                sceneKey = hoverSceneKey;
                 paintHoverLens(g2, s, ls, sceneCache, 0, 0, lens);
             } else {
                 int pad = (int) Math.ceil(HOVER_EDGE_K * (1 + HOVER_DISPERSION)) + 3;
@@ -690,16 +693,6 @@ public class GlassBar extends JComponent {
                     paintHoverLens(g2, s, ls, renderScene(ls, cw, ch, ox, oy), ox, oy, lens);
                 }
             }
-        }
-        // The surrounding lens covers both halves of a split action;
-        // only the hovered half receives the darker interaction highlight.
-        if (hoverItem != null && hoverItem.splitGroup >= 0 && lensAlpha > .01f) {
-            float x = MARGIN + PAD + hoverItem.x + 2;
-            float y = MARGIN + PAD + 2;
-            float width = Math.max(4, hoverItem.w - 4);
-            float height = SEG_H - 4;
-            g2.setColor(new Color(30, 38, 55, Math.round(27 * lensAlpha)));
-            g2.fill(new RoundRectangle2D.Float(x, y, width, height, 17, 17));
         }
         prevKey = key;
         g2.dispose();
@@ -880,7 +873,27 @@ public class GlassBar extends JComponent {
         g2.setFont(font);
         FontMetrics fm = g2.getFontMetrics();
         for (Item it : items) {
-            Rectangle2D b = slot(it.x, it.w, cap, scale).getBounds2D();
+            paintItemForeground(g2, cap, scale, fm, it);
+        }
+        // Split actions share a single glass hover lens and have adjacent hit areas.
+        // A hairline at their common boundary is decorative only, never a click target.
+        g2.setColor(BoardTheme.LABEL_DISABLED);
+        g2.setStroke(new BasicStroke(Math.max(0.8f, scale)));
+        for (int i = 1; i < items.size(); i++) {
+            Item left = items.get(i - 1);
+            Item right = items.get(i);
+            if (left.splitGroup >= 0 && left.splitGroup == right.splitGroup) {
+                Rectangle2D boundary = slot(right.x, right.w, cap, scale).getBounds2D();
+                double x = boundary.getMinX();
+                double cy = boundary.getCenterY();
+                g2.draw(new Line2D.Double(x, cy - 9 * scale, x, cy + 9 * scale));
+            }
+        }
+    }
+
+    private void paintItemForeground(Graphics2D g2, RoundRectangle2D.Float cap, float scale,
+                                     FontMetrics fm, Item it) {
+        Rectangle2D b = slot(it.x, it.w, cap, scale).getBounds2D();
             if (it.kind == Kind.SEGMENT || it.kind == Kind.ACTION) {
                 Color c = !it.enabled.getAsBoolean() ? BoardTheme.LABEL_DISABLED
                         : selected.get(it.group) == it ? BoardTheme.LABEL_SELECTED : BoardTheme.LABEL;
@@ -917,7 +930,6 @@ public class GlassBar extends JComponent {
                 it.icon.paint(g2);
                 g2.setTransform(t);
             }
-        }
     }
 
     private void paintSwatch(Graphics2D g2, Item it, double cx, double cy, float scale) {

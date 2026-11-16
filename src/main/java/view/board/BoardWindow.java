@@ -125,7 +125,6 @@ public class BoardWindow extends JPanel implements HistoryPanel.DragHost {
         }, () -> true);
         saveItem.setEnabled(() -> lastSaveState.phase() != SaveMenuState.Phase.SAVED);
         saveItem.setSplitGroup(1);
-        historyBar.splitDivider();
         historyBar.action(null, Icons::chevronDown, this::showSaveChoices, () -> true).setSplitGroup(1);
         historyBar.action("Open", Icons::openFolder, () -> {
             openCanvas.run();

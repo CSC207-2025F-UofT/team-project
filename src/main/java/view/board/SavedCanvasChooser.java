@@ -1,6 +1,8 @@
 package view.board;
 
 import view.glass.GlassTextField;
+import view.glass.GlassDialogs;
+import view.glass.GlassButton;
 import workspace.domain.CanvasState;
 import workspace.domain.SavedCanvas;
 
@@ -106,27 +108,15 @@ public final class SavedCanvasChooser extends JPanel {
         JLabel hint = new JLabel("Double-click to open");
         hint.setForeground(new Color(111, 111, 117));
         hint.setFont(BoardTheme.font(11f));
-        JPanel footer = new JPanel(new BorderLayout());
-        footer.setOpaque(false);
-        footer.add(hint, BorderLayout.WEST);
-        JPanel commands = new JPanel(new java.awt.FlowLayout(java.awt.FlowLayout.RIGHT, 8, 0));
-        commands.setOpaque(false);
-        JButton rename = new JButton("Rename");
-        rename.setFocusable(false);
-        rename.addActionListener(e -> { if (selected() != null) { choice = Choice.RENAME; openSelected.run(); } });
-        JButton create = new JButton("+ New");
-        create.setFocusable(false);
-        create.setForeground(Color.WHITE);
-        create.setBackground(BLUE);
-        create.setOpaque(true);
-        create.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(BLUE, 1, true),
-                BorderFactory.createEmptyBorder(8, 16, 8, 16)));
+        // The modal's shared action row owns all four buttons, so they have
+        // precisely the same vertical position, height, and baseline.
+
+        GlassButton create = GlassDialogs.actionButton("New", true);
         create.addActionListener(e -> { choice = Choice.NEW; openSelected.run(); });
-        commands.add(rename);
-        commands.add(create);
-        footer.add(commands, BorderLayout.EAST);
-        add(footer, BorderLayout.SOUTH);
+        GlassButton rename = GlassDialogs.actionButton("Rename", false);
+        rename.addActionListener(e -> { if (selected() != null) { choice = Choice.RENAME; openSelected.run(); } });
+        GlassDialogs.setLeadingActions(this, create, rename);
+        add(hint, BorderLayout.SOUTH);
         filter();
     }
 
