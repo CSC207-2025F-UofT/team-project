@@ -33,6 +33,17 @@ so that I can evaluate my application progress.
 As a user, I want to create a profile with all my qualifications so that I would be recommended internships without 
 having to search
 
+### User Story 6
+As a user, I want to save job applications that I may apply to into a shortlist so that I can easily find them and 
+work on them later.
+
+### User Story 7
+As a user, I want to sort my shortlist of applications by due date so that I can identify which applications have 
+the earliest deadlines and prioritize them accordingly.
+
+### User Story 8
+As a user, I want to sort my shortlist of applications by relevancy so that I can identify which applications are 
+most useful to my career development and prioritize them accordingly.
 
 ---
 ## Use Cases
@@ -148,7 +159,103 @@ Extensions
 - 5a. No postings match: The system explains that no matches were found and offers the option to update the profile or preferences.
 Limits: Suggestions indicate keyword relevance, not verified eligibility. Unspecified requirements stay unknown. An empty result is a valid result. The MVP does not automatically submit applications.
 
-(Add additional use cases as needed.)
+### Use Case 8: Add an Application to the Shortlist
+Owner: Rui Zhou
+Primary actor: User
+Preconditions:
+- The application is running and the user is logged in.
+- The user is viewing the job display page for a specific job.
+Trigger: The user clicks the “Save to Shortlist” button for the currently displayed job.
+Success outcome: 
+- The selected job application is added to the user's shortlist and can be viewed later from the home page or shortlist 
+page.
+Main Success Scenario: 
+1. The user requests to add the currently displayed job application to the shortlist.
+2. The system identifies the currently displayed job application.
+3. The system checks whether the application is already in the user's shortlist.
+4. The system adds the application to the user's shortlist.
+5. The system saves the updated shortlist.
+6. The system confirms that the application was successfully added.
+7. The user can later view the saved application from the shortlist on the home page.
+Extensions:
+3a. The application is already in the shortlist.
+- The system does not add a duplicate application.
+- The system informs the user that the application has already been saved.
+4a. The application can no longer be saved or does not exist.
+- The system does not modify the shortlist.
+- The system informs the user that the application could not be added.
+5a. The shortlist cannot be saved because of a system or data-storage error.
+- The system informs the user that the application could not be saved.
+- The user's existing shortlist remains unchanged.
+
+### Use Case 9: Sort Shortlist by Due Date
+Owner: Rui Zhou
+Primary actor: User
+Preconditions:
+- The application is running and the user is logged in.
+- The user is viewing their shortlist.
+- The user has access to their shortlist.
+Trigger: The user clicks the button to sort the shortlist by due date.
+Success outcome:
+- The applications in the shortlist are displayed in order according to their due dates, allowing the user to identify 
+the applications with the closest deadlines.
+Main Success Scenario:
+1. The user requests to sort the shortlist by due date.
+2. The system retrieves the applications currently saved in the user's shortlist.
+3. The system retrieves the due date associated with each application.
+4. The system orders the applications by due date, with the earliest due dates appearing first.
+5. The system displays the newly sorted shortlist to the user.
+Extensions:
+2a. The shortlist is empty.
+- The system informs the user that there are no applications to sort.
+- The shortlist remains unchanged.
+3a. One or more applications do not have a due date.
+- The system still sorts all applications that have known due dates.
+- Applications without a due date are displayed after applications with known due dates.
+3b. Due-date information cannot be retrieved for one or more applications.
+- The system sorts applications with available due-date information and places applications with 
+unavailable due dates at the bottom of the shortlist.
+4a. Multiple applications have the same due date.
+- Applications with the same due date are grouped together.
+- The system preserves their existing relative order.
+
+### Use Case 10: Sort Shortlist by Relevancy
+Owner: Rui Zhou 
+Primary actor: User
+Preconditions:
+- The application is running and the user is logged in.
+- The user is viewing their shortlist.
+Trigger: The user clicks the button to sort their shortlist by relevancy.
+Success outcome: 
+- The applications in the shortlist are displayed in descending order of relevancy based on the user's 
+preferred career fields, allowing the user to identify applications that best match their career interests.
+Main Success Scenario:
+1. The user selects the option to sort by relevancy.
+2. The system retrieves the user's preferred career fields from their profile.
+3. The system retrieves the user’s shortlist.
+4. The system identifies keywords in each shortlisted application's job title that match the user's preferred fields or their associated synonyms.
+5. The system calculates a relevancy score for each application based on the number of distinct preferred fields matched.
+6. The system sorts the applications in descending order of relevancy score.
+7. The system displays the sorted shortlist to the user.
+Extensions:
+2a. The shortlist is empty.
+- The system informs the user that there are no applications to sort.
+- The shortlist remains unchanged.
+2b. The user has not specified any preferred career fields.
+- The system informs the user that preferred career fields must be specified to sort applications by relevancy.
+- The shortlist remains in its existing order.
+4a. No keywords match any of the user's preferred fields.
+- The system assigns a relevancy score of zero to every application.
+- The system preserves the existing order of the shortlist.
+5a. Multiple applications have the same relevancy score.
+- The system preserves their existing relative order.
+Postconditions:
+- The shortlisted applications are displayed in descending order of relevancy based on the user's preferred career 
+fields.
+- Applications with equal relevancy scores retain their existing relative order.
+- No applications are added to or removed from the shortlist.
+- The user's saved applications remain unchanged; only their displayed order is affected.
+
 ---
 ## Minimal Viable Product (MVP)
 | Team Member | MVP Use Case |
