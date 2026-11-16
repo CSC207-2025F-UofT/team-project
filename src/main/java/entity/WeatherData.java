@@ -5,7 +5,7 @@ import java.util.Arrays;
 import java.util.List;
 
 public class WeatherData {
-    final ArrayList<String> conditions = new ArrayList<>(Arrays.asList("Thunderstorm", "Drizzle",
+    private final ArrayList<String> conditions = new ArrayList<>(Arrays.asList("Thunderstorm", "Drizzle",
             "Rain", "Snow", "Mist", "Smoke", "Haze", "Dust", "Fog", "Sand", "Ash", "Squall",
             "Tornado", "Clear", "Clouds"));
 
@@ -38,6 +38,9 @@ public class WeatherData {
     }
     public List<Integer> getWarmthLevels() {
         return this.warmthLevels;
+    }
+    public ArrayList<String> getConditions() {
+        return this.conditions;
     }
 
 }

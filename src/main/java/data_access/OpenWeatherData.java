@@ -94,6 +94,7 @@ public class OpenWeatherData {
         System.out.println(today.getCondition());
         System.out.println(today.getTemperature());
         System.out.println(today.getWarmthLevels());
+        System.out.println(today.getConditions());
 
     } //this is just for me to quick test
 }
