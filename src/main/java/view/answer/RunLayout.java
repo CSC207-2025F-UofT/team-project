@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-// answer runs laid out in kalam: exponents small + up, √ gets a bar over its radicand
+// answer runs laid out in kalam: exponents small + up (twice for a ^ inside one), √ gets a bar
 public final class RunLayout {
     private static final float RAISED_SCALE = 0.6f;  // exponent size vs body
     private static final double RAISE = 0.45;        // exponent baseline lift, x the digit height
@@ -60,12 +60,16 @@ public final class RunLayout {
         return new LinkedHashMap<>(bySize);
     }
 
-    // runs -> placed bits; each √ and its radicand get cut out so the bar can go over
+    // runs -> placed bits; each √, its radicand and any second-level exponent get cut out
     private static List<Piece> typeset(List<TextRun> runs, float size) {
-        List<Radicands.Root> roots = Radicands.find(TextRun.plain(runs));
+        String plain = TextRun.plain(runs);
+        List<Operands.Span> roots = Operands.after(plain, '√');
+        List<Operands.Span> upAgain = secondLevel(runs, plain);
         Set<Integer> cuts = new HashSet<>();
-        for (Radicands.Root r : roots) {
-            cuts.addAll(List.of(r.sign, r.sign + 1, r.end));
+        for (List<Operands.Span> spans : List.of(roots, upAgain)) {
+            for (Operands.Span span : spans) {
+                cuts.addAll(List.of(span.mark, span.mark + 1, span.end));
+            }
         }
         List<Piece> pieces = new ArrayList<>();
         Map<Integer, Piece> signs = new HashMap<>();
@@ -73,42 +77,89 @@ public final class RunLayout {
         int at = 0;
         for (TextRun run : runs) {
             String text = run.getText();
-            float s = sizeOf(run, size);
             for (int from = 0, to; from < text.length(); from = to) {
                 to = from + 1;
                 while (to < text.length() && !cuts.contains(at + to)) {
                     to++;
                 }
-                Piece piece = new Piece(AnswerFont.layout(text.substring(from, to), s), at + from, at + to, s, pen,
-                        -lift(run, size));
+                if (startsAny(upAgain, at + from)) {
+                    continue;  // the ^ itself isn't drawn
+                }
+                float s = sizeOf(run, size);
+                double y = -lift(run, size);
+                if (holdsAny(upAgain, at + from, at + to)) {
+                    y -= AnswerFont.digitHeight(s) * RAISE;
+                    s *= RAISED_SCALE;
+                }
+                Piece piece = new Piece(AnswerFont.layout(text.substring(from, to), s), at + from, at + to, s, pen, y);
                 pieces.add(piece);
                 pen += piece.layout.getAdvance();
-                for (Radicands.Root r : roots) {
-                    if (r.sign == piece.start) {
-                        signs.put(r.sign, piece);
+                for (Operands.Span r : roots) {
+                    if (r.mark == piece.start) {
+                        signs.put(r.mark, piece);
                         pen = Math.max(pen, piece.ink().getMaxX() + SIGN_GAP * s);  // kalam's √ arm sticks out
                     }
                     if (r.end == piece.end) {
-                        pen += BAR_PAST * signs.get(r.sign).size;
+                        pen += BAR_PAST * signs.get(r.mark).size;
                     }
                 }
             }
             at += text.length();
         }
-        List<Radicands.Root> innerFirst = new ArrayList<>(roots);
-        innerFirst.sort(Comparator.comparingInt(r -> r.end - r.sign));
-        for (Radicands.Root r : innerFirst) {
-            barOver(signs.get(r.sign), pieces, r);
+        List<Operands.Span> innerFirst = new ArrayList<>(roots);
+        innerFirst.sort(Comparator.comparingInt(r -> r.end - r.mark));
+        for (Operands.Span r : innerFirst) {
+            barOver(signs.get(r.mark), pieces, r);
         }
         return pieces;
     }
 
+    // ^ the writer leaves inside an exponent bc runs only go up once; ones nested deeper stay as text
+    private static List<Operands.Span> secondLevel(List<TextRun> runs, String plain) {
+        List<Operands.Span> up = new ArrayList<>();
+        for (Operands.Span caret : Operands.after(plain, '^')) {
+            if (raisedAt(runs, caret.mark) && !holdsAny(up, caret.mark, caret.end)) {
+                up.add(caret);
+            }
+        }
+        return up;
+    }
+
+    private static boolean raisedAt(List<TextRun> runs, int index) {
+        int at = 0;
+        for (TextRun run : runs) {
+            at += run.getText().length();
+            if (index < at) {
+                return run.isRaised();
+            }
+        }
+        return false;
+    }
+
+    private static boolean startsAny(List<Operands.Span> spans, int index) {
+        for (Operands.Span span : spans) {
+            if (span.mark == index) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static boolean holdsAny(List<Operands.Span> spans, int from, int to) {
+        for (Operands.Span span : spans) {
+            if (span.holds(from, to)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     // stretch the √ up past the radicand, then run the bar off its tip
-    private static void barOver(Piece sign, List<Piece> pieces, Radicands.Root r) {
+    private static void barOver(Piece sign, List<Piece> pieces, Operands.Span r) {
         Rectangle2D under = null;
         for (Piece p : pieces) {
             Rectangle2D ink = p.ink();
-            if (p.start > r.sign && p.end <= r.end && ink.getWidth() > 0) {
+            if (r.holds(p.start, p.end) && ink.getWidth() > 0) {
                 under = under == null ? ink : under.createUnion(ink);
             }
         }

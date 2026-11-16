@@ -7,6 +7,7 @@ import java.awt.Shape;
 import java.awt.geom.Rectangle2D;
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -55,6 +56,24 @@ class RunLayoutTest {
         List<TextRun> runs = List.of(new TextRun("√(x", false), new TextRun("2", true), new TextRun("+1)", false));
         Rectangle2D raised = RunLayout.visualBounds(List.of(new TextRun("x", false), new TextRun("2", true)), size);
         assertTrue(RunLayout.visualBounds(runs, size).getY() < raised.getY() - 1);
+    }
+
+    @Test
+    void caretInAnExponentRaisesAgainInsteadOfShowing() {
+        // e^(x^2): runs only go up one level, the writer leaves a ^ for the second
+        float size = AnswerFont.sizeFor(40);
+        List<TextRun> caret = List.of(new TextRun("e", false), new TextRun("x^2", true));
+        List<TextRun> flat = List.of(new TextRun("e", false), new TextRun("x2", true));
+        assertEquals(3, RunLayout.outlinesBySize(caret, size).size(), "body, exponent, exponent's exponent");
+        assertTrue(RunLayout.visualBounds(caret, size).getWidth() < RunLayout.visualBounds(flat, size).getWidth(),
+                "no ^ drawn, 2 smaller");
+    }
+
+    @Test
+    void caretInsideTheSecondLevelStaysAsIs() {
+        float size = AnswerFont.sizeFor(40);
+        List<TextRun> deep = List.of(new TextRun("e", false), new TextRun("x^(x^2)", true));
+        assertEquals(3, RunLayout.outlinesBySize(deep, size).size(), "no third level, too small to read");
     }
 
     // any ink in a thin column at x, from way up down to just above top
