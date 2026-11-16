@@ -91,6 +91,19 @@ Use Cases
 
 Minimal Viable Product (MVP) 
 
+
+Investment porfoilo
+Feature	MVP behaviour
+Initial balance	Give each user $10,000 in virtual cash
+Buy stocks	Enter a ticker and quantity; buy at the current market price
+Sell stocks	Sell shares that the user currently owns
+Available cash	Display remaining virtual cash
+Holdings	Show each stock, quantity, average purchase price and current price
+Portfolio value	Cash + current market value of all holdings
+Profit/loss	Current portfolio value − initial $10,000
+Transaction history	Record each buy/sell, quantity, price and timestamp
+Persistence	Save and reload the portfolio when the user logs in again
+
 Add team member who does what user story here
 
  
