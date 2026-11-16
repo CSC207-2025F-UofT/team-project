@@ -3,7 +3,6 @@ package view;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
-import java.text.Normalizer;
 
 /**
  * Formats a button
@@ -40,9 +39,4 @@ public class FormattedButton extends JButton {
         this.setCursor(new Cursor(Cursor.HAND_CURSOR));
         this.setBorder(new EmptyBorder(10, 20, 10, 20));
     }
-
-
-
-
-
 }

@@ -32,17 +32,6 @@ public class HomescreenView extends JPanel implements ActionListener, GetAllDeck
     private GetDeckController getDeckController = null;
     private GetAllDecksController getAllDecksController = null;
 
-    // Colors
-    private static final Color BG_COLOR = new Color(244, 247, 245); // Green Tinted Off-White
-    private static final Color CARD_COLOR = Color.WHITE;
-    private static final Color PRIMARY_COLOR = new Color(16, 185, 129); // Green
-    private static final Color SELECTION_BG = new Color(236, 253, 245); // Light Green
-    private static final Color TEXT_PRIMARY = new Color(20, 42, 34); // Dark Grey
-    private static final Color BG_SECONDARY = new Color(225, 235, 230); // Light Gray
-    private static final Color BORDER_COLOR = new Color(225, 235, 230); // Light Gray
-
-    private static final String FONT_NAME = "Segoe UI";
-
     // Class used for swing JList
     static class SwingDeck {
         private final String name;
