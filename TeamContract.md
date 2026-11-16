@@ -56,5 +56,7 @@ Team Member Signatures:
 Rowan Parkinson,
 Niki Zhang,
 Elya Fan,
-Gwen Gao
+Gwen Gao,
+Alex Heo,
+Kyra Park
 
