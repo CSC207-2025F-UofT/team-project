@@ -1,5 +1,5 @@
 # Project Name
-# CityGuesser
+## CityGuesser
 
 The readme should include information such as:
 - a summary of what your application is all about
@@ -145,6 +145,7 @@ Location (image they’re trying to guess)
 Leaderboard
 ### Entity 4
 Guess box (where you input answers)
+
 ---
 ## API Usage
 
@@ -169,9 +170,17 @@ This API will be used in addition to a JSON dataset containing popular cities lo
 ---
 ## Notes
 [Any additional project information.]
+—
+## Project Updates
+**2026/11/15** - Elliot
+First iteration of view
+<img width="5791" height="2795" alt="file" src="https://github.com/user-attachments/assets/15b4ac5f-76e4-43b1-9f76-851d129b2980" />
+
+
+
+
 
 MVP Description:
 
 Users are greeted with a home page where they click a button to start the game. It’s a single player game where the user guesses the city and is scored based on how many guesses it takes them to guess the correct city. The user gets 5 tries to guess the correct city. Every incorrect guess provides the user with a clue, by zooming out on the satellite image and listing the distance from their guessed city to the target city, with a direction. The user doesn’t have an account. A correct answer opens up a window showing the user their final score, with a button to play again and a button to return home.
-
 
