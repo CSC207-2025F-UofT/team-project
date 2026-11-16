@@ -78,14 +78,15 @@ public class GlassBar extends JComponent {
     /** One thing in the bar. */
     public static final class Item {
         final Kind kind;
-        final String label;
-        final Icons.Glyph icon;
+        String label;
+        Icons.Glyph icon;
         final int group;
         final float base;   // natural width for fixed-size items
         float w;
         float x;
         Color color;
         boolean custom;
+        int splitGroup = -1;
         BooleanSupplier onActivate = () -> true;  // false keeps the old selection
         BooleanSupplier enabled = () -> true;
 
@@ -102,8 +103,17 @@ public class GlassBar extends JComponent {
             return x + w / 2f;
         }
 
+        /** Visually connect related actions while retaining separate hit targets. */
+        public void setSplitGroup(int group) { this.splitGroup = group; }
+
         public String getLabel() {
             return label;
+        }
+
+        /** View-only display update; call GlassBar.finish() to remeasure the capsule. */
+        public void setDisplay(String label, Icons.Glyph icon) {
+            this.label = label;
+            this.icon = icon;
         }
 
         public Color getColor() {
@@ -310,6 +320,11 @@ public class GlassBar extends JComponent {
         Item it = swatch(null, group, onActivate);
         it.custom = true;
         return it;
+    }
+
+    /** Hairline between two independently clickable parts of one glass capsule. */
+    public void splitDivider() {
+        items.add(new Item(Kind.SEPARATOR, null, null, -1, 1));
     }
 
     public void separator() {
@@ -588,6 +603,15 @@ public class GlassBar extends JComponent {
         if (h != null) {
             float cx = h.center() + ((mouseX - MARGIN - PAD) - h.center()) * HOVER_STICK;
             float w = h.w + HOVER_GROW_X;
+            if (h.splitGroup >= 0) {
+                float left = h.x, right = h.x + h.w;
+                for (Item other : items) if (other.splitGroup == h.splitGroup) {
+                    left = Math.min(left, other.x);
+                    right = Math.max(right, other.x + other.w);
+                }
+                cx = (left + right) / 2f;
+                w = right - left + HOVER_GROW_X;
+            }
             if (lensAlpha < 0.05f) {
                 lensX.x = cx;
                 lensW.x = w;
@@ -666,6 +690,16 @@ public class GlassBar extends JComponent {
                     paintHoverLens(g2, s, ls, renderScene(ls, cw, ch, ox, oy), ox, oy, lens);
                 }
             }
+        }
+        // The surrounding lens covers both halves of a split action;
+        // only the hovered half receives the darker interaction highlight.
+        if (hoverItem != null && hoverItem.splitGroup >= 0 && lensAlpha > .01f) {
+            float x = MARGIN + PAD + hoverItem.x + 2;
+            float y = MARGIN + PAD + 2;
+            float width = Math.max(4, hoverItem.w - 4);
+            float height = SEG_H - 4;
+            g2.setColor(new Color(30, 38, 55, Math.round(27 * lensAlpha)));
+            g2.fill(new RoundRectangle2D.Float(x, y, width, height, 17, 17));
         }
         prevKey = key;
         g2.dispose();

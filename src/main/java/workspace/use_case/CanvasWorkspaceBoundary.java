@@ -12,5 +12,7 @@ public interface CanvasWorkspaceBoundary {
     List<SavedCanvas> all() throws IOException;
     Optional<SavedCanvas> mostRecent() throws IOException;
     SavedCanvas open(String id) throws IOException;
+    void newCanvas();
+    SavedCanvas rename(String id, String name) throws IOException;
     SavedCanvas save(CanvasState state, String name, boolean saveAs) throws IOException;
 }

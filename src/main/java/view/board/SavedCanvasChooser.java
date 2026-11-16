@@ -11,6 +11,7 @@ import javax.swing.BoxLayout;
 import javax.swing.DefaultListModel;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
+import javax.swing.JButton;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -49,6 +50,8 @@ public final class SavedCanvasChooser extends JPanel {
     private final GlassTextField search = new GlassTextField(24, "Search canvases");
     private final JLabel count = new JLabel();
     private final JLabel empty = new JLabel("No canvases found", SwingConstants.CENTER);
+    public enum Choice { OPEN, NEW, RENAME }
+    private Choice choice = Choice.OPEN;
     private Runnable openSelected = () -> { };
 
     public SavedCanvasChooser(List<SavedCanvas> canvases) {
@@ -103,13 +106,34 @@ public final class SavedCanvasChooser extends JPanel {
         JLabel hint = new JLabel("Double-click to open");
         hint.setForeground(new Color(111, 111, 117));
         hint.setFont(BoardTheme.font(11f));
-        add(hint, BorderLayout.SOUTH);
+        JPanel footer = new JPanel(new BorderLayout());
+        footer.setOpaque(false);
+        footer.add(hint, BorderLayout.WEST);
+        JPanel commands = new JPanel(new java.awt.FlowLayout(java.awt.FlowLayout.RIGHT, 8, 0));
+        commands.setOpaque(false);
+        JButton rename = new JButton("Rename");
+        rename.setFocusable(false);
+        rename.addActionListener(e -> { if (selected() != null) { choice = Choice.RENAME; openSelected.run(); } });
+        JButton create = new JButton("+ New");
+        create.setFocusable(false);
+        create.setForeground(Color.WHITE);
+        create.setBackground(BLUE);
+        create.setOpaque(true);
+        create.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(BLUE, 1, true),
+                BorderFactory.createEmptyBorder(8, 16, 8, 16)));
+        create.addActionListener(e -> { choice = Choice.NEW; openSelected.run(); });
+        commands.add(rename);
+        commands.add(create);
+        footer.add(commands, BorderLayout.EAST);
+        add(footer, BorderLayout.SOUTH);
         filter();
     }
 
     /** The enclosing modal registers its submit callback; no persistence or navigation is performed here. */
     public void onDoubleClick(Runnable callback) { openSelected = callback == null ? () -> { } : callback; }
     public SavedCanvas selected() { return list.getSelectedValue(); }
+    public Choice choice() { return choice; }
     public int resultCount() { return results.size(); }
     public void query(String query) { search.setText(query); }
 

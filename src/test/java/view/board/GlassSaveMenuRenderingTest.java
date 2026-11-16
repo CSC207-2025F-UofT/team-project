@@ -8,57 +8,90 @@ import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
-/** Regression for the collapsed, unreadable Save menu seen in the one-board UI. */
+/** Regression: menu entries stay readable and never reserve system shortcut/icon gutters. */
 class GlassSaveMenuRenderingTest {
-    @Test
-    void bothSaveChoicesHaveReadableWidthAfterLayout() {
-        GlassSaveMenu menu = new GlassSaveMenu(() -> { }, () -> { });
-        JPanel rows = (JPanel) menu.getComponent(0);
-        JButton save = (JButton) rows.getComponent(0);
-        JButton saveAs = (JButton) rows.getComponent(1);
-
-        // JButton inherits ImageObserver.WIDTH = 1. Unqualified WIDTH in the old MenuAction
-        // resolved to that constant, yielding a preferred button width of -21 pixels.
-        assertTrue(save.getPreferredSize().width >= 160);
-        assertTrue(saveAs.getPreferredSize().width >= 160);
-        Dimension size = menu.getPreferredSize();
-        assertTrue(size.width >= 180, "The popup must not collapse into a 20px-wide strip");
-        assertTrue(size.height >= 70);
-
-        menu.setSize(size);
-        menu.doLayout();
-        rows.doLayout();
-        assertTrue(save.getWidth() >= 160);
-        assertTrue(saveAs.getWidth() >= 160);
-        assertTrue(saveAs.getY() > save.getY());
+    private static GlassSaveMenu menu(SaveMenuState.Phase phase) {
+        return new GlassSaveMenu(new SaveMenuState("123", phase), () -> { }, () -> { });
     }
 
-    @Test
-    void twoLabelsAreActuallyPaintedAndNotInvisible() {
-        GlassSaveMenu menu = new GlassSaveMenu(() -> { }, () -> { });
-        Dimension size = menu.getPreferredSize();
-        menu.setSize(size);
-        menu.doLayout();
-        ((JPanel) menu.getComponent(0)).doLayout();
+    @Test void dirtyCanvasOffersTwoDistinctActions() {
+        var popup = menu(SaveMenuState.Phase.MODIFIED);
+        var rows = (JPanel) popup.getComponent(0);
+        assertEquals(2, rows.getComponentCount());
+        assertEquals("save-current-canvas", rows.getComponent(0).getName());
+        assertEquals("save-as-new-canvas", rows.getComponent(1).getName());
+    }
 
-        BufferedImage image = new BufferedImage(size.width, size.height, BufferedImage.TYPE_INT_ARGB);
-        Graphics2D g = image.createGraphics();
-        menu.paint(g);
-        g.dispose();
+    @Test void savedCanvasShowsOnlySaveAsAndNewCanvasShowsOnlySave() {
+        var saved = menu(SaveMenuState.Phase.SAVED);
+        var fresh = menu(SaveMenuState.Phase.NEW);
+        assertEquals(1, ((JPanel) saved.getComponent(0)).getComponentCount());
+        assertEquals("save-as-new-canvas", ((JPanel) saved.getComponent(0)).getComponent(0).getName());
+        assertEquals(1, ((JPanel) fresh.getComponent(0)).getComponentCount());
+        assertEquals("save-current-canvas", ((JPanel) fresh.getComponent(0)).getComponent(0).getName());
+    }
 
-        int darkTextPixels = 0;
-        for (int y = 10; y < size.height - 10; y++) {
-            for (int x = 20; x < Math.min(142, size.width - 10); x++) {
-                int color = image.getRGB(x, y);
-                int alpha = (color >>> 24) & 255;
-                int red = (color >>> 16) & 255;
-                int green = (color >>> 8) & 255;
-                int blue = color & 255;
-                if (alpha >= 150 && red < 100 && green < 100 && blue < 110) darkTextPixels++;
+    @Test void menuWidthFitsItsLabelsWithoutEmptyShortcutColumn() {
+        for (var phase : SaveMenuState.Phase.values()) {
+            var popup = menu(phase);
+            var rows = (JPanel) popup.getComponent(0);
+            Dimension size = popup.getPreferredSize();
+            assertTrue(size.width >= 180, phase.name());
+            assertTrue(size.width < 335, "no width left for platform-specific key labels");
+            popup.setSize(size);
+            popup.doLayout();
+            rows.doLayout();
+            for (var row : rows.getComponents()) {
+                assertTrue(row.getWidth() >= 160);
+                assertTrue(row.getHeight() >= 50);
+                var action = (GlassSaveMenu.MenuAction) row;
+                assertTrue(action.getDescription().length() > 4);
             }
         }
-        assertTrue(darkTextPixels > 25, "Both menu labels must render as visible dark text");
+    }
+
+    @Test void currentSaveAndSaveAsInvokeDifferentActions() {
+        var currentCalls = new java.util.concurrent.atomic.AtomicInteger();
+        var newCalls = new java.util.concurrent.atomic.AtomicInteger();
+        var menu = new GlassSaveMenu(new SaveMenuState("123", SaveMenuState.Phase.MODIFIED),
+                currentCalls::incrementAndGet, newCalls::incrementAndGet);
+        var rows = (JPanel) menu.getComponent(0);
+        ((JButton) rows.getComponent(0)).doClick();
+        assertEquals(1, currentCalls.get());
+        assertEquals(0, newCalls.get());
+        ((JButton) rows.getComponent(1)).doClick();
+        assertEquals(1, currentCalls.get());
+        assertEquals(1, newCalls.get());
+    }
+
+    @Test void longUnicodeNamesTruncateOnlyInMenuNotInStorageState() {
+        String name = "期末复习材料和微积分课堂笔记第三单元公式的完整版本2026";
+        var state = new SaveMenuState(name, SaveMenuState.Phase.MODIFIED);
+        assertEquals(name, state.name());
+        assertTrue(state.compactName().endsWith("…"));
+        var menu = new GlassSaveMenu(state, () -> { }, () -> { });
+        assertTrue(menu.getPreferredSize().width < 470);
+    }
+
+    @Test void labelsAreActuallyPaintedAndNotCollapsed() {
+        var popup = menu(SaveMenuState.Phase.MODIFIED);
+        Dimension size = popup.getPreferredSize();
+        popup.setSize(size);
+        popup.doLayout();
+        ((JPanel) popup.getComponent(0)).doLayout();
+        BufferedImage image = new BufferedImage(size.width, size.height, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D g = image.createGraphics();
+        popup.paint(g);
+        g.dispose();
+        int dark = 0;
+        for (int y = 10; y < size.height - 8; y++) {
+            for (int x = 16; x < size.width - 16; x++) {
+                int rgb = image.getRGB(x, y);
+                if ((rgb >>> 24) >= 180 && ((rgb >> 16) & 255) < 120 && ((rgb >> 8) & 255) < 130) dark++;
+            }
+        }
+        assertTrue(dark > 70, "Both menu entries must draw visible text");
     }
 }
