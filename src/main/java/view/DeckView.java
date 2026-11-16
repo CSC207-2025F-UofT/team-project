@@ -5,16 +5,12 @@ import interface_adapter.get_deck.GetDeckState;
 import interface_adapter.get_deck.GetDeckViewModel;
 import interface_adapter.get_deck.GetDeckViewModelListener;
 
-import javax.smartcardio.Card;
 import javax.swing.*;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.MatteBorder;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.ComponentAdapter;
-import java.awt.event.ComponentEvent;
+import java.awt.event.*;
 import java.util.Map;
 import java.util.List;
 
@@ -29,23 +25,17 @@ public class DeckView extends JPanel implements ActionListener, GetDeckViewModel
 
     private final JLabel deckName = new JLabel();
 
-    private final JButton home;
+    private final CardLayout layout = new CardLayout();
+
+    private int currentIndex = 0;
+    private boolean isFlipped = false;
+
+    private final JLabel flashcardLabel = new JLabel("", SwingConstants.CENTER);
+    private final JPanel flashcard = new JPanel(new BorderLayout());
+    private final JLabel whichSideLabel = new JLabel("QUESTION", SwingConstants.CENTER);
+    private final JLabel currentIndexLabel = new JLabel("", SwingConstants.CENTER);
+
     private GetDeckController getDeckController = null;
-
-
-    // Class used for swing JList
-    static class SwingDeck {
-        private final String question;
-        private final String answer;
-
-        public SwingDeck(String question, String answer) {
-            this.question = question;
-            this.answer = answer;
-        }
-
-        public String getQuestion() { return question; }
-        public String getAnswer() { return answer; }
-    }
 
     public DeckView(GetDeckViewModel getDeckViewModel) {
         this.getDeckViewModel = getDeckViewModel;
@@ -55,6 +45,56 @@ public class DeckView extends JPanel implements ActionListener, GetDeckViewModel
         deckName.setFont(new Font(AppTheme.FONT_NAME, Font.BOLD, AppTheme.FONT_SIZE_TITLE));
         deckName.setForeground(AppTheme.TEXT_PRIMARY);
 
+        JPanel deckView = createDeckView();
+        JPanel studyView = createStudyView();
+
+        this.setLayout(layout);
+        this.add(deckView, "deckView");
+        this.add(studyView, "studyView");
+
+        layout.show(this, "deckView");
+
+    }
+
+    /**
+     * React to a button click that results in evt.
+     * @param evt the ActionEvent to react to
+     */
+    public void actionPerformed(ActionEvent evt) {
+        System.out.println("Click " + evt.getActionCommand());
+    }
+
+    @Override
+    public void stateChanged() {
+        if (getDeckViewModel.getState().getDeckError() != null) {
+            JOptionPane.showMessageDialog(this, getDeckViewModel.getState().getDeckError());
+        } else {
+            layout.show(this, "deckView");
+            deckModel.clear();
+            setFields(getDeckViewModel.getState());
+            updateCardDisplay();
+        }
+    }
+
+    private void setFields(GetDeckState state) {
+        deckName.setText(state.getDeckName());
+        List<Map<String, String>> list = state.getFlashcards();
+
+        if (list != null) {
+            for (Map<String, String> flashcard : list) {
+                for (Map.Entry<String, String> f : flashcard.entrySet()) {
+                    deckModel.addElement(new DeckView.SwingDeck(f.getKey(), f.getValue()));
+                }
+            }
+        }
+    }
+
+    public void setGetDeckController(GetDeckController getDeckController) {
+        this.getDeckController = getDeckController;
+    }
+
+    // gui for deck view which lists the flashcards
+    private JPanel createDeckView() {
         // list of flashcards
         JList<SwingDeck> flashcards = new JList<>(deckModel) {
             // used so JList will wrap text and resize with the window
@@ -81,8 +121,8 @@ public class DeckView extends JPanel implements ActionListener, GetDeckViewModel
         scrollPane.getVerticalScrollBar().setUnitIncrement(12); // makes scrolling smoother
         scrollPane.setBorder(null);
 
-        //  buttons
-        home = new FormattedButton();
+        // buttons
+        JButton home = new FormattedButton();
 
         JButton study = new FormattedButton("Study");
 
@@ -94,10 +134,11 @@ public class DeckView extends JPanel implements ActionListener, GetDeckViewModel
                 }
         );
 
+        DeckView viewPanel = this;
         study.addActionListener(
                 new ActionListener() {
                     public void actionPerformed(ActionEvent evt) {
-                        // not yet implemented
+                        layout.show(viewPanel, "studyView");
                     }
                 }
         );
@@ -111,6 +152,7 @@ public class DeckView extends JPanel implements ActionListener, GetDeckViewModel
         toolBar.setOpaque(false);
         JPanel buttons = new JPanel();
         buttons.setLayout(new BoxLayout(buttons, BoxLayout.Y_AXIS));
+        buttons.setOpaque(false);
         buttons.add(home);
         buttons.add(Box.createVerticalStrut(10));
         buttons.add(study);
@@ -123,10 +165,121 @@ public class DeckView extends JPanel implements ActionListener, GetDeckViewModel
 
         deckView.add(centerPanel, BorderLayout.CENTER);
         deckView.add(toolBar, BorderLayout.WEST);
+        return deckView;
+    }
 
-        this.setLayout(new CardLayout());
-        this.add(deckView, "flashcardList");
+    private JPanel createStudyView() {
+        JPanel studyView = new JPanel();
+        studyView.setLayout(new BorderLayout(14, 14));
+        studyView.setBorder(new EmptyBorder(20, 20, 20, 20));
+        studyView.setBackground(AppTheme.BG_COLOR);
 
+        JPanel flashcardPanel = new JPanel(new BorderLayout(20, 10));
+        flashcardPanel.setOpaque(false);
+        flashcardPanel.setBorder(BorderFactory.createEmptyBorder(10, 28, 10, 28));
+
+//        JButton prevArrowBtn = new arrowButton("‹", true);
+//        JButton nextArrowBtn = new arrowButton("›", true);
+
+        flashcard.setBorder(BorderFactory.createEmptyBorder(24, 36, 36, 36));
+        flashcard.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        flashcard.setBackground(AppTheme.CARD_COLOR);
+
+        whichSideLabel.setFont(new Font(AppTheme.FONT_NAME, Font.BOLD, 11));
+        whichSideLabel.setForeground(AppTheme.TEXT_PRIMARY);
+
+        flashcardLabel.setFont(new Font(AppTheme.FONT_NAME, Font.PLAIN, 22));
+        flashcardLabel.setForeground(AppTheme.TEXT_PRIMARY);
+
+        currentIndexLabel.setFont(new Font(AppTheme.FONT_NAME, Font.PLAIN, AppTheme.FONT_SIZE));
+        currentIndexLabel.setForeground(AppTheme.TEXT_SECONDARY);
+
+        flashcard.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                flipCard();
+            }
+        });
+
+        flashcard.add(flashcardLabel, BorderLayout.CENTER);
+        flashcard.add(whichSideLabel, BorderLayout.NORTH);
+
+        flashcardPanel.add(currentIndexLabel, BorderLayout.SOUTH);
+        flashcardPanel.add(flashcard, BorderLayout.CENTER);
+
+        // buttons
+        JButton home = new FormattedButton();
+        JButton back = new FormattedButton("Back");
+
+        home.addActionListener(
+                new ActionListener() {
+                    public void actionPerformed(ActionEvent evt) {
+                        goHome();
+                        getDeckController.switchToHomescreenView();
+                    }
+                }
+        );
+
+        DeckView viewPanel = this;
+        back.addActionListener(
+                new ActionListener() {
+                    public void actionPerformed(ActionEvent evt) {
+                        layout.show(viewPanel, "deckView");
+                    }
+                }
+        );
+
+        JPanel toolBar = new JPanel(new BorderLayout());
+        toolBar.setOpaque(false);
+        JPanel buttons = new JPanel();
+        buttons.setLayout(new BoxLayout(buttons, BoxLayout.Y_AXIS));
+        buttons.setOpaque(false);
+        buttons.add(home);
+        buttons.add(Box.createVerticalStrut(10));
+        buttons.add(back);
+        toolBar.add(buttons, BorderLayout.NORTH);
+
+        studyView.add(toolBar, BorderLayout.WEST);
+        studyView.add(flashcardPanel, BorderLayout.CENTER);
+
+        return studyView;
+    }
+
+    private void updateCardDisplay() {
+        SwingDeck current = deckModel.get(currentIndex);
+        String text = !isFlipped ? current.getQuestion() : current.getAnswer();
+
+        whichSideLabel.setText(!isFlipped ? "QUESTION" : "ANSWER");
+        flashcardLabel.setFont(new Font(AppTheme.FONT_NAME, isFlipped ? Font.PLAIN : Font.BOLD, 22));
+        flashcardLabel.setText("<html><div style='text-align: center; line-height: 1.4;'>" + text + "</div></html>");
+
+        flashcard.setBackground(!isFlipped ? AppTheme.CARD_COLOR : AppTheme.SELECTION_BG);
+        currentIndexLabel.setText(String.format("Card %d of %d", currentIndex + 1, deckModel.size()));
+    }
+
+    private void goHome() {
+        currentIndex = 0;
+        isFlipped = false;
+        updateCardDisplay();
+    }
+
+    private void flipCard() {
+        isFlipped = !isFlipped;
+        updateCardDisplay();
+    }
+
+    // Class used for swing JList
+    static class SwingDeck {
+        private final String question;
+        private final String answer;
+
+        public SwingDeck(String question, String answer) {
+            this.question = question;
+            this.answer = answer;
+        }
+
+        public String getQuestion() { return question; }
+        public String getAnswer() { return answer; }
     }
 
     // Sets the format of each Deck in the list
@@ -203,41 +356,4 @@ public class DeckView extends JPanel implements ActionListener, GetDeckViewModel
             return this;
         }
     }
-
-
-    /**
-     * React to a button click that results in evt.
-     * @param evt the ActionEvent to react to
-     */
-    public void actionPerformed(ActionEvent evt) {
-        System.out.println("Click " + evt.getActionCommand());
-    }
-
-    @Override
-    public void stateChanged() {
-        if (getDeckViewModel.getState().getDeckError() != null) {
-            JOptionPane.showMessageDialog(this, getDeckViewModel.getState().getDeckError());
-        } else {
-            deckModel.clear();
-            setFields(getDeckViewModel.getState());
-        }
-    }
-
-    private void setFields(GetDeckState state) {
-        deckName.setText(state.getDeckName());
-        List<Map<String, String>> list = state.getFlashcards();
-
-        if (list != null) {
-            for (Map<String, String> flashcard : list) {
-                for (Map.Entry<String, String> f : flashcard.entrySet()) {
-                    deckModel.addElement(new DeckView.SwingDeck(f.getKey(), f.getValue()));
-                }
-            }
-        }
-    }
-
-    public void setGetDeckController(GetDeckController getDeckController) {
-        this.getDeckController = getDeckController;
-    }
-
 }
