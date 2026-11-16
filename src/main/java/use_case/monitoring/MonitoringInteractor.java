@@ -1,6 +1,6 @@
 package use_case.monitoring;
 
-import entity.Task;
+import entity.StudentTask;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -17,38 +17,37 @@ public class MonitoringInteractor {
         this.holidayService = holidayService;
     }
 
-    public List<Task> getTasksForMonitoring(List<Task> tasks, String countryCode) {
+    public List<StudentTask> getTasksForMonitoring(List<StudentTask> tasks, String countryCode) {
         LocalDate today = LocalDate.now();
 
-        Comparator<Task> byDeadlineThenTitle = Comparator
-                .comparing(Task::getDeadline)
-                .thenComparing(Task::getTitle, String.CASE_INSENSITIVE_ORDER);
+        Comparator<StudentTask> byDeadlineThenTitle = new Comparator<StudentTask>() {
 
-        List<Task> incomplete = tasks.stream()
-                .filter(task -> task.getCompletionProgress() < 100)
-                .collect(Collectors.toList());
+            @Override
+            public int compare(StudentTask first, StudentTask second) {
+                int deadlineComparison = first.getDeadline().compareTo(second.getDeadline());
 
-        List<Task> overdue = incomplete.stream()
-                .filter(task -> !task.getDeadline().isAfter(today))
-                .sorted(byDeadlineThenTitle)
-                .collect(Collectors.toList());
+                if (deadlineComparison != 0) {
+                    return deadlineComparison;
+                }
 
-        List<Task> upcoming = incomplete.stream()
-                .filter(task -> task.getDeadline().isAfter(today))
-                .sorted(byDeadlineThenTitle)
-                .collect(Collectors.toList());
+                return first.getTitle().compareToIgnoreCase(second.getTitle());
+            }
+        };
 
-        List<Task> result = new ArrayList<>();
+        List<StudentTask> incomplete = tasks.stream().filter(task -> task.getCompletionProgress() < 100).collect(Collectors.toList());
+
+        List<StudentTask> overdue = incomplete.stream().filter(task -> !task.getDeadline().isAfter(today)).sorted(byDeadlineThenTitle).collect(Collectors.toList());
+
+        List<StudentTask> upcoming = incomplete.stream().filter(task -> task.getDeadline().isAfter(today)).sorted(byDeadlineThenTitle).collect(Collectors.toList());
+
+        List<StudentTask> result = new ArrayList<>();
         result.addAll(overdue);
         result.addAll(upcoming);
 
         return result;
     }
 
-    public Optional<String> getHolidayWarning(Task task, String countryCode) {
-        return holidayService.getHolidayName(
-                task.getDeadline(),
-                countryCode
-        );
+    public Optional<String> getHolidayWarning(StudentTask task, String countryCode) {
+        return holidayService.getHolidayName(task.getDeadline(), countryCode);
     }
 }
