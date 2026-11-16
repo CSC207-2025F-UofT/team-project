@@ -153,6 +153,14 @@ class EvaluatePresenterTest {
     }
 
     @Test
+    void subscriptedVariableReadsAsSubscript() {
+        presenter.prepareSolutionsView("x_1", List.of(3.0));
+        assertEquals("x₁ = 3", viewModel.getState().getResultText());
+        presenter.prepareExcludedView("x_12", List.of(0.0));
+        assertEquals("x₁₂ ≠ 0", viewModel.getState().getResultText());
+    }
+
+    @Test
     void showsAtMostTenSolutions() {
         List<Double> solutions = new ArrayList<>();
         for (int i = 0; i < 12; i++) {

@@ -102,6 +102,13 @@ class ExprWriterTest {
     }
 
     @Test
+    void subscriptedNamesGetSubscriptDigits() {
+        assertEquals("2x₁", plain(mul(n(2), var("x_1"))));
+        assertEquals("2x₁₂ dx₁₂/dx", plain(mul(n(2), var("x_12"), Expr.dvar("x_12", "x"))));
+        assertEquals("2x_1", latex(mul(n(2), var("x_1"))));
+    }
+
+    @Test
     void minusSign() {
         Expr e = add(X, n(-1));
         assertEquals("x-1", latex(e));

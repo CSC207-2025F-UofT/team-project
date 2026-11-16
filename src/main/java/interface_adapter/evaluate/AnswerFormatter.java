@@ -70,7 +70,7 @@ public final class AnswerFormatter {
         List<String> shown = formatApart(solutions);
         List<String> parts = new ArrayList<>();
         for (String number : shown) {
-            parts.add(variable + " = " + number);
+            parts.add(ReadableLatex.of(variable) + " = " + number);  // x_1 -> x₁
         }
         return firstFew(parts, " or ");
     }
@@ -88,7 +88,7 @@ public final class AnswerFormatter {
         List<String> shown = formatApart(ends);
         List<String> parts = new ArrayList<>();
         for (int i = 0; i < intervals.size(); i++) {
-            parts.add(interval(variable, intervals.get(i), shown.get(2 * i), shown.get(2 * i + 1)));
+            parts.add(interval(ReadableLatex.of(variable), intervals.get(i), shown.get(2 * i), shown.get(2 * i + 1)));
         }
         return firstFew(parts, " or ");
     }
@@ -99,13 +99,13 @@ public final class AnswerFormatter {
         }
         List<String> parts = new ArrayList<>();
         for (String number : formatApart(excluded)) {
-            parts.add(variable + " ≠ " + number);
+            parts.add(ReadableLatex.of(variable) + " ≠ " + number);
         }
         return firstFew(parts, " and ");
     }
 
     public static String alwaysTrue(String variable) {
-        return "true for all " + variable;
+        return "true for all " + ReadableLatex.of(variable);
     }
 
     public static String defined(String definition) {

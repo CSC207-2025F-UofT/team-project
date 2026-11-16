@@ -233,7 +233,7 @@ public final class ExprWriter {
                 writeNumber(f);
                 break;
             case VAR:
-                emit(f.name(), GREEK.getOrDefault(f.name(), f.name().replace("\\", "")));
+                emit(f.name(), readable(f.name()));
                 break;
             case E:
                 emit("e");
@@ -250,7 +250,7 @@ public final class ExprWriter {
                 break;
             case DVAR:
                 emit("\\frac{d" + f.name() + "}{d" + f.withRespectTo() + "}",
-                        "d" + f.name() + "/d" + f.withRespectTo());
+                        "d" + readable(f.name()) + "/d" + readable(f.withRespectTo()));
                 break;
             default:
                 writeGroup(f);
@@ -367,6 +367,11 @@ public final class ExprWriter {
         ExprWriter w = sub();
         w.writeGroup(base);
         return "_" + w.flat();
+    }
+
+    // x_12 -> x₁₂, \alpha -> α
+    private static String readable(String name) {
+        return GREEK.getOrDefault(name, ReadableLatex.of(name));
     }
 
     private static boolean isSymbol(ExprOutputData e) {
