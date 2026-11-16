@@ -17,7 +17,7 @@ import java.awt.geom.RoundRectangle2D;
 
 /** Compact, icon-gutter-free glass menu for the two canvas save commands. View layer only. */
 final class GlassSaveMenu extends JPopupMenu {
-    private static final int WIDTH = 198;
+    private static final int MENU_WIDTH = 198;
     private static final Color INK = new Color(35, 42, 54);
 
     GlassSaveMenu(Runnable save, Runnable saveAs) {
@@ -65,7 +65,7 @@ final class GlassSaveMenu extends JPopupMenu {
             setRolloverEnabled(true);
             addActionListener(e -> action.run());
         }
-        @Override public Dimension getPreferredSize() { return new Dimension(WIDTH - 22, 34); }
+        @Override public Dimension getPreferredSize() { return new Dimension(GlassSaveMenu.MENU_WIDTH - 22, 34); }
         @Override protected void paintComponent(Graphics graphics) {
             Graphics2D g = (Graphics2D) graphics.create();
             g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
