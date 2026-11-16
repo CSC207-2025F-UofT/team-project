@@ -31,7 +31,7 @@ entertainment
 
 ### 3. As a player, I want to grow, raise, and process livestock for my farm. [UPDATE: GROW FLOWERS]
 
-### 4. As a player, I want to trade resources with NPCs. [UPDATE: HARVEST FLOWERS]
+### 4. As a player, I want to harvest my fully grown flowers so that they are counted in my Gallery.
 
  
 
@@ -74,34 +74,6 @@ Use Case 1.1
     - 3a. Player cancels, so the plot stays empty.
 - Success outcome: The plot contains a growing crop, and the backpack has one fewer seed.
 
-Use Case 1.2
-- Name: Tend a Crop
-- Primary actor: Player
-- Precondition: The plot has a planted crop that has not been tended.
-- Trigger: The player clicks a planted plot.
-- Main success scenario:
-    1. Player clicks a planted plot.
-    2. System checks the current weather.
-    3. System offers to water the crop (weather is Clear).
-    4. Player chooses to water.
-    5. System marks the crop as tended and shows the updated plot.
-- Extensions:
-    - 3a. Weather is Rain, so the system offers to fertilize instead of water. Continue at step 4.
-    - 4a. Player cancels, so the crop stays untended.
-- Success outcome: The crop is marked as tended and ready to harvest.
-
-Use Case 1.3
-- Name: Harvest a Crop
-- Primary actor: Player
-- Precondition: The plot has a tended crop.
-- Trigger: The player clicks a tended plot.
-- Main success scenario:
-    1. Player clicks a tended plot.
-    2. System removes the crop from the plot and adds the harvested crop to the backpack.
-    3. System shows the plot as empty.
-- Extensions:
-    - 1a. The crop has not been tended, so the system tells the player it is not ready.
-- Success outcome: The plot is empty and the backpack has the harvested crop.
 
 ### User Story 3: Grow flower
 
@@ -187,7 +159,20 @@ inventory remain unchanged → use case returns to step 2.
 payment.
 
 ### User Story 4: Harvest flower
-
+Use Case 4
+- Name: Harvest a Flower
+- Primary actor: Player
+- Precondition: The player is logged in and the selected plot has a big flower.
+- Trigger: The player clicks a plot with a big flower.
+- Main success scenario:
+  1. Player clicks a plot with a big flower.
+  2. System shows the prompt "harvest flower at plot N".
+  3. Player clicks the prompt to confirm.
+  4. System sets the plot to empty and adds one to the player's plants submitted to Gallery.
+  5. System shows the updated grid and the new count.
+- Extensions:
+  - None.
+- Success outcome: The plot is empty and the player's plants submitted to Gallery has increased by one.
 
 ---
 
@@ -201,7 +186,7 @@ payment.
 
 | Angela | Use Case 3 |
 
-| Tiffany | Use Case 4 |
+| Tiffany | Use Case 4: Harvest a Flower |
 
 ---
 
@@ -209,13 +194,12 @@ payment.
 
 ### Plot
 - Instance variables:
-  - state: EMPTY, PLANTED, or TENDED
-  - crop: the Crop planted here (none when EMPTY)
+  - status: String ("empty", "small", or "big"), starts as "empty"
 - Methods:
-  - isEmpty(): boolean
-  - plant(crop): sets crop and state to PLANTED
-  - tend(): sets state to TENDED (only allowed when PLANTED)
-  - harvest(): returns the crop and resets the plot to EMPTY (only allowed when TENDED)
+  - getStatus(): String
+  - plant(): sets status from "empty" to "small"
+  - grow(): sets status from "small" to "big"
+  - harvest(): sets status from "big" to "empty"
   
 ### Crop
 - Instance variables:
