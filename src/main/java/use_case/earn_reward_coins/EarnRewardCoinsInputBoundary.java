@@ -1,4 +1,5 @@
 package use_case.earn_reward_coins;
 
-public class EarnRewardCoinsInputBoundary {
+public interface EarnRewardCoinsInputBoundary {
+    void execute(EarnRewardCoinsInputData inputData);
 }

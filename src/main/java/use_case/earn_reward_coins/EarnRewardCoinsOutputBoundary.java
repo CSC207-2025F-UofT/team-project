@@ -1,4 +1,6 @@
 package use_case.earn_reward_coins;
 
-public class EarnRewardCoinsOutputBoundary {
+public interface EarnRewardCoinsOutputBoundary {
+    void prepareSuccessView(EarnRewardCoinsOutputData outputData);
+    void prepareFailView(String errorMessage);
 }
