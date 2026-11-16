@@ -29,7 +29,7 @@ As a player, I want the game to get easier with every wrong answer that I make, 
 ### User Story 4 - Regan
 As a player, I want cityGuesser to know my name so that I can be personally called by my name.
 ### User Story 5 - Ingrid
-As a player, I want to be able to compare myself to top players of the cityGuesser to see how good I am, relatively, at the game.
+As a player, I want to see how well I am doing at the game by being able to see how many points I have and how many guesses I usually make.
 
 ---
 ## Use Cases
@@ -38,16 +38,20 @@ As a player, I want to be able to compare myself to top players of the cityGuess
 Primary Actor: Player
 Preconditions:
 - Player has opened the app and is on the welcome screen
+- 
 Trigger:
 - Player types a username and selects 'Continue'
+
 Success Outcome:
 - The system knows who is playing and the main menu greets the player by name
+  
 Main Success Scenario:
 - Player types a username and submits it
 - System checks the database for a player with that name
 - No player is found, so the system creates a new player with all stats at 0 and saves it
 - System sets them as the current player
 - System shows the main menu with "Welcome, [name]!" and the 'Play' and 'Statistics' buttons
+  
 Extensions:
 - Name already exists: system loads that player's saved stats instead of creating a new player, and shows "Welcome back, [name]!"
 - Empty name or only spaces: system asks for a name and stays on the welcome screen
@@ -56,13 +60,17 @@ Extensions:
 
 ### Use Case 2 - Start Round (Felix)
 Primary Actor: Player
+
 Preconditions:
 - Player has entered a name (see Use Case 1)
 - Player is on the main menu, or has just finished a round
+  
 Trigger:
 - Player selects 'Play' on the main menu, or 'Play again' after a round
+  
 Success Outcome:
 - A new round starts and the player sees an unlabeled satellite image of a city, fully zoomed in, with 5 attempts remaining
+  
 Main Success Scenario:
 - System picks a random city from the JSON dataset
 - System creates a new round with that city as the target and no guesses made
@@ -70,6 +78,7 @@ Main Success Scenario:
 - System builds a Mapbox Static Images API URL using the coordinates, the most zoomed-in level, the image size and the satellite style
 - System sends the request to Mapbox and receives the image
 - System shows the game screen with the image, an empty guess box and 5 attempts remaining
+  
 Extensions:
 - Request fails or times out: system retries once, then picks a different city
 - Invalid or missing API key: system shows an error message and returns to the main menu
@@ -78,13 +87,17 @@ Extensions:
 
 ### Use Case 3 - Submit Guess (Elliot)
 Primary Actor: Player
+
 Preconditions:
 - A round is in progress (see Use Case 2)
 - Player has at least one attempt remaining
+  
 Trigger:
 - Player types a city name and selects 'Guess'
+  
 Success Outcome:
 - Player finds out if the guess was right. A wrong guess gives them a hint, and a correct guess or a fifth wrong guess ends the round
+  
 Main Success Scenario:
 - Player submits a city name
 - System finds the city in the dataset, ignoring capitalization and extra spaces
@@ -92,6 +105,7 @@ Main Success Scenario:
 - System compares the guessed city to the target city
 - The guess is correct, so the system marks the round as won
 - The round ends (see Use Case 4)
+  
 Extensions:
 - Wrong guess with attempts remaining: system works out the distance and direction from the guessed city to the target city, adds them to the list of past guesses, requests the satellite image one zoom step further out, and updates the attempts remaining
 - Wrong guess on the fifth attempt: system marks the round as lost and the round ends (see Use Case 4)
@@ -102,19 +116,24 @@ Extensions:
 
 ### Use Case 4 - Finish Round (Ingrid)
 Primary Actor: Player
+
 Preconditions:
 - The current round has just been won or lost
 - The result has not been saved yet
+  
 Trigger:
 - The round ends, by a correct guess or a fifth wrong guess (see Use Case 3)
+  
 Success Outcome:
 - Player sees the result and their points, and their updated stats are saved
+  
 Main Success Scenario:
 - System works out the points from the number of guesses used (100 for 1, 50 for 2, 25 for 3, 10 for 4, 0 for 5)
 - System adds the points to the player's total
 - System increases games played and wins, extends the current streak, updates the longest streak if it was beaten, and adds one to the guess distribution for that attempt number
 - System saves the player to the database
 - System shows a result window with the city name and points earned, and 'Play again', 'View stats' and 'Main menu' buttons
+  
 Extensions:
 - Player lost the round: system takes away 25 points, increases games played, resets the current streak to 0, leaves the guess distribution unchanged, and the result window reveals the correct city
 - Save fails: system still shows the result window, with a warning that the result was not saved
@@ -123,19 +142,24 @@ Extensions:
 
 ### Use Case 5 - View Statistics (Nikola)
 Primary Actor: Player
+
 Preconditions:
 - Player has entered a name (see Use Case 1)
 - Player is on the main menu, or on the result window after a round
+  
 Trigger:
 - Player selects the 'Statistics' button on the main menu, or 'View stats' on the result window
+  
 Success Outcome:
 - A statistics window shows the player's game history
+  
 Main Success Scenario:
 - System loads the current player's saved stats from the database
 - System displays total points, games played, win %, current streak and longest streak
 - System displays a guess distribution: how many games were won on attempt 1, 2, 3, 4 and 5
 - If the window was opened after a won round, the bar for that round's attempt number is highlighted
 - Player closes the window and returns to the previous screen
+  
 Extensions:
 - No games played yet: all stats show 0 and the distribution bars are empty
 - Window opened after a lost round: no distribution bar is highlighted
@@ -147,11 +171,11 @@ Extensions:
 ## Minimal Viable Product (MVP)
 | Team Member | MVP Use Case |
 |-------------|--------------|
-| Felix | Use Case  5 | 
+| Felix | Use Case  2 | 
 | Elliot | Use Case 3 | 
-| Nikola | Use Case 4,6 | 
-| Regan | Use Case 1,7 | 
-| Ingrid | Use Case 2 | 
+| Nikola | Use Case 5 | 
+| Regan | Use Case 1 | 
+| Ingrid | Use Case 4 | 
 
 
 ---
