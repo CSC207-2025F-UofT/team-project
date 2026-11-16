@@ -15,3 +15,5 @@ at the end of the term.
 ## Summary
 
 ## User Stories
+- As a user, I want to be able to save my timetable as a pdf onto my computer so that I can share it with others, check
+it later or print it onto a paper.
