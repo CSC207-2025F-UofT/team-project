@@ -1,4 +1,5 @@
 package entity;
+
 /**
  * One piece of clothing in the user's closet (name, category, color,
  * material, vibe, warmth, layer level, see-through, image path).
@@ -31,6 +32,7 @@ public class ClothingItem {
         this.weatherRating = weatherRating;
         this.imagePath = imagePath;
     }
+
     public String getId() {
         return id;
     }
@@ -65,5 +67,9 @@ public class ClothingItem {
 
     public String getImagePath() {
         return imagePath;
+    }
+
+    public boolean isDress() {
+        return category == Category.TOP && DRESS.equalsIgnoreCase(subCategory);
     }
 }
