@@ -132,7 +132,20 @@ used in the program:**
 
 ## How to Run
 
-[Instructions for running the program.]
+Requires JDK 11+ (17 recommended).
+
+- IntelliJ: open the project and run `app.Main`.
+- Maven: `mvn compile exec:java -Dexec.mainClass=app.Main`, or `mvn compile` then `java -cp target/classes app.Main`.
+
+Move the white box with WASD or the arrow keys.
+
+### Architecture (core loop)
+
+- `entity/Player`: position, size and speed (no Swing).
+- `use_case/update_game`: one tick of game rules (`UpdateGameInteractor`) with input/output boundaries.
+- `interface_adapter/game`: `GameController` (key state -> request), `GamePresenter` + `GameViewModel` (result -> what to draw).
+- `view`: `GameWindow` (JFrame), `GamePanel` (draws), `KeyboardInput` (records held keys).
+- `app`: `GameLoop` (60 ticks/s thread: input -> update -> repaint) and `Main` (builds and wires everything).
 
 ---
 
