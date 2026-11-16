@@ -286,7 +286,8 @@ term’s stored weather.
 
 **Success outcome:** The completed shift increases Money according to correct orders, decreases Energy, and advances time.
 
-### Use Case 4 — Talk with an NPC
+### Use Case 4.1 — Talk with an NPC
+
 **Primary actor:** Player
 
 **Preconditions:**
@@ -295,32 +296,57 @@ term’s stored weather.
 
 **Trigger:** The player asks to talk with the NPC.
 
-**Success outcome:** The player receives an NPC reply, the completed
-conversation is recorded, and Friendship with that NPC increases. Later
-conversations with other NPCs can refer to characters the player has met.
+**Success outcome:** The player receives a reply that reflects their
+current Friendship level with the NPC. The completed conversation is
+recorded, Friendship increases, and game time advances. The updated
+Friendship level can influence future conversations.
 
 **Main success scenario:**
-1. The player asks to talk with an NPC.
+1. The player asks to talk with the NPC.
 2. The system confirms that the NPC is available and shows the current
    Friendship level.
 3. The player sends a message.
-4. The system gives an in-character reply. The reply may refer to another
-   character the player has previously talked with.
-5. The system records who the player talked with and the conversation.
-6. The system increases Friendship with this NPC and advances game time.
-7. The system shows the reply and updated Friendship level.
+4. The system gives an in-character reply based on the current Friendship
+   level. The reply may also refer to a character the player has
+   previously talked with.
+5. The system records the conversation, increases Friendship with this
+   NPC, and advances game time.
+6. The system shows the reply and updated Friendship level.
 
 **Extensions:**
 - **2a. The NPC is unavailable:** The system explains this and ends the
   interaction without changing Friendship or time.
 - **3a. The message is empty or too long:** The system asks for a revised
   message and returns to step 3 without changing game state.
-- **4a. A suitable reply cannot be obtained:** The system provides an
-  in-character fallback reply and continues at step 5.
+- **4a. A suitable reply cannot be obtained:** The system gives an
+  in-character fallback reply appropriate to the current Friendship
+  level and continues at step 5.
 - **4b. The player leaves before a reply is ready:** The late reply is
   ignored; no conversation is recorded and game state does not change.
-- **6a. Friendship reaches the NPC's event threshold:** The system unlocks
-  that NPC's event once and informs the player.
+
+
+### Use Case 4.2 — View Friendship Levels
+
+**Primary actor:** Player
+
+**Preconditions:**
+- A game is in progress.
+
+**Trigger:** The player asks to view their relationships with NPCs.
+
+**Success outcome:** The player can see their current Friendship level
+with each NPC they have talked with.
+
+**Main success scenario:**
+1. The player asks to view their relationships.
+2. The system lists the NPCs the player has talked with and their
+   Friendship levels.
+3. The player selects an NPC.
+4. The system shows the current Friendship level with that NPC.
+
+**Extensions:**
+- **2a. The player has not talked with any NPC:** The system shows that
+  there are no relationships to display.
 
 ---
 ## Minimal Viable Product (MVP)
