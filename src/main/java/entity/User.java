@@ -8,6 +8,7 @@ public class User {
     private final String name;
     private final String password;
 
+
     /**
      * Creates a new user with the given non-empty name and non-empty password.
      * @param name the username

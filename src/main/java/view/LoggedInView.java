@@ -99,6 +99,17 @@ public class LoggedInView extends JPanel implements ActionListener, LoggedInView
         this.add(passwordInfo);
         this.add(passwordErrorField);
         this.add(buttons);
+
+        final JPanel petMenu = new JPanel();
+        final JButton interactPet = new JButton("Interact with pet!");
+        final JButton petShop = new JButton("Enter pet item shop!");
+
+        petMenu.add(interactPet);
+        petMenu.add(petShop);
+
+        this.add(petMenu);
+
+
     }
 
     /**
