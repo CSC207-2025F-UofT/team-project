@@ -33,13 +33,6 @@ class AnswerPopupTest {
     }
 
     @Test
-    void problemHasNoCalculate() {
-        popup.showProblem("Handwriting recognition is not connected yet.");
-        assertFalse(popup.hasCalculate());
-        assertEquals("Handwriting recognition is not connected yet.", popup.getProblem());
-    }
-
-    @Test
     void popupPlacedBelowInkDoesNotOverlapInk() {
         popup.showFormula("5\\times7", () -> { });
         Rectangle ink = new Rectangle(100, 100, 101, 51);

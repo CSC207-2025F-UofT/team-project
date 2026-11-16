@@ -39,7 +39,6 @@ public class AnswerPopup extends JPanel {
     private static final int POPUP_GAP = 8;    // between formula and popup
     private static final int POPUP_LEFT = 40;  // starts a bit left of the formula's right end
     private static final Color BORDER = new Color(203, 213, 225);
-    private static final Color ERROR_TEXT = new Color(185, 28, 28);
 
     private final GlassBar calcBar;   // Calculate only
     private final GlassBar graphBar;  // Graph only
@@ -53,7 +52,6 @@ public class AnswerPopup extends JPanel {
     private Runnable onCalculate = () -> { };
     private Runnable onGraph = () -> { };
     private String latex;
-    private String problem;
     private TeXIcon icon;
 
     public AnswerPopup(Consumer<Graphics2D> backdrop) {
@@ -98,21 +96,10 @@ public class AnswerPopup extends JPanel {
     // board popup: null = that button's left out, at least one of them is set
     public void showFormula(String latex, Runnable onCalculate, Runnable onGraph) {
         this.latex = latex;
-        this.problem = null;
         this.onCalculate = onCalculate == null ? () -> { } : onCalculate;
         this.onGraph = onGraph == null ? () -> { } : onGraph;
         icon = typeset(latex);
         bar = onGraph == null ? calcBar : onCalculate == null ? graphBar : bothBar;
-        relayout();
-    }
-
-    public void showProblem(String reason) {
-        this.latex = null;
-        this.problem = reason;
-        this.onCalculate = () -> { };
-        this.onGraph = () -> { };
-        icon = null;
-        bar = null;
         relayout();
     }
 
@@ -144,10 +131,6 @@ public class AnswerPopup extends JPanel {
 
     String getLatex() {
         return latex;
-    }
-
-    String getProblem() {
-        return problem;
     }
 
     boolean hasCalculate() {
@@ -218,12 +201,10 @@ public class AnswerPopup extends JPanel {
             addMouseMotionListener(new MouseAdapter() { });
         }
 
-        private Font textFont() {
-            return problem != null ? Fonts.ui(Font.PLAIN, 13f) : Fonts.ui(Font.PLAIN, 16f);
-        }
+        private Font textFont() { return Fonts.ui(Font.PLAIN, 16f); }
 
         private String text() {
-            return problem != null ? problem : latex == null ? "" : latex;
+            return latex == null ? "" : latex;
         }
 
         @Override
@@ -250,7 +231,8 @@ public class AnswerPopup extends JPanel {
             int h = getHeight() - SHADOW;
             for (int i = 1; i <= SHADOW; i++) {
                 g2.setColor(new Color(15, 23, 42, 7));
-                g2.fill(new RoundRectangle2D.Double(i * 0.4, i * 0.8, w + i * 0.2, h + i * 0.2, ARC + i, ARC + i));
+                g2.fill(new RoundRectangle2D.Double(i * 0.4, i * 0.8, w + i * 0.2,
+                        h + i * 0.2, ARC + i, ARC + i));
             }
             RoundRectangle2D shape = new RoundRectangle2D.Double(0, 0, w - 1, h - 1, ARC, ARC);
             g2.setColor(Color.WHITE);
@@ -263,12 +245,13 @@ public class AnswerPopup extends JPanel {
                 icon.paintIcon(this, g2, PAD_X, PAD_Y);
             } else {
                 g2.setFont(textFont());
-                g2.setColor(problem != null ? ERROR_TEXT : Color.DARK_GRAY);
+                g2.setColor(Color.DARK_GRAY);
                 FontMetrics fm = g2.getFontMetrics();
-                g2.clipRect(PAD_X, 0, w - 2 * PAD_X, h);
+                g2.clipRect(PAD_X, 0, Math.max(1, w - 2 * PAD_X), h);
                 g2.drawString(text(), PAD_X, PAD_Y + fm.getAscent());
             }
             g2.dispose();
         }
+
     }
 }
