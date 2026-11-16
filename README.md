@@ -61,9 +61,13 @@ As a user, I want to be able to log in so that I can save my data across multipl
 ### Use Case 3
 
 Name: Prepare a Fireball
+
 Primary actor: Player
+
 Preconditions: The player is in an active game, the spellbook is active (listening for drawing).
+
 Trigger: The player begins drawing a fireball symbol in the spellbook.
+
 Success outcome: The game shows that the fireball is ready to cast.
 
 Main success scenario:
