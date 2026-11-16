@@ -259,9 +259,16 @@ In every alternative flow, nothing is saved and no XP is given.
 
 </details>
 
-### Use Case 5: Recommendations Quests
 
-### Use Case 6: Defaults/Adding Quests
+### Use Case 5: <Recommendations Quests>
+**1. Take the Questionnaire** <br>
+The user answers a list of questions about interests, activity type, allocated budget, etc. and the system saves the user’s preferences. <br>
+User can retake the questionnaire later to update their preferences if their interests or budget changes. <br>
+**2. Recommend Sidequests** <br>
+The system recommends a list of sidequests based on the user’s preference from the questionnaire. <br>
+The system displays the sidequest that ‘fits’ the user’s preference the most by assessing how close the sidequest is to user’s preference. <br>
+User can view the activity type, budget, and location of the sidequest and decide to accept or decline. <br>
+### Use Case 6: <Defaults/Adding Quests>
 
 [Back to top](#linked-out)
 
@@ -272,10 +279,10 @@ In every alternative flow, nothing is saved and no XP is given.
 | Team Member | MVP Use Case |
 |-------------|--------------|
 | Pauline | [Create a Text Journal Entry](#pauline) |
-| Lucy | Use Case 1: LogIn, SetUsername |
-| Joon | Use Case |
-| Serena | [Use Case 4: Find a Nearby Side Quest on the Map](#serena) |
-| Issac | Use Case 6: Create Side Quests |
+| Lucy | LogIn, SetUsername |
+| Joon | **Recommend Quest** <br> **Precondition** <br> The user has completed the questionnaire, and their preference has been logged into the system. <br> **Trigger** <br> The user opens up the quest recommendation page. <br> **Main Scenario** <br> 1. The user opens up the system, and navigates to the quest recommendation page. <br> 2. The system displays a list of sidequests based on the user’s preference, from the sidequest that is closest to a certain limit. <br> 3. The user accepts certain sidequests, and the system logs the quest into the current quests. <br> **Alternate Scenario** <br> The user declines certain sidequests, and the recommendation engine removes the sidequest from the list and the UI. |
+| Serena | [Find a Nearby Side Quest on the Map](#serena) |
+| Issac | Create Side Quests |
 | Daniel | [Use Case 2.1: Accept Quest, Use Case 2.2: Complete Quest, Use Case 2.3: Abandon Quest, Use Case 2.4: View Dashboard](#daniel) |
 
 ### Pauline
