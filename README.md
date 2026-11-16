@@ -38,7 +38,46 @@ having to search
 ## Use Cases
 ### Use Case 1
 ### Use Case 2
+Name: Import Resume
+
+Primary actor: A user finding internships
+
+Preconditions: User should be logged in with a profile
+
+Trigger: The user clicks the import resume button
+
+Success outcome: Imported resume is saved on the system
+
+Main success scenario:  
+1. User signs in with their profile
+2. User clicks on their list of resumes
+3. User clicks on a new resume
+4. User selects how they want to import a new resume
+5. Resume is imported and saved in the list
+
+Extensions:Ask user if they want to add a new resume when they make a new application
+
 ### Use Case 3
+Name: Create a resume in the system
+
+Primary actor: A user finding internships
+
+Preconditions: User should be logged in with a profile
+
+Trigger: User clicks the resume builder
+
+Success outcome: A resume is saved on the system
+
+Main success scenario:  
+1. User signs in with their profile
+2. User clicks on the resume builder
+3. Program asks if they want to save an externally made resume or build on the program
+4. Program asks for user’s specifications
+5. Resume is created and program asks for confirmation
+6. Resume is saved in the list of resumes
+
+Extensions: Ask user if they would like to build a resume before sending them through the link
+
 ### Use Case 4: 
 Owner: Yuheng Liu
 
