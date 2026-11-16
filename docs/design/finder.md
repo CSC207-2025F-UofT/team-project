@@ -145,3 +145,17 @@ Tests assert behaviour rather than pixel equality.
 
 `Main --check-api` is a separate, explicit live-service smoke check. Normal tests
 do not call the internet. `--demo` uses fictional listings and labels them as such.
+
+### Verified on 2026-11-16
+
+- JDK 11 `mvn verify`: successful executable JAR build; 49 tests passed, no failures.
+- Checkstyle: 0 violations under the documented configuration and baseline exclusions.
+- `jdeps -verbose:class -filter:none target/classes`: inspected Entity/Use Case
+  dependencies; no Swing, transport, JSON, file IO or outer application dependencies.
+- Packaged `--check-api`: Cloudflare and Figma both succeeded, returning 610 postings,
+  including 17 matching the internship title rule. Counts are a live snapshot.
+- Swing component integration tests and the rendered preview passed. A desktop JVM
+  was launched successfully; native-window automation could not select the Java app,
+  so no claim is made that native browser interaction was automated.
+- Trial merge with Ling's reviewed UML branch: no Git conflicts. There is still no
+  Profile/Recommendation implementation against which to run cross-feature tests.

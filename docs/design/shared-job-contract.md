@@ -11,9 +11,9 @@ already approved or integrated those features.
 - The PR adds README content and seven PlantUML diagrams with SVG/PNG exports.
   It adds no Profile/Recommendation Java implementation. Java files on that branch
   are older starter skeletons, including an empty `Internship`.
-- A three-way trial merge of our synchronized branch with Ling's branch completed
-  without conflicts before implementation. Recheck against the latest remote refs
-  before integration; unpushed work cannot be evaluated.
+- Three-way trial merges with Ling's branch completed without conflicts both before
+  implementation and after implementation commit `9b52e39`. Remote branch tips were
+  checked again on 2026-11-16 and were unchanged. Unpushed work cannot be evaluated.
 
 ## Clean Architecture findings
 
