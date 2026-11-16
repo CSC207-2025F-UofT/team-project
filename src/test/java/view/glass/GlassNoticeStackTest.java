@@ -49,6 +49,18 @@ class GlassNoticeStackTest {
     }
 
     @Test
+    void errorStaysButSuccessFades() throws Exception {
+        java.util.concurrent.atomic.AtomicReference<JRootPane> root = new java.util.concurrent.atomic.AtomicReference<>();
+        SwingUtilities.invokeAndWait(() -> {
+            root.set(root());
+            GlassNotices.showError(root.get(), "Can't calculate", "a has no value");
+            GlassNotices.showSuccess(root.get(), "Saved");
+        });
+        Thread.sleep(GlassNotices.SUCCESS_DURATION_MS + 400);
+        SwingUtilities.invokeAndWait(() -> assertEquals(1, stack(root.get()).activeCount(), "only the error is left"));
+    }
+
+    @Test
     void stackReflowsWhenTheHostWindowChangesWidth() throws Exception {
         SwingUtilities.invokeAndWait(() -> {
             JRootPane root = root();

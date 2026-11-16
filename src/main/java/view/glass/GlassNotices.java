@@ -51,7 +51,7 @@ public final class GlassNotices {
         return show(parent, Kind.ERROR, title, message);
     }
 
-    /** All notices, including errors, auto-dismiss after two seconds unless closed sooner. */
+    // success fades after 2 s, errors stay till closed or fixed
     public static final int DEFAULT_DURATION_MS = SUCCESS_DURATION_MS;
     private static final int TOP = 105;
     private static final int GAP = 8;
@@ -110,9 +110,11 @@ public final class GlassNotices {
             entry.y = entry.destination + 16;
             entry.opacity = 0f;
             view.setOpacity(0f);
-            entry.expiry = new Timer(DEFAULT_DURATION_MS, event -> dismiss(entry));
-            entry.expiry.setRepeats(false);
-            entry.expiry.start();
+            if (kind == Kind.SUCCESS) {
+                entry.expiry = new Timer(DEFAULT_DURATION_MS, event -> dismiss(entry));
+                entry.expiry.setRepeats(false);
+                entry.expiry.start();
+            }
             animator.start();
             return () -> {
                 if (SwingUtilities.isEventDispatchThread()) dismiss(entry);
