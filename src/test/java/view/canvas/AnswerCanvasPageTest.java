@@ -837,7 +837,7 @@ class AnswerCanvasPageTest {
         SwingUtilities.invokeAndWait(() -> {
             page = new AnswerCanvasPage(shared, controller, viewModel, (id, latex, result) -> { },
                     new GraphController(input -> { }), new GraphViewModel(), graphCheck::canGraph,
-                    java.awt.Color.WHITE, 0);
+                    java.awt.Color.WHITE);
             page.setCalculateCheck(calcCheck::canCalculate);
             page.setPopupDelay(100);
             shared.attachTo(page);

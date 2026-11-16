@@ -123,13 +123,13 @@ public class AnswerCanvasPage extends CanvasPage {
     public AnswerCanvasPage(SharedCanvas sharedCanvas, EvaluateController controller, MathLabViewModel viewModel,
                             FormulaResultSink resultSink, GraphController graphController,
                             GraphViewModel graphViewModel, Predicate<String> graphable,
-                            java.awt.Color background, int messageTop) {
+                            java.awt.Color background) {
         this(sharedCanvas, controller, viewModel, resultSink);
         this.graphable = graphable;
         graphing = new PopupGraphing(sharedCanvas, graphController, graphViewModel, notices,
                 getCanvasArea(), this::publishFormulaOnly);
         addCanvasOverlay(graphing.rangeBar());
-        useBoardLook(background, messageTop);
+        useBoardLook(background);
     }
 
     // the area the board floats things over (same coords as the canvas)
