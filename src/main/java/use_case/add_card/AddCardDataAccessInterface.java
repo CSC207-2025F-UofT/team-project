@@ -2,7 +2,7 @@ package use_case.add_card;
 
 import entity.Card;
 
-public interface AddCardDataAccessInterace {
+public interface AddCardDataAccessInterface {
     /**
      * Saves the card to the database.
      *

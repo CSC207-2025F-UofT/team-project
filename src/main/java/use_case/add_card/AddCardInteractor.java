@@ -3,10 +3,10 @@ package use_case.add_card;
 import entity.Card;
 
 public class AddCardInteractor implements AddCardInputBoundary {
-    private final AddCardDataAccessInterace dataAccess;
+    private final AddCardDataAccessInterface dataAccess;
     private final AddCardOutputBoundary presenter;
 
-    public AddCardInteractor(AddCardDataAccessInterace dataAccess, AddCardOutputBoundary presenter) {
+    public AddCardInteractor(AddCardDataAccessInterface dataAccess, AddCardOutputBoundary presenter) {
         this.dataAccess = dataAccess;
         this.presenter = presenter;
     }

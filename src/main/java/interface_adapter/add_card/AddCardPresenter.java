@@ -18,7 +18,7 @@ public class AddCardPresenter implements AddCardOutputBoundary {
             outputData.getQuestion(), 
             outputData.getAnswer(),
             "Card added success"
-        )
+        );
     }
 
     @Override
