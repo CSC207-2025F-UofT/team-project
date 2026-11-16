@@ -1,4 +1,4 @@
-package use_case.earn_coins;
+package use_case.earn_reward_coins;
 
 public class EarnRewardCoinsInteractor {
 }
