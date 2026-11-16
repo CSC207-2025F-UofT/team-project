@@ -62,9 +62,9 @@ As a user, I want be able to change my currency type so I could keep using this 
 
 ## Entities
 
-### Entity 1
+### entity 1
 
-### Entity 2
+### entity 2
 
 (Add additional entities as needed.)
 

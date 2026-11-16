@@ -1,3 +1,5 @@
+package interface_adapter;
+
 import org.json.JSONObject;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -10,7 +12,7 @@ abstract class JSONControl {
   public JSONControl (String file) throws IOException {
     this.fileName = file;
     try {
-      String flatContents = Files.readString(Path.of("src/main/data/" + file));
+      String flatContents = Files.readString(Path.of("src/main/java/data/" + file));
       this.contents = new JSONObject(flatContents);
     } catch (IOException e) {
       System.out.println("File not accessible. Has " + file + " been removed or misnamed?");
@@ -24,7 +26,7 @@ abstract class JSONControl {
 
   public void writeContents() throws IOException {
     try {
-      Files.writeString(Path.of("src/main/data/", this.fileName), this.contents.toString(4));
+      Files.writeString(Path.of("src/main/java/data/", this.fileName), this.contents.toString(4));
     } catch (IOException e) {
       System.out.println("Unable to write to file. Has " + this.fileName + " been removed or misnamed?");
       throw e;}
