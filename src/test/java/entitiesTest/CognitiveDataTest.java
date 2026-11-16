@@ -18,10 +18,10 @@ public class CognitiveDataTest {
     void correctBuildTestEmpty() {
         Date date = new Date(0);
         Hashtable<Date, Object[]> expected = new Hashtable<Date, Object[]> ();
-        Object[] subPut = {1};
-        Object[] put = {"none", subPut, 0};
+        Object[] cogTest = {"blank", 0.0};
+        Object[] put = {"none", cogTest, 0.0};
         expected.put(date, put);
 
-//        assertEquals(expected, data.getCognitiveResults());
+        assertEquals(expected, data.getCognitiveResults());
     }
 }

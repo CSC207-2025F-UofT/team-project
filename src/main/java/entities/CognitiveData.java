@@ -27,7 +27,7 @@ public class CognitiveData {
     public static class CogBuilder {
         private Date date;
         private String mood = "none";
-        private Object[] cogTest = {1, 2};
+        private Object[] cogTest = {"blank", 0.0};
         private Double productivityRating = 0.0;
 
         public CogBuilder(Date date) {
