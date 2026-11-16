@@ -20,7 +20,8 @@ public class Main {
     private static final double PLAYER_SPEED = 4;
 
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(Main::start);
+        // Build the window on Swing's thread (Swing should only be used from that thread).
+        SwingUtilities.invokeLater(() -> start());
     }
 
     private static void start() {
