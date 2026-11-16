@@ -56,7 +56,8 @@ final class ReadableLatex {
         return out.toString();
     }
 
-    private static String subscripts(String s) {
+    // x_12 -> x₁₂
+    static String subscripts(String s) {
         Matcher m = SUBSCRIPT.matcher(s);
         StringBuilder out = new StringBuilder();
         while (m.find()) {

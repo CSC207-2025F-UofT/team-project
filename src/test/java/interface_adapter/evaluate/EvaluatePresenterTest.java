@@ -153,11 +153,12 @@ class EvaluatePresenterTest {
     }
 
     @Test
-    void subscriptedVariableReadsAsSubscript() {
+    void subscriptedVariableReadsAsSubscriptOnTheCanvas() {
         presenter.prepareSolutionsView("x_1", List.of(3.0));
-        assertEquals("x₁ = 3", viewModel.getState().getResultText());
+        assertEquals("x₁ = 3", viewModel.getState().getAnswerText());
+        assertEquals("x_1 = 3", viewModel.getState().getResultText(), "pdf renders the result as latex");
         presenter.prepareExcludedView("x_12", List.of(0.0));
-        assertEquals("x₁₂ ≠ 0", viewModel.getState().getResultText());
+        assertEquals("x₁₂ ≠ 0", viewModel.getState().getAnswerText());
     }
 
     @Test

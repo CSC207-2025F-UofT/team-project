@@ -27,10 +27,10 @@ public final class AnswerFormatter {
     private AnswerFormatter() {
     }
 
-    // what gets drawn: drop the "= " right after the user's =, real minus sign
+    // what gets drawn: drop the "= " after the users =, real minus, x_1 -> x₁ (result stays latex for pdf)
     static String canvasText(AnswerKind kind, String result) {
         String text = kind == AnswerKind.AFTER_EQUALS && result.startsWith("= ") ? result.substring(2) : result;
-        return text.replace('-', '−');
+        return ReadableLatex.subscripts(text.replace('-', '−'));
     }
 
     // "= " in front unless it goes right after the user's =
@@ -70,7 +70,7 @@ public final class AnswerFormatter {
         List<String> shown = formatApart(solutions);
         List<String> parts = new ArrayList<>();
         for (String number : shown) {
-            parts.add(ReadableLatex.of(variable) + " = " + number);  // x_1 -> x₁
+            parts.add(variable + " = " + number);
         }
         return firstFew(parts, " or ");
     }
@@ -88,7 +88,7 @@ public final class AnswerFormatter {
         List<String> shown = formatApart(ends);
         List<String> parts = new ArrayList<>();
         for (int i = 0; i < intervals.size(); i++) {
-            parts.add(interval(ReadableLatex.of(variable), intervals.get(i), shown.get(2 * i), shown.get(2 * i + 1)));
+            parts.add(interval(variable, intervals.get(i), shown.get(2 * i), shown.get(2 * i + 1)));
         }
         return firstFew(parts, " or ");
     }
@@ -99,13 +99,13 @@ public final class AnswerFormatter {
         }
         List<String> parts = new ArrayList<>();
         for (String number : formatApart(excluded)) {
-            parts.add(ReadableLatex.of(variable) + " ≠ " + number);
+            parts.add(variable + " ≠ " + number);
         }
         return firstFew(parts, " and ");
     }
 
     public static String alwaysTrue(String variable) {
-        return "true for all " + ReadableLatex.of(variable);
+        return "true for all " + variable;
     }
 
     public static String defined(String definition) {
