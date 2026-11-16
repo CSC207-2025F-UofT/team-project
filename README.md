@@ -5,9 +5,9 @@ Coffee with Coworkers
 ## Team Information
 
 ### Team Members
-- Shreya Rajesh
 - Jasmine Chen
 - Ellicia Mak
+- Shreya Rajesh
 - Jack Tang
 
 ---
@@ -50,22 +50,28 @@ As an organization, I want to prevent external users from accessing our Tinder t
 
 ---
 
-## Use Cases
-Sign up
-### Use Case 1
-Log In
+## Use Cases 1
+Sign Up
 ### Use Case 2
-Join an Organization
+Log In
 ### Use Case 3
-View own Profile
+Log Out
 ### Use Case 4
-Edit Profile
+Join Organization
 ### Use Case 5
-Match
+View own Profile
 ### Use Case 6
-View Matches
+Edit Profile
 ### Use Case 7
-View Match Profile
+View Matches
+### Use Case 8
+Suggest Matches
+### Use Case 9
+Show Home Page
+### Use Case 10
+Create Organization
+### Use Case 11
+Edit Organization
 
 ---
 
@@ -75,11 +81,15 @@ View Match Profile
 |-------------|--------------|
 | Name | Sign Up |
 | Name | Log In |
-| Name | Edit Profile |
+| Name | Log Out |
+| Name | Join Organization |
 | Name | View Own Profile |
-| Name | Match |
+| Name | Edit Profile |
 | Name | View Matches |
-| Name | View Match Profile |
+| Name | Suggest Matches |
+| Name | Show Home Page |
+| Name | Create Organization |
+| Name | Edit Organization |
 
 ---
 
