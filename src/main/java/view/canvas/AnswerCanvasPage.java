@@ -38,8 +38,6 @@ import java.util.function.Predicate;
 // answer page: pause after an "=" -> popup with the read formula -> Calculate -> answer on the canvas
 public class AnswerCanvasPage extends CanvasPage {
     static final int POPUP_DELAY_MILLIS = 1500;
-    private static final int ERROR_MESSAGE_MILLIS = 7000;
-    private static final int DEFINED_MESSAGE_MILLIS = 4000;
 
     /** Optional source-aware export callback. Older two-argument integrations remain supported. */
     @FunctionalInterface public interface FormulaResultSink {
@@ -57,8 +55,8 @@ public class AnswerCanvasPage extends CanvasPage {
     private boolean targetPick;       // the lasso pick
     private long generation;          // bumps on every user action, old results check it
     private FormulaCapture shown;     // formula the popup is about
-    private int running;              // Calculate jobs still going
-    private boolean ownMessage;       // one of them put up its own message
+    private final GlassPageNotices notices = new GlassPageNotices(this);
+    private long errorFor = -1;       // formula the error card is about
     private PopupGraphing graphing;   // one board only: Graph in the popup
     private PopupHover hover;         // mouse on an unanswered "=" brings the popup back
     private final Map<Long, Read> reads = new HashMap<>();  // last read per formula
@@ -128,7 +126,7 @@ public class AnswerCanvasPage extends CanvasPage {
                             java.awt.Color background, int messageTop) {
         this(sharedCanvas, controller, viewModel, resultSink);
         this.graphable = graphable;
-        graphing = new PopupGraphing(sharedCanvas, graphController, graphViewModel, this::showMessage,
+        graphing = new PopupGraphing(sharedCanvas, graphController, graphViewModel, notices,
                 getCanvasArea(), this::publishFormulaOnly);
         addCanvasOverlay(graphing.rangeBar());
         useBoardLook(background, messageTop);
@@ -186,6 +184,10 @@ public class AnswerCanvasPage extends CanvasPage {
 
     // ink of a formula changed: answer is gone already, offer again after a pause
     private void formulaChanged(long id) {
+        if (id == errorFor) {
+            notices.clearError();  // they're fixing it
+            errorFor = -1;
+        }
         if (!inFront()) {
             return;
         }
@@ -370,8 +372,7 @@ public class AnswerCanvasPage extends CanvasPage {
                 return;
             }
             defined.put(capture.getId(), capture.getRevision());
-            ownMessage = true;
-            showMessage(outcome.result, false, DEFINED_MESSAGE_MILLIS);
+            notices.success(outcome.result);
             publishFormulaOnly(capture, latex);  // saved = done, so PDF Studio gets it
             then.accept(true);
         });
@@ -389,8 +390,7 @@ public class AnswerCanvasPage extends CanvasPage {
     private void present(FormulaCapture capture, String latex, String problem) {
         if (problem != null) {
             hidePopup();
-            showMessage(problem, true, ERROR_MESSAGE_MILLIS);
-            view.glass.GlassNotices.showError(this, "Can't read formula", problem);
+            showError(capture, "Can't read formula", problem);
             return;
         } else if (graphing != null) {
             boolean canGraph = graphable.test(latex);
@@ -427,11 +427,6 @@ public class AnswerCanvasPage extends CanvasPage {
         if (!waiting.isEmpty()) {
             restartPause();  // this one's handled, offer the next after a beat
         }
-        if (running == 0) {
-            ownMessage = false;
-        }
-        running++;
-        showMessage("Calculating " + latex + "…", false, 0);
         worker.calculate(latex, outcome -> deliver(capture, latex, outcome));
     }
 
@@ -460,31 +455,38 @@ public class AnswerCanvasPage extends CanvasPage {
         if (!error.isEmpty()) {
             // popup only, nothing drawn
             if (getSharedCanvas().isCurrent(capture.getId(), capture.getRevision())) {
-                ownMessage = true;
-                showMessage(error, true, ERROR_MESSAGE_MILLIS);
-                // Use the same non-modal error card as Save/Open failures for explicit Calculate.
-                view.glass.GlassNotices.showError(this, outcome.errorTitle, error);
+                showError(capture, outcome.errorTitle, error);
                 // any Calculate goes to PDF Studio, errors just w/ no answer (y=3x, x+1=...)
                 publishFormulaOnly(capture, latex);
             }
         } else if (outcome.definition) {
-            ownMessage = true;
-            showMessage(result, false, DEFINED_MESSAGE_MILLIS);
+            notices.success(result);
             // Definitions have no numeric answer but are still explicitly requested work.
             publishFormulaOnly(capture, latex);
         } else {
             boolean drawn = runs == null
                     ? getSharedCanvas().showAnswer(capture.getId(), capture.getRevision(), kind, outcome.answerText, false)
                     : getSharedCanvas().showAnswer(capture.getId(), capture.getRevision(), kind, runs, false);
+            if (drawn) {
+                notices.clearError();  // answer's on the canvas, that's the success
+            }
             if (drawn && latex != null && !latex.isBlank()
                     && !java.util.Objects.equals(exportedRevisions.get(capture.getId()), capture.getRevision())) {
                 exportedRevisions.put(capture.getId(), capture.getRevision());
                 pdfResultSink.accept(capture.getId(), latex, result);
             }
         }
-        if (--running == 0 && !ownMessage) {
-            hideMessage();
-        }
+    }
+
+    // error card stays till X or the formula gets fixed
+    private void showError(FormulaCapture capture, String title, String reason) {
+        errorFor = capture.getId();
+        notices.error(title, reason);
+    }
+
+    // tests peek at what the cards said
+    GlassPageNotices notices() {
+        return notices;
     }
 
     // what the popup said last for a formula

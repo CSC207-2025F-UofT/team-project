@@ -14,7 +14,7 @@ import java.util.function.Consumer;
 
 // background jobs for the answer page, callbacks land on the EDT
 final class AnswerWorker {
-    private static final String CANT_READ = "Couldn't read the formula.";
+    private static final String CANT_READ = "Try writing it a bit clearer";
     private final EvaluateController controller;
     // one at a time so jobs don't fight over the view model
     private final ExecutorService executor = Executors.newSingleThreadExecutor(r -> {

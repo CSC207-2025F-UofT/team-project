@@ -144,7 +144,8 @@ class AnswerCanvasPageTest {
     }
 
     private boolean errorShown(String text) {
-        return page.isMessageError() && page.currentMessage() != null && page.currentMessage().contains(text);
+        String shown = page.notices().shownError();
+        return shown != null && shown.contains(text);
     }
 
     @Test
@@ -181,7 +182,7 @@ class AnswerCanvasPageTest {
         CanvasAnswer a = answers().get(0);
         assertFalse(a.isError());
         assertTrue(a.getX() > 200, "right of the ink");
-        waitFor(() -> page.currentMessage() == null, "the progress message to go away");
+        assertNull(page.notices().shownError());
     }
 
     @Test
@@ -284,8 +285,7 @@ class AnswerCanvasPageTest {
     void recognitionProblemShowsReasonWithoutCalculate() throws Exception {
         openPage();
         writeWithEquals();
-        waitFor(() -> page.currentMessage() != null && page.currentMessage().equals("Couldn't read the formula."),
-                "the reason");
+        waitFor(() -> errorShown("Try writing it a bit clearer"), "the reason");
         assertNull(popup(), "legacy error popup must not appear");
         assertTrue(answers().isEmpty());
     }
@@ -297,7 +297,7 @@ class AnswerCanvasPageTest {
         });
         openPage();
         writeWithEquals();
-        waitFor(() -> "Couldn't read the formula.".equals(page.currentMessage()), "plain words, no guts");
+        waitFor(() -> errorShown("Try writing it a bit clearer"), "plain words, no guts");
         assertNull(popup(), "legacy error popup must not appear");
     }
 
@@ -333,8 +333,7 @@ class AnswerCanvasPageTest {
         waitPopup("f(x)=x^{2}");
         clickCalculate();
 
-        waitFor(() -> page.currentMessage() != null && page.currentMessage().startsWith("Defined"), "the message");
-        assertFalse(page.isMessageError());
+        waitFor(this::definedShown, "the message");
         assertTrue(answers().isEmpty());
     }
 
@@ -349,7 +348,8 @@ class AnswerCanvasPageTest {
     }
 
     private boolean definedShown() {
-        return !page.isMessageError() && page.currentMessage() != null && page.currentMessage().startsWith("Defined");
+        String done = page.notices().lastSuccess();
+        return page.notices().shownError() == null && done != null && done.startsWith("Defined");
     }
 
     @Test
@@ -411,7 +411,7 @@ class AnswerCanvasPageTest {
         write();
         waitPopup("x+1=");
         clickCalculate();
-        waitFor(() -> page.isMessageError(), "the error");
+        waitFor(() -> page.notices().shownError() != null, "the error");
         waitFor(() -> sent.equals(List.of("x+1=|")), "sent w/ no answer");
     }
 
@@ -433,7 +433,44 @@ class AnswerCanvasPageTest {
         autoDefine();
         write();
         waitPopup("f(x)=");
-        assertNull(page.currentMessage());
+        assertNull(page.notices().shownError());
+        assertNull(page.notices().lastSuccess());
+    }
+
+    @Test
+    void errorCardStaysTillTheFormulaIsFixed() throws Exception {
+        AtomicReference<String> latex = new AtomicReference<>("x+1=");
+        shared.setFormulaRecognizer(image -> latex.get());
+        openPage();
+        write();
+        waitPopup("x+1=");
+        clickCalculate();
+        waitFor(() -> page.notices().shownError() != null, "the error");
+        Thread.sleep(300);
+        assertNotNull(page.notices().shownError(), "doesn't time out");
+
+        latex.set("1+1=");
+        editFormula();
+        waitFor(() -> page.notices().shownError() == null, "card gone once they fix it");
+        waitPopup("1+1=");
+        clickCalculate();
+        waitFor(() -> answerIs("2"), "the answer");
+        assertNull(page.notices().shownError());
+    }
+
+    @Test
+    void answerAfterAnErrorClearsTheCard() throws Exception {
+        shared.setFormulaRecognizer(image -> image.getHeight() < 80 ? "1+1=" : "x+1=");
+        openPage();
+        write();
+        waitPopup("x+1=");
+        clickCalculate();
+        waitFor(() -> page.notices().shownError() != null, "the error");
+
+        drag(400, 300, 420, 330);
+        waitPopup("1+1=");
+        clickCalculate();
+        waitFor(() -> page.notices().shownError() == null, "stale error gone");
     }
 
     @Test
