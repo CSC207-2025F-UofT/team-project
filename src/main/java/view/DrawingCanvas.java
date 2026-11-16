@@ -9,6 +9,7 @@ import view.answer.CanvasAnswer;
 import interface_adapter.TextRun;
 import view.answer.Formula;
 import view.answer.FormulaBook;
+import view.answer.Scripts;
 import entity.InkEditor;
 import entity.InkPoint;
 import entity.Stroke;
@@ -1209,15 +1210,35 @@ public class DrawingCanvas extends JPanel {
         return capture(mine);
     }
 
-    // unbound strokes near seed, grown until nothing else joins
+    // seed's row, plus any limits stacked over/under it (or the row it's a limit of)
     private Set<Stroke> looseGroup(Stroke seed, double h) {
+        Set<Stroke> group = looseRow(seed, h, Set.of());
+        boolean grew = true;
+        while (grew) {
+            grew = false;
+            for (Stroke s : strokes) {
+                if (group.contains(s) || book.isBound(s)) {
+                    continue;
+                }
+                Set<Stroke> other = looseRow(s, h, group);
+                if (Scripts.stackedOn(group, other) || Scripts.stackedOn(other, group)) {
+                    group.addAll(other);
+                    grew = true;
+                }
+            }
+        }
+        return group;
+    }
+
+    // unbound strokes on seed's line, grown until nothing else joins
+    private Set<Stroke> looseRow(Stroke seed, double h, Set<Stroke> skip) {
         Set<Stroke> group = new LinkedHashSet<>(List.of(seed));
         boolean grew = true;
         while (grew) {
             grew = false;
             Rectangle box = boundsOf(group);
             for (Stroke s : strokes) {
-                Rectangle b = group.contains(s) || book.isBound(s) ? null : boundsOf(List.of(s));
+                Rectangle b = group.contains(s) || skip.contains(s) || book.isBound(s) ? null : boundsOf(List.of(s));
                 if (b != null && box != null && AnswerLayout.sameNewFormula(box, h, b)) {
                     group.add(s);
                     grew = true;
