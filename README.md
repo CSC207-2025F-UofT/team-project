@@ -177,15 +177,20 @@ Extensions:
 | Regan | Use Case 1 | 
 | Ingrid | Use Case 4 | 
 
+### MVP Description
+Users are greeted with a home page where they click a button to start the game. It’s a single player game where the user guesses the city and is scored based on how many guesses it takes them to guess the correct city. The user gets 5 tries to guess the correct city. Every incorrect guess provides the user with a clue, by zooming out on the satellite image and listing the distance from their guessed city to the target city, with a direction. The user doesn’t have an account. A correct answer opens up a window showing the user their final score, with a button to play again and a button to return home.
 
 ---
 ## Entities
-### Entity 1 
-Player
-### Entity 2
-Location (image they’re trying to guess)
-### Entity 3
-Guess box (where you input answers)
+### Entity 1: Player
+ie username, points, current streak ...
+### Entity 2: Location
+ie city name, latitude, longitude, ...
+### Entity 3: Round
+ie the current city, attempts, guesses made so far etc
+
+### UML Class Diagram
+(add through PlantUML - shows the instance variables and methods)
 
 ---
 ## API Usage
@@ -202,11 +207,6 @@ Mongo db could be used for the implementation of the leaderboard.
 This API will be used in addition to a JSON dataset containing popular cities longitude and latitude. Then those coordinates will help build a URL query to get the satellite image.
 
 ---
-## Design Diagrams
-### UML Class Diagram
-### Sequence Diagrams
-
----
 ## How to Run
 [Instructions for running the program.]
 
@@ -219,7 +219,5 @@ This API will be used in addition to a JSON dataset containing popular cities lo
 **2026/11/15** - Elliot
 First iteration of view
 
-
 ---
-## MVP Description
-Users are greeted with a home page where they click a button to start the game. It’s a single player game where the user guesses the city and is scored based on how many guesses it takes them to guess the correct city. The user gets 5 tries to guess the correct city. Every incorrect guess provides the user with a clue, by zooming out on the satellite image and listing the distance from their guessed city to the target city, with a direction. The user doesn’t have an account. A correct answer opens up a window showing the user their final score, with a button to play again and a button to return home.
+
