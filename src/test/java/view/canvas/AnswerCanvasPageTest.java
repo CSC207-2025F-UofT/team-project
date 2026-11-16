@@ -443,6 +443,37 @@ class AnswerCanvasPageTest {
         assertNull(page.notices().lastSuccess());
     }
 
+    // which notice cards are really sitting in the window
+    private static List<String> cardsIn(javax.swing.JRootPane root) {
+        List<String> names = new java.util.ArrayList<>();
+        for (java.awt.Component c : root.getLayeredPane().getComponents()) {
+            if (c.getName() != null && c.getName().startsWith("glass-notice-")) {
+                names.add(c.getName());
+            }
+        }
+        return names;
+    }
+
+    @Test
+    void errorCardReallyLandsInTheWindow() throws Exception {
+        shared.setFormulaRecognizer(image -> "x+1=");
+        openPage();
+        javax.swing.JRootPane root = new javax.swing.JRootPane();
+        onEdt(() -> {
+            root.setSize(900, 600);
+            root.getLayeredPane().setSize(900, 600);
+            root.getContentPane().add(page);
+        });
+        write();
+        waitPopup("x+1=");
+        clickCalculate();
+        waitFor(() -> page.notices().shownError() != null, "the error");
+        Thread.sleep(300);
+        AtomicReference<List<String>> cards = new AtomicReference<>();
+        onEdt(() -> cards.set(cardsIn(root)));
+        assertTrue(cards.get().contains("glass-notice-error"), "cards: " + cards.get());
+    }
+
     @Test
     void errorCardStaysTillTheFormulaIsFixed() throws Exception {
         AtomicReference<String> latex = new AtomicReference<>("x+1=");
