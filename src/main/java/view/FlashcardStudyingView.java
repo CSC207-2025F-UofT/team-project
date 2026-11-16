@@ -1,6 +1,9 @@
 package view;
 
 import interface_adapters.flashcard_studying.FlashcardStudyingController;
+import interface_adapters.flashcard_studying.FlashcardStudyingViewModel;
+import interface_adapters.flashcard_studying.FlashcardStudyingViewModelListener;
+import interface_adapters.flashcard_studying.FlashcardStudyingState;
 
 import javax.swing.*;
 import javax.swing.text.*;
@@ -9,73 +12,66 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-public class FlashcardStudyingView extends JPanel implements ActionListener {
+public class FlashcardStudyingView extends JPanel implements ActionListener, FlashcardStudyingViewModelListener {
 
     private final FlashcardStudyingController controller;
+    private final FlashcardStudyingViewModel viewModel;
 
     private final JLabel title;
     private final JLabel deckTitle;
-    private final JLabel question;
-    private final JLabel answer;
+//    private final JLabel question;
+//    private final JLabel answer;
     private final JButton knewIt;
     private final JButton stillLearning;
-    private final JButton flip;
+    private final JButton flipButton;
 
     /**
-     * Constructs the Flashcard Generator View
+     * Constructs the Flashcard Studying View
      * Initializes all it's components, and connects the View to the Controller
      * @param controller the Controller for FlashcardGenerator
      */
-    public FlashcardStudyingView(FlashcardStudyingController controller){
+    public FlashcardStudyingView(FlashcardStudyingController controller, FlashcardStudyingViewModel viewModel){
         this.controller = controller;
         this.setLayout(null);
 
-        title = new JLabel("FLASHCARD GENERATOR!!!");
+        this.viewModel = viewModel;
+        this.viewModel.addListener(this);
+
+        title = new JLabel("Time to review!");
         title.setBounds(0,0,500,35);
         title.setFont(new Font("Chalkduster",Font.BOLD, 30));
+        title.setAlignmentX(Component.CENTER_ALIGNMENT);
         this.add(title);
 
-        tutorialTitle = new JLabel("TUTORIAL");
-        tutorialTitle.setBounds(10,70,200,35);
-        tutorialTitle.setFont(new Font("Chalkduster",Font.BOLD, 25));
-        this.add(tutorialTitle);
+        deckTitle = new JLabel("TUTORIAL");
+        deckTitle.setBounds(10,70,200,35);
+        deckTitle.setFont(new Font("Chalkduster",Font.BOLD, 25));
+        this.add(deckTitle);
 
-        tutorial = new JTextArea("Add Tutorial later...");
-        tutorial.setEditable(false);
-        tutorial.setBounds(10,120, 300,300);
-        tutorial.setFont(new Font("Chalkduster",Font.BOLD, 12));
-        tutorial.setOpaque(false);
-        tutorial.setBackground(new Color(0,0,0,0));
-        this.add(tutorial);
 
-        textInput = new JTextPane();
-        textInput.setEditable(true);
-        textInput.setBounds(400,100, 375, 350);
-        textInput.setFont(new Font("Arial", Font.PLAIN, 12));
-        this.add(textInput);
+        flipButton = new JButton("Flip");
+        flipButton.setBounds(100,410, 600,60);
+        flipButton.setFont(new Font("Chalkduster", Font.PLAIN, 30));
+        flipButton.setBackground(Color.LIGHT_GRAY);
+        flipButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        flipButton.addActionListener(this);
+        this.add(flipButton);
 
-        scrollPane = new JScrollPane(textInput);
-        scrollPane.setBounds(400,100,375,350);
-        scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
-        scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-        this.add(scrollPane);
+        knewIt = new JButton("Knew it!");
+        knewIt.setBounds(400,470, 300,60);
+        knewIt.setFont(new Font("Chalkduster", Font.PLAIN, 30));
+        knewIt.setBackground(Color.GREEN);
+        knewIt.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        knewIt.addActionListener(this);
+        this.add(knewIt);
 
-        generateButton = new JButton("Generate");
-        generateButton.setBounds(420,470, 200,60);
-        generateButton.setFont(new Font("Chalkduster", Font.PLAIN, 30));
-        generateButton.setBackground(Color.LIGHT_GRAY);
-        generateButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        generateButton.addActionListener(this);
-        this.add(generateButton);
-
-        boldButton = new JButton("Bold");
-        boldButton.setBounds(630,470, 100,60);
-        boldButton.setFont(new Font("Chalkduster", Font.PLAIN, 30));
-        boldButton.setBackground(Color.LIGHT_GRAY);
-        boldButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        boldButton.addActionListener(this);
-        this.add(boldButton);
-
+        stillLearning = new JButton("Still learning...");
+        stillLearning.setBounds(100,470, 300,60);
+        stillLearning.setFont(new Font("Chalkduster", Font.PLAIN, 30));
+        stillLearning.setBackground(Color.RED);
+        stillLearning.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        stillLearning.addActionListener(this);
+        this.add(stillLearning);
 
 
 
@@ -88,15 +84,30 @@ public class FlashcardStudyingView extends JPanel implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        if (e.getSource() == boldButton) {
-            toggleBold();
-        }
-        else if (e.getSource() == generateButton){
-            String text = textInput.getText();
-
-
-        }
+//        if (e.getSource() == boldButton) {
+//            toggleBold();
+//            System.out.println("Click " + evt.getActionCommand());
+//        }
+//        else if (e.getSource() == generateButton){
+//            String text = textInput.getText();
+//
+//
+//        }
 
 
     }
+
+    @Override
+    public void stateChanged() {
+//      setFields(viewModel.getState());
+        title.setText(viewModel.getState().getDeckTitle());
+    }
+
+//    private void setFields(FlashcardStudyingState state) {
+//        title.setText(state.getUsername());
+//    }
+//
+//    public void setLoginController(LoginController loginController) {
+//        this.loginController = loginController;
+//    }
 }
