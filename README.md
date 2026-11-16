@@ -219,7 +219,6 @@ As a student, I want to be able to have a suggested prioritization of today's ta
 ##### Preconditions
 
 - The application is running, and the window for both task creation and task editing is open.
-
 ##### Trigger
 
 - The user chooses to create a new academic task.
@@ -231,7 +230,7 @@ As a student, I want to be able to have a suggested prioritization of today's ta
 ##### Main success scenario
 
 1. The user requests to create a new academic task.
-2. The system displays the task creation form.
+2. The system displays the task creation form specific to the user logged in.
 3. The user enters the task title, description, and deadline.
 4. The user optionally enters the estimated number of hours required to complete the task. If unspecified, the system defaults to 10 hours.
 5. The user optionally selects a difficulty level. If unspecified, the system defaults to Average.
@@ -301,11 +300,12 @@ As a student, I want to be able to have a suggested prioritization of today's ta
 
 #### Main success scenario
 - The user selects an existing task to edit.
+    -  The task is specific to the user logged in. 
 - The system displays its current title, description, deadline, estimated total hours, completion progress, and difficulty. 
 - The student modifies one or more fields.
 - The student asks to save the changes. 
 - The system validates the edited information. 
-  - There would only be these three exact choices for the user to select for the difficulty level. i.e., the user cannot just type in a string. 
+    - There would only be these three exact choices for the user to select for the difficulty level. i.e., the user cannot just type in a string. 
 - The system saves the updated task locally, preserving its identifier and other unchanged fields. 
 - The system displays the updated information and a confirmation message that it was saved.
 
@@ -336,6 +336,7 @@ As a student, I want to be able to have a suggested prioritization of today's ta
 
 #### Main success scenario
 - The user selects an existing task and asks to delete it.
+    -  The task is specific to the user logged in. 
 - The system identifies the selected task and asks for confirmation
 - The student confirms the deletion.
 - The system deletes the task from local storage.
@@ -399,10 +400,12 @@ As a student, I want to be able to have a suggested prioritization of today's ta
 #### Main success scenario
 1. The user opens the Monitoring View window, or the Monitoring View window is already open and the user requests to select and sort tasks by due date.
 2. The system retrieves all the tasks stored inside the system.
+    -  The tasks retrieved are specific to the logged-in user. 
 3. The system identifies all incomplete tasks whose deadlines have passed, including tasks due today, as overdue and displays them at the top separately.
 4. The system sorts the remaining incomplete tasks by deadline, with the closest deadline listed first.
 5. The system retrieves public holiday information from the Nager.Date Public Holiday API and checks whether the deadline of each task falls on a public holiday.
     - The initial result will be cached, and subsequent runs will not repeat requests to the API. 
+    -  The holidays retrieved are country-specific to the user logged in. 
 6. The system displays an overdue warning beside each overdue task and a public holiday warning beside each task whose deadline falls on a public holiday.
 7. The system makes the holiday-warning information available for reuse by Story 4 through an abstract interface.
 
@@ -451,6 +454,7 @@ As a student, I want to be able to have a suggested prioritization of today's ta
 ##### Main success scenario
 1. The user requests to prioritize the tasks in the Monitoring View using the suggested daily workload algorithm.
 2. The system retrieves all the tasks stored inside the system.
+    -  The tasks retrieved are specific to the user logged in. 
 3. The system finds all the tasks ***NOT*** overdue ***AND*** that have ***NOT*** been completed, as the overdue tasks would always be displayed at the top separately.
 4. The system sorts the tasks using the suggested daily workload, with the task requiring the greatest workload listed first.
 5. The system selects the top three tasks (or up to three tasks, if there are fewer than three tasks), and they are already sorted in the right order to be displayed.
