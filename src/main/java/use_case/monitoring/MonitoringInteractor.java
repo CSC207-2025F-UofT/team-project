@@ -20,23 +20,13 @@ public class MonitoringInteractor {
     public List<Task> getTasksForMonitoring(List<Task> tasks, String countryCode) {
         LocalDate today = LocalDate.now();
 
-        Comparator<Task> byDeadlineThenTitle = Comparator
-                .comparing(Task::getDeadline)
-                .thenComparing(Task::getTitle, String.CASE_INSENSITIVE_ORDER);
+        Comparator<Task> byDeadlineThenTitle = Comparator.comparing(Task::getDeadline).thenComparing(Task::getTitle, String.CASE_INSENSITIVE_ORDER);
 
-        List<Task> incomplete = tasks.stream()
-                .filter(task -> task.getCompletionProgress() < 100)
-                .collect(Collectors.toList());
+        List<Task> incomplete = tasks.stream().filter(task -> task.getCompletionProgress() < 100).collect(Collectors.toList());
 
-        List<Task> overdue = incomplete.stream()
-                .filter(task -> !task.getDeadline().isAfter(today))
-                .sorted(byDeadlineThenTitle)
-                .collect(Collectors.toList());
+        List<Task> overdue = incomplete.stream().filter(task -> !task.getDeadline().isAfter(today)).sorted(byDeadlineThenTitle).collect(Collectors.toList());
 
-        List<Task> upcoming = incomplete.stream()
-                .filter(task -> task.getDeadline().isAfter(today))
-                .sorted(byDeadlineThenTitle)
-                .collect(Collectors.toList());
+        List<Task> upcoming = incomplete.stream().filter(task -> task.getDeadline().isAfter(today)).sorted(byDeadlineThenTitle).collect(Collectors.toList());
 
         List<Task> result = new ArrayList<>();
         result.addAll(overdue);
@@ -46,9 +36,6 @@ public class MonitoringInteractor {
     }
 
     public Optional<String> getHolidayWarning(Task task, String countryCode) {
-        return holidayService.getHolidayName(
-                task.getDeadline(),
-                countryCode
-        );
+        return holidayService.getHolidayName(task.getDeadline(), countryCode);
     }
 }

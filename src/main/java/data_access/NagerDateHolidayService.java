@@ -18,8 +18,7 @@ import java.util.Map;
 import java.util.Optional;
 
 public class NagerDateHolidayService implements HolidayService {
-    private static final String BASE_URL =
-            "https://nagerholidays.com/api/v4/Holidays/";
+    private static final String BASE_URL = "https://nagerholidays.com/api/v4/Holidays/";
 
     private final HttpClient client = HttpClient.newHttpClient();
 
@@ -27,14 +26,16 @@ public class NagerDateHolidayService implements HolidayService {
 
     @Override
     public Optional<String> getHolidayName(LocalDate date, String countryCode) {
-        String normalizedCountry = countryCode.toUpperCase(Locale.ROOT);
-        String cacheKey = normalizedCountry + "-" + date.getYear();
+        String upperCaseCountry = countryCode.toUpperCase(Locale.ROOT);
+        String cacheCode = upperCaseCountry + "-" + date.getYear();
 
         try {
-            Map<LocalDate, String> holidays = cache.computeIfAbsent(
-                    cacheKey,
-                    ignored -> loadHolidays(date.getYear(), normalizedCountry)
-            );
+            Map<LocalDate, String> holidays = cache.get(cacheCode);
+
+            if (holidays == null) {
+                holidays = loadHolidays(date.getYear(), upperCaseCountry);
+                cache.put(cacheCode, holidays);
+            }
 
             return Optional.ofNullable(holidays.get(date));
 
@@ -44,37 +45,23 @@ public class NagerDateHolidayService implements HolidayService {
     }
 
     private Map<LocalDate, String> loadHolidays(int year, String countryCode) {
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(BASE_URL + countryCode + "/" + year))
-                .GET()
-                .build();
+        HttpRequest request = HttpRequest.newBuilder().uri(URI.create(BASE_URL + countryCode + "/" + year)).GET().build();
 
         try {
-            HttpResponse<String> response = client.send(
-                    request,
-                    HttpResponse.BodyHandlers.ofString()
-            );
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
             if (response.statusCode() != 200) {
-                throw new HolidayApiException(
-                        "Holiday API returned HTTP " + response.statusCode()
-                );
+                throw new HolidayApiException("Holiday API returned HTTP " + response.statusCode());
             }
 
-            JsonArray json = JsonParser
-                    .parseString(response.body())
-                    .getAsJsonArray();
+            JsonArray json = JsonParser.parseString(response.body()).getAsJsonArray();
 
             Map<LocalDate, String> holidays = new HashMap<>();
 
             for (JsonElement element : json) {
-                LocalDate holidayDate = LocalDate.parse(
-                        element.getAsJsonObject().get("date").getAsString()
-                );
+                LocalDate holidayDate = LocalDate.parse(element.getAsJsonObject().get("date").getAsString());
 
-                String holidayName = element.getAsJsonObject()
-                        .get("name")
-                        .getAsString();
+                String holidayName = element.getAsJsonObject().get("name").getAsString();
 
                 holidays.put(holidayDate, holidayName);
             }
@@ -83,13 +70,9 @@ public class NagerDateHolidayService implements HolidayService {
 
         } catch (InterruptedException exception) {
             Thread.currentThread().interrupt();
-            throw new HolidayApiException(
-                    "Holiday API request was interrupted", exception
-            );
+            throw new HolidayApiException("Holiday API request was interrupted", exception);
         } catch (IOException exception) {
-            throw new HolidayApiException(
-                    "Could not load holiday data", exception
-            );
+            throw new HolidayApiException("Could not load holiday data", exception);
         }
     }
 }
