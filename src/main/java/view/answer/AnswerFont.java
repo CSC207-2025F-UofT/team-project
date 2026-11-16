@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -105,6 +106,15 @@ public final class AnswerFont {
             piece.appendTo(all);
         }
         return all;
+    }
+
+    // same outline split by glyph size, exponents get their own so they can be traced at their own scale
+    public static Map<Float, Shape> outlinesBySize(List<TextRun> runs, float size) {
+        Map<Float, Path2D> bySize = new LinkedHashMap<>();
+        for (Piece piece : typeset(runs, size)) {
+            piece.appendTo(bySize.computeIfAbsent(piece.size, s -> new Path2D.Double()));
+        }
+        return new LinkedHashMap<>(bySize);
     }
 
     // runs -> placed bits; each √ and its radicand get cut out so the bar can go over
