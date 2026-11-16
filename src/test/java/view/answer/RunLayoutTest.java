@@ -36,7 +36,8 @@ class RunLayoutTest {
         List<TextRun> runs = runs("√x+y");
         Rectangle2D all = RunLayout.visualBounds(runs, size);
         double xTop = AnswerFont.visualBounds("x", size).getY();
-        double overX = AnswerFont.visualBounds("√", size).getMaxX() + AnswerFont.visualBounds("x", size).getWidth() / 2;
+        double overX = AnswerFont.visualBounds("√", size).getMaxX()
+                + AnswerFont.visualBounds("x", size).getWidth() / 2;
         assertTrue(inkAbove(runs, size, overX, xTop), "bar over x");
         assertFalse(inkAbove(runs, size, all.getMaxX() - 0.1 * size, xTop), "no bar over y");
     }

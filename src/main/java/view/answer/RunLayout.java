@@ -65,12 +65,7 @@ public final class RunLayout {
         String plain = TextRun.plain(runs);
         List<Operands.Span> roots = Operands.after(plain, '√');
         List<Operands.Span> upAgain = secondLevel(runs, plain);
-        Set<Integer> cuts = new HashSet<>();
-        for (List<Operands.Span> spans : List.of(roots, upAgain)) {
-            for (Operands.Span span : spans) {
-                cuts.addAll(List.of(span.mark, span.mark + 1, span.end));
-            }
-        }
+        Set<Integer> cuts = cutsAround(roots, upAgain);
         List<Piece> pieces = new ArrayList<>();
         Map<Integer, Piece> signs = new HashMap<>();
         double pen = 0;
@@ -93,16 +88,7 @@ public final class RunLayout {
                 }
                 Piece piece = new Piece(AnswerFont.layout(text.substring(from, to), s), at + from, at + to, s, pen, y);
                 pieces.add(piece);
-                pen += piece.layout.getAdvance();
-                for (Operands.Span r : roots) {
-                    if (r.mark == piece.start) {
-                        signs.put(r.mark, piece);
-                        pen = Math.max(pen, piece.ink().getMaxX() + SIGN_GAP * s);  // kalam's √ arm sticks out
-                    }
-                    if (r.end == piece.end) {
-                        pen += BAR_PAST * signs.get(r.mark).size;
-                    }
-                }
+                pen = roomForRoots(roots, piece, signs, pen + piece.layout.getAdvance());
             }
             at += text.length();
         }
@@ -112,6 +98,31 @@ public final class RunLayout {
             barOver(signs.get(r.mark), pieces, r);
         }
         return pieces;
+    }
+
+    // each mark alone, and a cut where its operand ends
+    private static Set<Integer> cutsAround(List<Operands.Span> roots, List<Operands.Span> upAgain) {
+        Set<Integer> cuts = new HashSet<>();
+        for (List<Operands.Span> spans : List.of(roots, upAgain)) {
+            for (Operands.Span span : spans) {
+                cuts.addAll(List.of(span.mark, span.mark + 1, span.end));
+            }
+        }
+        return cuts;
+    }
+
+    // pen after this piece: clear of a √'s arm, or past where its bar will end
+    private static double roomForRoots(List<Operands.Span> roots, Piece piece, Map<Integer, Piece> signs, double pen) {
+        for (Operands.Span r : roots) {
+            if (r.mark == piece.start) {
+                signs.put(r.mark, piece);
+                pen = Math.max(pen, piece.ink().getMaxX() + SIGN_GAP * piece.size);  // kalam's √ arm sticks out
+            }
+            if (r.end == piece.end) {
+                pen += BAR_PAST * signs.get(r.mark).size;
+            }
+        }
+        return pen;
     }
 
     // ^ the writer leaves inside an exponent bc runs only go up once; ones nested deeper stay as text

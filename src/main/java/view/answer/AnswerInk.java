@@ -22,7 +22,7 @@ import java.util.Objects;
 public final class AnswerInk {
     static final float REF = 240f;  // font size the centre lines get traced at
     private static final int PAD = 2;
-    private static final double TWIG = 0.15;  // spurs up to this x glyph size get pointed; real corners stop ~.125, x/q arms start ~.175
+    private static final double TWIG = 0.15;  // spurs up to this x glyph size get pointed, x/q arms start ~.175
     private static final int PINHOLE = 50;  // aa gaps are 1-2px, smallest real counter (e) ~1200
     private static final int CACHE_SIZE = 64;
     private static final Map<Key, Path2D> LINES = new LinkedHashMap<>(16, 0.75f, true) {
