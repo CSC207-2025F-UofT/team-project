@@ -2,14 +2,20 @@ package view;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
 
-public class SessionView extends JPanel {
+/**
+ * The View for when the user first enters the program.
+ * Provides the initial focus timer interface.
+ */
+public class HomeView extends JPanel {
 
-    public SessionView() {
+    private JButton adjustButton = new JButton();
+
+    public HomeView() {
+
         Font winkle = null;
         try {
             winkle = Font.createFont(Font.TRUETYPE_FONT, new File("src/font/Winkle-Regular.ttf"));
@@ -31,19 +37,22 @@ public class SessionView extends JPanel {
         }
         ge.registerFont(appleGaramond);
 
+        // Main panel containing all sections of the home view.
         JPanel mainTimerPanel = new JPanel();
         mainTimerPanel.setLayout(new BoxLayout(mainTimerPanel, BoxLayout.Y_AXIS));
         mainTimerPanel.setBackground(Color.WHITE);
 
+        // Top section containing the heading, timer display, and Start button.
         JPanel topPanel = new JPanel();
         topPanel.setLayout(new BoxLayout(topPanel, BoxLayout.Y_AXIS));
-        topPanel.setPreferredSize(new Dimension(800, 200));
+        topPanel.setPreferredSize(new Dimension(800, 220));
         topPanel.setBackground(Color.WHITE);
 
         JPanel bottomPanel = new JPanel();
-        bottomPanel.setPreferredSize(new Dimension(800, 300));
+        bottomPanel.setPreferredSize(new Dimension(800, 310));
         bottomPanel.setBackground(Color.WHITE);
 
+        // Panel reserved for navigation components.
         JPanel navigationPanel = new JPanel();
         navigationPanel.setPreferredSize(new Dimension(800, 30));
         navigationPanel.setBackground(Color.WHITE);
@@ -52,6 +61,7 @@ public class SessionView extends JPanel {
         focusTextLabel.setFont(appleGaramond.deriveFont(30f));
         focusTextLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
 
+        // Panel containing the timer display and adjustment button.
         JPanel timerPanel = new JPanel();
         timerPanel.setMaximumSize(new Dimension(450, 120));
         timerPanel.setBackground(Color.WHITE);
@@ -60,21 +70,15 @@ public class SessionView extends JPanel {
         timerLabel.setFont(winkle.deriveFont(100f));
         timerLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
 
+        // Creates the button used to access timer adjustment settings.
         ImageIcon adjustIcon = new ImageIcon("src/images/AdjustIcon.png");
-        JButton adjustTimer = new JButton(adjustIcon);
-        adjustTimer.setBorderPainted(false);
-        adjustTimer.setFocusPainted(false);
-
-        adjustTimer.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                // Open the settings panel
-            }
-        });
+        adjustButton = new JButton(adjustIcon);
+        adjustButton.setBorderPainted(false);
+        adjustButton.setFocusPainted(false);
 
         timerPanel.add(Box.createHorizontalStrut(90));
         timerPanel.add(timerLabel);
-        timerPanel.add(adjustTimer);
+        timerPanel.add(adjustButton);
 
         JButton startButton = new JButton("Start");
         startButton.setFont(winkle.deriveFont(48f));
@@ -90,15 +94,17 @@ public class SessionView extends JPanel {
         mainTimerPanel.add(bottomPanel);
         mainTimerPanel.add(navigationPanel);
 
-        JFrame mainFrame = new JFrame();
-        mainFrame.add(mainTimerPanel);
-        mainFrame.setSize(800, 600);
-        mainFrame.setVisible(true);
-        mainFrame.setLocationRelativeTo(null);
+        this.setLayout(new BorderLayout());
+        this.add(mainTimerPanel, BorderLayout.CENTER);
 
     }
 
-    public static void main(String[] args){
-        SessionView v = new SessionView();
+    /**
+     * Adds an ActionListener to the timer adjustment button.
+     * @param listener the ActionListener that handles clicks on the button
+     */
+    public void addAdjustButtonListener(ActionListener listener) {
+        adjustButton.addActionListener(listener);
     }
+
 }
