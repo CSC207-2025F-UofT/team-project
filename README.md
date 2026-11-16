@@ -47,7 +47,7 @@
 | Lucy Liu | [NOVAx1216-coder](https://github.com/NOVAx1216-coder) | lucymeichen.liu@mail.utoronto.ca | Locked in and Linked Out! |
 | Joon Park | [kdaster](https://github.com/kdaster) | jooner.park@mail.utoronto.ca | |
 | Serena Ganbaatar | [serena-gb](https://github.com/serena-gb) | saruul.ganbaatar@mail.utoronto.ca | This too shall pass. |
-| Issac Wan | [isaacwan-dev](https://github.com/isaacwan-dev) | isaac.wan@mail.utoronto.ca | We can do this |
+| Isaac Wan | [isaacwan-dev](https://github.com/isaacwan-dev) | isaac.wan@mail.utoronto.ca | We can do this |
 | Daniel Park | [dannysauce25](https://github.com/dannysauce25) | daniell.park@mail.utoronto.ca | we got dis shi |
 
 [Back to top](#linked-out)
