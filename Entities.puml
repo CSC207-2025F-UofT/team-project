@@ -10,40 +10,58 @@ hide empty members
 ' ========
 ' Foundational entities
 ' ========
-abstract class BusinessMapping
+abstract class BusinessMappings {
+  + addMapping : Map<Object, Object>
+}
 
 ' Maps with keys and values being both one-to-one and onto
-abstract class BusinessOneToOneCorrespondenceMapping
+abstract class BusinessOneToOneCorrespondenceMappings
 
 ' 1 - Easy, 2 - Average, 3 - Difficult
-class DifficultyLevelMapping {
-  - difficultyLevelToStringMapping : Map<int, String>
-  - difficultyStringToLevelMapping : Map<String, int>
+class DifficultyLevelMappings {
+  - difficultyLevelToNameMapping : Map<byte, String>
+  - difficultyNameToLevelMapping : Map<String, byte>
+  + getDifficultyName(level : byte) : String
+  + getDifficultyLevel(name : String) : byte
 }
 
 ' CA - Canada, US - USA, ET - Ethiopia, IN - India, FR - France, GH - Ghana
-class CountryCodeAndCountryMapping {
-  - countryToCountryCodeMapping : Map<int, String>
-  - countryCodeToCountryMapping : Map<String, int>
+class CountryCodeAndCountryMappings {
+  - countryNameToCountryCodeMapping : Map<String, String>
+  - countryCodeToCountryNameMapping : Map<String, String>
+  + getCountryCode(name : String) : String
+  + getCountryNameMapping(code : String) : String
 }
 
-class TaskSortingStrategyNameMapping {
- - strategyNameToStrategyMapping : Map<String, TaskSortingStrategy>
- - StrategyToStrategyNameMapping : Map<TaskSortingStrategy, String>
+class TaskSortingStrategyNameMappings {
+ - strategyNameToSortingStrategyMapping : Map<String, TaskSortingStrategy>
+ - sortingStrategyToStrategyNameMapping : Map<TaskSortingStrategy, String>
+ + getTaskSortingStrategy(name : String) : TaskSortingStrategy
+ + getStrategyName(strategy : TaskSortingStrategy) : String
 }
 
-' The unique ID is only unique per user
+' The uniqueId is only unique per user
+' The uniqueUserId reflects the user that owns the task
 abstract class Task {
-  - uniqueId : int
+  - {final} uniqueTaskId : int
+  - {final} uniqueUserId : int
+  + getUniqueId() : int
+  + getUniqueUserId() : int
 }
 
-' The estimated number of hours needed to complete the task must be positive
-' The completion progress must be an integer between 0 and 100. Both 0 and 100 are allowed.
+' The `fieldsValidation()` method checks the following:
+' - The estimated number of hours needed to complete the task must be positive
+' - The completion progress must be an integer between 0 and 100. Both 0 and 100 are allowed.
+' - The `deadline` field cannot be empty, and it could be a date that has already passed.
+' - The `uniqueUserId` field cannot be empty
+' The constructor of `StudentTask` should use the method `fieldsValidation()` to double-check the validity of the
+'     object created, and throw an error if the item is not valid.
+' The setter of `StudentTask` should use the method `fieldsValidation()` to double-check the validity of the object
+'     before and after the fields are changed, and throw an error if the item is not valid.
 class StudentTask {
-  - uniqueId : int
   - title : String
   - description : String
-  - deadline : Dates
+  - deadline : LocalDate
   - estimatedHoursToCompleteTask : double
   - completionProgress : byte
   - difficultyLevel : byte
@@ -53,7 +71,7 @@ class StudentTask {
 abstract class User {
   - username : String
   - password : String
-  - uniqueId : int
+  - {final} uniqueUserId : int
 }
 
 abstract class TasksUser {
@@ -64,8 +82,8 @@ class StudentTasksUser {
   - countryCode : String
 }
 
-abstract class TaskSortingStrategy {
-  + sort(tasks : List<Task>) : List<Task>
+abstract class TaskSortingStrategy<T extends Task> {
+  + {abstract} sort(tasks : List<T>) : List<Td>
 }
 
 class StudentTaskSortingStrategy {
@@ -74,13 +92,13 @@ class StudentTaskSortingStrategy {
 
 ' Country code is in ISO 3166-1 alpha-2 code
 class Holidays {
-  - countryCodeToHolidays: Map<String,Set<Dates>>
+  - countryCodeToHolidays: Map<String,Set<LocalDate>>
 }
 
-BusinessMapping <|-- BusinessOneToOneCorrespondenceMapping
-BusinessOneToOneCorrespondenceMapping <|-- DifficultyLevelMapping
-BusinessOneToOneCorrespondenceMapping <|-- CountryCodeAndCountryMapping
-BusinessOneToOneCorrespondenceMapping <|-- TaskSortingStrategyNameMapping
+BusinessMappings <|-- BusinessOneToOneCorrespondenceMappings
+BusinessOneToOneCorrespondenceMappings <|-- DifficultyLevelMappings
+BusinessOneToOneCorrespondenceMappings <|-- CountryCodeAndCountryMappings
+BusinessOneToOneCorrespondenceMappings <|-- TaskSortingStrategyNameMappings
 
 Task <|-- StudentTask
 
@@ -91,7 +109,7 @@ Task <--o TasksUser
 
 TaskSortingStrategy <|-- StudentTaskSortingStrategy
 
-TaskSortingStrategy <--o TaskSortingStrategyNameMapping
+TaskSortingStrategy <--o TaskSortingStrategyNameMappings
 
 @enduml
 
@@ -107,30 +125,30 @@ hide empty members
 ' ========
 ' Factories
 ' ========
-abstract class BusinessMappingFactory {
+abstract class BusinessMappingsFactory {
   + createMapping() : BusinessMapping
 }
 
-abstract class BusinessOneToOneCorrespondenceMappingFactory {
+abstract class BusinessOneToOneCorrespondenceMappingsFactory {
   + createMapping() : BusinessOneToOneCorrespondenceMapping
 }
 
-class DifficultyLevelMappingFactory {
+class DifficultyLevelMappingsFactory {
   + createMapping() : DifficultyLevelMapping
 }
 
-class CountryCodeAndCountryMappingFactory {
+class CountryCodeAndCountryMappingsFactory {
   + createMapping() : CountryCodeAndCountryMapping
 }
 
-class StrategyToStrategyNameMappingFactory {
+class StrategyToStrategyNameMappingsFactory {
   + createMapping() : StrategyToStrategyNameMapping
 }
 
-BusinessMappingFactory <|-- BusinessOneToOneCorrespondenceMappingFactory
-BusinessOneToOneCorrespondenceMappingFactory <|-- DifficultyLevelMappingFactory
-BusinessOneToOneCorrespondenceMappingFactory <|-- CountryCodeAndCountryMappingFactory
-BusinessOneToOneCorrespondenceMappingFactory <|-- StrategyToStrategyNameMappingFactory
+BusinessMappingsFactory <|-- BusinessOneToOneCorrespondenceMappingsFactory
+BusinessOneToOneCorrespondenceMappingsFactory <|-- DifficultyLevelMappingsFactory
+BusinessOneToOneCorrespondenceMappingsFactory <|-- CountryCodeAndCountryMappingsFactory
+BusinessOneToOneCorrespondenceMappingsFactory <|-- StrategyToStrategyNameMappingsFactory
 
 abstract class UserFactory {
   - nextUniqueID : int
