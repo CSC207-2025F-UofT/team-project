@@ -13,14 +13,14 @@ your team will find it easier to prepare for the final presentation
 at the end of the term.
 
 # Project Name
-AdoptionPet
+PawPortal
 ## Team Information
 
 ### Team Members
 - Audrey Luo
-- Yu Guo
-- Yuhan Chen
 - Xinmeng Zhang
+- Xiangyu Zhou
+- Kenny Gu
 
 ---
 ## Project Description
@@ -91,13 +91,14 @@ The admin opens the applications list and can filter by pet or by status.
 The admin opens an application, reads it, and changes its status with an optional note.
 The system saves the change. The adopter sees the new status and note in "My Applications".
 When an application is APPROVED, the system marks the pet as ADOPTED.
+
 ---
 ## Minimal Viable Product (MVP)
 | Team Member | MVP Use Case |
 |-------------|--------------|
 | Audrey Luo | Use Case 3: Browse and Filter Pets, Use Case 4: Check Pet Compatibility |
-| Yu Guo | Use Case 2: Add / Edit / Remove a Pet |
-| Yuhan Chen | Use Case 5: Submit an Application, Use Case 6: Track My Applications |
+| Kenny Gu | Use Case 2: Add / Edit / Remove a Pet |
+| Xiangyu Zhou | Use Case 5: Submit an Application, Use Case 6: Track My Applications |
 | Xinmeng Zhang | Use Case 1: Sign up / Log in, Use Case 7: Review Applications |
 ---
 ## Entities
@@ -120,27 +121,44 @@ adminNote, submittedAt
 hasChildren, 
 hasOtherPets, 
 canHandleMedicalNeeds, 
+canHandleKitten&Pregenancy
 preferredSpecies
+
 ---
 ## API Usage
 **API Name: TheCatAPI**
-**Documentation:** [ https://developers.thecatapi.com/ ]
+**Documentation:** [ https://homeatlastrescue.ca ]
 **How it is used in the program: When an admin picks a breed in the Add/Edit Pet form, 
 the program calls the API to fetch general breed information (typical temperament and a 
-reference photo). The breed's typical temperament is offered as suggested tags that the 
-admin can accept or change. If the API is unavailable or the breed is not found, the form 
-still works and the admin enters the information manually.**
+reference photo).**
+
+**API Name: TorontoCat**
+**Documentation:** [ https://torontocatrescue.ca/ ]
+**How it is used in the program: When an admin picks a breed in the Add/Edit Pet form,
+the program calls the API to fetch general breed information (typical temperament and a
+reference photo).**
+
+**API Name: **
+**Documentation:** [ https://northtorontocatrescue.com/ ]
+**How it is used in the program: When an admin picks a breed in the Add/Edit Pet form,
+the program calls the API to fetch general breed information (typical temperament and a
+reference photo).**
+
+https://www.torontohumanesociety.com/cats/
+https://teamcatrescue.com/
+https://annexcatrescue.ca/
 ---
 ## Design Diagrams
 ### UML Class Diagram
 ### Sequence Diagrams
 ---
+
 ## How to Run
-`git clone [repo URL]
+`git clone [repo URL]`
 
-cd [repo name]
+`cd [repo name]`
 
-./gradlew run`
+`./gradlew run`
 
 ---
 ## Notes
