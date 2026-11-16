@@ -7,4 +7,6 @@ interface Notices {
     void error(String title, String reason);
 
     void clearError();  // problem got fixed
+
+    Runnable progress(String text);  // run what comes back when the work is done
 }

@@ -175,7 +175,12 @@ class AnswerCanvasPageTest {
         assertNull(popup(), "no = yet");
         lasso(80, 80, 220, 170);
         waitPopup("\\frac{1}{2}+2^{3}");
-        clickCalculate();
+        AtomicReference<String> working = new AtomicReference<>();
+        onEdt(() -> {
+            page.visiblePopup().clickCalculate();
+            working.set(page.notices().shownProgress());  // answer can't land before this
+        });
+        assertEquals("Calculating \\frac{1}{2}+2^{3}…", working.get());
         assertNull(popup(), "popup goes when clicked");
 
         waitFor(() -> answerIs("= 8.5"), "the answer");
@@ -183,6 +188,7 @@ class AnswerCanvasPageTest {
         assertFalse(a.isError());
         assertTrue(a.getX() > 200, "right of the ink");
         assertNull(page.notices().shownError());
+        waitFor(() -> page.notices().shownProgress() == null, "the Calculating card to go");
     }
 
     @Test

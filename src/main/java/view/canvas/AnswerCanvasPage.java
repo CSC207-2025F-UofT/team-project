@@ -57,6 +57,8 @@ public class AnswerCanvasPage extends CanvasPage {
     private FormulaCapture shown;     // formula the popup is about
     private final GlassPageNotices notices = new GlassPageNotices(this);
     private long errorFor = -1;       // formula the error card is about
+    private int running;              // Calculate jobs still going
+    private Runnable calculating = () -> { };  // takes the Calculating… card down
     private PopupGraphing graphing;   // one board only: Graph in the popup
     private PopupHover hover;         // mouse on an unanswered "=" brings the popup back
     private final Map<Long, Read> reads = new HashMap<>();  // last read per formula
@@ -427,6 +429,9 @@ public class AnswerCanvasPage extends CanvasPage {
         if (!waiting.isEmpty()) {
             restartPause();  // this one's handled, offer the next after a beat
         }
+        calculating.run();  // newest one gets the card
+        calculating = notices.progress("Calculating " + latex + "…");
+        running++;
         worker.calculate(latex, outcome -> deliver(capture, latex, outcome));
     }
 
@@ -452,6 +457,9 @@ public class AnswerCanvasPage extends CanvasPage {
         String result = outcome.result;
         List<TextRun> runs = outcome.answerRuns;
         String error = outcome.error;
+        if (--running == 0) {
+            calculating.run();  // all back, before the result card shows
+        }
         if (!error.isEmpty()) {
             // popup only, nothing drawn
             if (getSharedCanvas().isCurrent(capture.getId(), capture.getRevision())) {

@@ -34,6 +34,7 @@ class PopupGraphPublicationTest {
         @Override public void success(String text) { }
         @Override public void error(String title, String reason) { }
         @Override public void clearError() { }
+        @Override public Runnable progress(String text) { return () -> { }; }
     };
 
     @TempDir Path storage;

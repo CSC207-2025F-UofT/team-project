@@ -41,7 +41,7 @@ public final class GlassNotices {
     private GlassNotices() { }
 
     public interface NoticeHandle { void dismiss(); }
-    public enum Kind { SUCCESS, ERROR }
+    public enum Kind { SUCCESS, ERROR, PROGRESS }
 
     public static NoticeHandle showSuccess(Component parent, String message) {
         return show(parent, Kind.SUCCESS, "", message);
@@ -49,6 +49,11 @@ public final class GlassNotices {
 
     public static NoticeHandle showError(Component parent, String title, String message) {
         return show(parent, Kind.ERROR, title, message);
+    }
+
+    // stays till the caller dismisses it, e.g. Calculating…
+    public static NoticeHandle showProgress(Component parent, String message) {
+        return show(parent, Kind.PROGRESS, "", message);
     }
 
     // success fades after 2 s, errors stay till closed or fixed
@@ -249,7 +254,7 @@ public final class GlassNotices {
         void layoutAll() { doLayout(); }
 
         @Override public Dimension getPreferredSize() {
-            if (kind == Kind.SUCCESS) {
+            if (kind != Kind.ERROR) {  // success + progress share the small pill
                 FontMetrics metrics = getFontMetrics(SUCCESS_TEXT);
                 return new Dimension(Math.max(205, Math.min(480, metrics.stringWidth(message) + 98)), 64);
             }
@@ -272,7 +277,8 @@ public final class GlassNotices {
 
             // Opaque floating white glass: Canvas strokes must not shine through notification text.
             double x = 5, y = 3, sw = w - 10, sh = h - 11;
-            double rounding = kind == Kind.SUCCESS ? sh : 32;
+            boolean pill = kind != Kind.ERROR;
+            double rounding = pill ? sh : 32;
             RoundRectangle2D shadow = new RoundRectangle2D.Double(x + 1, y + 5, sw, sh, rounding, rounding);
             g.setColor(new Color(15, 23, 42, 22));
             g.fill(shadow);
@@ -286,11 +292,14 @@ public final class GlassNotices {
             int markerX = 37;
             int markerY = (int)(y + sh / 2);
             boolean success = kind == Kind.SUCCESS;
-            g.setColor(success ? new Color(226, 242, 231) : new Color(255, 231, 230));
+            boolean progress = kind == Kind.PROGRESS;
+            g.setColor(progress ? new Color(236, 237, 241) : success ? new Color(226, 242, 231) : new Color(255, 231, 230));
             g.fill(new Ellipse2D.Double(markerX - 18, markerY - 18, 36, 36));
             g.setStroke(new BasicStroke(2.8f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
-            g.setColor(success ? new Color(25, 139, 64) : new Color(215, 30, 38));
-            if (success) {
+            g.setColor(progress ? new Color(120, 120, 128) : success ? new Color(25, 139, 64) : new Color(215, 30, 38));
+            if (progress) {
+                for (int dot = -1; dot <= 1; dot++) g.fillOval(markerX + dot * 8 - 2, markerY - 2, 5, 5);  // …
+            } else if (success) {
                 g.drawLine(markerX - 9, markerY, markerX - 2, markerY + 7);
                 g.drawLine(markerX - 2, markerY + 7, markerX + 10, markerY - 8);
             } else {
@@ -299,7 +308,7 @@ public final class GlassNotices {
             }
 
             int textX = 69;
-            if (success) {
+            if (pill) {
                 g.setFont(SUCCESS_TEXT);
                 FontMetrics fm = g.getFontMetrics();
                 g.setColor(new Color(28, 28, 30));

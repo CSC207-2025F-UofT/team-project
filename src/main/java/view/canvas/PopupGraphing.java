@@ -37,6 +37,7 @@ final class PopupGraphing {
     });
     private String lastLatex;
     private Rectangle lastFormula;   // world coords
+    private Runnable drawing = () -> { };  // takes the Drawing… card down
     private Rectangle pending;       // where the card goes when the graph comes back
 
     PopupGraphing(SharedCanvas canvas, GraphController controller, GraphViewModel viewModel,
@@ -93,12 +94,17 @@ final class PopupGraphing {
             return;
         }
         pending = formulaWorld;
+        drawing.run();
+        drawing = notices.progress("Drawing the graph of " + latex + "…");
         executor.execute(() -> {
             try {
                 controller.execute(latex, x, y);  // answer comes through the view model
             } catch (RuntimeException e) {
                 String reason = e.getMessage() == null ? e.toString() : e.getMessage();
-                SwingUtilities.invokeLater(() -> notices.error(CANT_GRAPH, reason));
+                SwingUtilities.invokeLater(() -> {
+                    drawing.run();
+                    notices.error(CANT_GRAPH, reason);
+                });
             }
         });
     }
@@ -110,6 +116,7 @@ final class PopupGraphing {
     }
 
     private void show(GraphState state) {
+        drawing.run();
         if (state.getError() != null) {
             notices.error(CANT_GRAPH, state.getError());
         } else if (state.getGraphImage() != null) {

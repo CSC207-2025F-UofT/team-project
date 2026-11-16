@@ -61,6 +61,24 @@ class GlassNoticeStackTest {
     }
 
     @Test
+    void progressStaysTillDismissedAndHasNoX() throws Exception {
+        java.util.concurrent.atomic.AtomicReference<JRootPane> root = new java.util.concurrent.atomic.AtomicReference<>();
+        java.util.concurrent.atomic.AtomicReference<GlassNotices.NoticeHandle> card = new java.util.concurrent.atomic.AtomicReference<>();
+        SwingUtilities.invokeAndWait(() -> {
+            root.set(root());
+            card.set(GlassNotices.showProgress(root.get(), "Calculating 1+1…"));
+            var view = new GlassNotices.NoticeView(GlassNotices.Kind.PROGRESS, "", "Calculating 1+1…");
+            assertEquals(0, view.getComponentCount(), "nothing to close");
+        });
+        Thread.sleep(GlassNotices.SUCCESS_DURATION_MS + 400);
+        SwingUtilities.invokeAndWait(() -> {
+            assertEquals(1, stack(root.get()).activeCount(), "still working");
+            card.get().dismiss();
+            assertEquals(0, stack(root.get()).activeCount());
+        });
+    }
+
+    @Test
     void stackReflowsWhenTheHostWindowChangesWidth() throws Exception {
         SwingUtilities.invokeAndWait(() -> {
             JRootPane root = root();
