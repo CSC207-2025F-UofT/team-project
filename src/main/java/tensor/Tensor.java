@@ -19,8 +19,8 @@ public class Tensor {
         int flatDim = flatDimension(shape);
         if (data.length != flatDim) {
             throw new IllegalArgumentException(
-                "Shape and Data mismatch : (shape flat dim) " + flatDim +
-                "!= " + data.length + " data length"
+                    "Shape and Data mismatch : (shape flat dim) " + flatDim +
+                            "!= " + data.length + " data length"
             );
         }
 
@@ -77,7 +77,15 @@ public class Tensor {
             right--;
         }
 
-        return new Tensor(shapeCopy, stridesCopy, this.storage, this.requiresGrad);
+        Tensor out = new Tensor(shapeCopy, stridesCopy, this.storage, this.requiresGrad);
+
+        if (this.requiresGrad) {
+            out.setBackward(() -> {
+                this.addGrad(out.getGrad().transpose());
+            }, this);
+        }
+
+        return out;
     }
 
     public static Tensor zeroes(int[] shape, Device device, boolean requiresGrad) {
@@ -127,7 +135,9 @@ public class Tensor {
             return;
         }
 
-
+        if (!Arrays.equals(this.shape, gradient.getShape())) {
+            throw new IllegalArgumentException("Gradient shape mismatch.");
+        }
 
         if (this.grad == null) {
             this.grad = Tensor.zeroes(this.shape, this.getDevice(), false);
