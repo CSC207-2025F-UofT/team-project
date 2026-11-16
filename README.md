@@ -29,7 +29,8 @@ University life simulation, presented as a casual top-down game
 
 ---
 ## User Stories
-### As a student player, I want to choose my major and courses and attend classes and exams so that I can earn a good GPA.
+### User Story 1
+As a student player, I want to choose my courses, attend classes and exams so that I can earn a good GPA.
 ### User Story 2
 As a player, I want to choose where I live and have each day, the weather, and the terms progress, with my progress
 saved, so that my life feels continuous and real.
@@ -65,31 +66,29 @@ Responsible team member: Xinjia Shen
 
 ---
 ## Use Cases
-### Use Case 1.1: Choose a major and enrol in courses
+### Use Case 1.1: Enrol in courses
 Primary actor: student player
 
 Preconditions:
 - A game has started
 - The player has not finalized their academic choices for the current semester
-- The game has a predefined catalogue of majors and courses
+- The game has a predefined catalogue of courses
 
 Trigger: The player asks to set up their academic plan
 
-Success outcome: The selected major and courses are recorded, and the player can view their confirmed academic plan.
+Success outcome: The selected courses are recorded, and the player can view their confirmed academic plan.
 
 Main success scenario:
-1. The system displays the available majors.
-2. The player selects a major.
-3. The system displays the courses available for that major and the permitted number of selections.
-4. The player selects courses and submits their academic plan.
-5. The system checks that the selections meet the enrolment rules.
-6. The system records the major and selected courses.
-7. The system displays the confirmed academic plan.
+1. The system displays the courses available and the permitted number of selections.
+2. The player selects courses and submits their academic plan.
+3. The system checks that the selections meet the enrolment rules.
+4. The system records the selected courses.
+5. The system displays the confirmed academic plan.
 
 Extensions:
-- 4a. The player cancels before confirming.
+- 2a. The player cancels before confirming.
   The system ends the selection process without changing the recorded academic plan.
-- 5a. The selections do not meet the enrolment rules.
+- 3a. The selections do not meet the enrolment rules.
   The system explains what must change and allows the player to revise their selections. No invalid plan is recorded
 
 ### Use Case 1.2: Attend a class
@@ -362,7 +361,7 @@ marked resolved.
 | Team Member | MVP Use Case |
 |-------------|--------------|
 | Zhenbin An | UC3A — Buy food and eat (spend Money); UC3B — Work a café shift (earn Money) |
-| Name | Use Case |
+| Lanxin Fu | UC1.1 -  |
 | Name | Use Case |
 | Name | Use Case |
 ---
