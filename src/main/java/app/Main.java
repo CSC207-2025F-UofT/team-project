@@ -1,4 +1,4 @@
-package App;
+package app;
 import javaex.swing.*;
 
 public class Main {
