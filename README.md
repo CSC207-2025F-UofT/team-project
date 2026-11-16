@@ -37,7 +37,7 @@ As a user, I want to customize existing cocktail recipes by adding, removing, or
 ### User Story 3 [Jiaqi]
 As a user, I want to save my favourite cocktails, rate them, and add personal notes so that I can keep track of drinks I enjoy and revisit their recipes later.
 ### User Story 4 [Wenqian]
-As a user, I want to enter the ingredients I currently have and receive cocktail recommendations based on them so that I can discover drinks I like and can make with purchasing minimum additional ingredients.
+As a user, I want to browse cocktails on the main page and save my favourite cocktails so that I can easily find and revisit them later.
 
 ---
 ## Use Cases
@@ -113,17 +113,21 @@ EXTENSION:
 
 
 ### Use Case 4 [Wenqian]
+PRECONDTION
+1. The application is running.
+2. The user is on the main page.
+
 MAIN SUCCESS SCENARIO
-1. The user enters the ingredients she/he currently has.
-2. The user clicks Match. (trigger)
-3. The system match at most cocktail recipes which includes all or some of the ingredients.
-4. The system shows these recipes and the additional ingredients user needs to purchase. (success outcome)
-5. The system allows user to filter these results by flavour and base or popularity by default.
+1. User browses the cocktails.
+2. User click the cocktail.
+3. The system display the detail of this cocktail.
+4. User selects a cocktail they like.
+5. User clicks the "Favourite" button.
+6. The system saves the selected cocktail to the user's favourites.
    
 EXTENSION
-1. If the ingredients user enters do not exist in the system, the system ask the user which category this ingredients is and its flavour.
-2. If the user wants to see more cocktail recommendations, the system continues to display.
-3. If no recipes matches, the system shows: "No cocktails found."
+1. If the cocktail is already saved, the system informs the user and ask user whether to remove it from favourites.
+2. If saving fails, the system displays an error message.
 
 (Add additional use cases as needed.)
 ---
@@ -133,7 +137,7 @@ EXTENSION
 | Qinli | The user enters a cocktail name and/or selects one or more base spirits, then clicks Search. The system displays matching cocktail names or a message indicating missing input, no matches, or an API failure. |
 | Enhao | The user selects an existing cocktail recipe, adds, removes, or replaces ingredients, and adjusts quantities. The user then names and saves the customized recipe. The system validates the input and saves it separately from the original recipe.  |
 | Jiaqi | The user can log in and log out at any time. They are able to create an account if they never log in before. The user enters a cocktail name, then clicks Save. The system saved all the information above to save pages. |
-| Wenqian | The user enters the ingredients she/he currently has, then clicks Match. The system gives cocktail recommendations based on them. |
+| Wenqian | The user clicks a cocktail, the system display the ingredients of it. The user click 'Favourite' button, then save this cocktail to home page.|
 ---
 ## Entities
 ### Entity 1
@@ -150,22 +154,13 @@ Ingredient
 ### Entity 3
 RecipeIngredient
 - ingredient
-- quantity
 - unit
+- quantity
 ### Entity 4
 User
 - userId
 - userName
-### Entity 5
-CocktailReview
-- user
-- cocktail
-- rating
-- reviewNote
-### Entity 6
-UserIngredient
-- user
-- ingredients
+- favourite
 ---
 ## API Usage
 **API Name:**
