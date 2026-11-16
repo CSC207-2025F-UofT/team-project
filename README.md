@@ -33,121 +33,114 @@ As a player, I want to be able to compare myself to top players of the cityGuess
 
 ---
 ## Use Cases
-### Use Case 1 - Play game
+
+### Use Case 1 - Enter Name (Regan)
 Primary Actor: Player
 Preconditions:
-Player is on the main menu
+- Player has opened the app and is on the welcome screen
 Trigger:
-Player selects ‘Play’ button
-Success Outcome: 
-A round starts and the player is shown an unlabeled satellite image of a city to guess 
-Main Success Scenario: 
-System picks a random city from the dataset
-System displays its satellite image, fully zoomed in, with 5 attempts remaining
-Player submits a guess (see Use Case 2 and Use Case 3)
-Round ends and the player can play again or return to the menu 
-Extensions:
-Image fails to load: system picks a different city
-Empty guess: system asks for a city name and doesn't use up an attempt
-
-### Use Case 2 - Correct Answer
-Primary Actor: Player
-Preconditions: 
-Player has started a game
-Player input the correct city name
-Player has not exceeded allotted guesses (5)
-Trigger:
-Player guess matches city in dataset
+- Player types a username and selects 'Continue'
 Success Outcome:
-A message outputs that the 
-Points are accumulated based on the number of guesses it took (100 for 1, 50 for 2, 25 for 3, 10 for 4, 0 for 5, negative amount for not guessed)
+- The system knows who is playing and the main menu greets the player by name
 Main Success Scenario:
-Display that 
-Increase player rating
+- Player types a username and submits it
+- System checks the database for a player with that name
+- No player is found, so the system creates a new player with all stats at 0 and saves it
+- System sets them as the current player
+- System shows the main menu with "Welcome, [name]!" and the 'Play' and 'Statistics' buttons
 Extensions:
-Accumulate points to my profile if I am signed in.
+- Name already exists: system loads that player's saved stats instead of creating a new player, and shows "Welcome back, [name]!"
+- Empty name or only spaces: system asks for a name and stays on the welcome screen
+- Name is longer than 20 characters: system asks for a shorter name
+- Database can't be read: system shows an error message and stays on the welcome screen
 
-### Use Case 3 - Incorrect Answer
-Primary Actor:
-Preconditions: 
-Player has started a game
-Player has not guessed correctly yet
-Trigger:
-Player makes an incorrect city guess
-Success Outcome: 
-User is given more information about the city
-If the fifth guess is guessed incorrectly, 
-Main Success Scenario: 
-Zooms out on the satellite image by a constant amount.
-Shows the distance from the guessed city to the target city, with a direction.
-Extensions:
-
-
-### Use Case 4 - View Statistics
+### Use Case 2 - Start Round (Felix)
 Primary Actor: Player
 Preconditions:
-Player is on the main menu, or has just finished a round
+- Player has entered a name (see Use Case 1)
+- Player is on the main menu, or has just finished a round
 Trigger:
-Player selects the "Statistics" button, or a round ends
+- Player selects 'Play' on the main menu, or 'Play again' after a round
 Success Outcome:
-A statistics window shows the player's game history
+- A new round starts and the player sees an unlabeled satellite image of a city, fully zoomed in, with 5 attempts remaining
 Main Success Scenario:
-System loads the player's saved stats
-System displays games played, win %, current streak and longest streak
-System displays a guess distribution: how many games were won on attempt 1, 2, 3, 4 and 5
-If the window opened after a round, the bar for that round's attempt number is highlighted
-Player closes the window and returns to the previous screen
+- System picks a random city from the JSON dataset
+- System creates a new round with that city as the target and no guesses made
+- System gets the city's latitude and longitude from the dataset
+- System builds a Mapbox Static Images API URL using the coordinates, the most zoomed-in level, the image size and the satellite style
+- System sends the request to Mapbox and receives the image
+- System shows the game screen with the image, an empty guess box and 5 attempts remaining
 Extensions:
-No games played yet: all stats show 0 and the distribution bars are empty
-Player lost the round (5 wrong guesses): games played goes up, current streak resets to 0, and no distribution bar is highlighted
+- Request fails or times out: system retries once, then picks a different city
+- Invalid or missing API key: system shows an error message and returns to the main menu
+- Dataset can't be loaded: system shows an error message and returns to the main menu
+- Same city as the previous round is picked: system picks again
 
-### Use Case 5 - Load and Zoom Satellite Image
+### Use Case 3 - Submit Guess (Elliot)
 Primary Actor: Player
 Preconditions:
-Player has started a game (see Use Case 1)
-A city has been picked from the JSON dataset
+- A round is in progress (see Use Case 2)
+- Player has at least one attempt remaining
 Trigger:
-A new round starts, or the player makes an incorrect guess (see Use Case 3)
+- Player types a city name and selects 'Guess'
 Success Outcome:
-The satellite image of the city is displayed at the correct zoom level for the current attempt
+- Player finds out if the guess was right. A wrong guess gives them a hint, and a correct guess or a fifth wrong guess ends the round
 Main Success Scenario:
-System gets the city's latitude and longitude from the JSON dataset
-System works out the zoom level from the attempt number (e.g. attempt 1 = most zoomed in, each wrong guess zooms out one step)
-System builds a Mapbox Static Images API URL using the coordinates, zoom level, image size and satellite style
-System sends the request to Mapbox and receives the image
-System displays the image with no labels
+- Player submits a city name
+- System finds the city in the dataset, ignoring capitalization and extra spaces
+- System records the guess and uses up one attempt
+- System compares the guessed city to the target city
+- The guess is correct, so the system marks the round as won
+- The round ends (see Use Case 4)
 Extensions:
-Request fails or times out: system retries once, then shows an error and picks a different city
-Invalid or missing API key: system shows an error message and returns to the main menu
-Player is on the last attempt: image is shown at the most zoomed-out level
+- Wrong guess with attempts remaining: system works out the distance and direction from the guessed city to the target city, adds them to the list of past guesses, requests the satellite image one zoom step further out, and updates the attempts remaining
+- Wrong guess on the fifth attempt: system marks the round as lost and the round ends (see Use Case 4)
+- Empty guess: system asks for a city name and doesn't use up an attempt
+- City is not in the dataset: system shows "not a known city" and doesn't use up an attempt
+- City was already guessed this round: system tells the player and doesn't use up an attempt
+- Zoomed-out image fails to load: system keeps the current image and still shows the distance and direction
 
-### Use Case 6 - Save data to the database
-Primary Actor:
-
+### Use Case 4 - Finish Round (Ingrid)
+Primary Actor: Player
 Preconditions:
-
+- The current round has just been won or lost
+- The result has not been saved yet
 Trigger:
-A player completes a game.
+- The round ends, by a correct guess or a fifth wrong guess (see Use Case 3)
 Success Outcome:
-The player’s data is saved to the data base
+- Player sees the result and their points, and their updated stats are saved
 Main Success Scenario:
-The player’s stats are saved to the data base
-Extensions: 
-Failed to save data
+- System works out the points from the number of guesses used (100 for 1, 50 for 2, 25 for 3, 10 for 4, 0 for 5)
+- System adds the points to the player's total
+- System increases games played and wins, extends the current streak, updates the longest streak if it was beaten, and adds one to the guess distribution for that attempt number
+- System saves the player to the database
+- System shows a result window with the city name and points earned, and 'Play again', 'View stats' and 'Main menu' buttons
+Extensions:
+- Player lost the round: system takes away 25 points, increases games played, resets the current streak to 0, leaves the guess distribution unchanged, and the result window reveals the correct city
+- Save fails: system still shows the result window, with a warning that the result was not saved
+- Player selects 'Play again': a new round starts (see Use Case 2)
+- Player selects 'View stats': the statistics window opens (see Use Case 5)
 
-### Use Case 7 - Retrieve user data from the database
-Primary Actor:
-
+### Use Case 5 - View Statistics (Nikola)
+Primary Actor: Player
 Preconditions:
-
+- Player has entered a name (see Use Case 1)
+- Player is on the main menu, or on the result window after a round
 Trigger:
-The program starts running.
+- Player selects the 'Statistics' button on the main menu, or 'View stats' on the result window
 Success Outcome:
-The player’s data is retrieved from the data base
+- A statistics window shows the player's game history
 Main Success Scenario:
-The player’s stats are retrieved from the data base
-Extensions: 
-Failed to retrieve data
+- System loads the current player's saved stats from the database
+- System displays total points, games played, win %, current streak and longest streak
+- System displays a guess distribution: how many games were won on attempt 1, 2, 3, 4 and 5
+- If the window was opened after a won round, the bar for that round's attempt number is highlighted
+- Player closes the window and returns to the previous screen
+Extensions:
+- No games played yet: all stats show 0 and the distribution bars are empty
+- Window opened after a lost round: no distribution bar is highlighted
+- Stats can't be loaded: system shows an error message and returns to the previous screen
+
 
 (Add additional use cases as needed.)
 ---
