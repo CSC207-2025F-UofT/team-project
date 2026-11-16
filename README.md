@@ -1,5 +1,4 @@
-# Project Name
-## CityGuesser
+# CityGuesser
 
 The readme should include information such as:
 - a summary of what your application is all about
@@ -26,9 +25,9 @@ As a player, I want it to be easy to start a new game, so that I can begin guess
 ### User Story 2 - Elliot
 As a player, I want to receive a confirmation when I guess the correct answer, so that I can see my points and stats based on the number of guesses it took me.
 ### User Story 3 - Nikola
-As a player, I want the game to get easier with every wrong answer that I make.
+As a player, I want the game to get easier with every wrong answer that I make, so that I have more information to base my guesses off of.
 ### User Story 4 - Regan
-As a player, I want cityGuesser to know my name so I feel more connected to it.
+As a player, I want cityGuesser to know my name so that I can be personally called by my name.
 ### User Story 5 - Ingrid
 As a player, I want to be able to compare myself to top players of the cityGuesser to see how good I am, relatively, at the game.
 
@@ -122,6 +121,33 @@ Request fails or times out: system retries once, then shows an error and picks a
 Invalid or missing API key: system shows an error message and returns to the main menu
 Player is on the last attempt: image is shown at the most zoomed-out level
 
+### Use Case 6 - Save data to the database
+Primary Actor:
+
+Preconditions:
+
+Trigger:
+A player completes a game.
+Success Outcome:
+The player’s data is saved to the data base
+Main Success Scenario:
+The player’s stats are saved to the data base
+Extensions: 
+Failed to save data
+
+### Use Case 7 - Retrieve user data from the database
+Primary Actor:
+
+Preconditions:
+
+Trigger:
+The program starts running.
+Success Outcome:
+The player’s data is retrieved from the data base
+Main Success Scenario:
+The player’s stats are retrieved from the data base
+Extensions: 
+Failed to retrieve data
 
 (Add additional use cases as needed.)
 ---
@@ -130,8 +156,8 @@ Player is on the last attempt: image is shown at the most zoomed-out level
 |-------------|--------------|
 | Felix | Use Case  5 | 
 | Elliot | Use Case 3 | 
-| Nikola | Use Case 4 | 
-| Regan | Use Case 1 | 
+| Nikola | Use Case 4,6 | 
+| Regan | Use Case 1,7 | 
 | Ingrid | Use Case 2 | 
 
 
@@ -142,8 +168,6 @@ Player
 ### Entity 2
 Location (image they’re trying to guess)
 ### Entity 3
-Leaderboard
-### Entity 4
 Guess box (where you input answers)
 
 ---
@@ -164,23 +188,21 @@ This API will be used in addition to a JSON dataset containing popular cities lo
 ## Design Diagrams
 ### UML Class Diagram
 ### Sequence Diagrams
+
 ---
 ## How to Run
 [Instructions for running the program.]
+
 ---
 ## Notes
 [Any additional project information.]
-—
+
+---
 ## Project Updates
 **2026/11/15** - Elliot
 First iteration of view
-<img width="5791" height="2795" alt="file" src="https://github.com/user-attachments/assets/15b4ac5f-76e4-43b1-9f76-851d129b2980" />
 
 
-
-
-
-MVP Description:
-
+---
+## MVP Description
 Users are greeted with a home page where they click a button to start the game. It’s a single player game where the user guesses the city and is scored based on how many guesses it takes them to guess the correct city. The user gets 5 tries to guess the correct city. Every incorrect guess provides the user with a clue, by zooming out on the satellite image and listing the distance from their guessed city to the target city, with a direction. The user doesn’t have an account. A correct answer opens up a window showing the user their final score, with a button to play again and a button to return home.
-
