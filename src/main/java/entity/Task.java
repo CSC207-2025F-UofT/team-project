@@ -1,27 +1,20 @@
 package entity;
 
-import java.time.LocalDate;
+public abstract class Task {
+    private final int uniqueTaskId;
+    private final int uniqueUserId;
 
-public class Task {
-    private String title;
-    private LocalDate deadline;
-    private byte completionProgress;
-
-    public Task(String title, LocalDate deadline, byte completionProgress) {
-        this.title = title;
-        this.deadline = deadline;
-        this.completionProgress = completionProgress;
+    protected Task(int uniqueTaskId, int uniqueUserId) {
+        this.uniqueTaskId = uniqueTaskId;
+        this.uniqueUserId = uniqueUserId;
     }
 
-    public String getTitle() {
-        return title;
+    public int getUniqueTaskId() {
+        return uniqueTaskId;
     }
 
-    public LocalDate getDeadline() {
-        return deadline;
+    public int getUniqueUserId() {
+        return uniqueUserId;
     }
 
-    public byte getCompletionProgress() {
-        return completionProgress;
-    }
 }
