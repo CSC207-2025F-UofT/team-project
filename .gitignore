@@ -8,6 +8,8 @@ target/
 .idea/jarRepositories.xml
 .idea/compiler.xml
 .idea/libraries/
+.idea/inspectionProfiles/Project_Default.xml
+.idea/checkstyle-idea.xml
 *.iws
 *.iml
 *.ipr
