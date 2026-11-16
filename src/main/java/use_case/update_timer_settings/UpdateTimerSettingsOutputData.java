@@ -1,13 +1,13 @@
-package use_case.save_session;
+package use_case.update_timer_settings;
 
-/**
- * The input data for the Save Session Use Case.
- */
-public class SaveSessionInputData {
+public class UpdateTimerSettingsOutputData {
     private int focusDuration;
     private int breakDuration;
 
-    public SaveSessionInputData(int focusDuration, int breakDuration) {
+    /**
+     * Output Data for the Update Timer Settings Use Case.
+     */
+    public UpdateTimerSettingsOutputData(int focusDuration, int breakDuration) {
         this.focusDuration = focusDuration;
         this.breakDuration = breakDuration;
     }
