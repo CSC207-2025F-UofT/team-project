@@ -12,8 +12,22 @@ public class GameController {
     }
 
     public void tick(boolean up, boolean down, boolean left, boolean right) {
-        int moveX = (right ? 1 : 0) - (left ? 1 : 0);
-        int moveY = (down ? 1 : 0) - (up ? 1 : 0);   // Swing's y grows downward
+        int moveX = 0;
+        if (right) {
+            moveX = moveX + 1;
+        }
+        if (left) {
+            moveX = moveX - 1;   // if both are held, they cancel out to 0
+        }
+
+        int moveY = 0;
+        if (down) {
+            moveY = moveY + 1;   // Swing's y grows downward, so down is +1
+        }
+        if (up) {
+            moveY = moveY - 1;
+        }
+
         updateGame.execute(new UpdateGameInputData(moveX, moveY));
     }
 }
