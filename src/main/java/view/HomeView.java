@@ -1,7 +1,12 @@
 package view;
 
+import interface_adapters.home.HomeViewModel;
+import interface_adapters.home.HomeViewModelListener;
+import interface_adapters.open_settings.OpenSettingsController;
+
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
@@ -10,11 +15,15 @@ import java.io.IOException;
  * The View for when the user first enters the program.
  * Provides the initial focus timer interface.
  */
-public class HomeView extends JPanel {
+public class HomeView extends JPanel implements HomeViewModelListener {
 
-    private JButton adjustButton = new JButton();
+    private HomeViewModel viewModel;
+    private OpenSettingsController controller = null;
+    JLabel timerLabel = new JLabel();
 
-    public HomeView() {
+    public HomeView(HomeViewModel viewModel) {
+        this.viewModel = viewModel;
+        viewModel.addListener(this);
 
         Font winkle = null;
         try {
@@ -66,15 +75,21 @@ public class HomeView extends JPanel {
         timerPanel.setMaximumSize(new Dimension(450, 120));
         timerPanel.setBackground(Color.WHITE);
 
-        JLabel timerLabel = new JLabel("00:00");
+        timerLabel = new JLabel("00:00");
         timerLabel.setFont(winkle.deriveFont(100f));
         timerLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
 
         // Creates the button used to access timer adjustment settings.
         ImageIcon adjustIcon = new ImageIcon("src/images/AdjustIcon.png");
-        adjustButton = new JButton(adjustIcon);
+        JButton adjustButton = new JButton(adjustIcon);
         adjustButton.setBorderPainted(false);
         adjustButton.setFocusPainted(false);
+        adjustButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                controller.execute();
+            }
+        });
 
         timerPanel.add(Box.createHorizontalStrut(90));
         timerPanel.add(timerLabel);
@@ -100,11 +115,18 @@ public class HomeView extends JPanel {
     }
 
     /**
-     * Adds an ActionListener to the timer adjustment button.
-     * @param listener the ActionListener that handles clicks on the button
+     * Assign the controller to the Home View.
+     * @param controller Open Settings Controller
      */
-    public void addAdjustButtonListener(ActionListener listener) {
-        adjustButton.addActionListener(listener);
+    public void setController(OpenSettingsController controller) {
+        this.controller = controller;
     }
 
+    /**
+     * Updates the timer display when the Home View Model state changes.
+     */
+    @Override
+    public void stateChanged() {
+        timerLabel.setText(viewModel.getState().getTimerDisplay());
+    }
 }

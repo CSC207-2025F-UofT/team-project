@@ -1,22 +1,26 @@
 package app;
 
-import data_access.InMemorySaveSessionDataAccess;
+import data_access.InMemoryUpdateTimerSettingsDataAccess;
 import entities.TimerSessionFactory;
 import interface_adapters.ViewManagerModel;
-import interface_adapters.save_session.SaveSessionController;
-import interface_adapters.save_session.SaveSessionPresenter;
-import interface_adapters.save_session.SaveSessionViewModel;
-import use_case.save_session.SaveSessionDataAccessInterface;
-import use_case.save_session.SaveSessionInputBoundary;
-import use_case.save_session.SaveSessionInteractor;
-import use_case.save_session.SaveSessionOutputBoundary;
+import interface_adapters.home.HomeViewModel;
+import interface_adapters.open_settings.OpenSettingsController;
+import interface_adapters.open_settings.OpenSettingsPresenter;
+import interface_adapters.update_timer_settings.UpdateTimerSettingsController;
+import interface_adapters.update_timer_settings.UpdateTimerSettingsPresenter;
+import interface_adapters.update_timer_settings.TimerSettingsViewModel;
+import use_case.open_settings.OpenSettingsInputBoundary;
+import use_case.open_settings.OpenSettingsInteractor;
+import use_case.open_settings.OpenSettingsOutputBoundary;
+import use_case.update_timer_settings.UpdateTimerSettingsDataAccessInterface;
+import use_case.update_timer_settings.UpdateTimerSettingsInputBoundary;
+import use_case.update_timer_settings.UpdateTimerSettingsInteractor;
+import use_case.update_timer_settings.UpdateTimerSettingsOutputBoundary;
 import view.HomeView;
-import view.SaveSessionView;
+import view.TimerSettingsView;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
 /**
  * Builds and initializes the application by creating its views and use cases.
@@ -27,25 +31,26 @@ public class AppBuilder {
     TimerSessionFactory sessionFactory = new TimerSessionFactory();
     final ViewManagerModel viewManagerModel = new ViewManagerModel();
 
-    SaveSessionDataAccessInterface dataAccessInterface = new InMemorySaveSessionDataAccess(sessionFactory);
+    UpdateTimerSettingsDataAccessInterface dataAccessInterface = new InMemoryUpdateTimerSettingsDataAccess(sessionFactory);
 
-    private SaveSessionView saveSessionView;
-    private SaveSessionViewModel saveSessionViewModel;
+    private TimerSettingsView timerSettingsView;
+    private TimerSettingsViewModel timerSettingsViewModel;
     private HomeView homeView;
+    private HomeViewModel homeViewModel;
 
     public AppBuilder() {
         cardPanel.setLayout(cardLayout);
     }
 
     /**
-     * Adds the Save Session View to the application.
-     * The save session view is displayed in a separate popup window rather than being added to the card panel.
+     * Adds the Update Timer Settings View to the application.
+     * The timer settings view is displayed in a separate popup window rather than being added to the card panel.
      * @return this builder
      */
-    public AppBuilder addSaveSessionView() {
+    public AppBuilder addTimerSettingsView() {
         // We do not add this to the cardPanel because it is a separate popup JFrame
-        saveSessionViewModel = new SaveSessionViewModel();
-        saveSessionView = new SaveSessionView(saveSessionViewModel);
+        timerSettingsViewModel = new TimerSettingsViewModel();
+        timerSettingsView = new TimerSettingsView(timerSettingsViewModel);
         return this;
     }
 
@@ -54,36 +59,41 @@ public class AppBuilder {
      * @return this builder
      */
     public AppBuilder addHomeView() {
-        homeView = new HomeView();
-
-        homeView.addAdjustButtonListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                // Displays the popup window: SaveSessionView
-                saveSessionView.showWindow();
-            }
-        });
-
-        cardPanel.add(homeView, "home view");
+        homeViewModel = new HomeViewModel();
+        homeView = new HomeView(homeViewModel);
+        cardPanel.add(homeView, homeViewModel.VIEW_NAME);
         return this;
     }
 
     /**
-     * Adds the Save Session Use Case to the application.
+     * Adds the Open Settings Use Case to the application.
      * @return this builder
      */
-    public AppBuilder addSaveSessionUseCase() {
-        final SaveSessionOutputBoundary saveSessionOutputBoundary = new SaveSessionPresenter(saveSessionViewModel);
-        final SaveSessionInputBoundary saveSessionInteractor = new SaveSessionInteractor(
-                saveSessionOutputBoundary, dataAccessInterface, sessionFactory);
+    public AppBuilder addOpenSettingsUseCase() {
+        final OpenSettingsOutputBoundary openSettingsPresenter = new OpenSettingsPresenter(timerSettingsViewModel);
+        final OpenSettingsInputBoundary openSettingsInteractor = new OpenSettingsInteractor(openSettingsPresenter);
 
-        SaveSessionController controller = new SaveSessionController(saveSessionInteractor);
-        saveSessionView.setController(controller);
+        OpenSettingsController controller = new OpenSettingsController(openSettingsInteractor);
+        homeView.setController(controller);
         return this;
     }
 
     /**
-     * ABuilds the main application window
+     * Adds the Update Timer Settings Use Case to the application.
+     * @return this builder
+     */
+    public AppBuilder addUpdateTimerSettingsUseCase() {
+        final UpdateTimerSettingsOutputBoundary saveSessionPresenter = new UpdateTimerSettingsPresenter(timerSettingsViewModel, homeViewModel);
+        final UpdateTimerSettingsInputBoundary saveSessionInteractor = new UpdateTimerSettingsInteractor(
+                saveSessionPresenter, dataAccessInterface, sessionFactory);
+
+        UpdateTimerSettingsController controller = new UpdateTimerSettingsController(saveSessionInteractor);
+        timerSettingsView.setController(controller);
+        return this;
+    }
+
+    /**
+     * Builds the main application window
      * @return the JFrame application
      */
     public JFrame build() {
@@ -103,9 +113,10 @@ public class AppBuilder {
     public static void main(String[] args) {
         AppBuilder appBuilder = new AppBuilder();
         JFrame application = appBuilder
-                .addSaveSessionView()
-                .addSaveSessionUseCase()
+                .addTimerSettingsView()
                 .addHomeView()
+                .addUpdateTimerSettingsUseCase()
+                .addOpenSettingsUseCase()
                 .build();
 
         application.setLocationRelativeTo(null);

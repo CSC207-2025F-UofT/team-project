@@ -1,8 +1,8 @@
 package view;
 
-import interface_adapters.save_session.SaveSessionController;
-import interface_adapters.save_session.SaveSessionViewModel;
-import interface_adapters.save_session.SaveSessionViewModelListener;
+import interface_adapters.update_timer_settings.UpdateTimerSettingsController;
+import interface_adapters.update_timer_settings.TimerSettingsViewModel;
+import interface_adapters.update_timer_settings.TimerSettingsViewModelListener;
 
 
 import javax.swing.*;
@@ -16,13 +16,13 @@ import java.io.IOException;
 /**
  * The View for when the user is adjusting the timer settings for a study session in the program.
  */
-public class SaveSessionView extends JPanel implements SaveSessionViewModelListener {
+public class TimerSettingsView extends JPanel implements TimerSettingsViewModelListener {
 
-    private SaveSessionViewModel viewModel;
-    private SaveSessionController controller = null;
+    private TimerSettingsViewModel viewModel;
+    private UpdateTimerSettingsController controller = null;
     private final JFrame settingsFrame = new JFrame();
 
-    public SaveSessionView(SaveSessionViewModel viewModel) {
+    public TimerSettingsView(TimerSettingsViewModel viewModel) {
         this.viewModel = viewModel;
         viewModel.addListener(this);
 
@@ -147,7 +147,7 @@ public class SaveSessionView extends JPanel implements SaveSessionViewModelListe
         saveButton.setFont(appleGaramond.deriveFont(20f));
         saveButton.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        // Passes the focus and break durations to the Save Session controller when the user clicks Save.
+        // Passes the focus and break durations to the Update Timer Settings controller when the user clicks Save.
         saveButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -171,27 +171,30 @@ public class SaveSessionView extends JPanel implements SaveSessionViewModelListe
     }
 
     /**
-     * Responds to changes in the Save Session View Model.
+     * Responds to changes in the Update Timer Settings View Model.
      */
     @Override
     public void stateChanged() {
-        if(viewModel.getState().getErrorMessage() == null) {
-            settingsFrame.dispose();
-        } else {
+        if (viewModel.getState().getSettingsOpen()) {
+            this.showWindow();
+            viewModel.getState().setSettingsOpen(false);
+        } else if (viewModel.getState().getErrorMessage() != null) {
             JOptionPane.showMessageDialog(
                     settingsFrame,
                     viewModel.getState().getErrorMessage(),
                     "Invalid Input",
                     JOptionPane.ERROR_MESSAGE
             );
+        } else {
+            settingsFrame.setVisible(false);
         }
     }
 
     /**
-     * Assign the controller to the Save Session View.
-     * @param controller Save Session Controller
+     * Assign the controller to the Update Timer Settings View.
+     * @param controller Update Timer Settings Controller
      */
-    public void setController(SaveSessionController controller) {
+    public void setController(UpdateTimerSettingsController controller) {
         this.controller = controller;
     }
 

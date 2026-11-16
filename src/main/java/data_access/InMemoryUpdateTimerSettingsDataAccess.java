@@ -2,16 +2,16 @@ package data_access;
 
 import entities.Session;
 import entities.TimerSessionFactory;
-import use_case.save_session.SaveSessionDataAccessInterface;
+import use_case.update_timer_settings.UpdateTimerSettingsDataAccessInterface;
 
 /**
- * In-memory implementation of the DAO for storing focus and break sessions. This implementation does
+ * In-memory implementation of the DAO for storing length of focus and break sessions. This implementation does
  * NOT persist data between runs of the program.
  */
-public class InMemorySaveSessionDataAccess implements SaveSessionDataAccessInterface {
+public class InMemoryUpdateTimerSettingsDataAccess implements UpdateTimerSettingsDataAccessInterface {
     private Session session;
 
-    public InMemorySaveSessionDataAccess(TimerSessionFactory factory) {
+    public InMemoryUpdateTimerSettingsDataAccess(TimerSessionFactory factory) {
         // Set the default values the moment the app opens. The factory stores default timer values
         this.session = factory.createDefault();
     }
