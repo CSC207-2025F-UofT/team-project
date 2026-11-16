@@ -1,5 +1,8 @@
 package entity;
 
 public class Application {
-    private String name;
+    private Resume resumeVersion;
+    private String status;
+    private JobPosting job;
+    private int priority;
 }
