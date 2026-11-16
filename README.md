@@ -286,7 +286,7 @@ term’s stored weather.
 
 **Success outcome:** The completed shift increases Money according to correct orders, decreases Energy, and advances time.
 
-### Use Case 4.1 — Talk with an NPC
+### Use Case 4 — Talk with an NPC
 **Primary actor:** Player
 
 **Preconditions:**
@@ -321,41 +321,6 @@ conversations with other NPCs can refer to characters the player has met.
   ignored; no conversation is recorded and game state does not change.
 - **6a. Friendship reaches the NPC's event threshold:** The system unlocks
   that NPC's event once and informs the player.
-
-### Use Case 4.2 — Check Campus Email
-
-**Primary actor:** Player
-
-**Preconditions:**
-- A game is in progress.
-- The player has an in-game campus mailbox.
-
-**Trigger:** The player opens the mailbox.
-
-**Success outcome:** The player can read delivered emails. Reading a course
-reminder shows the relevant assignment and due date. If the player replies
-to a job offer, the result changes their in-game Money and the offer is
-marked resolved.
-
-**Main success scenario:**
-1. The player opens the mailbox.
-2. The system lists delivered emails and identifies unread messages.
-3. The player opens a course reminder.
-4. The system shows the course, assignment, and due date.
-5. The system marks the reminder as read.
-
-**Extensions:**
-- **2a. The mailbox is empty:** The system shows that there is no mail.
-- **3a. The player opens a job-offer email:**
-    1. The system shows the offer.
-    2. The player chooses to reply.
-    3. The system determines whether the player gains or loses Money.
-    4. The system applies the result, shows what happened, and marks the
-       offer resolved so it cannot be answered again.
-- **3b. The player ignores a job offer:** Money does not change and the
-  offer remains unresolved.
-- **3c. The player opens an already resolved offer:** The system shows the
-  previous result but does not allow another reply.
 
 ---
 ## Minimal Viable Product (MVP)
