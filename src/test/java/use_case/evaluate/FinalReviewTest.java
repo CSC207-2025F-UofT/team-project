@@ -9,7 +9,7 @@ import static org.junit.jupiter.api.Assertions.assertTimeout;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class FinalReviewTest {
-    private static final String UNCALCULABLE = "Uncalculable";
+    private static final String UNCALCULABLE = "Can't calculate";
 
     // right answer or uncalc, never wrong
     private static void correctOrUncalculable(String correct, String input) {

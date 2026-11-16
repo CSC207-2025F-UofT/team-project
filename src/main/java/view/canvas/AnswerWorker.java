@@ -54,7 +54,7 @@ final class AnswerWorker {
             try {
                 controller.execute(latex);
             } catch (Throwable e) {
-                finish(CalculationOutcome.failed("Uncalculable"));
+                finish(CalculationOutcome.failed("Can't calculate", "Something went wrong"));
             }
         });
     }
@@ -65,7 +65,7 @@ final class AnswerWorker {
         }
         MathLabState state = (MathLabState) event.getNewValue();
         finish(new CalculationOutcome(state.getResultText(), state.getAnswerKind(), state.getAnswerText(),
-                state.getAnswerRuns(), state.getErrorText(), state.isDefinition()));
+                state.getAnswerRuns(), state.getErrorTitle(), state.getErrorText(), state.isDefinition()));
     }
 
     private void finish(CalculationOutcome outcome) {

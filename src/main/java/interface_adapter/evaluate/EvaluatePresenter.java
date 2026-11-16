@@ -57,45 +57,48 @@ public class EvaluatePresenter implements EvaluateOutputBoundary {
 
     @Override
     public void prepareFunctionDefinedView(String definition) {
-        publish(AnswerFormatter.defined(definition), null, "", true);
+        publish(AnswerFormatter.defined(definition), null, "", "", true);
     }
 
     @Override
     public void prepareExpressionView(ExprOutputData expression) {
         List<TextRun> runs = ExprWriter.runs(expression);
         if (TextRun.plain(runs).length() > MAX_ANSWER_LENGTH) {
-            fail(UncalculableText.answerTooLong());
+            fail(UncalculableText.TITLE, UncalculableText.answerTooLong());
             return;
         }
-        publish("= " + ExprWriter.latex(expression), AnswerFormatter.canvasRuns(kind, runs), "", false);
+        publish("= " + ExprWriter.latex(expression), AnswerFormatter.canvasRuns(kind, runs), "", "", false);
     }
 
     @Override
     public void prepareUncalculableView(UncalculableOutputData why) {
-        fail(UncalculableText.of(why.getReason(), why.getDetail()));
+        fail(UncalculableText.TITLE, UncalculableText.of(why.getReason(), why.getDetail()));
     }
 
     @Override
     public void prepareInvalidView(InvalidOutputData why) {
-        fail(InvalidText.of(why.getProblem(), why.getDetails()));
+        fail(InvalidText.TITLE, InvalidText.of(why.getProblem(), why.getDetails()));
     }
 
-    private void fail(String errorText) {
-        publish("", null, errorText, false);
+    // title on top, reason under it
+    private void fail(String title, String reason) {
+        publish("", null, title, reason, false);
     }
 
     private void showResult(String text) {
         // 5×10^20 gets its 20 raised
-        publish(text, PowerOfTen.runs(AnswerFormatter.canvasText(kind, text)), "", false);
+        publish(text, PowerOfTen.runs(AnswerFormatter.canvasText(kind, text)), "", "", false);
     }
 
     // canvasRuns null = plain text answer
-    private void publish(String resultText, List<TextRun> canvasRuns, String errorText, boolean definition) {
+    private void publish(String resultText, List<TextRun> canvasRuns, String errorTitle, String errorText,
+                         boolean definition) {
         MathLabState state = viewModel.getState();
         state.setResultText(resultText);
         state.setAnswerKind(kind);
         state.setAnswerText(AnswerFormatter.canvasText(kind, resultText));
         state.setAnswerRuns(canvasRuns);
+        state.setErrorTitle(errorTitle);
         state.setErrorText(errorText);
         state.setDefinition(definition);
         viewModel.firePropertyChanged(MathLabViewModel.RESULT);

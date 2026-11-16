@@ -7,7 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class UncalculableReasonTest {
     private static void reason(String reason, String... inputs) {
         for (String input : inputs) {
-            assertEquals("Uncalculable — " + reason, Calc.once(input), input);
+            assertEquals("Can't calculate — " + reason, Calc.once(input), input);
         }
     }
 
@@ -36,7 +36,7 @@ class UncalculableReasonTest {
         reason("Function not defined", "z'(1)", "f'(x)=\\cos(e^{x})");
         Calc calc = new Calc();
         calc.show("f(x)=x^2");
-        assertEquals("Uncalculable — Max 4th derivative", calc.show("f^{(5)}(3)"));
+        assertEquals("Can't calculate — Max 4th derivative", calc.show("f^{(5)}(3)"));
         reason("Max 4th derivative", "\\frac{d^5}{dx^5}x=1");
         reason("sin⁻¹ is ambiguous", "\\sin^{-1} 1");
     }
@@ -100,9 +100,9 @@ class UncalculableReasonTest {
         reason("Can't decide", "\\forall x\\in\\mathbb{Q}, x^2\\neq2");
         Calc calc = new Calc();
         calc.show("s(x)=\\sin x");
-        assertEquals("Uncalculable — Derivative unstable", calc.show("s'(10^{12})"));
+        assertEquals("Can't calculate — Derivative unstable", calc.show("s'(10^{12})"));
         calc.show("T(x,y)=x+y");
-        assertEquals("Uncalculable — Not a function input", calc.show("\\frac{\\partial T}{\\partial z}(1,2)"));
+        assertEquals("Can't calculate — Not a function input", calc.show("\\frac{\\partial T}{\\partial z}(1,2)"));
     }
 
     @Test

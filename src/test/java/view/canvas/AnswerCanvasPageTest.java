@@ -310,7 +310,7 @@ class AnswerCanvasPageTest {
         waitPopup("\\int");
         clickCalculate();
 
-        waitFor(() -> errorShown("Uncalculable — Integrals not supported"), "the reason");
+        waitFor(() -> errorShown("Integrals not supported"), "the reason");
         assertTrue(answers().isEmpty(), "no red ?");
     }
 
@@ -321,7 +321,7 @@ class AnswerCanvasPageTest {
         write();
         waitPopup("x+1=3\\\\x=2");
         clickCalculate();
-        waitFor(() -> errorShown("Uncalculable — Not a calculation"), "the warning");
+        waitFor(() -> errorShown("Not a calculation"), "the warning");
         assertTrue(answers().isEmpty());
     }
 

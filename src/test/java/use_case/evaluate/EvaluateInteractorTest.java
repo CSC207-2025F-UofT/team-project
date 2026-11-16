@@ -246,11 +246,11 @@ class EvaluateInteractorTest {
         assertEquals("false", Calc.once("5+7=13"));
         assertEquals("= 2", Calc.once("1+1="));
         assertEquals("= undefined", Calc.once("1/0"));
-        assertEquals("Uncalculable", Calc.withoutReason(Calc.once("10^{400}")));
-        assertEquals("Uncalculable", Calc.withoutReason(Calc.once("200!")));
+        assertEquals("Can't calculate", Calc.withoutReason(Calc.once("10^{400}")));
+        assertEquals("Can't calculate", Calc.withoutReason(Calc.once("200!")));
         assertEquals("no solution", Calc.once("x^2=-1"));
         assertEquals("true for all x", Calc.once("2(x+1)=2x+2"));
-        assertEquals("Uncalculable", Calc.withoutReason(Calc.once("\\text{hi}")));
+        assertEquals("Can't calculate", Calc.withoutReason(Calc.once("\\text{hi}")));
     }
 
     @Test
@@ -261,7 +261,7 @@ class EvaluateInteractorTest {
         assertEquals("Invalid formula — Nothing after \"=\"", Calc.once("5=="));
         assertEquals("Invalid formula — Only one \"=\" allowed", Calc.once("1=x=3"));
         assertEquals("false", Calc.once("1=2=3"));
-        assertEquals("Invalid formula — x has no value", Calc.once("x+1"));
+        assertEquals("Invalid formula — x has no value — write x = … first", Calc.once("x+1"));
         assertEquals("Invalid formula — Too many unknowns: x, y", Calc.once("x+y=3"));
         assertEquals("Invalid formula — Nothing after \"f(x)=\"", Calc.once("f(x)=="));
         assertEquals("Invalid formula — Nothing after \"f(x)=\"", Calc.once("f(x)="));

@@ -5,7 +5,7 @@ import java.util.List;
 
 // popup words for a badly written formula, short + plain, no latex
 final class InvalidText {
-    private static final String HEAD = "Invalid formula — ";
+    static final String TITLE = "Invalid formula";
 
     private InvalidText() {
     }
@@ -15,7 +15,7 @@ final class InvalidText {
         for (String r : raw) {
             d.add(ReadableLatex.of(r));
         }
-        return HEAD + words(problem, d);
+        return words(problem, d);
     }
 
     private static String words(String problem, List<String> d) {
@@ -39,7 +39,7 @@ final class InvalidText {
             case "SET_DIMENSION":
                 return "Dimension must be a whole number ≥ 1";
             case "UNKNOWN_VARIABLE":
-                return d.get(0) + " has no value";
+                return d.get(0) + " has no value — write " + d.get(0) + " = … first";
             case "CALLS_ITSELF":
                 return (d.isEmpty() ? "Function" : d.get(0)) + " calls itself forever";
             case "WRONG_INPUTS":

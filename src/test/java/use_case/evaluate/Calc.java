@@ -14,14 +14,14 @@ final class Calc {
         interactor.execute(new EvaluateInputData(input));
         MathLabState state = viewModel.getState();
         if (!state.getErrorText().isEmpty()) {
-            return state.getErrorText();
+            return state.getErrorTitle() + " — " + state.getErrorText();  // one line, easy to assert
         }
         return state.getResultText();
     }
 
-    // "Uncalculable — why" -> "Uncalculable"
+    // "Can't calculate — why" -> "Can't calculate"
     static String withoutReason(String answer) {
-        return answer.startsWith("Uncalculable — ") ? "Uncalculable" : answer;
+        return answer.startsWith("Can't calculate — ") ? "Can't calculate" : answer;
     }
 
     static String once(String input) {

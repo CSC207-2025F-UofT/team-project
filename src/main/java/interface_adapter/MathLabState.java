@@ -7,7 +7,9 @@ public class MathLabState {
 
     private String resultText = "";
 
-    private String errorText = "";
+    private String errorTitle = "";  // notice heading, e.g. Can't calculate
+
+    private String errorText = "";  // just the reason under it
 
     private AnswerKind answerKind = AnswerKind.RIGHT;
 
@@ -64,6 +66,14 @@ public class MathLabState {
 
     public void setDefinition(boolean definition) {
         this.definition = definition;
+    }
+
+    public String getErrorTitle() {
+        return errorTitle;
+    }
+
+    public void setErrorTitle(String errorTitle) {
+        this.errorTitle = errorTitle;
     }
 
     public String getErrorText() {

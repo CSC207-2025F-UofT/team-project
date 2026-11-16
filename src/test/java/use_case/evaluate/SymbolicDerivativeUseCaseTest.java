@@ -25,7 +25,7 @@ class SymbolicDerivativeUseCaseTest {
     private String show(String input) {
         interactor.execute(new EvaluateInputData(input));
         MathLabState state = viewModel.getState();
-        return state.getErrorText().isEmpty() ? state.getResultText() : state.getErrorText();
+        return state.getErrorText().isEmpty() ? state.getResultText() : state.getErrorTitle() + " — " + state.getErrorText();
     }
 
     @Test
@@ -60,8 +60,8 @@ class SymbolicDerivativeUseCaseTest {
     @Test
     void numericUsesStayTheSame() {
         assertEquals("x = 3", show("\\frac{d}{dx}x^2=6"));
-        assertEquals("Invalid formula — x has no value", show("x+1"));
-        assertTrue(show("\\frac{d}{dx}(\\tan^{-1}x)").startsWith("Uncalculable — tan⁻¹ is ambiguous"));
+        assertEquals("Invalid formula — x has no value — write x = … first", show("x+1"));
+        assertTrue(show("\\frac{d}{dx}(\\tan^{-1}x)").startsWith("Can't calculate — tan⁻¹ is ambiguous"));
     }
 
     @Test
@@ -117,15 +117,15 @@ class SymbolicDerivativeUseCaseTest {
 
     @Test
     void failuresGiveAReason() {
-        assertEquals("Uncalculable — Can't differentiate |x|", show("\\frac{d}{dx}|x|"));
-        assertEquals("Uncalculable — Answer too long", show("\\frac{d}{dx}(\\frac{\\sin x}{\\ln x+x^x})"));
+        assertEquals("Can't calculate — Can't differentiate |x|", show("\\frac{d}{dx}|x|"));
+        assertEquals("Can't calculate — Answer too long", show("\\frac{d}{dx}(\\frac{\\sin x}{\\ln x+x^x})"));
     }
 
     @Test
     void constantWithNoValueIsUndefinedNotWrittenOut() {
-        assertEquals("Uncalculable — Has an undefined part", show("\\frac{d}{dx}x\\ln 0"));
-        assertEquals("Uncalculable — Has an undefined part", show("\\frac{d}{dx}x\\cot 0"));
-        assertEquals("Uncalculable — Has an undefined part", show("\\frac{d}{dx}x\\sqrt{-1}"));
+        assertEquals("Can't calculate — Has an undefined part", show("\\frac{d}{dx}x\\ln 0"));
+        assertEquals("Can't calculate — Has an undefined part", show("\\frac{d}{dx}x\\cot 0"));
+        assertEquals("Can't calculate — Has an undefined part", show("\\frac{d}{dx}x\\sqrt{-1}"));
         assertEquals("= \\sin 2", show("\\frac{d}{dx}x\\sin 2"));
         assertEquals("= \\ln 2", show("\\frac{d}{dx}x\\ln 2"));
     }

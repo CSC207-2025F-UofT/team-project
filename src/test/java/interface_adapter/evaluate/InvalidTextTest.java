@@ -22,11 +22,11 @@ class InvalidTextTest {
 
     @Test
     void noLatexLeaksOut() {
-        assertEquals("Invalid formula — Unexpected \"·\"", InvalidText.of("UNEXPECTED", List.of("\\cdot")));
-        assertEquals("Invalid formula — \"foo\" not supported", InvalidText.of("NOT_SUPPORTED", List.of("\\foo")));
-        assertEquals("Invalid formula — Missing \"}\"", InvalidText.of("EXPECTED", List.of("}")));
-        assertEquals("Invalid formula — Stray \".\"", InvalidText.of("BAD_NUMBER", List.of(".")));
-        assertEquals("Invalid formula — f needs 1 input", InvalidText.of("WRONG_INPUTS", List.of("f", "1")));
+        assertEquals("Unexpected \"·\"", InvalidText.of("UNEXPECTED", List.of("\\cdot")));
+        assertEquals("\"foo\" not supported", InvalidText.of("NOT_SUPPORTED", List.of("\\foo")));
+        assertEquals("Missing \"}\"", InvalidText.of("EXPECTED", List.of("}")));
+        assertEquals("Stray \".\"", InvalidText.of("BAD_NUMBER", List.of(".")));
+        assertEquals("f needs 1 input", InvalidText.of("WRONG_INPUTS", List.of("f", "1")));
     }
 
     @Test

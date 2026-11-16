@@ -177,7 +177,8 @@ class EvaluatePresenterTest {
         presenter.prepareValuesView(List.of(OutputDataMapper.of(new NumberValue(2))));
         presenter.prepareInvalidView(new InvalidOutputData("UNEXPECTED", List.of("\\cdot")));
         assertEquals("", viewModel.getState().getResultText());
-        assertEquals("Invalid formula — Unexpected \"·\"", viewModel.getState().getErrorText());
+        assertEquals("Invalid formula", viewModel.getState().getErrorTitle());
+        assertEquals("Unexpected \"·\"", viewModel.getState().getErrorText());
     }
 
     @Test
