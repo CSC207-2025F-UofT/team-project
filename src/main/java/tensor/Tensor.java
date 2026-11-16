@@ -2,6 +2,8 @@
 package tensor;
 import tensor.storage.Storage;
 import tensor.storage.StorageFactory;
+import java.util.*;
+
 
 public class Tensor {
 
@@ -9,12 +11,15 @@ public class Tensor {
     private int[] shape;
     private int[] strides;
     private boolean requiresGrad;
+    private Tensor grad;
+    private Set<Tensor> parents;
+    private Runnable backwardFunction;
 
     Tensor(int[] shape, float[] data, Device device, boolean requiresGrad) {
         int flatDim = flatDimension(shape);
         if (data.length != flatDim) {
             throw new IllegalArgumentException(
-                "Shape and Data mismatch : (shape flat dim) " + flatDim + 
+                "Shape and Data mismatch : (shape flat dim) " + flatDim +
                 "!= " + data.length + " data length"
             );
         }
@@ -24,6 +29,9 @@ public class Tensor {
         this.shape = shape.clone();
         this.strides = continguousStrides(shape);
         this.requiresGrad = requiresGrad;
+        this.grad = null;
+        this.parents = new HashSet<>();
+        this.backwardFunction = () -> {};
 
     }
 
@@ -32,6 +40,9 @@ public class Tensor {
         this.strides = strides;
         this.storage = storage;
         this.requiresGrad = requiresGrad;
+        this.grad = null;
+        this.parents = new HashSet<>();
+        this.backwardFunction = () -> {};
 
     }
 
@@ -74,9 +85,9 @@ public class Tensor {
         return new Tensor(shape.clone(), continguousStrides(shape), storage, requiresGrad);
     }
 
-    private static int flatDimension(int[] shape) {
+    public static int flatDimension(int[] shape) {
         int dim = 1;
-        for (int i : shape){ 
+        for (int i : shape){
             if (i <= 0) { throw new IllegalArgumentException("Shape cannot contain non-positive values.");}
             dim *= i;
         } return dim;
@@ -95,5 +106,122 @@ public class Tensor {
     public Storage getStorage() {return this.storage;}
     public Device getDevice() {return this.storage.device();}
     public boolean requiresGrad() {return this.requiresGrad;}
+    public Tensor getGrad() {
+        return this.grad;
+    }
+    public void setRequiresGrad(boolean requiresGrad) {
+        this.requiresGrad = requiresGrad;
+    }
 
+    public void setBackward(Runnable backwardFunction, Tensor... parents) {
+        if (!this.requiresGrad) {
+            return;
+        }
+
+        this.parents = new HashSet<>(Arrays.asList(parents));
+        this.backwardFunction = backwardFunction;
+    }
+
+    public void addGrad(Tensor gradient) {
+        if (!this.requiresGrad) {
+            return;
+        }
+
+
+
+        if (this.grad == null) {
+            this.grad = Tensor.zeroes(this.shape, this.getDevice(), false);
+            this.resetGrad();
+        }
+
+        int[] idx = new int[this.shape.length];
+        int dim = flatDimension(this.shape);
+
+        for (int i = 0; i < dim; i++) {
+            int remainder = i;
+
+            for (int j = this.shape.length - 1; j >= 0; j--) {
+                idx[j] = remainder % this.shape[j];
+                remainder /= this.shape[j];
+            }
+
+            this.grad.set(idx, this.grad.get(idx) + gradient.get(idx));
+        }
+    }
+
+    private void resetGrad() {
+        if (this.grad == null) {
+            return;
+        }
+
+        int[] idx = new int[this.shape.length];
+        int dim = flatDimension(this.shape);
+
+        for (int i = 0; i < dim; i++) {
+            int remainder = i;
+
+            for (int j = this.shape.length - 1; j >= 0; j--) {
+                idx[j] = remainder % this.shape[j];
+                remainder /= this.shape[j];
+            }
+
+            this.grad.set(idx, 0.0f);
+        }
+    }
+
+    private static void buildTopo(
+            Tensor tensor,
+            Set<Tensor> visited,
+            List<Tensor> topo) {
+
+        if (!visited.contains(tensor)) {
+            visited.add(tensor);
+
+            for (Tensor parent: tensor.parents) {
+                buildTopo(parent, visited, topo);
+            }
+
+            topo.add(tensor);
+        }
+    }
+
+    public void backward() {
+        if (flatDimension(this.shape) != 1) {
+            throw new IllegalStateException("Require an initial gradient.");
+        }
+
+        Tensor gradient = Tensor.zeroes(this.shape, this.getDevice(), false);
+        gradient.set(new int[this.shape.length], 1.0f);
+
+        backward(gradient);
+    }
+
+    public void backward(Tensor gradient) {
+        List<Tensor> topo = new ArrayList<>();
+        Set<Tensor> visited = new HashSet<>();
+        buildTopo(this, visited, topo);
+
+        for (Tensor tensor: topo) {
+            if (!tensor.parents.isEmpty()) {
+                tensor.resetGrad();
+            }
+        }
+
+        this.addGrad(gradient);
+
+        for (int i = topo.size() - 1; i >= 0; i--) {
+            Tensor tensor = topo.get(i);
+            tensor.backwardFunction.run();
+        }
+    }
+
+    public void zeroGrad() {
+        List<Tensor> topo = new ArrayList<>();
+        Set<Tensor> visited = new HashSet<>();
+        buildTopo(this, visited, topo);
+
+        for (Tensor tensor: topo) {
+            tensor.resetGrad();
+        }
+    }
 }
