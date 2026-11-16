@@ -3,5 +3,5 @@ package usecase.estimateroi;
 /**
  * Interactor.
  */
-public class EstimateROIInteractor {
+public class EstimateRoiInteractor {
 }
