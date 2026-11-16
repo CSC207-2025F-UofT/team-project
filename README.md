@@ -312,6 +312,7 @@ As a student, I want to be able to have a suggested prioritization of today's ta
 #### Extensions
 - The entered information is invalid.
   - The number entered for completion progress should be between 0 and 100 percent, inclusive, and the number of hours should be positive. If not, the system identifies the invalid fields and leaves the saved task unchanged.
+  - If the task deadline is invalid or missing, the system displays an error message and prevents the task from being saved.
   - The student returns to the editing page to correct the information or cancels editing.
 - The student cancels the editing.
   - The system pops up a window to let the user confirm the cancellation.
