@@ -3,7 +3,6 @@ package view.board;
 import view.DrawingCanvas;
 import interface_adapter.history.HistoryItem;
 import javax.swing.JPopupMenu;
-import javax.swing.JMenuItem;
 import java.util.function.Function;
 
 import javax.swing.JComponent;
@@ -52,6 +51,8 @@ public class BoardWindow extends JPanel implements HistoryPanel.DragHost {
     private int lastCanvasRight = -1;
     private int lastBoardWidth = -1;
     private final Function<String, Boolean> deleteHistory;
+    private final Runnable saveCanvas;
+    private final Runnable saveAsCanvas;
 
     public BoardWindow(JComponent page, DrawingCanvas canvas,
                        java.util.function.Function<HistoryPanel.DragHost, HistoryPanel> history, JComponent pdf) {
@@ -70,7 +71,17 @@ public class BoardWindow extends JPanel implements HistoryPanel.DragHost {
                        java.util.function.Function<HistoryPanel.DragHost, HistoryPanel> history,
                        JComponent pdf, Function<String, Boolean> deleteHistory,
                        Runnable saveCanvas, Runnable openCanvas) {
+        this(page, canvas, history, pdf, deleteHistory, saveCanvas, saveCanvas, openCanvas);
+    }
+
+    /** Distinct Save / Save As callbacks supplied by the composition root. */
+    public BoardWindow(JComponent page, DrawingCanvas canvas,
+                       java.util.function.Function<HistoryPanel.DragHost, HistoryPanel> history,
+                       JComponent pdf, Function<String, Boolean> deleteHistory,
+                       Runnable saveCanvas, Runnable saveAsCanvas, Runnable openCanvas) {
         super(null);
+        this.saveCanvas = java.util.Objects.requireNonNull(saveCanvas);
+        this.saveAsCanvas = java.util.Objects.requireNonNull(saveAsCanvas);
         this.page = page;
         this.canvas = canvas;
         this.history = history.apply(this);
@@ -98,7 +109,7 @@ public class BoardWindow extends JPanel implements HistoryPanel.DragHost {
             setHistoryOpen(!historyOpen);
             return historyOpen;
         });
-        historyBar.action("Save", Icons::save, saveCanvas, () -> true);
+        historyBar.action("Save", Icons::save, this::showSaveChoices, () -> true);
         historyBar.action("Open", Icons::openFolder, openCanvas, () -> true);
         historyBar.finish();
         historyClose = bar(15f);
@@ -128,6 +139,17 @@ public class BoardWindow extends JPanel implements HistoryPanel.DragHost {
         add(pdf);
         add(page);
         relayout();
+    }
+
+    /** Menu choices also allow users to create a separate named version without a shortcut. */
+    JPopupMenu createSaveMenu() {
+        return new GlassSaveMenu(saveCanvas, saveAsCanvas);
+    }
+
+    private void showSaveChoices() {
+        // GlassBar includes a generous shadow margin. Anchor below the visible capsule.
+        createSaveMenu().show(historyBar, GlassBar.MARGIN + 72,
+                GlassBar.MARGIN + GlassBar.CAP_H);
     }
 
     private GlassBar bar(float size) {
@@ -179,17 +201,6 @@ public class BoardWindow extends JPanel implements HistoryPanel.DragHost {
     public boolean isPdfOverlay() { return pdfOverlay; }
     /** Overlay keeps the canvas at full width behind the PDF pane; split reserves its own width. */
     public void setPdfOverlay(boolean overlay) { pdfOverlay = overlay; relayout(); }
-
-    private void showPdfChoices() {
-        JPopupMenu choices = new JPopupMenu();
-        JMenuItem split = new JMenuItem("PDF · Split view (side by side)");
-        split.addActionListener(e -> { pdfOverlay = false; setPdfOpen(true); });
-        JMenuItem overlay = new JMenuItem("PDF · Overlay on canvas");
-        overlay.addActionListener(e -> { pdfOverlay = true; setPdfOpen(true); });
-        // Closing is the responsibility of the adjacent X capsule.
-        choices.add(split); choices.add(overlay);
-        choices.show(pdfBar, 0, pdfBar.getHeight());
-    }
 
     double getHistoryRatio() {
         return historyRatio;

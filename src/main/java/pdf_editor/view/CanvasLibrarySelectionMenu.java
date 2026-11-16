@@ -4,6 +4,7 @@ import entity.Stroke;
 import pdf_editor.adapter.SelectedInkRegistry;
 import pdf_editor.use_case.SelectionToLibrary;
 import view.DrawingCanvas;
+import view.glass.GlassDialogs;
 import javax.swing.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -39,7 +40,7 @@ public final class CanvasLibrarySelectionMenu {
                                             : action.addCalculation(latex, selectedResult)).id(), strokes);
                                 }
                             } catch (Exception failure) {
-                                JOptionPane.showMessageDialog(canvas, "Recognition failed: " +
+                                GlassDialogs.error(canvas, "Recognition failed: " +
                                         (failure.getCause() == null ? failure.getMessage() : failure.getCause().getMessage()));
                             }
                         }

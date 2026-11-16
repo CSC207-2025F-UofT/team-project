@@ -1,5 +1,7 @@
 package view.board.doc;
 
+import view.glass.GlassDialogs;
+
 import history.adapter.HistoryMaterialMapper;
 import interface_adapter.history.HistoryItem;
 import pdf_editor.MathLibrary;
@@ -450,7 +452,7 @@ public final class DocEditorPanel extends JPanel implements PdfWorkspacePort {
     private void addPage() {paper.finishInlineEdit();controller.addPage();updateStatus();}
     private void deletePage() {
         paper.finishInlineEdit();
-        if (!controller.deletePage()) JOptionPane.showMessageDialog(this, "The document must contain one page.");
+        if (!controller.deletePage()) GlassDialogs.warning(this, "The document must contain one page.");
         updateStatus();
     }
     private void undo() {paper.finishInlineEdit();controller.undo();updateStatus();}
@@ -472,27 +474,27 @@ public final class DocEditorPanel extends JPanel implements PdfWorkspacePort {
     }
     private void addNote() {paper.finishInlineEdit();controller.addNote();updateStatus();editNote();}
     private void insertFormula() {
-        String latex = JOptionPane.showInputDialog(this, "LaTeX formula", "Insert formula", JOptionPane.PLAIN_MESSAGE);
+        String latex = GlassDialogs.input(this, "Insert formula", "LaTeX formula", "", "Insert");
         if (latex == null || latex.isBlank()) return;
         PdfMaterial material = new PdfMaterial("Typed formula", latex, "", null, 0, 0) {};
         addMaterial(material, 90, 120);
     }
     private void insertCanvasInk() {
         BufferedImage image = canvasCapture.get();
-        if (image == null) {JOptionPane.showMessageDialog(this, "Select some handwriting on the Canvas first.");return;}
+        if (image == null) {GlassDialogs.warning(this, "Select some handwriting on the Canvas first.");return;}
         addMaterial(MathLibrary.region("Handwriting", image), 85, 110);
     }
     private void editFormula() {
         PdfDocument.Placement selected = controller.selected();
         if (selected == null || selected.isNote() || selected.material().isGraph()) {
-            JOptionPane.showMessageDialog(this, "Select a formula on the page first.");return;
+            GlassDialogs.warning(this, "Select a formula on the page first.");return;
         }
         FormulaEditDialog.Result change = FormulaEditDialog.show(SwingUtilities.getWindowAncestor(this), selected.material());
         if (change != null) {controller.editSelectedFormula(change.formula(), change.result()); updateStatus();}
     }
     private void editNote() {
         if (!paper.editNoteInline()) {
-            JOptionPane.showMessageDialog(this, "Select a text box first, or double-click an empty page to type.");
+            GlassDialogs.warning(this, "Select a text box first, or double-click an empty page to type.");
         }
     }
     private void setNoteStyle(String style) {
@@ -508,7 +510,7 @@ public final class DocEditorPanel extends JPanel implements PdfWorkspacePort {
                 case UNDERLINE -> javax.swing.text.StyleConstants.Underline;
             });
         } else if (!controller.toggleSelectedNoteStyle(requested)) {
-            JOptionPane.showMessageDialog(this, "Select or edit a text box first.");
+            GlassDialogs.warning(this, "Select or edit a text box first.");
         }
         updateStatus();
     }
@@ -523,7 +525,7 @@ public final class DocEditorPanel extends JPanel implements PdfWorkspacePort {
         updateStatus();
     }
     private void arrangeMenu() {
-        if (controller.selected() == null) {JOptionPane.showMessageDialog(this, "Select a page object first.");return;}
+        if (controller.selected() == null) {GlassDialogs.warning(this, "Select a page object first.");return;}
         JPopupMenu menu = new JPopupMenu();
         item(menu, "Bring forward", () -> arrange(1));
         item(menu, "Send backward", () -> arrange(-1));
@@ -553,7 +555,7 @@ public final class DocEditorPanel extends JPanel implements PdfWorkspacePort {
         return destinations;
     }
     private void moveToPageMenu() {
-        if (controller.selected() == null) {JOptionPane.showMessageDialog(this, "Select a page object first.");return;}
+        if (controller.selected() == null) {GlassDialogs.warning(this, "Select a page object first.");return;}
         JPopupMenu menu = new JPopupMenu();
         JMenu choices = pageDestinations();
         while (choices.getItemCount() > 0) {
@@ -610,12 +612,12 @@ public final class DocEditorPanel extends JPanel implements PdfWorkspacePort {
         Path target = chooser.getSelectedFile().toPath();
         if (!target.toString().toLowerCase(java.util.Locale.ROOT).endsWith(".pdf"))
             target = Path.of(target.toString() + ".pdf");
-        if (java.nio.file.Files.exists(target) && JOptionPane.showConfirmDialog(this,
-                "Replace existing file?", "Confirm export", JOptionPane.YES_NO_OPTION) != JOptionPane.YES_OPTION) return;
+        if (java.nio.file.Files.exists(target) && !GlassDialogs.confirm(this,
+                "Confirm export", "Replace existing file?", "Replace")) return;
         try {controller.export(target);title.setText(target.getFileName().toString());}
         catch (IOException bad) {error("Export failed", bad);}
     }
-    private void error(String message, Exception e) {JOptionPane.showMessageDialog(this, message + ": " + e.getMessage());}
+    private void error(String message, Exception e) {GlassDialogs.error(this, message + ": " + e.getMessage());}
     private final class Tab {
         private final String text;
         private final JPanel ribbon;

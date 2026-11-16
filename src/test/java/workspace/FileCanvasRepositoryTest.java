@@ -54,6 +54,14 @@ class FileCanvasRepositoryTest {
         byte[] original=data.png();original[0]=0;
         assertNotEquals(0,data.png()[0]);
     }
+    @Test void unicodeCanvasNameSurvivesSaveAndOpenWithoutFileNameEncodingChanges() throws IOException {
+        var repo = new FileCanvasRepository(temp);
+        String id = UUID.randomUUID().toString();
+        repo.write(new SavedCanvas(id, "微积分·第3章 — 练习", Instant.now(), fixture()));
+        assertEquals("微积分·第3章 — 练习", repo.find(id).orElseThrow().name());
+        assertEquals(1, repo.list().size());
+        assertTrue(Files.exists(temp.resolve(id + ".mlcanvas")));
+    }
     @Test void invalidDocumentIdCannotEscapeStorageFolder() {
         var repo=new FileCanvasRepository(temp);
         assertThrows(IllegalArgumentException.class,()->repo.find("../../other"));

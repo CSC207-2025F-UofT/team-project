@@ -49,6 +49,7 @@ public abstract class CanvasPage extends JPanel {
     private final GlassDock messageDock = new GlassDock();
     private final Timer messageTimer = new Timer(0, e -> hideMessage());
     private boolean messageIsError;
+    private boolean messageActive;
     private CanvasArea canvasArea;
     private int boardMessageTop = -1;  // one-board look: message sits under the top capsules
 
@@ -90,7 +91,9 @@ public abstract class CanvasPage extends JPanel {
         message.setText(text);
         message.setForeground(error ? ERROR_TEXT : Glass.TEXT_MUTED);
         messageIsError = error;
-        messageDock.setVisible(true);
+        messageActive = true;
+        // Errors are presented only through GlassNotices, not this legacy banner.
+        messageDock.setVisible(!error);
         messageDock.revalidate();
         messageDock.repaint();
         if (hideAfterMillis > 0) {
@@ -101,16 +104,17 @@ public abstract class CanvasPage extends JPanel {
 
     protected final void hideMessage() {
         messageTimer.stop();
+        messageActive = false;
         messageDock.setVisible(false);
     }
 
     /** The message on show, or null if there is none. */
     String currentMessage() {
-        return messageDock.isVisible() ? message.getText() : null;
+        return messageActive ? message.getText() : null;
     }
 
     boolean isMessageError() {
-        return messageDock.isVisible() && messageIsError;
+        return messageActive && messageIsError;
     }
 
     /** Shows the zoom of the infinite canvas; click it to go back to 100% with the ink in the middle. */
