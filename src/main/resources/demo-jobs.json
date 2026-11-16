@@ -1,0 +1,11 @@
+{
+  "jobs": [
+    {"id": 1, "title": "Software Engineering Intern", "location": {"name": "Toronto"},
+     "content": "&lt;p&gt;Build software using Java and Python.&lt;/p&gt;",
+     "absolute_url": "https://example.com/internships/software"},
+    {"id": 2, "title": "Data Science Co-op", "content": "Analyze data using Python and SQL.",
+     "absolute_url": "https://example.com/internships/data"},
+    {"id": 3, "title": "Internal Tools Engineer", "location": {"name": "Toronto"},
+     "content": "Develop software with Java.", "absolute_url": "https://example.com/jobs/internal"}
+  ]
+}

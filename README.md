@@ -78,8 +78,13 @@ Main success scenario:
 
 Extensions: Ask user if they would like to build a resume before sending them through the link
 
-### Use Case 4: 
+### Use Case 4: Search Internship Opportunities
 Owner: Yuheng Liu
+
+MVP: Yes
+
+Implementation: [Finder architecture and verification](docs/design/finder.md).
+Shared integration contract: [Job source and Ling compatibility review](docs/design/shared-job-contract.md).
 
 Primary actor: A user looking for internship opportunities.
 
@@ -196,13 +201,13 @@ Limits: Suggestions indicate keyword relevance, not verified eligibility. Unspec
 |Jerry Zhou| Use Case |
 |Austin Wu|          |
 |Lingnan Meng| Use Case |
-|Yuheng Liu| Use Case |
+|Yuheng Liu| UC4: Search Internship Opportunities |
 ---
 ## Entities
 - User
 - Resume
 - Application
-- Internship
+- JobPosting
 ---
 ## API Usage
 **API Name:**: Greenhouse Job Board API
@@ -226,13 +231,59 @@ keyword matching to their titles and descriptions within the application.
 Matching results will be displayed in the Swing interface with links
 to the original application pages. Searches will cover only the
 configured company job boards.
+The packaged Java client successfully retrieved both configured boards (Cloudflare and Figma)
+on 2026-11-16. Availability and posting counts can change; use `--check-api` to recheck.
 ---
 ## Design Diagrams
 ### UML Class Diagram
 ### Sequence Diagrams
 ---
 ## How to Run
-[Instructions for running the program.]
+UC4 (Finder) is implemented on this branch. Other team features are still in progress.
+
+Prerequisites: **JDK 11** and Maven. In IntelliJ, import `pom.xml` and select an installed
+JDK 11 for both the project SDK and Maven runner. Check `mvn -version` before building.
+
+```bash
+mvn verify
+java -jar target/TeamProject-1.0-SNAPSHOT.jar
+```
+
+On macOS with multiple JDKs, select JDK 11 first:
+
+```bash
+export JAVA_HOME="$(/usr/libexec/java_home -v 11)"
+```
+
+The default boards are Cloudflare and Figma. Enter keywords, press Search (or Enter),
+select a result and open its application page. No login or API key is required for Finder.
+The application does not automatically apply or mark a job as applied.
+
+For an offline demonstration using clearly labelled fictional listings:
+
+```bash
+java -jar target/TeamProject-1.0-SNAPSHOT.jar --demo
+```
+
+Try `python` for two sample matches, `java` for one, or `unmatched` for zero.
+
+To configure company boards, create a properties file containing `boardToken=Company Name`
+entries and supply its path:
+
+```bash
+java -jar target/TeamProject-1.0-SNAPSHOT.jar --boards /path/to/boards.properties
+```
+
+API connectivity can be checked separately from the UI and unit tests:
+
+```bash
+java -jar target/TeamProject-1.0-SNAPSHOT.jar --check-api
+```
+
+Tests use local HTTP fixtures and run without an internet connection once dependencies
+are installed. `mvn validate` runs Checkstyle; `mvn verify` also tests and packages.
+`mvn spotless:apply` applies the course Google formatter (run it with JDK 11).
+See the [Finder design](docs/design/finder.md) for CA boundaries and acceptance coverage.
 ---
 ## Notes
 [Any additional project information.]
