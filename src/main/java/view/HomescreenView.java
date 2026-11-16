@@ -78,7 +78,7 @@ public class HomescreenView extends JPanel implements ActionListener, GetAllDeck
         centerPanel.add(scrollPane, "LIST");
 
         // open button
-        openButton = createButton("Open");
+        openButton = new FormattedButton("Open");
         openButton.setEnabled(false); // Disable button until an item is selected
 
         // Enable openButton when a Deck is selected
@@ -160,20 +160,6 @@ public class HomescreenView extends JPanel implements ActionListener, GetAllDeck
             ));
             return this;
         }
-    }
-
-    // Creates and formats a button
-    private static JButton createButton(String text) {
-        JButton button = new JButton(text);
-        button.setFont(new Font(AppTheme.FONT_NAME, Font.BOLD, AppTheme.FONT_SIZE_BUTTON));
-        button.setForeground(Color.WHITE);
-        button.setBackground(AppTheme.PRIMARY_COLOR);
-        button.setFocusPainted(false);
-        button.setBorderPainted(false);
-        button.setOpaque(true);
-        button.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        button.setBorder(new EmptyBorder(10, 20, 10, 20));
-        return button;
     }
 
     /**

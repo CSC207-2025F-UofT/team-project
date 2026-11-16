@@ -5,6 +5,7 @@ import interface_adapter.get_deck.GetDeckState;
 import interface_adapter.get_deck.GetDeckViewModel;
 import interface_adapter.get_deck.GetDeckViewModelListener;
 
+import javax.smartcardio.Card;
 import javax.swing.*;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
@@ -54,8 +55,6 @@ public class DeckView extends JPanel implements ActionListener, GetDeckViewModel
         deckName.setFont(new Font(AppTheme.FONT_NAME, Font.BOLD, AppTheme.FONT_SIZE_TITLE));
         deckName.setForeground(AppTheme.TEXT_PRIMARY);
 
-        home = new HomeButton();
-
         // list of flashcards
         JList<SwingDeck> flashcards = new JList<>(deckModel) {
             // used so JList will wrap text and resize with the window
@@ -82,6 +81,11 @@ public class DeckView extends JPanel implements ActionListener, GetDeckViewModel
         scrollPane.getVerticalScrollBar().setUnitIncrement(12); // makes scrolling smoother
         scrollPane.setBorder(null);
 
+        //  buttons
+        home = new FormattedButton();
+
+        JButton study = new FormattedButton("Study");
+
         home.addActionListener(
                 new ActionListener() {
                     public void actionPerformed(ActionEvent evt) {
@@ -90,25 +94,38 @@ public class DeckView extends JPanel implements ActionListener, GetDeckViewModel
                 }
         );
 
-        this.setLayout(new BorderLayout(14, 14));
-        this.setBorder(new EmptyBorder(20, 20, 20, 20));
-        this.setBackground(AppTheme.BG_COLOR);
+        study.addActionListener(
+                new ActionListener() {
+                    public void actionPerformed(ActionEvent evt) {
+                        // not yet implemented
+                    }
+                }
+        );
 
-        JPanel topPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 15, 15));
-        topPanel.setOpaque(false);
+        JPanel deckView = new JPanel();
+        deckView.setLayout(new BorderLayout(14, 14));
+        deckView.setBorder(new EmptyBorder(20, 20, 20, 20));
+        deckView.setBackground(AppTheme.BG_COLOR);
 
         JPanel toolBar = new JPanel(new BorderLayout());
         toolBar.setOpaque(false);
-        toolBar.add(home, BorderLayout.NORTH);
+        JPanel buttons = new JPanel();
+        buttons.setLayout(new BoxLayout(buttons, BoxLayout.Y_AXIS));
+        buttons.add(home);
+        buttons.add(Box.createVerticalStrut(10));
+        buttons.add(study);
+        toolBar.add(buttons, BorderLayout.NORTH);
 
         JPanel centerPanel = new JPanel(new BorderLayout(0, 14));
         centerPanel.setOpaque(false);
         centerPanel.add(deckName, BorderLayout.NORTH);
         centerPanel.add(scrollPane, BorderLayout.CENTER);
 
-        this.add(topPanel, BorderLayout.NORTH);
-        this.add(centerPanel, BorderLayout.CENTER);
-        this.add(toolBar, BorderLayout.WEST);
+        deckView.add(centerPanel, BorderLayout.CENTER);
+        deckView.add(toolBar, BorderLayout.WEST);
+
+        this.setLayout(new CardLayout());
+        this.add(deckView, "flashcardList");
 
     }
 
