@@ -1,15 +1,46 @@
 @startuml
 'https://plantuml.com/class-diagram
+' `..|>` represents Interface Realization/Implementation (dashed line with an open arrow).
+' `--|>` represents Inheritance/Generalization (solid line with an open arrow).
+' `o-->` represents Aggregation (a hollow diamond pointing to the owner/container). The "\*" indicates multiplicity (e.g., Drawing holds multiple Shape objects).
+skinparam dpi 120
+skinparam classAttributeIconSize 0
+hide empty members
 
-abstract class TaskCollection {
-  - nextUniqueID : int
-  - tasks : Set<Task>
+' ========
+' Foundational entities
+' ========
+abstract class BusinessMapping
+
+' Maps with keys and values being both one-to-one and onto
+abstract class BusinessOneToOneCorrespondenceMapping
+
+' 1 - Easy, 2 - Average, 3 - Difficult
+class DifficultyLevelMapping {
+  - difficultyLevelToStringMapping : Map<int, String>
+  - difficultyStringToLevelMapping : Map<String, int>
+}
+
+' CA - Canada, US - USA, ET - Ethiopia, IN - India, FR - France, GH - Ghana
+class CountryCodeAndCountryMapping {
+  - countryToCountryCodeMapping : Map<int, String>
+  - countryCodeToCountryMapping : Map<String, int>
+}
+
+class TaskSortingStrategyNameMapping {
+ - strategyNameToStrategyMapping : Map<String, TaskSortingStrategy>
+ - StrategyToStrategyNameMapping : Map<TaskSortingStrategy, String>
+}
+
+' The unique ID is only unique per user
+abstract class Task {
+  - uniqueId : int
 }
 
 ' The estimated number of hours needed to complete the task must be positive
 ' The completion progress must be an integer between 0 and 100. Both 0 and 100 are allowed.
-abstract class Task {
-  - uniqueID : int
+class StudentTask {
+  - uniqueId : int
   - title : String
   - description : String
   - deadline : Dates
@@ -18,19 +49,123 @@ abstract class Task {
   - difficultyLevel : byte
 }
 
-' 1 - Easy, 2 - Average, 3 - Difficult
-abstract class DifficultyLevelMapping {
-  - difficultyLevelToStringMapping : Map<int, String>
-  - difficultyStringToLevelMapping : Map<String, int>
+abstract class User {
+  - username : String
+  - password : String
+  - uniqueId : int
+}
+
+abstract class TasksUser {
+  - tasks : List<Task>
+}
+
+class StudentTasksUser {
+  - countryCode : String
+}
+
+abstract class TaskSortingStrategy {
+  + sort(tasks : List<Task>) : List<Task>
+}
+
+class StudentTaskSortingStrategy {
+  + sort(studentTasks : List<StudentTask>) : List<StudentTask>
 }
 
 ' Country code is in ISO 3166-1 alpha-2 code
-abstract class Holiday {
-  - countryCode : String
-  - dates : Set<Dates>
+class Holidays {
+  - countryCodeToHolidays: Map<String,Set<Dates>>
 }
 
-DifficultyLevelMapping <--- Task
-Task <-- TaskCollection
+BusinessMapping <|-- BusinessOneToOneCorrespondenceMapping
+BusinessOneToOneCorrespondenceMapping <|-- DifficultyLevelMapping
+BusinessOneToOneCorrespondenceMapping <|-- CountryCodeAndCountryMapping
+BusinessOneToOneCorrespondenceMapping <|-- TaskSortingStrategyNameMapping
+
+Task <|-- StudentTask
+
+User <|-- TasksUser
+TasksUser <|-- StudentTasksUser
+
+Task <--o TasksUser
+
+TaskSortingStrategy <|-- StudentTaskSortingStrategy
+
+TaskSortingStrategy <--o TaskSortingStrategyNameMapping
+
+@enduml
+
+@startuml
+'https://plantuml.com/class-diagram
+' `..|>` represents Interface Realization/Implementation (dashed line with an open arrow).
+' `--|>` represents Inheritance/Generalization (solid line with an open arrow).
+' `o-->` represents Aggregation (a hollow diamond pointing to the owner/container). The "\*" indicates multiplicity (e.g., Drawing holds multiple Shape objects).
+skinparam dpi 120
+skinparam classAttributeIconSize 0
+hide empty members
+
+' ========
+' Factories
+' ========
+abstract class BusinessMappingFactory {
+  + createMapping() : BusinessMapping
+}
+
+abstract class BusinessOneToOneCorrespondenceMappingFactory {
+  + createMapping() : BusinessOneToOneCorrespondenceMapping
+}
+
+class DifficultyLevelMappingFactory {
+  + createMapping() : DifficultyLevelMapping
+}
+
+class CountryCodeAndCountryMappingFactory {
+  + createMapping() : CountryCodeAndCountryMapping
+}
+
+class StrategyToStrategyNameMappingFactory {
+  + createMapping() : StrategyToStrategyNameMapping
+}
+
+BusinessMappingFactory <|-- BusinessOneToOneCorrespondenceMappingFactory
+BusinessOneToOneCorrespondenceMappingFactory <|-- DifficultyLevelMappingFactory
+BusinessOneToOneCorrespondenceMappingFactory <|-- CountryCodeAndCountryMappingFactory
+BusinessOneToOneCorrespondenceMappingFactory <|-- StrategyToStrategyNameMappingFactory
+
+abstract class UserFactory {
+  - nextUniqueID : int
+  + createUser() : User
+}
+
+abstract class TaskUserFactory {
+  + createUser() : TaskUser
+}
+
+class StudentUserFactory {
+  + createUser() : StudentUser
+}
+
+UserFactory <|-- TaskUserFactory
+TaskUserFactory <|-- StudentUserFactory
+
+abstract class TaskFactory {
+  - nextUniqueID : int
+  + createTask() : Task
+}
+
+class StudentTaskFactory {
+  + createTask() : StudentTask
+}
+
+TaskFactory <|-- StudentTaskFactory
+
+abstract class TaskSortingStrategyFactory {
+  + createStrategy() : TaskSortingStrategy
+}
+
+class StudentTaskSortingStrategyFactory {
+  + createStrategy() : StudentTaskSortingStrategy
+}
+
+TaskSortingStrategyFactory <|-- StudentTaskSortingStrategyFactory
 
 @enduml
