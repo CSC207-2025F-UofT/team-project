@@ -1,0 +1,27 @@
+{
+    "_id": "amaro-ciociaro",
+    "_parent_id": "amaro",
+    "name": "Amaro CioCiaro",
+    "strength": 30,
+    "description": "Amaro CioCiaro is a classic Italian herbal liqueur with a rich, complex profile rooted in traditional Italian amaro traditions. Created in 1860 by the Ciarlo family in Turin, it blends over 20 botanicals—including bitter orange peel, gentian root, rhubarb, and cinnamon—with a touch of sugar and alcohol. Its deep, aromatic flavor balances sweetness, bitterness, and herbal warmth, making it a versatile base for cocktails or a digestif.",
+    "origin": "Italy",
+    "color": "#6B3F20",
+    "category": "Apéritif > Amaro",
+    "created_at": null,
+    "updated_at": null,
+    "images": [
+        {
+            "uri": "file:///amaro-ciociaro.webp",
+            "sort": 1,
+            "placeholder_hash": "5BiGDQBFh2iGeIv0h4hweAcYCKeGeHd4dw",
+            "copyright": "Ciarlo Distillery"
+        }
+    ],
+    "ingredient_parts": [],
+    "prices": [],
+    "calculator_id": null,
+    "sugar_g_per_ml": 240,
+    "acidity": null,
+    "distillery": "Ciarlo Distillery",
+    "units": null
+}

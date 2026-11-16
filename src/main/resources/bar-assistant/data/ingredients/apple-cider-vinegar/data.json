@@ -1,0 +1,20 @@
+{
+    "_id": "apple-cider-vinegar",
+    "_parent_id": null,
+    "name": "Apple cider vinegar",
+    "strength": 0,
+    "description": "Apple cider vinegar is a fermented beverage made from apple juice, typically produced through a double fermentation process: first by yeast converting sugars into alcohol, then by acetic acid bacteria converting alcohol into acetic acid. It has a sharp, tangy flavor with a slightly sweet aftertaste, often used in cocktails for balance, acidity, and depth.",
+    "origin": "United States",
+    "color": "#D4A574",
+    "category": null,
+    "created_at": null,
+    "updated_at": null,
+    "images": [],
+    "ingredient_parts": [],
+    "prices": [],
+    "calculator_id": null,
+    "sugar_g_per_ml": 1,
+    "acidity": null,
+    "distillery": null,
+    "units": null
+}

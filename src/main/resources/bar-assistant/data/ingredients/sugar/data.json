@@ -1,0 +1,27 @@
+{
+    "_id": "sugar",
+    "_parent_id": "sweeteners",
+    "name": "Sugar",
+    "strength": 0,
+    "description": "White sugar",
+    "origin": null,
+    "color": null,
+    "category": "Sweeteners",
+    "created_at": null,
+    "updated_at": null,
+    "images": [
+        {
+            "uri": "file:///sugar.webp",
+            "sort": 1,
+            "placeholder_hash": "dgiCBQA0mXN8hGoER1NwNAVIB5iId4F7hw",
+            "copyright": ""
+        }
+    ],
+    "ingredient_parts": [],
+    "prices": [],
+    "calculator_id": null,
+    "sugar_g_per_ml": 1000,
+    "acidity": null,
+    "distillery": null,
+    "units": "cube"
+}
