@@ -11,3 +11,9 @@ The readme should include information such as:
 By keeping this README up-to-date,
 your team will find it easier to prepare for the final presentation
 at the end of the term.
+
+## Summary
+
+## User Stories
+- As a user, I want to be able to save my timetable as a pdf onto my computer so that I can share it with others, check
+it later or print it onto a paper.
