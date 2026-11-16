@@ -8,11 +8,15 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 
-public class ViewMainMenu {
+import MainMenuViewModel;
+
+public class MainMenuView {
 
     static final int WIDTH = 300;
     static final int HEIGHT = 200;
 
+    //This is the case if the user is playing for the first time.
+    //If they've played before, they should be greeted by name
     public static void main(String[] args) {
         SwingUtilities.invokeLater(
                 () -> {
@@ -21,7 +25,7 @@ public class ViewMainMenu {
                     welcomePanel.add(new JLabel("Welcome to CityGuesser"));
 
                     JPanel usernamePanel = new JPanel();
-                    JTextField usernameField = new JTextField(10);
+                    JTextField usernameField = new JTextField(20);
                     usernamePanel.add(new JLabel("Username:"));
                     usernamePanel.add(usernameField);
 
@@ -35,6 +39,7 @@ public class ViewMainMenu {
                         @Override
                         public void actionPerformed(ActionEvent e) {
                             String username = usernameField.getText();
+                            mainMenuViewModel.setState();
                         }
                     });
                     JPanel mainPanel = new JPanel();
@@ -51,7 +56,5 @@ public class ViewMainMenu {
                     menu.pack();
                     menu.setVisible(true);
                 });
-
     }
-
 }
