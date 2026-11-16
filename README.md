@@ -51,6 +51,7 @@ so that I always know where things stand without depending on someone replying t
 ### User Story 4
 As a shelter admin, I want to publish and maintain accurate pet profiles and review applications in one place, 
 so that animals are matched with suitable adopters efficiently.
+
 ---
 ## Use Cases
 ### Use Case 1
