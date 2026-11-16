@@ -1,29 +1,21 @@
 package entities;
 
-import java.time.LocalDateTime;
-
+/**
+ * A simple entity representing a study sessions. A session has a focus timer and a break timer.
+ */
 public class Session {
-    private final int durationSec;
-    private int remainingTimeSec;
-    private final LocalDateTime completedDate;
-    //private String sessionType;
+    private int focusDuration;
+    private int breakDuration;
 
-    public Session(int durationSec, int remainingTimeSec, LocalDateTime date) {
-        this.durationSec = durationSec;
-        this.remainingTimeSec = remainingTimeSec;
-        this.completedDate = date;
+    public Session(int focusDuration, int breakDuration) {
+        this.focusDuration = focusDuration;
+        this.breakDuration = breakDuration;
     }
 
-    public int getDurationSec() {
-        return this.durationSec;
+    public int getFocusDuration() {
+        return this.focusDuration;
     }
 
-    public int getRemainingTimeSec() {
-        return this.remainingTimeSec;
-    }
-
-    public LocalDateTime getCompletedDate() {
-        return this.completedDate;
-    }
+    public int getBreakDuration() { return this.breakDuration; }
 
 }
