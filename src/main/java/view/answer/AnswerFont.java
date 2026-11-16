@@ -11,18 +11,30 @@ import java.awt.font.FontRenderContext;
 import java.awt.font.TextAttribute;
 import java.awt.font.TextLayout;
 import java.awt.geom.AffineTransform;
+import java.awt.geom.Area;
 import java.awt.geom.Path2D;
 import java.awt.geom.Rectangle2D;
+import java.awt.geom.RoundRectangle2D;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.AttributedString;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 // Kalam handwriting for answers on the canvas
 public final class AnswerFont {
     private static final FontRenderContext FRC = new FontRenderContext(null, true, true);
     private static final float RAISED_SCALE = 0.6f;  // exponent size vs body
     private static final double RAISE = 0.45;        // exponent baseline lift, x the digit height
+    private static final double SIGN_GAP = 0.03;     // radicand starts this far past the √ ink, x size
+    private static final double BAR = 0.075;         // √ bar thickness, about one kalam stroke
+    private static final double CLEAR = 0.08;        // room between radicand top and the bar
+    private static final double BAR_PAST = 0.05;     // bar runs this far past the radicand
     private static Font base;
     private static double digitRatio;  // ink height of "0" per point of font size
 
@@ -69,34 +81,15 @@ public final class AnswerFont {
 
     // ink box of runs, raised ones small and lifted; origin at baseline start
     public static Rectangle2D visualBounds(List<TextRun> runs, float size) {
-        Rectangle2D box = null;
-        double pen = 0;
-        for (TextRun run : runs) {
-            if (run.getText().isEmpty()) {
-                continue;
-            }
-            TextLayout layout = layout(run.getText(), sizeOf(run, size));
-            Rectangle2D ink = layout.getBounds();
-            ink.setRect(ink.getX() + pen, ink.getY() - lift(run, size), ink.getWidth(), ink.getHeight());
-            if (ink.getWidth() > 0) {
-                box = box == null ? ink : box.createUnion(ink);
-            }
-            pen += layout.getAdvance();
-        }
-        return box == null ? new Rectangle2D.Double() : box;
+        return inkOf(typeset(runs, size));
     }
 
     // same as draw(String) but w/ exponents raised
     public static void draw(Graphics2D g, List<TextRun> runs, float size, double left, double top) {
-        Rectangle2D ink = visualBounds(runs, size);
-        double pen = left - ink.getX();
-        for (TextRun run : runs) {
-            if (run.getText().isEmpty()) {
-                continue;
-            }
-            TextLayout layout = layout(run.getText(), sizeOf(run, size));
-            layout.draw(g, (float) pen, (float) (top - ink.getY() - lift(run, size)));
-            pen += layout.getAdvance();
+        List<Piece> pieces = typeset(runs, size);
+        Rectangle2D ink = inkOf(pieces);
+        for (Piece piece : pieces) {
+            piece.draw(g, left - ink.getX(), top - ink.getY());
         }
     }
 
@@ -108,16 +101,91 @@ public final class AnswerFont {
     // outline w/ exponents raised, same spots as draw(runs)
     public static Shape outline(List<TextRun> runs, float size) {
         Path2D all = new Path2D.Double();
-        double pen = 0;
-        for (TextRun run : runs) {
-            if (run.getText().isEmpty()) {
-                continue;
-            }
-            TextLayout layout = layout(run.getText(), sizeOf(run, size));
-            all.append(layout.getOutline(AffineTransform.getTranslateInstance(pen, -lift(run, size))), false);
-            pen += layout.getAdvance();
+        for (Piece piece : typeset(runs, size)) {
+            piece.appendTo(all);
         }
         return all;
+    }
+
+    // runs -> placed bits; each √ and its radicand get cut out so the bar can go over
+    private static List<Piece> typeset(List<TextRun> runs, float size) {
+        List<Radicands.Root> roots = Radicands.find(TextRun.plain(runs));
+        Set<Integer> cuts = new HashSet<>();
+        for (Radicands.Root r : roots) {
+            cuts.addAll(List.of(r.sign, r.sign + 1, r.end));
+        }
+        List<Piece> pieces = new ArrayList<>();
+        Map<Integer, Piece> signs = new HashMap<>();
+        double pen = 0;
+        int at = 0;
+        for (TextRun run : runs) {
+            String text = run.getText();
+            float s = sizeOf(run, size);
+            for (int from = 0, to; from < text.length(); from = to) {
+                to = from + 1;
+                while (to < text.length() && !cuts.contains(at + to)) {
+                    to++;
+                }
+                Piece piece = new Piece(layout(text.substring(from, to), s), at + from, at + to, s, pen,
+                        -lift(run, size));
+                pieces.add(piece);
+                pen += piece.layout.getAdvance();
+                for (Radicands.Root r : roots) {
+                    if (r.sign == piece.start) {
+                        signs.put(r.sign, piece);
+                        pen = Math.max(pen, piece.ink().getMaxX() + SIGN_GAP * s);  // kalam's √ arm sticks out
+                    }
+                    if (r.end == piece.end) {
+                        pen += BAR_PAST * signs.get(r.sign).size;
+                    }
+                }
+            }
+            at += text.length();
+        }
+        List<Radicands.Root> innerFirst = new ArrayList<>(roots);
+        innerFirst.sort(Comparator.comparingInt(r -> r.end - r.sign));
+        for (Radicands.Root r : innerFirst) {
+            barOver(signs.get(r.sign), pieces, r);
+        }
+        return pieces;
+    }
+
+    // stretch the √ up past the radicand, then run the bar off its tip
+    private static void barOver(Piece sign, List<Piece> pieces, Radicands.Root r) {
+        Rectangle2D under = null;
+        for (Piece p : pieces) {
+            Rectangle2D ink = p.ink();
+            if (p.start > r.sign && p.end <= r.end && ink.getWidth() > 0) {
+                under = under == null ? ink : under.createUnion(ink);
+            }
+        }
+        if (under == null) {
+            return;
+        }
+        Rectangle2D glyph = sign.ink();
+        double thick = BAR * sign.size;
+        double top = Math.min(glyph.getY(), under.getY() - CLEAR * sign.size - thick);
+        if (top < glyph.getY()) {
+            double bottom = glyph.getMaxY();
+            sign.stretch = new AffineTransform();
+            sign.stretch.translate(0, bottom);
+            sign.stretch.scale(1, (bottom - top) / (bottom - glyph.getY()));
+            sign.stretch.translate(0, -bottom);
+        }
+        double left = glyph.getMaxX() - thick;
+        double right = under.getMaxX() + BAR_PAST * sign.size;
+        sign.bar = new RoundRectangle2D.Double(left, top, right - left, thick, thick, thick);
+    }
+
+    private static Rectangle2D inkOf(List<Piece> pieces) {
+        Rectangle2D box = null;
+        for (Piece piece : pieces) {
+            Rectangle2D ink = piece.ink();
+            if (ink.getWidth() > 0) {
+                box = box == null ? ink : box.createUnion(ink);
+            }
+        }
+        return box == null ? new Rectangle2D.Double() : box;
     }
 
     private static float sizeOf(TextRun run, float size) {
@@ -146,5 +214,64 @@ public final class AnswerFont {
             }
         }
         return new TextLayout(styled.getIterator(), FRC);
+    }
+
+    // bit of answer text at (x, y) off the baseline start; a √ may get stretched + a bar
+    private static final class Piece {
+        private final TextLayout layout;
+        private final int start;  // chars of the plain text
+        private final int end;
+        private final float size;
+        private final double x;
+        private final double y;
+        private AffineTransform stretch;
+        private Shape bar;
+
+        Piece(TextLayout layout, int start, int end, float size, double x, double y) {
+            this.layout = layout;
+            this.start = start;
+            this.end = end;
+            this.size = size;
+            this.x = x;
+            this.y = y;
+        }
+
+        Rectangle2D ink() {
+            Rectangle2D ink = layout.getBounds();
+            ink.setRect(ink.getX() + x, ink.getY() + y, ink.getWidth(), ink.getHeight());
+            if (stretch != null) {
+                ink = stretch.createTransformedShape(ink).getBounds2D();
+            }
+            return bar == null ? ink : ink.createUnion(bar.getBounds2D());
+        }
+
+        void appendTo(Path2D all) {
+            if (bar == null) {
+                all.append(glyphs(), false);
+                return;
+            }
+            Area joined = new Area(glyphs());  // bar winds the other way, a plain append punches a hole at the tip
+            joined.add(new Area(bar));
+            all.append(joined, false);
+        }
+
+        void draw(Graphics2D g, double dx, double dy) {
+            if (stretch == null) {
+                layout.draw(g, (float) (dx + x), (float) (dy + y));
+            } else {
+                g.fill(AffineTransform.getTranslateInstance(dx, dy).createTransformedShape(glyphs()));
+            }
+            if (bar != null) {
+                g.fill(AffineTransform.getTranslateInstance(dx, dy).createTransformedShape(bar));
+            }
+        }
+
+        private Shape glyphs() {
+            AffineTransform at = AffineTransform.getTranslateInstance(x, y);
+            if (stretch != null) {
+                at.preConcatenate(stretch);
+            }
+            return layout.getOutline(at);
+        }
     }
 }
