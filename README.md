@@ -138,7 +138,42 @@ Features that can be added later: <br>
 1. Editing and deleting existing entries.
 2. Searching or filtering entries.
 
-### Use Case 4: Open Map tab, select side quest pins that open up that particular quests page.
+### Use Case 4: Find a Nearby Side Quest on the Map
+ 
+**Lead:** Serena Ganbaatar <br>
+**Primary actor:** App user <br>
+**Goal:** See which side quests are near the user and open one of them from the map.
+ 
+**Preconditions:**
+1. The user is logged in.
+2. The system has a location for the user. In the MVP this is a fixed default (U of T St. George campus).
+**Trigger:** The user opens the Map tab.
+ 
+**Main success scenario:**
+1. The system reads the user's location and the current search radius (2 km the first time).
+2. The system loads the side quests that have a location and keeps the ones inside the radius.
+3. The system displays a map centred on the user, with a "you are here" marker and one pin for each nearby quest.
+4. The user selects a pin.
+5. The system shows a preview of that quest: title, theme, XP, and distance from the user.
+6. The user selects "Open quest".
+7. The system opens that quest's page.
+**Alternative flows and exceptions:**
+* 2a. Quests cannot be loaded: The system displays the map and the "you are here" marker with no pins, and shows an error with a "Retry" option.
+* 3a. No quests inside the radius: The system displays the map with no pins and the message "No side quests within N km. Try a larger radius."
+* 3b. Map images cannot be downloaded (for example, no internet): The marker and pins are still drawn, on a blank background, so the user can still select a pin.
+* 4a. The user changes the radius instead of selecting a pin: The system repeats steps 2 and 3 with the new radius.
+* 4b. The radius is outside the allowed range (0.5 km to 10 km): The system shows an error and keeps the previous radius.
+* 6a. The user closes the preview: The system returns to step 3 with the same pins.
+* 7a. The quest was deleted after the pins were drawn: The system shows "This quest no longer exists." and reloads the pins.
+**Success postcondition:** The selected quest's page is displayed. Nothing is saved or changed, because this use case only reads data. <br>
+**Failure postcondition:** The user stays on the Map tab and no data is changed.
+ 
+**Features that can be added later:**
+1. Real user location in place of the fixed default: the user types an address that a geocoding API converts to coordinates, or the location is looked up from the IP address.
+2. Filtering pins by theme.
+3. Choosing a quest's location by dropping a pin on the map when adding a quest (with Use Case 6).
+4. Different pin colours for pending and completed quests (with Use Case 2).
+
 ### Use Case 5: <Recommendations Quests>
 ### Use Case 6: <Defaults/Adding Quests>
 
@@ -149,8 +184,7 @@ Features that can be added later: <br>
 | Pauline |**Create a Text Journal Entry**<br><br>**Lead:** Pauline Nguyen<br>**Primary actor:** App user<br><br>**Goal:** Create and save a text journal entry linked to a quest.<br><br>**Preconditions:**<br>1. The user is logged in.<br>2. The user has a quest available to journal about.<br>3. The user is on the journal page for that quest.<br><br>**Trigger:** The user clicks a text block on the journal page for the quest.<br><br>**Main success scenario:**<br>1. The system displays the selected quest and a text field for the reflection.<br>2. The user enters a reflection.<br>3. The user selects “Save.”<br>4. The system checks that the reflection is not blank.<br>5. The system saves the entry with its associated user and quest.<br>6. The system displays the saved entry.<br><br>**Alternative flows and exceptions:**<br>1. Blank reflection: The system displays “Please enter a reflection” and keeps the form open.<br>2. Save fails: The system displays an error and retains the reflection so the user can retry.<br>3. User cancels: The system exits without saving the entry.<br><br>**Success postcondition:** The entry is stored persistently and can be retrieved after restarting the application.<br><br>**Failure postcondition:** No new entry is saved. |
 | Lucy | Use Case 1: LogIn, SetUsername |
 | Joon | Use Case |
-| Serena | Use case 4: Open Map tab, select side quest pins that open up that particular quests page. |
-| Issac | Use Case 6: Create Side Quests |
+| Serena |**Use Case 4: Find a Nearby Side Quest on the Map**<br><br>**Lead:** Serena Ganbaatar<br>**Primary actor:** App user<br><br>**Goal:** See the side quests within a chosen radius of a fixed location and open one from its pin.<br><br>**MVP limits:**<br>1. The user's location is a fixed default (U of T St. George campus). The app does not detect or ask for a real location.<br>2. The radius is picked from preset values: 0.5, 1, 2, 5, or 10 km. The default is 2 km.<br>3. The map shows a "you are here" marker and quest pins. There is no filtering by theme and no pin colour coding.<br><br>**Preconditions:**<br>1. The user is logged in.<br><br>**Trigger:** The user opens the Map tab.<br><br>**Main success scenario:**<br>1. The system reads the default location and the current radius.<br>2. The system loads the quests that have a location and keeps the ones inside the radius.<br>3. The system displays a map centred on the default location, with a "you are here" marker and one pin per nearby quest.<br>4. The user selects a pin.<br>5. The system shows a preview with the quest's title, theme, XP, and distance.<br>6. The user selects "Open quest".<br>7. The system opens that quest's page.<br><br>**Alternative flows and exceptions:**<br>1. Quests cannot be loaded: The system displays the map and marker with no pins, and shows an error with a "Retry" option.<br>2. No quests inside the radius: The system displays "No side quests within N km. Try a larger radius."<br>3. Map images cannot be downloaded: The marker and pins are still drawn on a blank background.<br>4. User changes the radius: The system reloads the pins for the new radius.<br>5. User closes the preview: The system returns to the map with the same pins.<br><br>**Success postcondition:** The selected quest's page is displayed. No data is changed.<br><br>**Failure postcondition:** The user stays on the Map tab and no data is changed.<br><br>| Issac | Use Case 6: Create Side Quests |
 | Daniel |**Use Case 2.1: Accept Quest**<br><br>**Lead:** Daniel Park<br>**Primary actor:** App user<br><br>**Goal:** Start a quest so it appears as pending on the dashboard.<br><br>**Preconditions:**<br>1. The user is logged in.<br>2. The quest exists.<br>3. The user is viewing the quest in the quest catalogue, recommendations, or map.<br><br>**Trigger:** The user clicks “Do this quest.”<br><br>**Main success scenario:**<br>1. The system displays “Would you like to do this side quest?”<br>2. The user confirms.<br>3. The system checks that the quest is not already pending or completed for this user.<br>4. The system saves the quest as PENDING with the current time as its start time.<br>5. The system displays “Quest accepted!” and the quest appears under Pending on the dashboard.<br><br>**Alternative flows and exceptions:**<br>1. Already pending: The system displays “You're already doing this quest.”<br>2. Already completed: The system displays “You've already completed this quest.”<br>3. Quest no longer exists: The system displays an error.<br>4. User cancels: The system exits without saving.<br><br>**Success postcondition:** The quest is stored as pending with its start time and can be retrieved after restarting the application.<br><br>**Failure postcondition:** Nothing is saved.<br><br><br>**Use Case 2.2: Complete Quest**<br><br>**Lead:** Daniel Park<br>**Primary actor:** App user<br><br>**Goal:** Mark a pending quest as completed and earn its XP.<br><br>**Preconditions:**<br>1. The user is logged in.<br>2. The user has accepted the quest and it is still pending.<br>3. The user is on the dashboard.<br><br>**Trigger:** The user clicks “Complete” on a pending quest.<br><br>**Main success scenario:**<br>1. The system checks that the quest is pending.<br>2. The system checks that the user has completed fewer than 5 quests today.<br>3. The system checks that at least 10 minutes have passed since the quest was accepted.<br>4. The system marks the quest COMPLETED with the current time.<br>5. The system adds the quest's XP to the user.<br>6. The system saves the quest and the user.<br>7. The system displays “+50 XP!” and “Level up!” if the user's level increased.<br>8. The system asks “Would you like to journal this?” and opens the journal entry if the user agrees.<br><br>**Alternative flows and exceptions:**<br>1. Too soon: The system displays “Too soon! Wait N more minutes before completing.”<br>2. Daily limit reached: The system displays “You've hit today's limit of 5 quests. Come back tomorrow!”<br>3. Quest not pending: The system displays “This quest is already completed.” (or abandoned).<br>4. Quest deleted: The system displays “This quest no longer exists.”<br>5. User declines to journal: The system returns to the dashboard. The completion is still saved.<br><br>**Success postcondition:** The quest is stored as completed with its completion time, the user's XP is increased, and both can be retrieved after restarting the application.<br><br>**Failure postcondition:** The quest stays pending and no XP is given.<br><br><br>**Use Case 2.3: Abandon Quest**<br><br>**Lead:** Daniel Park<br>**Primary actor:** App user<br><br>**Goal:** Give up on a pending quest.<br><br>**Preconditions:**<br>1. The user is logged in.<br>2. The quest is pending for this user.<br>3. The user is on the dashboard.<br><br>**Trigger:** The user clicks “Abandon” on a pending quest.<br><br>**Main success scenario:**<br>1. The system displays “Are you sure? You won't get XP for this quest.”<br>2. The user confirms.<br>3. The system checks that the quest is pending.<br>4. The system marks the quest ABANDONED with the current time and saves it.<br>5. The system moves the quest to the Abandoned list.<br><br>**Alternative flows and exceptions:**<br>1. Quest not pending: The system displays an error.<br>2. User cancels: The system exits without saving.<br><br>**Success postcondition:** The quest is stored as abandoned and no XP is given.<br><br>**Failure postcondition:** The quest's status is unchanged.<br><br><br>**Use Case 2.4: View Dashboard**<br><br>**Lead:** Daniel Park<br>**Primary actor:** App user<br><br>**Goal:** See all of the user's quests grouped by status.<br><br>**Preconditions:**<br>1. The user is logged in.<br><br>**Trigger:** The user opens the Dashboard tab, or Use Case 2.1, 2.2, or 2.3 finishes.<br><br>**Main success scenario:**<br>1. The system loads the user's quests.<br>2. The system groups them into Pending, Completed, and Abandoned, newest first.<br>3. Each row shows the quest's title, theme, XP, and date.<br>4. The system displays a summary of quests completed and total XP earned from quests.<br>5. Pending rows show “Complete” and “Abandon” buttons.<br><br>**Alternative flows and exceptions:**<br>1. No quests: The system displays “No quests yet!” with a button to the recommendations.<br>2. A quest was deleted: The system skips that row.<br>3. Loading fails: The system displays an error and shows empty lists.<br><br>**Success postcondition:** The dashboard shows the user's saved quest history.<br><br>**Failure postcondition:** An error is shown and no data is changed.<br><br><br>**Later (not MVP):** Use Case 2.5: Star / Unstar Theme |
 
 ---
@@ -168,7 +202,25 @@ QuestStatus (Daniel): enum PENDING, COMPLETED, ABANDONED. Status only moves PEND
 
 Full design for this part (classes per layer, data flow, teammate touchpoints): docs/DASHBOARD.md
 ### Entity 2: <Profile/Person Entity> User
-### Entity 3
+### Entity 3: Location
+One point on the Earth. It is the only class that knows how coordinates are checked and how distance is measured.
+ 
+Instance variables: latitude: double, longitude: double (both final, so a Location never changes after it is created)
+ 
+Methods: getters, distanceTo(other: Location): double, equals, hashCode. The constructor throws IllegalArgumentException if latitude is outside -90 to 90 or longitude is outside -180 to 180. distanceTo returns the distance in kilometres along the Earth's surface (haversine formula).
+ 
+Reason to change: the way a position is represented or the way distance is calculated.
+ 
+### Entity 4: SearchArea
+A circle on the map: a centre and a radius. It holds the rule for what counts as "nearby".
+ 
+Instance variables: centre: Location, radiusKm: double
+ 
+Constants: MIN_RADIUS_KM = 0.5, MAX_RADIUS_KM = 10, DEFAULT_RADIUS_KM = 2
+ 
+Methods: getters, contains(point: Location): boolean. The constructor throws IllegalArgumentException if the radius is outside MIN_RADIUS_KM to MAX_RADIUS_KM. contains returns true when centre.distanceTo(point) is at most radiusKm.
+ 
+Reason to change: the rule for which quests count as nearby (for example, new radius limits).
 
 ---
 ## API Usage
