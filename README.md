@@ -99,13 +99,19 @@ Extensions:
 
 | Name | Use Case |
 
+| Name | Use Case |
 ---
 
 ## Entities
 
 ### Entity 1
+Player
 ### Entity 2
-
+Spell
+### Entity 3
+Enemy
+### Entity 4
+World
 (Add additional entities as needed.)
 
 ---
