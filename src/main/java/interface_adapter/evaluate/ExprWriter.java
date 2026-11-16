@@ -216,9 +216,16 @@ public final class ExprWriter {
             emit("\\cdot ", "·");
         } else if (!tex && (isFunction(next) || next.kind() == ExprOutputData.Kind.DVAR)) {
             emit(" ");
+        } else if (c == '√' && exponentJustEnded()) {
+            emit("", "·");  // 2^x √x isn't 2 times the x-th root
         } else if (tex && Character.isLetter(c) && before.matches(".*\\\\[a-zA-Z]+")) {
             emit(" ");  // \pi x, not \pix
         }
+    }
+
+    // last thing written is up in an exponent, body level only
+    private boolean exponentJustEnded() {
+        return !tex && raised == 0 && !runs.isEmpty() && runs.get(runs.size() - 1).isRaised();
     }
 
     private static boolean isFunction(ExprOutputData e) {

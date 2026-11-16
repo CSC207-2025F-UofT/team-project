@@ -102,6 +102,15 @@ class ExprWriterTest {
     }
 
     @Test
+    void exponentRightBeforeARootGetsADot() {
+        // 2^x √x read as 2 times the x-th root of x
+        Expr e = mul(pow(n(2), X), pow(X, n(1, 2)));
+        assertEquals("2x·√x", plain(e));
+        assertEquals("2^{x}\\sqrt{x}", latex(e));
+        assertEquals("3√x", plain(mul(n(3), pow(X, n(1, 2)))));
+    }
+
+    @Test
     void subscriptedNamesGetSubscriptDigits() {
         assertEquals("2x₁", plain(mul(n(2), var("x_1"))));
         assertEquals("2x₁₂ dx₁₂/dx", plain(mul(n(2), var("x_12"), Expr.dvar("x_12", "x"))));
