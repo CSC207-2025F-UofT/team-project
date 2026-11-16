@@ -417,10 +417,16 @@ public class AnswerCanvasPage extends CanvasPage {
             return;
         }
         JComponent area = getCanvasArea();
-        Rectangle f = SwingUtilities.convertRectangle(getSharedCanvas().getDrawingCanvas(),
-                getSharedCanvas().worldToScreen(world).getBounds(), area);
-        popup.setBounds(popup.spotBeside(f, area.getWidth(), area.getHeight()));
+        Rectangle f = toArea(world);
+        Rectangle eqWorld = hover.equalsOf(shown.getId());
+        Rectangle eq = eqWorld == null ? null : toArea(eqWorld);
+        popup.setBounds(popup.spotBeside(f, eq, area.getWidth(), area.getHeight()));
         area.repaint();
+    }
+
+    private Rectangle toArea(Rectangle world) {
+        return SwingUtilities.convertRectangle(getSharedCanvas().getDrawingCanvas(),
+                getSharedCanvas().worldToScreen(world).getBounds(), getCanvasArea());
     }
 
     // Calculate in the popup: use the latex we already have, no second read

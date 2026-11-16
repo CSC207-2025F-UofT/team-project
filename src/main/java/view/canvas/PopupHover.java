@@ -20,7 +20,7 @@ import java.util.Objects;
 // mouse resting on an unanswered formula's "=" brings its popup back
 final class PopupHover {
     static final int SHOW_MILLIS = 300;
-    static final int HIDE_MILLIS = 300;
+    static final int HIDE_MILLIS = 1800;  // slow trip from "=" to the buttons still makes it
 
     // the answer page
     interface Host {
@@ -138,6 +138,16 @@ final class PopupHover {
         Point p = info.getLocation();
         SwingUtilities.convertPointFromScreen(p, area);
         return p;
+    }
+
+    // world box of its "=", null if gone / no ink
+    Rectangle equalsOf(long id) {
+        for (Formula f : canvas.getFormulas()) {
+            if (f.getId() == id) {
+                return spotOf(f).world;
+            }
+        }
+        return null;
     }
 
     // unanswered formula whose "=" is under p, -1 if none

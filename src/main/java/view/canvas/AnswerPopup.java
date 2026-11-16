@@ -103,11 +103,26 @@ public class AnswerPopup extends JPanel {
         relayout();
     }
 
-    // above-right of the formula, below if no room, always inside the canvas
+    // no "=" known: above-right of the formula, below if no room, always inside the canvas
     Rectangle spotBeside(Rectangle formula, int areaWidth, int areaHeight) {
+        return spotBeside(formula, null, areaWidth, areaHeight);
+    }
+
+    // right next to the "=", buttons level with it; above/below the formula if ink's in the way
+    Rectangle spotBeside(Rectangle formula, Rectangle equals, int areaWidth, int areaHeight) {
         Dimension d = getPreferredSize();
         int m = bar != null ? GlassBar.MARGIN : 0;  // clear shadow margin top-left
-        int x = formula.x + formula.width - POPUP_LEFT - m;
+        if (equals != null) {
+            int capH = bar != null ? GlassBar.CAP_H : d.height;
+            int x = equals.x + equals.width + POPUP_GAP - m;
+            int y = equals.y + equals.height / 2 - capH / 2 - m;
+            y = Math.max(EDGE - m, Math.min(y, areaHeight - d.height - EDGE));
+            Rectangle seen = new Rectangle(x + m, y + m, d.width - m, d.height - m);
+            if (x + d.width <= areaWidth - EDGE && !seen.intersects(formula)) {
+                return new Rectangle(x, y, d.width, d.height);
+            }
+        }
+        int x = equals != null ? equals.x - m : formula.x + formula.width - POPUP_LEFT - m;
         int y = formula.y - POPUP_GAP - d.height;
         if (y + m < EDGE) {
             // The whole popup (not just its visible glass capsule) must clear

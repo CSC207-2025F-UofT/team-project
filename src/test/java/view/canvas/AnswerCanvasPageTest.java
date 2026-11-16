@@ -160,7 +160,7 @@ class AnswerCanvasPageTest {
         assertTrue(p.isTypeset());
         assertTrue(p.hasCalculate());
         Rectangle box = p.getBounds();
-        assertFalse(box.intersects(new Rectangle(100, 100, 101, 51)), "does not cover the formula");
+        assertFalse(p.visibleBounds().intersects(new Rectangle(100, 100, 101, 51)), "does not cover the formula");  // glass margin is see-through
         assertTrue(new Rectangle(0, 0, p.getParent().getWidth(), p.getParent().getHeight()).contains(box), "stays in view");
         Thread.sleep(300);
         assertTrue(answers().isEmpty(), "nothing until Calculate");
