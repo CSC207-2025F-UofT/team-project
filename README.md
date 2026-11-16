@@ -96,8 +96,16 @@ Edit Organization
 ## Entities
 
 ### Entity 1
+User
 
 ### Entity 2
+User Factory
+
+### Entity 3
+Organization
+
+### Entity 4
+Organization Factory
 
 (Add additional entities as needed.)
 
@@ -116,9 +124,10 @@ Edit Organization
 ## Design Diagrams
 
 ### UML Class Diagram
-
+Generate this later
 
 ### Sequence Diagrams
+Generate this later
 
 ---
 
