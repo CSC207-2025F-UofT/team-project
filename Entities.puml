@@ -47,6 +47,7 @@ class StudentTask {
   - estimatedHoursToCompleteTask : double
   - completionProgress : byte
   - difficultyLevel : byte
+  + fieldsValidation() : boolean
 }
 
 abstract class User {
