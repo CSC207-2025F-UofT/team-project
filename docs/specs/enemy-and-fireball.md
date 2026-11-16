@@ -1,21 +1,22 @@
-# SpellBook: Enemy & First Spell Spec
+# SpellBook: Enemy, Spell & Map Spec
 
 2026-11-16 · Jordan Lin
 
 ## Overview
 
-This milestone adds the first enemy (Aayaan) and the first spell, a fireball (Omer), on top of the core loop that already moves the player with WASD. Everything below is a starting proposal: numbers and designs marked *proposed* are defaults to confirm or change when we talk them through (see Open questions).
+This milestone adds the first enemy (Aayaan), the first spell, a fireball (Omer), and a tile map loaded from a text file (Seran), on top of the core loop that already moves the player with WASD. Everything below is a starting proposal: numbers and designs marked *proposed* are defaults to confirm or change when we talk them through (see Open questions).
 
 | Owner | Feature | Branch (proposed) | Done when |
 | --- | --- | --- | --- |
 | Aayaan | Enemy that chases the player | `feat/enemy` | An animated enemy walks to the player and stops on contact |
 | Omer | Fireball spell | `feat/fireball-spell` | Drawing a circle, then clicking, launches an animated fireball toward the click |
+| Seran | Tile map from a text file | `feat/tile-map` | The game draws a dirt-and-water map read from a file of tile numbers |
 
-Both features build on `feature/core-loop` (the movable player), which is not on `main` yet. Branch from it, or wait until it merges. Commits follow Conventional Commits, and each feature goes in by pull request with one teammate reviewing.
+All three features build on `feature/core-loop` (the movable player), which is open as PR #2 and not on `main` yet. Branch from it, or wait until it merges. Commits follow Conventional Commits, and each feature goes in by pull request with one teammate reviewing.
 
 ## How new features plug in
 
-Neither feature needs a new architecture. Each one adds to the same once-per-tick path the player already uses, so work through it in the order shown. Lines starting with `+` are new this milestone (proposed).
+No feature needs a new architecture. The enemy and the fireball add to the same once-per-tick path the player already uses, so work through it in the order shown. The map is the exception: it loads once at startup through a new `data_access` package, and the tick path then reads it. Lines starting with `+` are new this milestone (proposed).
 
 ```mermaid
 flowchart LR
@@ -49,7 +50,7 @@ One enemy appears, walks toward the player using an animated sprite, and stops w
 
 **Pathfinding**
 
-The world is currently an empty 960 × 640 px box with no walls. With nothing in the way, moving in a straight line toward the player is the shortest path. Step one is that straight-line chase. Real pathfinding, such as A\* on a grid of 32 px tiles (30 × 20 tiles), only matters once the map has obstacles. Whether obstacles are part of this milestone is an open question.
+The world is currently an empty 960 × 640 px box with no walls. With nothing in the way, moving in a straight line toward the player is the shortest path. Step one is that straight-line chase. Real pathfinding, such as A\* over the 30 × 20 grid of 32 px tiles in Seran's `TileMap`, only matters once tiles block movement. If water blocks movement this milestone, the enemy needs it to get around lakes. That is an open question.
 
 **Sprites**
 
@@ -116,9 +117,106 @@ Mouse events arrive on Swing's thread, but the game loop runs on its own thread.
 - [ ] The fireball disappears on hitting the enemy or leaving the screen
 - [ ] Unit tests feed recorded strokes into the recogniser: several circles pass, and a line and a zigzag fail
 
+## Seran: tile map
+
+The world becomes a grid of 32 px tiles read from a text file where each number is one tile type: 0 = water, 1 = dirt. The 960 × 640 window holds exactly 30 × 20 tiles, so a screen-sized map is a file of 20 lines with 30 numbers each. The map loads once at startup. It is not part of the per-tick path.
+
+**Map file format (proposed)**
+
+- One file per map in `src/main/resources/maps/`, for example `level1.txt`.
+- One line per row of tiles, with numbers separated by spaces. Spaces leave room for tile ids above 9 later.
+- Lines starting with `#` are comments, and blank lines are skipped, so the file can carry notes.
+
+Example: an 8 × 5 corner of a map with a lake on the right.
+
+```
+# 0 = water, 1 = dirt
+1 1 1 1 1 0 0 0
+1 1 1 1 0 0 0 0
+1 1 1 1 1 0 0 0
+1 1 1 1 1 1 0 0
+1 1 1 1 1 1 1 1
+```
+
+**Tile design: keep images out of the tile**
+
+An `image()` method on the tile class would mean the `entity` layer imports AWT image classes, which breaks the dependency rule. It would also stop tests from creating a map without the image files present. Instead, the entity says *what* a tile is, and the view decides *how it looks*:
+
+```java
+// entity/TileType.java
+public enum TileType {
+    WATER(0, false),
+    DIRT(1, true);
+
+    private final int id;
+    private final boolean walkable;
+
+    TileType(int id, boolean walkable) {
+        this.id = id;
+        this.walkable = walkable;
+    }
+
+    public boolean isWalkable() {
+        return walkable;
+    }
+
+    public static TileType fromId(int id) {
+        for (TileType type : values()) {
+            if (type.id == id) {
+                return type;
+            }
+        }
+        throw new IllegalArgumentException("Unknown tile id: " + id);
+    }
+}
+```
+
+An enum fits because every water tile is identical. That way 600 tiles share 2 constants instead of being 600 objects, and adding a tile type is one line. If a tile later needs its own state, such as a door that opens, a `Tile` class can wrap a `TileType` plus that state.
+
+**Where the code goes**
+
+| Layer | Change |
+| --- | --- |
+| `entity` | `TileType` enum (above). `TileMap` holds a `TileType[][]` grid (rows × columns) and the tile size, with `getTile(col, row)`, `tileAtPixel(x, y)`, `isWalkable(x, y)` and width and height in pixels |
+| `use_case/load_map` | `LoadMapInteractor` asks a `MapDataAccessInterface` for a map by name and passes the resulting `TileMap` to the game |
+| `data_access` (new package) | `FileMapDataAccessObject` implements `MapDataAccessInterface`. It reads the text file and parses it into a `TileMap` |
+| `interface_adapter` | A presenter sends the tile grid to the view once, after loading |
+| `view` | `TileSprites` maps each `TileType` to its image, which is where `image()` lives. `GamePanel` draws the map before the player and enemy |
+| `app` | `Main` creates the file data-access object and runs the map load before starting the loop |
+
+**Parsing rules**
+
+- Every row must have the same number of tiles.
+- An unknown number stops loading with an error that names the line and column.
+- A missing or empty file is an error too, so a mistake shows up at startup instead of as a blank screen.
+
+**Drawing**
+
+The map doesn't change between ticks, so don't copy it into `GameState` every tick. When the map loads, draw all its tiles once into a single 960 × 640 `BufferedImage`. Then `GamePanel` draws that one image each frame, which takes 1 draw call instead of 600.
+
+**Walkable tiles (proposed second step)**
+
+Once the map draws, stop the player from walking onto water. In `UpdateGameInteractor`, check the player's next position against `TileMap.isWalkable` at the four corners of its hitbox. If a corner lands on water, cancel the move on that axis. Checking x and y separately lets the player slide along a shoreline instead of sticking to it.
+
+**Done when**
+
+- [ ] `level1.txt` (30 × 20) loads, and dirt and water sprites draw behind the player
+- [ ] Editing a number in the file changes the map on the next run, with no code change
+- [ ] A bad file (uneven rows or an unknown number) stops with a clear error that names the line
+- [ ] Unit tests parse a small map string into a `TileMap` and check `tileAtPixel` and `isWalkable`
+- [ ] Second step: the player cannot walk onto water and slides along the shore
+
+**Ideas for later**
+
+- More tile types: 2 = stone wall, 3 = grass, 4 = sand
+- Spawn markers in the file (for example 8 = player start, 9 = enemy spawn) that draw as dirt
+- Maps bigger than the screen, with a camera that follows the player
+- Randomly generated maps that write the same number format, so the loader doesn't change
+- Shoreline edge tiles where dirt meets water (autotiling)
+
 ## Shared pieces and coordination
 
-Both features edit the same five files: `UpdateGameInteractor`, `UpdateGameOutputData`, `GameState`, `GamePresenter` and `GamePanel`. Agreeing on these shared pieces first avoids painful merge conflicts.
+The enemy and the fireball both edit the same five files: `UpdateGameInteractor`, `UpdateGameOutputData`, `GameState`, `GamePresenter` and `GamePanel`. Agreeing on these shared pieces first avoids painful merge conflicts.
 
 | Shared piece | Proposed owner | Why it is shared |
 | --- | --- | --- |
@@ -126,6 +224,7 @@ Both features edit the same five files: `UpdateGameInteractor`, `UpdateGameOutpu
 | Sprite-sheet loader in `view` (load PNG, cut frames, pick frame by tick) | Aayaan | Enemy and fireball are both animated |
 | `GameState` shape: lists of enemy and fireball snapshots | Both, agreed up front | Both add fields to it and to `UpdateGameOutputData` |
 | Order of steps inside one tick | Both, agreed up front | The fireball's hit check needs the enemy's position for that tick |
+| Tile size (32 px) and `TileMap.isWalkable` | Seran | Player movement and the enemy's pathfinding both ask the map which tiles block them |
 
 **Proposed tick order** inside `UpdateGameInteractor.execute`:
 
@@ -143,20 +242,21 @@ Both features edit the same five files: `UpdateGameInteractor`, `UpdateGameOutpu
 
 ## Out of scope
 
-These wait for a later milestone, so neither feature should build them now:
+These wait for a later milestone, so none of the three features should build them now:
 
 - HP, damage and death, for both the player and enemies
 - Waves, more than one enemy, and different enemy types
 - Spells other than the fireball, plus mana and cooldowns
 - Upgrades, chests and sound
+- Maps bigger than one screen, a scrolling camera, and tile types beyond water and dirt
 
 ## Open questions
 
-Settle these with Aayaan and Omer before coding starts, then tick each one off and update the sections above.
+Settle these with Aayaan, Omer and Seran before coding starts, then tick each one off and update the sections above.
 
 **For Aayaan**
 
-- [ ] Does this milestone include obstacles? If yes, the enemy needs grid pathfinding (A\*). If no, a straight-line chase is enough.
+- [ ] Does water block the enemy this milestone? If yes, it needs grid pathfinding (A\*) over Seran's `TileMap`. If no, a straight-line chase is enough.
 - [ ] Where does the sprite art come from (made ourselves or a free asset pack), and what size are the frames?
 - [ ] Is 2 px per tick the right enemy speed, and should it stop on touching or a few pixels before?
 
@@ -166,6 +266,14 @@ Settle these with Aayaan and Omer before coding starts, then tick each one off a
 - [ ] Does aiming fire on a separate click, or on the release of a second drag?
 - [ ] Does a ready fireball expire after a few seconds if not used?
 - [ ] A new `cast_spell` use case, or fold everything into `update_game`?
+
+**For Seran**
+
+- [ ] 32 px tiles, or 48 px to match the player? 640 px is not a whole number of 48 px rows (13.3).
+- [ ] Does water block the player this milestone, or is the map only drawn for now?
+- [ ] Do fireballs fly over water?
+- [ ] Where does the tile art come from, and is each tile one 32 × 32 px image?
+- [ ] Space-separated numbers, or one digit per tile with no spaces (shorter, but only 10 tile types)?
 
 **For both**
 
