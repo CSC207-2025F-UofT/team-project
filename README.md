@@ -20,15 +20,15 @@ Guess the city game where a player is shown a satellite image of a city. They ha
 
 ---
 ## User Stories
-### User Story 1 - Regan
+### User Story 1
 As a player, I want it to be easy to start a new game, so that I can begin guessing right away.
-### User Story 2 - Elliot
+### User Story 2
 As a player, I want to receive a confirmation when I guess the correct answer, so that I can see my points and stats based on the number of guesses it took me.
-### User Story 3 - Nikola
+### User Story 3
 As a player, I want the game to get easier with every wrong answer that I make, so that I have more information to base my guesses off of.
-### User Story 4 - Regan
+### User Story 4
 As a player, I want cityGuesser to know my name so that I can be personally called by my name.
-### User Story 5 - Ingrid
+### User Story 5
 As a player, I want to see how well I am doing at the game by being able to see how many points I have and how many guesses I usually make.
 
 ---
@@ -38,7 +38,7 @@ As a player, I want to see how well I am doing at the game by being able to see 
 Primary Actor: Player
 Preconditions:
 - Player has opened the app and is on the welcome screen
-- 
+  
 Trigger:
 - Player types a username and selects 'Continue'
 
