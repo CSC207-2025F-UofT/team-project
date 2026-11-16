@@ -7,5 +7,6 @@
     "createdAt": [],
     "defaultCurrency": [],
     "balanceTracking" : [],
-    "mainProfile" : []
+    "mainProfile" : [],
+    "interestRate" : []
 }

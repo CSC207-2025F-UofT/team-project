@@ -4,18 +4,11 @@ import java.time.LocalDate;
 
 public class Income extends Transaction {
 
-    private Category category;
+  public Income(double amount, LocalDate date, String description, Account account, String transactionCurrency, Category category, String note) throws IOException {
+    super(amount, date, description, account, transactionCurrency, category, note, "Revenues.json");
+  }
 
-    public Income(int transactionID, double amount,
-                  LocalDate date, String description,
-                  Account account, Category category, String transactionCurrency) throws IOException {
-
-        super(transactionID, amount, date, description, account, transactionCurrency);
-
-        this.category = category;
-    }
-
-    // Getter
+  // Getter
     public Category getCategory() {
         return category;
     }

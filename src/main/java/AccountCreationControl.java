@@ -24,17 +24,26 @@ public class AccountCreationControl extends JSONControl {
     return getContents().getJSONArray("mainProfile");
   }
 
+  public JSONArray returnInterest() { return getContents().getJSONArray("interestRate");}
+
   public void addData(String country, String IP, LocalDateTime time, int profile) throws IOException{
     returnCreatedCountry().put(country);
     returnCreatedIP().put(IP);
     returnCreatedAt().put(time.toString());
     returnProfile().put(profile);
+    returnInterest().put(0);
     writeContents();
   }
 
   public void changeMainProfile(int accountID, int newMain) throws IOException {
     JSONArray profiles = returnProfile();
     profiles.put(accountID, newMain);
+    writeContents();
+  }
+
+  public void setInterestRate(int accountID, double newInterest) throws IOException {
+    JSONArray interest = returnInterest();
+    interest.put(accountID, newInterest);
     writeContents();
   }
 }
