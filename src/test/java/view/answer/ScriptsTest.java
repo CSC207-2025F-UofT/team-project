@@ -65,6 +65,11 @@ class ScriptsTest {
     }
 
     @Test
+    void lonelyDashUnderIsNot() {
+        assertFalse(Scripts.stackedOn(sum(), List.of(stroke(120, 250, 200, 250))));  // next line's "-"
+    }
+
+    @Test
     void smallInkOffToTheSideIsNot() {
         List<Stroke> side = List.of(stroke(500, 240, 500, 270));
         assertFalse(Scripts.stackedOn(sum(), side));

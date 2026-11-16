@@ -18,7 +18,7 @@ public final class Scripts {
     // script sits right over or under some body ink and is written smaller
     public static boolean stackedOn(Collection<Stroke> body, Collection<Stroke> script) {
         Rectangle s = AnswerLayout.bounds(script);
-        if (s == null || body.isEmpty()) {
+        if (s == null || body.isEmpty() || !AnswerLayout.hasChars(script)) {  // lone "-" = next line, not a limit
             return false;
         }
         double h = AnswerLayout.charHeight(body);

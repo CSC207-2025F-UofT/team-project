@@ -58,6 +58,11 @@ public final class AnswerLayout {
         return clamped(median(heights));
     }
 
+    // any real char in there, not just "-" "=" dots
+    public static boolean hasChars(Collection<Stroke> strokes) {
+        return !tallHeights(glyphs(strokes)).isEmpty();
+    }
+
     // top-left of an answer right of the formula, centred on its last glyph
     public static Point2D.Double rightOf(Collection<Stroke> formula, double charHeight, double answerHeight) {
         Rectangle all = bounds(formula);
