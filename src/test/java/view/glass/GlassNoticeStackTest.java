@@ -79,6 +79,22 @@ class GlassNoticeStackTest {
     }
 
     @Test
+    void pillMakesRoomForAFormulaAndShrinksTallOnes() throws Exception {
+        SwingUtilities.invokeAndWait(() -> {
+            javax.swing.Icon tall = new javax.swing.Icon() {
+                @Override public void paintIcon(java.awt.Component c, java.awt.Graphics g, int x, int y) { }
+                @Override public int getIconWidth() { return 120; }
+                @Override public int getIconHeight() { return 68; }
+            };
+            var words = new GlassNotices.NoticeView(GlassNotices.Kind.PROGRESS, "", "Calculating");
+            var both = new GlassNotices.NoticeView(GlassNotices.Kind.PROGRESS, "", "Calculating", tall);
+            int extra = both.getPreferredSize().width - words.getPreferredSize().width;
+            assertTrue(extra >= 60 && extra < 120, "68 tall gets halved, width " + extra);
+            assertEquals(64, both.getPreferredSize().height, "pill stays one size");
+        });
+    }
+
+    @Test
     void stackReflowsWhenTheHostWindowChangesWidth() throws Exception {
         SwingUtilities.invokeAndWait(() -> {
             JRootPane root = root();

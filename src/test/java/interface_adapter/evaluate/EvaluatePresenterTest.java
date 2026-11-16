@@ -215,6 +215,7 @@ class EvaluatePresenterTest {
         presenter.prepareAlwaysTrueView("x");
         assertEquals("true for all x", viewModel.getState().getResultText());
         presenter.prepareFunctionDefinedView("f(x) = x^2+1");
-        assertEquals("Defined f(x) = x^2+1", viewModel.getState().getResultText());
+        assertEquals("Defined", viewModel.getState().getResultText());
+        assertEquals("f(x) = x^2+1", viewModel.getState().getDefinedLatex());
     }
 }

@@ -31,10 +31,10 @@ import static org.junit.jupiter.api.Assertions.*;
 class PopupGraphPublicationTest {
     // no cards in these tests
     private static final Notices QUIET = new Notices() {
-        @Override public void success(String text) { }
+        @Override public void success(String words, String latex) { }
         @Override public void error(String title, String reason) { }
         @Override public void clearError() { }
-        @Override public Runnable progress(String text) { return () -> { }; }
+        @Override public Runnable progress(String words, String latex) { return () -> { }; }
     };
 
     @TempDir Path storage;

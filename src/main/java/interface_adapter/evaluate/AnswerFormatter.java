@@ -108,8 +108,9 @@ public final class AnswerFormatter {
         return "true for all " + variable;
     }
 
-    public static String defined(String definition) {
-        return "Defined " + definition;
+    // words only, the formula goes next to it typeset
+    public static String defined() {
+        return "Defined";
     }
 
     public static String format(double value) {

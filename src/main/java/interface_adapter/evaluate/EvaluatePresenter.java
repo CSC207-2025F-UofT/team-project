@@ -57,7 +57,7 @@ public class EvaluatePresenter implements EvaluateOutputBoundary {
 
     @Override
     public void prepareFunctionDefinedView(String definition) {
-        publish(AnswerFormatter.defined(definition), null, "", "", true);
+        publish(AnswerFormatter.defined(), null, "", "", definition);
     }
 
     @Override
@@ -67,7 +67,7 @@ public class EvaluatePresenter implements EvaluateOutputBoundary {
             fail(UncalculableText.TITLE, UncalculableText.answerTooLong());
             return;
         }
-        publish("= " + ExprWriter.latex(expression), AnswerFormatter.canvasRuns(kind, runs), "", "", false);
+        publish("= " + ExprWriter.latex(expression), AnswerFormatter.canvasRuns(kind, runs), "", "", null);
     }
 
     @Override
@@ -82,17 +82,17 @@ public class EvaluatePresenter implements EvaluateOutputBoundary {
 
     // title on top, reason under it
     private void fail(String title, String reason) {
-        publish("", null, title, reason, false);
+        publish("", null, title, reason, null);
     }
 
     private void showResult(String text) {
         // 5×10^20 gets its 20 raised
-        publish(text, PowerOfTen.runs(AnswerFormatter.canvasText(kind, text)), "", "", false);
+        publish(text, PowerOfTen.runs(AnswerFormatter.canvasText(kind, text)), "", "", null);
     }
 
-    // canvasRuns null = plain text answer
+    // canvasRuns null = plain text answer, definedLatex null = not a definition
     private void publish(String resultText, List<TextRun> canvasRuns, String errorTitle, String errorText,
-                         boolean definition) {
+                         String definedLatex) {
         MathLabState state = viewModel.getState();
         state.setResultText(resultText);
         state.setAnswerKind(kind);
@@ -100,7 +100,8 @@ public class EvaluatePresenter implements EvaluateOutputBoundary {
         state.setAnswerRuns(canvasRuns);
         state.setErrorTitle(errorTitle);
         state.setErrorText(errorText);
-        state.setDefinition(definition);
+        state.setDefinition(definedLatex != null);
+        state.setDefinedLatex(definedLatex == null ? "" : definedLatex);
         viewModel.firePropertyChanged(MathLabViewModel.RESULT);
     }
 }

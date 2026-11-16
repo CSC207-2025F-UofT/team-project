@@ -374,7 +374,7 @@ public class AnswerCanvasPage extends CanvasPage {
                 return;
             }
             defined.put(capture.getId(), capture.getRevision());
-            notices.success(outcome.result);
+            notices.success(outcome.result, outcome.definedLatex);
             publishFormulaOnly(capture, latex);  // saved = done, so PDF Studio gets it
             then.accept(true);
         });
@@ -430,7 +430,7 @@ public class AnswerCanvasPage extends CanvasPage {
             restartPause();  // this one's handled, offer the next after a beat
         }
         calculating.run();  // newest one gets the card
-        calculating = notices.progress("Calculating " + latex + "…");
+        calculating = notices.progress("Calculating", latex);
         running++;
         worker.calculate(latex, outcome -> deliver(capture, latex, outcome));
     }
@@ -468,7 +468,7 @@ public class AnswerCanvasPage extends CanvasPage {
                 publishFormulaOnly(capture, latex);
             }
         } else if (outcome.definition) {
-            notices.success(result);
+            notices.success(result, outcome.definedLatex);
             // Definitions have no numeric answer but are still explicitly requested work.
             publishFormulaOnly(capture, latex);
         } else {

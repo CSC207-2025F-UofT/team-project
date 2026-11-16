@@ -19,6 +19,8 @@ public class MathLabState {
 
     private boolean definition;  // f(x)= got saved, nothing to draw
 
+    private String definedLatex = "";  // the f(x) = ... that got saved, typeset in the card
+
     public String getExpression() {
         return expression;
     }
@@ -66,6 +68,14 @@ public class MathLabState {
 
     public void setDefinition(boolean definition) {
         this.definition = definition;
+    }
+
+    public String getDefinedLatex() {
+        return definedLatex;
+    }
+
+    public void setDefinedLatex(String definedLatex) {
+        this.definedLatex = definedLatex;
     }
 
     public String getErrorTitle() {

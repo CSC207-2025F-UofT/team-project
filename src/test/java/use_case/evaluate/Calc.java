@@ -16,6 +16,9 @@ final class Calc {
         if (!state.getErrorText().isEmpty()) {
             return state.getErrorTitle() + " — " + state.getErrorText();  // one line, easy to assert
         }
+        if (state.isDefinition()) {
+            return state.getResultText() + " " + state.getDefinedLatex();
+        }
         return state.getResultText();
     }
 

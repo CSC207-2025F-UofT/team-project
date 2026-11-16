@@ -1,5 +1,6 @@
 package view.glass;
 
+import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JLayeredPane;
@@ -44,16 +45,26 @@ public final class GlassNotices {
     public enum Kind { SUCCESS, ERROR, PROGRESS }
 
     public static NoticeHandle showSuccess(Component parent, String message) {
-        return show(parent, Kind.SUCCESS, "", message);
+        return showSuccess(parent, message, null);
+    }
+
+    // formula = e.g. a typeset equation drawn after the words, null for none
+    public static NoticeHandle showSuccess(Component parent, String message, Icon formula) {
+        return show(parent, Kind.SUCCESS, "", message, formula);
     }
 
     public static NoticeHandle showError(Component parent, String title, String message) {
-        return show(parent, Kind.ERROR, title, message);
+        return show(parent, Kind.ERROR, title, message, null);
     }
 
     // stays till the caller dismisses it, e.g. Calculating…
     public static NoticeHandle showProgress(Component parent, String message) {
-        return show(parent, Kind.PROGRESS, "", message);
+        return showProgress(parent, message, null);
+    }
+
+    // with a formula the … goes after it: "Calculating ½+2³…"
+    public static NoticeHandle showProgress(Component parent, String message, Icon formula) {
+        return show(parent, Kind.PROGRESS, "", message, formula);
     }
 
     // success fades after 2 s, errors stay till closed or fixed
@@ -61,14 +72,14 @@ public final class GlassNotices {
     private static final int TOP = 105;
     private static final int GAP = 8;
 
-    private static NoticeHandle show(Component parent, Kind kind, String title, String message) {
+    private static NoticeHandle show(Component parent, Kind kind, String title, String message, Icon formula) {
         Objects.requireNonNull(kind);
         Objects.requireNonNull(message);
         if (!SwingUtilities.isEventDispatchThread()) {
             java.util.concurrent.atomic.AtomicReference<NoticeHandle> reference = new java.util.concurrent.atomic.AtomicReference<>();
             java.util.concurrent.atomic.AtomicBoolean closed = new java.util.concurrent.atomic.AtomicBoolean();
             SwingUtilities.invokeLater(() -> {
-                NoticeHandle actual = show(parent, kind, title, message);
+                NoticeHandle actual = show(parent, kind, title, message, formula);
                 reference.set(actual);
                 if (closed.get()) actual.dismiss();
             });
@@ -85,7 +96,7 @@ public final class GlassNotices {
             stack = new NoticeStack(root);
             root.putClientProperty(KEY, stack);
         }
-        return stack.enqueue(kind, title, message);
+        return stack.enqueue(kind, title, message, formula);
     }
 
     /** One stack per root pane: multiple successes and errors are never silently replaced. */
@@ -105,8 +116,8 @@ public final class GlassNotices {
             root.getLayeredPane().addComponentListener(resizeListener);
         }
 
-        NoticeHandle enqueue(Kind kind, String title, String message) {
-            NoticeView view = new NoticeView(kind, title, message);
+        NoticeHandle enqueue(Kind kind, String title, String message, Icon formula) {
+            NoticeView view = new NoticeView(kind, title, message, formula);
             Displayed entry = new Displayed(view);
             view.onClose(() -> dismiss(entry));
             root.getLayeredPane().add(view, JLayeredPane.POPUP_LAYER);
@@ -211,6 +222,7 @@ public final class GlassNotices {
         final Kind kind;
         private final String title;
         private final String message;
+        private final Icon formula;  // null = words only
         private final JButton closeButton;
         private Runnable close = () -> { };
         private float opacity = 1f;
@@ -227,7 +239,12 @@ public final class GlassNotices {
         }
 
         NoticeView(Kind kind, String title, String message) {
+            this(kind, title, message, null);
+        }
+
+        NoticeView(Kind kind, String title, String message, Icon formula) {
             super(null);
+            this.formula = formula;
             this.kind = Objects.requireNonNull(kind);
             this.title = title == null ? "" : title;
             this.message = Objects.requireNonNull(message);
@@ -256,6 +273,11 @@ public final class GlassNotices {
         @Override public Dimension getPreferredSize() {
             if (kind != Kind.ERROR) {  // success + progress share the small pill
                 FontMetrics metrics = getFontMetrics(SUCCESS_TEXT);
+                if (formula != null) {
+                    int wide = metrics.stringWidth(message) + FORMULA_GAP + (int) Math.ceil(formula.getIconWidth() * formulaScale())
+                            + metrics.stringWidth(suffix()) + 98;
+                    return new Dimension(Math.max(205, Math.min(MAX_PILL, wide)), 64);
+                }
                 return new Dimension(Math.max(205, Math.min(480, metrics.stringWidth(message) + 98)), 64);
             }
             FontMetrics headingMetrics = getFontMetrics(HEADING);
@@ -308,7 +330,9 @@ public final class GlassNotices {
             }
 
             int textX = 69;
-            if (pill) {
+            if (pill && formula != null) {
+                paintWithFormula(g, textX, markerY, w);
+            } else if (pill) {
                 g.setFont(SUCCESS_TEXT);
                 FontMetrics fm = g.getFontMetrics();
                 g.setColor(new Color(28, 28, 30));
@@ -331,6 +355,40 @@ public final class GlassNotices {
             }
             g.dispose();
             super.paintComponent(graphics); // paints actual close JButton on top of the shell
+        }
+
+        private static final int FORMULA_GAP = 6;
+        private static final int FORMULA_MAX_H = 40;  // tall stuff like fractions gets shrunk to fit the pill
+        private static final int MAX_PILL = 560;
+
+        private String suffix() {
+            return kind == Kind.PROGRESS ? "…" : "";
+        }
+
+        private double formulaScale() {
+            return Math.min(1.0, FORMULA_MAX_H / (double) Math.max(1, formula.getIconHeight()));
+        }
+
+        // words, then the formula centred on the text, then … for progress
+        private void paintWithFormula(Graphics2D g, int textX, int markerY, int w) {
+            g.setFont(SUCCESS_TEXT);
+            FontMetrics fm = g.getFontMetrics();
+            g.setColor(new Color(28, 28, 30));
+            int baseline = markerY + (fm.getAscent() - fm.getDescent()) / 2;
+            g.drawString(message, textX, baseline);
+            int x = textX + fm.stringWidth(message) + FORMULA_GAP;
+            int room = w - x - 22 - fm.stringWidth(suffix());
+            double scale = Math.min(formulaScale(), room / (double) Math.max(1, formula.getIconWidth()));
+            if (scale > 0) {
+                double shownH = formula.getIconHeight() * scale;
+                Graphics2D f = (Graphics2D) g.create();  // icon messes w/ font + color, keep it off g
+                f.translate(x, markerY - shownH / 2);
+                f.scale(scale, scale);
+                formula.paintIcon(this, f, 0, 0);
+                f.dispose();
+                x += (int) Math.round(formula.getIconWidth() * scale);
+            }
+            g.drawString(suffix(), x, baseline);
         }
 
         private static String ellipsize(String message, FontMetrics fm, int width) {

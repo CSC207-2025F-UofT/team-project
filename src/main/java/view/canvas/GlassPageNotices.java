@@ -2,6 +2,7 @@ package view.canvas;
 
 import view.glass.GlassNotices;
 
+import javax.swing.Icon;
 import java.awt.Component;
 import java.util.ArrayList;
 import java.util.List;
@@ -19,10 +20,15 @@ final class GlassPageNotices implements Notices {
     }
 
     @Override
-    public void success(String text) {
+    public void success(String words, String latex) {
         clearError();  // something worked, old error is stale
-        lastSuccess = text;
-        GlassNotices.showSuccess(parent, text);
+        lastSuccess = plain(words, latex, "");
+        Icon formula = FormulaIcons.inline(latex);
+        if (formula == null) {
+            GlassNotices.showSuccess(parent, lastSuccess);
+        } else {
+            GlassNotices.showSuccess(parent, words, formula);
+        }
     }
 
     @Override
@@ -42,8 +48,12 @@ final class GlassPageNotices implements Notices {
     }
 
     @Override
-    public Runnable progress(String text) {
-        GlassNotices.NoticeHandle card = GlassNotices.showProgress(parent, text);
+    public Runnable progress(String words, String latex) {
+        String text = plain(words, latex, "…");
+        Icon formula = FormulaIcons.inline(latex);
+        GlassNotices.NoticeHandle card = formula == null
+                ? GlassNotices.showProgress(parent, text)
+                : GlassNotices.showProgress(parent, words, formula);
         working.add(text);
         boolean[] done = {false};
         return () -> {
@@ -53,6 +63,11 @@ final class GlassPageNotices implements Notices {
                 working.remove(text);
             }
         };
+    }
+
+    // raw text version, fallback when latex won't typeset (tests read it too)
+    private static String plain(String words, String latex, String end) {
+        return (latex == null || latex.isBlank() ? words : words + " " + latex) + end;
     }
 
     String shownProgress() {

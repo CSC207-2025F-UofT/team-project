@@ -95,7 +95,7 @@ final class PopupGraphing {
         }
         pending = formulaWorld;
         drawing.run();
-        drawing = notices.progress("Drawing the graph of " + latex + "…");
+        drawing = notices.progress("Drawing the graph of", latex);
         executor.execute(() -> {
             try {
                 controller.execute(latex, x, y);  // answer comes through the view model
@@ -127,7 +127,7 @@ final class PopupGraphing {
                     && state.getLatex().equals(lastLatex)) {
                 graphSaved.accept(pendingCapture, state.getLatex());
             }
-            notices.success("Graph of " + state.getLatex());
+            notices.success("Graph of", state.getLatex());
             placeRanges();
         }
     }
