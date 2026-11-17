@@ -116,16 +116,28 @@ The system informs the user that the movie is already in their favourites.
 The system does not add the movie again.
 
 ### Use Case 6
-Use Case: Seeing past comments and movie ratings
+Use Case: View past comments and movie ratings
 
 Primary actor: User clicking the movie posters and the past comments and ratings will pop up
 
 Precondition: 
 The user is logged in.
-Trigger: The user clicks on the movie poster.
+The user has searched for a movie and can view its poster.
+
+Trigger: User clicks on the movie poster.
+
+Success Outcome: The user can view the available comments and overall rating of the selected movie.
+
+Main success scenario:
+User clicks on the movie poster
+The system retrieves the comments and ratings associated with the selected movie
+The system displays the available comments and overall movie rating
 
 Extensions:
-2a. -
+2a. No comments or ratings are available for the selected movie
+the system displays a message indicating that no comments or ratings are available
+the system does not display any comments or ratings
+
 
 (Add additional use cases as needed.)
 ---
