@@ -1,9 +1,7 @@
 """训练与去重共用的保守标签规范化；原始标签不覆盖。"""
 import re
 
-NORMALIZATION_VERSION = 3
-MATRIX_ENVIRONMENTS = ('matrix', 'pmatrix', 'bmatrix', 'Bmatrix', 'vmatrix', 'Vmatrix', 'smallmatrix')
-MATRIX_ENV_RE = re.compile(r'\\(begin|end)\s*\{\s*(' + '|'.join(MATRIX_ENVIRONMENTS) + r')\s*\}')
+NORMALIZATION_VERSION = 2
 TOKEN_RE = re.compile(r"\\[a-zA-Z]+|\\.|\S", re.S)
 ALIASES = {r"\le": r"\leq", r"\ge": r"\geq", r"\ne": r"\neq", r"\to": r"\rightarrow",
            r"\Box": r"\square", "□": r"\square", "⟨": r"\langle", "⟩": r"\rangle",
@@ -83,10 +81,7 @@ def math_tokens(text: str) -> list[str]:
                 break
         wrapped = text[match.start():end]
         exact = WRAPPER_RE.fullmatch(wrapped)
-        matrix = MATRIX_ENV_RE.fullmatch(wrapped)
-        if matrix:
-            result.extend(['\\' + matrix[1], '{', matrix[2], '}'])
-        elif exact and "".join(exact[1].split()) in FUNCTIONS:
+        if exact and "".join(exact[1].split()) in FUNCTIONS:
             result.append("\\" + "".join(exact[1].split()))
         else:
             result.extend(TOKEN_RE.findall(wrapped))

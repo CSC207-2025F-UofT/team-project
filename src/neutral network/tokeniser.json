@@ -238,14 +238,7 @@
             "\\ddots" : 230,
             "&": 231,
             "\\%" : 232,
-            "$" : 233,
-            "matrix" : 234,
-            "pmatrix" : 235,
-            "bmatrix" : 236,
-            "Bmatrix" : 237,
-            "vmatrix" : 238,
-            "Vmatrix" : 239,
-            "smallmatrix" : 240
+            "$" : 233
 
 
         }
