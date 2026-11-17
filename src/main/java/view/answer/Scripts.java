@@ -29,7 +29,7 @@ public final class Scripts {
         // body char = tallest stroke beside the column, so the Σ itself, lowercase + other limits don't skew it
         List<Stroke> beside = new ArrayList<>(body);
         beside.removeAll(over);
-        double h = AnswerLayout.tallestStroke(beside.isEmpty() ? body : beside);
+        double h = AnswerLayout.tallestStroke(AnswerLayout.hasChars(beside) ? beside : body);  // just "=" beside says nothing
         if (AnswerLayout.charHeight(script) > SMALLER * h) {
             return false;
         }

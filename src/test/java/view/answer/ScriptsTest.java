@@ -119,4 +119,13 @@ class ScriptsTest {
         List<Stroke> five = List.of(stroke(237, 164, 223, 164, 222, 177, 236, 182, 230, 194, 221, 192));
         assertTrue(Scripts.stackedOn(body, five));
     }
+
+    @Test
+    void limitOnASumWithOnlyAnEqualsBesideIt() {
+        List<Stroke> body = List.of(
+                stroke(251, 200, 200, 200, 229, 232, 200, 264, 251, 264),  // Σ 64
+                stroke(261, 226, 285, 226), stroke(261, 236, 285, 236));  // = right after
+        List<Stroke> five = List.of(stroke(237, 164, 223, 164, 222, 177, 236, 182, 230, 194, 221, 192));
+        assertTrue(Scripts.stackedOn(body, five), "flat = beside says nothing about char size");
+    }
 }
