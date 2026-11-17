@@ -1,0 +1,1 @@
+Will contain all code tied to the Buyer perspective UseCase implementations.
