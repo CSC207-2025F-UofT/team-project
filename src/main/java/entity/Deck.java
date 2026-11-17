@@ -32,6 +32,8 @@ public class Deck {
 
   public ArrayList<User> getEditors() { return this.editors; }
 
+  public ArrayList<Card> getCards() { return this.cards; }
+
   public void add_card(Card card) {
     this.cards.add(card);
   }

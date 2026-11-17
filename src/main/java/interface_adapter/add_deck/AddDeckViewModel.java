@@ -26,5 +26,7 @@ public class AddDeckViewModel {
   public void setError(String error) {
     this.error = error;
     this.message = "";
+
+    support.firePropertyChange("error", null, error);
   }
 }

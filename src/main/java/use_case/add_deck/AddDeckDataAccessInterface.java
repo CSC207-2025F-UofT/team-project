@@ -13,5 +13,5 @@ public interface AddDeckDataAccessInterface {
 
   int generateDeckId();
 
-  void saveDeck(int deckId, String name, String owner);
+  void saveDeck(Deck deck);
 }
