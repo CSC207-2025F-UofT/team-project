@@ -7,7 +7,7 @@
 - Grace Manurung
 - Syaikha Faiza Arifin
 - Yuxuan Lin
-- Frank Li
+- Boao Li
 - Zhanyuan Su
 ---
 ## Project Description
@@ -20,13 +20,13 @@ entertainment
 ### User Story 1:
 #### As a user of the movie finder I want to be able to search movies by their title so that I can look at its description, rating and other relevant information.  
 ### User Story 2:
-#### As a user [type of user] I want to see the details regarding the searched movie so that I can [some benefit]
+#### As a user of the movie finder, I want to see the details regarding the searched movie so that I can review its synopsis, rating, release year, and cast to decide if I want to watch it.
 ### User Story 3:
 #### As a user of the movie finder I want to have a watchlist so that I can save movies I plan to watch later.
 ### User Story 4:
 #### As a user of the movie finder I want to add favourites so that I can easily find and keep track of the movies I like.
 ### User Story 5:
-#### As a user [type of user] I want to see the movie posters so that I can [some benefit]
+#### As a user of the movie finder, I want to view movie posters so that I can visually identify films.
 ### User Story 6:
 #### As a user of the movie finder I want to see past comments or movie ratings so that I can look at other's opinion about the movie and also the overall rating of a movie.
 ### User Story 7:
