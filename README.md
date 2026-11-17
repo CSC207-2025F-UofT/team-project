@@ -52,7 +52,7 @@
 ### Use Case 3: Guess Input
 #### Preconditions:
 * The game is currently running
-* There is no active question, i.e. the game is just starting or the previous question has been completed
+* There is an active question, i.e. a current question board is loaded.
 
 #### Trigger:
 * The host inputs to the system to check if the contestants answer is valid.
