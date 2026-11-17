@@ -118,7 +118,9 @@ Room
 ## API Usage
 
 **API Name:** https://www.dnd5eapi.co/
+
 **Documentation:** [Link]
+
 **How it is used in the program:**
 
 • Used to fetch races, classes, monsters and equipment, which form the contents of the game.
