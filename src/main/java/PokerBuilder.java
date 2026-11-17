@@ -2,11 +2,10 @@
 import javax.swing.*;
 import java.awt.*;
 
-import main.interface_adapters.ViewManagerModel;
-import main.view.MainMenuView;
-import main.view.GameView;
-import main.interface_adapters.MainMenuViewModel;
 import main.interface_adapters.GameViewModel;
+import main.interface_adapters.ViewManagerModel;
+import main.interface_adapters.main_menu.*;
+import main.view.*;
 import main.view.ViewManager;
 
 
@@ -15,10 +14,14 @@ public class PokerBuilder {
     private final CardLayout cardLayout = new CardLayout();
 
     private final ViewManagerModel viewManagerModel = new ViewManagerModel();
-    private ViewManager viewManager = new ViewManager(cardPanel, cardLayout, viewManagerModel);
+    private final ViewManager viewManager = new ViewManager(cardPanel, cardLayout, viewManagerModel);
 
     private MainMenuView mainMenuView;
     private MainMenuViewModel mainMenuViewModel;
+
+    private GameView gameView;
+    private GameViewModel gameViewModel;
+
 
     public PokerBuilder() {cardPanel.setLayout(cardLayout);}
 
@@ -27,7 +30,19 @@ public class PokerBuilder {
         this.mainMenuViewModel = new MainMenuViewModel();
         this.mainMenuView = new MainMenuView(mainMenuViewModel);
 
-        cardPanel.add(mainMenuView);
+        MainMenuPresenter mainMenuPresenter = new MainMenuPresenter(viewManagerModel,gameViewModel);
+        MainMenuController mainMenuController = new MainMenuController(mainMenuPresenter);
+        mainMenuView.setMainMenuController(mainMenuController);
+
+        cardPanel.add(mainMenuView, MainMenuViewModel.VIEW_NAME);
+        return this;
+    }
+
+    public PokerBuilder addGameView() {
+        this.gameViewModel = new GameViewModel();
+        this.gameView = new GameView(gameViewModel);
+
+        cardPanel.add(gameView, GameViewModel.VIEW_NAME);
         return this;
     }
 

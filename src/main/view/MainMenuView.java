@@ -1,24 +1,27 @@
 package main.view;
 
-import main.interface_adapters.MainMenuViewModel;
+import main.interface_adapters.main_menu.MainMenuController;
+import main.interface_adapters.main_menu.MainMenuViewModel;
 import javax.swing.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.awt.event.*;
 
 public class MainMenuView extends JPanel {
 
     private final String viewName = "Main Menu";
     private final MainMenuViewModel viewModel;
+    private MainMenuController mainMenuController = null;
+
     public final JButton play;
+
 
     public MainMenuView(MainMenuViewModel mainMenuViewModel) {
         this.viewModel = mainMenuViewModel;
 
-        final JLabel title = new JLabel(viewModel.TITLE_LABEL);
+        final JLabel title = new JLabel(MainMenuViewModel.TITLE_LABEL);
         title.setAlignmentX(CENTER_ALIGNMENT);
 
         final JPanel button = new JPanel();
-        this.play = new JButton(viewModel.PLAY_LABEL);
+        this.play = new JButton(MainMenuViewModel.PLAY_LABEL);
         button.add(this.play);
 
         this.play.addActionListener(
@@ -26,7 +29,7 @@ public class MainMenuView extends JPanel {
                     @Override
                     public void actionPerformed(ActionEvent evt) {
                         if (evt.getSource().equals(play)) {
-                            System.out.println("User pressed Play");
+                            mainMenuController.switchToGameView();
                         }
                     }
                 }
@@ -36,5 +39,9 @@ public class MainMenuView extends JPanel {
         this.add(title);
         this.add(button);
 
+    }
+
+    public void setMainMenuController(MainMenuController mainMenuController) {
+        this.mainMenuController = mainMenuController;
     }
 }

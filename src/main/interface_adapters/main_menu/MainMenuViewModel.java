@@ -1,4 +1,4 @@
-package main.interface_adapters;
+package main.interface_adapters.main_menu;
 
 public class MainMenuViewModel {
 
@@ -7,7 +7,4 @@ public class MainMenuViewModel {
 
     public static final String VIEW_NAME = "main menu";
 
-    public MainMenuViewModel() {
-
-    }
 }

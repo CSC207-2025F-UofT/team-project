@@ -5,7 +5,10 @@ public class Main {
 
     public static void main(String[] args) {
         PokerBuilder pokerBuilder = new PokerBuilder();
-        JFrame application = pokerBuilder.build();
+        JFrame application = pokerBuilder
+                .addMainMenuView()
+                .addGameView()
+                .build();
 
         application.pack();
         application.setLocationRelativeTo(null);
