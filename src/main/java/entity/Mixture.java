@@ -36,6 +36,15 @@ public class Mixture {
   }
 
   /**
+   * Sets the mixture's pH. Only reaction rules should call this.
+   *
+   * @param ph the new pH
+   */
+  public void setPh(double ph) {
+    this.ph = ph;
+  }
+
+  /**
    * Adds a substance. Water and ether join their layer straight away. Anything else sits
    * undissolved until the mixture is mixed.
    *
