@@ -20,9 +20,9 @@ public class SkillListController {
      * @param student student that contains the required courses to be analyzed
      */
     public void execute(Student student) {
-        final AnalysisInputData AnalysisInputData = new AnalysisInputData(student);
+        final AnalysisInputData analysisInputData = new AnalysisInputData(student);
 
-        userAnalysisUseCaseInteractor.execute(AnalysisInputData);
+        userAnalysisUseCaseInteractor.execute(analysisInputData);
     }
 
     /**

@@ -5,7 +5,7 @@ import entity.Student;
 /**
  * The DAO interface for the Change Password Use Case.
  */
-public interface AnalysisStudentDataAccessInterface {
+public interface SkillDataAccessInterface {
 
     /**
      * Updates the system to record this user's password.
@@ -13,7 +13,4 @@ public interface AnalysisStudentDataAccessInterface {
      */
     void changeSkills(Student student);
 
-    String getCourseDescription(String course);
-
-    String getSkill(String description);
 }
