@@ -85,42 +85,59 @@ Choose race and class.
 • Success outcome: The monster is defeated, its defeat is recorded, and the player can continue exploring the dungeon. The character's remaining health and any changes to their inventory are preserved.
 
 • Main success scenario:
+```text
   1. The player enters a room with a monster
-  2. The system displays the monster's description, health, and combat information.
-  3. The system determines which character or monster takes the first turn based on relevant stats of either.
-  4. If player is first, the system indicates that it is the player's turn (otherwise refer to relevant steps from 8.).
-  5. The player chooses an action, such as attacking with a weapon or using an item from their inventory.
-  6. The system calculates the outcome of the player's action using the appropriate dice rolls and character or item stats.
-  7. The system updates the monster's health and displays the result of the player's action.
-  8. If the monster is still alive, the system begins the monster's turn).
-  9. The system determines the outcome of the monster's attack and updates the character's health.
-  10. The system displays the result of the monster's action.
-  11. The system repeats steps 4–10 until either the monster or the character is defeated.
-  12. The system informs the player that the monster has been defeated and allows the player to continue exploring.
 
+  2. The system displays the monster's description, health, and combat information.
+
+  3. The system determines which character or monster takes the first turn based on relevant stats of either.
+
+  4. If player is first, the system indicates that it is the player's turn (otherwise refer to relevant steps from 8.).
+
+  5. The player chooses an action, such as attacking with a weapon or using an item from their inventory.
+
+  6. The system calculates the outcome of the player's action using the appropriate dice rolls and character or item stats.
+
+  7. The system updates the monster's health and displays the result of the player's action.
+
+  8. If the monster is still alive, the system begins the monster's turn).
+
+  9. The system determines the outcome of the monster's attack and updates the character's health.
+
+  10. The system displays the result of the monster's action.
+
+  11. The system repeats steps 4–10 until either the monster or the character is defeated.
+
+  12. The system informs the player that the monster has been defeated and allows the player to continue exploring.
+```
 • Extensions:
+```text
   5a: The player chooses to use an item:
       1. The system displays the available items from the player's current inventory.
       2. The player selects an item from the list.
       3. The system applies the item's effect.
       4. The system updates the character's current inventory and relevant attributes.
       5. Combat continues
+
   6a: The player's attack misses:
       1. The system informs the player that the attack was unsuccessful.
       2. The monster's health remains unchanged and combat continues.
+
   8a: The monster's attack misses:
       1. The system informs the player that the attack was unsuccessful.
       2. The character's health remains unchanged and combat continues.
+
   11a: The character's health reaches <=0:
       1. The system informs the player that their character has been defeated.
       2. The system ends the combat encounter.
       3. The system records the character's final progress as a numerical score.
       4. The use case ends.
+
   12a. The monster has loot that is dropped:
       1. The system displays what loot was dropped by the monster.
       2. The system adds the selected items if sufficient inventory space is available.
       3. Any uncollected items remain available.
-    
+```
 (Add additional use cases as needed.)
 ---
 ## Minimal Viable Product (MVP)
@@ -148,13 +165,13 @@ Item
 
 • Instance variables: name, description, type (weapon, armor, potion), value
 
-• Methods: get
+• Methods: getDescription(), getValue()
 
 Inventory
 
-• Instance variables: item, maxCapacity
+• Instance variables: items, maxCapacity
 
-• Methods: addItem(Item), removeItem(Item), isFull()
+• Methods: addItem(Item), removeItem(Item), isFull(), getItems()
 
 Room
 
@@ -162,6 +179,23 @@ Room
 
 • Methods: getExit(direction), removeItem(Item), monsterPresent()
 
+Monster
+
+• Instance variables: name, description, currentHealth, maxHealth, loot
+
+• Methods: takeDamage(int), isAlive(), attack(Character)
+
+Character
+
+• Instance variables: TODO ADD THESE
+
+• Methods: takeDamage(int), isAlive()
+
+Combat
+
+• Instance variables: character, monster, currentTurn, isDone
+
+• Methods: startCombat(), executeTurn(), update(), endCombat
 
 (Add additional entities as needed.)
 ---
