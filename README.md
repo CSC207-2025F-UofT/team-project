@@ -99,6 +99,7 @@ MAIN SUCCESS SCENARIO
 8. When the user clicks "Logout", the system clears the current-user session and returns to the Login page.
 
 EXTENSION
+
 User does not have an account
   1. The user clicks the "Sign Up" button on the Login page.
   2. The system displays the Registration page.
@@ -108,9 +109,11 @@ User does not have an account
   6. The system creates and saves the new account.
   7. The system displays a registration success message and returns to the Login page.
   8. The user continues from Step 2 of the Main Success Scenario.
+
 Invalid username or password
   1. The system displays an error message indicating that the username or password is incorrect.
   2. The user can re-enter their credentials and try again.
+
 Invalid registration information
   1. If the system cannot verify the account because the data service is unavailable, it displays an error message.
   2. The user remains on the Login page and can try again later.
