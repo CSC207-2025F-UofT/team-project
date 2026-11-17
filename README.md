@@ -17,9 +17,8 @@
 - Entertainment
 
 ---
-
 ## User Stories
-### As surveyor, I want to be able to store survey results, so that they can be accessed later.
+### As a host, I want to create custom questions and answers, and save them, so that players can play the game in the future.
 ### As a player, I want each round's question displayed with the correct number of hidden answers, so that I know how many answers there are to find.
 ### As a host, I want to be able to type in a guess and see if it on the board, so that teams can earn points.
 ### As a player, I want my team score tracked and displayed throughout the game and saved between sessions, so we can track our teams history.
@@ -27,7 +26,28 @@
 
 ---
 ## Use Cases
-### Use Case 1
+### Use Case 1: Add and store questions
+#### Primary actor:
+* Game host
+
+#### Preconditions:
+* The game is running and the user has navigated to the "Add Question" screen.
+
+#### Trigger:
+* The user selects the "Add Question" option from the menu and submits a new question with its answers and point values.
+#### Main success scenario:
+1. The user selects the "Add Question" from the main menu.
+2. The system displays the question creation frame.
+3. The user enters the question and answers.
+4. The user clicks the "Save" button.
+5. The system validates the input.
+6. The system create the Question entity and store it.
+#### Extensions:
+* #### 5a: empty question or missing answers
+* The system displays an error message. 
+* #### 5b: Duplicate Question
+* The system warns the user about the duplicate.
+
 ### Use Case 2: Display a new question
 #### Primary actor: 
 * Game show host
