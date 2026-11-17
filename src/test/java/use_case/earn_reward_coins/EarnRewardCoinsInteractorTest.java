@@ -70,14 +70,18 @@ class EarnRewardCoinsInteractorTest {
     }
 
     @Test
-    void spendingEqualToBudgetIsRejected() {
+    void spendingEqualToBudgetEarnsReward() {
         setBudget("20.00");
         dao.setTotalSpending(
                 USER_ID, yesterday, new BigDecimal("20.00"));
 
         claim();
 
-        assertRejectedWithoutReward();
+        assertNotNull(presenter.result);
+        assertNull(presenter.error);
+        assertEquals(REWARD, presenter.result.getCoinsEarned());
+        assertEquals(REWARD, dao.getCoinBalance(USER_ID));
+        assertTrue(dao.hasClaimedReward(USER_ID, yesterday));
     }
 
     @Test
