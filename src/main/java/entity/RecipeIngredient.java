@@ -7,7 +7,7 @@ public class RecipeIngredient {
     /*
     TODO
      */
-    private RecipeIngredient(IngredientName name, String measure) {
+    public RecipeIngredient(IngredientName name, String measure) {
         this.name = name;
         this.measure = measure;
     }
