@@ -1188,7 +1188,7 @@ public class DrawingCanvas extends JPanel {
         return capture(mine);
     }
 
-    // lasso pick -> one formula, gaps and all; null if empty or answered
+    // lasso pick -> one formula, gaps and all; null if empty, already answered, or 2+ answered (moving them)
     public FormulaCapture registerSelection() {
         List<Stroke> picked = selectedInkSnapshot();
         if (picked.isEmpty()) {
@@ -1199,12 +1199,17 @@ public class DrawingCanvas extends JPanel {
                 return captureForRecalculation(f.getId());  // already one formula, keep it
             }
         }
+        Set<Long> answered = new HashSet<>();
         for (Stroke s : picked) {
             Formula f = book.holding(s);
             if (f != null && f.getAnswer() != null) {
-                return null;
+                answered.add(f.getId());
             }
         }
+        if (answered.size() > 1) {
+            return null;
+        }
+        // one answered + more/less ink = they're fixing its grouping, old answer goes
         Formula mine = book.add(picked, nextRevision());
         repaint();
         return capture(mine);

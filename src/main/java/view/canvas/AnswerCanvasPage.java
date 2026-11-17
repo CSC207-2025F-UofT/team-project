@@ -267,11 +267,12 @@ public class AnswerCanvasPage extends CanvasPage {
         } else if (targetId >= 0) {
             capture = getSharedCanvas().captureForRecalculation(targetId);
         }
+        boolean pick = targetPick;
         targetStroke = null;
         targetId = -1;
         targetPick = false;
-        if (capture == null) {
-            capture = nextWaiting();
+        if (capture == null && !pick) {
+            capture = nextWaiting();  // a pick is on purpose, never swap in another formula
         }
         if (capture != null) {
             readAhead();

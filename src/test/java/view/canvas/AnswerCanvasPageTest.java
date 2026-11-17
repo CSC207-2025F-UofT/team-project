@@ -701,6 +701,25 @@ class AnswerCanvasPageTest {
     }
 
     // mouse comes to rest at (x, y), no button down
+    @Test
+    void pickOnAnAnsweredFormulaNeverOffersAnother() throws Exception {
+        shared.setFormulaRecognizer(image -> "1+1=");
+        openPage();
+        write();
+        waitPopup("1+1=");
+        clickCalculate();
+        waitFor(() -> canvas.getAnswers().size() == 1, "the answer");
+        onEdt(() -> {
+            stroke(400, 100, 450, 150);            // two more in one go, one waits its turn
+            stroke(700, 100, 750, 150);
+        });
+        waitPopup("1+1=");
+
+        lasso(80, 80, 220, 170);                   // just the answered one again
+        Thread.sleep(400);
+        assertNull(popup(), "a pick never swaps in some other formula");
+    }
+
     private void hover(int x, int y) throws Exception {
         onEdt(() -> canvas.dispatchEvent(new MouseEvent(canvas, MouseEvent.MOUSE_MOVED, 0, 0, x, y, 0, false)));
     }

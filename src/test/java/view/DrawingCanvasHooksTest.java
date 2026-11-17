@@ -1,6 +1,7 @@
 package view;
 
 import entity.Stroke;
+import interface_adapter.AnswerKind;
 import org.junit.jupiter.api.Test;
 
 import java.awt.Rectangle;
@@ -221,5 +222,42 @@ class DrawingCanvasHooksTest {
         canvas.clear();
         assertNull(canvas.registerNewInk(a, List.of(a)));
         assertNull(canvas.formulaBounds(12345));
+    }
+
+    // one stroke bound + answered, 40 tall at x
+    private Stroke answeredAt(int x) {
+        write(x, 100, x, 140);
+        Stroke s = last();
+        FormulaCapture c = canvas.registerNewInk(s, List.of(s));
+        assertTrue(canvas.showAnswer(c.getId(), c.getRevision(), AnswerKind.AFTER_EQUALS, "1", false));
+        return s;
+    }
+
+    private void lasso(int left, int top, int right, int bottom) {
+        canvas.setTool(DrawingCanvas.Tool.LASSO);
+        write(left, top, right, top, right, bottom, left, bottom);
+    }
+
+    @Test
+    void lassoAddingMissedInkToAnAnsweredFormulaRebuildsIt() {
+        Stroke a = answeredAt(100);
+        write(100, 200, 130, 230);                 // missed bit, stays loose
+        Stroke missed = last();
+        lasso(80, 80, 160, 250);
+        FormulaCapture capture = canvas.registerSelection();
+        assertNotNull(capture, "user fixed the grouping, read it again");
+        assertEquals(2, strokesIn(capture));
+        assertTrue(canvas.isBound(a) && canvas.isBound(missed));
+        assertTrue(canvas.getAnswers().isEmpty(), "old answer was for the wrong ink");
+    }
+
+    @Test
+    void lassoOverTwoAnsweredFormulasLeavesThem() {
+        answeredAt(100);
+        answeredAt(400);
+        lasso(80, 80, 600, 200);
+        assertNull(canvas.registerSelection());
+        assertEquals(2, canvas.getAnswers().size());
+        assertEquals(2, canvas.getFormulas().size());
     }
 }
