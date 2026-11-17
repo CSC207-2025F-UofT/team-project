@@ -13,12 +13,13 @@ A student signs up, logs in, and lands on a home page listing their enrolled cou
   - the **estimated grade** and the **target grade** as letter grades (A, B, C, D, ...);
   - the list of **main topics/chapters**, each marked **green** (confident), **yellow** (not so confident), or **red** (needs more attention).
 - **Calculate their current grade** in a small pop-up grade calculator, by entering test/assignment/exam marks and how much each one weighs.
+- **See which subjects they are most confident in**: courses are grouped by subject (every MAT course, every CSC course, ...) and the subjects are ranked by the average confidence of their topics.
 
 Data is saved per user, so courses, topic confidence and marks are still there after the program is restarted.
 
 ## Use cases and team split
 
-Signup, login, logout and change password come from the starter code and are reused. The six new use cases below are each one CA engine, two per team member.
+Signup, login, logout and change password come from the starter code and are reused. The new use cases below are each one CA engine.
 
 | # | Use case | Trigger | What the interactor does | Owner |
 |---|---|---|---|---|
@@ -28,20 +29,28 @@ Signup, login, logout and change password come from the starter code and are reu
 | 4 | Update topic confidence | Green/yellow/red selector on a topic | Sets the topic's confidence level and saves | Member B |
 | 5 | Calculate current grade | Calculate in the pop-up | Validates marks and weights, computes the weighted grade, saves the assessments, updates the estimated grade | Member C |
 | 6 | Set target grade | Edit target on progress page | Updates the target letter grade and reports the average needed on the remaining weight | Member C |
+| 7 | Rank subjects by confidence | Subject Ranking button on home | Groups the user's courses by subject code (the letters of the course code, e.g. MAT), averages the confidence of every topic in each subject (green 100%, yellow 50%, red 0%), and ranks the subjects from most to least confident; tied subjects share a rank | Member C |
 
 Each member owns one screen area (home, progress page, calculator pop-up), which keeps pull requests from colliding. Possible replacements or future extensions: Add Topic, Drop Course.
 
 Shared by everyone: `Main`, `AppBuilder`, the entities and factories, and the data access objects.
+
+## User story: Rank subjects by confidence (use case 7)
+
+**As a user, I can know which category of courses I am good at, so that I know where to spend my study time.**
+
+Mia is enrolled in CSC207, CSC148, MAT137 and STA247. On the home page she presses Subject Ranking. The app groups her courses by subject (every MAT course together, every CSC course together, and so on) and ranks the subjects by her average confidence across all their topics, where a green topic counts as 100%, yellow as 50% and red as 0%. She sees Mathematics first at 83%, Computer Science second at 30% and Statistics last at 0%, so she decides to spend this weekend on Statistics.
 
 ## Screens
 
 | View | Contents | Use cases |
 |---|---|---|
 | `SignupView`, `LoginView` | Existing | Signup, login |
-| `HomeView` | Course list, Enrol button, logout | 2, 3 (opens a course), logout |
+| `HomeView` | Course list, Enrol button, Subject Ranking button, logout | 2, 3 (opens a course), 7, logout |
 | `EnrolView` | Course details form | 1 |
 | `CourseProgressView` | Estimated and target grade, topic list with colour selectors, Calculate Grade button | 3, 4, 6 |
 | `GradeCalculatorDialog` | Pop-up with rows of name, mark, weight | 5 |
+| `SubjectRankingDialog` | Pop-up table of subjects with rank, courses, average confidence and topic counts | 7 |
 
 ## Package structure
 
@@ -55,7 +64,8 @@ src/main/java
 │   ├── Course.java                    code, name, targetGrade, topics, assessments
 │   ├── CourseFactory.java
 │   ├── Topic.java                     name + ConfidenceLevel
-│   ├── ConfidenceLevel.java           constants GREEN, YELLOW, RED; fromName()
+│   ├── ConfidenceLevel.java           constants GREEN, YELLOW, RED; fromName(), getScore()
+│   ├── Subject.java                   a subject code and its courses; average confidence
 │   ├── Assessment.java                name, mark, weight
 │   └── LetterGrade.java               constants A+..F; fromPercentage(), fromLabel()
 ├── use_case/
@@ -65,7 +75,8 @@ src/main/java
 │   ├── view_course_progress/
 │   ├── update_topic_confidence/
 │   ├── calculate_grade/
-│   └── set_target_grade/
+│   ├── set_target_grade/
+│   └── rank_subjects/
 │        each: XInputBoundary, XInputData, XInteractor,
 │              XOutputBoundary, XOutputData, XCourseDataAccessInterface
 ├── interface_adapter/
@@ -77,7 +88,8 @@ src/main/java
 │   │                      ViewCourseProgress Controller + Presenter
 │   ├── update_topic_confidence/   Controller, Presenter
 │   ├── calculate_grade/   Controller, Presenter, GradeCalculatorViewModel, State
-│   └── set_target_grade/  Controller, Presenter
+│   ├── set_target_grade/  Controller, Presenter
+│   └── rank_subjects/     Controller, Presenter, SubjectRankingViewModel, State
 ├── data_access/
 │   ├── FileUserDataAccessObject.java  (existing)
 │   ├── DBCourseDataAccessObject.java  (API-backed; implements all six course interfaces)
@@ -87,7 +99,8 @@ src/main/java
     ├── HomeView.java                  course list + Enrol button (from LoggedInView)
     ├── EnrolView.java                 course details form
     ├── CourseProgressView.java        estimated/target grade, topic list with colour selectors
-    └── GradeCalculatorDialog.java     JDialog pop-up
+    ├── GradeCalculatorDialog.java     JDialog pop-up
+    └── SubjectRankingDialog.java      JDialog pop-up with the subject ranking
 
 src/test/java/use_case/<each use case>/XInteractorTest.java
 ```
@@ -134,6 +147,17 @@ Planned JSON shape per user:
   ]
 }
 ```
+
+## Integration notes for use cases 5, 6 and 7
+
+Use cases 5 (Calculate current grade), 6 (Set target grade) and 7 (Rank subjects by confidence) are implemented and wired in `AppBuilder` (`addCalculateGradeUseCase`, `addSetTargetGradeUseCase`, `addRankSubjectsUseCase`). To try them before the progress page exists, run `src/test/java/app/GradeToolsDemo.java` from the IDE.
+
+What the other use cases need to do to connect them:
+
+- **Course progress page (use case 3, Member B).** `interface_adapter/course_progress/` holds a minimal `CourseProgressViewModel` and `CourseProgressState`, which both presenters update. Extend these rather than creating a second view model. When a course is opened, fill the state's `username`, `courseCode`, `targetGrade`, `estimatedGrade` and `assessments` (the grade calculator starts from these rows). In `CourseProgressView`, add `appBuilder.getTargetGradePanel()` and make the Calculate Grade button call `appBuilder.getGradeCalculatorDialog().open()`.
+- **Home page (Member A).** Add a Subject Ranking button to `HomeView` that calls `appBuilder.getSubjectRankingDialog().open(username)` with the logged-in username.
+- **Course DAO.** `AppBuilder` uses `InMemoryCourseDataAccessObject` for now, so courses are lost on restart. When `DBCourseDataAccessObject` is written, add `CalculateGradeCourseDataAccessInterface` and `SetTargetGradeCourseDataAccessInterface` (both `getCourse(username, courseCode)` and `saveCourse(username, course)`) and `RankSubjectsCourseDataAccessInterface` (`getCourses(username)`) to its `implements` list, and switch the field marked TODO in `AppBuilder`.
+- **Letter grades.** The target grade selector reads `CourseProgressViewModel.GRADE_OPTIONS`, a copy of the `LetterGrade` labels so views do not import entities. `TargetMessageFormatterTest` fails if the two lists drift apart.
 
 ## Testing
 

@@ -1,8 +1,13 @@
 package app;
 
 import data_access.FileUserDataAccessObject;
+import data_access.InMemoryCourseDataAccessObject;
 import entity.UserFactory;
 import interface_adapter.ViewManagerModel;
+import interface_adapter.calculate_grade.CalculateGradeController;
+import interface_adapter.calculate_grade.CalculateGradePresenter;
+import interface_adapter.calculate_grade.GradeCalculatorViewModel;
+import interface_adapter.course_progress.CourseProgressViewModel;
 import interface_adapter.logged_in.ChangePasswordController;
 import interface_adapter.logged_in.ChangePasswordPresenter;
 import interface_adapter.logged_in.LoggedInViewModel;
@@ -14,6 +19,9 @@ import interface_adapter.logout.LogoutPresenter;
 import interface_adapter.signup.SignupController;
 import interface_adapter.signup.SignupPresenter;
 import interface_adapter.signup.SignupViewModel;
+import use_case.calculate_grade.CalculateGradeInputBoundary;
+import use_case.calculate_grade.CalculateGradeInteractor;
+import use_case.calculate_grade.CalculateGradeOutputBoundary;
 import use_case.change_password.ChangePasswordInputBoundary;
 import use_case.change_password.ChangePasswordInteractor;
 import use_case.change_password.ChangePasswordOutputBoundary;
@@ -26,6 +34,7 @@ import use_case.logout.LogoutOutputBoundary;
 import use_case.signup.SignupInputBoundary;
 import use_case.signup.SignupInteractor;
 import use_case.signup.SignupOutputBoundary;
+import view.GradeCalculatorDialog;
 import view.LoggedInView;
 import view.LoginView;
 import view.SignupView;
@@ -53,6 +62,16 @@ public class AppBuilder {
     private LoggedInViewModel loggedInViewModel;
     private LoggedInView loggedInView;
     private LoginView loginView;
+
+    // The main window. It is created early so that pop-ups can use it as their owner.
+    private final JFrame application = new JFrame("University Learning Progress Tracker");
+
+    // Course data. TODO: replace with DBCourseDataAccessObject once it is written,
+    // so that courses are still there after the program is restarted.
+    final InMemoryCourseDataAccessObject courseDataAccessObject =
+            new InMemoryCourseDataAccessObject();
+    private final CourseProgressViewModel courseProgressViewModel = new CourseProgressViewModel();
+    private GradeCalculatorDialog gradeCalculatorDialog;
 
     public AppBuilder() {
         cardPanel.setLayout(cardLayout);
@@ -128,8 +147,36 @@ public class AppBuilder {
         return this;
     }
 
+    /**
+     * Adds the Calculate Grade Use Case (use case 5) to the application.
+     * The course progress page opens the pop-up with getGradeCalculatorDialog().open().
+     * @return this builder
+     */
+    public AppBuilder addCalculateGradeUseCase() {
+        final GradeCalculatorViewModel gradeCalculatorViewModel = new GradeCalculatorViewModel();
+        gradeCalculatorDialog = new GradeCalculatorDialog(application, gradeCalculatorViewModel,
+                courseProgressViewModel);
+
+        final CalculateGradeOutputBoundary calculateGradeOutputBoundary =
+                new CalculateGradePresenter(gradeCalculatorViewModel, courseProgressViewModel);
+        final CalculateGradeInputBoundary calculateGradeInteractor =
+                new CalculateGradeInteractor(courseDataAccessObject, calculateGradeOutputBoundary);
+
+        final CalculateGradeController calculateGradeController =
+                new CalculateGradeController(calculateGradeInteractor);
+        gradeCalculatorDialog.setCalculateGradeController(calculateGradeController);
+        return this;
+    }
+
+    public CourseProgressViewModel getCourseProgressViewModel() {
+        return courseProgressViewModel;
+    }
+
+    public GradeCalculatorDialog getGradeCalculatorDialog() {
+        return gradeCalculatorDialog;
+    }
+
     public JFrame build() {
-        final JFrame application = new JFrame("User Login Example");
         application.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
         application.add(cardPanel);
