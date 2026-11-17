@@ -738,6 +738,21 @@ class AnswerCanvasPageTest {
         waitFor(() -> calls.get() >= 3, "both read");
     }
 
+    @Test
+    void limitFoldedIntoAnEditedFormulaStillPopsUp() throws Exception {
+        shared.setFormulaRecognizer(image -> "1+1=");
+        openPage();
+        write();
+        waitPopup("1+1=");
+        onEdt(() -> {
+            stroke(110, 160, 125, 175);            // small limit under it, loose
+            stroke(205, 100, 205, 150);            // then a stroke on the formula
+        });
+        waitPopup("1+1=");
+        assertEquals(1, shared.getFormulas().size());
+        assertEquals(3, shared.getFormulas().get(0).getStrokes().size());
+    }
+
     private void hover(int x, int y) throws Exception {
         onEdt(() -> canvas.dispatchEvent(new MouseEvent(canvas, MouseEvent.MOUSE_MOVED, 0, 0, x, y, 0, false)));
     }
