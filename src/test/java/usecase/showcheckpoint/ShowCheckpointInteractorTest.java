@@ -2,6 +2,7 @@ package usecase.showcheckpoint;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import data.InMemoryLabDataAccessObject;
@@ -15,7 +16,7 @@ import usecase.ChoiceOrderer;
 
 class ShowCheckpointInteractorTest {
   private ShowCheckpointOutputData output;
-  private String error;
+  private Integer noCheckpointStep;
   private final InMemoryLabDataAccessObject dataAccess = new InMemoryLabDataAccessObject();
   private final ShowCheckpointOutputBoundary presenter = new ShowCheckpointOutputBoundary() {
     @Override
@@ -24,8 +25,8 @@ class ShowCheckpointInteractorTest {
     }
 
     @Override
-    public void prepareFailView(String message) {
-      error = message;
+    public void prepareNoCheckpointView(int stepIndex) {
+      noCheckpointStep = stepIndex;
     }
   };
   private final ShowCheckpointInteractor interactor =
@@ -93,8 +94,9 @@ class ShowCheckpointInteractorTest {
   }
 
   @Test
-  void unknownStepFails() {
+  void aStepWithNoCheckpointIsReportedAsSuchNotAsAnError() {
     interactor.execute(new ShowCheckpointInputData(99));
-    assertEquals("There is no checkpoint after step 99.", error);
+    assertEquals(99, noCheckpointStep);
+    assertNull(output, "no question is shown");
   }
 }

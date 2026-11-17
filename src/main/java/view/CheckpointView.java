@@ -105,10 +105,12 @@ public class CheckpointView extends JPanel implements PropertyChangeListener {
   }
 
   /**
-   * Pauses the procedure with the checkpoint that follows a step.
+   * Pauses the procedure with the checkpoint that follows a step. A step with no checkpoint
+   * doesn't pause: {@code onContinue} runs straight away.
    *
    * @param stepIndex the index of the step the student just finished
-   * @param onContinue called when the student answers correctly and clicks Continue
+   * @param onContinue called when the student answers correctly and clicks Continue, or at
+   *     once if the step has no checkpoint
    */
   public void open(int stepIndex, Runnable onContinue) {
     this.onContinue = onContinue;
@@ -118,6 +120,10 @@ public class CheckpointView extends JPanel implements PropertyChangeListener {
   /** Redraws the question when a new one loads, or the feedback when an answer is checked. */
   @Override
   public void propertyChange(PropertyChangeEvent event) {
+    if (viewModel.hasNoCheckpoint()) {
+      onContinue.run();
+      return;
+    }
     if (CheckpointViewModel.QUESTION.equals(event.getPropertyName())) {
       drawQuestion();
     }

@@ -21,6 +21,7 @@ public class CheckpointViewModel {
   private List<String> choices = List.of();
   private List<Integer> choiceOrder = List.of();
   private boolean multipleChoice;
+  private boolean noCheckpoint;
   private boolean correct;
   private String verdict = "";
   private String explanation = "";
@@ -45,7 +46,18 @@ public class CheckpointViewModel {
     this.choices = List.copyOf(choices);
     this.choiceOrder = List.copyOf(choiceOrder);
     this.multipleChoice = multipleChoice;
+    this.noCheckpoint = false;
     setFeedback(false, "", "", "", "");
+  }
+
+  /**
+   * Records that the step has no checkpoint, and clears any question left from the last one.
+   *
+   * @param stepIndex the step that has none
+   */
+  public void setNoCheckpoint(int stepIndex) {
+    setQuestion(stepIndex, "", "", List.of(), List.of(), false);
+    this.noCheckpoint = true;
   }
 
   /**
@@ -118,6 +130,11 @@ public class CheckpointViewModel {
    */
   public int shownPositionOf(int original) {
     return choiceOrder.indexOf(original);
+  }
+
+  /** Whether the step just opened has no checkpoint, so the student can go straight on. */
+  public boolean hasNoCheckpoint() {
+    return noCheckpoint;
   }
 
   public boolean isMultipleChoice() {

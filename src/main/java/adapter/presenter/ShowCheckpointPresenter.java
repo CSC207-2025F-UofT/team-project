@@ -1,7 +1,6 @@
 package adapter.presenter;
 
 import adapter.viewmodel.CheckpointViewModel;
-import java.util.List;
 import usecase.showcheckpoint.ShowCheckpointOutputBoundary;
 import usecase.showcheckpoint.ShowCheckpointOutputData;
 
@@ -28,9 +27,8 @@ public class ShowCheckpointPresenter implements ShowCheckpointOutputBoundary {
   }
 
   @Override
-  public void prepareFailView(String error) {
-    viewModel.setQuestion(-1, "", "", List.of(), List.of(), false);
-    viewModel.setFeedback(false, "", "", "", error);
+  public void prepareNoCheckpointView(int stepIndex) {
+    viewModel.setNoCheckpoint(stepIndex);
     viewModel.firePropertyChanged(CheckpointViewModel.QUESTION);
   }
 }

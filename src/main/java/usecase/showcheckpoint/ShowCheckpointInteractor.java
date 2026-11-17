@@ -34,7 +34,7 @@ public class ShowCheckpointInteractor implements ShowCheckpointInputBoundary {
   public void execute(ShowCheckpointInputData in) {
     Optional<Checkpoint> found = dataAccess.getCheckpoint(in.getStepIndex());
     if (found.isEmpty()) {
-      presenter.prepareFailView("There is no checkpoint after step " + in.getStepIndex() + ".");
+      presenter.prepareNoCheckpointView(in.getStepIndex());
       return;
     }
     Checkpoint checkpoint = found.get();

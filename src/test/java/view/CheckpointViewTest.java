@@ -81,6 +81,29 @@ class CheckpointViewTest {
   }
 
   @Test
+  void aStepWithNoCheckpointContinuesStraightAway() {
+    CheckpointViewModel viewModel = new CheckpointViewModel();
+    CheckpointView view = viewFor(viewModel);
+    boolean[] continued = {false};
+    view.open(99, () -> continued[0] = true);
+    assertTrue(continued[0], "the student is never stuck on a step without a checkpoint");
+    assertTrue(viewModel.hasNoCheckpoint());
+  }
+
+  @Test
+  void openingAStepWithACheckpointAfterOneWithoutShowsTheQuestion() {
+    CheckpointViewModel viewModel = new CheckpointViewModel();
+    CheckpointView view = viewFor(viewModel);
+    view.open(99, () -> { });
+    boolean[] continued = {false};
+    view.open(0, () -> continued[0] = true);
+    assertFalse(viewModel.hasNoCheckpoint());
+    assertFalse(continued[0]);
+    assertFalse(button(view, "I understand, continue →").isEnabled());
+    assertEquals(4, choices(view).size());
+  }
+
+  @Test
   void theRightAnswerIsAcceptedInEveryShownPosition() {
     boolean[] seen = new boolean[4];
     for (int attempt = 0; attempt < 60 && !allTrue(seen); attempt++) {

@@ -13,9 +13,9 @@ public interface ShowCheckpointOutputBoundary {
   void prepareSuccessView(ShowCheckpointOutputData out);
 
   /**
-   * Shows why there is no question.
+   * Reports that the step has no checkpoint, so there is nothing to pause for.
    *
-   * @param error what went wrong
+   * @param stepIndex the step that was asked about
    */
-  void prepareFailView(String error);
+  void prepareNoCheckpointView(int stepIndex);
 }
