@@ -50,4 +50,9 @@ public class TransactionControl extends JSONControl {
     writeContents();
     return transactionID;
   }
+
+  public void addAccount (String accountID) throws IOException {
+    getContents().put(accountID, new JSONObject());
+    writeContents();
+  }
 }

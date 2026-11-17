@@ -78,6 +78,14 @@ public class Account {
         this.mainProfile = mainProfile;
         AccountCreationControl allCreation = new AccountCreationControl(userDatabase);
         allCreation.addData(this.createdCountry, this.createdIPAddress, this.createdAt, mainProfile);
+
+        String stringID = String.valueOf(this.accountID);
+        TransactionControl expense = new TransactionControl("Expenditures.json");
+
+        expense.addAccount(stringID);
+
+        TransactionControl revenue = new TransactionControl("Revenues.json");
+        revenue.addAccount(stringID);
       }
     }
 
