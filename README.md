@@ -30,7 +30,30 @@ Add login as a shared use case based on the course's login example.
 ---
 ## Use Cases
 ### Use Case 1
-Choose race and class.
+• Name: Create a character with a race class, and starting stats.
+
+• Primary actor: Player
+
+• Preconditions: The player is logged in
+
+• Trigger: The player chooses to create a new game after logging in 
+
+• Success outcome: 
+
+• Main success scenario:
+```text
+1. Player chooses to start a new game
+2. System displays the available races and classes for a character
+3. Player selects race and class
+4. Player chooses to create the character
+5. System calculates starting stats based on the character's race and class. 
+6. System presents the created character's race, class, and stats.
+```
+
+• Extensions:
+```text
+```
+
 ### Use Case 2
 • Name: Explore the Dungeon room by room
 
