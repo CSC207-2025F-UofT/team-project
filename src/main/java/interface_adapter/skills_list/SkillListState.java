@@ -1,70 +1,34 @@
 package interface_adapter.skills_list;
+import java.util.ArrayList;
 
 /**
  * The state for the Signup View Model.
  */
 public class SkillListState {
-    private String username = "";
-    private String usernameError;
-    private String password = "";
-    private String passwordError;
-    private String repeatPassword = "";
-    private String repeatPasswordError;
 
-    public String getUsername() {
-        return username;
+    private ArrayList<String> skills;
+    private String skillsError;
+
+    public String getSkillsError() {
+        return skillsError;
     }
 
-    public String getUsernameError() {
-        return usernameError;
+    public void setSkillsError(String error) {
+        this.skillsError = error;
     }
 
-    public String getPassword() {
-        return password;
+    public void setSkills(ArrayList<String> skills) {
+        this.skills = skills;
     }
 
-    public String getPasswordError() {
-        return passwordError;
-    }
-
-    public String getRepeatPassword() {
-        return repeatPassword;
-    }
-
-    public String getRepeatPasswordError() {
-        return repeatPasswordError;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
-    public void setUsernameError(String usernameError) {
-        this.usernameError = usernameError;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    public void setPasswordError(String passwordError) {
-        this.passwordError = passwordError;
-    }
-
-    public void setRepeatPassword(String repeatPassword) {
-        this.repeatPassword = repeatPassword;
-    }
-
-    public void setRepeatPasswordError(String repeatPasswordError) {
-        this.repeatPasswordError = repeatPasswordError;
+    public ArrayList<String> getSkills() {
+        return new ArrayList<>(skills);
     }
 
     @Override
     public String toString() {
-        return "SignupState{"
-                + "username='" + username + '\''
-                + ", password='" + password + '\''
-                + ", repeatPassword='" + repeatPassword + '\''
+        return "AnalysisState{"
+                + "skills='" + skills.toString() + '\''
                 + '}';
     }
 }

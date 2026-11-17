@@ -6,8 +6,10 @@ import use_case.change_password.ChangePasswordUserDataAccessInterface;
 import use_case.login.LoginUserDataAccessInterface;
 import use_case.logout.LogoutUserDataAccessInterface;
 import use_case.signup.SignupUserDataAccessInterface;
+import use_case.course_analysis.AnalysisStudentDataAccessInterface;
 
 import java.io.*;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -18,7 +20,9 @@ import java.util.Map;
 public class FileUserDataAccessObject implements SignupUserDataAccessInterface,
                                                  LoginUserDataAccessInterface,
                                                  ChangePasswordUserDataAccessInterface,
-                                                 LogoutUserDataAccessInterface {
+                                                 LogoutUserDataAccessInterface,
+                                                 AnalysisStudentDataAccessInterface
+{
 
     private static final String HEADER = "username,password";
 
@@ -57,7 +61,9 @@ public class FileUserDataAccessObject implements SignupUserDataAccessInterface,
                     final String[] col = row.split(",");
                     final String username = String.valueOf(col[headers.get("username")]);
                     final String password = String.valueOf(col[headers.get("password")]);
-                    final Student student = studentFactory.create(username, password);
+                    // temporary fix, i dont want to see the big red lines
+                    final Student student = studentFactory.create(username, password,
+                            new ArrayList<>(), new ArrayList<>());
                     accounts.put(username, student);
                 }
             }
@@ -75,8 +81,9 @@ public class FileUserDataAccessObject implements SignupUserDataAccessInterface,
             writer.newLine();
 
             for (Student student : accounts.values()) {
-                final String line = String.format("%s,%s",
-                        student.getName(), student.getPassword());
+                final String line = String.format("%s,%s,%s,%s",
+                        student.getName(), student.getPassword(),
+                        student.getCourses().toString(), student.getSkills().toString());
                 writer.write(line);
                 writer.newLine();
             }
@@ -121,4 +128,23 @@ public class FileUserDataAccessObject implements SignupUserDataAccessInterface,
         accounts.put(student.getName(), student);
         save();
     }
+
+    @Override
+    public void changeSkills(Student student) {
+        accounts.put(student.getName(), student);
+        save();
+    }
+
+    @Override
+    public String getCourseDescription(String course) {
+        // This would be an api call.
+        return "";
+    }
+
+    @Override
+    public String getSkill(String description) {
+        // This would be an api call.
+        return "";
+    }
+
 }

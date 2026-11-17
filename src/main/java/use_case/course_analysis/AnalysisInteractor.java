@@ -3,6 +3,8 @@ package use_case.course_analysis;
 import entity.Student;
 import entity.StudentFactory;
 
+import java.util.ArrayList;
+
 /**
  * The Change Password Interactor.
  */
@@ -21,17 +23,23 @@ public class AnalysisInteractor implements AnalysisInputBoundary {
 
     @Override
     public void execute(AnalysisInputData analysisInputData) {
-        if ("".equals(analysisInputData.getPassword())) {
-            userPresenter.prepareFailView("New password cannot be empty");
+        if (analysisInputData.getCourses().isEmpty()) {
+            userPresenter.prepareFailView("Course list cannot be empty");
         }
         else {
-            final Student student = studentFactory.create(analysisInputData.getUsername(),
-                    analysisInputData.getPassword());
+            final Student student = studentFactory.create(analysisInputData.getName(),
+                    analysisInputData.getPassword(), new ArrayList<>(),
+                    analysisInputData.getCourses());
 
-            userDataAccessObject.changePassword(student);
+            userDataAccessObject.changeSkills(student);
 
-            final AnalysisOutputData analysisOutputData = new AnalysisOutputData(student.getName());
+            final AnalysisOutputData analysisOutputData = new AnalysisOutputData(student.getSkills());
             userPresenter.prepareSuccessView(analysisOutputData);
         }
+    }
+
+    @Override
+    public void switchToSkillListView() {
+
     }
 }

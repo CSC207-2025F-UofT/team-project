@@ -9,7 +9,11 @@ public interface AnalysisStudentDataAccessInterface {
 
     /**
      * Updates the system to record this user's password.
-     * @param student the user whose password is to be updated
+     * @param student the user whose skills are to be updated
      */
-    void changePassword(Student student);
+    void changeSkills(Student student);
+
+    String getCourseDescription(String course);
+
+    String getSkill(String description);
 }

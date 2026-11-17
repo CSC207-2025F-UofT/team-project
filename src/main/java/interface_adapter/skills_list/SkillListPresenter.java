@@ -1,49 +1,46 @@
 package interface_adapter.skills_list;
 
 import interface_adapter.ViewManagerModel;
-import interface_adapter.login.LoginState;
-import interface_adapter.login.LoginViewModel;
-import use_case.signup.SignupOutputBoundary;
-import use_case.signup.SignupOutputData;
+import interface_adapter.skills_list.SkillListState;
+import interface_adapter.skills_list.SkillListViewModel;
+import use_case.course_analysis.AnalysisOutputBoundary;
+import use_case.course_analysis.AnalysisOutputData;
 
 /**
- * The Presenter for the Signup Use Case.
+ * The Presenter for the Analysis Use Case.
  */
-public class SkillListPresenter implements SignupOutputBoundary {
+public class SkillListPresenter implements AnalysisOutputBoundary {
 
     private final SkillListViewModel skillListViewModel;
-    private final LoginViewModel loginViewModel;
     private final ViewManagerModel viewManagerModel;
 
     public SkillListPresenter(ViewManagerModel viewManagerModel,
-                              SkillListViewModel skillListViewModel,
-                              LoginViewModel loginViewModel) {
+                              SkillListViewModel skillListViewModel) {
         this.viewManagerModel = viewManagerModel;
         this.skillListViewModel = skillListViewModel;
-        this.loginViewModel = loginViewModel;
     }
 
     @Override
-    public void prepareSuccessView(SignupOutputData response) {
-        // On success, switch to the login view.
-        final LoginState loginState = loginViewModel.getState();
-        loginState.setUsername(response.getUsername());
-        loginViewModel.notifyStateChanged();
+    public void prepareSuccessView(AnalysisOutputData response) {
+        // On success, switch to the skillList view.
+        final SkillListState skillListState = skillListViewModel.getState();
+        skillListState.setSkills(response.getSkills());
+        skillListViewModel.notifyStateChanged();
 
-        viewManagerModel.setState(LoginViewModel.VIEW_NAME);
+        viewManagerModel.setState(SkillListViewModel.VIEW_NAME);
         viewManagerModel.notifyViewChanged();
     }
 
     @Override
     public void prepareFailView(String error) {
         final SkillListState skillListState = skillListViewModel.getState();
-        skillListState.setUsernameError(error);
+        skillListState.setSkillsError(error);
         skillListViewModel.notifyStateChanged();
     }
 
     @Override
-    public void switchToLoginView() {
-        viewManagerModel.setState(LoginViewModel.VIEW_NAME);
+    public void switchToSkillListView() {
+        viewManagerModel.setState(SkillListViewModel.VIEW_NAME);
         viewManagerModel.notifyViewChanged();
     }
 }

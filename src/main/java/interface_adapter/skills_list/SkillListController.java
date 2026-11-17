@@ -1,36 +1,34 @@
 package interface_adapter.skills_list;
 
-import use_case.signup.SignupInputBoundary;
-import use_case.signup.SignupInputData;
+import entity.Student;
+import use_case.course_analysis.AnalysisInputBoundary;
+import use_case.course_analysis.AnalysisInputData;
 
 /**
- * Controller for the Signup Use Case.
+ * Controller for the Analysis Use Case.
  */
 public class SkillListController {
 
-    private final SignupInputBoundary userSignupUseCaseInteractor;
+    private final AnalysisInputBoundary userAnalysisUseCaseInteractor;
 
-    public SkillListController(SignupInputBoundary userSignupUseCaseInteractor) {
-        this.userSignupUseCaseInteractor = userSignupUseCaseInteractor;
+    public SkillListController(AnalysisInputBoundary userAnalysisUseCaseInteractor) {
+        this.userAnalysisUseCaseInteractor = userAnalysisUseCaseInteractor;
     }
 
     /**
-     * Executes the Signup Use Case.
-     * @param username the username to sign up
-     * @param password1 the password
-     * @param password2 the password repeated
+     * Executes the Analysis Use Case.
+     * @param student student that contains the required courses to be analyzed
      */
-    public void execute(String username, String password1, String password2) {
-        final SignupInputData signupInputData = new SignupInputData(
-                username, password1, password2);
+    public void execute(Student student) {
+        final AnalysisInputData AnalysisInputData = new AnalysisInputData(student);
 
-        userSignupUseCaseInteractor.execute(signupInputData);
+        userAnalysisUseCaseInteractor.execute(AnalysisInputData);
     }
 
     /**
-     * Executes the "switch to LoginView" Use Case.
+     * Executes the "switch to SkillView" Use Case.
      */
     public void switchToLoginView() {
-        userSignupUseCaseInteractor.switchToLoginView();
+        userAnalysisUseCaseInteractor.switchToSkillListView();
     }
 }

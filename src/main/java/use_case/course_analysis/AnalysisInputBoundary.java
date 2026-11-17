@@ -11,4 +11,6 @@ public interface AnalysisInputBoundary {
      */
     void execute(AnalysisInputData analysisInputData);
 
+    void switchToSkillListView();
+
 }

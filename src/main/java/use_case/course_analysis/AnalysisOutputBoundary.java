@@ -15,4 +15,6 @@ public interface AnalysisOutputBoundary {
      * @param errorMessage the explanation of the failure
      */
     void prepareFailView(String errorMessage);
+
+    void switchToSkillListView();
 }
