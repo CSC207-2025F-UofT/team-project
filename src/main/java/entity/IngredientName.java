@@ -8,32 +8,51 @@ public final class IngredientName {
     private final String displayName;
     private final String key;
 
+    /*
+    TODO
+     */
+    public IngredientName(String displayName, String key) {
+        this.displayName = displayName;
+        this.key = key;
+    }
+
     /**
      * Creates an ingredient name from user- or API-provided text.
      *
      * @param rawName the ingredient name
      * @throws IllegalArgumentException if the name is null or blank
      */
-    public IngredientName(String rawName) {
+    public static IngredientName FromRawName(String rawName) throws IllegalArgumentException {
         if (rawName == null) {
             throw new IllegalArgumentException("ingredient name cannot be null");
         }
 
-        displayName = rawName.trim();
-        key = normalize(rawName);
+        String displayName = rawName.trim();
+        String key = normalize(rawName);
         if (key.isEmpty()) {
             throw new IllegalArgumentException("ingredient name cannot be blank");
         }
+
+        return new IngredientName(displayName, key);
     }
 
+    /*
+    TODO
+     */
     public String getDisplayName() {
         return displayName;
     }
 
+    /*
+    TODO
+     */
     public String getKey() {
         return key;
     }
 
+    /*
+    TODO
+     */
     private static String normalize(String rawName) {
         return rawName
                 .trim()
@@ -42,6 +61,9 @@ public final class IngredientName {
                 .replaceAll("\\s+", " ");
     }
 
+    /*
+    TODO
+     */
     @Override
     public boolean equals(Object other) {
         if (this == other) {
@@ -54,11 +76,17 @@ public final class IngredientName {
         return key.equals(that.key);
     }
 
+    /*
+    TODO
+     */
     @Override
     public int hashCode() {
         return key.hashCode();
     }
 
+    /*
+    TODO
+     */
     @Override
     public String toString() {
         return displayName;
