@@ -135,7 +135,7 @@
 * -score: int → The number of points allocated to a team for getting a given answer correct.
 #### Relevant Methods:
 * +Answer(primaryAnswer: String, acceptedVariants: List\<String>, score: int)
-* +isAccepted(potentialAnswer: String): int
+* +isAccepted(potentialAnswer: String): boolean
 * +getScore(): int
 ### Entity 2: Question
 #### Instance Variables:
@@ -144,12 +144,13 @@
 #### Relevant Methods:
 * +Question(questionText: String, correctAnswers: List\<Answer>)
 * +getQuestionText(): String → Return the main text of the question
-* +verifyAnswer(potentialAnswer: String): Integer → Return the number of points associated with a given answer, with 0 if the answer is not correct
+* +verifyAnswer(potentialAnswer: String): int → Return the number of points associated with a given answer, with 0 if the answer is not correct
 ### Entity 3: Team
 #### Instance Variables:
 * -name: String → the team's name
 * -score: int → the total number of points the team has earned in this current game
 #### Relevant Methods:
+* +Team(name: String)
 * +getName(): String → return the team's name
 * +addPoints(pointsToAdd: int): void → increment the team's score by the provided number of points
 * +getScore(): int → return the team's current score
