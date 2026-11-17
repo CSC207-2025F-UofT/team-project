@@ -69,17 +69,19 @@ This application follows **Clean Architecture** principles to ensure high cohesi
 - As a fashionista, I want to know about current fashion trends
 ## User story 2
 
-- As a ..., I want to ...
+- As a student, I want to make a shopping list within my budget
 ## User story 3
 
-- As a ..., I want to ...
+- As a white-collar worker, I want to look for formal clothing
 ## User story 4
 
-- As a ..., I want to ...
+- As a user, I want to receive outfit recommendations, evaluations
 ---
-# User cases
+# Use cases  
 
-- 
+### Use case: Sign up an account
+
+
 - 
 
 [//]: # (Logistics:)
