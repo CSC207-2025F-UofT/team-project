@@ -1,55 +1,69 @@
-//import java.io.IOException;
-//
-//import okhttp3.OkHttpClient;
-//import okhttp3.Request;
-//import okhttp3.Response;
-//import org.json.JSONObject;
-//
-///**
-// * A minimal example of making an API call that requires no additional parameters.
-// */
-//public class GetMovieData {
-//    private final OkHttpClient client = new OkHttpClient();
-//
-//    /**
-//     * Make an API call to the specified URL with the given extra parameter key-value pair
-//     * and return the result.
-//     * @param baseURL the URL to query
-//     * @param paramKey the name for the extra parameter
-//     * @param paramValue the value for the extra parameter
-//     * @return the response as a String
-//     * @throws IOException if there is a problem connecting to the API
-//     */
-//    public String run(String baseURL, String paramKey, String paramValue) throws IOException {
-////        HttpUrl url = HttpUrl.parse(baseURL).newBuilder()
-////                .addQueryParameter(paramKey, paramValue)
-////                .build();
-//
+package data_access;
+
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
+
+
+import java.io.FileWriter;
+import java.io.IOException;
+
+public class GetMovieData {
+
+    public static void main(String[] args) {
+
+        int movieId = 550; // Example: Fight Club
+//        String token = System.getenv("eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiJiMzA4YmFhNzE3MDgyZWFkNTQ4ODBkZWMxZmNlYTYwNiIsIm5iZiI6MTc5MTc0NDA0NS4wODgsInN1YiI6IjZhY2JkODJkNmVkZTFkZDZjZTE0ZTIzMyIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.yJV30ApjkLuoz6cUk2JKP8F7h6MrR5MRp9lpMK_ELOs\n" +
+//                "\n");
+
+        String token = "eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiJiMzA4YmFhNzE3MDgyZWFkNTQ4ODBkZWMxZmNlYTYwNiIsIm5iZiI6MTc5MTc0NDA0NS4wODgsInN1YiI6IjZhY2JkODJkNmVkZTFkZDZjZTE0ZTIzMyIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.yJV30ApjkLuoz6cUk2JKP8F7h6MrR5MRp9lpMK_ELOs";
+
+        OkHttpClient client = new OkHttpClient();
+
 //        Request request = new Request.Builder()
-//                .url("https://api.example.com/data")
-//                .addHeader("Authorization", "Bearer " + apiToken)
+//                .url("https://api.themoviedb.org/3/movie/11?language=en-US")
+//                .get()
+//                .addHeader("accept", "application/json")
+//                .addHeader("Authorization", "Bearer " + token)
 //                .build();
 //
-////        Request request = new Request.Builder()
-////                .url(url)
-////                .build();
-//
-//        try (Response response = client.newCall(request).execute()) {
-//            return response.body().string();
-//        }
-//    }
-//
-//    /**
-//     * Sample main method demonstrating calling the meowfacts API.
-//     * @param args not used
-//     * @throws IOException if the run method fails
-//     */
-//    public static void main(String[] args) throws IOException {
-//        GetExample example = new GetExample();
-//        String response = example.run("https://meowfacts.herokuapp.com");
-//        System.out.println(response);
-//
-//        response = example.run("https://meowfacts.herokuapp.com", "count", "2");
-//        System.out.println(response);
-//    }
-//}
+//        OkHttpClient client = new OkHttpClient();
+
+        Request request = new Request.Builder()
+                .url("https://api.themoviedb.org/3/search/movie?query=Avatar&include_adult=false&language=en-US&page=1")
+                .get()
+                .addHeader("accept", "application/json")
+                .addHeader("Authorization", "Bearer " + token)
+                .build();
+
+
+        try (Response response =
+                     client.newCall(request).execute()) {
+
+            if (!response.isSuccessful()) {
+                throw new IOException(
+                        "API request failed: " + response.code()
+                );
+            }
+
+            if (response.body() == null) {
+                throw new IOException("Empty response body");
+            }
+
+            // Step 1: Get the JSON response
+            String jsonResponse = response.body().string();
+
+            // Step 2: Save JSON into a file
+            try (FileWriter file =
+                         new FileWriter("movie.json")) {
+
+                file.write(jsonResponse);
+            }
+
+            System.out.println("Movie JSON saved successfully!");
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+}
