@@ -178,7 +178,7 @@ Each use case below is led by one member. A lead owns every View listed under th
 | Team Member | MVP Use Case | Extensions (after MVP) |
 |---|---|---|
 | Zean | 1a Search, 1b Details, 1c Add to plan | Random recipe; "cook with what's in my fridge" search |
-| TBD | 2a View, 2b Add, 2c Update/remove fridge items; ingredient name catalog | Filter by expiring soon |
+| Yilin Hou | 2a View, 2b Add, 2c Update/remove fridge items; ingredient name catalog | Filter by expiring soon |
 | Shuyin Hu | 3a View week and a planned meal, 3b Remove/move | Switch to previous/next week; copy last week |
 | Shaoheng Fan | 4a Generate, 4b Tick off | Bought items go straight into the fridge; export as text |
 | TBD | 5a Cook a planned meal, 5b History | 5c Stats; undo a completion |
