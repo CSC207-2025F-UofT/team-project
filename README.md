@@ -82,11 +82,11 @@ Alternative Flows
 5) If the user clicks Cancel, the system discards the changes and returns to the original recipe.
 
 ### Use Case 3 [Jiaqi]
-Inputs:
-Username: The username entered by the user.
-Password: The password entered by the user.
-Confirm Password: Required only when registering a new account.
-Login, Sign Up, Profile, and Logout buttons.
+Inputs
+- Username: The username entered by the user.
+- Password: The password entered by the user.
+- Confirm Password: Required only when registering a new account.
+- Login, Sign Up, Profile, and Logout buttons.
 
 MAIN SUCCESS SCENARIO
 1. The user opens the Login page.
@@ -99,7 +99,7 @@ MAIN SUCCESS SCENARIO
 8. When the user clicks "Logout", the system clears the current-user session and returns to the Login page.
 
 EXTENSION
-a. User does not have an account
+User does not have an account
   1. The user clicks the "Sign Up" button on the Login page.
   2. The system displays the Registration page.
   3. The user enters a username, password, and password confirmation.
@@ -108,10 +108,10 @@ a. User does not have an account
   6. The system creates and saves the new account.
   7. The system displays a registration success message and returns to the Login page.
   8. The user continues from Step 2 of the Main Success Scenario.
-b. Invalid username or password
+Invalid username or password
   1. The system displays an error message indicating that the username or password is incorrect.
   2. The user can re-enter their credentials and try again.
-c. Invalid registration information
+Invalid registration information
   1. If the system cannot verify the account because the data service is unavailable, it displays an error message.
   2. The user remains on the Login page and can try again later.
 
