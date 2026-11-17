@@ -260,4 +260,29 @@ class DrawingCanvasHooksTest {
         assertEquals(2, canvas.getAnswers().size());
         assertEquals(2, canvas.getFormulas().size());
     }
+
+    @Test
+    void limitsWrittenAfterThePauseJoinTheirFormula() {
+        List<Stroke> body = new ArrayList<>();
+        int[][] lim = {{100, 100, 100, 140}, {115, 110, 115, 140}, {130, 110, 130, 140, 145, 112, 160, 140}};
+        for (int[] s : lim) {
+            write(s);
+            body.add(last());
+        }
+        assertNotNull(canvas.registerNewInk(last(), body));
+        List<Stroke> later = new ArrayList<>();
+        int[][] limit = {
+            {98, 150, 110, 162}, {110, 150, 98, 162},            // x right under the l
+            {114, 156, 134, 156}, {128, 152, 134, 156, 128, 160}, // arrow, flat bits
+            {140, 150, 140, 162, 148, 162, 148, 150, 140, 150},   // 0
+        };
+        for (int[] s : limit) {
+            write(s);
+            later.add(last());
+            assertTrue(!canvas.isBound(last()), "waits for the pause");
+        }
+        FormulaCapture capture = canvas.registerNewInk(last(), later);
+        assertEquals(8, strokesIn(capture));
+        assertEquals(1, canvas.getFormulas().size());
+    }
 }

@@ -1179,13 +1179,25 @@ public class DrawingCanvas extends JPanel {
             }
         }
         double h = AnswerLayout.strokeHeight(pool);
-        Formula mine = book.add(looseGroup(last, h), nextRevision());
+        Formula mine = bindGroup(looseGroup(last, h));
         for (Stroke s : session) {
             if (strokes.contains(s) && !book.isBound(s)) {
-                book.add(looseGroup(s, h), nextRevision());
+                bindGroup(looseGroup(s, h));
             }
         }
         return capture(mine);
+    }
+
+    // limits written after the pause join the formula they sit on, judged as a whole row; else a new one
+    private Formula bindGroup(Set<Stroke> group) {
+        for (Formula f : book.all()) {
+            if (Scripts.stackedOn(f.getStrokes(), group) || Scripts.stackedOn(group, f.getStrokes())) {
+                Set<Stroke> both = new LinkedHashSet<>(f.getStrokes());
+                both.addAll(group);
+                return book.add(both, nextRevision());
+            }
+        }
+        return book.add(group, nextRevision());
     }
 
     // lasso pick -> one formula, gaps and all; null if empty, already answered, or 2+ answered (moving them)

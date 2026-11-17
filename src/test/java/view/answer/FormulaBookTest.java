@@ -98,16 +98,14 @@ class FormulaBookTest {
         assertTrue(book.get(bottom.getId()).getStrokes().contains(added));
     }
 
-    // "lim" 40 tall, then x→0 put under it after the pause
+    // "lim" 40 tall, then x→0 put under it after the pause: judged as a whole row at the next pause, not stroke by stroke
     @Test
-    void limitWrittenLaterJoins() {
-        Formula f = answered(stroke(100, 100, 100, 140), stroke(115, 110, 115, 140), stroke(130, 110, 160, 140));
+    void limitWrittenLaterWaitsForThePause() {
+        answered(stroke(100, 100, 100, 140), stroke(115, 110, 115, 140), stroke(130, 110, 160, 140));
         Stroke x = stroke(105, 165, 125, 185);  // 25 below, 20 tall
 
-        Set<Long> changed = book.strokesReplaced(List.of(), List.of(x), revisions);
-
-        assertEquals(Set.of(f.getId()), changed);
-        assertTrue(book.get(f.getId()).getStrokes().contains(x));
+        assertTrue(book.strokesReplaced(List.of(), List.of(x), revisions).isEmpty());
+        assertFalse(book.isBound(x));
     }
 
     @Test
