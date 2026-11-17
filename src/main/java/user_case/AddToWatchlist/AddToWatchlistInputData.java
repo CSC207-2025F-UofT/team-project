@@ -12,14 +12,23 @@ public class AddToWatchlistInputData {
         this.movieTitle = movieTitle;
     }
 
+    /**
+     * Return the username from the input data.
+     */
     public String getUsername() {
         return username;
     }
 
+    /**
+     * Return the id of the chosen movie from the input data.
+     */
     public String getMovieId() {
         return movieId;
     }
 
+    /**
+     * Return the title of the chosen movie from the input data.
+     */
     public String getMovieTitle() {
         return movieTitle;
     }
