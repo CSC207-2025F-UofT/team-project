@@ -1,5 +1,6 @@
 package view;
 
+import interface_adapter.enrol_course.EnrolCourseController;
 import interface_adapter.logged_in.ChangePasswordController;
 import interface_adapter.logged_in.LoggedInState;
 import interface_adapter.logged_in.LoggedInViewModel;
@@ -22,6 +23,7 @@ public class LoggedInView extends JPanel implements ActionListener, LoggedInView
     private final JLabel passwordErrorField = new JLabel();
     private ChangePasswordController changePasswordController = null;
     private LogoutController logoutController;
+    private EnrolCourseController enrolCourseController;
 
     private final JLabel username;
 
@@ -49,6 +51,10 @@ public class LoggedInView extends JPanel implements ActionListener, LoggedInView
 
         changePassword = new JButton("Change Password");
         buttons.add(changePassword);
+
+        final JButton enrol = new JButton("Enrol");
+        buttons.add(enrol);
+        enrol.addActionListener(evt -> enrolCourseController.switchToEnrolView());
 
         logOut.addActionListener(this);
 
@@ -115,6 +121,10 @@ public class LoggedInView extends JPanel implements ActionListener, LoggedInView
 
     public void setLogoutController(LogoutController logoutController) {
         this.logoutController = logoutController;
+    }
+
+    public void setEnrolCourseController(EnrolCourseController enrolCourseController) {
+        this.enrolCourseController = enrolCourseController;
     }
 
     /**

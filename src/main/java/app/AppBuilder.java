@@ -1,8 +1,13 @@
 package app;
 
 import data_access.FileUserDataAccessObject;
+import data_access.InMemoryCourseDataAccessObject;
+import entity.CourseFactory;
 import entity.UserFactory;
 import interface_adapter.ViewManagerModel;
+import interface_adapter.enrol_course.EnrolCourseController;
+import interface_adapter.enrol_course.EnrolCoursePresenter;
+import interface_adapter.enrol_course.EnrolViewModel;
 import interface_adapter.logged_in.ChangePasswordController;
 import interface_adapter.logged_in.ChangePasswordPresenter;
 import interface_adapter.logged_in.LoggedInViewModel;
@@ -14,6 +19,9 @@ import interface_adapter.logout.LogoutPresenter;
 import interface_adapter.signup.SignupController;
 import interface_adapter.signup.SignupPresenter;
 import interface_adapter.signup.SignupViewModel;
+import use_case.enrol_course.EnrolCourseInputBoundary;
+import use_case.enrol_course.EnrolCourseInteractor;
+import use_case.enrol_course.EnrolCourseOutputBoundary;
 import use_case.change_password.ChangePasswordInputBoundary;
 import use_case.change_password.ChangePasswordInteractor;
 import use_case.change_password.ChangePasswordOutputBoundary;
@@ -26,6 +34,7 @@ import use_case.logout.LogoutOutputBoundary;
 import use_case.signup.SignupInputBoundary;
 import use_case.signup.SignupInteractor;
 import use_case.signup.SignupOutputBoundary;
+import view.EnrolView;
 import view.LoggedInView;
 import view.LoginView;
 import view.SignupView;
@@ -47,12 +56,18 @@ public class AppBuilder {
     // DAO version using local file storage
     final FileUserDataAccessObject userDataAccessObject = new FileUserDataAccessObject("users.csv", userFactory);
 
+    final CourseFactory courseFactory = new CourseFactory();
+    // TODO: swap for the persistent course DAO once it exists; courses are lost on restart for now.
+    final InMemoryCourseDataAccessObject courseDataAccessObject = new InMemoryCourseDataAccessObject();
+
     private SignupView signupView;
     private SignupViewModel signupViewModel;
     private LoginViewModel loginViewModel;
     private LoggedInViewModel loggedInViewModel;
     private LoggedInView loggedInView;
     private LoginView loginView;
+    private EnrolViewModel enrolViewModel;
+    private EnrolView enrolView;
 
     public AppBuilder() {
         cardPanel.setLayout(cardLayout);
@@ -76,6 +91,31 @@ public class AppBuilder {
         loggedInViewModel = new LoggedInViewModel();
         loggedInView = new LoggedInView(loggedInViewModel);
         cardPanel.add(loggedInView, LoggedInViewModel.VIEW_NAME);
+        return this;
+    }
+
+    public AppBuilder addEnrolView() {
+        enrolViewModel = new EnrolViewModel();
+        enrolView = new EnrolView(enrolViewModel);
+        cardPanel.add(enrolView, EnrolViewModel.VIEW_NAME);
+        return this;
+    }
+
+    /**
+     * Adds the Enrol Course Use Case to the application.
+     * Call after addLoggedInView and addEnrolView.
+     * @return this builder
+     */
+    public AppBuilder addEnrolCourseUseCase() {
+        final EnrolCourseOutputBoundary enrolCourseOutputBoundary =
+                new EnrolCoursePresenter(viewManagerModel, enrolViewModel);
+        final EnrolCourseInputBoundary enrolCourseInteractor = new EnrolCourseInteractor(
+                courseDataAccessObject, enrolCourseOutputBoundary, courseFactory);
+
+        final EnrolCourseController enrolCourseController =
+                new EnrolCourseController(enrolCourseInteractor, loggedInViewModel);
+        enrolView.setEnrolCourseController(enrolCourseController);
+        loggedInView.setEnrolCourseController(enrolCourseController);
         return this;
     }
 
