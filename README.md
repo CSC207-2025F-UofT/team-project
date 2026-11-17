@@ -243,8 +243,28 @@ Direction
 **Character**
 
 • Instance variables: TODO ADD THESE
+Race, CharacterClass
 
 • Methods: takeDamage(int), isAlive()
+getRace(), getCharacterClass(), totalStats()
+
+**Race**
+
+• Instance variables: name, bonuses
+
+• Methods: getName(), getBonuses(), toString()
+
+**CharacterClass**
+
+• Instance variables: name, stats
+
+• Methods: getName(), getBaseStats(), toString()
+
+**Stats**
+
+• Instance variables: strength, dexterity, constitution, intelligence, wisdom, charisma
+
+• Methods: getStrength(), getDexterity(), getConstitution(), getIntelligence(), getWisdom(), getCharisma(), plus(Stats), toString()
 
 **Combat**
 
