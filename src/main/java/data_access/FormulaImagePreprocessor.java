@@ -10,26 +10,23 @@ import java.util.Arrays;
  * Turns a picture of a handwritten formula into the input the model was trained on, the same
  * way as {@code src/neutral network/preprocess.py} ({@code load_formula_image}) with
  * {@code IMAGE_INVERT = False} from {@code train.py}:
- * RGB colours and light/dark kept as they are, cropped to the ink, scaled so the ink fits 128 px
- * high with an 8 px margin (at most 1024 px wide), centred on a canvas 128 px high whose width
- * is a multiple of 16 (at least 64), the background filled with the original background colour.
+ * RGB colours and light/dark kept as they are, cropped to the ink, scaled by the rule in
+ * {@link FormulaLayout} (the tallest line of ink 112 px high, so every line of a multi-line formula
+ * keeps the size a single line has), centred with an 8 px margin on a canvas whose height (at least
+ * 128) and width (at least 64) are multiples of 16, the background filled with the original
+ * background colour.
  *
- * <p>{@code vital_pixel.forward} only accepts {@code [B,3,128,W]} with W a multiple of 16, so an
+ * <p>{@code vital_pixel.forward} only accepts {@code [B,3,H,W]} with H and W multiples of 16, so an
  * image straight from the canvas must go through here first.
  */
 final class FormulaImagePreprocessor {
-    static final int HEIGHT = 128;
-    static final int MARGIN = 8;
-    static final int STRIDE = 16;
-    static final int MAX_WIDTH = 1024;
-    static final int MIN_WIDTH = 64;
     private static final int INK_THRESHOLD = 32;  // difference in any RGB channel from black/white background
 
     private FormulaImagePreprocessor() {
     }
 
     /**
-     * @return an RGB image {@value #HEIGHT} px high, width a multiple of {@value #STRIDE},
+     * @return an RGB image at least 128 px high, height and width multiples of 16,
      *         preserving the source RGB colours like the training images
      * @throws IllegalArgumentException if there is no ink in the image
      */
@@ -44,6 +41,7 @@ final class FormulaImagePreprocessor {
         int top = height;
         int right = -1;
         int bottom = -1;
+        boolean[] rowHasInk = new boolean[height];
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
                 int pixel = rgb[y * width + x];
@@ -57,6 +55,7 @@ final class FormulaImagePreprocessor {
                     top = Math.min(top, y);
                     right = Math.max(right, x);
                     bottom = Math.max(bottom, y);
+                    rowHasInk[y] = true;
                 }
             }
         }
@@ -68,21 +67,23 @@ final class FormulaImagePreprocessor {
         BufferedImage ink = new BufferedImage(inkWidth, inkHeight, BufferedImage.TYPE_INT_RGB);
         ink.setRGB(0, 0, inkWidth, inkHeight, rgb, top * width + left, width);
 
-        // Same scaling as training: very flat ink (a long line) is measured as 20% of its width high.
-        double scale = Math.min((HEIGHT - 2.0 * MARGIN) / Math.max(inkHeight, 0.2 * inkWidth),
-                (MAX_WIDTH - 2.0 * MARGIN) / inkWidth);
-        int resizedWidth = Math.max(1, (int) Math.round(inkWidth * scale));
-        int resizedHeight = Math.max(1, (int) Math.round(inkHeight * scale));
+        // Same scale and canvas as training (formula_layout.py).
+        double tallest = FormulaLayout.tallestBand(
+                FormulaLayout.rowSpans(Arrays.copyOfRange(rowHasInk, top, bottom + 1)),
+                inkHeight, FormulaLayout.GAP_MIN_PX);
+        FormulaLayout.Size layout = FormulaLayout.size(inkWidth, inkHeight, tallest);
+        int resizedWidth = Math.max(1, FormulaLayout.roundHalfUp(inkWidth * layout.scale()));
+        int resizedHeight = Math.max(1, FormulaLayout.roundHalfUp(inkHeight * layout.scale()));
         BufferedImage resized = resize(ink, resizedWidth, resizedHeight);
 
-        int canvasWidth = Math.max(MIN_WIDTH,
-                (int) Math.ceil((resizedWidth + 2.0 * MARGIN) / STRIDE) * STRIDE);
-        BufferedImage canvas = new BufferedImage(canvasWidth, HEIGHT, BufferedImage.TYPE_INT_RGB);
+        int canvasWidth = layout.width();
+        int canvasHeight = layout.height();
+        BufferedImage canvas = new BufferedImage(canvasWidth, canvasHeight, BufferedImage.TYPE_INT_RGB);
         Graphics2D g = canvas.createGraphics();
         int background = lightBackground ? 255 : 0;  // not inverted, so the background keeps its colour
         g.setColor(new java.awt.Color(background, background, background));
-        g.fillRect(0, 0, canvasWidth, HEIGHT);
-        g.drawImage(resized, (canvasWidth - resizedWidth) / 2, (HEIGHT - resizedHeight) / 2, null);
+        g.fillRect(0, 0, canvasWidth, canvasHeight);
+        g.drawImage(resized, (canvasWidth - resizedWidth) / 2, (canvasHeight - resizedHeight) / 2, null);
         g.dispose();
         return canvas;
     }

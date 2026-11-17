@@ -15,7 +15,7 @@ class Vocab234Tests(unittest.TestCase):
     def test_matrix_and_new_commands_round_trip(self):
         table = load_vocab()
         vocab = {token: index for index, token in enumerate(table)}
-        self.assertEqual(vocab_size, 234)
+        self.assertEqual(vocab_size, 241)
         self.assertEqual(vocab['_'], 72)
         self.assertEqual(vocab['&'], 231)
         for label in (r'\begin{pmatrix}a&b\\c&d\end{pmatrix}',
@@ -40,24 +40,36 @@ class Vocab234Tests(unittest.TestCase):
 
     def test_append_migration_preserves_weights_and_new_rows_learn(self):
         torch.set_num_threads(2)
-        old = vital_mini(num_tokens=200)
+        old = vital_mini(num_tokens=234)
         model = vital_mini()
         self.assertTrue(load_training_weights(model, old.state_dict()))
         for key, value in old.state_dict().items():
             actual = model.state_dict()[key]
             if key in ('token_embedding.weight', 'head.weight'):
-                actual = actual[:200]
+                actual = actual[:234]
             self.assertTrue(torch.equal(actual, value), key)
         self.assertIs(model.head.weight, model.token_embedding.weight)
         model.eval()
-        tokens = torch.tensor([[68, 209, 231, 233]])
+        tokens = torch.tensor([[68, 234, 235, 240]])
         logits = model(torch.rand(1, 3, 128, 32), tokens)
-        self.assertEqual(tuple(logits.shape), (1, 4, 234))
-        loss = torch.nn.functional.cross_entropy(logits.flatten(0, 1), torch.tensor([209, 231, 233, 69]))
+        self.assertEqual(tuple(logits.shape), (1, 4, 241))
+        loss = torch.nn.functional.cross_entropy(logits.flatten(0, 1), torch.tensor([234, 235, 240, 69]))
         loss.backward()
         gradient = model.token_embedding.weight.grad
         self.assertTrue(torch.isfinite(gradient).all())
-        self.assertGreater(float(gradient[200:].abs().sum()), 0)
+        self.assertGreater(float(gradient[234:].abs().sum()), 0)
+
+    def test_matrix_environment_tokens_are_context_specific(self):
+        from labels import MATRIX_ENVIRONMENTS
+        vocab = {t: i for i, t in enumerate(load_vocab())}
+        for index, name in enumerate(MATRIX_ENVIRONMENTS, 234):
+            self.assertEqual(vocab[name], index)
+            raw = r'\begin{' + name + r'}a&b\\c&d\end{' + name + '}'
+            tokens = tokenize_label(raw)
+            self.assertEqual(tokens[:4], [r'\begin', '{', name, '}'])
+            self.assertEqual(tokens[-4:], [r'\end', '{', name, '}'])
+            self.assertEqual(tokenize_label(name), list(name))
+            self.assertEqual(tokenize_label(r'\text{' + name + '}'), [r'\text', '{', *name, '}'])
 
 
 if __name__ == '__main__':

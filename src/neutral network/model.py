@@ -8,13 +8,13 @@ import torch.nn.functional as F
 
 d_model = 256
 attention_heads = 4
-vocab_size = 234
-legacy_vocab_sizes = (147, 148, 149, 154, 186, 187, 188, 200)
+vocab_size = 241
+legacy_vocab_sizes = (147, 148, 149, 154, 186, 187, 188, 200, 234)
 pad_id, bos_id, eos_id = 67, 68, 69   # 与 tokeniser.json 中的特殊 token 对应
 max_len = 300                        # LaTeX token 序列的最大长度(含 <bos>/<eos>)
 
 '''输入的照片应该满足以下格式
-宽度像素是16的倍数，高度是128像素
+宽度和高度像素都是16的倍数，高度至少128像素（多行公式更高，见 formula_layout.py）
 原始照片可以通过缩放或补齐背景来满足要求，补齐背景的颜色最好是白色
 '''
 

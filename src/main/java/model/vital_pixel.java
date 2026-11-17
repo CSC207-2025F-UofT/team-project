@@ -39,7 +39,7 @@ public final class vital_pixel implements AutoCloseable {
 
     public Device device() { return manager().getDevice(); }
 
-    /** 已预处理的输入：[B,3,128,W]，W 为 16 的倍数；不重复缩放或反色。 */
+    /** 已预处理的输入：[B,3,H,W]，H 和 W 都是 16 的倍数（多行公式更高）；不重复缩放或反色。 */
     public NDArray forward(NDArray image) throws TranslateException {
         try (NDManager scope = manager().newSubManager()) {
             NDArray output = forwardIn(scope, image);
@@ -52,9 +52,10 @@ public final class vital_pixel implements AutoCloseable {
         manager();
         Shape shape = image.getShape();
         if (image.getDataType() != DataType.FLOAT32 || shape.dimension() != 4
-                || shape.get(0) < 1 || shape.get(1) != 3 || shape.get(2) != 128
+                || shape.get(0) < 1 || shape.get(1) != 3
+                || shape.get(2) < 16 || shape.get(2) % 16 != 0
                 || shape.get(3) < 16 || shape.get(3) % 16 != 0) {
-            throw new IllegalArgumentException("image 必须为 FLOAT32 [B,3,128,W]，W 是 16 的正整数倍");
+            throw new IllegalArgumentException("image 必须为 FLOAT32 [B,3,H,W]，H 和 W 都是 16 的正整数倍");
         }
         NDArray x = runtime.copyInput(scope, image);
         // 对应 Python cnn.forward，逐步展示各层，不在 Java 中重新定义权重。
