@@ -140,7 +140,7 @@ Main Success Scenario:
 ## Minimal Viable Product (MVP)
 | Team Member | MVP Use Case |
 |-------------|--------------|
-| Name | Use Case |
+| Ema | Use Case 2 |
 | Name | Use Case |
 | Name | Use Case |
 --
