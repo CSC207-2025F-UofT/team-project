@@ -1,4 +1,4 @@
-package com.terrain.model;
+package com.terrain.entity.model;
 
 public class TerrainMap {
     private final int width;

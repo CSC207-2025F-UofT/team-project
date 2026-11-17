@@ -1,4 +1,4 @@
-package com.terrain.model.feature.parameter;
+package com.terrain.entity.model.feature.parameter;
 
 public final class BooleanParameter extends Parameter {
     private boolean value;

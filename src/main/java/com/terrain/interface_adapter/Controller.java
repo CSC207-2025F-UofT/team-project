@@ -1,9 +1,11 @@
-package com.terrain.ui;
+package com.terrain.interface_adapter;
 
+import com.terrain.entity.model.feature.Feature;
+import com.terrain.entity.model.feature.FeatureType;
 import com.terrain.generation.GenerationSettings;
 import com.terrain.generation.TerrainGenerator;
-import com.terrain.model.feature.Feature;
-import com.terrain.model.feature.FeatureType;
+import com.terrain.ui.MapView;
+import com.terrain.ui.SettingsPanel;
 
 // Connects the UI to generation.
 public class Controller {

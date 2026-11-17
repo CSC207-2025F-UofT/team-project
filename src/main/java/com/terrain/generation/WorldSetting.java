@@ -1,8 +1,8 @@
 package com.terrain.generation;
 
-import com.terrain.model.feature.parameter.BooleanParameter;
-import com.terrain.model.feature.parameter.NumberParameter;
-import com.terrain.model.feature.parameter.ParameterSet;
+import com.terrain.entity.model.feature.parameter.BooleanParameter;
+import com.terrain.entity.model.feature.parameter.NumberParameter;
+import com.terrain.entity.model.feature.parameter.ParameterSet;
 
 // All the non-feature settings for a map; also contains default values for the map generation.
 // Parameters are shown in the UI in the order they are declared here.

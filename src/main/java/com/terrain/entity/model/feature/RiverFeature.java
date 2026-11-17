@@ -1,10 +1,10 @@
-package com.terrain.model.feature;
-
-import com.terrain.model.TerrainMap;
-import com.terrain.model.feature.parameter.CoordinateParameter;
-import com.terrain.model.feature.parameter.NumberParameter;
+package com.terrain.entity.model.feature;
 
 import java.util.Random;
+
+import com.terrain.entity.model.TerrainMap;
+import com.terrain.entity.model.feature.parameter.CoordinateParameter;
+import com.terrain.entity.model.feature.parameter.NumberParameter;
 
 public class RiverFeature extends Feature {
     private final CoordinateParameter start = coordinate("Start", 0, 0);

@@ -1,4 +1,4 @@
-package com.terrain.model;
+package com.terrain.entity.model;
 
 public class Tile {
     private double elevation;

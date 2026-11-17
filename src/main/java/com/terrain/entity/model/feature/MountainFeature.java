@@ -1,11 +1,11 @@
-package com.terrain.model.feature;
-
-import com.terrain.model.TerrainMap;
-import com.terrain.model.feature.parameter.BooleanParameter;
-import com.terrain.model.feature.parameter.CoordinateParameter;
-import com.terrain.model.feature.parameter.NumberParameter;
+package com.terrain.entity.model.feature;
 
 import java.util.Random;
+
+import com.terrain.entity.model.TerrainMap;
+import com.terrain.entity.model.feature.parameter.BooleanParameter;
+import com.terrain.entity.model.feature.parameter.CoordinateParameter;
+import com.terrain.entity.model.feature.parameter.NumberParameter;
 
 public class MountainFeature extends Feature {
     private final NumberParameter height = number("Height", 100, 10, 1000);

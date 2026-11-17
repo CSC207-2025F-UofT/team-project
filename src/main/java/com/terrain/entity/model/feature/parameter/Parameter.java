@@ -1,4 +1,4 @@
-package com.terrain.model.feature.parameter;
+package com.terrain.entity.model.feature.parameter;
 
 // A parameter for a feature, which can be a number, a coordinate, or a boolean. This is an abstract class that is
 // sealed to only allow the three subclasses. Because this is sealed, the compiler flags any switch that misses a type.
