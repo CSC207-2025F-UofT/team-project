@@ -82,7 +82,7 @@ Alternative Flows
 5) If the user clicks Cancel, the system discards the changes and returns to the original recipe.
 
 ### Use Case 3 [Jiaqi]
-Inputs
+INPUTS
 - Username: The username entered by the user.
 - Password: The password entered by the user.
 - Confirm Password: Required only when registering a new account.
@@ -142,7 +142,7 @@ EXTENSION
 |-------------|--------------|
 | Qinli | The user enters a cocktail name and/or selects one or more base spirits, then clicks Search. The system displays matching cocktail names or a message indicating missing input, no matches, or an API failure. |
 | Enhao | The user selects an existing cocktail recipe, adds, removes, or replaces ingredients, and adjusts quantities. The user then names and saves the customized recipe. The system validates the input and saves it separately from the original recipe.  |
-| Jiaqi | The user can log in and log out at any time. They are able to create an account if they never log in before. The user enters a cocktail name, then clicks Save. The system saved all the information above to save pages. |
+| Jiaqi | The users register a new account, log in with their username and password, and access their personal profile to access saved cocktails. The system saves user account information so that users can log in again after restarting the application.|
 | Wenqian | The user clicks a cocktail, the system display the ingredients of it. The user click 'Favourite' button, then save this cocktail to home page.|
 ---
 ## Entities
