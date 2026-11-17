@@ -139,7 +139,37 @@ Choose race and class.
       2. The system adds the selected items if sufficient inventory space is available.
       3. Any uncollected items remain available.
 ```
-(Add additional use cases as needed.)
+### Use Case 4
+• Name: Save and load the game, and view the leaderboard.
+
+• Primary actor: Player
+
+• Preconditions: The player is logged in (shared login use case). To save, the player has a character in a dungeon room and is not in combat. To load, the player has at least one saved game.
+
+• Trigger: The player chooses "Save game", "Load game", or "Leaderboard" from the menu.
+
+• Main success scenario:
+```text
+1. Player chooses "Save game".
+2. System collects the current game state (character stats, inventory, current floor, current room).
+3. System stores the game state under the player's account.
+4. System compares the player's deepest floor reached with their previous best and updates if it is higher.
+5. System confirms the game was saved.
+6. Later, the player logs in and chooses "Load game".
+7. System retrieves the saved state from the player's account and restores the character, inventory, floor and room.
+8. System presents the current room's description, items and exits (as in Use Case 2).
+9. Player chooses "Leaderboard".
+10. System presents all players ranked by deepest floor reached, highlighting the player's own rank.
+```
+• Extensions:
+```text
+1a. The player is in combat: System tells the player they can't save during an encounter, and nothing is saved.
+3a. The save fails (for example, a storage error): System shows an error message, and the previous save stays unchanged.
+3b. The player already has a saved game: System asks to confirm overwriting it. If the player cancels, nothing changes.
+7a. No saved game exists: System tells the player and offers to start a new character (Use Case 1).
+10a. No players have a recorded score yet: System shows an empty leaderboard message.
+```
+
 ---
 ## Minimal Viable Product (MVP)
 | Team Member | MVP Use Case |
