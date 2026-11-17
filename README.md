@@ -116,9 +116,15 @@ Room
 (Add additional entities as needed.)
 ---
 ## API Usage
-**API Name: https://www.dnd5eapi.co/**
+
+**API Name:** https://www.dnd5eapi.co/
 **Documentation:** [Link]
 **How it is used in the program:**
+
+• Used to fetch races, classes, monsters and equipment, which form the contents of the game.
+
+• Invoked from a Data Access Object in the outermost layer, so that the use case interactors do not depend on the API but on an interface only.
+
 ---
 ## Design Diagrams
 ### UML Class Diagram
