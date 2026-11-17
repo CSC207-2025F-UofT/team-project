@@ -66,7 +66,8 @@ public class AnswerCanvasPage extends CanvasPage {
     private Predicate<String> graphable = latex -> false;
     private Predicate<String> definitionCheck = latex -> false;
     private Predicate<String> calculable = latex -> true;
-    private final PopupGate gate = new PopupGate();
+    private Predicate<String> question = latex -> false;
+    private final PopupGate gate = new PopupGate(latex -> question.test(latex));
 
     // no evaluate feature, just a placeholder
     public AnswerCanvasPage(SharedCanvas sharedCanvas) {
@@ -151,6 +152,11 @@ public class AnswerCanvasPage extends CanvasPage {
     // only-graphable lines (y=3x, f(x)=x^2) drop Calculate
     public void setCalculateCheck(Predicate<String> calculable) {
         this.calculable = calculable;
+    }
+
+    // done comparisons (2x>5) pop up w/o an "="
+    public void setQuestionCheck(Predicate<String> question) {
+        this.question = question;
     }
 
     // tests type ranges like the user
