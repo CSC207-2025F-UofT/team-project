@@ -1,9 +1,11 @@
+package interface_adapter;
+
 import org.json.JSONObject;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-abstract class JSONControl {
+public abstract class JSONControl {
   private final String fileName;
   private JSONObject contents;
 
