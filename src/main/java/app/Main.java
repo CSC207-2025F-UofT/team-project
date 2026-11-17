@@ -1,6 +1,6 @@
 package app;
 
-import interface_adapters.FlashcardGeneratorController;
+import interface_adapters.flashcard_generator.FlashcardGeneratorController;
 import view.FlashcardGeneratorView;
 
 import javax.swing.*;

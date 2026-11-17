@@ -1,0 +1,6 @@
+package interface_adapters.flashcard_generator;
+
+import use_case_layer.flashcard_generator.FlashcardGeneratorOutputBoundary;
+
+public class FlashcardGeneratorPresenter implements FlashcardGeneratorOutputBoundary {
+}

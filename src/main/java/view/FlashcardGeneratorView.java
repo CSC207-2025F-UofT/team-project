@@ -1,13 +1,15 @@
 package view;
 
-import interface_adapters.FlashcardGeneratorController;
-
+import interface_adapters.flashcard_generator.FlashcardGeneratorController;
+import java.util.List;
+import java.util.ArrayList;
 import javax.swing.*;
 import javax.swing.text.*;
 import javax.swing.text.StyleConstants;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import use_case_layer.flashcard_generator.FlashcardGeneratorInputData.TextPiece;
 
 public class FlashcardGeneratorView extends JPanel implements ActionListener {
 
@@ -92,7 +94,8 @@ public class FlashcardGeneratorView extends JPanel implements ActionListener {
             toggleBold();
         }
         else if (e.getSource() == generateButton){
-            String text = textInput.getText();
+            List<TextPiece> condensedList = extractText();
+            controller.execute(condensedList);
 
 
         }
@@ -113,4 +116,34 @@ public class FlashcardGeneratorView extends JPanel implements ActionListener {
         textInput.requestFocusInWindow();
 
     }
-}
+
+    /**
+     * Returns a list of TextPieces containing whether each text segment is bold/unbolded (and in order)
+     * @return
+     */
+    private List<TextPiece> extractText(){
+        List<TextPiece> pieces = new ArrayList<>();
+        StyledDocument text = textInput.getStyledDocument();
+        int i = 0;
+        while (i < text.getLength()){
+            Element element = text.getCharacterElement(i);
+            boolean isBold = StyleConstants.isBold(element.getAttributes());
+            int startOfPart = element.getStartOffset();
+            int endOfPart = Math.min(element.getEndOffset(), text.getLength());
+            try{
+                String textToAdd = text.getText(startOfPart, endOfPart - startOfPart);
+                TextPiece textPiece = new TextPiece(textToAdd, isBold);
+                pieces.add(textPiece);
+
+            } catch (BadLocationException e) {
+                throw new IllegalStateException("Failed to extract text", e);
+            }
+            i = endOfPart;
+
+            }
+        return pieces;
+
+        }
+
+    }
+
