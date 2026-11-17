@@ -43,9 +43,9 @@
 5. The system saves the entity into the database.
 #### Extensions:
 * #### 3a: empty question or missing answers
-* The system displays an error message. 
+  * The system displays an error message. 
 * #### 3b: Duplicate Question
-* The system warns the user about the duplicate.
+  * The system warns the user about the duplicate.
 
 ### Use Case 2: Display a new question
 #### Primary actor: 
