@@ -34,6 +34,11 @@ import view.LoggedInView;
 import view.LoginView;
 import view.SignupView;
 import view.ViewManager;
+import entity.Trip;
+import java.util.List;
+import interface_adapter.add_expense.*;
+import use_case.log_expense.*;
+import view.AddExpenseView;
 
 public class AppBuilder {
   private final JPanel cardPanel = new JPanel();
@@ -60,6 +65,8 @@ public class AppBuilder {
   private LoggedInViewModel loggedInViewModel;
   private LoggedInView loggedInView;
   private LoginView loginView;
+  private AddExpenseViewModel addExpenseViewModel;
+  private AddExpenseView addExpenseView;
 
   public AppBuilder() {
     cardPanel.setLayout(cardLayout);
@@ -150,5 +157,81 @@ public class AppBuilder {
     viewManagerModel.notifyViewChanged();
 
     return application;
+  }
+
+  /**
+   * Creates and registers {@link AddExpenseView} and {@link AddExpenseViewModel} in the card panel.
+   *
+   * @return this builder
+   */
+  public AppBuilder addAddExpenseView() {
+    addExpenseViewModel = new AddExpenseViewModel();
+    addExpenseView = new AddExpenseView(addExpenseViewModel);
+    addExpenseView.setViewManagerModel(viewManagerModel);
+    cardPanel.add(addExpenseView, AddExpenseViewModel.VIEW_NAME);
+    return this;
+  }
+
+  /**
+   * Wires the Log Expense use case ({@link LogExpenseInteractor}, {@link LogExpensePresenter}, and
+   * {@link LogExpenseController}) and connects the Log Expense button on {@link LoggedInView}.
+   *
+   * @return this builder
+   */
+  public AppBuilder addLogExpenseUseCase() {
+    final LogExpenseOutputBoundary logExpenseOutputBoundary =
+            new LogExpensePresenter(addExpenseViewModel);
+
+    final LogExpenseInputBoundary logExpenseInteractor =
+            new LogExpenseInteractor(
+                    tripDataAccessObject, exchangeRateGateway, logExpenseOutputBoundary);
+
+    final LogExpenseController logExpenseController =
+            new LogExpenseController(logExpenseInteractor);
+    addExpenseView.setLogExpenseController(logExpenseController);
+
+    if (loggedInView != null) {
+      loggedInView.setOnOpenLogExpense(this::openLogExpenseForCurrentUser);
+    }
+    return this;
+  }
+
+  private void openLogExpenseForCurrentUser() {
+    final String username = loggedInViewModel.getState().getUsername();
+    Trip trip = null;
+    if (tripDataAccessObject.getCurrentTripId() != null) {
+      trip = tripDataAccessObject.getTrip(tripDataAccessObject.getCurrentTripId());
+    }
+    if (trip == null && username != null && !username.isBlank()) {
+      final List<Trip> memberTrips = tripDataAccessObject.getTripsForMember(username);
+      if (!memberTrips.isEmpty()) {
+        trip = memberTrips.get(0);
+      }
+    }
+    if (trip == null) {
+      trip = tripDataAccessObject.getTrip(SampleDataSeeder.SAMPLE_TRIP_ID);
+    }
+
+    final AddExpenseState state = addExpenseViewModel.getState();
+    state.setStatusMessage("");
+    state.setError(false);
+    state.setClearForm(false);
+    if (trip != null) {
+      tripDataAccessObject.setCurrentTripId(trip.getId());
+      state.setTripId(trip.getId());
+      state.setTripName(trip.getName());
+      state.setHomeCurrency(trip.getHomeCurrency());
+      state.setExpenses(
+              LogExpensePresenter.formatExpenses(
+                      tripDataAccessObject.getExpenses(trip.getId()), trip.getHomeCurrency()));
+    } else {
+      state.setTripId("");
+      state.setTripName("");
+      state.setStatusMessage("No trip found. Run SampleDataSeeder first.");
+      state.setError(true);
+    }
+    addExpenseViewModel.notifyStateChanged();
+    viewManagerModel.setState(AddExpenseViewModel.VIEW_NAME);
+    viewManagerModel.notifyViewChanged();
   }
 }

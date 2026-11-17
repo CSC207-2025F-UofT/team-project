@@ -27,6 +27,9 @@ public class LoggedInView extends JPanel implements ActionListener, LoggedInView
   private final JTextField passwordInputField = new JTextField(15);
   private final JButton changePassword;
 
+  private Runnable onOpenLogExpense;
+  private final JButton logExpenseButton;
+
   public LoggedInView(LoggedInViewModel loggedInViewModel) {
     this.loggedInViewModel = loggedInViewModel;
     this.loggedInViewModel.addListener(this);
@@ -96,6 +99,16 @@ public class LoggedInView extends JPanel implements ActionListener, LoggedInView
     this.add(passwordInfo);
     this.add(passwordErrorField);
     this.add(buttons);
+
+    logExpenseButton = new JButton("Log Expense");
+    buttons.add(logExpenseButton);
+
+    logExpenseButton.addActionListener(
+            evt -> {
+              if (onOpenLogExpense != null) {
+                onOpenLogExpense.run();
+              }
+            });
   }
 
   /**
@@ -134,5 +147,14 @@ public class LoggedInView extends JPanel implements ActionListener, LoggedInView
     } else {
       JOptionPane.showMessageDialog(this, state.getPasswordError());
     }
+  }
+
+  /**
+   * Sets the callback invoked when the user clicks the Log Expense button.
+   *
+   * @param onOpenLogExpense the navigation callback
+   */
+  public void setOnOpenLogExpense(Runnable onOpenLogExpense) {
+    this.onOpenLogExpense = onOpenLogExpense;
   }
 }
