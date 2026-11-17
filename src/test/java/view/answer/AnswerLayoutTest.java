@@ -90,4 +90,14 @@ class AnswerLayoutTest {
     void nextLineBelowIsNotJoined() {
         assertFalse(AnswerLayout.joins(new Rectangle(100, 100, 200, 40), 40, new Rectangle(100, 152, 200, 40)));
     }
+
+    @Test
+    void tallestStrokeIgnoresFractionStacking() {
+        List<Stroke> fraction = List.of(
+                stroke(200, 176, 220, 200), stroke(220, 176, 200, 200),    // x, 24
+                stroke(257, 168, 265, 160, 265, 200),                      // 1, 40
+                stroke(195, 205, 285, 205),                                // bar
+                stroke(230, 220, 236, 212, 250, 218, 230, 252, 252, 252)); // 2, 40
+        assertEquals(40, AnswerLayout.tallestStroke(fraction), 0.01, "not the 92 tall stack");
+    }
 }

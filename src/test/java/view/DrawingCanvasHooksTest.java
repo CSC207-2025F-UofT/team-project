@@ -285,4 +285,27 @@ class DrawingCanvasHooksTest {
         assertEquals(8, strokesIn(capture));
         assertEquals(1, canvas.getFormulas().size());
     }
+
+    @Test
+    void lineWrittenUnderAFormulaLaterDoesntSwallowIt() {
+        List<Stroke> sum = new ArrayList<>();
+        int[][] ink = {
+            {251, 200, 200, 200, 229, 232, 200, 264, 251, 264},     // Σ 64
+            {261, 222, 261, 246}, {261, 230, 271, 222, 281, 246},    // n
+            {317, 214, 323, 212, 331, 220, 317, 254, 339, 254},      // 2, 40
+        };
+        for (int[] s : ink) {
+            write(s);
+            sum.add(last());
+        }
+        assertNotNull(canvas.registerNewInk(last(), sum));
+        List<Stroke> line = new ArrayList<>();
+        int[][] next = {{205, 290, 210, 285, 210, 325}, {222, 305, 242, 305}, {232, 295, 232, 315}, {250, 290, 255, 285, 255, 325}};
+        for (int[] s : next) {
+            write(s);                              // full size 1+1, 26 under the Σ
+            line.add(last());
+        }
+        assertEquals(4, strokesIn(canvas.registerNewInk(last(), line)));
+        assertEquals(2, canvas.getFormulas().size());
+    }
 }

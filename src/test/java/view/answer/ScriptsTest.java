@@ -74,4 +74,49 @@ class ScriptsTest {
         List<Stroke> side = List.of(stroke(500, 240, 500, 270));
         assertFalse(Scripts.stackedOn(sum(), side));
     }
+
+    // Σ 64 tall, then lowercase "n+2" 40 line: n / + drag the median down
+    private static List<Stroke> sumLowercase() {
+        return List.of(
+                stroke(251, 200, 200, 200, 229, 232, 200, 264, 251, 264),  // Σ
+                stroke(261, 222, 261, 246), stroke(261, 230, 271, 222, 281, 246),  // n, x-height
+                stroke(289, 236, 309, 236), stroke(299, 226, 299, 246),    // +
+                stroke(317, 214, 323, 212, 331, 220, 317, 254, 339, 254)); // 2, full height
+    }
+
+    @Test
+    void digitSizedLimitOverALowercaseBodyIsStacked() {
+        List<Stroke> five = List.of(stroke(237, 164, 223, 164, 222, 177, 236, 182, 230, 194, 221, 192));  // 30 tall
+        assertTrue(Scripts.stackedOn(sumLowercase(), five));
+    }
+
+    // (x+1)/2 = , numerator over a bar over the 2
+    private static List<Stroke> fraction() {
+        return List.of(
+                stroke(200, 176, 220, 200), stroke(220, 176, 200, 200),    // x
+                stroke(225, 184, 245, 184), stroke(235, 174, 235, 194),    // +
+                stroke(257, 168, 265, 160, 265, 200),                      // 1
+                stroke(195, 205, 285, 205),                                // bar
+                stroke(230, 220, 236, 212, 250, 218, 230, 252, 252, 252),  // 2
+                stroke(300, 207, 322, 207), stroke(300, 216, 322, 216));   // =
+    }
+
+    @Test
+    void lineWellUnderAFractionIsNot() {
+        List<Stroke> next = List.of(stroke(205, 318, 212, 312, 212, 340),  // 1, 28 tall, 1.5 lines down
+                stroke(220, 326, 234, 326), stroke(227, 319, 227, 333),    // +
+                stroke(240, 318, 247, 312, 247, 340));                     // 1
+        assertFalse(Scripts.stackedOn(fraction(), next));
+    }
+
+    @Test
+    void limitStillCountsOnceTheOtherLimitIsIn() {
+        List<Stroke> body = new java.util.ArrayList<>(sumLowercase());
+        body.add(stroke(205, 270, 205, 282, 210, 270, 215, 282));   // lower "n=0" already joined, small
+        body.add(stroke(219, 274, 229, 274));
+        body.add(stroke(219, 279, 229, 279));
+        body.add(stroke(233, 270, 233, 290, 241, 290, 241, 270, 233, 270));
+        List<Stroke> five = List.of(stroke(237, 164, 223, 164, 222, 177, 236, 182, 230, 194, 221, 192));
+        assertTrue(Scripts.stackedOn(body, five));
+    }
 }

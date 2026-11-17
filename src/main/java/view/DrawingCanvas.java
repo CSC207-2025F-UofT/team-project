@@ -1191,7 +1191,7 @@ public class DrawingCanvas extends JPanel {
     // limits written after the pause join the formula they sit on, judged as a whole row; else a new one
     private Formula bindGroup(Set<Stroke> group) {
         for (Formula f : book.all()) {
-            if (Scripts.stackedOn(f.getStrokes(), group) || Scripts.stackedOn(group, f.getStrokes())) {
+            if (Scripts.stackedOn(f.getStrokes(), group)) {  // one way only, old formula is never the new ink's limit
                 Set<Stroke> both = new LinkedHashSet<>(f.getStrokes());
                 both.addAll(group);
                 return book.add(both, nextRevision());
