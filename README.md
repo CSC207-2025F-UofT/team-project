@@ -128,17 +128,31 @@
 | Eric Wu | Use Case |
 ---
 ## Entities
-### Entity 1: Question object
+### Entity 1: Answer
+#### Instance Variables:
+* -primaryAnswer: String → The main representative answer.
+* -acceptedVariants: List\<String> → A collection of additional acceptable answers / variants on the primary answer.
+* -score: int → The number of points allocated to a team for getting a given answer correct.
+#### Relevant Methods:
+* +Answer(primaryAnswer: String, acceptedVariants: List\<String>, score: int)
+* +isAccepted(potentialAnswer: String): int
+* +getScore(): int
+### Entity 2: Question
 #### Instance Variables:
 * -questionText: String → The main text of the question 
-* -correctAnswers: List<String> → The primary answers to the question
-* -answerVariants: List<List\<String>> → A collection of additional acceptable answers / variants on the primary answers
-* -points: List\<Integer> → The number of points allocated to a team for getting a given answer correct
-#### Relevant Methods: TODO: DEPENDING ON WHICH DESIGN PATTERN WE GO WITH FOR INSTANTIATING THESE, I THINK THE RELEVANT SETUP METHODS (setQuestion, setAnswers, setAnswerVariants, etc.) WILL BE DIFFERENT, SO I LEFT THEM BLANK FOR NOW
-* +verifyAnswer(answer: String): Integer → Return the number of points associated with a given answer, with 0 if the answer is not correct
+* -correctAnswers: List\<Answer> → The acceptable answers to the question
+#### Relevant Methods:
+* +Question(questionText: String, correctAnswers: List\<Answer>)
 * +getQuestionText(): String → Return the main text of the question
-### Entity 2
-(Add additional entities as needed.)
+* +verifyAnswer(potentialAnswer: String): Integer → Return the number of points associated with a given answer, with 0 if the answer is not correct
+### Entity 3: Team
+#### Instance Variables:
+* -name: String → the team's name
+* -score: int → the total number of points the team has earned in this current game
+#### Relevant Methods:
+* +getName(): String → return the team's name
+* +addPoints(pointsToAdd: int): void → increment the team's score by the provided number of points
+* +getScore(): int → return the team's current score
 ---
 ## API Usage
 **API Name: MongoDB**
