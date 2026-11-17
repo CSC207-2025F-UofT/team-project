@@ -101,7 +101,17 @@ Student's guess is invalid
 1. The system detects that the guess has invalid characters.
 2. The submit button is disabled until a valid guess is detected. 
 ### Use Case 4 
-### Use Case 5   
+### Use Case 5  Studying flashcards
+Primary Actor: Student 
+Preconditions: Flashcards are generated properly 
+Trigger: Clicking the “Knew it” or “Still Learning” button 
+Main Success Scenario:
+
+1. Student is on the flashcard page after flashcards are generated
+2. Student clicks “Knew It” or “Still Learning” button
+3. If “Knew It” pressed, removes flashcard from deck and if “Still Learning” is pressed, then moves flashcard to the back of the deck
+4. System displays a new flashcard for the user
+5. Extensions: If all flashcards are done on Step 3, then prompts student to restart/exit
 
 ---
 ## Minimal Viable Product (MVP)
