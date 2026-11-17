@@ -35,7 +35,6 @@
 - Implemented the Create Plan input/output data classes, boundaries, data access interface, and custom data access exception.
 - Implemented CreatePlanInteractor to validate input, prevent duplicate plans for the same date, create configurable meal slots, and save the plan together with its schedule.
 - Added six unit tests covering successful creation, duplicate dates, missing dates, blank meal slot names, storage read failures, and storage save failures. All six Create Plan unit tests passed.
-- Implemented CreatePlanController to pass user input to the use case.
 - Defined the intended behavior of planned-meal replacement and swapping for later implementation.
 
 
