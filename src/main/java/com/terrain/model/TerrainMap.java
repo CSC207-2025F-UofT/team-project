@@ -11,6 +11,12 @@ public class TerrainMap {
 
         // Initialize the tiles array with default Tile objects
         tiles = new Tile[width][height];
+
+        for (int x = 0; x < width; x++) {
+            for (int y = 0; y < height; y++) {
+                tiles[x][y] = new Tile();
+            }
+        }
     }
 
     // This can totally return null, if a feature requests a tile out of bounds; Need to decide if we want to handle

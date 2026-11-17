@@ -5,6 +5,10 @@ public class Tile {
     private TileType type;
     private TileType finalType; // Type after elevation has been considered.
 
+    public Tile() {
+        elevation = 0;
+    }
+
     public double getElevation() {
         return elevation;
     }
