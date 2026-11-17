@@ -13,6 +13,7 @@ public class Book {
     private final Integer publicationYear;
     private final Integer coverID;
     private final LocalDateTime dateAdded;
+    private Review review;
 
     public Book(String openLibraryId, String title, String author,
                  Integer publicationYear, String isbn, String genre,
@@ -25,6 +26,7 @@ public class Book {
         this.publicationYear =publicationYear;
         this.coverID = coverID;
         this.dateAdded = dateAdded;
+        this.review = null;
     }
 
     /**
@@ -60,6 +62,14 @@ public class Book {
     }
 
     /**
+     * Returns the genre of the Book.
+     * @return the genre of the Book.
+     */
+    public String getGenre(){
+        return genre;
+    }
+
+    /**
      * Returns the publication year of the Book.
      * @return the publication year of the Book.
      */
@@ -67,15 +77,35 @@ public class Book {
         return publicationYear;
     }
 
-    public String getGenre(){
-        return genre;
+    /**
+     * Returns the cover id of the Book.
+     * @return the cover id of the Book.
+     */
+    public Integer getCoverID(){
+        return coverID;
     }
+
+    /**
+     * Returns the date the Book was added to the bookshelf.
+     * @return the date the Book was added to the bookshelf.
+     */
     public LocalDateTime getDateAdded(){
         return dateAdded;
     }
+
+    /**
+     * Returns the review of the Book.
+     * @return the review of the Book.
+     */
+    public Review getReview(){
+        return review;
+    }
+
+    public void setReview(Review review) {this.review = review;}
+
     @Override
     public String toString(){
-        return title + "by" + author;
+        return title + " by " + author;
     }
 }
 
