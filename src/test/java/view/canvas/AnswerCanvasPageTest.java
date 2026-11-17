@@ -14,6 +14,7 @@ import use_case.evaluate.CalculateCheckInteractor;
 import use_case.evaluate.DefinitionCheckInteractor;
 import use_case.graph_check.GraphCheckInteractor;
 import use_case.evaluate.EvaluateInteractor;
+import use_case.evaluate.QuestionCheckInteractor;
 import view.DrawingCanvas;
 
 import javax.swing.SwingUtilities;
@@ -876,6 +877,7 @@ class AnswerCanvasPageTest {
                     new GraphController(input -> { }), new GraphViewModel(), graphCheck::canGraph,
                     java.awt.Color.WHITE);
             page.setCalculateCheck(calcCheck::canCalculate);
+            page.setQuestionCheck(new QuestionCheckInteractor()::isQuestion);
             page.setPopupDelay(100);
             shared.attachTo(page);
             page.setSize(900, 560);
@@ -909,5 +911,27 @@ class AnswerCanvasPageTest {
         boardPopupFor("y=2+3");
         assertTrue(popup().hasCalculate());
         assertTrue(popup().hasGraph());
+    }
+
+    @Test
+    void comparisonPopsWithoutEquals() throws Exception {
+        boardPopupFor("2x>5");
+        assertTrue(popup().hasCalculate());
+        clickCalculate();
+        waitFor(() -> canvas.getAnswers().size() == 1, "the answer");
+    }
+
+    @Test
+    void halfWrittenComparisonWaits() throws Exception {
+        AtomicInteger calls = new AtomicInteger();
+        shared.setFormulaRecognizer(image -> {
+            calls.incrementAndGet();
+            return "2x>";
+        });
+        openBoard();
+        write();
+        waitFor(() -> calls.get() == 1, "the read");
+        Thread.sleep(300);
+        assertNull(popup());
     }
 }
