@@ -19,7 +19,7 @@ public class CreationInteractor implements CreationInputBoundary {
             userPresenter.prepareFailView("A document already exists with that name.");
         }
         else if ("".equals(creationInputData.getDocumentName())) {
-            userPresenter.prepareFailView("Document name cannot be empty");
+            userPresenter.prepareFailView("Document name cannot be empty.");
         }
         else {
             User creator = creationInputData.getCreator();

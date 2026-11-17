@@ -11,7 +11,7 @@ public class Document {
 
     private final String name;
     private final User creator;
-    private final List<User> accessedBy;
+    private final List<User> accessedBy = new ArrayList<>();
 
     /**
      * Creates a new document with the given non-empty name and the user that
@@ -22,11 +22,10 @@ public class Document {
      */
     public Document(String name, User creator) {
         if ("".equals(name)) {
-            throw new IllegalArgumentException("Username cannot be empty");
+            throw new IllegalArgumentException("Document name cannot be empty.");
         }
         this.name = name;
         this.creator = creator;
-        accessedBy = new ArrayList<>();
     }
 
     public String getName() { return name; }
@@ -34,4 +33,6 @@ public class Document {
     public User getCreator() { return creator; }
 
     public List<User> getAccessedBy() { return accessedBy; }
+
+    public void addAccessedBy(User user) { accessedBy.add(user); }
 }

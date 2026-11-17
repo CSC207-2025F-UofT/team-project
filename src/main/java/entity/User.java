@@ -20,7 +20,7 @@ public class User {
      */
     public User(String name) {
         if ("".equals(name)) {
-            throw new IllegalArgumentException("Username cannot be empty");
+            throw new IllegalArgumentException("Username cannot be empty.");
         }
         this.name = name;
     }
