@@ -338,4 +338,23 @@ class DrawingCanvasHooksTest {
         assertTrue(canvas.isCurrent(capture.getId(), capture.getRevision()), "not a formula that got merged again");
         assertEquals(9, strokesIn(capture));
     }
+
+    @Test
+    void equalsAfterAFractionStaysInOnePiece() {
+        List<Stroke> session = new ArrayList<>();
+        int[][] ink = {
+            {200, 176, 220, 200}, {220, 176, 200, 200},              // x, x-height
+            {225, 184, 245, 184}, {235, 174, 235, 194},              // +
+            {257, 168, 265, 160, 265, 200},                          // 1
+            {195, 205, 285, 205},                                    // bar
+            {230, 220, 236, 212, 250, 218, 230, 252, 252, 252},      // 2
+            {300, 207, 322, 207}, {300, 216, 322, 216},              // = at the bar, lower bar last
+        };
+        for (int[] s : ink) {
+            write(s);
+            session.add(last());
+        }
+        assertEquals(9, strokesIn(canvas.registerNewInk(last(), session)));
+        assertEquals(1, canvas.getFormulas().size());
+    }
 }

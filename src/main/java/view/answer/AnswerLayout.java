@@ -91,13 +91,14 @@ public final class AnswerLayout {
         return Math.hypot(dx, dy);
     }
 
-    // median height of tall single strokes; lines stacked above each other don't add up
+    // 3/4 up the tall single strokes, lowercase + "+" don't shrink it; lines stacked above each other don't add up
     public static double strokeHeight(Collection<Stroke> strokes) {
         List<Integer> heights = tallHeights(strokeBoxes(strokes));
         if (heights.isEmpty()) {
             return charHeight(strokes);
         }
-        return clamped(median(heights));
+        heights.sort(null);
+        return clamped(heights.get((int) (0.75 * (heights.size() - 1))));
     }
 
     // tallest single stroke = a full char, a fraction doesn't stack up, lowercase doesn't drag it down
