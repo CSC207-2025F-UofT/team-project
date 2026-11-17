@@ -5,11 +5,13 @@ import entity.UserFactory;
 import okhttp3.*;
 import org.json.JSONObject;
 import use_case.login.LoginUserDataAccessInterface;
+import use_case.signup.SignupUserDataAccessInterface;
 
 import java.io.IOException;
 
 public class CourseUserDataAccessObject
-        implements LoginUserDataAccessInterface {
+        implements LoginUserDataAccessInterface,
+        SignupUserDataAccessInterface {
 
     private static final String BASE_URL =
             "https://csc207-20269-vm.teach.cs.toronto.edu";
@@ -70,6 +72,7 @@ public class CourseUserDataAccessObject
                 user.getString("password"));
     }
 
+    @Override
     public void save(User user) {
 
         JSONObject json = new JSONObject();
