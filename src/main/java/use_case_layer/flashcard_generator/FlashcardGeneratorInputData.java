@@ -1,7 +1,7 @@
 package use_case_layer.flashcard_generator;
 
 import java.util.List;
-import java.util.SequencedCollection;
+//import java.util.SequencedCollection;
 
 public class FlashcardGeneratorInputData {
     private List<TextPiece> listTextPiece;

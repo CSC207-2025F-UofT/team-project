@@ -17,6 +17,7 @@ public class CandleGameView extends JPanel implements ActionListener {
     private final CandleGameController controller;
 
     private final JLabel attempts;
+    private final JLabel attemptsRemaining;
     private final JLabel background;
     private final JTextField[] numberBoxes;
     private final JButton quitButton;
@@ -43,11 +44,17 @@ public class CandleGameView extends JPanel implements ActionListener {
             throw new RuntimeException(e);
         }
 
-        //Attempt Tracker
-        attempts = new JLabel("110");
-        attempts.setBounds(700, 20, 500, 35);
-        attempts.setFont(winkle.deriveFont(48f));
+        //Attempts Recorded
+        attempts = new JLabel("12345");
+        attempts.setBounds(700, 60, 500, 20);
+        attempts.setFont(winkle.deriveFont(30f));
         this.add(attempts);
+
+        //Attempts Remaining Tracker
+        attemptsRemaining = new JLabel("110");
+        attemptsRemaining.setBounds(700, 20, 500, 35);
+        attemptsRemaining.setFont(winkle.deriveFont(48f));
+        this.add(attemptsRemaining);
 
 
         // Quit Button
@@ -61,7 +68,7 @@ public class CandleGameView extends JPanel implements ActionListener {
 
         // Instructions Button
         instructionsButton = new JButton("?");
-        instructionsButton.setBounds(120, 10, 50, 50);
+        instructionsButton.setBounds(10, 70, 50, 50);
         instructionsButton.setFont(winkle.deriveFont(30f));
         instructionsButton.setBackground(Color.decode("#362514"));
         instructionsButton.setForeground(Color.WHITE);
