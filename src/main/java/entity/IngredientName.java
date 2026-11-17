@@ -11,7 +11,7 @@ public final class IngredientName {
     /*
     TODO
      */
-    public IngredientName(String displayName, String key) {
+    private IngredientName(String displayName, String key) {
         this.displayName = displayName;
         this.key = key;
     }
