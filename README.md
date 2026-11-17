@@ -217,8 +217,7 @@ Every ingredient in the app is compared through this class, never through a raw 
 - `getDisplayName(): String` Desc TODO
 - `toString(): String` Desc TODO
 + Static Methods:
-- `fromName(String): IngredientName` Desc TODO
-- `normalize(String): String` Desc TODO
+- `fromRawName(String): IngredientName` Desc TODO
 
 ### RecipeIngredient
 + Fields: 
