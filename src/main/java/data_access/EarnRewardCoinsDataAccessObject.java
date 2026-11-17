@@ -113,4 +113,10 @@ public class EarnRewardCoinsDataAccessObject
             throw new IllegalArgumentException("Unknown user: " + userId);
         }
     }
+
+    @Override
+    public synchronized int getCoinBalance(String userId) {
+        requireUser(userId);
+        return balances.get(userId);
+    }
 }

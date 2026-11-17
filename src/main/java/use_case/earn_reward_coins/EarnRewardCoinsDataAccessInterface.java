@@ -12,4 +12,5 @@ public interface EarnRewardCoinsDataAccessInterface {
     BigDecimal getTotalSpending(String userId, LocalDate date);
     boolean hasClaimedReward(String userId, LocalDate rewardDate);
     int claimReward(String userId, LocalDate rewardDate, int coins);
+    int getCoinBalance(String userId);
 }

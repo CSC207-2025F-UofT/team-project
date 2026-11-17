@@ -5,6 +5,7 @@ public class EarnRewardCoinsState {
     private String message = "";
     private String error = "";
     private boolean rewardClaimed;
+    private boolean eligible;
 
     public Integer getCoinBalance(){
         return coinBalance;
@@ -36,5 +37,13 @@ public class EarnRewardCoinsState {
 
     public void setRewardClaimed(boolean rewardClaimed) {
         this.rewardClaimed = rewardClaimed;
+    }
+
+    public boolean isEligible() {
+        return eligible;
+    }
+
+    public void setEligible(boolean eligible) {
+        this.eligible = eligible;
     }
 }

@@ -9,6 +9,11 @@ import java.time.Clock;
 import java.time.LocalDate;
 import java.time.ZoneId;
 
+import use_case.earn_reward_coins.EarnRewardCoinsStatusInteractor;
+import view.EarnRewardCoinsView;
+import javax.swing.JFrame;
+import javax.swing.SwingUtilities;
+
 public class EarnRewardCoinsDemo {
     public static void main(String[] args) {
         Clock clock = Clock.systemUTC();
@@ -35,8 +40,11 @@ public class EarnRewardCoinsDemo {
         EarnRewardCoinsInteractor interactor =
                 new EarnRewardCoinsInteractor(dao, presenter, 10, clock);
 
+        EarnRewardCoinsStatusInteractor statusInteractor =
+                new EarnRewardCoinsStatusInteractor(dao, presenter, clock);
+
         EarnRewardCoinsController controller =
-                new EarnRewardCoinsController(interactor);
+                new EarnRewardCoinsController(interactor, statusInteractor);
 
         viewModel.addPropertyChangedListener(event -> {
             EarnRewardCoinsState state = viewModel.getState();
@@ -49,7 +57,16 @@ public class EarnRewardCoinsDemo {
             }
         });
 
-        controller.execute("user1"); // First click.
-        controller.execute("user1"); // Repeated click.
+        SwingUtilities.invokeLater(() -> {
+            EarnRewardCoinsView view = new EarnRewardCoinsView(
+                    "user1", controller, viewModel);
+
+            JFrame frame = new JFrame("Earn Reward Coins");
+            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+            frame.setContentPane(view);
+            frame.pack();
+            frame.setLocationRelativeTo(null);
+            frame.setVisible(true);
+        });
     }
 }
