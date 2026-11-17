@@ -1,6 +1,8 @@
 package view.board;
 
 import view.glass.GlassTextField;
+import view.glass.GlassDialogs;
+import view.glass.GlassButton;
 import workspace.domain.CanvasState;
 import workspace.domain.SavedCanvas;
 
@@ -11,6 +13,7 @@ import javax.swing.BoxLayout;
 import javax.swing.DefaultListModel;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
+import javax.swing.JButton;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -49,6 +52,8 @@ public final class SavedCanvasChooser extends JPanel {
     private final GlassTextField search = new GlassTextField(24, "Search canvases");
     private final JLabel count = new JLabel();
     private final JLabel empty = new JLabel("No canvases found", SwingConstants.CENTER);
+    public enum Choice { OPEN, NEW, RENAME }
+    private Choice choice = Choice.OPEN;
     private Runnable openSelected = () -> { };
 
     public SavedCanvasChooser(List<SavedCanvas> canvases) {
@@ -103,6 +108,14 @@ public final class SavedCanvasChooser extends JPanel {
         JLabel hint = new JLabel("Double-click to open");
         hint.setForeground(new Color(111, 111, 117));
         hint.setFont(BoardTheme.font(11f));
+        // The modal's shared action row owns all four buttons, so they have
+        // precisely the same vertical position, height, and baseline.
+
+        GlassButton create = GlassDialogs.actionButton("New", true);
+        create.addActionListener(e -> { choice = Choice.NEW; openSelected.run(); });
+        GlassButton rename = GlassDialogs.actionButton("Rename", false);
+        rename.addActionListener(e -> { if (selected() != null) { choice = Choice.RENAME; openSelected.run(); } });
+        GlassDialogs.setLeadingActions(this, create, rename);
         add(hint, BorderLayout.SOUTH);
         filter();
     }
@@ -110,6 +123,7 @@ public final class SavedCanvasChooser extends JPanel {
     /** The enclosing modal registers its submit callback; no persistence or navigation is performed here. */
     public void onDoubleClick(Runnable callback) { openSelected = callback == null ? () -> { } : callback; }
     public SavedCanvas selected() { return list.getSelectedValue(); }
+    public Choice choice() { return choice; }
     public int resultCount() { return results.size(); }
     public void query(String query) { search.setText(query); }
 

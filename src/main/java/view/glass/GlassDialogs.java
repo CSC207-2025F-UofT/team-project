@@ -219,6 +219,14 @@ public final class GlassDialogs {
             }
             if (unsaved) trailingButtons.forEach(trailing::add);
             else for (int i = trailingButtons.size()-1; i >= 0; i--) trailing.add(trailingButtons.get(i));
+            if (extra != null && extra.getClientProperty("glass.leadingActions") instanceof List<?> leading) {
+                JPanel leadingRow = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 0));
+                leadingRow.setOpaque(false);
+                for (Object item : leading) {
+                    if (item instanceof GlassButton button) leadingRow.add(button);
+                }
+                actions.add(leadingRow, BorderLayout.WEST);
+            }
             actions.add(trailing, BorderLayout.EAST);
             add(actions, BorderLayout.SOUTH);
         }
@@ -241,6 +249,16 @@ public final class GlassDialogs {
             g2.dispose();
             super.paintComponent(g);
         }
+    }
+
+    /** Place embedded actions on the same baseline as the modal's Cancel/Open buttons. */
+    public static void setLeadingActions(JComponent content, GlassButton... actions) {
+        content.putClientProperty("glass.leadingActions", List.of(actions));
+    }
+
+    /** Reuse the exact dialog action appearance in embedded views such as the canvas browser. */
+    public static GlassButton actionButton(String label, boolean primary) {
+        return new ActionButton(label, primary ? Style.PRIMARY : Style.SECONDARY);
     }
 
     private enum Style { PRIMARY, SECONDARY, DESTRUCTIVE }

@@ -201,6 +201,26 @@ public final class Icons {
         g.draw(new Line2D.Double(0, 0, 3.5, 2.5));
     }
 
+    /** Down chevron for the always-available Save options; crisp at every DPI. */
+    public static void chevronDown(Graphics2D g) {
+        prep(g);
+        Path2D p = new Path2D.Double();
+        p.moveTo(-5.5, -2);
+        p.lineTo(0, 3.5);
+        p.lineTo(5.5, -2);
+        g.draw(p);
+    }
+
+    /** A separate check icon for a canvas whose current contents are already saved. */
+    public static void check(Graphics2D g) {
+        prep(g);
+        Path2D p = new Path2D.Double();
+        p.moveTo(-7, 0);
+        p.lineTo(-1.8, 5.5);
+        p.lineTo(7.5, -5.5);
+        g.draw(p);
+    }
+
     public static void close(Graphics2D g) {
         prep(g);
         g.draw(new Line2D.Double(-5.5, -5.5, 5.5, 5.5));

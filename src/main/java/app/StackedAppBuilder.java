@@ -155,6 +155,10 @@ public class StackedAppBuilder {
         pdfPanel.setFullscreenAction(() -> board.setPdfFullscreen(!board.isPdfFullscreen()));
         pdfStudio.onOpen(() -> board.setPdfOpen(true));
         dialogs.get().restoreLatestAtStartup();
+        board.setSaveStateSupplier(dialogs.get()::saveMenuState);
+        drawing.addInkChangeListener(board::scheduleSaveStateRefresh);
+        drawing.addFormulaChangeListener(id -> board.scheduleSaveStateRefresh());
+        drawing.addViewListener(board::scheduleSaveStateRefresh);
 
         JFrame frame = new JFrame("Math Lab");
         JRootPane root = frame.getRootPane();
@@ -166,9 +170,14 @@ public class StackedAppBuilder {
         int shortcut = Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx();
         root.registerKeyboardAction(e -> drawing.undo(), KeyStroke.getKeyStroke(KeyEvent.VK_Z, shortcut),
                 JComponent.WHEN_IN_FOCUSED_WINDOW);
-        root.registerKeyboardAction(e -> dialogs.get().save(), KeyStroke.getKeyStroke(KeyEvent.VK_S, shortcut),
-                JComponent.WHEN_IN_FOCUSED_WINDOW);
-        root.registerKeyboardAction(e -> dialogs.get().saveAs(), KeyStroke.getKeyStroke(KeyEvent.VK_S, shortcut | java.awt.event.InputEvent.SHIFT_DOWN_MASK),
+        root.registerKeyboardAction(e -> {
+            dialogs.get().save();
+            board.refreshSaveState();
+        }, KeyStroke.getKeyStroke(KeyEvent.VK_S, shortcut), JComponent.WHEN_IN_FOCUSED_WINDOW);
+        root.registerKeyboardAction(e -> {
+            dialogs.get().saveAs();
+            board.refreshSaveState();
+        }, KeyStroke.getKeyStroke(KeyEvent.VK_S, shortcut | java.awt.event.InputEvent.SHIFT_DOWN_MASK),
                 JComponent.WHEN_IN_FOCUSED_WINDOW);
 
         root.registerKeyboardAction(e -> board.setPdfFullscreen(false),
