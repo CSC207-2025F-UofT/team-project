@@ -39,9 +39,9 @@ public class EarnRewardCoinsInteractor implements EarnRewardCoinsInputBoundary{
             return;
         }
         BigDecimal spending = dataAccess.getTotalSpending(userId, yesterday);
-        if (spending.compareTo(budget.get()) >= 0){
+        if (spending.compareTo(budget.get()) > 0){
             presenter.prepareFailView(
-                    "Your spending yesterday was not under budget.");
+                    "Your spending yesterday was exceeded your budget.");
             return;
         }
         if (dataAccess.hasClaimedReward(userId, yesterday)) {

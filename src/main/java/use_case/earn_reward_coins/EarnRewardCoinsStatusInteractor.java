@@ -39,7 +39,7 @@ public class EarnRewardCoinsStatusInteractor
         boolean eligible = !claimed
                 && budget.isPresent()
                 && budget.get().signum() > 0
-                && spending.compareTo(budget.get()) < 0;
+                && spending.compareTo(budget.get()) <= 0;
 
         String message;
 
