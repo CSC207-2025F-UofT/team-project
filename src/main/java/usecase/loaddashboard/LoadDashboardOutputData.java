@@ -129,6 +129,7 @@ public final class LoadDashboardOutputData {
     private final String reactants;
     private final int blankCount;
     private final List<String> choices;
+    private final List<Integer> choiceOrder;
     private final boolean savedCorrect;
 
     /**
@@ -141,13 +142,14 @@ public final class LoadDashboardOutputData {
      * @param equation true if the student fills product tiles into blanks after the reactants
      * @param reactants the left side of the equation, or empty when not {@code equation}
      * @param blankCount how many blanks the equation has, or 0 when not {@code equation}
-     * @param choices choice labels, image resource paths when {@code imageChoices}, or
-     *     product tiles when {@code equation}
+     * @param choices the choices in the order they are shown: choice labels, image resource
+     *     paths when {@code imageChoices}, or product tiles when {@code equation}
+     * @param choiceOrder for each shown position, the original index of the choice there
      * @param savedCorrect whether the student's saved answer to it is correct
      */
     public QuestionInfo(String prompt, boolean multipleChoice, boolean imageChoices,
         boolean equation, String reactants, int blankCount, List<String> choices,
-        boolean savedCorrect) {
+        List<Integer> choiceOrder, boolean savedCorrect) {
       this.prompt = prompt;
       this.multipleChoice = multipleChoice;
       this.imageChoices = imageChoices;
@@ -155,6 +157,7 @@ public final class LoadDashboardOutputData {
       this.reactants = reactants;
       this.blankCount = blankCount;
       this.choices = choices;
+      this.choiceOrder = choiceOrder;
       this.savedCorrect = savedCorrect;
     }
 
@@ -184,6 +187,11 @@ public final class LoadDashboardOutputData {
 
     public List<String> getChoices() {
       return choices;
+    }
+
+    /** For each shown position, the original index of the choice there. */
+    public List<Integer> getChoiceOrder() {
+      return choiceOrder;
     }
 
     public boolean isSavedCorrect() {

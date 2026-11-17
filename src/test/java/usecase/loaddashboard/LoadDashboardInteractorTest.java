@@ -5,13 +5,17 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import data.InMemoryLabDataAccessObject;
+import data.RandomChoiceOrderer;
 import entity.LabModule;
 import entity.QuizQuestion;
 import entity.QuizQuestion.Type;
 import java.time.LocalDate;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Random;
 import java.util.Set;
 import org.junit.jupiter.api.Test;
+import usecase.ChoiceOrderer;
 import usecase.loaddashboard.LoadDashboardOutputData.ModuleInfo;
 import usecase.loaddashboard.LoadDashboardOutputData.QuestionInfo;
 
@@ -52,6 +56,36 @@ class LoadDashboardInteractorTest {
   }
 
   @Test
+  void choicesComeBackShuffledAndTheOrderMapsThemToTheOriginals() {
+    List<String> original = List.of("a", "b", "c", "d");
+    LabModule module = new LabModule("Pre-lab", LocalDate.of(2026, 11, 30), "", List.of(),
+        List.of(), null, List.of(new QuizQuestion("q", Type.SINGLE, original, Set.of(0), "")));
+    boolean shuffled = false;
+    ChoiceOrderer orderer = new RandomChoiceOrderer(new Random(3));
+    for (int i = 0; i < 20; i++) {
+      QuestionInfo question = load(module, orderer).getQuestions().get(0);
+      assertEquals(new HashSet<>(List.of(0, 1, 2, 3)), new HashSet<>(question.getChoiceOrder()));
+      for (int shown = 0; shown < 4; shown++) {
+        assertEquals(original.get(question.getChoiceOrder().get(shown)),
+            question.getChoices().get(shown));
+      }
+      shuffled |= !question.getChoiceOrder().equals(List.of(0, 1, 2, 3));
+    }
+    assertTrue(shuffled, "the order changes between loads");
+  }
+
+  @Test
+  void savedCorrectAndSavedAnswersStayInOriginalIndexesWhenShuffled() {
+    LabModule module = new LabModule("Pre-lab", LocalDate.of(2026, 11, 30), "", List.of(),
+        List.of(), null, List.of(
+            new QuizQuestion("q", Type.SINGLE, List.of("a", "b", "c", "d"), Set.of(2), "")));
+    module.setSavedAnswers(List.of(Set.of(2)));
+    ModuleInfo info = load(module, new RandomChoiceOrderer(new Random(5)));
+    assertEquals(List.of(Set.of(2)), info.getSavedAnswers());
+    assertTrue(info.getQuestions().get(0).isSavedCorrect());
+  }
+
+  @Test
   void savedCorrectMarksRightSavedAnswers() {
     LabModule module = new LabModule("Pre-lab", LocalDate.of(2026, 11, 30), "", List.of(),
         List.of(), null, List.of(
@@ -68,6 +102,11 @@ class LoadDashboardInteractorTest {
 
   /** Runs LoadDashboard with {@code module} as the only module. */
   private static ModuleInfo load(LabModule module) {
+    return load(module, ChoiceOrderer.IN_ORDER);
+  }
+
+  /** Runs LoadDashboard with {@code module} as the only module and a chosen shuffle. */
+  private static ModuleInfo load(LabModule module, ChoiceOrderer orderer) {
     LoadDashboardOutputData[] out = new LoadDashboardOutputData[1];
     new LoadDashboardInteractor(new InMemoryLabDataAccessObject(List.of(module)),
         new LoadDashboardOutputBoundary() {
@@ -80,7 +119,7 @@ class LoadDashboardInteractorTest {
           public void prepareFailView(String error) {
             throw new AssertionError(error);
           }
-        }).execute(new LoadDashboardInputData());
+        }, orderer).execute(new LoadDashboardInputData());
     return out[0].getModules().get(0);
   }
 }

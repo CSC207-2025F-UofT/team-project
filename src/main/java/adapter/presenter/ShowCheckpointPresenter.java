@@ -23,13 +23,13 @@ public class ShowCheckpointPresenter implements ShowCheckpointOutputBoundary {
   @Override
   public void prepareSuccessView(ShowCheckpointOutputData out) {
     viewModel.setQuestion(out.getStepIndex(), out.getStepTitle(), out.getPrompt(),
-        out.getChoices(), out.isMultipleChoice());
+        out.getChoices(), out.getChoiceOrder(), out.isMultipleChoice());
     viewModel.firePropertyChanged(CheckpointViewModel.QUESTION);
   }
 
   @Override
   public void prepareFailView(String error) {
-    viewModel.setQuestion(-1, "", "", List.of(), false);
+    viewModel.setQuestion(-1, "", "", List.of(), List.of(), false);
     viewModel.setFeedback(false, "", "", "", error);
     viewModel.firePropertyChanged(CheckpointViewModel.QUESTION);
   }

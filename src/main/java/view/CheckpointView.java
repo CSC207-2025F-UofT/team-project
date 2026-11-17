@@ -175,12 +175,12 @@ public class CheckpointView extends JPanel implements PropertyChangeListener {
     check.setEnabled(!correct && !choiceButtons.isEmpty());
   }
 
-  /** The indexes of the choices the student selected. */
+  /** The original indexes of the choices the student selected, whatever order they are shown. */
   private Set<Integer> selected() {
     Set<Integer> selected = new HashSet<>();
     for (int i = 0; i < choiceButtons.size(); i++) {
       if (choiceButtons.get(i).isSelected()) {
-        selected.add(i);
+        selected.add(viewModel.originalIndexOf(i));
       }
     }
     return selected;

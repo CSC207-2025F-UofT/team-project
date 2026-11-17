@@ -10,10 +10,12 @@ import adapter.presenter.AnswerCheckpointPresenter;
 import adapter.presenter.ShowCheckpointPresenter;
 import adapter.viewmodel.CheckpointViewModel;
 import data.InMemoryLabDataAccessObject;
+import data.RandomChoiceOrderer;
 import java.awt.Component;
 import java.awt.Container;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import javax.swing.AbstractButton;
 import org.junit.jupiter.api.Test;
 import usecase.answercheckpoint.AnswerCheckpointInteractor;
@@ -25,27 +27,29 @@ class CheckpointViewTest {
     InMemoryLabDataAccessObject dataAccess = new InMemoryLabDataAccessObject();
     return new CheckpointView(viewModel,
         new ShowCheckpointController(
-            new ShowCheckpointInteractor(dataAccess, new ShowCheckpointPresenter(viewModel))),
+            new ShowCheckpointInteractor(dataAccess, new ShowCheckpointPresenter(viewModel),
+                new RandomChoiceOrderer(new Random()))),
         new AnswerCheckpointController(
             new AnswerCheckpointInteractor(dataAccess, new AnswerCheckpointPresenter(viewModel))));
   }
 
   @Test
   void continueStaysLockedUntilTheAnswerIsCorrect() {
-    CheckpointView view = viewFor(new CheckpointViewModel());
+    CheckpointViewModel viewModel = new CheckpointViewModel();
+    CheckpointView view = viewFor(viewModel);
     boolean[] continued = {false};
     view.open(0, () -> continued[0] = true);
 
     AbstractButton next = button(view, "I understand, continue →");
     assertFalse(next.isEnabled(), "locked before answering");
 
-    // Wrong answer (second choice): still locked.
-    choices(view).get(1).setSelected(true);
+    // Wrong answer (original choice 1, wherever it is shown): still locked.
+    shown(view, viewModel, 1).setSelected(true);
     button(view, "Check Answer").doClick();
     assertFalse(next.isEnabled());
 
-    // Right answer (first choice): unlocked, and Continue moves on.
-    choices(view).get(0).setSelected(true);
+    // Right answer (original choice 0, wherever it is shown): unlocked, and Continue moves on.
+    shown(view, viewModel, 0).setSelected(true);
     button(view, "Check Answer").doClick();
     assertTrue(next.isEnabled());
     next.doClick();
@@ -64,15 +68,66 @@ class CheckpointViewTest {
 
   @Test
   void openingAnotherStepReplacesTheQuestionAndRelocksContinue() {
-    CheckpointView view = viewFor(new CheckpointViewModel());
+    CheckpointViewModel viewModel = new CheckpointViewModel();
+    CheckpointView view = viewFor(viewModel);
     view.open(0, () -> { });
-    choices(view).get(0).setSelected(true);
+    shown(view, viewModel, 0).setSelected(true);
     button(view, "Check Answer").doClick();
     assertTrue(button(view, "I understand, continue →").isEnabled());
 
     view.open(1, () -> { });
     assertFalse(button(view, "I understand, continue →").isEnabled());
     assertTrue(button(view, "Check Answer").isEnabled());
+  }
+
+  @Test
+  void theRightAnswerIsAcceptedInEveryShownPosition() {
+    boolean[] seen = new boolean[4];
+    for (int attempt = 0; attempt < 60 && !allTrue(seen); attempt++) {
+      CheckpointViewModel viewModel = new CheckpointViewModel();
+      CheckpointView view = viewFor(viewModel);
+      view.open(0, () -> { });
+      int position = viewModel.shownPositionOf(0);
+      seen[position] = true;
+      choices(view).get(position).setSelected(true);
+      button(view, "Check Answer").doClick();
+      assertTrue(button(view, "I understand, continue →").isEnabled(),
+          "right answer shown at position " + position);
+    }
+    assertTrue(allTrue(seen), "the right answer moves around between showings");
+  }
+
+  @Test
+  void aWrongAnswerIsRejectedInEveryShownPosition() {
+    CheckpointViewModel viewModel = new CheckpointViewModel();
+    CheckpointView view = viewFor(viewModel);
+    view.open(0, () -> { });
+    int rightPosition = viewModel.shownPositionOf(0);
+    // Every other position is wrong, however the choices were shuffled.
+    for (int position = 0; position < 4; position++) {
+      if (position == rightPosition) {
+        continue;
+      }
+      choices(view).get(position).setSelected(true);
+      button(view, "Check Answer").doClick();
+      assertFalse(button(view, "I understand, continue →").isEnabled(),
+          "wrong answer at position " + position);
+    }
+  }
+
+  private static boolean allTrue(boolean[] flags) {
+    for (boolean flag : flags) {
+      if (!flag) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  /** The button showing the choice whose original index is {@code original}. */
+  private static AbstractButton shown(Container view, CheckpointViewModel viewModel,
+      int original) {
+    return choices(view).get(viewModel.shownPositionOf(original));
   }
 
   private static List<AbstractButton> choices(Container container) {

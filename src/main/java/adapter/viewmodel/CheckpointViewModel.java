@@ -19,6 +19,7 @@ public class CheckpointViewModel {
   private String stepTitle = "";
   private String prompt = "";
   private List<String> choices = List.of();
+  private List<Integer> choiceOrder = List.of();
   private boolean multipleChoice;
   private boolean correct;
   private String verdict = "";
@@ -32,15 +33,17 @@ public class CheckpointViewModel {
    * @param stepIndex the step the checkpoint comes after
    * @param stepTitle that step's name
    * @param prompt the question text
-   * @param choices the choice labels
+   * @param choices the choice labels, in the order they are shown
+   * @param choiceOrder for each shown position, the original index of the choice there
    * @param multipleChoice true if the student ticks every correct choice
    */
   public void setQuestion(int stepIndex, String stepTitle, String prompt, List<String> choices,
-      boolean multipleChoice) {
+      List<Integer> choiceOrder, boolean multipleChoice) {
     this.stepIndex = stepIndex;
     this.stepTitle = stepTitle;
     this.prompt = prompt;
     this.choices = List.copyOf(choices);
+    this.choiceOrder = List.copyOf(choiceOrder);
     this.multipleChoice = multipleChoice;
     setFeedback(false, "", "", "", "");
   }
@@ -95,6 +98,26 @@ public class CheckpointViewModel {
 
   public List<String> getChoices() {
     return choices;
+  }
+
+  /**
+   * Translates a shown position into the choice's original index, which is what answers use.
+   *
+   * @param shown the position of a choice on screen
+   * @return the choice's original index
+   */
+  public int originalIndexOf(int shown) {
+    return choiceOrder.get(shown);
+  }
+
+  /**
+   * Translates a choice's original index into where it is shown.
+   *
+   * @param original the choice's original index
+   * @return its position on screen, or -1 if there is no such choice
+   */
+  public int shownPositionOf(int original) {
+    return choiceOrder.indexOf(original);
   }
 
   public boolean isMultipleChoice() {
