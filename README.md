@@ -85,7 +85,6 @@ The user must enter a name, select at least one base spirit, or both.
 - If no cocktails match, the system displays “No cocktails found.”
 - If the catalog cannot be accessed, the system reports the failure and allows retry.
 
-### Use Case 2 [Enhao]
 
 ### Use Case 2 [Enhao]
 
