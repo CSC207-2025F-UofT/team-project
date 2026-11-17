@@ -196,7 +196,7 @@ the system does not display any comments or ratings
 | Grace Manurung | Use Case #6: Comments and Ratings |
 | Syaikha Faiza Arifin | Use Case #3: Add a movie to watchlist |
 | Yuxuan Lin | Use Case #4: Add a movie to favourites |
-| Frank Li | Use Case |
+| Frank Li | Use Case #2: View movie details |
 | Zhanyuan Su | Use Case#5：View movie posters |
 ---
 ## Entities
