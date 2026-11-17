@@ -22,11 +22,14 @@ public final class MealSlot implements Comparable<MealSlot> {
      * Creates a slot.
      * @param day the day of the week
      * @param mealType the meal of that day
-     * @throws NullPointerException if day or mealType is null
+     * @throws IllegalArgumentException if day or mealType is null
      */
     public MealSlot(DayOfWeek day, MealType mealType) {
-        this.day = Objects.requireNonNull(day, "day");
-        this.mealType = Objects.requireNonNull(mealType, "mealType");
+        if (day == null || mealType == null) {
+            throw new IllegalArgumentException("Day and meal type cannot be null");
+        }
+        this.day = day;
+        this.mealType = mealType;
     }
 
     public DayOfWeek getDay() {
