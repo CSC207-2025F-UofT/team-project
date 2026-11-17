@@ -1,5 +1,7 @@
 package entity;
 
+import java.util.Locale;
+
 /**
  * The name of an ingredient. Equality is based on a normalized key so names
  * received from the UI and TheMealDB can be compared consistently.
@@ -55,10 +57,10 @@ public final class IngredientName {
      */
     private static String normalize(String rawName) {
         return rawName
-                .trim()
-                .toLowerCase()
                 .replace('_', ' ')
-                .replaceAll("\\s+", " ");
+                .replaceAll("\\s+", " ")
+                .trim()
+                .toLowerCase(Locale.ROOT);
     }
 
     /*
