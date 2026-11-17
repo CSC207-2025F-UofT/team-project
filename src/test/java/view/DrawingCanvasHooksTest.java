@@ -308,4 +308,34 @@ class DrawingCanvasHooksTest {
         assertEquals(4, strokesIn(canvas.registerNewInk(last(), line)));
         assertEquals(2, canvas.getFormulas().size());
     }
+
+    @Test
+    void bothLimitsAfterThePauseComeBackAsOneCurrentFormula() {
+        List<Stroke> sum = new ArrayList<>();
+        int[][] ink = {
+            {251, 200, 200, 200, 229, 232, 200, 264, 251, 264},     // Σ 64
+            {261, 222, 261, 246}, {261, 230, 271, 222, 281, 246},    // n
+            {317, 214, 323, 212, 331, 220, 317, 254, 339, 254},      // 2, 40
+        };
+        for (int[] s : ink) {
+            write(s);
+            sum.add(last());
+        }
+        assertNotNull(canvas.registerNewInk(last(), sum));
+        List<Stroke> later = new ArrayList<>();
+        int[][] limits = {
+            {237, 160, 223, 160, 222, 173, 236, 178, 230, 190, 221, 188},  // 5 over Σ, loose
+            {205, 274, 205, 286, 210, 274, 215, 286},                     // n=0 under it, loose
+            {219, 278, 229, 278}, {219, 283, 229, 283},
+            {233, 274, 233, 294, 241, 294, 241, 274, 233, 274},
+        };
+        for (int[] s : limits) {
+            write(s);
+            later.add(last());
+            assertTrue(!canvas.isBound(last()), "both limits wait for the pause");
+        }
+        FormulaCapture capture = canvas.registerNewInk(last(), later);
+        assertTrue(canvas.isCurrent(capture.getId(), capture.getRevision()), "not a formula that got merged again");
+        assertEquals(9, strokesIn(capture));
+    }
 }

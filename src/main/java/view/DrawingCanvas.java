@@ -1179,13 +1179,13 @@ public class DrawingCanvas extends JPanel {
             }
         }
         double h = AnswerLayout.strokeHeight(pool);
-        Formula mine = bindGroup(looseGroup(last, h));
+        bindGroup(looseGroup(last, h));
         for (Stroke s : session) {
             if (strokes.contains(s) && !book.isBound(s)) {
                 bindGroup(looseGroup(s, h));
             }
         }
-        return capture(mine);
+        return capture(book.holding(last));  // after all of it, a later limit may have merged it again
     }
 
     // limits written after the pause join the formula they sit on, judged as a whole row; else a new one
