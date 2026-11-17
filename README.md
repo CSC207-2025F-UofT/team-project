@@ -212,9 +212,12 @@ Every ingredient in the app is compared through this class, never through a raw 
 - `displayName: String` as shown to the user 
 - `key: String` key used to access API and normalization
 + Methods:
-- `equals` 
-- `hashCode` TODO
-- `getDisplayName(): String` TODO
+- `equals(Object): boolean` Desc TODO 
+- `hashCode(): int` Desc TODO
+- `getDisplayName(): String` Desc TODO
+- `toString(): String` Desc TODO
++ Static Methods:
+- `fromRawName(String): IngredientName` Desc TODO
 
 ### RecipeIngredient
 + Fields: 
