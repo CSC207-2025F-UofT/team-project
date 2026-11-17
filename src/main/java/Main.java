@@ -9,8 +9,7 @@ public class Main {
                 .addMainMenuView()
                 .addGameView()
                 .build();
-
-        application.pack();
+        
         application.setLocationRelativeTo(null);
         application.setVisible(true);
     }

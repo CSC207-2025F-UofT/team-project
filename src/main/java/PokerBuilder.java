@@ -1,6 +1,8 @@
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 
 import main.interface_adapters.GameViewModel;
 import main.interface_adapters.ViewManagerModel;
@@ -49,10 +51,22 @@ public class PokerBuilder {
     public JFrame build() {
         final JFrame application = new JFrame("Poker");
         application.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+        application.setExtendedState(JFrame.MAXIMIZED_BOTH);
 
         viewManagerModel.setActiveView(MainMenuViewModel.VIEW_NAME);
         viewManagerModel.notifyViewChanged();
         application.add(cardPanel);
+
+
+        //listens for window resizes, uses CardPanel instead of application since cardpanel excludes
+        // OS window title bar
+        cardPanel.addComponentListener(new ComponentAdapter() {
+            @Override
+            public void componentResized(ComponentEvent e) {
+                UserSystemSettings.updateWindowSize();
+            }
+        });
+
 
         return application;
     }
