@@ -1,0 +1,89 @@
+@startuml entities
+' Render in IntelliJ with the PlantUML Integration plugin, or at https://www.plantuml.com
+title Trip Planner & Budgeter: Entities
+hide empty members
+skinparam classAttributeIconSize 0
+
+class User {
+  - name : String
+  - password : String
+  + getName() : String
+  + getPassword() : String
+}
+
+class Trip {
+  - id : String
+  - name : String
+  - destination : String
+  - startDate : LocalDate
+  - endDate : LocalDate
+  - homeCurrency : String
+  - dailyBudget : double
+  - ownerUsername : String
+  - memberUsernames : List<String>
+  - savingsGoals : Map<String, Double>
+  + addMember(username : String) : boolean
+  + hasMember(username : String) : boolean
+  + containsDate(date : LocalDate) : boolean
+  + getNumberOfDays() : int
+  + getDates() : List<LocalDate>
+  + getTotalBudget() : double
+  + setDailyBudget(amount : double)
+  + setSavingsGoal(username : String, amount : double)
+  + getSavingsGoal(username : String) : double
+  + getTotalSavingsGoal() : double
+}
+
+class Contribution {
+  - id : String
+  - tripId : String
+  - memberUsername : String
+  - amount : double
+  - date : LocalDate
+}
+
+class Expense {
+  - id : String
+  - tripId : String
+  - payerUsername : String
+  - description : String
+  - amount : double
+  - currency : String
+  - amountInHomeCurrency : double
+  - category : ExpenseCategory
+  - date : LocalDate
+}
+
+enum ExpenseCategory {
+  FLIGHT
+  TRANSPORT
+  FOOD
+  LODGING
+  ACTIVITY
+  SHOPPING
+  OTHER
+}
+
+class ActivityIdea {
+  - id : String
+  - tripId : String
+  - day : LocalDate
+  - title : String
+  - estimatedCost : double
+  - proposedBy : String
+  - createdAt : LocalDateTime
+  - voterUsernames : Set<String>
+  + {static} BY_RANK : Comparator<ActivityIdea>
+  + addVote(username : String) : boolean
+  + removeVote(username : String) : boolean
+  + toggleVote(username : String) : boolean
+  + hasVoted(username : String) : boolean
+  + getVoteCount() : int
+}
+
+Trip "1" o-- "1..*" User : members (by username)
+Trip "1" -- "*" Contribution : tripId
+Trip "1" -- "*" Expense : tripId
+Trip "1" -- "*" ActivityIdea : tripId
+Expense --> ExpenseCategory
+@enduml

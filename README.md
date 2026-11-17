@@ -2,157 +2,415 @@
 
 **Team name:** _TBD_
 
-## Project Domain
+## Team Members
 
-**Domain:** Travel / personal finance
+- Amelia Ha
+- Emily Tran
+- Jadyn Nok Tong Mo
+- Tamima Wadageri
+- Yi Xuan (Jessica) Su
 
-A group trip planner for friends travelling together. Before the trip, each member sets a personal savings goal and logs what they've saved, so the group can see how close it is to affording the trip. While planning, members propose activities for each day and vote on them to build a ranked list. During the trip, members log every expense in whatever currency they paid, and the app converts it to the trip's home currency using live exchange rates and compares each day's spending to a daily budget.
+---
 
-**Specification.** A *user* creates a *trip* with a name, destination, start and end dates, a home currency and a daily budget, then invites other users as members. Each member sets a savings goal and logs *contributions* toward it. Members propose *activity ideas* for specific days of the trip and vote on them; each member can vote once per idea. During the trip, members log *expenses* with an amount, currency, category, date and payer. Expenses in a foreign currency are converted to the home currency with the current exchange rate. For any day of the trip, a member can see the total spent against the daily budget.
+## Project Description
+
+### Domain
+
+Travel and personal finance.
+
+Planning a trip with friends usually means a group chat, a shared spreadsheet and a currency app, none of which talk to each other. Trip Planner & Budgeter puts the whole trip in one place: the group saves up for it together, decides what to do each day, and keeps track of what everyone spends while they are away.
+
+### Specification
+
+A **user** signs up with a username and password. A user can create a **trip** by giving it a name, a destination, a start date, an end date, a home currency (the currency the group thinks in, such as Canadian dollars) and a daily budget. The user who creates a trip becomes its first **member** and can invite other users by username. Each user sees a list of the trips they belong to and can open any of them.
+
+**Before the trip**, each member can set a personal **savings goal** and log **contributions** as they put money aside. The group can see each member's progress and the group's combined progress toward the total of everyone's goals.
+
+**While planning**, members suggest **activity ideas** for specific days of the trip, optionally with an estimated cost. Every member can vote once for each idea, and each day's ideas are ranked by votes so the group can see what is most popular.
+
+**During the trip**, members log **expenses**: what it was, how much, in which currency, which category (such as food, transport or lodging), on which day, and who paid. Amounts paid in another currency are converted into the home currency at the current exchange rate. For any day of the trip, a member can see how much the group spent compared with the daily budget, with a breakdown by category.
+
+---
 
 ## User Stories
 
-1. As a group trip organizer, I want to create a trip and invite my friends, so that we can all plan it together.
-2. As a trip member, I want to set a personal savings goal and log what I've saved, so that the group can see how close we are to affording the trip.
-3. As a traveller, I want to log each expense in whatever currency I paid, so that the group has one record of what we spent.
-4. As a traveller, I want to see how much we've spent on a given day compared to our daily budget, so that I know whether we need to cut back.
-5. As a traveller, I want to convert an amount between currencies using current rates, so that I understand what things actually cost.
-6. As a trip member, I want to suggest activities and vote on other members' suggestions, so that we choose what the group wants most each day.
+1. **Create and share a trip.** As a group trip organizer, I want to create a trip and invite my friends to it, so that we can all plan and track the same trip together.
+2. **Save up together.** As a trip member, I want to set a personal savings goal and log what I put aside, so that the group can see how close we are to affording the trip.
+3. **Log spending in any currency.** As a traveller, I want to log what I spend in whatever currency I paid in, so that the group has one record of spending in our home currency.
+4. **Stay on budget each day.** As a traveller, I want to see how much the group spent on a given day compared with our daily budget, broken down by category, so that we know whether we need to cut back.
+5. **Decide what to do.** As a trip member, I want to suggest activities for each day and vote on everyone's suggestions, so that we spend our time on what the group wants most.
+
+---
 
 ## Use Cases
 
-### Use Case 1: Create a trip and invite collaborators
+Each use case follows the course's lightweight format. Screen sketches for every use case, before and after, including the error cases, are in [`docs/ui-sketches/`](docs/ui-sketches/).
 
-**Main Flow**
-1. A logged-in user clicks **New Trip**.
-2. The user enters a trip name, destination, start date, end date, home currency and daily budget, then clicks **Create**.
-3. The system saves the trip with the user as its first member and opens the trip dashboard.
-4. On the dashboard, the user enters another user's username and clicks **Invite**.
-5. The system adds that user to the trip's members, and the member list updates.
+Every use case below assumes the user is signed in (signup, login and logout come from the course starter code).
 
-**Alternative Flows**
-- A required field is empty: the system shows an error and does not create the trip.
-- The end date is before the start date: the system shows an error.
-- The invited username does not exist: the system shows "No user with that username."
-- The invited user is already a member: the system shows "Already a member of this trip."
+### Use Case 1a: Create a trip
 
-### Use Case 2: Set a savings goal and log contributions
+**Primary actor:** A user planning a trip
 
-**Main Flow**
-1. A member opens the **Savings** view of a trip.
-2. The member enters a personal savings goal (in the trip's home currency) and clicks **Set Goal**.
-3. The member enters a contribution amount and date and clicks **Log Contribution**.
-4. The system records the contribution and updates the member's progress bar and the group's total progress (total contributed / total of all goals).
+**Preconditions:**
 
-**Alternative Flows**
-- The amount is zero, negative or not a number: the system shows an error.
-- The member logs a contribution before setting a goal: the system asks them to set a goal first.
-- A member's contributions pass their goal: the contribution is accepted and their progress shows "Goal reached."
+* The user is signed in.
+
+**Trigger:** The user asks to create a new trip.
+
+**Success outcome:** The trip exists with the user as its only member, and the user is looking at that trip.
+
+**Main success scenario:**
+
+1. The user asks to create a new trip.
+2. The user provides a trip name, destination, start date, end date, home currency and daily budget.
+3. The system checks the details.
+4. The system saves the trip with the user as its first member.
+5. The system shows the new trip.
+
+**Extensions:**
+
+* **3a.** A detail is missing.
+  1. The system explains which detail is missing and does not create the trip.
+* **3b.** The end date is before the start date.
+  1. The system explains the problem and does not create the trip.
+* **3c.** The daily budget is not a number or is negative.
+  1. The system explains the problem and does not create the trip.
+* **3d.** The home currency is not a recognized currency.
+  1. The system explains the problem and does not create the trip.
+
+### Use Case 1b: Invite a member to a trip
+
+**Primary actor:** A member of the trip
+
+**Preconditions:**
+
+* The user is a member of the trip and is viewing it.
+
+**Trigger:** The user asks to invite another user by username.
+
+**Success outcome:** The invited user is a member of the trip and can see the trip in their own list of trips.
+
+**Main success scenario:**
+
+1. The user asks to invite someone and provides their username.
+2. The system checks that a user with that username exists and is not already a member.
+3. The system adds that user to the trip.
+4. The system shows the updated list of members.
+
+**Extensions:**
+
+* **2a.** No user has that username.
+  1. The system says there is no user with that username. Nobody is added.
+* **2b.** The user is already a member.
+  1. The system says they are already a member. Nothing changes.
+
+### Use Case 1c: Open a trip
+
+**Primary actor:** A member of one or more trips
+
+**Preconditions:**
+
+* The user is signed in.
+
+**Trigger:** The user asks to see their trips.
+
+**Success outcome:** The user is looking at the trip they chose, with its members and the ways to plan and track it.
+
+**Main success scenario:**
+
+1. The user asks to see their trips.
+2. The system shows every trip the user is a member of.
+3. The user chooses one.
+4. The system shows that trip.
+
+**Extensions:**
+
+* **2a.** The user is not a member of any trip yet.
+  1. The system says there are no trips yet and offers to create one (Use Case 1a).
+
+### Use Case 2a: Set a savings goal
+
+**Primary actor:** A member of the trip
+
+**Preconditions:**
+
+* The user is a member of the trip and is viewing it.
+
+**Trigger:** The user asks to set how much they plan to save for the trip.
+
+**Success outcome:** The user's savings goal is recorded, and the progress shown for the user and for the group reflects it.
+
+**Main success scenario:**
+
+1. The user asks to set a savings goal and provides an amount in the trip's home currency.
+2. The system checks the amount.
+3. The system records the goal.
+4. The system shows the user's progress and the group's progress.
+
+**Extensions:**
+
+* **2a.** The amount is not a number, or is zero or negative.
+  1. The system explains the problem and keeps the previous goal, if any.
+* **3a.** The user already had a goal.
+  1. The system replaces it and recalculates both progress figures.
+
+### Use Case 2b: Log a savings contribution
+
+**Primary actor:** A member of the trip
+
+**Preconditions:**
+
+* The user is a member of the trip and is viewing it.
+* The user has set a savings goal (Use Case 2a).
+
+**Trigger:** The user asks to record money they have put aside for the trip.
+
+**Success outcome:** The contribution is recorded, and the progress shown for the user and for the group includes it.
+
+**Main success scenario:**
+
+1. The user asks to log a contribution and provides an amount and a date.
+2. The system checks the amount.
+3. The system records the contribution.
+4. The system shows the user's progress (saved so far out of their goal) and the group's progress (everyone's savings out of everyone's goals).
+
+**Extensions:**
+
+* **2a.** The amount is not a number, or is zero or negative.
+  1. The system explains the problem and records nothing.
+* **2b.** The user has not set a savings goal yet.
+  1. The system asks the user to set a goal first and records nothing.
+* **4a.** The user's savings now reach or pass their goal.
+  1. The system tells the user their goal is reached.
 
 ### Use Case 3: Log an expense
 
-**Main Flow**
-1. On the trip dashboard, a member clicks **Add Expense**.
-2. The member enters a description, amount, currency, category (flight, transport, food, lodging, activity, other), date and payer (defaults to themselves), then clicks **Save**.
-3. If the currency differs from the trip's home currency, the system gets the current exchange rate and stores the converted amount.
-4. The system saves the expense, and the expense list updates.
+**Primary actor:** A member of the trip
 
-**Alternative Flows**
-- The amount is zero, negative or not a number: the system shows an error.
-- The date is outside the trip's dates: the system shows an error.
-- The exchange rate cannot be retrieved: the system shows "Couldn't get the exchange rate. Try again." and does not save the expense.
+**Preconditions:**
 
-### Use Case 4: View daily budget summary
+* The user is a member of the trip and is viewing it.
 
-**Main Flow**
-1. A member opens the **Daily Budget** view and selects a day of the trip.
-2. The system totals that day's expenses in the home currency and compares the total to the daily budget.
-3. The view shows the amount spent, the amount remaining and a breakdown by category.
+**Trigger:** The user asks to record money that was spent on the trip.
 
-**Alternative Flows**
-- No expenses were logged that day: the view shows 0 spent and the full budget remaining.
-- Spending is over the daily budget: the view shows the amount over budget, highlighted in red.
+**Success outcome:** The expense is recorded with its amount in the currency it was paid in and in the trip's home currency, and appears in the trip's list of expenses.
 
-### Use Case 5: Convert currency
+**Main success scenario:**
 
-**Main Flow**
-1. A user opens the **Currency Converter** view.
-2. The user enters an amount and chooses a "from" currency and a "to" currency, then clicks **Convert**.
-3. The system gets the latest exchange rate from the exchange rate API.
-4. The view shows the converted amount and the date of the rate used.
+1. The user asks to log an expense and provides a description, amount, currency, category (flight, transport, food, lodging, activity, shopping or other), date, and who paid.
+2. The system checks the details.
+3. The system works out the amount in the trip's home currency using today's exchange rate.
+4. The system records the expense.
+5. The system shows the trip's expenses, including the new one with both amounts.
 
-**Alternative Flows**
-- Both currencies are the same: the system returns the same amount without calling the API.
-- The amount is not a valid number: the system shows an error.
-- The API cannot be reached or rejects the currency: the system shows "Couldn't get the exchange rate. Try again."
+**Extensions:**
 
-### Use Case 6: Propose and vote on activities
+* **2a.** The description is missing, or the amount is not a number, or is zero or negative.
+  1. The system explains the problem and records nothing.
+* **2b.** The date is not within the trip's dates.
+  1. The system says the date is not part of this trip and records nothing.
+* **2c.** The person who paid is not a member of the trip.
+  1. The system explains the problem and records nothing.
+* **3a.** The currency is the trip's home currency.
+  1. The system uses the amount as it is, with no conversion.
+* **3b.** Today's exchange rate cannot be found, for example because there is no internet connection.
+  1. The system says it could not get the exchange rate and asks the user to try again. Nothing is recorded.
 
-**Main Flow**
-1. A member opens the **Activities** view and selects a day of the trip.
-2. The member enters an activity title (and optionally an estimated cost) and clicks **Propose**.
-3. The system saves the idea, and it appears in that day's list.
-4. Members click **Vote** on ideas they like.
-5. The system records each vote and re-sorts the day's list by number of votes (ties: earliest proposed first).
+### Use Case 4a: View the daily budget summary
 
-**Alternative Flows**
-- The title is empty: the system shows an error.
-- An idea with the same title already exists for that day: the system shows "Already proposed."
-- A member clicks **Vote** on an idea they already voted for: the system removes their vote.
+**Primary actor:** A member of the trip
 
-## MVP
+**Preconditions:**
 
-Every use case above is part of the MVP. Each team member takes the lead on one.
+* The user is a member of the trip and is viewing it.
 
-| Use Case | Lead |
-| --- | --- |
-| 1. Create a trip and invite collaborators | |
-| 2. Set a savings goal and log contributions | |
-| 3. Log an expense | |
-| 4. View daily budget summary | |
-| 5. Convert currency | |
-| 6. Propose and vote on activities | |
+**Trigger:** The user asks to see how spending compares with the daily budget for a day of the trip.
 
-Login and signup come from the course's ca-login starter code and are shared by the team.
+**Success outcome:** The user sees what the group spent that day, what is left of the daily budget, and what the spending was on, by category.
+
+**Main success scenario:**
+
+1. The user asks for the budget summary and chooses a day of the trip.
+2. The system adds up that day's expenses in the trip's home currency.
+3. The system compares the total with the daily budget.
+4. The system shows the amount spent, the amount remaining, and the spending by category.
+
+**Extensions:**
+
+* **2a.** No expenses were logged that day.
+  1. The system shows nothing spent and the full budget remaining.
+* **3a.** The group spent more than the daily budget.
+  1. The system shows how much over budget the group is and makes this stand out.
+
+### Use Case 4b: Change the daily budget
+
+**Primary actor:** A member of the trip
+
+**Preconditions:**
+
+* The user is a member of the trip and is viewing the budget summary (Use Case 4a).
+
+**Trigger:** The user asks to change the daily budget.
+
+**Success outcome:** The trip has the new daily budget, and the summary reflects it.
+
+**Main success scenario:**
+
+1. The user asks to change the daily budget and provides the new amount.
+2. The system checks the amount.
+3. The system saves the new daily budget.
+4. The system shows the updated summary.
+
+**Extensions:**
+
+* **2a.** The amount is not a number or is negative.
+  1. The system explains the problem and keeps the current budget.
+
+### Use Case 5a: Suggest an activity
+
+**Primary actor:** A member of the trip
+
+**Preconditions:**
+
+* The user is a member of the trip and is viewing it.
+
+**Trigger:** The user asks to suggest something to do on a day of the trip.
+
+**Success outcome:** The idea is recorded for that day and is visible to every member, ranked with the other ideas for that day.
+
+**Main success scenario:**
+
+1. The user asks to suggest an activity and provides a day, a name, and optionally an estimated cost.
+2. The system checks the details.
+3. The system records the idea with no votes.
+4. The system shows that day's ideas, ranked.
+
+**Extensions:**
+
+* **2a.** The name is missing, or the estimated cost is not a number or is negative.
+  1. The system explains the problem and records nothing.
+* **2b.** The day is not within the trip's dates.
+  1. The system explains the problem and records nothing.
+* **2c.** An idea with the same name already exists for that day.
+  1. The system says it was already suggested and records nothing.
+
+### Use Case 5b: Vote on an activity
+
+**Primary actor:** A member of the trip
+
+**Preconditions:**
+
+* The user is a member of the trip and is viewing a day's activity ideas.
+
+**Trigger:** The user asks to vote for an idea.
+
+**Success outcome:** The user's vote is counted once for that idea, and the day's ideas are ranked by number of votes, with ties going to the idea suggested first.
+
+**Main success scenario:**
+
+1. The user asks to vote for an idea.
+2. The system records the vote.
+3. The system shows that day's ideas, ranked again.
+
+**Extensions:**
+
+* **2a.** The user already voted for this idea.
+  1. The system removes their vote instead.
+  2. The system shows that day's ideas, ranked again.
+
+---
+
+## Minimal Viable Product (MVP)
+
+All of the use cases above are in the MVP. There are five groups, one per team member, and each member leads one group. Sign up, log in and log out come from the course's starter code and are shared.
+
+| Team Member | MVP Use Cases |
+|-------------|---------------|
+| | 1. Create a trip (1a), invite a member (1b), open a trip (1c) |
+| | 2. Set a savings goal (2a), log a savings contribution (2b) |
+| | 3. Log an expense (3) |
+| | 4. View the daily budget summary (4a), change the daily budget (4b) |
+| | 5. Suggest an activity (5a), vote on an activity (5b) |
+
+---
 
 ## Entities
 
-**User**
-- Instance variables: `username: String`, `password: String`
-- Methods: getters
+A class diagram is in [`docs/diagrams/entities.puml`](docs/diagrams/entities.puml).
 
-**Trip**
-- Instance variables: `id: String`, `name: String`, `destination: String`, `startDate: LocalDate`, `endDate: LocalDate`, `homeCurrency: String`, `dailyBudget: double`, `memberUsernames: List<String>`, `savingsGoals: Map<String, Double>`
-- Methods: `addMember(String username)`, `hasMember(String username): boolean`, `containsDate(LocalDate date): boolean`, `getNumberOfDays(): int`, `setSavingsGoal(String username, double amount)`, `getTotalSavingsGoal(): double`
+### User
+- **Instance variables:** `name: String`, `password: String`
+- **Methods:** getters
 
-**Contribution**
-- Instance variables: `id: String`, `tripId: String`, `member: String`, `amount: double`, `date: LocalDate`
-- Methods: getters
+### Trip
+- **Instance variables:** `id`, `name`, `destination`, `startDate: LocalDate`, `endDate: LocalDate`, `homeCurrency` (ISO code such as "CAD"), `dailyBudget: double`, `ownerUsername`, `memberUsernames: List<String>`, `savingsGoals: Map<String, Double>`
+- **Methods:** `addMember(username): boolean`, `hasMember(username)`, `containsDate(date)`, `getNumberOfDays()`, `getDates()`, `getTotalBudget()`, `setDailyBudget(amount)`, `setSavingsGoal(username, amount)`, `hasSavingsGoal(username)`, `getSavingsGoal(username)`, `getTotalSavingsGoal()`
 
-**Expense**
-- Instance variables: `id: String`, `tripId: String`, `payer: String`, `description: String`, `amount: double`, `currency: String`, `amountInHomeCurrency: double`, `category: ExpenseCategory`, `date: LocalDate`
-- Methods: getters
-- `ExpenseCategory` is an enum: `FLIGHT, TRANSPORT, FOOD, LODGING, ACTIVITY, OTHER`
+### Contribution
+- **Instance variables:** `id`, `tripId`, `memberUsername`, `amount: double` (home currency), `date: LocalDate`
+- **Methods:** getters
 
-**ActivityIdea**
-- Instance variables: `id: String`, `tripId: String`, `day: LocalDate`, `title: String`, `estimatedCost: double`, `proposedBy: String`, `voters: Set<String>`, `createdAt: LocalDateTime`
-- Methods: `addVote(String username): boolean`, `removeVote(String username): boolean`, `hasVoted(String username): boolean`, `getVoteCount(): int`
+### Expense
+- **Instance variables:** `id`, `tripId`, `payerUsername`, `description`, `amount: double`, `currency`, `amountInHomeCurrency: double`, `category: ExpenseCategory`, `date: LocalDate`
+- **Methods:** getters
+- `ExpenseCategory` is an enum: `FLIGHT, TRANSPORT, FOOD, LODGING, ACTIVITY, SHOPPING, OTHER`
+
+### ActivityIdea
+- **Instance variables:** `id`, `tripId`, `day: LocalDate`, `title`, `estimatedCost: double`, `proposedBy`, `createdAt: LocalDateTime`, `voterUsernames: Set<String>`
+- **Methods:** `addVote(username)`, `removeVote(username)`, `toggleVote(username)`, `hasVoted(username)`, `getVoteCount()`, and the `BY_RANK` comparator (most votes first, ties broken by earliest suggestion)
+
+All entities check their own inputs (for example, amounts must be positive and currencies must be real ISO codes), so invalid data can never be created.
+
+---
 
 ## API Usage
 
-**Frankfurter (exchange rates)**
-- Documentation: https://frankfurter.dev
-- Free, open source, no API key. Example: `GET https://api.frankfurter.dev/v2/rate/CAD/JPY` returns the current CAD to JPY rate.
-- Used by Use Case 5 (Convert currency) and Use Case 3 (converting expenses into the trip's home currency), through a shared exchange rate data access interface.
-- Status: not yet called from our Java program.
+### Frankfurter (exchange rates)
 
-**Course user/data API (data persistence)**
-- Reference: the `DBUserDataAccessObject` class in the course's ca-login repository (`db-user` branch).
-- Stores a user and an associated JSON object. We will use it to save users, trips, contributions, expenses and activity ideas so that all members see the same data across devices. Plan to confirm with our TA: storing each trip as its own record keyed by trip id, so every member reads and writes the same record.
-- Status: not yet called from our Java program.
+**Documentation:** https://frankfurter.dev
 
-## Future Extensions
+**How it is used in the program:** Converts expenses paid in a foreign currency into the trip's home currency (Use Case 3). The currency dropdowns are filled from the API's list of supported currencies. Free, no API key, rates from the European Central Bank, updated every working day. About 30 major currencies are supported.
 
-- Search for activities, flights and lodging through an external API
-- Charts beyond the daily summary (spending over the whole trip, by category)
-- Splitting costs between members and showing who owes whom
+- Rate request: `GET https://api.frankfurter.dev/v1/latest?base=CAD&symbols=JPY` returns `{"amount":1.0,"base":"CAD","date":"2026-11-16","rates":{"JPY":111.72}}`
+- Currency list: `GET https://api.frankfurter.dev/v1/currencies`
+- Code: `data_access.FrankfurterExchangeRateGateway`, used through the `use_case.exchange_rate.ExchangeRateDataAccessInterface` interface, so use cases never depend on the API directly.
+
+**Status:** Endpoints confirmed working on Nov 16, 2026. Run `app.ExchangeRateApiDemo` to see live rates from Java.
+
+### Data persistence
+
+Users are saved to `users.csv` (course starter code). Trips, contributions, expenses and activity ideas are saved to `trips.json` by `data_access.JsonFileTripDataAccessObject`, and loaded again when the app starts. Use cases only see small data access interfaces, so the storage could later be swapped for a database without changing any use case code.
+
+---
+
+## Design Diagrams
+
+### UML Class Diagram
+
+- Entities: [`docs/diagrams/entities.puml`](docs/diagrams/entities.puml)
+
+### Sequence Diagrams
+
+_To be added for each MVP use case._
+
+---
+
+## How to Run
+
+1. Open the project in IntelliJ as a Maven project (JDK 11 or newer, as in the course Quickstart).
+2. Optional: run `app.SampleDataSeeder` once to create five sample users (`tamima`, `amelia`, `jadyn`, `jessica`, `emily`, password `password`) and a sample trip.
+3. Run `app.Main`.
+
+Tests: `mvn test` · Coverage report: `mvn verify`, then open `target/site/jacoco/index.html` · Style check (Google Java Style, same rules as the course notes): `mvn checkstyle:check` · Auto-format: `mvn spotless:apply`
+
+---
+
+## Notes
+
+### Future extensions
+- Standalone currency converter screen (reuses the same exchange rate interface)
+- Save flights, transport, restaurants and lodging to the trip with their prices
+- Split costs and show who owes whom
+- Trip-wide spending charts
+- Store data online so members on different laptops share the same trip
