@@ -102,15 +102,20 @@ Student's guess is invalid
 2. The submit button is disabled until a valid guess is detected. 
 ### Use Case 4 
 Name: Start the Candle Game 
+
 Primary Actor: Student
+
 Preconditions: Break Timer is on, student is in the right page
+
 Trigger: Student clicks the button linked to the break page
+
 Success Outcome: Game page is open, ready to work and take students input
+
 Main Success Scenario:
-Student clicks the button linked to the break page 
-Program checks if Break Timer is on, if it is;
-Game creates a secret code and a new game
-The system opens the game window showing the candles, Break Timer, and the tries left.
+1. Student clicks the button linked to the break page 
+2. Program checks if Break Timer is on, if it is;
+3. Game creates a secret code and a new game
+4. The system opens the game window showing the candles, Break Timer, and the tries left.
 Extensions:
 - If Break Timer is not active then the program does not let users access the game.
 - If Student clicks the quit button, program marks Game Condition as “QUIT” and student returns to the focus page
