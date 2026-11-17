@@ -52,6 +52,7 @@ Add login as a shared use case based on the course's login example.
 
 • Extensions:
 ```text
+n/a
 ```
 
 ### Use Case 2
