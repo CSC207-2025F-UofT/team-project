@@ -91,8 +91,26 @@ public final class AnswerLayout {
         return Math.hypot(dx, dy);
     }
 
-    // median height of tall single strokes; lines stacked above each other don't add up
+    // 3/4 up the tall single strokes, lowercase + "+" don't shrink it; lines stacked above each other don't add up
     public static double strokeHeight(Collection<Stroke> strokes) {
+        List<Integer> heights = tallHeights(strokeBoxes(strokes));
+        if (heights.isEmpty()) {
+            return charHeight(strokes);
+        }
+        heights.sort(null);
+        return clamped(heights.get((int) (0.75 * (heights.size() - 1))));
+    }
+
+    // tallest single stroke = a full char, a fraction doesn't stack up, lowercase doesn't drag it down
+    public static double tallestStroke(Collection<Stroke> strokes) {
+        List<Integer> heights = tallHeights(strokeBoxes(strokes));
+        if (heights.isEmpty()) {
+            return charHeight(strokes);
+        }
+        return clamped(java.util.Collections.max(heights));
+    }
+
+    private static List<Rectangle> strokeBoxes(Collection<Stroke> strokes) {
         List<Rectangle> boxes = new ArrayList<>();
         for (Stroke s : strokes) {
             Rectangle b = bounds(List.of(s));
@@ -100,11 +118,7 @@ public final class AnswerLayout {
                 boxes.add(b);
             }
         }
-        List<Integer> heights = tallHeights(boxes);
-        if (heights.isEmpty()) {
-            return charHeight(strokes);
-        }
-        return clamped(median(heights));
+        return boxes;
     }
 
     // fresh loose ink: same formula if on the same line, gaps up to 1.5 chars

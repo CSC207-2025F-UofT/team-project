@@ -93,7 +93,7 @@ public class FormulaBook {
             if (box == null) {
                 continue;
             }
-            Formula home = homeOf(s, box, gone, before);
+            Formula home = homeOf(box, gone, before);
             if (home != null) {
                 after.get(home.getId()).add(s);
                 changed.add(home.getId());
@@ -111,13 +111,13 @@ public class FormulaBook {
     }
 
     // formula a stroke lands on: the one it was cut out of, else the closest. null = none
-    private Formula homeOf(Stroke s, Rectangle box, Set<Stroke> gone, Map<Long, Rectangle> before) {
+    private Formula homeOf(Rectangle box, Set<Stroke> gone, Map<Long, Rectangle> before) {
         Formula closest = null;
         double closestGap = 0;
         for (Formula f : formulas.values()) {
             // judge against the old box so erased pieces still count
             Rectangle old = before.get(f.getId());
-            if (!AnswerLayout.joins(old, f.getCharHeight(), box) && !Scripts.stackedOn(f.getStrokes(), List.of(s))) {
+            if (!AnswerLayout.joins(old, f.getCharHeight(), box)) {  // limits wait for the pause, judged as a row
                 continue;
             }
             if (wasCutFrom(f, gone, box)) {

@@ -17,6 +17,7 @@ import interface_adapter.evaluate.CalculateCheckController;
 import interface_adapter.evaluate.DefinitionCheckController;
 import interface_adapter.evaluate.EvaluateController;
 import interface_adapter.evaluate.EvaluatePresenter;
+import interface_adapter.evaluate.QuestionCheckController;
 import interface_adapter.graph.GraphController;
 import interface_adapter.graph.GraphPresenter;
 import interface_adapter.graph.GraphState;
@@ -28,6 +29,7 @@ import pdf_editor.PdfStudioLauncher;
 import use_case.evaluate.CalculateCheckInteractor;
 import use_case.evaluate.DefinitionCheckInteractor;
 import use_case.evaluate.EvaluateInteractor;
+import use_case.evaluate.QuestionCheckInteractor;
 import use_case.graph_check.GraphCheckInteractor;
 import use_case.graph_function.GraphFunctionInteractor;
 import view.DrawingCanvas;
@@ -87,6 +89,7 @@ public class StackedAppBuilder {
                 functions, new EvaluatePresenter(mathViewModel)));
         CalculateCheckController calculateCheck = new CalculateCheckController(new CalculateCheckInteractor(functions));
         DefinitionCheckController definitionCheck = new DefinitionCheckController(new DefinitionCheckInteractor());
+        QuestionCheckController questionCheck = new QuestionCheckController(new QuestionCheckInteractor());
 
         // graph, graphs also go to PDF Studio like before
         GraphViewModel graphViewModel = new GraphViewModel();
@@ -129,6 +132,7 @@ public class StackedAppBuilder {
                 graph, graphViewModel, graphCheck::canGraph, BoardTheme.CANVAS);
         page.setDefinitionCheck(definitionCheck::isDefinition);
         page.setCalculateCheck(calculateCheck::canCalculate);
+        page.setQuestionCheck(questionCheck::isQuestion);
         sharedCanvas.attachTo(page);
         PdfPanel pdfPanel = pdfStudio.createPanel();
         // Use the live selection (lasso or whole ink), not an outdated startup screenshot.

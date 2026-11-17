@@ -66,7 +66,8 @@ public class AnswerCanvasPage extends CanvasPage {
     private Predicate<String> graphable = latex -> false;
     private Predicate<String> definitionCheck = latex -> false;
     private Predicate<String> calculable = latex -> true;
-    private final PopupGate gate = new PopupGate();
+    private Predicate<String> question = latex -> false;
+    private final PopupGate gate = new PopupGate(latex -> question.test(latex));
 
     // no evaluate feature, just a placeholder
     public AnswerCanvasPage(SharedCanvas sharedCanvas) {
@@ -151,6 +152,11 @@ public class AnswerCanvasPage extends CanvasPage {
     // only-graphable lines (y=3x, f(x)=x^2) drop Calculate
     public void setCalculateCheck(Predicate<String> calculable) {
         this.calculable = calculable;
+    }
+
+    // done comparisons (2x>5) pop up w/o an "="
+    public void setQuestionCheck(Predicate<String> question) {
+        this.question = question;
     }
 
     // tests type ranges like the user
@@ -259,18 +265,36 @@ public class AnswerCanvasPage extends CanvasPage {
             queueRest(capture);
             session.clear();
         } else if (targetId >= 0) {
+            FormulaCapture loose = registerLeftovers();  // first, it may fold into the edited one
             capture = getSharedCanvas().captureForRecalculation(targetId);
+            if (capture == null) {
+                capture = loose;
+            }
+            queueRest(capture);
+            session.clear();
         }
+        boolean pick = targetPick;
         targetStroke = null;
         targetId = -1;
         targetPick = false;
-        if (capture == null) {
-            capture = nextWaiting();
+        if (capture == null && !pick) {
+            capture = nextWaiting();  // a pick is on purpose, never swap in another formula
         }
         if (capture != null) {
             readAhead();
             recognize(capture, generation);
         }
+    }
+
+    // loose ink written before the edit gets bound too instead of dropped; null if none
+    private FormulaCapture registerLeftovers() {
+        Stroke last = null;
+        for (Stroke s : session) {
+            if (!getSharedCanvas().isBound(s)) {
+                last = s;
+            }
+        }
+        return last == null ? null : getSharedCanvas().registerNewInk(last, session);
     }
 
     // other formulas of this round got bound too, only the last one gets the popup now

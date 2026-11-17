@@ -14,6 +14,7 @@ import use_case.evaluate.CalculateCheckInteractor;
 import use_case.evaluate.DefinitionCheckInteractor;
 import use_case.graph_check.GraphCheckInteractor;
 import use_case.evaluate.EvaluateInteractor;
+import use_case.evaluate.QuestionCheckInteractor;
 import view.DrawingCanvas;
 
 import javax.swing.SwingUtilities;
@@ -700,6 +701,58 @@ class AnswerCanvasPageTest {
     }
 
     // mouse comes to rest at (x, y), no button down
+    @Test
+    void pickOnAnAnsweredFormulaNeverOffersAnother() throws Exception {
+        shared.setFormulaRecognizer(image -> "1+1=");
+        openPage();
+        write();
+        waitPopup("1+1=");
+        clickCalculate();
+        waitFor(() -> canvas.getAnswers().size() == 1, "the answer");
+        onEdt(() -> {
+            stroke(400, 100, 450, 150);            // two more in one go, one waits its turn
+            stroke(700, 100, 750, 150);
+        });
+        waitPopup("1+1=");
+
+        lasso(80, 80, 220, 170);                   // just the answered one again
+        Thread.sleep(400);
+        assertNull(popup(), "a pick never swaps in some other formula");
+    }
+
+    @Test
+    void looseInkBeforeAnEditStillGetsRegistered() throws Exception {
+        AtomicInteger calls = new AtomicInteger();
+        shared.setFormulaRecognizer(image -> {
+            calls.incrementAndGet();
+            return "1+1";
+        });
+        openPage();
+        write();
+        waitFor(() -> calls.get() == 1, "the first read");
+        onEdt(() -> {
+            stroke(500, 300, 530, 340);            // loose bit far off
+            stroke(205, 100, 205, 150);            // then a stroke on the formula
+        });
+        waitFor(() -> canvas.getStrokes().stream().allMatch(shared::isBound), "the loose bit registered too");
+        waitFor(() -> calls.get() >= 3, "both read");
+    }
+
+    @Test
+    void limitFoldedIntoAnEditedFormulaStillPopsUp() throws Exception {
+        shared.setFormulaRecognizer(image -> "1+1=");
+        openPage();
+        write();
+        waitPopup("1+1=");
+        onEdt(() -> {
+            stroke(110, 160, 125, 175);            // small limit under it, loose
+            stroke(205, 100, 205, 150);            // then a stroke on the formula
+        });
+        waitPopup("1+1=");
+        assertEquals(1, shared.getFormulas().size());
+        assertEquals(3, shared.getFormulas().get(0).getStrokes().size());
+    }
+
     private void hover(int x, int y) throws Exception {
         onEdt(() -> canvas.dispatchEvent(new MouseEvent(canvas, MouseEvent.MOUSE_MOVED, 0, 0, x, y, 0, false)));
     }
@@ -876,6 +929,7 @@ class AnswerCanvasPageTest {
                     new GraphController(input -> { }), new GraphViewModel(), graphCheck::canGraph,
                     java.awt.Color.WHITE);
             page.setCalculateCheck(calcCheck::canCalculate);
+            page.setQuestionCheck(new QuestionCheckInteractor()::isQuestion);
             page.setPopupDelay(100);
             shared.attachTo(page);
             page.setSize(900, 560);
@@ -909,5 +963,27 @@ class AnswerCanvasPageTest {
         boardPopupFor("y=2+3");
         assertTrue(popup().hasCalculate());
         assertTrue(popup().hasGraph());
+    }
+
+    @Test
+    void comparisonPopsWithoutEquals() throws Exception {
+        boardPopupFor("2x>5");
+        assertTrue(popup().hasCalculate());
+        clickCalculate();
+        waitFor(() -> canvas.getAnswers().size() == 1, "the answer");
+    }
+
+    @Test
+    void halfWrittenComparisonWaits() throws Exception {
+        AtomicInteger calls = new AtomicInteger();
+        shared.setFormulaRecognizer(image -> {
+            calls.incrementAndGet();
+            return "2x>";
+        });
+        openBoard();
+        write();
+        waitFor(() -> calls.get() == 1, "the read");
+        Thread.sleep(300);
+        assertNull(popup());
     }
 }

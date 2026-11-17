@@ -1179,16 +1179,28 @@ public class DrawingCanvas extends JPanel {
             }
         }
         double h = AnswerLayout.strokeHeight(pool);
-        Formula mine = book.add(looseGroup(last, h), nextRevision());
+        bindGroup(looseGroup(last, h));
         for (Stroke s : session) {
             if (strokes.contains(s) && !book.isBound(s)) {
-                book.add(looseGroup(s, h), nextRevision());
+                bindGroup(looseGroup(s, h));
             }
         }
-        return capture(mine);
+        return capture(book.holding(last));  // after all of it, a later limit may have merged it again
     }
 
-    // lasso pick -> one formula, gaps and all; null if empty or answered
+    // limits written after the pause join the formula they sit on, judged as a whole row; else a new one
+    private Formula bindGroup(Set<Stroke> group) {
+        for (Formula f : book.all()) {
+            if (Scripts.stackedOn(f.getStrokes(), group)) {  // one way only, old formula is never the new ink's limit
+                Set<Stroke> both = new LinkedHashSet<>(f.getStrokes());
+                both.addAll(group);
+                return book.add(both, nextRevision());
+            }
+        }
+        return book.add(group, nextRevision());
+    }
+
+    // lasso pick -> one formula, gaps and all; null if empty, already answered, or 2+ answered (moving them)
     public FormulaCapture registerSelection() {
         List<Stroke> picked = selectedInkSnapshot();
         if (picked.isEmpty()) {
@@ -1199,12 +1211,17 @@ public class DrawingCanvas extends JPanel {
                 return captureForRecalculation(f.getId());  // already one formula, keep it
             }
         }
+        Set<Long> answered = new HashSet<>();
         for (Stroke s : picked) {
             Formula f = book.holding(s);
             if (f != null && f.getAnswer() != null) {
-                return null;
+                answered.add(f.getId());
             }
         }
+        if (answered.size() > 1) {
+            return null;
+        }
+        // one answered + more/less ink = they're fixing its grouping, old answer goes
         Formula mine = book.add(picked, nextRevision());
         repaint();
         return capture(mine);
