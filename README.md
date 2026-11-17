@@ -35,7 +35,7 @@ As a user, I want to search for cocktails by name and filter them by base spirit
 ### User Story 2 [Enhao]
 As a user, I want to customize existing cocktail recipes by adding, removing, or replacing ingredients and adjusting quantities so that I can make drinks according to my personal preferences.
 ### User Story 3 [Jiaqi]
-As a user, I want to save my favourite cocktails, rate them, and add personal notes so that I can keep track of drinks I enjoy and revisit their recipes later.
+As a user, I want to register an account, log in and log out, and access my personal profile so that I can securely manage my account and revisit my favourite cocktails and customized recipes.
 ### User Story 4 [Wenqian]
 As a user, I want to browse cocktails on the main page and save my favourite cocktails so that I can easily find and revisit them later.
 
@@ -82,35 +82,38 @@ Alternative Flows
 5) If the user clicks Cancel, the system discards the changes and returns to the original recipe.
 
 ### Use Case 3 [Jiaqi]
-use case 1:
+Inputs:
+Username: The username entered by the user.
+Password: The password entered by the user.
+Confirm Password: Required only when registering a new account.
+Login, Sign Up, Profile, and Logout buttons.
+
 MAIN SUCCESS SCENARIO
-1. User access log in page, enters their username and password. 
-2. The user click log in/cancel; 
-3. The system received the account information.
-4. The user enters the main page.
-5. If the user doesn't have an account
-6. the user click registar.
-7. The user chooses a username
-8. The user chooses a password and enters it twice to help catch typing mistakes
-9. If the username already exists, the system alerts the user
-10. If the two passwords don't match, the system alerts the user
-11. If the username doesn’t exist in the system and the passwords match, then the system creates the user but does not log in them.
-12. System goes back to the login page.
+1. The user opens the Login page.
+2. The user enters their username and password.
+3. The user clicks the "Login" button.
+4. The system verifies the username and password.
+5. If the credentials are valid, the system logs the user in and establishes the current-user session.
+6. The system displays the user's personal profile, including their username.
+7. The user can navigate to Favourite Cocktails or My Custom Cocktails from their profile.
+8. When the user clicks "Logout", the system clears the current-user session and returns to the Login page.
 
 EXTENSION
-
-
-use case 2:
-MAIN SUCCESS SCENARIO
-1. User enters the cocktail she/he tried, gives it a rating from 1 to 5, and add additional notes optionally.
-2. The users click save button
-3. The system received the entered information.
-4. System updates the information and display them in the saved page.
-
-EXTENSION:
-1. if the user didn’t enter cocktail name or score or both of them and try to click save button first, then the system asks user to enter both of them.
-2. Once the user click the saved page, it should display all the rating history to the user. User can click the the specific history to check more details.
-
+a. User does not have an account
+  1. The user clicks the "Sign Up" button on the Login page.
+  2. The system displays the Registration page.
+  3. The user enters a username, password, and password confirmation.
+  4. The user clicks the "Sign Up" button.
+  5. The system checks that the required fields are completed, the passwords match, and the username is available.
+  6. The system creates and saves the new account.
+  7. The system displays a registration success message and returns to the Login page.
+  8. The user continues from Step 2 of the Main Success Scenario.
+b. Invalid username or password
+  1. The system displays an error message indicating that the username or password is incorrect.
+  2. The user can re-enter their credentials and try again.
+c. Invalid registration information
+  1. If the system cannot verify the account because the data service is unavailable, it displays an error message.
+  2. The user remains on the Login page and can try again later.
 
 ### Use Case 4 [Wenqian]
 PRECONDTION
