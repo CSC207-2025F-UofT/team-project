@@ -205,14 +205,24 @@ Each lead splits their use case into small Interactors, one per user action. Eac
 
 ### IngredientName (value object)
 Every ingredient in the app is compared through this class, never through a raw `String`.
-- Fields: `displayName: String` (as shown to the user), `key: String` (normalized)
-- Normalization: trim, lowercase, `_` → space, collapse repeated spaces. So `"Chicken_Breast"`, `" chicken breast "` and `"Chicken Breast"` are equal.
-- Methods: `equals` / `hashCode` on `key` only; `getDisplayName()`
-- Why: TheMealDB spells the same ingredient differently in different places (see API Usage). If we later need synonyms (e.g. "chopped tomatoes" ≈ "tomatoes"), only this class (or a matcher it delegates to) changes; no use case code changes.
+
++ Normalization rules:
+- TODO
++ Fields:
+- `displayName: String` as shown to the user 
+- `key: String` key used to access API and normalization
++ Methods:
+- `equals` 
+- `hashCode` TODO
+- `getDisplayName(): String` TODO
 
 ### RecipeIngredient
-- Fields: `name: IngredientName`, `measure: String`
-- `measure` is free text from the API ("1/4 cup", "3 cloves", "sprinkling"). It is only displayed, never calculated with.
++ Fields: 
+- `name: IngredientName`
+- `measure: String`
++ Methods:
+- `getMeasureDescription(): String` TODO
+- `getDisplayName(): String` TODO
 
 ### Recipe
 - Fields: `id`, `name`, `category`, `area`, `instructions`, `thumbnailUrl`, `ingredients: List<RecipeIngredient>`
