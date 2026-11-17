@@ -48,15 +48,9 @@ As a user, I want to customize an existing cocktail and save it as my own recipe
 so that I can revisit and edit my variations without changing the original recipe.
 
 ### User Story 3 [Jiaqi]
-
-As a user, I want to register, log in, and access my personal profile so that I can
-return to my favourites and customized recipes across application sessions.
-
+As a user, I want to register an account, log in and log out, and access my personal profile so that I can securely manage my account and revisit my favourite cocktails and customized recipes.
 ### User Story 4 [Wenqian]
-
-As a user, I want to browse cocktails, view their recipes and available images,
-and save favourites to my personal collection so that I can discover drinks and
-revisit recipes I like.
+As a user, I want to browse cocktails on the main page and save my favourite cocktails so that I can easily find and revisit them later.
 
 ---
 
@@ -124,82 +118,70 @@ The user is logged in.
 - An empty personal collection displays an empty-state message.
 
 ### Use Case 3 [Jiaqi]
+INPUTS
+- Username: The username entered by the user.
+- Password: The password entered by the user.
+- Confirm Password: Required only when registering a new account.
+- Login, Sign Up, Profile, and Logout buttons.
 
-**Inputs**
+MAIN SUCCESS SCENARIO
+1. The user opens the Login page.
+2. The user enters their username and password.
+3. The user clicks the "Login" button.
+4. The system verifies the username and password.
+5. If the credentials are valid, the system logs the user in and establishes the current-user session.
+6. The system navigates to the Home page after successful login.
+7. The user can access their personal profile from the Home page, which displays their username and Favourite Cocktails.
+8. When the user clicks "Logout", the system clears the current-user session and returns to the Login page.
 
-- A username and password for Login.
-- A username, password, and password confirmation for Register.
+EXTENSION
 
-**Normal Flow — Register**
+User does not have an account
+  1. The user clicks the "Sign Up" button on the Login page.
+  2. The system displays the Registration page.
+  3. The user enters a username, password, and password confirmation.
+  4. The user clicks the "Sign Up" button.
+  5. The system checks that the required fields are completed, the passwords match, and the username is available.
+  6. The system creates and saves the new account.
+  7. The system displays a registration success message and returns to the Login page.
+  8. The user continues from Step 2 of the Main Success Scenario.
 
-1. The user opens Register and submits the required information.
-2. The system validates the information and checks username availability.
-3. The system saves the account and directs the user to Login.
+Invalid username or password
+  1. The system displays an error message indicating that the username or password is incorrect.
+  2. The user can re-enter their credentials and try again.
 
-**Normal Flow — Login, Profile, and Logout**
-
-1. The user submits their credentials on Login.
-2. The system verifies the credentials and establishes the current-user session.
-3. The user opens Profile, which displays their username and access to Favourites
-   and My Custom Cocktails.
-4. The user can open either collection.
-5. Logout ends the session and removes access to the prior user's personal data.
-
-**Alternative Flows**
-
-- Missing information, taken usernames, mismatched confirmations, and invalid
-  credentials receive appropriate feedback.
-- Guests opening Profile are directed to Login or Register.
-- Account storage or network failures are reported and allow retry.
+Invalid registration information
+  1. If the system cannot verify the account because the data service is unavailable, it displays an error message.
+  2. The user remains on the Login page and can try again later.
 
 ### Use Case 4 [Wenqian]
+PRECONDTION
+1. The application is running.
+2. The user is on the main page.
 
-**Inputs**
+MAIN SUCCESS SCENARIO
+1. User browses the cocktails.
+2. User click the cocktail.
+3. The system display the detail of this cocktail.
+4. User selects a cocktail they like.
+5. User clicks the "Favourite" button.
+6. The system saves the selected cocktail to the user's favourites.
+   
+EXTENSION
+1. If the cocktail is already saved, the system informs the user and ask user whether to remove it from favourites.
+2. If saving fails, the system displays an error message.
 
-- A cocktail selected from Home, Search results, or Favourites.
-- The user's Favourite/Unfavourite action.
-
-**Normal Flow — Browse and View Details**
-
-1. Home displays cocktail cards.
-2. The user selects a card from Home or Search results.
-3. The system displays the cocktail's name, ingredients, quantities, units, and
-   available instructions and description.
-4. The system requests a matching image from TheCocktailDB and displays it when
-   a suitable match is available.
-5. The user can return to browsing or choose an available action in Details.
-
-**Normal Flow — Manage Favourites**
-
-1. A logged-in user clicks Favourite in Details.
-2. The system saves the cocktail to that user's Favourites and updates its status.
-3. The user opens Favourites from Profile and can revisit saved recipes.
-4. The user can remove a cocktail from Favourites.
-5. Favourites remain available after restarting and logging in again.
-
-**Alternative Flows**
-
-- Missing or ambiguous image matches and API failures use a placeholder image
-  while leaving the recipe accessible.
-- Missing optional recipe information is omitted or marked unavailable.
-- Guests are asked to log in before changing Favourites.
-- Empty collections display an empty-state message.
-- Save failures are reported without displaying an unsaved change as successful.
-
+(Add additional use cases as needed.)
 ---
 
 ## Minimal Viable Product (MVP)
 
 | Team Member | MVP Use Case |
 |-------------|--------------|
-| Qinli | Search by name and/or base spirit, display shared result cards, handle missing input and no matches, and open Details. |
-| Enhao | Customize an existing recipe, validate and save a personal variation, and load/edit saved variations through My Custom Cocktails. |
-| Jiaqi | Register, Login, Logout, account persistence, current-user session, and Profile entry points to personal collections. |
-| Wenqian | Browse catalog cards, view Details and available API images, and Favourite/Unfavourite recipes with Save/Load. |
-
-Beyond MVP: additional search filters, ratings/comments, and public publishing of
-Custom Recipes. Saving a personal recipe does not publish it to the public catalog.
-
+| Qinli | The user enters a cocktail name and/or selects one or more base spirits, then clicks Search. The system displays matching cocktail names or a message indicating missing input, no matches, or an API failure. |
+| Enhao | The user selects an existing cocktail recipe, adds, removes, or replaces ingredients, and adjusts quantities. The user then names and saves the customized recipe. The system validates the input and saves it separately from the original recipe.  |
+| Jiaqi | The users register a new account, log in with their username and password, and access their personal profile to access saved cocktails. The system saves user account information so that users can log in again after restarting the application.|
+| Wenqian | The user clicks a cocktail, the system display the ingredients of it. The user click 'Favourite' button, then save this cocktail to home page.|
 ---
 
 ## Entities
@@ -225,35 +207,15 @@ and contracts require team agreement before implementation.
 - Classification/category fields should follow the agreed Search requirements.
 
 ### Entity 3
-
-**RecipeIngredient — implemented minimal version**
-
-- `name`
-- `amount`: currently a String; the numeric representation must be agreed with Enhao.
-- `unit`
-
+RecipeIngredient
+- ingredient
+- unit
+- quantity
 ### Entity 4
-
-**User — planned; Jiaqi leads the Account contract**
-
-- A stable user identity and username.
-- Credential handling and session representation remain to be designed.
-
-### Entity 5
-
-**Custom Recipe — planned; Enhao leads the contract**
-
-- Its own ID, owner user ID, and original recipe reference.
-- Recipe name, ingredients, and other agreed recipe fields.
-- Whether this is a separate Class or another representation is not finalized.
-
-### Entity 6
-
-**Favourite association — planned; Wenqian leads the contract**
-
-- A user identity linked to a cocktail ID.
-- A separate Entity Class is not required unless the design needs one.
-
+User
+- userId
+- userName
+- favourite
 ---
 
 ## API Usage
