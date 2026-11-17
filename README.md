@@ -32,6 +32,44 @@ Add login as a shared use case based on the course's login example.
 ### Use Case 1
 Choose race and class.
 ### Use Case 2
+• Name: Explore the Dungeon room by room
+
+• Primary actor: Player
+
+• Preconditions: The player has a character that is standing in a dungeon room and is not in an encounter with monster. The room has one or several items in it that has magical power and is useful in either fighting dragon or improving the character's traits.
+
+• Trigger: The player chooses a direction to move towards a room or an item.
+
+• Main success scenario:
+
+    1.  Player chooses a direction to move.
+    
+    2.  System finds the room connected in that direction.
+    
+    3.  System moves the character into that room.
+    
+    4.  System presents the room's description, its items and its exits.
+    
+    5.  Player move and chooses to pick up an item.
+    
+    6.  System shows the description of the item, player choose to save it to their inventory or to drop it.
+    
+    7.  If the player chooses to save it, system adds the item to player's inventory and removes it from the room.
+    
+    8.  System presents the updated inventory.
+    
+    9.  If the player chooses to drop it, nothing happens.
+    
+• Extensions:
+
+    ◦ 2a. There is no exit in that direction: System shows a message and the character stays in the current room.
+    
+    ◦ 4a. The room contains a monster: System starts the Combat use case (Use Case 3) and this use case ends.
+    
+    ◦ 7a. The inventory is full: System tells the player and the item stays in the room. The player can also choose to drop one of the items in their inventory to have this item.
+    
+• Success outcome: The character is in the chosen room, and any item picked up is in the inventory and no longer in the room.
+
 ### Use Case 3
 (Add additional use cases as needed.)
 ---
@@ -46,6 +84,31 @@ Choose race and class.
 ## Entities
 ### Entity 1
 ### Entity 2
+Dungeon
+
+• Instance variables: floorNumber, rooms, currentRoom
+
+• Methods: moveTo(direction), isFloorFinished()
+
+Item
+
+• Instance variables: name, description, type (weapon, armor, potion), value
+
+• Methods: get
+
+Inventory
+
+• Instance variables: item, maxCapacity
+
+• Methods: addItem(Item), removeItem(Item), isFull()
+
+Room
+
+• Instance variables: description, exits (directions), item, monster (Not in use case 2 but a room can have monster)
+
+• Methods: getExit(direction), removeItem(Item), monsterPresent()
+
+
 (Add additional entities as needed.)
 ---
 ## API Usage
