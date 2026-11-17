@@ -23,6 +23,8 @@ Team Members
 
     Runyu Tian
 
+    EdwinYichun Deng
+
 Project Description 
 
 Domain 
@@ -91,6 +93,19 @@ Use Cases
 
 Minimal Viable Product (MVP) 
 
+
+Investment porfoilo
+Feature	MVP behaviour
+Initial balance	Give each user $10,000 in virtual cash
+Buy stocks	Enter a ticker and quantity; buy at the current market price
+Sell stocks	Sell shares that the user currently owns
+Available cash	Display remaining virtual cash
+Holdings	Show each stock, quantity, average purchase price and current price
+Portfolio value	Cash + current market value of all holdings
+Profit/loss	Current portfolio value − initial $10,000
+Transaction history	Record each buy/sell, quantity, price and timestamp
+Persistence	Save and reload the portfolio when the user logs in again
+
 Add team member who does what user story here
 
  
@@ -115,6 +130,72 @@ Alpha Vantage
 Documentation: https://www.alphavantage.co/documentation/ 
 
 The program uses the Api to retrieve stock data for the user stories 
+
+### Stock API data access
+
+This is Edwin's first milestone: retrieve daily stock prices and display them in
+a console demo so the team can inspect and reuse the data. The separate second
+milestone is the two-stock comparison feature: price histories, correlation,
+projected prices, and its Swing interface. Those comparison features are not
+implemented in this prototype.
+
+The reusable classes are in `src/main/java/stockprototype`:
+
+- `StockDataSource`: interface for retrieving raw daily closing prices.
+- `AlphaVantageClient`: requests and parses Alpha Vantage's `TIME_SERIES_DAILY`
+  response, validates data, and reports request errors.
+- `StockApiDemo`: demonstrates the interface by printing prices; other features
+  should call the data source rather than parse this demo's console output.
+
+Example usage inside a method that handles or declares `IOException`:
+
+```java
+import stockprototype.AlphaVantageClient;
+import stockprototype.StockDataSource;
+
+// Inside your method:
+StockDataSource source =
+        new AlphaVantageClient(System.getenv("ALPHA_VANTAGE_API_KEY"));
+java.util.NavigableMap<java.time.LocalDate, java.math.BigDecimal> prices =
+        source.getDailyClosingPrices("IBM");
+```
+
+Each call makes one request and returns an immutable map ordered from oldest to
+newest date. Prices are raw closing prices, not split/dividend-adjusted prices or
+real-time quotes. The response does not establish the stock's currency. The
+client requests `outputsize=compact`, which returns up to 100 recent daily
+prices; full daily history requires premium access. See the
+[provider's daily API documentation](https://www.alphavantage.co/documentation/#daily).
+
+This interface is provisional until reconciled with the team's agreed domain
+types. Inject the interface into use cases and construct the concrete client in
+application setup. Network calls must run off Swing's event dispatch thread.
+Caching, persistence, charts, and comparison calculations are not included.
+
+#### Running the API demo
+
+1. Open this repository's `pom.xml` as a Maven project in IntelliJ and select
+   JDK 11 or later.
+2. Run `stockprototype.StockApiDemo` without program arguments to read the
+   explicitly synthetic `sample-daily.json`. This makes no API request.
+3. For a real request, set `ALPHA_VANTAGE_API_KEY` in the local run configuration's
+   environment variables and set program arguments to `--live IBM` (or another
+   stock symbol). Here, `--live` means a real HTTP request, not real-time quotes.
+4. The demo prints the symbol, daily price count, date range, and latest five
+   closing prices. Never put the key in source code or shared run configurations.
+
+#### Validation status
+
+Run `mvn test` with JDK 11+ to execute nine offline tests using synthetic data and
+fake HTTP responses. They cover parsing, date ordering, invalid input, provider
+notices, malformed data, HTTP/network errors, credential-safe errors, and thread
+interruption. No API key is needed for these tests.
+
+On November 16, 2026, the existing IntelliJ console run of `StockApiDemo --live IBM`
+showed a successful live response with 100 daily prices, covering
+June 25 through November 13, 2026, and exit code 0. The API key is not included.
+The integrated copy also passes the nine offline tests and the synthetic demo;
+no additional live request was made during integration.
 
  
 
