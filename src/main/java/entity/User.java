@@ -2,7 +2,6 @@ package entity;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.entity.Document;
 
 /**
  * An entity representing a user. Users have a username, list of documents they
@@ -33,5 +32,13 @@ public class User {
     public List<Document> getDocumentsCreated() { return documentsCreated; }
 
     public List<Document> getDocumentsAccessed() { return documentsAccessed; }
+
+    public void addDocumentCreated(Document document) {
+        documentsCreated.add(document);
+    }
+
+    public void addDocumentAccessed(Document document) {
+        documentsAccessed.add(document);
+    }
 
 }
