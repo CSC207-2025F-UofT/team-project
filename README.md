@@ -37,22 +37,30 @@ Predict final averages and allow user to enter hypothetical grades and see the r
 ## GUI Sketches
 #### Main dashboard
 <img width="857" height="612" alt="image" src="https://github.com/user-attachments/assets/59535862-7329-48d6-8e1e-93b4467f3ba4" />
+
 #### Calendar view
 <img width="858" height="616" alt="image" src="https://github.com/user-attachments/assets/4d3c771a-1b12-4abd-bc5b-e45918bfaa05" />
+
 #### Table view
 <img width="860" height="607" alt="image" src="https://github.com/user-attachments/assets/f47c696e-ddfc-4a49-9fd1-edca92efd808" />
+
 #### Grade view 
 TBD
 
+<details>
+  <summary>Initial instructions from template</summary>
+  
+  Please keep this up-to-date with information about your project throughout the term.
 
-Please keep this up-to-date with information about your project throughout the term.
+  The readme should include information such as:
+  - a summary of what your application is all about
+  - a list of the user stories, along with who is responsible for each one
+  - information about the API(s) that your project uses 
+  - screenshots or animations demonstrating current functionality
+  
+  By keeping this README up-to-date,
+  your team will find it easier to prepare for the final presentation
+  at the end of the term.
+  
+</details>
 
-The readme should include information such as:
-- a summary of what your application is all about
-- a list of the user stories, along with who is responsible for each one
-- information about the API(s) that your project uses 
-- screenshots or animations demonstrating current functionality
-
-By keeping this README up-to-date,
-your team will find it easier to prepare for the final presentation
-at the end of the term.
