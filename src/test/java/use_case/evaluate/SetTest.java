@@ -94,10 +94,10 @@ class SetTest {
 
     @Test
     void rationalStillUnknownWhenNoProof() {
-        assertEquals("Uncalculable — Can't tell if rational", Calc.once("\\ln 2\\in\\mathbb{Q}"));
-        assertEquals("Uncalculable — Can't tell if rational", Calc.once("\\log_2 10\\in\\mathbb{Q}"));
-        assertEquals("Uncalculable — Can't tell if rational", Calc.once("\\sin(\\pi/6)\\in\\mathbb{Q}"));
-        assertEquals("Uncalculable — Can't tell if rational", Calc.once("\\cos(\\pi/3)\\in\\mathbb{Q}"));
+        assertEquals("Can't calculate — Can't tell if rational", Calc.once("\\ln 2\\in\\mathbb{Q}"));
+        assertEquals("Can't calculate — Can't tell if rational", Calc.once("\\log_2 10\\in\\mathbb{Q}"));
+        assertEquals("Can't calculate — Can't tell if rational", Calc.once("\\sin(\\pi/6)\\in\\mathbb{Q}"));
+        assertEquals("Can't calculate — Can't tell if rational", Calc.once("\\cos(\\pi/3)\\in\\mathbb{Q}"));
     }
 
     @Test
@@ -145,11 +145,11 @@ class SetTest {
 
     @Test
     void uncalculableCases() {
-        assertEquals("Uncalculable", Calc.withoutReason(Calc.once("\\{1\\}+1")));
-        assertEquals("Uncalculable", Calc.withoutReason(Calc.once("\\mathbb{R}")));
-        assertEquals("Uncalculable", Calc.withoutReason(Calc.once("\\mathbb{N}\\cup\\{1\\}")));
-        assertEquals("Uncalculable", Calc.withoutReason(Calc.once("\\{1/0\\}")));
-        assertEquals("Uncalculable", Calc.withoutReason(Calc.once("\\{\\infty\\}")));
+        assertEquals("Can't calculate", Calc.withoutReason(Calc.once("\\{1\\}+1")));
+        assertEquals("Can't calculate", Calc.withoutReason(Calc.once("\\mathbb{R}")));
+        assertEquals("Can't calculate", Calc.withoutReason(Calc.once("\\mathbb{N}\\cup\\{1\\}")));
+        assertEquals("Can't calculate", Calc.withoutReason(Calc.once("\\{1/0\\}")));
+        assertEquals("Can't calculate", Calc.withoutReason(Calc.once("\\{\\infty\\}")));
     }
 
     @Test

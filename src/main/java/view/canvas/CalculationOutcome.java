@@ -11,20 +11,24 @@ final class CalculationOutcome {
     final AnswerKind kind;
     final String answerText;
     final List<TextRun> answerRuns;  // null = plain text
-    final String error;
+    final String errorTitle;
+    final String error;  // reason only, empty = no error
     final boolean definition;
+    final String definedLatex;  // f(x) = ... when definition
 
-    CalculationOutcome(String result, AnswerKind kind, String answerText, List<TextRun> answerRuns, String error,
-                       boolean definition) {
+    CalculationOutcome(String result, AnswerKind kind, String answerText, List<TextRun> answerRuns,
+                       String errorTitle, String error, boolean definition, String definedLatex) {
         this.result = result;
         this.kind = kind;
         this.answerText = answerText;
         this.answerRuns = answerRuns;
+        this.errorTitle = errorTitle;
         this.error = error;
         this.definition = definition;
+        this.definedLatex = definedLatex;
     }
 
-    static CalculationOutcome failed(String error) {
-        return new CalculationOutcome("", AnswerKind.RIGHT, "", null, error, false);
+    static CalculationOutcome failed(String errorTitle, String error) {
+        return new CalculationOutcome("", AnswerKind.RIGHT, "", null, errorTitle, error, false, "");
     }
 }

@@ -27,10 +27,10 @@ public final class AnswerFormatter {
     private AnswerFormatter() {
     }
 
-    // what gets drawn: drop the "= " right after the user's =, real minus sign
+    // what gets drawn: drop the "= " after the users =, real minus, x_1 -> x₁ (result stays latex for pdf)
     static String canvasText(AnswerKind kind, String result) {
         String text = kind == AnswerKind.AFTER_EQUALS && result.startsWith("= ") ? result.substring(2) : result;
-        return text.replace('-', '−');
+        return ReadableLatex.subscripts(text.replace('-', '−'));
     }
 
     // "= " in front unless it goes right after the user's =
@@ -108,8 +108,9 @@ public final class AnswerFormatter {
         return "true for all " + variable;
     }
 
-    public static String defined(String definition) {
-        return "Defined " + definition;
+    // words only, the formula goes next to it typeset
+    public static String defined() {
+        return "Defined";
     }
 
     public static String format(double value) {

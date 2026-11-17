@@ -153,6 +153,15 @@ class EvaluatePresenterTest {
     }
 
     @Test
+    void subscriptedVariableReadsAsSubscriptOnTheCanvas() {
+        presenter.prepareSolutionsView("x_1", List.of(3.0));
+        assertEquals("x₁ = 3", viewModel.getState().getAnswerText());
+        assertEquals("x_1 = 3", viewModel.getState().getResultText(), "pdf renders the result as latex");
+        presenter.prepareExcludedView("x_12", List.of(0.0));
+        assertEquals("x₁₂ ≠ 0", viewModel.getState().getAnswerText());
+    }
+
+    @Test
     void showsAtMostTenSolutions() {
         List<Double> solutions = new ArrayList<>();
         for (int i = 0; i < 12; i++) {
@@ -168,7 +177,8 @@ class EvaluatePresenterTest {
         presenter.prepareValuesView(List.of(OutputDataMapper.of(new NumberValue(2))));
         presenter.prepareInvalidView(new InvalidOutputData("UNEXPECTED", List.of("\\cdot")));
         assertEquals("", viewModel.getState().getResultText());
-        assertEquals("Invalid formula — Unexpected \"·\"", viewModel.getState().getErrorText());
+        assertEquals("Invalid formula", viewModel.getState().getErrorTitle());
+        assertEquals("Unexpected \"·\"", viewModel.getState().getErrorText());
     }
 
     @Test
@@ -205,6 +215,7 @@ class EvaluatePresenterTest {
         presenter.prepareAlwaysTrueView("x");
         assertEquals("true for all x", viewModel.getState().getResultText());
         presenter.prepareFunctionDefinedView("f(x) = x^2+1");
-        assertEquals("Defined f(x) = x^2+1", viewModel.getState().getResultText());
+        assertEquals("Defined", viewModel.getState().getResultText());
+        assertEquals("f(x) = x^2+1", viewModel.getState().getDefinedLatex());
     }
 }

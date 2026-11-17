@@ -7,7 +7,9 @@ public class MathLabState {
 
     private String resultText = "";
 
-    private String errorText = "";
+    private String errorTitle = "";  // notice heading, e.g. Can't calculate
+
+    private String errorText = "";  // just the reason under it
 
     private AnswerKind answerKind = AnswerKind.RIGHT;
 
@@ -16,6 +18,8 @@ public class MathLabState {
     private List<TextRun> answerRuns;  // same w/ raised exponents, null for plain answers
 
     private boolean definition;  // f(x)= got saved, nothing to draw
+
+    private String definedLatex = "";  // the f(x) = ... that got saved, typeset in the card
 
     public String getExpression() {
         return expression;
@@ -64,6 +68,22 @@ public class MathLabState {
 
     public void setDefinition(boolean definition) {
         this.definition = definition;
+    }
+
+    public String getDefinedLatex() {
+        return definedLatex;
+    }
+
+    public void setDefinedLatex(String definedLatex) {
+        this.definedLatex = definedLatex;
+    }
+
+    public String getErrorTitle() {
+        return errorTitle;
+    }
+
+    public void setErrorTitle(String errorTitle) {
+        this.errorTitle = errorTitle;
     }
 
     public String getErrorText() {

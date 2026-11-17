@@ -98,6 +98,27 @@ class FormulaBookTest {
         assertTrue(book.get(bottom.getId()).getStrokes().contains(added));
     }
 
+    // "lim" 40 tall, then x→0 put under it after the pause
+    @Test
+    void limitWrittenLaterJoins() {
+        Formula f = answered(stroke(100, 100, 100, 140), stroke(115, 110, 115, 140), stroke(130, 110, 160, 140));
+        Stroke x = stroke(105, 165, 125, 185);  // 25 below, 20 tall
+
+        Set<Long> changed = book.strokesReplaced(List.of(), List.of(x), revisions);
+
+        assertEquals(Set.of(f.getId()), changed);
+        assertTrue(book.get(f.getId()).getStrokes().contains(x));
+    }
+
+    @Test
+    void dashStartingTheNextLineStaysLoose() {
+        answered(stroke(100, 100, 100, 140), stroke(115, 110, 115, 140), stroke(130, 110, 160, 140));
+        Stroke dash = stroke(105, 175, 135, 175);
+
+        assertTrue(book.strokesReplaced(List.of(), List.of(dash), revisions).isEmpty());
+        assertFalse(book.isBound(dash));
+    }
+
     @Test
     void writingFarAwayChangesNothing() {
         Formula f = answered(stroke(100, 100, 100, 140));

@@ -216,9 +216,16 @@ public final class ExprWriter {
             emit("\\cdot ", "·");
         } else if (!tex && (isFunction(next) || next.kind() == ExprOutputData.Kind.DVAR)) {
             emit(" ");
+        } else if (c == '√' && exponentJustEnded()) {
+            emit("", "·");  // 2^x √x isn't 2 times the x-th root
         } else if (tex && Character.isLetter(c) && before.matches(".*\\\\[a-zA-Z]+")) {
             emit(" ");  // \pi x, not \pix
         }
+    }
+
+    // last thing written is up in an exponent, body level only
+    private boolean exponentJustEnded() {
+        return !tex && raised == 0 && !runs.isEmpty() && runs.get(runs.size() - 1).isRaised();
     }
 
     private static boolean isFunction(ExprOutputData e) {
@@ -233,7 +240,7 @@ public final class ExprWriter {
                 writeNumber(f);
                 break;
             case VAR:
-                emit(f.name(), GREEK.getOrDefault(f.name(), f.name().replace("\\", "")));
+                emit(f.name(), readable(f.name()));
                 break;
             case E:
                 emit("e");
@@ -250,7 +257,7 @@ public final class ExprWriter {
                 break;
             case DVAR:
                 emit("\\frac{d" + f.name() + "}{d" + f.withRespectTo() + "}",
-                        "d" + f.name() + "/d" + f.withRespectTo());
+                        "d" + readable(f.name()) + "/d" + readable(f.withRespectTo()));
                 break;
             default:
                 writeGroup(f);
@@ -367,6 +374,11 @@ public final class ExprWriter {
         ExprWriter w = sub();
         w.writeGroup(base);
         return "_" + w.flat();
+    }
+
+    // x_12 -> x₁₂, \alpha -> α
+    private static String readable(String name) {
+        return GREEK.getOrDefault(name, ReadableLatex.of(name));
     }
 
     private static boolean isSymbol(ExprOutputData e) {

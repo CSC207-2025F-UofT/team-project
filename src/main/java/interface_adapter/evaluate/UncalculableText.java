@@ -4,6 +4,8 @@ import java.util.Map;
 
 // popup words for each reason, short + plain, no latex
 final class UncalculableText {
+    static final String TITLE = "Can't calculate";
+    static final String NO_REASON = "No answer for this one";
     private static final Map<String, String> WORDS = Map.ofEntries(
             Map.entry("TEXT", "Contains text"),
             Map.entry("ELLIPSIS", "Has \"…\""),
@@ -48,14 +50,14 @@ final class UncalculableText {
     }
 
     static String answerTooLong() {
-        return "Uncalculable — Answer too long";
+        return "Answer too long";
     }
 
     static String of(String reason, String detail) {
         if ("INVERSE_AMBIGUOUS".equals(reason)) {
-            return "Uncalculable — " + detail.substring(1) + "⁻¹ is ambiguous";  // e.g. sin⁻¹
+            return detail.substring(1) + "⁻¹ is ambiguous";  // e.g. sin⁻¹
         }
         String words = reason == null ? null : WORDS.get(reason);
-        return words == null ? "Uncalculable" : "Uncalculable — " + words;
+        return words == null ? NO_REASON : words;
     }
 }

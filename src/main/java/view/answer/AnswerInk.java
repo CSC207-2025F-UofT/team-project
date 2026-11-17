@@ -20,9 +20,10 @@ import java.util.Objects;
 
 // answer text drawn like pen ink: kalam's centre line traced w/ the same round pen
 public final class AnswerInk {
-    private static final float REF = 240f;  // font size the centre lines get traced at
+    static final float REF = 240f;  // font size the centre lines get traced at
     private static final int PAD = 2;
-    private static final double TWIG = 1.0;  // twigs up to this x pen width get cut
+    private static final double TWIG = 0.15;  // spurs up to this x glyph size get pointed, x/q arms start ~.175
+    private static final int PINHOLE = 50;  // aa gaps are 1-2px, smallest real counter (e) ~1200
     private static final int CACHE_SIZE = 64;
     private static final Map<Key, Path2D> LINES = new LinkedHashMap<>(16, 0.75f, true) {
         @Override
@@ -115,14 +116,23 @@ public final class AnswerInk {
         Key key = new Key(text, runs);
         Path2D line = LINES.get(key);
         if (line == null) {
-            line = trace(runs == null ? AnswerFont.outline(text, REF) : AnswerFont.outline(runs, REF));
+            line = runs == null ? trace(AnswerFont.outline(text, REF), REF) : traceEachSize(runs);
             LINES.put(key, line);
         }
         return line;
     }
 
+    // exponents traced apart, their twigs are 0.6x
+    private static Path2D traceEachSize(List<TextRun> runs) {
+        Path2D line = new Path2D.Double();
+        for (Map.Entry<Float, Shape> group : RunLayout.outlinesBySize(runs, REF).entrySet()) {
+            line.append(trace(group.getValue(), group.getKey()), false);
+        }
+        return line;
+    }
+
     // raster the glyphs, thin to 1px, join neighbouring pixels w/ tiny segments
-    private static Path2D trace(Shape outline) {
+    private static Path2D trace(Shape outline, float glyphSize) {
         Rectangle2D b = outline.getBounds2D();
         int w = (int) Math.ceil(b.getWidth()) + 2 * PAD;
         int h = (int) Math.ceil(b.getHeight()) + 2 * PAD;
@@ -130,9 +140,9 @@ public final class AnswerInk {
         if (b.isEmpty()) {
             return line;
         }
-        boolean[] filled = raster(outline, b, w, h);
+        boolean[] filled = Pinholes.fill(raster(outline, b, w, h), w, h, PINHOLE);
         boolean[] thin = Skeleton.thin(filled, w, h);
-        boolean[] on = Skeleton.prune(thin, w, h, (int) Math.round(TWIG * thickness(filled, thin)));
+        boolean[] on = Skeleton.sharpen(thin, w, h, (int) Math.round(TWIG * glyphSize));
         double ox = b.getX() - PAD + 0.5;
         double oy = b.getY() - PAD + 0.5;
         for (int y = 0; y < h; y++) {
@@ -162,17 +172,6 @@ public final class AnswerInk {
             }
         }
         return line;
-    }
-
-    // rough pen width of the glyphs: ink area / centre line length
-    private static double thickness(boolean[] filled, boolean[] thin) {
-        int area = 0;
-        int line = 0;
-        for (int i = 0; i < filled.length; i++) {
-            area += filled[i] ? 1 : 0;
-            line += thin[i] ? 1 : 0;
-        }
-        return line == 0 ? 0 : (double) area / line;
     }
 
     private static boolean link(Path2D line, double ox, double oy, int x1, int y1, int x2, int y2) {

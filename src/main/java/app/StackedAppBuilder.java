@@ -39,7 +39,6 @@ import pdf_editor.view.CanvasHistoryEditMenu;
 import view.board.BoardWindow;
 import view.board.FloatingToolbar;
 import view.board.HistoryPanel;
-import view.board.ToolbarSpot;
 import view.canvas.AnswerCanvasPage;
 import view.canvas.SharedCanvas;
 
@@ -127,7 +126,7 @@ public class StackedAppBuilder {
                 new SelectionToLibrary(sharedCanvas::recognizeFormula, pdfStudio.getLibrary()),
                 new SelectedInkRegistry(drawing, pdfStudio.getLibrary()));
         AnswerCanvasPage page = new AnswerCanvasPage(sharedCanvas, evaluate, mathViewModel, results,
-                graph, graphViewModel, graphCheck::canGraph, BoardTheme.CANVAS, ToolbarSpot.TOP_Y);
+                graph, graphViewModel, graphCheck::canGraph, BoardTheme.CANVAS);
         page.setDefinitionCheck(definitionCheck::isDefinition);
         page.setCalculateCheck(calculateCheck::canCalculate);
         sharedCanvas.attachTo(page);

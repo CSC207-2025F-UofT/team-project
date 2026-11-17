@@ -3,9 +3,12 @@ package view.answer;
 import interface_adapter.TextRun;
 import org.junit.jupiter.api.Test;
 
+import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Shape;
+import java.awt.geom.Area;
+import java.awt.geom.PathIterator;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.util.List;
@@ -115,6 +118,40 @@ class AnswerInkTest {
             middle += line[y * w + 15] ? 1 : 0;
         }
         assertEquals(1, middle);
+    }
+
+    @Test
+    void xNextToStraightStrokesStaysOnItsInk() {
+        // 1/x pushed the pen estimate up and the x got pointed into a κ, line ran off the glyph
+        assertStaysOnInk("= 1/x", null);
+    }
+
+    @Test
+    void qKeepsItsBowl() {
+        assertStaysOnInk("q", null);
+    }
+
+    @Test
+    void raisedXStaysOnItsInkNextToBigText() {
+        assertStaysOnInk("= e√x/(2√x)", List.of(new TextRun("= e", false), new TextRun("√x", true),
+                new TextRun("/(2√x)", false)));
+    }
+
+    @Test
+    void cornersStillGetPointedOnTheInk() {
+        assertStaysOnInk("Mmm Nnn hk3", null);
+    }
+
+    // every centre line px sits on the glyph ink, 1px slack for the raster
+    private static void assertStaysOnInk(String text, List<TextRun> runs) {
+        Shape glyphs = runs == null ? AnswerFont.outline(text, AnswerInk.REF) : RunLayout.outline(runs, AnswerInk.REF);
+        Area ink = new Area(glyphs);
+        ink.add(new Area(new BasicStroke(2f).createStrokedShape(glyphs)));
+        double[] c = new double[6];
+        for (PathIterator it = AnswerInk.centerline(text, runs).getPathIterator(null); !it.isDone(); it.next()) {
+            it.currentSegment(c);
+            assertTrue(ink.contains(c[0], c[1]), text + " off the ink at " + c[0] + "," + c[1]);
+        }
     }
 
     private static CanvasAnswer answer(String text, double charHeight) {

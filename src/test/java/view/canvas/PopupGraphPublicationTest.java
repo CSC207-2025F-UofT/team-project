@@ -29,6 +29,14 @@ import static org.junit.jupiter.api.Assertions.*;
 
 /** Tests Graph's real presenter/callback path, without an external chart service or ML model. */
 class PopupGraphPublicationTest {
+    // no cards in these tests
+    private static final Notices QUIET = new Notices() {
+        @Override public void success(String words, String latex) { }
+        @Override public void error(String title, String reason) { }
+        @Override public void clearError() { }
+        @Override public Runnable progress(String words, String latex) { return () -> { }; }
+    };
+
     @TempDir Path storage;
     private static byte[] png() throws Exception {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -48,7 +56,7 @@ class PopupGraphPublicationTest {
         var shared = new SharedCanvas(new DrawingCanvas());
         CountDownLatch saved = new CountDownLatch(1);
         var popup = new PopupGraphing(shared, new GraphController(graph), viewModel,
-                (message, error, duration) -> { }, new JPanel(), (capture, latex) -> {
+                QUIET, new JPanel(), (capture, latex) -> {
                     collector.acceptCalculation(capture.getId(), latex, "");
                     saved.countDown();
                 });
@@ -72,7 +80,7 @@ class PopupGraphPublicationTest {
         GraphFunctionInputBoundary graph = input -> presenter.prepareFailView("Invalid graph");
         AtomicInteger callbacks = new AtomicInteger();
         var popup = new PopupGraphing(new SharedCanvas(new DrawingCanvas()), new GraphController(graph),
-                viewModel, (message, error, duration) -> { }, new JPanel(), (capture, latex) -> {
+                viewModel, QUIET, new JPanel(), (capture, latex) -> {
                     callbacks.incrementAndGet();
                     collector.acceptCalculation(capture.getId(), latex, "");
                 });

@@ -19,19 +19,13 @@ import java.util.concurrent.Executors;
 
 // Graph from the popup: uses the latex already read, card goes beside that formula
 final class PopupGraphing {
-    private static final int ERROR_MESSAGE_MILLIS = 7000;
-    private static final int SUCCESS_MESSAGE_MILLIS = 3000;
+    private static final String CANT_GRAPH = "Can't graph";
     private static final int RANGE_GAP = 6;
-
-    // the page's message strip
-    interface Messages {
-        void show(String text, boolean error, int hideAfterMillis);
-    }
 
     private final SharedCanvas canvas;
     private final GraphController controller;
     private final GraphViewModel viewModel;
-    private final Messages messages;
+    private final Notices notices;
     private final JComponent area;
     private final java.util.function.BiConsumer<FormulaCapture, String> graphSaved;
     private FormulaCapture pendingCapture;
@@ -43,15 +37,16 @@ final class PopupGraphing {
     });
     private String lastLatex;
     private Rectangle lastFormula;   // world coords
+    private Runnable drawing = () -> { };  // takes the Drawing… card down
     private Rectangle pending;       // where the card goes when the graph comes back
 
     PopupGraphing(SharedCanvas canvas, GraphController controller, GraphViewModel viewModel,
-                  Messages messages, JComponent area,
+                  Notices notices, JComponent area,
                   java.util.function.BiConsumer<FormulaCapture, String> graphSaved) {
         this.canvas = canvas;
         this.controller = controller;
         this.viewModel = viewModel;
-        this.messages = messages;
+        this.notices = notices;
         this.area = area;
         this.graphSaved = java.util.Objects.requireNonNull(graphSaved);
         this.ranges = new GraphRangeBar(this::regraph);
@@ -95,17 +90,21 @@ final class PopupGraphing {
             x = AxisRangeParser.parse(ranges.xText(), "x");
             y = AxisRangeParser.parse(ranges.yText(), "y");
         } catch (IllegalArgumentException e) {
-            messages.show(e.getMessage(), true, ERROR_MESSAGE_MILLIS);
+            notices.error(CANT_GRAPH, e.getMessage());
             return;
         }
         pending = formulaWorld;
-        messages.show("Drawing the graph of " + latex + "…", false, 0);
+        drawing.run();
+        drawing = notices.progress("Drawing the graph of", latex);
         executor.execute(() -> {
             try {
                 controller.execute(latex, x, y);  // answer comes through the view model
             } catch (RuntimeException e) {
                 String reason = e.getMessage() == null ? e.toString() : e.getMessage();
-                SwingUtilities.invokeLater(() -> messages.show(reason, true, ERROR_MESSAGE_MILLIS));
+                SwingUtilities.invokeLater(() -> {
+                    drawing.run();
+                    notices.error(CANT_GRAPH, reason);
+                });
             }
         });
     }
@@ -117,8 +116,9 @@ final class PopupGraphing {
     }
 
     private void show(GraphState state) {
+        drawing.run();
         if (state.getError() != null) {
-            messages.show(state.getError(), true, ERROR_MESSAGE_MILLIS);
+            notices.error(CANT_GRAPH, state.getError());
         } else if (state.getGraphImage() != null) {
             canvas.showGraph(state.getGraphImage(), pending);
             // Explicit, successful Graph is the publication boundary for formula-only material.
@@ -127,7 +127,7 @@ final class PopupGraphing {
                     && state.getLatex().equals(lastLatex)) {
                 graphSaved.accept(pendingCapture, state.getLatex());
             }
-            messages.show("Graph of " + state.getLatex(), false, SUCCESS_MESSAGE_MILLIS);
+            notices.success("Graph of", state.getLatex());
             placeRanges();
         }
     }

@@ -49,6 +49,52 @@ class GlassNoticeStackTest {
     }
 
     @Test
+    void errorStaysButSuccessFades() throws Exception {
+        java.util.concurrent.atomic.AtomicReference<JRootPane> root = new java.util.concurrent.atomic.AtomicReference<>();
+        SwingUtilities.invokeAndWait(() -> {
+            root.set(root());
+            GlassNotices.showError(root.get(), "Can't calculate", "a has no value");
+            GlassNotices.showSuccess(root.get(), "Saved");
+        });
+        Thread.sleep(GlassNotices.SUCCESS_DURATION_MS + 400);
+        SwingUtilities.invokeAndWait(() -> assertEquals(1, stack(root.get()).activeCount(), "only the error is left"));
+    }
+
+    @Test
+    void progressStaysTillDismissedAndHasNoX() throws Exception {
+        java.util.concurrent.atomic.AtomicReference<JRootPane> root = new java.util.concurrent.atomic.AtomicReference<>();
+        java.util.concurrent.atomic.AtomicReference<GlassNotices.NoticeHandle> card = new java.util.concurrent.atomic.AtomicReference<>();
+        SwingUtilities.invokeAndWait(() -> {
+            root.set(root());
+            card.set(GlassNotices.showProgress(root.get(), "Calculating 1+1…"));
+            var view = new GlassNotices.NoticeView(GlassNotices.Kind.PROGRESS, "", "Calculating 1+1…");
+            assertEquals(0, view.getComponentCount(), "nothing to close");
+        });
+        Thread.sleep(GlassNotices.SUCCESS_DURATION_MS + 400);
+        SwingUtilities.invokeAndWait(() -> {
+            assertEquals(1, stack(root.get()).activeCount(), "still working");
+            card.get().dismiss();
+            assertEquals(0, stack(root.get()).activeCount());
+        });
+    }
+
+    @Test
+    void pillMakesRoomForAFormulaAndShrinksTallOnes() throws Exception {
+        SwingUtilities.invokeAndWait(() -> {
+            javax.swing.Icon tall = new javax.swing.Icon() {
+                @Override public void paintIcon(java.awt.Component c, java.awt.Graphics g, int x, int y) { }
+                @Override public int getIconWidth() { return 120; }
+                @Override public int getIconHeight() { return 68; }
+            };
+            var words = new GlassNotices.NoticeView(GlassNotices.Kind.PROGRESS, "", "Calculating");
+            var both = new GlassNotices.NoticeView(GlassNotices.Kind.PROGRESS, "", "Calculating", tall);
+            int extra = both.getPreferredSize().width - words.getPreferredSize().width;
+            assertTrue(extra >= 60 && extra < 120, "68 tall gets halved, width " + extra);
+            assertEquals(64, both.getPreferredSize().height, "pill stays one size");
+        });
+    }
+
+    @Test
     void stackReflowsWhenTheHostWindowChangesWidth() throws Exception {
         SwingUtilities.invokeAndWait(() -> {
             JRootPane root = root();

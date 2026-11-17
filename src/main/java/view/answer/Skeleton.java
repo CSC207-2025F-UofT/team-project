@@ -5,7 +5,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-// zhang-suen thinning: filled pixels -> 1px wide centre line
+// zhang-suen thinning: filled pixels -> 1px wide centre line, then corner spurs pointed
 final class Skeleton {
     private Skeleton() {
     }
@@ -41,36 +41,69 @@ final class Skeleton {
         return on;
     }
 
-    // cut short twigs hanging off a fork, thinning leaves them at sharp corners (middle of a "3")
-    static boolean[] prune(boolean[] grid, int w, int h, int maxLen) {
+    // corner spurs (middle of a 3, foot of an n): arms run straight into the tip, like a pen going in and back
+    static boolean[] sharpen(boolean[] grid, int w, int h, int maxLen) {
         boolean[] on = grid.clone();
         for (int y = 1; y < h - 1; y++) {
             for (int x = 1; x < w - 1; x++) {
                 if (on[y * w + x] && around(on, w, x, y)[0] == 1) {
-                    List<Integer> twig = twig(on, w, h, y * w + x, maxLen);
-                    for (int i : twig) {
-                        on[i] = false;
-                    }
+                    pointUp(on, w, h, y * w + x, maxLen);
                 }
             }
         }
         return on;
     }
 
-    // pixels from an end up to a fork, empty if no fork within maxLen
+    private static void pointUp(boolean[] on, int w, int h, int tip, int maxLen) {
+        List<Integer> spur = twig(on, w, h, tip, maxLen);
+        if (spur.isEmpty()) {
+            return;
+        }
+        int fork = spur.remove(spur.size() - 1);
+        if (spur.size() <= NOISE) {
+            for (int i : spur) {
+                on[i] = false;  // px noise, way under a pen width
+            }
+            return;
+        }
+        List<List<Integer>> arms = arms(on, w, h, fork, spur);
+        if (arms.size() != 2) {
+            return;
+        }
+        for (List<Integer> arm : arms) {
+            if (arm.isEmpty() || !awayFrom(w, fork, tip, arm.get(arm.size() - 1))) {
+                return;  // sideways overshoot (bar of an H), real ink
+            }
+        }
+        List<Integer> gone = new ArrayList<>(spur.subList(1, spur.size()));
+        gone.add(fork);
+        for (List<Integer> arm : arms) {
+            gone.addAll(arm.subList(0, arm.size() - 1));
+        }
+        for (int i : gone) {
+            on[i] = false;
+        }
+        for (List<Integer> arm : arms) {
+            draw(on, w, tip, arm.get(arm.size() - 1));
+        }
+        for (int i : gone) {
+            sweep(on, w, i);  // corner px the walk skipped
+        }
+    }
+
+    // pixels from an end up to a fork, fork last; empty if no fork within maxLen
     private static List<Integer> twig(boolean[] on, int w, int h, int start, int maxLen) {
         List<Integer> path = new ArrayList<>();
         Set<Integer> seen = new HashSet<>();
         int prev = -1;
         int cur = start;
         while (path.size() <= maxLen) {
-            int x = cur % w;
-            int y = cur / w;
-            if (x < 1 || y < 1 || x >= w - 1 || y >= h - 1) {
+            if (!inside(cur, w, h)) {
                 return List.of();
             }
-            if (cur != start && around(on, w, x, y)[1] >= 3) {
-                return path;  // hit the fork, keep it
+            if (cur != start && around(on, w, cur % w, cur / w)[1] >= 3) {
+                path.add(cur);
+                return path;
             }
             path.add(cur);
             seen.add(cur);
@@ -82,6 +115,84 @@ final class Skeleton {
             cur = next;
         }
         return List.of();
+    }
+
+    // the other branches off the fork, each walked as far as the spur is long
+    private static List<List<Integer>> arms(boolean[] on, int w, int h, int fork, List<Integer> spur) {
+        Set<Integer> seen = new HashSet<>(spur);
+        seen.add(fork);
+        List<Integer> starts = new ArrayList<>();
+        boolean wasOn = ringOn(on, w, fork, RING.length - 1, seen);
+        for (int i = 0; i < RING.length; i++) {
+            int n = fork + RING[i][1] * w + RING[i][0];
+            boolean isOn = ringOn(on, w, fork, i, seen);
+            if (isOn && !wasOn) {
+                starts.add(n);  // first px of each run round the fork
+            }
+            wasOn = isOn;
+        }
+        for (int i = 0; i < RING.length; i++) {
+            seen.add(fork + RING[i][1] * w + RING[i][0]);
+        }
+        List<List<Integer>> arms = new ArrayList<>();
+        for (int start : starts) {
+            List<Integer> arm = new ArrayList<>();
+            int prev = fork;
+            int cur = start;
+            while (arm.size() < spur.size() && cur >= 0 && inside(cur, w, h)) {
+                arm.add(cur);
+                if (around(on, w, cur % w, cur / w)[1] >= 3) {
+                    break;  // next fork, stop there
+                }
+                seen.add(cur);
+                int next = step(on, w, cur, prev, seen);
+                prev = cur;
+                cur = next;
+            }
+            arms.add(arm);
+        }
+        return arms;
+    }
+
+    private static boolean ringOn(boolean[] on, int w, int c, int i, Set<Integer> skip) {
+        int n = c + RING[i][1] * w + RING[i][0];
+        return on[n] && !skip.contains(n);
+    }
+
+    // arm heads back the other way from the tip
+    private static boolean awayFrom(int w, int fork, int tip, int end) {
+        double tx = tip % w - fork % w;
+        double ty = tip / w - fork / w;
+        double ex = end % w - fork % w;
+        double ey = end / w - fork / w;
+        return tx * ex + ty * ey < AWAY * Math.hypot(tx, ty) * Math.hypot(ex, ey);
+    }
+
+    private static void draw(boolean[] on, int w, int from, int to) {
+        int x1 = from % w;
+        int y1 = from / w;
+        int dx = to % w - x1;
+        int dy = to / w - y1;
+        int n = Math.max(Math.abs(dx), Math.abs(dy));
+        for (int i = 0; i <= n; i++) {
+            on[(y1 + Math.round((float) dy * i / n)) * w + x1 + Math.round((float) dx * i / n)] = true;
+        }
+    }
+
+    // drop lone px next to i
+    private static void sweep(boolean[] on, int w, int i) {
+        for (int[] d : RING) {
+            int n = i + d[1] * w + d[0];
+            if (on[n] && around(on, w, n % w, n / w)[0] == 0) {
+                on[n] = false;
+            }
+        }
+    }
+
+    private static boolean inside(int i, int w, int h) {
+        int x = i % w;
+        int y = i / w;
+        return x >= 1 && y >= 1 && x < w - 1 && y < h - 1;
     }
 
     // next pixel along, straight before diagonal, skips ones that just hug the last step
@@ -119,6 +230,9 @@ final class Skeleton {
         }
         return new int[] {count, flips};
     }
+
+    private static final int NOISE = 2;
+    private static final double AWAY = -0.34;  // cos ~110 deg
 
     // clockwise from north
     private static final int[][] RING = {{0, -1}, {1, -1}, {1, 0}, {1, 1}, {0, 1}, {-1, 1}, {-1, 0}, {-1, -1}};

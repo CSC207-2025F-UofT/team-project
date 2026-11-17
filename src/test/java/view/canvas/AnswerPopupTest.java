@@ -42,6 +42,28 @@ class AnswerPopupTest {
     }
 
     @Test
+    void popupSitsRightNextToTrailingEquals() {
+        popup.showFormula("5\\times7", () -> { });
+        Rectangle ink = new Rectangle(100, 200, 160, 60);
+        Rectangle eq = new Rectangle(230, 215, 35, 30);
+        Rectangle placed = popup.spotBeside(ink, eq, 900, 560);
+        Rectangle seen = seenAt(placed);
+        assertFalse(seen.intersects(ink));
+        assertTrue(seen.x - (eq.x + eq.width) < 20, "starts right after the =");
+        assertTrue(seen.y < eq.y + eq.height && seen.y + 40 > eq.y, "buttons level with the =");
+    }
+
+    @Test
+    void equalsInTheMiddleFallsBackOffTheInk() {
+        popup.showFormula("y=3x", null, () -> { });
+        Rectangle ink = new Rectangle(100, 200, 200, 60);
+        Rectangle eq = new Rectangle(140, 215, 35, 30);
+        Rectangle placed = popup.spotBeside(ink, eq, 900, 560);
+        assertFalse(seenAt(placed).intersects(ink));
+        assertTrue(new Rectangle(0, 0, 900, 560).contains(placed));
+    }
+
+    @Test
     void preferredSizeFitsButtonAndCard() {
         popup.showFormula("1+1", () -> { });
         Dimension small = popup.getPreferredSize();
@@ -77,5 +99,10 @@ class AnswerPopupTest {
         popup.showFormula("1+1=", () -> { }, null);
         assertTrue(popup.hasCalculate());
         assertFalse(popup.hasGraph());
+    }
+
+    private Rectangle seenAt(Rectangle placed) {
+        popup.setBounds(placed);
+        return popup.visibleBounds();
     }
 }

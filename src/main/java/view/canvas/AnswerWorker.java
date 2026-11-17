@@ -14,7 +14,7 @@ import java.util.function.Consumer;
 
 // background jobs for the answer page, callbacks land on the EDT
 final class AnswerWorker {
-    private static final String CANT_READ = "Couldn't read the formula.";
+    private static final String CANT_READ = "Try writing it a bit clearer";
     private final EvaluateController controller;
     // one at a time so jobs don't fight over the view model
     private final ExecutorService executor = Executors.newSingleThreadExecutor(r -> {
@@ -54,7 +54,7 @@ final class AnswerWorker {
             try {
                 controller.execute(latex);
             } catch (Throwable e) {
-                finish(CalculationOutcome.failed("Uncalculable"));
+                finish(CalculationOutcome.failed("Can't calculate", "Something went wrong"));
             }
         });
     }
@@ -65,7 +65,8 @@ final class AnswerWorker {
         }
         MathLabState state = (MathLabState) event.getNewValue();
         finish(new CalculationOutcome(state.getResultText(), state.getAnswerKind(), state.getAnswerText(),
-                state.getAnswerRuns(), state.getErrorText(), state.isDefinition()));
+                state.getAnswerRuns(), state.getErrorTitle(), state.getErrorText(), state.isDefinition(),
+                state.getDefinedLatex()));
     }
 
     private void finish(CalculationOutcome outcome) {

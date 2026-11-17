@@ -194,6 +194,27 @@ class DrawingCanvasHooksTest {
     }
 
     @Test
+    void registerNewInkKeepsLimitsOnASum() {
+        List<Stroke> session = new ArrayList<>();
+        int[][] ink = {
+            {140, 55, 140, 85},                              // 1 over Σ
+            {160, 55, 180, 85},                              // 0
+            {220, 100, 100, 100, 160, 160, 100, 220, 220, 220},  // Σ
+            {240, 130, 240, 190},                            // body, 60 tall
+            {280, 130, 280, 190},
+            {120, 250, 120, 280},                            // n under Σ, half a char down
+            {150, 260, 170, 260},                            // =
+            {180, 250, 200, 280},                            // 0
+        };
+        for (int[] s : ink) {
+            write(s);
+            session.add(last());
+        }
+        assertEquals(8, strokesIn(canvas.registerNewInk(session.get(4), session)));
+        assertEquals(1, canvas.getFormulas().size());
+    }
+
+    @Test
     void registerNewInkReturnsNullForGoneStroke() {
         write(100, 100, 130, 140);
         Stroke a = last();

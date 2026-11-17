@@ -144,7 +144,8 @@ class AnswerCanvasPageTest {
     }
 
     private boolean errorShown(String text) {
-        return page.isMessageError() && page.currentMessage() != null && page.currentMessage().contains(text);
+        String shown = page.notices().shownError();
+        return shown != null && shown.contains(text);
     }
 
     @Test
@@ -159,7 +160,7 @@ class AnswerCanvasPageTest {
         assertTrue(p.isTypeset());
         assertTrue(p.hasCalculate());
         Rectangle box = p.getBounds();
-        assertFalse(box.intersects(new Rectangle(100, 100, 101, 51)), "does not cover the formula");
+        assertFalse(p.visibleBounds().intersects(new Rectangle(100, 100, 101, 51)), "does not cover the formula");  // glass margin is see-through
         assertTrue(new Rectangle(0, 0, p.getParent().getWidth(), p.getParent().getHeight()).contains(box), "stays in view");
         Thread.sleep(300);
         assertTrue(answers().isEmpty(), "nothing until Calculate");
@@ -174,14 +175,20 @@ class AnswerCanvasPageTest {
         assertNull(popup(), "no = yet");
         lasso(80, 80, 220, 170);
         waitPopup("\\frac{1}{2}+2^{3}");
-        clickCalculate();
+        AtomicReference<String> working = new AtomicReference<>();
+        onEdt(() -> {
+            page.visiblePopup().clickCalculate();
+            working.set(page.notices().shownProgress());  // answer can't land before this
+        });
+        assertEquals("Calculating \\frac{1}{2}+2^{3}…", working.get());
         assertNull(popup(), "popup goes when clicked");
 
         waitFor(() -> answerIs("= 8.5"), "the answer");
         CanvasAnswer a = answers().get(0);
         assertFalse(a.isError());
         assertTrue(a.getX() > 200, "right of the ink");
-        waitFor(() -> page.currentMessage() == null, "the progress message to go away");
+        assertNull(page.notices().shownError());
+        waitFor(() -> page.notices().shownProgress() == null, "the Calculating card to go");
     }
 
     @Test
@@ -284,8 +291,7 @@ class AnswerCanvasPageTest {
     void recognitionProblemShowsReasonWithoutCalculate() throws Exception {
         openPage();
         writeWithEquals();
-        waitFor(() -> page.currentMessage() != null && page.currentMessage().equals("Couldn't read the formula."),
-                "the reason");
+        waitFor(() -> errorShown("Try writing it a bit clearer"), "the reason");
         assertNull(popup(), "legacy error popup must not appear");
         assertTrue(answers().isEmpty());
     }
@@ -297,7 +303,7 @@ class AnswerCanvasPageTest {
         });
         openPage();
         writeWithEquals();
-        waitFor(() -> "Couldn't read the formula.".equals(page.currentMessage()), "plain words, no guts");
+        waitFor(() -> errorShown("Try writing it a bit clearer"), "plain words, no guts");
         assertNull(popup(), "legacy error popup must not appear");
     }
 
@@ -310,7 +316,7 @@ class AnswerCanvasPageTest {
         waitPopup("\\int");
         clickCalculate();
 
-        waitFor(() -> errorShown("Uncalculable — Integrals not supported"), "the reason");
+        waitFor(() -> errorShown("Integrals not supported"), "the reason");
         assertTrue(answers().isEmpty(), "no red ?");
     }
 
@@ -321,7 +327,7 @@ class AnswerCanvasPageTest {
         write();
         waitPopup("x+1=3\\\\x=2");
         clickCalculate();
-        waitFor(() -> errorShown("Uncalculable — Not a calculation"), "the warning");
+        waitFor(() -> errorShown("Not a calculation"), "the warning");
         assertTrue(answers().isEmpty());
     }
 
@@ -333,8 +339,7 @@ class AnswerCanvasPageTest {
         waitPopup("f(x)=x^{2}");
         clickCalculate();
 
-        waitFor(() -> page.currentMessage() != null && page.currentMessage().startsWith("Defined"), "the message");
-        assertFalse(page.isMessageError());
+        waitFor(this::definedShown, "the message");
         assertTrue(answers().isEmpty());
     }
 
@@ -349,7 +354,8 @@ class AnswerCanvasPageTest {
     }
 
     private boolean definedShown() {
-        return !page.isMessageError() && page.currentMessage() != null && page.currentMessage().startsWith("Defined");
+        String done = page.notices().lastSuccess();
+        return page.notices().shownError() == null && done != null && done.startsWith("Defined");
     }
 
     @Test
@@ -411,7 +417,7 @@ class AnswerCanvasPageTest {
         write();
         waitPopup("x+1=");
         clickCalculate();
-        waitFor(() -> page.isMessageError(), "the error");
+        waitFor(() -> page.notices().shownError() != null, "the error");
         waitFor(() -> sent.equals(List.of("x+1=|")), "sent w/ no answer");
     }
 
@@ -433,7 +439,75 @@ class AnswerCanvasPageTest {
         autoDefine();
         write();
         waitPopup("f(x)=");
-        assertNull(page.currentMessage());
+        assertNull(page.notices().shownError());
+        assertNull(page.notices().lastSuccess());
+    }
+
+    // which notice cards are really sitting in the window
+    private static List<String> cardsIn(javax.swing.JRootPane root) {
+        List<String> names = new java.util.ArrayList<>();
+        for (java.awt.Component c : root.getLayeredPane().getComponents()) {
+            if (c.getName() != null && c.getName().startsWith("glass-notice-")) {
+                names.add(c.getName());
+            }
+        }
+        return names;
+    }
+
+    @Test
+    void errorCardReallyLandsInTheWindow() throws Exception {
+        shared.setFormulaRecognizer(image -> "x+1=");
+        openPage();
+        javax.swing.JRootPane root = new javax.swing.JRootPane();
+        onEdt(() -> {
+            root.setSize(900, 600);
+            root.getLayeredPane().setSize(900, 600);
+            root.getContentPane().add(page);
+        });
+        write();
+        waitPopup("x+1=");
+        clickCalculate();
+        waitFor(() -> page.notices().shownError() != null, "the error");
+        Thread.sleep(300);
+        AtomicReference<List<String>> cards = new AtomicReference<>();
+        onEdt(() -> cards.set(cardsIn(root)));
+        assertTrue(cards.get().contains("glass-notice-error"), "cards: " + cards.get());
+    }
+
+    @Test
+    void errorCardStaysTillTheFormulaIsFixed() throws Exception {
+        AtomicReference<String> latex = new AtomicReference<>("x+1=");
+        shared.setFormulaRecognizer(image -> latex.get());
+        openPage();
+        write();
+        waitPopup("x+1=");
+        clickCalculate();
+        waitFor(() -> page.notices().shownError() != null, "the error");
+        Thread.sleep(300);
+        assertNotNull(page.notices().shownError(), "doesn't time out");
+
+        latex.set("1+1=");
+        editFormula();
+        waitFor(() -> page.notices().shownError() == null, "card gone once they fix it");
+        waitPopup("1+1=");
+        clickCalculate();
+        waitFor(() -> answerIs("2"), "the answer");
+        assertNull(page.notices().shownError());
+    }
+
+    @Test
+    void answerAfterAnErrorClearsTheCard() throws Exception {
+        shared.setFormulaRecognizer(image -> image.getHeight() < 80 ? "1+1=" : "x+1=");
+        openPage();
+        write();
+        waitPopup("x+1=");
+        clickCalculate();
+        waitFor(() -> page.notices().shownError() != null, "the error");
+
+        drag(400, 300, 420, 330);
+        waitPopup("1+1=");
+        clickCalculate();
+        waitFor(() -> page.notices().shownError() == null, "stale error gone");
     }
 
     @Test
@@ -800,7 +874,7 @@ class AnswerCanvasPageTest {
         SwingUtilities.invokeAndWait(() -> {
             page = new AnswerCanvasPage(shared, controller, viewModel, (id, latex, result) -> { },
                     new GraphController(input -> { }), new GraphViewModel(), graphCheck::canGraph,
-                    java.awt.Color.WHITE, 0);
+                    java.awt.Color.WHITE);
             page.setCalculateCheck(calcCheck::canCalculate);
             page.setPopupDelay(100);
             shared.attachTo(page);

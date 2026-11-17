@@ -50,6 +50,6 @@ class RelationTest {
 
     @Test
     void orderingNeedsNumbers() {
-        assertEquals("Uncalculable", Calc.withoutReason(Calc.once("\\top<1")));
+        assertEquals("Can't calculate", Calc.withoutReason(Calc.once("\\top<1")));
     }
 }

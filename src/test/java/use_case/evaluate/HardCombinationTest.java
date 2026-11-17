@@ -34,8 +34,8 @@ class HardCombinationTest {
         assertEquals("= 0", Calc.once("\\frac{1}{\\infty}"));
         assertEquals("= 0", Calc.once("e^{-\\infty}"));
         assertEquals("= 3.32", Calc.once("(2.5)!"));
-        assertEquals("Uncalculable", Calc.withoutReason(Calc.once("\\frac{10^{200}\\cdot10^{200}}{10^{300}}")));
-        assertEquals("Uncalculable", Calc.withoutReason(Calc.once("171!")));
+        assertEquals("Can't calculate", Calc.withoutReason(Calc.once("\\frac{10^{200}\\cdot10^{200}}{10^{300}}")));
+        assertEquals("Can't calculate", Calc.withoutReason(Calc.once("171!")));
     }
 
     @Test
@@ -310,7 +310,7 @@ class HardCombinationTest {
         assertEquals("true for all x", Calc.once("\\sin x\\leq1"));
         assertEquals("true for all x", Calc.once("-1\\leq\\sin x\\leq1"));
         // these really fail at 2πk
-        assertEquals("Uncalculable", Calc.withoutReason(Calc.once("\\cos x<1")));
+        assertEquals("Can't calculate", Calc.withoutReason(Calc.once("\\cos x<1")));
     }
 
     @Test
@@ -346,13 +346,13 @@ class HardCombinationTest {
 
     @Test
     void rootsPastWhatDoublesHoldAreNotNoSolution() {
-        assertEquals("Uncalculable", Calc.withoutReason(Calc.once("\\ln x=1000")));
-        assertEquals("Uncalculable", Calc.withoutReason(Calc.once("\\ln x>1000")));
-        assertEquals("Uncalculable", Calc.withoutReason(Calc.once("x^{0.001}=2")));
-        assertEquals("Uncalculable", Calc.withoutReason(Calc.once("\\sqrt{x}=10^{200}")));
-        assertEquals("Uncalculable", Calc.withoutReason(Calc.once("(\\ln x-1000)(x-1)=0")));
-        assertEquals("Uncalculable", Calc.withoutReason(Calc.once("\\exists x\\in\\mathbb{R}, \\ln x=1000")));
-        assertEquals("Uncalculable", Calc.withoutReason(Calc.once("\\exists x\\in\\mathbb{R}, \\ln(\\ln x)=10")));
+        assertEquals("Can't calculate", Calc.withoutReason(Calc.once("\\ln x=1000")));
+        assertEquals("Can't calculate", Calc.withoutReason(Calc.once("\\ln x>1000")));
+        assertEquals("Can't calculate", Calc.withoutReason(Calc.once("x^{0.001}=2")));
+        assertEquals("Can't calculate", Calc.withoutReason(Calc.once("\\sqrt{x}=10^{200}")));
+        assertEquals("Can't calculate", Calc.withoutReason(Calc.once("(\\ln x-1000)(x-1)=0")));
+        assertEquals("Can't calculate", Calc.withoutReason(Calc.once("\\exists x\\in\\mathbb{R}, \\ln x=1000")));
+        assertEquals("Can't calculate", Calc.withoutReason(Calc.once("\\exists x\\in\\mathbb{R}, \\ln(\\ln x)=10")));
         // asymptotes still have no root
         assertEquals("no solution", Calc.once("\\frac{1}{x}=0"));
         assertEquals("no solution", Calc.once("e^{-x}=0"));
@@ -368,15 +368,15 @@ class HardCombinationTest {
         assertEquals("x > 115.13", Calc.once("e^x>10^{50}"));
         assertEquals("1 < x < 1000000", Calc.once("x^2-1000001x+1000000<0"));
         // still endless / still past what doubles hold
-        assertEquals("Uncalculable — Too many solutions", Calc.once("\\sin x>0"));
-        assertEquals("Uncalculable — Too many solutions", Calc.once("\\tan x>0"));
-        assertEquals("Uncalculable — Answer beyond ±100", Calc.once("\\ln x>1000"));
+        assertEquals("Can't calculate — Too many solutions", Calc.once("\\sin x>0"));
+        assertEquals("Can't calculate — Too many solutions", Calc.once("\\tan x>0"));
+        assertEquals("Can't calculate — Answer beyond ±100", Calc.once("\\ln x>1000"));
     }
 
     @Test
     void fewRootsInRangeButEndlessPastIt() {
-        assertEquals("Uncalculable", Calc.withoutReason(Calc.once("\\sin(x/100)=0")));
-        assertEquals("Uncalculable", Calc.withoutReason(Calc.once("\\cos(\\frac{x}{50})=1")));
+        assertEquals("Can't calculate", Calc.withoutReason(Calc.once("\\sin(x/100)=0")));
+        assertEquals("Can't calculate", Calc.withoutReason(Calc.once("\\cos(\\frac{x}{50})=1")));
         assertEquals("x = 50 or x = 150", Calc.once("(x-50)(x-150)=0"));
     }
 
@@ -410,7 +410,7 @@ class HardCombinationTest {
         assertEquals("true", Calc.once("\\forall x\\in\\mathbb{R}, \\lim_{h\\rightarrow0}\\frac{\\sin(x+h)-\\sin(x)}{h}"
                 + "=\\cos x"));
         // too noisy to trust -> not a made up number
-        assertEquals("Uncalculable", Calc.withoutReason(Calc.once("\\lim_{h\\rightarrow0}\\frac{(10^8+h)^2-10^{16}}{h}")));
+        assertEquals("Can't calculate", Calc.withoutReason(Calc.once("\\lim_{h\\rightarrow0}\\frac{(10^8+h)^2-10^{16}}{h}")));
         // real wobbles still have no limit
         assertEquals("= undefined", Calc.once("\\lim_{x\\rightarrow\\infty}x\\sin x"));
         assertEquals("= undefined", Calc.once("\\lim_{x\\rightarrow0}\\frac{1}{x}\\sin(\\frac{1}{x})"));
@@ -426,17 +426,17 @@ class HardCombinationTest {
         assertEquals("x = -0.96 or x = 4", Calc.once("x!=24"));
         assertEquals("= -0.58", Calc.once("\\lim_{x\\rightarrow0}\\frac{x!-1}{x}"));
         // creeping up when x! overflows isnt evidence of inf
-        assertEquals("Uncalculable", Calc.withoutReason(Calc.once("\\lim_{x\\rightarrow\\infty}\\frac{\\ln(x!)}{x\\ln x}")));
+        assertEquals("Can't calculate", Calc.withoutReason(Calc.once("\\lim_{x\\rightarrow\\infty}\\frac{\\ln(x!)}{x\\ln x}")));
         assertEquals("= ∞", Calc.once("\\lim_{x\\rightarrow\\infty}e^{x}"));
     }
 
     @Test
     void tooComplexFormulasSaySo() {
         String deep = "(".repeat(50000) + "1" + ")".repeat(50000);
-        assertEquals("Uncalculable — Formula too complex", Calc.once(deep));
-        assertEquals("Uncalculable — Formula too complex",
+        assertEquals("Can't calculate — Formula too complex", Calc.once(deep));
+        assertEquals("Can't calculate — Formula too complex",
                 Calc.once("\\sum_{i=1}^{1000}\\sum_{j=1}^{1000}\\sum_{k=1}^{100}ijk"));
-        assertEquals("Uncalculable — Formula too complex",
+        assertEquals("Can't calculate — Formula too complex",
                 Calc.once("\\forall n\\in\\mathbb{N}, \\sum_{i=1}^{n}i=\\frac{n(n+1)}{2}"));
     }
 }
