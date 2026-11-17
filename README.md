@@ -94,8 +94,8 @@ MAIN SUCCESS SCENARIO
 3. The user clicks the "Login" button.
 4. The system verifies the username and password.
 5. If the credentials are valid, the system logs the user in and establishes the current-user session.
-6. The system displays the user's personal profile, including their username.
-7. The user can navigate to Favourite Cocktails or My Custom Cocktails from their profile.
+6. The system navigates to the Home page after successful login.
+7. The user can access their personal profile from the Home page, which displays their username and Favourite Cocktails.
 8. When the user clicks "Logout", the system clears the current-user session and returns to the Login page.
 
 EXTENSION
