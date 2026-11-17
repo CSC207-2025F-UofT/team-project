@@ -50,14 +50,41 @@
     ii. The system does not load a new question, and the use case ends.
 ### Use Case 3
 ### Use Case 4
-### Use Case 5
+### Use Case 5: Start a New Game
+#### Primary actor:
+* Game show host
 
+#### Preconditions:
+* Application is open and the main menu is display
+* No active game is being played
+
+#### Trigger:
+* The host asks the system to start a new game
+#### Main success scenario:
+1. The host asks to start a new game.
+2. The system checks that there are questions available to play.
+3. The system asks the host for the names of the two teams.
+4. The host enters a name for each team.
+5. The system checks that both team names are valid.
+6. The system creates the new game with both teams starting at zero points.
+7. The system changes the active display from the main menu to the game board, showing both team names and scores.
+
+#### Extensions:
+* #### 2a. There are no questions available to be played
+  i. The system explains that a game cannot be started until questions have been added.\
+  ii. The system remains on the main menu, and the use case ends.
+* #### 3a. The host decides not to start a game
+  i. The system discards any entered team names.\
+  ii. The system returns to the main menu, and the use case ends with no game started.
+* #### 4a. A team name is empty, or both teams have the same name
+  i. The system explains which team name needs to be changed and keeps the names that were entered.\
+  ii. The use case continues at step 4.
 ---
 ## Minimal Viable Product (MVP)
 | Team Member | MVP Use Case |
 |-------------|--------------|
 | Charlie Neale | Use Case |
-| Caleb Gawthroupe | Use Case |
+| Caleb Gawthroupe | Start a New Game |
 | Kevin Liu | Use Case |
 | Jacob Chislett | Display a new question |
 | Eric Wu | Use Case |
