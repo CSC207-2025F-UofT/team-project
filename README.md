@@ -38,7 +38,7 @@ Add login as a shared use case based on the course's login example.
 
 • Trigger: The player chooses to create a new game after logging in 
 
-• Success outcome: 
+• Success outcome: A new character with a defined race, class, and stats is created. The game is ready to start.
 
 • Main success scenario:
 ```text
