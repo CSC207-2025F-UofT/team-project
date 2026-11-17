@@ -1,4 +1,4 @@
-package com.terrain.model.feature.parameter;
+package com.terrain.entity.model.feature.parameter;
 
 import java.util.ArrayList;
 import java.util.List;

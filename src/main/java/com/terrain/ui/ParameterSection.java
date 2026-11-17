@@ -11,10 +11,10 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 
-import com.terrain.model.feature.parameter.ParameterSet;
-import com.terrain.model.feature.parameter.Parameter;
-
 import java.util.function.Consumer;
+
+import com.terrain.entity.model.feature.parameter.Parameter;
+import com.terrain.entity.model.feature.parameter.ParameterSet;
 
 // A collapsible section showing an editor for each parameter. Used for both the world settings (not removable) and
 // each feature (removable, with an x button).

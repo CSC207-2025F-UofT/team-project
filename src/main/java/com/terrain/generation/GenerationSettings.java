@@ -1,11 +1,11 @@
 package com.terrain.generation;
 
-import com.terrain.model.feature.Feature;
-import com.terrain.model.feature.FeatureType;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.random.RandomGenerator;
+
+import com.terrain.entity.model.feature.Feature;
+import com.terrain.entity.model.feature.FeatureType;
 
 // Everything the user controls: seed, world settings, and the ordered list of features.
 public class GenerationSettings {

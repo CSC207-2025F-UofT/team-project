@@ -1,9 +1,9 @@
 package com.terrain.generation;
 
-import com.terrain.model.TerrainMap;
-import com.terrain.model.feature.Feature;
-
 import java.util.Random;
+
+import com.terrain.entity.model.TerrainMap;
+import com.terrain.entity.model.feature.Feature;
 
 public class TerrainGenerator {
     // Same settings and seed always produce the same map.

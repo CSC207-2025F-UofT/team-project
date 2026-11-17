@@ -6,9 +6,9 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 
+import com.terrain.entity.model.feature.Feature;
+import com.terrain.entity.model.feature.FeatureType;
 import com.terrain.generation.WorldSetting;
-import com.terrain.model.feature.Feature;
-import com.terrain.model.feature.FeatureType;
 
 import java.util.function.Consumer;
 

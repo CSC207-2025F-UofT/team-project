@@ -1,6 +1,5 @@
-package com.terrain.model;
+package com.terrain.entity.model;
 
-import com.terrain.model.feature.parameter.CoordinateParameter;
 import java.util.*;
 
 

@@ -8,10 +8,10 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 
-import com.terrain.model.feature.parameter.BooleanParameter;
-import com.terrain.model.feature.parameter.CoordinateParameter;
-import com.terrain.model.feature.parameter.NumberParameter;
-import com.terrain.model.feature.parameter.Parameter;
+import com.terrain.entity.model.feature.parameter.BooleanParameter;
+import com.terrain.entity.model.feature.parameter.CoordinateParameter;
+import com.terrain.entity.model.feature.parameter.NumberParameter;
+import com.terrain.entity.model.feature.parameter.Parameter;
 
 // Builds the editing widgets for a Parameter. Because Parameter is sealed, the compiler flags this switch if a new
 // parameter type is added without a matching editor.

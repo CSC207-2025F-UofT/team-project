@@ -1,4 +1,4 @@
-package com.terrain.model.feature.parameter;
+package com.terrain.entity.model.feature.parameter;
 
 // An (x, y) point, in map tiles.
 public final class CoordinateParameter extends Parameter {

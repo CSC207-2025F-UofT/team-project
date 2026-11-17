@@ -1,5 +1,7 @@
 package com.terrain.ui;
 
+import com.terrain.interface_adapter.Controller;
+
 import javafx.scene.control.SplitPane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;

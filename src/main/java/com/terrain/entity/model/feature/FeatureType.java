@@ -1,4 +1,4 @@
-package com.terrain.model.feature;
+package com.terrain.entity.model.feature;
 
 import java.util.function.Supplier;
 

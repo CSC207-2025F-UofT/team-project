@@ -1,9 +1,9 @@
 package com.terrain.ui;
 
+import com.terrain.entity.model.TerrainMap;
+
 import javafx.scene.canvas.Canvas;
 import javafx.scene.layout.StackPane;
-
-import com.terrain.model.TerrainMap;
 
 // Wraps the JavaFX Canvas and provides a view of the terrain map.
 public class MapView extends StackPane {

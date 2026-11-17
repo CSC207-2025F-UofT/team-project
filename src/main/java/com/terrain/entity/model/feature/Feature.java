@@ -1,11 +1,11 @@
-package com.terrain.model.feature;
-
-import com.terrain.model.TerrainMap;
-import com.terrain.model.feature.parameter.CoordinateParameter;
-import com.terrain.model.feature.parameter.Parameter;
-import com.terrain.model.feature.parameter.ParameterSet;
+package com.terrain.entity.model.feature;
 
 import java.util.Random;
+
+import com.terrain.entity.model.TerrainMap;
+import com.terrain.entity.model.feature.parameter.CoordinateParameter;
+import com.terrain.entity.model.feature.parameter.Parameter;
+import com.terrain.entity.model.feature.parameter.ParameterSet;
 
 // A feature the user added (river, mountain, ...). Each instance owns its own parameters.
 // To add a new feature: extend this, declare parameters with number()/coordinate()/bool(), implement apply(),
