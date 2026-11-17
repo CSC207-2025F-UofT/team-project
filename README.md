@@ -26,27 +26,23 @@ Many employees at large organizations struggle to make friends with/get to know 
 
 ### User Story 1
 
-As a lonely employee I want to know which of my coworkers share interests with me
+As a lonely employee I want to know which of my coworkers share interests with me through a matching system
 
 ### User Story 2
 
-As an employee working in a specific department, I want to meet co-workers from other departments
+As a User, I want to create and be able to edit a profile that adequately represents my character
 
 ### User Story 3
 
-As a remote employee, I want to connect with my colleagues digitally to feel more included in my workplace
+As a remote employee, I want to connect with my colleagues digitally through joining an organization to feel more included in my workplace
 
 ### User Story 4
 
-As a manager, I want to prevent workers in direct power imbalances from being friends, to avoid conflict of interests.
+As a manager, I want to prevent workers in direct power imbalances from being friends, through a filtering system
 
 ### User Story 5
 
-As an organization, I want to facilitate collaboration between employees in order to increase productivity
-
-### User Story 6
-
-As an organization, I want to prevent external users from accessing our Tinder to keep our platform relevant
+As an organization, I want to facilitate collaboration between employees in order to increase productivity through creating an organization
 
 ---
 
@@ -114,10 +110,12 @@ Organization Factory
 ## API Usage
 
 **API Name:**
-
+Spotify API?
 **Documentation:** [Link]
-
+https://developer.spotify.com/documentation/web-api
+https://developer.spotify.com
 **How it is used in the program:**
+potential use in allowing users to display their favourite songs on their profiles?
 
 ---
 
