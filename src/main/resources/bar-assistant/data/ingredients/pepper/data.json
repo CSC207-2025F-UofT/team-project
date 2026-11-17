@@ -1,0 +1,27 @@
+{
+    "_id": "pepper",
+    "_parent_id": "spices",
+    "name": "Pepper",
+    "strength": 0,
+    "description": "Black pepper",
+    "origin": null,
+    "color": null,
+    "category": "Spices",
+    "created_at": null,
+    "updated_at": null,
+    "images": [
+        {
+            "uri": "file:///pepper.webp",
+            "sort": 1,
+            "placeholder_hash": "jyiCBQBGp3iLhokFd01L36P0WGh1eHCpiA",
+            "copyright": ""
+        }
+    ],
+    "ingredient_parts": [],
+    "prices": [],
+    "calculator_id": null,
+    "sugar_g_per_ml": 0,
+    "acidity": null,
+    "distillery": null,
+    "units": "pinch"
+}

@@ -1,0 +1,27 @@
+{
+    "_id": "water",
+    "_parent_id": "beverages",
+    "name": "Water",
+    "strength": 0,
+    "description": "It's water.",
+    "origin": "Worldwide",
+    "color": "#fff",
+    "category": "Beverages",
+    "created_at": null,
+    "updated_at": null,
+    "images": [
+        {
+            "uri": "file:///water.webp",
+            "sort": 1,
+            "placeholder_hash": "9geKFQgeendZeKf1NlptkMQGBwd4eHiIhw",
+            "copyright": ""
+        }
+    ],
+    "ingredient_parts": [],
+    "prices": [],
+    "calculator_id": null,
+    "sugar_g_per_ml": 0,
+    "acidity": null,
+    "distillery": null,
+    "units": "ml"
+}

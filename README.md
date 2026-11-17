@@ -1,85 +1,121 @@
 # Team Project
 
-Please keep this up-to-date with information about your project throughout the term.
-
-The readme should include information such as:
-- a summary of what your application is all about
-- a list of the user stories, along with who is responsible for each one
-- information about the API(s) that your project uses 
-- screenshots or animations demonstrating current functionality
-
-By keeping this README up-to-date,
-your team will find it easier to prepare for the final presentation
-at the end of the term.
-
-
 # Project Name
+
 - CocktailCraft
+
 ## Team Information
-- team name: Team400
+
+- Team name: Team400
 - TUT: 0401 BA2200 Group4
+
 ### Team Members
+
 - Qinli Yang
 - Enhao Tang
 - Jiaqi Shen
 - Wenqian Ling
+
 ---
+
 ## Project Description
-CocktailCraft is an application for discovering, customizing, and managing cocktail recipes. It allows users to search and filter cocktails, personalize ingredients and quantities, save favourites, rate drinks, and receive recommendations based on the ingredients they have available.
+
+CocktailCraft is a Java Swing desktop application for discovering, customizing,
+and managing cocktail recipes. Users will browse recipes, search by name and base
+spirit, view recipe details and available images, save favourites, and create
+personal recipe variations. A personal profile will provide access to each user's
+favourites and customized recipes across application sessions.
+
+The project currently provides a shared scaffold. The user stories below describe
+planned behaviour; they are not claims that the features have been implemented.
+
 ### Domain
-- food: drinks
+
+- Food: drinks
+
 ---
+
 ## User Stories
+
 ### User Story 1 [Qinli]
-As a user, I want to search for cocktails by name and filter them by base spirit, flavour profile, and carbonation so that I can easily find drinks that match my preferences.
+
+As a user, I want to search for cocktails by name and/or base spirit so that I can
+find recipes that match my preferences.
+
 ### User Story 2 [Enhao]
-As a user, I want to customize existing cocktail recipes by adding, removing, or replacing ingredients and adjusting quantities so that I can make drinks according to my personal preferences.
+
+As a user, I want to customize an existing cocktail and save it as my own recipe
+so that I can revisit and edit my variations without changing the original recipe.
+
 ### User Story 3 [Jiaqi]
 As a user, I want to register an account, log in and log out, and access my personal profile so that I can securely manage my account and revisit my favourite cocktails and customized recipes.
 ### User Story 4 [Wenqian]
 As a user, I want to browse cocktails on the main page and save my favourite cocktails so that I can easily find and revisit them later.
 
 ---
-## Use Cases
-### Use Case 1 [Qinli]
-Inputs
-* Cocktail name: A text field where the user types a cocktail name.
-* Base spirit: A dropdown with the options: Gin, Vodka, Rum, Tequila, Whiskey, Brandy, and Other.
-  
-Input requirement
-The user must enter a cocktail name or select a specific base spirit, or both. The user can select multiple base spirits at a time, and the system would return (if exist) any cocktail that contains at least one of the base spirit.
 
-Normal Flow
-1. The user enters a cocktail name and/or selects the base spirit(s).
+## Use Cases
+
+### Use Case 1 [Qinli]
+
+**Inputs**
+
+- An optional cocktail name.
+- Zero or more selected base spirits.
+
+**Input Requirement**
+
+The user must enter a name, select at least one base spirit, or both.
+
+**Normal Flow**
+
+1. The user enters a name and/or selects base spirits in the Home search area.
 2. The user clicks Search.
-3. The system searches for cocktails that match all provided criteria. Name matching is case-insensitive and allows partial matches.
-4. The system displays the matching cocktail names in a results list.
-   
-Alternative Flows
-* If the name is blank and there is no selected base spirit, the system displays: “Please enter a cocktail name or select a base spirit.”
-* If no cocktails match, the system displays: “No cocktails found.”
-* If the API request fails, the system displays an error message and allows the user to retry.
+3. The system finds matching cocktails. Name matching is case-insensitive and
+   supports partial matches. A cocktail may match any selected spirit; when both
+   name and spirit criteria are provided, both must be satisfied.
+4. The system displays matching cocktails using the same card layout as Home.
+5. The user selects a card to open Cocktail Details.
+6. The user can clear the search to return to catalog browsing.
+
+**Alternative Flows**
+
+- If neither criterion is provided, the system requests a name or base spirit.
+- If no cocktails match, the system displays “No cocktails found.”
+- If the catalog cannot be accessed, the system reports the failure and allows retry.
 
 ### Use Case 2 [Enhao]
-Input
-1) An existing cocktail recipe selected by the user.
-2) Ingredient names, quantities, and units.
-3) A name for a customized recipe
 
-Normal Flow
-1) The user selects an existing cocktail recipe and clicks Customize.
-2) The system displays the recipe's ingredients, quantities, and units.
-3) The user adds, removes, or replaces ingredients and adjusts quantities.
-4) The user enters a name for a customized recipe and clicks Save.
-5) The system validates the input.
-6) The system saves the customized recipe separately from the original and displays the saved recipe.
+**Inputs**
 
-Alternative Flows
-1) If the recipe name or an ingredient name is blank, the system asks the user to enter the missing information.
-2) If a quantity is not a positive number or a unit is missing, the system asks the user to enter a valid quantity and unit.
-3) If all ingredients have been removed, the system displays: “Please add at least one ingredient.”
-4) If saving fails, the system displays an error message and allows the user to retry.
-5) If the user clicks Cancel, the system discards the changes and returns to the original recipe.
+- An existing recipe selected from Cocktail Details, or the user's saved Custom Recipe.
+- A recipe name, ingredient names, quantities, and units.
+
+**Precondition**
+
+The user is logged in.
+
+**Normal Flow**
+
+1. The user opens Cocktail Details and clicks Customize.
+2. The system displays an editable copy of the original recipe.
+3. The user changes its name, ingredients, quantities, and/or units.
+4. The user clicks Save, and the system validates the recipe.
+5. The system saves a separate Custom Recipe belonging to the current user.
+6. The original recipe remains unchanged.
+7. The user opens My Custom Cocktails from Profile to view saved variations.
+8. The user can reopen a variation, edit it, and save the changes.
+9. Saved variations remain available after restarting and logging in again.
+
+**Alternative Flows**
+
+- Guests are asked to log in before customizing.
+- Blank recipe or ingredient names prompt the user to complete them.
+- Quantities must be positive numbers, and units must be provided.
+- A recipe must contain at least one ingredient.
+- Cancel discards unsaved changes.
+- Saving failures are reported, and the user's input is preserved for retry.
+- An empty personal collection displays an empty-state message.
 
 ### Use Case 3 [Jiaqi]
 INPUTS
@@ -137,7 +173,9 @@ EXTENSION
 
 (Add additional use cases as needed.)
 ---
+
 ## Minimal Viable Product (MVP)
+
 | Team Member | MVP Use Case |
 |-------------|--------------|
 | Qinli | The user enters a cocktail name and/or selects one or more base spirits, then clicks Search. The system displays matching cocktail names or a message indicating missing input, no matches, or an API failure. |
@@ -145,18 +183,29 @@ EXTENSION
 | Jiaqi | The users register a new account, log in with their username and password, and access their personal profile to access saved cocktails. The system saves user account information so that users can log in again after restarting the application.|
 | Wenqian | The user clicks a cocktail, the system display the ingredients of it. The user click 'Favourite' button, then save this cocktail to home page.|
 ---
+
 ## Entities
+
+Existing fields and planned additions are distinguished below. Planned entities
+and contracts require team agreement before implementation.
+
 ### Entity 1
-Cocktail
-- name
-- baseSpirit
-- flavour
-- recipeIngredient
+
+**Cocktail — implemented minimal version**
+
+- `id`
+- `name`
+- `ingredients`: a list of `RecipeIngredient`
+- Planned additions: `instructions` and optional `description`.
+- Base-spirit classification and image metadata representation are not finalized.
+
 ### Entity 2
-Ingredient
-- name
-- category
-- flavour
+
+**Ingredient — under discussion; no separate Class currently exists**
+
+- A stable ingredient ID and name may be needed.
+- Classification/category fields should follow the agreed Search requirements.
+
 ### Entity 3
 RecipeIngredient
 - ingredient
@@ -168,17 +217,215 @@ User
 - userName
 - favourite
 ---
+
 ## API Usage
-**API Name:**
-**Documentation:** [Link]
-**How it is used in the program:**
+
+**API Name:** TheCocktailDB — planned; not implemented.
+
+**Documentation:** [Official API documentation](https://www.thecocktaildb.com/api.php)
+
+**How it is used in the program:** Planned image lookup for Cocktail Details,
+with matching and fallback behaviour owned by Wenqian. The bundled Bar Assistant
+recipe remains the recipe source. Exact API integration is still pending.
+
+**API Name:** Course User API — candidate; not implemented.
+
+**Documentation:** [Course Login example, db-user branch](https://github.com/CSC207-2026F-UofT/ca-login/tree/db-user)
+
+**How it is used in the program:** Jiaqi will investigate Account persistence.
+The example demonstrates username/password operations, but documentation for
+associated-JSON Save/Load/Update still needs to be found. Storage of Favourites
+and Custom Recipes through this API is not assumed.
+
+The Bar Assistant dataset is a bundled offline snapshot; loading it does not
+constitute runtime external API usage. User-data persistence is also outstanding.
+
 ---
+
 ## Design Diagrams
+
 ### UML Class Diagram
+
+Current startup structure (individual use case classes are empty):
+
+```mermaid
+classDiagram
+    class Main
+    class AppBuilder
+    class MainPageView
+    class SearchView
+    Main ..> AppBuilder : starts on Swing EDT
+    AppBuilder ..> MainPageView : constructs
+    AppBuilder ..> SearchView : constructs
+    MainPageView o-- SearchView : opening search controls
+```
+
+Feature-specific diagrams will be added by their owners as implementations grow.
+See [architecture handoff](docs/ARCHITECTURE.md) for the current package structure.
+
 ### Sequence Diagrams
+
+```mermaid
+sequenceDiagram
+    participant Main
+    participant EDT as Swing EDT
+    participant AppBuilder
+    participant Window as JFrame
+    Main->>EDT: Schedule application startup
+    EDT->>AppBuilder: build()
+    AppBuilder->>Window: Create window with opening Home layout
+    AppBuilder-->>EDT: Return window
+    EDT->>Window: setVisible(true)
+```
+
+Search, Profile, Browse, and Customize sequences remain owner work.
+
 ---
+
 ## How to Run
-[Instructions for running the program.]
+
+### Setup
+
+1. Open the Maven project in IntelliJ IDEA.
+2. Use JDK 11 or newer. Maven targets Java 11 APIs and bytecode with `--release 11`.
+3. Reload the Maven project to download dependencies.
+
+### Launch the application
+
+Run `org.example.cocktailcraft.app.Main`.
+
+The application opens Home with a title, name input, disabled Search/base-spirit/
+Clear controls, a disabled Profile button, and a catalog placeholder.
+No other pages or navigation are implemented. Feature owners will add their own
+Views and connect their use cases. The GUI does not load the dataset at startup.
+
+### Verify dataset loading
+
+Run `org.example.cocktailcraft.app.DataReadCheck`.
+
+Expected output:
+
+```text
+Loaded cocktails: 663
+Cocktail ID: daiquiri
+Cocktail: Daiquiri
+Light Rum: 60 ml
+Lime juice: 22.5 ml
+Simple Syrup: 22.5 ml
+```
+
+The check loads the full dataset once, then prints Daiquiri as a known sample.
+It is not the application's Search functionality. GUI startup currently does not
+load the catalog or make network requests.
+
+### Run shared checks
+
+From the project root:
+
+```bash
+mvn test
+mvn verify
+```
+
+Both commands run the team Checkstyle configuration during `validate`.
+`mvn verify` also builds the JAR. IntelliJ Build Project alone does not necessarily
+run Maven tests or Checkstyle. The opening-window test is skipped in headless environments.
+
+Reports are in `target/checkstyle-result.xml` and `target/surefire-reports/`.
+`target/` is ignored by Git. The JAR is not a standalone executable bundle; Gson
+remains a runtime dependency. Use IntelliJ for launching at this stage.
+
 ---
+
 ## Notes
-[Any additional project information.]
+
+### Local dataset and shared scaffold status
+
+- The Bar Assistant snapshot contains 663 recipes, 296 ingredient records, and
+  8 auxiliary JSON files. Images are not bundled.
+- [Dataset source/version](src/main/resources/bar-assistant/SOURCE.md) and
+  [upstream license](src/main/resources/bar-assistant/LICENSE) are included.
+- `CocktailJsonReader.readAll()` returns a new unmodifiable `List<Cocktail>` per call;
+  it does not cache, search, or save user data.
+- `cocktail-index.txt` lists recipe resource paths and must be regenerated if recipe
+  files are added or removed. The separate Daiquiri example is not counted twice.
+- Existing Entity mapping covers ID, name, and ingredient name/amount/unit only;
+  instructions/description are shared follow-up work.
+- Implemented shared code includes Main/AppBuilder, the opening Home layout,
+  offline JSON reading, JUnit checks, and Checkstyle. The four feature groups
+  contain empty CA declarations; their Views and behaviour remain owner work.
+- The structure follows the [course CA Login Lab](https://github.com/CSC207-2026F-UofT/ca-login/blob/main/LAB_INSTRUCTIONS.md).
+- See [course checklist](docs/COURSE_REQUIREMENTS.md) for outstanding requirements.
+
+### Temporary Team Guide — Remove Before Final Submission
+
+> This section is a temporary handoff guide. Remove it before final submission.
+> The four feature packages contain **empty class/interface declarations only**:
+> no fields, constructors, methods, business logic, or feature wiring.
+> Owners may change or remove these starting files as their use cases require.
+
+#### Ownership
+
+All Java paths below are relative to `src/main/java/org/example/cocktailcraft/`.
+Each owner completes their feature's use case classes, adapters, Views, concrete
+data access implementation, and tests.
+
+| Owner | Feature | Packages and Views |
+|---|---|---|
+| Qinli | Search & Filter | `use_case/search/`, `interface_adapter/search/`, `view/search/`. `SearchView.java` currently contains only inactive controls for the opening Home layout. |
+| Enhao | Customize | `use_case/customize/`, `interface_adapter/customize/`, `view/customize/`. The View folder is empty, tracked with `.gitkeep`. |
+| Jiaqi | Profile and Account | `use_case/profile/`, `interface_adapter/profile/`, `view/profile/`. The View folder is empty, tracked with `.gitkeep`. |
+| Wenqian | Browse, Details, and Favourites | `use_case/browse/`, `interface_adapter/browse/`, `view/browse/`. `MainPageView.java` currently contains only the opening Home layout. Other Views are not created yet. |
+
+Owners decide whether to split their feature into additional use cases. No
+Login, Details, Favourite, or Customize page has been implemented for them.
+
+#### Starting files and their intended purpose
+
+`<Feature>` means Search, Customize, Profile, or Browse. Every feature has the
+same starting filenames. These declarations do not define final contracts.
+
+| Package | File | Intended purpose when implemented |
+|---|---|---|
+| `use_case/<feature>/` | `<Feature>InputBoundary.java` | Entry interface for the use case. |
+| `use_case/<feature>/` | `<Feature>InputData.java` | Data submitted to the use case. |
+| `use_case/<feature>/` | `<Feature>Interactor.java` | Validation and business rules. |
+| `use_case/<feature>/` | `<Feature>OutputBoundary.java` | Interface for reporting the outcome. |
+| `use_case/<feature>/` | `<Feature>OutputData.java` | Data returned by a successful use case. |
+| `use_case/<feature>/` | `<Feature>DataAccessInterface.java` | Storage operations required by the use case; implemented by a concrete DAO in `data_access/`. |
+| `interface_adapter/<feature>/` | `<Feature>Controller.java` | Converts View input into a use case request. |
+| `interface_adapter/<feature>/` | `<Feature>Presenter.java` | Converts use case output into display state. |
+| `interface_adapter/<feature>/` | `<Feature>ViewModel.java` | Exposes display state and update notifications. |
+| `interface_adapter/<feature>/` | `<Feature>State.java` | Holds fields displayed by the View. |
+
+#### Implemented shared files
+
+| File / location | What already works and what it is for |
+|---|---|
+| `app/Main.java` | Starts the application on the Swing EDT. |
+| `app/AppBuilder.java` | Creates the JFrame and opening Home layout. Add completed feature wiring here later. |
+| `view/browse/MainPageView.java` | Displays the Home title, search area, inactive Profile button, and catalog placeholder. No catalog behaviour. |
+| `view/search/SearchView.java` | Displays name input and disabled search controls. No matching or event handling. |
+| `entity/Cocktail.java` | Stores ID, name, and ingredients. |
+| `entity/RecipeIngredient.java` | Stores ingredient name, amount (currently String), and unit. |
+| `data_access/CocktailJsonReader.java` | Reads one recipe or the indexed dataset into shared Entities; no searching, caching, or saving. |
+| `app/DataReadCheck.java` | Loads 663 recipes and prints Daiquiri as a smoke check. It is not Search. |
+| `src/main/resources/bar-assistant/` | Bundled JSON dataset, resource index, license, and source/version information. |
+| `src/test/java/` and `src/test/resources/` | Check Reader behaviour, basic dependency direction, and the opening window. Individual feature tests still need to be written. |
+| `pom.xml` and `config/checkstyle/checkstyle.xml` | Shared dependencies, Java 11 compilation, JUnit execution, and style checks. |
+
+#### Coordinate before changing shared code
+
+- **Entities and dataset access — everyone:** agree before changing Entity fields,
+  constructors, quantity types, or the Reader. Reuse the existing dataset; decide
+  together how completed features will access the loaded catalog.
+- **Home and result cards — Qinli and Wenqian:** coordinate changes to the opening
+  Home/search area, shared result display, and passing a cocktail ID to Details.
+- **Personal collections — Jiaqi, Enhao, and Wenqian:** agree on user identity and
+  Save/Load contracts. Jiaqi owns Profile composition, Enhao owns Custom Recipes,
+  and Wenqian owns Favourites.
+- **Application wiring and build — everyone:** coordinate AppBuilder, dependency,
+  and Checkstyle changes. Runtime API integration and user-data persistence are
+  not implemented. Each owner adds their own tests and submits reviewed PRs.
+
+**End of temporary guide — remove before final submission.**

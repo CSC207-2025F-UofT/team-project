@@ -1,0 +1,27 @@
+{
+    "_id": "cointreau",
+    "_parent_id": "orange-curacao",
+    "name": "Cointreau",
+    "strength": 40,
+    "description": "Orange-flavoured triple sec liqueur, it was originally called Curaçao Blanco Triple Sec. Usually more dry tasting than Orange Curaçao.",
+    "origin": "France",
+    "color": "#ffffff",
+    "category": "Liqueurs > Orange Curaçao",
+    "created_at": null,
+    "updated_at": null,
+    "images": [
+        {
+            "uri": "file:///cointreau.webp",
+            "sort": 1,
+            "placeholder_hash": "oJqOHQQeB2eFe3uHh/iqaf+KBzdwcoEzSA",
+            "copyright": "Cointreau"
+        }
+    ],
+    "ingredient_parts": [],
+    "prices": [],
+    "calculator_id": null,
+    "sugar_g_per_ml": 233,
+    "acidity": null,
+    "distillery": "Cointreau",
+    "units": "ml"
+}
