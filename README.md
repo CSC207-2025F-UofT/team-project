@@ -76,9 +76,10 @@ Choose race and class.
 • Primary actor: Player
 
 • Preconditions:
-    - The player has logged in and created a character
-    - The character is currently in a dungeon room containing a monster
-    - The character and monster both have their healths greater than zero 
+
+    -The player has logged in and created a character
+    -The character is currently in a dungeon room containing a monster
+    -The character and monster both have their healths greater than zero 
 
 • Trigger: The player encounters a monster and chooses to engage in combat.
 
@@ -155,43 +156,43 @@ Direction
 
 • Values: NORTH, SOUTH, EAST, WEST
 
-Dungeon
+**Dungeon**
 
 • Instance variables: floorNumber, rooms, currentRoom
 
 • Methods: moveTo(direction), isFloorFinished()
 
-Item
+**Item**
 
 • Instance variables: name, description, type (weapon, armor, potion), value
 
 • Methods: getDescription(), getValue()
 
-Inventory
+**Inventory**
 
 • Instance variables: items, maxCapacity
 
 • Methods: addItem(Item), removeItem(Item), isFull(), getItems()
 
-Room
+**Room**
 
 • Instance variables: description, exits (directions), item, monster (Not in use case 2 but a room can have monster)
 
 • Methods: getExit(direction), removeItem(Item), monsterPresent()
 
-Monster
-
+**Monster
+**
 • Instance variables: name, description, currentHealth, maxHealth, loot
 
 • Methods: takeDamage(int), isAlive(), attack(Character)
 
-Character
+**Character**
 
 • Instance variables: TODO ADD THESE
 
 • Methods: takeDamage(int), isAlive()
 
-Combat
+**Combat**
 
 • Instance variables: character, monster, currentTurn, isDone
 
