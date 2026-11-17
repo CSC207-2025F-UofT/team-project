@@ -22,7 +22,7 @@ public final class IngredientName {
      * @param rawName the ingredient name
      * @throws IllegalArgumentException if the name is null or blank
      */
-    public static IngredientName FromRawName(String rawName) throws IllegalArgumentException {
+    public static IngredientName fromRawName(String rawName) throws IllegalArgumentException {
         if (rawName == null) {
             throw new IllegalArgumentException("ingredient name cannot be null");
         }
