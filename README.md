@@ -270,6 +270,8 @@ Direction
 ## Design Diagrams
 ### UML Class Diagram
 ### Sequence Diagrams
+<img width="1130" height="1002" alt="image" src="https://github.com/user-attachments/assets/0ad05e10-93a0-4a55-a8a6-2d82aa4d2165" />
+
 ---
 ## How to Run
 [Instructions for running the program.]
