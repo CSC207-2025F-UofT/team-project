@@ -1,27 +1,26 @@
 # UI sketches
 
-Last week's lab (Lab 7) asked each team to show their TA a sketch of the main UI for the MVP: what each view looks like **before** and **after** each use case, for the main flow and for alternative flows ([Developing a Use Case: The View](https://q.utoronto.ca/courses/444184/pages/developing-a-use-case-the-view)). These are our sketches. They are a starting point: each lead should adjust their own screens as they build them, and update the picture in the same PR.
+Sketches of the main screens for each of the five use cases: what the view looks like **before** the use case, during the **main flow**, and **after**, plus the alternative flows and error cases ([Developing a Use Case: The View](https://q.utoronto.ca/courses/444184/pages/developing-a-use-case-the-view)). They are a starting point: each lead should adjust their own screens as they build them, and update the picture in the same pull request.
 
-Numbers like "2a" and "3b" match the extension labels in the use cases in the [README](../../README.md).
+Labels like "2a" and "3b" match the extension labels of the use cases in the [README](../../README.md).
 
-## Use Cases 1a, 1b, 1c: Create a trip, invite a member, open a trip
-![Create a trip](uc1a-create-trip.png)
-![Create a trip, errors](uc1a-create-trip-errors.png)
-![Invite a member](uc1b-invite-member.png)
-![Open a trip](uc1c-open-trip.png)
+## Use Case 1: Create a trip with members
+![Create a trip](uc1-create-trip.png)
+![Create a trip, errors](uc1-create-trip-errors.png)
 
-## Use Cases 2a, 2b: Savings goal and contributions
-![Savings](uc2-savings.png)
-![Savings, alternative flows](uc2-savings-errors.png)
+## Use Case 2: Log a savings contribution
+![Log a contribution](uc2-contribution.png)
+![Log a contribution, alternative outcomes](uc2-contribution-alt.png)
+![Log a contribution, errors](uc2-contribution-errors.png)
 
 ## Use Case 3: Log an expense
 ![Log an expense](uc3-log-expense.png)
 ![Log an expense, errors](uc3-log-expense-errors.png)
 
-## Use Cases 4a, 4b: Daily budget summary
+## Use Case 4: View the daily budget
 ![Daily budget](uc4-daily-budget.png)
-![Change budget](uc4b-change-budget.png)
+![Changing the daily budget](uc4-daily-budget-change.png)
 
-## Use Cases 5a, 5b: Suggest and vote on activities
-![Suggest an activity](uc5-activities.png)
-![Vote on an activity](uc5b-vote-errors.png)
+## Use Case 5: Vote on activity ideas
+![Vote](uc5-vote.png)
+![Vote, alternative flows](uc5-vote-alt.png)

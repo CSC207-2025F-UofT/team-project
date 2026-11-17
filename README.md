@@ -1,6 +1,6 @@
 # Trip Planner & Budgeter
 
-**Team name:** _TBD_
+**Team name:** _(add team name)_
 
 ## Team Members
 
@@ -22,33 +22,51 @@ Planning a trip with friends usually means a group chat, a shared spreadsheet an
 
 ### Specification
 
-A **user** signs up with a username and password. A user can create a **trip** by giving it a name, a destination, a start date, an end date, a home currency (the currency the group thinks in, such as Canadian dollars) and a daily budget. The user who creates a trip becomes its first **member** and can invite other users by username. Each user sees a list of the trips they belong to and can open any of them.
+A **user** signs up with a username and password. A user can create a **trip** by giving it a name, a destination, a start date, an end date, a home currency (the currency the group thinks in, such as Canadian dollars) and a daily budget, and, if they like, by naming the friends (other users) who are coming. The user who creates a trip is its first **member**. Each user sees a list of the trips they belong to and can open any of them.
 
-**Before the trip**, each member can set a personal **savings goal** and log **contributions** as they put money aside. The group can see each member's progress and the group's combined progress toward the total of everyone's goals.
+**Before the trip**, each member sets a personal **savings goal** and logs **contributions** as they put money aside. Each time, the app tells them how much they still need to save per week to reach their goal before the trip starts, and whether the pace they have kept so far is enough. The group can also see everyone's combined progress.
 
-**While planning**, members suggest **activity ideas** for specific days of the trip, optionally with an estimated cost. Every member can vote once for each idea, and each day's ideas are ranked by votes so the group can see what is most popular.
+**While planning**, members suggest **activity ideas** for specific days of the trip. Each member has three votes per day to spend on that day's ideas, and each day's ideas are ranked by votes so the group can see what is most popular.
 
-**During the trip**, members log **expenses**: what it was, how much, in which currency, which category (such as food, transport or lodging), on which day, and who paid. Amounts paid in another currency are converted into the home currency at the current exchange rate. For any day of the trip, a member can see how much the group spent compared with the daily budget, with a breakdown by category.
+**During the trip**, members log **expenses**: what it was, how much, in which currency, which category (such as food, transport or lodging), on which day, and who paid. Amounts paid in another currency are converted into the home currency at the current exchange rate. For any day of the trip, a member can see how much the group may spend that day (the daily budget, plus anything left over from earlier days, or minus anything overspent), how much has been spent, a breakdown by category, and whether the trip as a whole is heading over budget. The daily budget can be changed at any time.
 
 ---
 
 ## User Stories
 
-1. **Create and share a trip.** As a group trip organizer, I want to create a trip and invite my friends to it, so that we can all plan and track the same trip together.
-2. **Save up together.** As a trip member, I want to set a personal savings goal and log what I put aside, so that the group can see how close we are to affording the trip.
+1. **Create and share a trip.** As a group trip organizer, I want to create a trip and invite my friends to it at the same time, so that we can all plan and track the same trip together.
+2. **Save up together.** As a trip member, I want to log what I put aside and be told whether I am saving fast enough, so that I reach my savings goal before the trip starts.
 3. **Log spending in any currency.** As a traveller, I want to log what I spend in whatever currency I paid in, so that the group has one record of spending in our home currency.
-4. **Stay on budget each day.** As a traveller, I want to see how much the group spent on a given day compared with our daily budget, broken down by category, so that we know whether we need to cut back.
-5. **Decide what to do.** As a trip member, I want to suggest activities for each day and vote on everyone's suggestions, so that we spend our time on what the group wants most.
+4. **Stay on budget each day.** As a traveller, I want to see how much the group can still spend today, counting what was left over or overspent on earlier days, and whether we are heading over budget for the whole trip, so that we know whether we need to cut back.
+5. **Decide what to do.** As a trip member, I want to spend my votes on the activity ideas for each day, so that we spend our time on what the group wants most.
 
 ---
 
 ## Use Cases
 
-Each use case follows the course's lightweight format. Screen sketches for every use case, before and after, including the error cases, are in [`docs/ui-sketches/`](docs/ui-sketches/).
+There are five use cases, one per user story. Each follows the course's lightweight format. Screen sketches, before and after, including the error cases, are in [`docs/ui-sketches/`](docs/ui-sketches/).
 
 Every use case below assumes the user is signed in (signup, login and logout come from the course starter code).
 
-### Use Case 1a: Create a trip
+### Terms and Assumptions
+
+These apply to every use case below, so they are stated once here.
+
+* **Home currency.** The currency a whole trip is tracked in. The daily budget, savings goals, contributions and every total are in the home currency. A home currency must be one of the roughly 30 major currencies the exchange rate service supports.
+* **Today** means the date on the user's computer.
+* **Days of the trip.** Every date from the start date to the end date, both included. A trip can be a single day (start date equal to end date). The start date can be in the past, so a trip that is already underway can still be set up.
+* **Members.** All members of a trip have the same permissions: any member can log expenses, change the daily budget and vote. Invited friends are added straight away and do not have to accept. In this version, members can only be added when the trip is created.
+* **Usernames** must be typed exactly as the user signed up, including capital letters.
+* **Savings goal.** Each member has one goal. It is set the first time they log a contribution and cannot be changed in this version.
+* **Weeks** are counted as whole weeks, rounded up, with a minimum of one.
+* **Exchange rates.** The latest rate available is used (the service updates once each working day), not the rate from the day of the expense. Once an expense is recorded, its amount in the home currency does not change.
+* **Money** is shown rounded to the cent.
+
+### Use Case 1: Create a trip with members
+
+**Lead:** _(add name)_
+
+**Sketches:** [main flow](docs/ui-sketches/uc1-create-trip.png), [error cases](docs/ui-sketches/uc1-create-trip-errors.png)
 
 **Primary actor:** A user planning a trip
 
@@ -58,15 +76,16 @@ Every use case below assumes the user is signed in (signup, login and logout com
 
 **Trigger:** The user asks to create a new trip.
 
-**Success outcome:** The trip exists with the user as its only member, and the user is looking at that trip.
+**Success outcome:** The trip exists with the user and every invited friend as members, each invited friend sees it in their own list of trips, and the user is looking at the new trip.
 
 **Main success scenario:**
 
 1. The user asks to create a new trip.
-2. The user provides a trip name, destination, start date, end date, home currency and daily budget.
+2. The user provides a trip name, destination, start date, end date, home currency and daily budget, and optionally the usernames of the friends to invite.
 3. The system checks the details.
-4. The system saves the trip with the user as its first member.
-5. The system shows the new trip.
+4. If any friends were named, the system checks that every username belongs to an existing user.
+5. The system saves the trip with the user and the invited friends as members.
+6. The system shows the new trip and its members.
 
 **Extensions:**
 
@@ -76,115 +95,56 @@ Every use case below assumes the user is signed in (signup, login and logout com
   1. The system explains the problem and does not create the trip.
 * **3c.** The daily budget is not a number or is negative.
   1. The system explains the problem and does not create the trip.
-* **3d.** The home currency is not a recognized currency.
+* **3d.** The home currency is not one the app supports.
   1. The system explains the problem and does not create the trip.
+* **4a.** One or more usernames do not belong to any user.
+  1. The system lists the usernames it could not find and does not create the trip.
+* **4b.** The same username is listed more than once, or is the user's own.
+  1. The system counts each person once.
+* **4c.** No friends were named.
+  1. The trip is created with the user as its only member.
 
-### Use Case 1b: Invite a member to a trip
+### Use Case 2: Log a savings contribution
 
-**Primary actor:** A member of the trip
+**Lead:** 
 
-**Preconditions:**
-
-* The user is a member of the trip and is viewing it.
-
-**Trigger:** The user asks to invite another user by username.
-
-**Success outcome:** The invited user is a member of the trip and can see the trip in their own list of trips.
-
-**Main success scenario:**
-
-1. The user asks to invite someone and provides their username.
-2. The system checks that a user with that username exists and is not already a member.
-3. The system adds that user to the trip.
-4. The system shows the updated list of members.
-
-**Extensions:**
-
-* **2a.** No user has that username.
-  1. The system says there is no user with that username. Nobody is added.
-* **2b.** The user is already a member.
-  1. The system says they are already a member. Nothing changes.
-
-### Use Case 1c: Open a trip
-
-**Primary actor:** A member of one or more trips
-
-**Preconditions:**
-
-* The user is signed in.
-
-**Trigger:** The user asks to see their trips.
-
-**Success outcome:** The user is looking at the trip they chose, with its members and the ways to plan and track it.
-
-**Main success scenario:**
-
-1. The user asks to see their trips.
-2. The system shows every trip the user is a member of.
-3. The user chooses one.
-4. The system shows that trip.
-
-**Extensions:**
-
-* **2a.** The user is not a member of any trip yet.
-  1. The system says there are no trips yet and offers to create one (Use Case 1a).
-
-### Use Case 2a: Set a savings goal
+**Sketches:** [main flow](docs/ui-sketches/uc2-contribution.png), [alternative outcomes](docs/ui-sketches/uc2-contribution-alt.png), [error cases](docs/ui-sketches/uc2-contribution-errors.png)
 
 **Primary actor:** A member of the trip
 
 **Preconditions:**
 
 * The user is a member of the trip and is viewing it.
-
-**Trigger:** The user asks to set how much they plan to save for the trip.
-
-**Success outcome:** The user's savings goal is recorded, and the progress shown for the user and for the group reflects it.
-
-**Main success scenario:**
-
-1. The user asks to set a savings goal and provides an amount in the trip's home currency.
-2. The system checks the amount.
-3. The system records the goal.
-4. The system shows the user's progress and the group's progress.
-
-**Extensions:**
-
-* **2a.** The amount is not a number, or is zero or negative.
-  1. The system explains the problem and keeps the previous goal, if any.
-* **3a.** The user already had a goal.
-  1. The system replaces it and recalculates both progress figures.
-
-### Use Case 2b: Log a savings contribution
-
-**Primary actor:** A member of the trip
-
-**Preconditions:**
-
-* The user is a member of the trip and is viewing it.
-* The user has set a savings goal (Use Case 2a).
 
 **Trigger:** The user asks to record money they have put aside for the trip.
 
-**Success outcome:** The contribution is recorded, and the progress shown for the user and for the group includes it.
+**Success outcome:** The contribution is recorded, and the user knows how much more they need to save each week to reach their goal before the trip starts and whether their pace so far is enough. The group's progress includes the new contribution.
 
 **Main success scenario:**
 
-1. The user asks to log a contribution and provides an amount and a date.
-2. The system checks the amount.
-3. The system records the contribution.
-4. The system shows the user's progress (saved so far out of their goal) and the group's progress (everyone's savings out of everyone's goals).
+1. The user asks to log a contribution and provides an amount and a date, both in the trip's home currency. If the user has no savings goal yet, the user also provides one.
+2. The system checks the details.
+3. The system records the contribution (and the goal, if one was provided).
+4. The system works out how much the user has saved in total, how much is left to reach the goal, and how many weeks there are from the contribution's date to the trip's start date.
+5. The system works out how much the user needs to save per week from now to reach the goal in time, and how much per week they have saved so far (their total savings divided by the weeks from the date of their first contribution to the date of this one).
+6. The system shows the user's progress, tells them whether they are on track (their weekly pace so far is at least the weekly amount they now need), and shows the group's progress (everyone's savings out of everyone's goals, where a member with no goal yet counts as a goal of zero).
 
 **Extensions:**
 
 * **2a.** The amount is not a number, or is zero or negative.
   1. The system explains the problem and records nothing.
-* **2b.** The user has not set a savings goal yet.
-  1. The system asks the user to set a goal first and records nothing.
-* **4a.** The user's savings now reach or pass their goal.
-  1. The system tells the user their goal is reached.
+* **2b.** The user has no savings goal and did not provide a valid one.
+  1. The system asks for a goal and records nothing.
+* **2c.** The date is on or after the trip's start date.
+  1. The system says savings are for before the trip and records nothing.
+* **4a.** The user's total savings are now equal to or more than their goal.
+  1. The system tells the user their goal is reached and does not show a weekly amount.
 
 ### Use Case 3: Log an expense
+
+**Lead:** 
+
+**Sketches:** [main flow](docs/ui-sketches/uc3-log-expense.png), [error cases](docs/ui-sketches/uc3-log-expense-errors.png)
 
 **Primary actor:** A member of the trip
 
@@ -200,7 +160,7 @@ Every use case below assumes the user is signed in (signup, login and logout com
 
 1. The user asks to log an expense and provides a description, amount, currency, category (flight, transport, food, lodging, activity, shopping or other), date, and who paid.
 2. The system checks the details.
-3. The system works out the amount in the trip's home currency using today's exchange rate.
+3. The system works out the amount in the trip's home currency using the latest exchange rate.
 4. The system records the expense.
 5. The system shows the trip's expenses, including the new one with both amounts.
 
@@ -212,12 +172,18 @@ Every use case below assumes the user is signed in (signup, login and logout com
   1. The system says the date is not part of this trip and records nothing.
 * **2c.** The person who paid is not a member of the trip.
   1. The system explains the problem and records nothing.
+* **2d.** The currency is not one the app supports.
+  1. The system explains the problem and records nothing.
 * **3a.** The currency is the trip's home currency.
   1. The system uses the amount as it is, with no conversion.
-* **3b.** Today's exchange rate cannot be found, for example because there is no internet connection.
+* **3b.** The exchange rate cannot be found, for example because there is no internet connection.
   1. The system says it could not get the exchange rate and asks the user to try again. Nothing is recorded.
 
-### Use Case 4a: View the daily budget summary
+### Use Case 4: View the daily budget
+
+**Lead:**
+
+**Sketches:** [main flow and alternative outcomes](docs/ui-sketches/uc4-daily-budget.png), [changing the budget](docs/ui-sketches/uc4-daily-budget-change.png)
 
 **Primary actor:** A member of the trip
 
@@ -225,113 +191,86 @@ Every use case below assumes the user is signed in (signup, login and logout com
 
 * The user is a member of the trip and is viewing it.
 
-**Trigger:** The user asks to see how spending compares with the daily budget for a day of the trip.
+**Trigger:** The user asks to see how spending compares with the budget for a day of the trip.
 
-**Success outcome:** The user sees what the group spent that day, what is left of the daily budget, and what the spending was on, by category.
+**Success outcome:** The user sees how much the group may spend that day, how much was spent, how much is left, what the spending was on, and whether the trip as a whole is heading over budget.
 
 **Main success scenario:**
 
 1. The user asks for the budget summary and chooses a day of the trip.
 2. The system adds up that day's expenses in the trip's home currency.
-3. The system compares the total with the daily budget.
-4. The system shows the amount spent, the amount remaining, and the spending by category.
+3. The system works out what the group may spend that day: the daily budget, plus whatever was left unspent on every earlier day of the trip, minus whatever was overspent.
+4. The system works out how much is left for the day.
+5. The system works out the projected cost of the whole trip: the average spent per day over the days from the first day of the trip up to and including the chosen day, times the number of days in the whole trip. It compares this with the trip's total budget (daily budget times number of days in the trip).
+6. The system shows the amount spent, the amount allowed, the amount left, the spending by category, and the projected cost against the total budget.
 
 **Extensions:**
 
 * **2a.** No expenses were logged that day.
-  1. The system shows nothing spent and the full budget remaining.
-* **3a.** The group spent more than the daily budget.
-  1. The system shows how much over budget the group is and makes this stand out.
+  1. The system treats the day as nothing spent.
+* **3a.** The chosen day is the first day of the trip.
+  1. The system allows exactly the daily budget, with nothing carried over.
+* **4a.** The group spent more than the day's allowance.
+  1. The system shows how much over the group is and makes this stand out.
+* **5a.** The projected cost is more than the total budget.
+  1. The system shows a warning with the amount the trip is projected to go over.
+* **6a.** The user changes the daily budget.
+  1. The user provides the new amount.
+  2. The system checks that it is a number and not negative.
+  3. The system saves the new daily budget, which applies to every day of the trip, including earlier days.
+  4. The system repeats steps 3 to 6 with the new budget.
+  * **6a.2a.** The amount is not a number or is negative.
+    1. The system explains the problem and keeps the current budget.
 
-### Use Case 4b: Change the daily budget
+### Use Case 5: Vote on activity ideas
 
-**Primary actor:** A member of the trip
+**Lead:** 
 
-**Preconditions:**
-
-* The user is a member of the trip and is viewing the budget summary (Use Case 4a).
-
-**Trigger:** The user asks to change the daily budget.
-
-**Success outcome:** The trip has the new daily budget, and the summary reflects it.
-
-**Main success scenario:**
-
-1. The user asks to change the daily budget and provides the new amount.
-2. The system checks the amount.
-3. The system saves the new daily budget.
-4. The system shows the updated summary.
-
-**Extensions:**
-
-* **2a.** The amount is not a number or is negative.
-  1. The system explains the problem and keeps the current budget.
-
-### Use Case 5a: Suggest an activity
+**Sketches:** [main flow](docs/ui-sketches/uc5-vote.png), [alternative flows](docs/ui-sketches/uc5-vote-alt.png)
 
 **Primary actor:** A member of the trip
 
 **Preconditions:**
 
-* The user is a member of the trip and is viewing it.
-
-**Trigger:** The user asks to suggest something to do on a day of the trip.
-
-**Success outcome:** The idea is recorded for that day and is visible to every member, ranked with the other ideas for that day.
-
-**Main success scenario:**
-
-1. The user asks to suggest an activity and provides a day, a name, and optionally an estimated cost.
-2. The system checks the details.
-3. The system records the idea with no votes.
-4. The system shows that day's ideas, ranked.
-
-**Extensions:**
-
-* **2a.** The name is missing, or the estimated cost is not a number or is negative.
-  1. The system explains the problem and records nothing.
-* **2b.** The day is not within the trip's dates.
-  1. The system explains the problem and records nothing.
-* **2c.** An idea with the same name already exists for that day.
-  1. The system says it was already suggested and records nothing.
-
-### Use Case 5b: Vote on an activity
-
-**Primary actor:** A member of the trip
-
-**Preconditions:**
-
-* The user is a member of the trip and is viewing a day's activity ideas.
+* The user is a member of the trip and is viewing a day's activity ideas, and there is at least one.
 
 **Trigger:** The user asks to vote for an idea.
 
-**Success outcome:** The user's vote is counted once for that idea, and the day's ideas are ranked by number of votes, with ties going to the idea suggested first.
+**Success outcome:** The user's vote is counted once for that idea, the day's ideas are ranked by number of votes (ties go to the idea suggested first), and the user knows how many of their three votes for that day are left.
 
 **Main success scenario:**
 
 1. The user asks to vote for an idea.
-2. The system records the vote.
-3. The system shows that day's ideas, ranked again.
+2. The system counts how many of their three votes for that day the user has already used.
+3. The system records the vote.
+4. The system ranks the day's ideas by number of votes.
+5. The system shows the ranked ideas and how many votes the user has left for that day.
 
 **Extensions:**
 
 * **2a.** The user already voted for this idea.
   1. The system removes their vote instead.
-  2. The system shows that day's ideas, ranked again.
+  2. The use case continues at step 4.
+* **2b.** The user has already used all three of their votes for that day, and has not voted for this idea.
+  1. The system says there are no votes left, suggests taking a vote back from another idea, and changes nothing.
+* **4a.** Two or more ideas have the same number of votes.
+  1. The system ranks the idea that was suggested first higher.
 
 ---
 
 ## Minimal Viable Product (MVP)
 
-All of the use cases above are in the MVP. There are five groups, one per team member, and each member leads one group. Sign up, log in and log out come from the course's starter code and are shared.
+All five use cases are in the MVP, and each member leads one. Sign up, log in and log out come from the course's starter code and are shared.
 
-| Team Member | MVP Use Cases |
-|-------------|---------------|
-| | 1. Create a trip (1a), invite a member (1b), open a trip (1c) |
-| | 2. Set a savings goal (2a), log a savings contribution (2b) |
-| | 3. Log an expense (3) |
-| | 4. View the daily budget summary (4a), change the daily budget (4b) |
-| | 5. Suggest an activity (5a), vote on an activity (5b) |
+| Team Member | MVP Use Case |
+|-------------|--------------|
+| _(add name)_ | 1. Create a trip with members |
+| _(add name)_ | 2. Log a savings contribution |
+| _(add name)_ | 3. Log an expense |
+| _(add name)_ | 4. View the daily budget |
+| _(add name)_ | 5. Vote on activity ideas |
+
+Small supporting screens are needed to run these but are not use cases that anyone leads: the list of the user's trips and the trip screen that links to the five use cases, and a basic form to suggest an activity idea (so that there is something to vote on).
 
 ---
 
@@ -370,7 +309,7 @@ All entities check their own inputs (for example, amounts must be positive and c
 
 **Documentation:** https://frankfurter.dev
 
-**How it is used in the program:** Converts expenses paid in a foreign currency into the trip's home currency (Use Case 3). The currency dropdowns are filled from the API's list of supported currencies. Free, no API key, rates from the European Central Bank, updated every working day. About 30 major currencies are supported.
+**How it is used in the program:** Converts expenses paid in a foreign currency into the trip's home currency (Use Case 3). The list of supported currencies is also used to check the home currency of a new trip (Use Case 1) and to fill the currency dropdowns. Free, no API key, rates from the European Central Bank, updated every working day. About 30 major currencies are supported.
 
 - Rate request: `GET https://api.frankfurter.dev/v1/latest?base=CAD&symbols=JPY` returns `{"amount":1.0,"base":"CAD","date":"2026-11-16","rates":{"JPY":111.72}}`
 - Currency list: `GET https://api.frankfurter.dev/v1/currencies`
@@ -392,7 +331,141 @@ Users are saved to `users.csv` (course starter code). Trips, contributions, expe
 
 ### Sequence Diagrams
 
-_To be added for each MVP use case._
+Every use case follows the Clean Architecture flow from the course (View, Controller, Interactor, Data Access, Presenter, ViewModel). Each diagram below fills that flow in with what the use case really does: what is loaded and saved, the decision the interactor makes, and the failure path. Class names are proposed and may be renamed by the lead in their own pull request.
+
+#### Use Case 1: Create a trip with members
+
+```mermaid
+sequenceDiagram
+    participant V as CreateTripView
+    participant C as CreateTripController
+    participant I as CreateTripInteractor
+    participant D as Data access for users, trips, currencies
+    participant P as CreateTripPresenter
+    participant M as CreateTripViewModel
+    V->>C: 1 click Create with the form fields
+    C->>I: 2 execute with CreateTripInputData
+    I->>D: 3 get supported currencies, check each username exists
+    D-->>I: 4 currencies and users
+    Note over I: Decide: all details present, end not before start, budget valid, currency supported, every username exists
+    alt a check fails
+        I->>P: 5 prepareFailView with the message
+    else all checks pass
+        I->>D: saveTrip with the creator and invited friends as members
+        I->>P: 5 prepareSuccessView with CreateTripOutputData
+    end
+    P->>M: 6 update state
+    M-->>V: 7 notify the View, Observer
+```
+
+#### Use Case 2: Log a savings contribution
+
+```mermaid
+sequenceDiagram
+    participant V as SavingsView
+    participant C as LogContributionController
+    participant I as LogContributionInteractor
+    participant D as Data access for trips, contributions
+    participant P as LogContributionPresenter
+    participant M as SavingsViewModel
+    V->>C: 1 click Log Contribution with amount, date, goal if first time
+    C->>I: 2 execute with LogContributionInputData
+    I->>D: 3 get the trip and the member's contributions
+    D-->>I: 4 trip, goal, earlier contributions
+    Note over I: Decide: amount above zero, goal present, date before trip start. Then work out total saved, weeks left, weekly amount needed, weekly pace so far, on track or behind
+    alt a check fails
+        I->>P: 5 prepareFailView with the message
+    else valid
+        I->>D: saveContribution, and save the goal if it was new
+        I->>P: 5 prepareSuccessView with progress, weekly figures, group progress
+    end
+    P->>M: 6 update state
+    M-->>V: 7 notify the View, Observer
+```
+
+#### Use Case 3: Log an expense
+
+```mermaid
+sequenceDiagram
+    participant V as AddExpenseView
+    participant C as LogExpenseController
+    participant I as LogExpenseInteractor
+    participant D as Data access for trips, expenses
+    participant X as Exchange rate gateway
+    participant P as LogExpensePresenter
+    participant M as AddExpenseViewModel
+    V->>C: 1 click Save with the expense fields
+    C->>I: 2 execute with LogExpenseInputData
+    I->>D: 3 get the trip
+    D-->>I: 4 trip with dates and members
+    Note over I: Decide: details valid, date inside the trip, payer is a member, currency supported
+    alt the currency differs from the home currency
+        I->>X: getRate from the expense currency to the home currency
+        X-->>I: rate, or ExchangeRateUnavailableException
+    end
+    alt a check fails or no rate
+        I->>P: 5 prepareFailView with the message
+    else converted
+        I->>D: saveExpense with both amounts
+        I->>P: 5 prepareSuccessView with the updated expense list
+    end
+    P->>M: 6 update state
+    M-->>V: 7 notify the View, Observer
+```
+
+#### Use Case 4: View the daily budget
+
+```mermaid
+sequenceDiagram
+    participant V as DailyBudgetView
+    participant C as DailyBudgetController
+    participant I as DailyBudgetInteractor
+    participant D as Data access for trips, expenses
+    participant P as DailyBudgetPresenter
+    participant M as DailyBudgetViewModel
+    V->>C: 1 choose a day
+    C->>I: 2 execute with DailyBudgetInputData
+    I->>D: 3 get the trip and all its expenses
+    D-->>I: 4 trip and expenses
+    Note over I: Decide: total each day, carry over what was left or overspent on earlier days, allowance and amount left for the chosen day, spending by category, projected trip cost against total budget
+    I->>P: 5 prepareSuccessView with the summary and any warning
+    P->>M: 6 update state
+    M-->>V: 7 notify the View, Observer
+    opt the user changes the daily budget
+        V->>C: click Update with the new amount
+        C->>I: execute with ChangeBudgetInputData
+        I->>D: saveTrip with the new daily budget, if it is a valid number
+        I->>P: recalculated summary, or prepareFailView if invalid
+        P->>M: update state
+        M-->>V: notify the View, Observer
+    end
+```
+
+#### Use Case 5: Vote on activity ideas
+
+```mermaid
+sequenceDiagram
+    participant V as ActivitiesView
+    participant C as VoteController
+    participant I as VoteInteractor
+    participant D as Data access for activity ideas
+    participant P as VotePresenter
+    participant M as ActivitiesViewModel
+    V->>C: 1 click Vote or Unvote on an idea
+    C->>I: 2 execute with VoteInputData
+    I->>D: 3 get all ideas for that day
+    D-->>I: 4 ideas with their votes
+    Note over I: Decide: already voted means remove the vote, otherwise reject if all three votes are used, else add the vote. Then rank by votes with ties to the earliest suggested
+    alt no votes left
+        I->>P: 5 prepareFailView with the message
+    else vote added or removed
+        I->>D: saveActivityIdea with the changed votes
+        I->>P: 5 prepareSuccessView with the ranked ideas and votes left
+    end
+    P->>M: 6 update state
+    M-->>V: 7 notify the View, Observer
+```
+
 
 ---
 
@@ -409,7 +482,9 @@ Tests: `mvn test` · Coverage report: `mvn verify`, then open `target/site/jacoc
 ## Notes
 
 ### Future extensions
+- Invite more friends to an existing trip
 - Standalone currency converter screen (reuses the same exchange rate interface)
+- Set a savings goal and suggest activities as full use cases of their own
 - Save flights, transport, restaurants and lodging to the trip with their prices
 - Split costs and show who owes whom
 - Trip-wide spending charts
