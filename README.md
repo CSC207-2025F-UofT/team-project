@@ -44,8 +44,9 @@ find recipes that match my preferences.
 
 ### User Story 2 [Enhao]
 
-As a user, I want to customize an existing cocktail and save it as my own recipe
-so that I can revisit and edit my variations without changing the original recipe.
+As a user, I want to customize existing cocktail recipes by changing their names, adding, removing, 
+or replacing ingredients, and adjusting quantities. I also want to save these recipes to my account 
+and view and edit them through My Custom Cocktails so that I can keep and reuse recipes that match my personal preferences.
 
 ### User Story 3 [Jiaqi]
 As a user, I want to register an account, log in and log out, and access my personal profile so that I can securely manage my account and revisit my favourite cocktails and customized recipes.
@@ -86,6 +87,8 @@ The user must enter a name, select at least one base spirit, or both.
 
 ### Use Case 2 [Enhao]
 
+### Use Case 2 [Enhao]
+
 **Inputs**
 
 - An existing recipe selected from Cocktail Details, or the user's saved Custom Recipe.
@@ -95,27 +98,44 @@ The user must enter a name, select at least one base spirit, or both.
 
 The user is logged in.
 
-**Normal Flow**
+**Normal Flow — Create a Custom Recipe**
 
 1. The user opens Cocktail Details and clicks Customize.
-2. The system displays an editable copy of the original recipe.
-3. The user changes its name, ingredients, quantities, and/or units.
-4. The user clicks Save, and the system validates the recipe.
-5. The system saves a separate Custom Recipe belonging to the current user.
-6. The original recipe remains unchanged.
-7. The user opens My Custom Cocktails from Profile to view saved variations.
-8. The user can reopen a variation, edit it, and save the changes.
-9. Saved variations remain available after restarting and logging in again.
+2. The system displays an editable copy of the selected recipe.
+3. The user changes the recipe name, adds, removes, or replaces ingredients, and adjusts quantities and units.
+4. The user clicks Save.
+5. The system validates the input.
+6. The system creates and saves a separate Custom Recipe associated with the current user.
+7. The system displays the saved Custom Recipe.
+
+**Normal Flow — View and Edit My Custom Cocktails**
+
+1. The user opens My Custom Cocktails from Profile.
+2. The system loads and displays the current user's saved Custom Recipes.
+3. The user selects a Custom Recipe to view its details.
+4. The user clicks Edit.
+5. The system displays the recipe in an editable form.
+6. The user modifies the recipe and clicks Save.
+7. The system validates the input and saves the changes to the selected Custom Recipe.
+8. The system displays the updated recipe.
 
 **Alternative Flows**
 
-- Guests are asked to log in before customizing.
-- Blank recipe or ingredient names prompt the user to complete them.
-- Quantities must be positive numbers, and units must be provided.
-- A recipe must contain at least one ingredient.
-- Cancel discards unsaved changes.
-- Saving failures are reported, and the user's input is preserved for retry.
-- An empty personal collection displays an empty-state message.
+- If the user is not logged in, the system asks them to log in before customizing.
+- If the recipe name or an ingredient name is blank, the system asks the user to complete it.
+- If a quantity is not a positive number or a unit is missing, the system asks the user to correct the input.
+- If the recipe contains no ingredients, the system displays: "Please add at least one ingredient."
+- If the user clicks Cancel, the system discards unsaved changes and returns to the recipe's details.
+- If saving fails, the system displays an error message and preserves the user's input for retry.
+- If loading fails, the system displays an error message and allows the user to retry.
+- If the user has no saved Custom Recipes, the system displays: "You have no custom cocktails yet."
+
+**Postconditions**
+
+- A newly created Custom Recipe is saved separately from the original recipe and belongs to its creator.
+- Editing an existing Custom Recipe updates that recipe.
+- Only the creator can view and edit their Custom Recipes.
+- Saved Custom Recipes remain available after restarting the application and logging in again.
 
 ### Use Case 3 [Jiaqi]
 INPUTS
@@ -179,7 +199,7 @@ EXTENSION
 | Team Member | MVP Use Case |
 |-------------|--------------|
 | Qinli | The user enters a cocktail name and/or selects one or more base spirits, then clicks Search. The system displays matching cocktail names or a message indicating missing input, no matches, or an API failure. |
-| Enhao | The user selects an existing cocktail recipe, adds, removes, or replaces ingredients, and adjusts quantities. The user then names and saves the customized recipe. The system validates the input and saves it separately from the original recipe.  |
+| Enhao | The user customizes an existing cocktail recipe by changing its name, ingredients, and quantities, then saves it as a separate Custom Recipe linked to their account. Through My Custom Cocktails, the user can list, reopen, and edit their own recipes. Saved recipes remain available after restarting the application and logging in again. |
 | Jiaqi | The users register a new account, log in with their username and password, and access their personal profile to access saved cocktails. The system saves user account information so that users can log in again after restarting the application.|
 | Wenqian | The user clicks a cocktail, the system display the ingredients of it. The user click 'Favourite' button, then save this cocktail to home page.|
 ---
