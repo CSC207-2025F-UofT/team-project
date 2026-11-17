@@ -56,7 +56,7 @@ public class GetDeckInteractorTest {
         list.add(deck1);
         list.add(deck2);
 
-        GetDeckInputData inputData = new GetDeckInputData("CSC207H1");
+        GetDeckInputData inputData = new GetDeckInputData("CSC207H1", "LIST");
         GetDeckDataAccessInterface deck = new TestMockDeckDataAccessObject(list);
 
         GetDeckOutputBoundary successPresenter = new GetDeckOutputBoundary() {
@@ -76,11 +76,6 @@ public class GetDeckInteractorTest {
             public void prepareFailView(String error) {
                 fail("Use case failure is unexpected.");
             }
-
-            @Override
-            public void switchToHomescreenView() {
-                fail("Use case failure is unexpected.");
-            }
         };
 
         GetDeckInputBoundary interactor = new GetDeckInteractor(deck, successPresenter);
@@ -90,7 +85,7 @@ public class GetDeckInteractorTest {
 
     @Test
     void noAvailableDeckTest() {
-        GetDeckInputData inputData = new GetDeckInputData(null);
+        GetDeckInputData inputData = new GetDeckInputData(null, "STUDY");
         GetDeckDataAccessInterface decks = new TestMockDeckDataAccessObject(new ArrayList<>());
 
         GetDeckOutputBoundary emptyPresenter = new GetDeckOutputBoundary() {
@@ -102,11 +97,6 @@ public class GetDeckInteractorTest {
             @Override
             public void prepareFailView(String error) {
                 assertNotNull(error);
-            }
-
-            @Override
-            public void switchToHomescreenView() {
-                fail("Use case failure is unexpected.");
             }
         };
 

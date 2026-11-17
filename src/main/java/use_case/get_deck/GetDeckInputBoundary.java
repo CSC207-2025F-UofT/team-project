@@ -10,9 +10,4 @@ public interface GetDeckInputBoundary {
      * @param getDeckInputData the input data
      */
     void execute(GetDeckInputData getDeckInputData);
-
-    /**
-     * Executes the switch to HomescreenView use case.
-     */
-    void switchToHomescreenView();
 }

@@ -28,7 +28,7 @@ public class MockDeckDataAccessObject implements GetAllDecksDataAccessInterface,
         deck.addFlashcard(new Flashcard(
                 "Checked Exceptions",
                 "-like IOException these are child " +
-                "classes of Excaption that the developer must check (except runtime exception)\n" +
+                "classes of Exception that the developer must check (except runtime exception)\n" +
                 "-The method caller must either catch or throw the exception, this is checked " +
                 "when the code is compiled.\n" +
                 "- use try, catch. Or throw exception\n" +
@@ -36,8 +36,7 @@ public class MockDeckDataAccessObject implements GetAllDecksDataAccessInterface,
                 "expected to recover."));
         deck.addFlashcard(new Flashcard(
                 "Unchecked Exceptions",
-                "\n" +
-                        "Like Error and RuntimeException and any of their subclasses. " +
+                "Like Error and RuntimeException and any of their subclasses. " +
                         "You do not need to catch or declare these exceptions, " +
                         "these are the error messages you see when you code crashes."));
         deck.addFlashcard(new Flashcard(
@@ -85,20 +84,6 @@ public class MockDeckDataAccessObject implements GetAllDecksDataAccessInterface,
         decks.add(mockDataMakeDeck("CSC209H1"));
         decks.add(mockDataMakeDeck("MAT237Y1"));
 
-        // to test scroll bar
-//        decks.add(mockDataMakeDeck("1"));
-//        decks.add(mockDataMakeDeck("2"));
-//        decks.add(mockDataMakeDeck("3"));
-//        decks.add(mockDataMakeDeck("4"));
-//        decks.add(mockDataMakeDeck("5"));
-//        decks.add(mockDataMakeDeck("6"));
-//        decks.add(mockDataMakeDeck("7"));
-//        decks.add(mockDataMakeDeck("8"));
-//        decks.add(mockDataMakeDeck("9"));
-//        decks.add(mockDataMakeDeck("10"));
-//        decks.add(mockDataMakeDeck("11"));
-//        decks.add(mockDataMakeDeck("12"));
-
         return decks;
     }
 
@@ -114,7 +99,7 @@ public class MockDeckDataAccessObject implements GetAllDecksDataAccessInterface,
     @Override
     public Deck getDeck(String name) {
         for (Deck deck: decks) {
-            if (deck.getName() == name) {
+            if (deck.getName().equals(name)) {
                 return deck;
             }
         }
