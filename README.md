@@ -116,7 +116,9 @@ Main Success Scenario:
 2. Program checks if Break Timer is on, if it is;
 3. Game creates a secret code and a new game
 4. The system opens the game window showing the candles, Break Timer, and the tries left.
+
 Extensions:
+
 - If Break Timer is not active then the program does not let users access the game.
 - If Student clicks the quit button, program marks Game Condition as “QUIT” and student returns to the focus page
 - If Student clicks the instructions button, the program shows instructions in a pop up screen.
