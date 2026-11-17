@@ -72,7 +72,7 @@ public final class Substance {
    * @return true if it dissolves there
    */
   public boolean isSolubleIn(Phase p, double ph) {
-    if (isAcid() && p == Phase.AQUEOUS && ph > pka) {
+    if (isAcid() && p == Phase.AQUEOUS && ph > 7 && ph > pka) {
       return true;
     }
     return p == getPhase();
