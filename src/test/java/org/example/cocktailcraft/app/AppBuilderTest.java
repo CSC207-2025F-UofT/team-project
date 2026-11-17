@@ -1,5 +1,6 @@
 package org.example.cocktailcraft.app;
 
+import org.example.cocktailcraft.view.browse.MainPageView;
 import org.junit.jupiter.api.Test;
 
 import java.awt.Component;
@@ -7,70 +8,47 @@ import java.awt.Container;
 import java.awt.GraphicsEnvironment;
 import javax.swing.JButton;
 import javax.swing.JFrame;
-import javax.swing.JLabel;
 import javax.swing.SwingUtilities;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 class AppBuilderTest {
     @Test
-    void assemblesAllPreviewPagesAndWiresFeatureStatus() throws Exception {
+    void opensOnlyHomeWithInactiveFeatureControls() throws Exception {
         assumeFalse(GraphicsEnvironment.isHeadless(), "Requires a graphical environment");
         SwingUtilities.invokeAndWait(() -> {
             JFrame frame = new AppBuilder().build();
             try {
                 assertEquals("CocktailCraft", frame.getTitle());
-                assertEquals(6, frame.getContentPane().getComponentCount());
-                findButton(frame, "Search").doClick();
-                assertTrue(hasLabel(frame, "Not implemented: Search (Qinli)."));
-                findButton(frame, "Profile").doClick();
-                assertTrue(SwingUtilities.getAncestorOfClass(
-                        org.example.cocktailcraft.view.ProfileView.class,
-                        findButton(frame, "Login")).isVisible());
-                findButton(frame, "Login").doClick();
-                findButton(frame, "Login (scaffold)").doClick();
-                assertTrue(hasLabel(frame, "Not implemented: Login (Jiaqi)."));
-                findButton(frame, "Back to Profile").doClick();
-                findButton(frame, "Home").doClick();
-                findButton(frame, "Preview Details layout").doClick();
-                findButton(frame, "Favourite (scaffold)").doClick();
-                assertTrue(hasLabel(frame, "Not implemented: Favourite (Wenqian)."));
-                findButton(frame, "Preview Customize layout").doClick();
-                assertNotNull(findButton(frame, "Save (not implemented)"));
-                assertTrue(!findButton(frame, "Save (not implemented)").isEnabled());
+                assertTrue(frame.getContentPane() instanceof MainPageView);
+                for (String label : new String[] {"Base spirits", "Search", "Clear", "Profile"}) {
+                    JButton button = findButton(frame.getContentPane(), label);
+                    assertNotNull(button, label);
+                    assertFalse(button.isEnabled(), label);
+                    assertEquals(0, button.getActionListeners().length, label);
+                }
             } finally {
                 frame.dispose();
             }
         });
     }
 
-    private static JButton findButton(Container parent, String text) {
+    private static JButton findButton(Container parent, String label) {
         for (Component child : parent.getComponents()) {
-            if (child instanceof JButton && ((JButton) child).getText().equals(text)) {
+            if (child instanceof JButton && ((JButton) child).getText().equals(label)) {
                 return (JButton) child;
             }
             if (child instanceof Container) {
-                JButton found = findButton((Container) child, text);
+                JButton found = findButton((Container) child, label);
                 if (found != null) {
                     return found;
                 }
             }
         }
         return null;
-    }
-
-    private static boolean hasLabel(Container parent, String text) {
-        for (Component child : parent.getComponents()) {
-            if (child instanceof JLabel && ((JLabel) child).getText().equals(text)) {
-                return true;
-            }
-            if (child instanceof Container && hasLabel((Container) child, text)) {
-                return true;
-            }
-        }
-        return false;
     }
 }

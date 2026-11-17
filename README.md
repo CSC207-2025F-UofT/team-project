@@ -284,53 +284,39 @@ constitute runtime external API usage. User-data persistence is also outstanding
 
 ### UML Class Diagram
 
-Current shared navigation structure:
+Current startup structure (individual use case classes are empty):
 
 ```mermaid
 classDiagram
+    class Main
     class AppBuilder
-    class NavigationController
-    class ViewManagerModel
-    class ViewManagerModelListener {
-        <<interface>>
-        +viewChanged()
-    }
-    class ViewManager
-    AppBuilder ..> NavigationController : constructs
-    AppBuilder ..> ViewManagerModel : constructs
-    AppBuilder ..> ViewManager : constructs
-    NavigationController --> ViewManagerModel : updates
-    ViewManagerModel o-- ViewManagerModelListener : notifies
-    ViewManager ..|> ViewManagerModelListener
-    ViewManager --> ViewManagerModel : reads navigation state
+    class MainPageView
+    class SearchView
+    Main ..> AppBuilder : starts on Swing EDT
+    AppBuilder ..> MainPageView : constructs
+    AppBuilder ..> SearchView : constructs
+    MainPageView o-- SearchView : opening search controls
 ```
 
-Feature-specific Entity/Interactor/DAO diagrams must be added as the contracts
-and implementations are completed. See [architecture handoff](docs/ARCHITECTURE.md)
-for dependency direction and planned extension points.
+Feature-specific diagrams will be added by their owners as implementations grow.
+See [architecture handoff](docs/ARCHITECTURE.md) for the current package structure.
 
 ### Sequence Diagrams
 
-The currently wired skeleton path reports unfinished behaviour:
-
 ```mermaid
 sequenceDiagram
-    actor User
-    participant View
-    participant Controller
-    participant Interactor
-    participant Presenter
-    participant ViewModel
-    User->>View: Click feature button
-    View->>Controller: execute(input)
-    Controller->>Interactor: execute(InputData), through InputBoundary
-    Interactor->>Presenter: prepareFailView("Not implemented"), through OutputBoundary
-    Presenter->>ViewModel: Update State and notify listeners
-    ViewModel-->>View: stateChanged()
-    View-->>User: Display unfinished-feature message
+    participant Main
+    participant EDT as Swing EDT
+    participant AppBuilder
+    participant Window as JFrame
+    Main->>EDT: Schedule application startup
+    EDT->>AppBuilder: build()
+    AppBuilder->>Window: Create window with opening Home layout
+    AppBuilder-->>EDT: Return window
+    EDT->>Window: setVisible(true)
 ```
 
-Completed success and persistence sequences remain owner work.
+Search, Profile, Browse, and Customize sequences remain owner work.
 
 ---
 
@@ -346,14 +332,10 @@ Completed success and persistence sequences remain owner work.
 
 Run `org.example.cocktailcraft.app.Main`.
 
-Current preview routes:
-
-- Home → Profile → Login / Register.
-- Home → Preview Details → Preview Customize.
-
-These are layout previews. They do not authenticate a user or select a real
-recipe. Feature buttons report `Not implemented`; Save and base-spirit controls
-are disabled. Cards, images, and individual business rules are not implemented.
+The application opens Home with a title, name input, disabled Search/base-spirit/
+Clear controls, a disabled Profile button, and a catalog placeholder.
+No other pages or navigation are implemented. Feature owners will add their own
+Views and connect their use cases. The GUI does not load the dataset at startup.
 
 ### Verify dataset loading
 
@@ -385,7 +367,7 @@ mvn verify
 
 Both commands run the team Checkstyle configuration during `validate`.
 `mvn verify` also builds the JAR. IntelliJ Build Project alone does not necessarily
-run Maven tests or Checkstyle. GUI wiring tests are skipped in headless environments.
+run Maven tests or Checkstyle. The opening-window test is skipped in headless environments.
 
 Reports are in `target/checkstyle-result.xml` and `target/surefire-reports/`.
 `target/` is ignored by Git. The JAR is not a standalone executable bundle; Gson
@@ -407,159 +389,81 @@ remains a runtime dependency. Use IntelliJ for launching at this stage.
   files are added or removed. The separate Daiquiri example is not counted twice.
 - Existing Entity mapping covers ID, name, and ingredient name/amount/unit only;
   instructions/description are shared follow-up work.
-- Working infrastructure includes AppBuilder, CardLayout navigation, observable
-  ViewModels/States, eight unfinished CA flows, JUnit tests, and Checkstyle.
+- Implemented shared code includes Main/AppBuilder, the opening Home layout,
+  offline JSON reading, JUnit checks, and Checkstyle. The four feature groups
+  contain empty CA declarations; their Views and behaviour remain owner work.
 - The structure follows the [course CA Login Lab](https://github.com/CSC207-2026F-UofT/ca-login/blob/main/LAB_INSTRUCTIONS.md).
 - See [course checklist](docs/COURSE_REQUIREMENTS.md) for outstanding requirements.
 
-### 临时团队实施指引 — 仅用于当前分工，最终提交前删除
+### Temporary Team Guide — Remove Before Final Submission
 
-> **这是临时的 onboarding / handoff 模块，不属于最终项目介绍。**
-> 用来帮助没有参与前期讨论的组员找到自己的代码入口、了解职责和共享边界。
-> 完成任务交接后，最迟在最终提交前删除本模块；保留上面的正式 specification、
-> 运行说明和数据来源，并按最终实现更新它们。
->
-> **当前是 scaffold，不是已完成的 Use Case。** Interactor 只返回 `Not implemented`；
-> `OutputData`、`DataAccessInterface` 还是空的 TODO；Presenter 的 success mapping
-> 尚未实现。Profile preview 不代表已 Login，也没有真实个人数据。
+> This section is a temporary handoff guide. Remove it before final submission.
+> The four feature packages contain **empty class/interface declarations only**:
+> no fields, constructors, methods, business logic, or feature wiring.
+> Owners may change or remove these starting files as their use cases require.
 
-#### 1. 先看懂目录：每一层做什么
+#### Ownership
 
-下面的 Java Package 均位于 `src/main/java/org/example/cocktailcraft/`。
+All Java paths below are relative to `src/main/java/org/example/cocktailcraft/`.
+Each owner completes their feature's use case classes, adapters, Views, concrete
+data access implementation, and tests.
 
-| Folder / Package | 用途 | 代码应该放在哪里 |
+| Owner | Feature | Packages and Views |
 |---|---|---|
-| `app/` | 创建 object、注入 dependency、组装 application。`Main` 启动，`AppBuilder` 连接各层。 | 在 AppBuilder 接入自己的 Controller、Interactor、Presenter 和 DAO；不要在这里实现业务规则。 |
-| `entity/` | 各功能共用的核心数据与领域规则。 | 目前有 `Cocktail`、`RecipeIngredient`；constructor、field/type 的改动要先协调。 |
-| `use_case/<feature>/` | 某个 Use Case 的 input/output contract、业务规则及需要的 storage interface。 | 本人的 Input/Output Data、Boundaries、Interactor、DataAccessInterface。 |
-| `interface_adapter/<feature>/` | 连接 UI 和 Use Case，把 input 转为请求、把 output 转为显示状态。 | 本人的 Controller、Presenter、ViewModel、State。 |
-| `interface_adapter/` 根目录 | 共用的 observer 和 navigation infrastructure。 | `ViewModel`、`MessageState`、listener、`ViewManagerModel`、`NavigationController`；修改前协调。 |
-| `view/` | Swing layout、用户事件和显示更新。 | 本人的 View；调用 Controller，监听 ViewModel。不要直接调用 Reader、API 或具体 Interactor。 |
-| `data_access/` | 实现 Use Case 需要的 DAO interface，处理 JSON、file、HTTP 和外部数据 mapping。 | 每个人新增自己功能的具体 DAO/API adapter；共用现有 Reader，不要复制四份。 |
-| `src/main/resources/` | 随 application 打包的只读资源。 | 已有 dataset 和 index。用户运行时保存的数据应放在约定的 writable storage，不写回 bundled dataset。 |
-| `src/test/java/` | 可重复执行的 JUnit tests。 | 建立与自己 feature 对应的 tests；现有 scaffold tests 不代表个人 Use Case 已测试。 |
-| `config/checkstyle/`、`pom.xml` | 团队共同的 style rules、dependency 和 build configuration。 | 全员用同一套；改规则或 dependency 前通知团队。 |
+| Qinli | Search & Filter | `use_case/search/`, `interface_adapter/search/`, `view/search/`. `SearchView.java` currently contains only inactive controls for the opening Home layout. |
+| Enhao | Customize | `use_case/customize/`, `interface_adapter/customize/`, `view/customize/`. The View folder is empty, tracked with `.gitkeep`. |
+| Jiaqi | Profile and Account | `use_case/profile/`, `interface_adapter/profile/`, `view/profile/`. The View folder is empty, tracked with `.gitkeep`. |
+| Wenqian | Browse, Details, and Favourites | `use_case/browse/`, `interface_adapter/browse/`, `view/browse/`. `MainPageView.java` currently contains only the opening Home layout. Other Views are not created yet. |
 
-#### 2. 每个 feature 里有哪些 Class，要写什么
+Owners decide whether to split their feature into additional use cases. No
+Login, Details, Favourite, or Customize page has been implemented for them.
 
-`<Feature>` 代表实际前缀，例如 Search、Login、Customize。不是要求复制这些文字新建 Class。
+#### Starting files and their intended purpose
 
-| Class | 负责人需要完成什么 |
+`<Feature>` means Search, Customize, Profile, or Browse. Every feature has the
+same starting filenames. These declarations do not define final contracts.
+
+| Package | File | Intended purpose when implemented |
+|---|---|---|
+| `use_case/<feature>/` | `<Feature>InputBoundary.java` | Entry interface for the use case. |
+| `use_case/<feature>/` | `<Feature>InputData.java` | Data submitted to the use case. |
+| `use_case/<feature>/` | `<Feature>Interactor.java` | Validation and business rules. |
+| `use_case/<feature>/` | `<Feature>OutputBoundary.java` | Interface for reporting the outcome. |
+| `use_case/<feature>/` | `<Feature>OutputData.java` | Data returned by a successful use case. |
+| `use_case/<feature>/` | `<Feature>DataAccessInterface.java` | Storage operations required by the use case; implemented by a concrete DAO in `data_access/`. |
+| `interface_adapter/<feature>/` | `<Feature>Controller.java` | Converts View input into a use case request. |
+| `interface_adapter/<feature>/` | `<Feature>Presenter.java` | Converts use case output into display state. |
+| `interface_adapter/<feature>/` | `<Feature>ViewModel.java` | Exposes display state and update notifications. |
+| `interface_adapter/<feature>/` | `<Feature>State.java` | Holds fields displayed by the View. |
+
+#### Implemented shared files
+
+| File / location | What already works and what it is for |
 |---|---|
-| `<Feature>InputData` | 定义一次请求需要的数据；当前只有起始 field，按 Use Case 补全。Browse、Logout 无 input，因此当前没有这两个 InputData。 |
-| `<Feature>InputBoundary` | 定义 Controller 可以调用的 Use Case method；由 Interactor 实现。 |
-| `<Feature>Interactor` | 实现 validation 和业务流程，依赖 DAO interface 与 OutputBoundary；本人应主导这里的实现和 tests。 |
-| `<Feature>OutputData` | 定义成功后交给 Presenter 的数据；目前为空，需要本人设计。不要把 Swing component 放进来。 |
-| `<Feature>OutputBoundary` | 定义 Interactor 向外报告成功或失败的方式；由 Presenter 实现。 |
-| `<Feature>DataAccessInterface` | 定义该 Use Case 真正需要的读取/保存 method；目前为空，不是已经定好的 storage contract。 |
-| `<Feature>Controller` | 从 View 接收参数，创建 InputData，调用 InputBoundary；不要实现匹配、Login verification 等业务规则。 |
-| `<Feature>Presenter` | 把 OutputData 映射到 ViewModel/State，通知 listener；需要时请求 navigation。目前 success method 尚未实现。 |
-| `<Feature>ViewModel` / `<Feature>State` | 保存 View 要显示的状态，例如结果、错误、选中信息；本人补充具体 field。 |
-| 本人的 View 和具体 DAO | View 负责 Swing 交互；DAO 实现上面的 DataAccessInterface，处理真正的数据读取/保存/API。 |
+| `app/Main.java` | Starts the application on the Swing EDT. |
+| `app/AppBuilder.java` | Creates the JFrame and opening Home layout. Add completed feature wiring here later. |
+| `view/browse/MainPageView.java` | Displays the Home title, search area, inactive Profile button, and catalog placeholder. No catalog behaviour. |
+| `view/search/SearchView.java` | Displays name input and disabled search controls. No matching or event handling. |
+| `entity/Cocktail.java` | Stores ID, name, and ingredients. |
+| `entity/RecipeIngredient.java` | Stores ingredient name, amount (currently String), and unit. |
+| `data_access/CocktailJsonReader.java` | Reads one recipe or the indexed dataset into shared Entities; no searching, caching, or saving. |
+| `app/DataReadCheck.java` | Loads 663 recipes and prints Daiquiri as a smoke check. It is not Search. |
+| `src/main/resources/bar-assistant/` | Bundled JSON dataset, resource index, license, and source/version information. |
+| `src/test/java/` and `src/test/resources/` | Check Reader behaviour, basic dependency direction, and the opening window. Individual feature tests still need to be written. |
+| `pom.xml` and `config/checkstyle/checkstyle.xml` | Shared dependencies, Java 11 compilation, JUnit execution, and style checks. |
 
-#### 3. Qinli：Search
+#### Coordinate before changing shared code
 
-**已有入口，需要补全：**
+- **Entities and dataset access — everyone:** agree before changing Entity fields,
+  constructors, quantity types, or the Reader. Reuse the existing dataset; decide
+  together how completed features will access the loaded catalog.
+- **Home and result cards — Qinli and Wenqian:** coordinate changes to the opening
+  Home/search area, shared result display, and passing a cocktail ID to Details.
+- **Personal collections — Jiaqi, Enhao, and Wenqian:** agree on user identity and
+  Save/Load contracts. Jiaqi owns Profile composition, Enhao owns Custom Recipes,
+  and Wenqian owns Favourites.
+- **Application wiring and build — everyone:** coordinate AppBuilder, dependency,
+  and Checkstyle changes. Runtime API integration and user-data persistence are
+  not implemented. Each owner adds their own tests and submits reviewed PRs.
 
-- `use_case/search/`：全部 `Search*` Class，负责 criteria、validation、matching 和 result contract。
-- `interface_adapter/search/`：全部 `Search*` Class，负责 input 转换、result/error mapping 和显示状态。
-- `view/SearchView.java`：name input、base-spirit selection、Search/Clear 和相关提示。
-
-**需要新增或接入：**
-
-- `data_access/` 中满足 SearchDataAccessInterface 的 catalog adapter；和 Browse/Details 协调复用数据源。
-- Search Interactor、Presenter 和 adapter 的 tests；用 fake DAO 先验证业务规则。
-- 把 Search results 接入共享 Cards 区域，并复用 Wenqian 提供的 Details 入口。
-
-**完成标准：**按 name/base spirit 搜索；正确处理空 input、无结果；Clear 返回 catalog；
-结果能进入同一份 Details。先和 Wenqian 确认 Cards 的展示数据及 cocktail ID 传递方式。
-
-#### 4. Enhao：Customize 和 My Custom Cocktails
-
-**已有入口，需要补全：**
-
-- `use_case/customize/`：全部 `Customize*` Class。当前 InputData 只有 original cocktail ID，
-  还没有完整的 recipe edit/save input；本人按流程扩展，必要时拆出 Save/Edit Use Case。
-- `interface_adapter/customize/`：全部 `Customize*` Class，负责 form state 和 output mapping。
-- `view/CustomizeView.java`：recipe form、ingredient rows、amount/unit、Save、Cancel。
-
-**需要新增或接入：**
-
-- `data_access/` 中 Custom Recipe 的 Save/Load/Edit adapter 和对应 tests。
-- My Custom Cocktails 的 collection UI 和必要的 Use Case/adapters，供 Jiaqi 接入 Profile。
-- 与团队确认 Custom Recipe ID、owner、original recipe reference，以及 quantity type。
-
-**完成标准：**从原始 recipe 创建独立 variation；原始数据不变；能在个人 collection 查看和编辑；
-重启后仍能 Load。公共 Publish 不在 MVP。Account/Login 的实现由 Jiaqi 提供。
-
-#### 5. Jiaqi：Account、Session 和 Profile 组装
-
-**已有入口，需要补全：**
-
-- `use_case/signup/`、`login/`、`logout/`：各 Package 内全部 Class，负责 Account 业务流程。
-- `interface_adapter/signup/`、`login/`、`logout/`：对应 Controller、Presenter、ViewModel、State。
-- `view/SignupView.java`、`LoginView.java`、`ProfileView.java`：Account form、反馈、Profile 入口。
-
-**需要新增或接入：**
-
-- `data_access/` 中 Account DAO/API adapter、需要的 User/session representation 和 tests。
-- 调查课程 User API；确认 associated-JSON 的 Save/Load/Update documentation 后再决定可用范围。
-- 提供全员约定的 current-user identity/session contract，处理 Logout 后的个人状态清理。
-- 组装 Wenqian 的 Favourites 区域和 Enhao 的 My Custom Cocktails 区域。
-
-**完成标准：**Register/Login/Logout 跑通，Account 能持久化，Profile 显示正确用户，
-Logout 后不能继续显示前一位用户的数据。Favourite 和 Custom Recipe 的核心实现不归 Jiaqi。
-
-#### 6. Wenqian：Browse、Details、Favourite 和图片 API
-
-**已有入口，需要补全：**
-
-- `use_case/browse/`、`details/`、`favourite/`：全部对应 Class，负责 catalog、选中 recipe、收藏流程。
-- `interface_adapter/browse/`、`details/`、`favourite/`：对应 adapters、显示状态和 result mapping。
-- `view/MainPageView.java`：主导 catalog/Cards 区域，与 Qinli 的 Search component 协作。
-- `view/CocktailDetailsView.java`：真实 recipe 信息、image、Favourite 状态和 Customize 入口。
-
-**需要新增或接入：**
-
-- 共享的 Cocktail Card component：目前尚未创建，供 Home、Search results 和 Favourites 复用。
-- `data_access/` 中 image API adapter、Favourite persistence adapter，以及必要的 catalog adapter。
-- Favourites collection UI 和 add/remove/list 所需的 Use Case/adapters，供 Jiaqi 接入 Profile。
-- 对应的业务 tests、API mapping/error tests 和 Favourite Save/Load tests。
-
-**完成标准：**能浏览并打开 Details；图片无匹配或失败时仍可使用；当前用户能收藏/取消收藏；
-重启后收藏仍存在。当前 FavouriteInputData 只有 cocktail ID，add/remove/list 和 session input
-仍需本人完善。真实 Customize 由 Enhao 实现；Account 和 Profile composition 由 Jiaqi 实现。
-
-#### 7. 需要合作共享的内容：谁主导、谁接入
-
-| 共享内容 | 主导 / 协作方式 | 开始前要约定什么 |
-|---|---|---|
-| `entity/Cocktail.java`、`RecipeIngredient.java` | 全员确认，由一个小 PR 统一修改。 | ID、instructions/description、quantity type、units；不要各自改一套 constructor。 |
-| 新的 User/session contract | Jiaqi 主导，Wenqian/Enhao 使用。 | 怎样读取 current-user identity、guest 行为、Logout 后如何清理状态。 |
-| Custom Recipe representation | Enhao 主导，全员确认与原始 Cocktail 的关系。 | 独立 ID、owner、original recipe reference、可编辑范围。 |
-| Home/Search/Favourites 的 Cards | Wenqian 主导 component，Qinli 负责 Search results integration。 | 展示数据格式、点击 callback、cocktail ID；共用同一份 Details。 |
-| `MainPageView.java` | Wenqian 主导 catalog layout，Qinli 接入 Search。 | 哪个区域更新 results；避免两个 PR 同时重写整个 View。 |
-| `ProfileView.java` | Jiaqi 主导组装；Wenqian 提供 Favourites，Enhao 提供 My Custom Cocktails。 | collection component/入口、刷新时机、个人数据的清理。 |
-| `app/AppBuilder.java` | 每个人接入自己的 wiring，分小 PR review。 | constructor 和 Interface 的变化先通知其他人；不把业务规则放进 AppBuilder。 |
-| `ViewManager`、`ViewManagerModel`、`NavigationController`、基础 ViewModel/listeners | 共享 infrastructure，修改前协调。 | route name、selection context、登录前后的 navigation；preview route 不能当权限验证。 |
-| `CocktailJsonReader`、dataset 和 index | 全员复用；指定小 PR 修改。 | 谁在启动时 Load、怎样共享 catalog；当前 Main 不 Load，Reader 也不 cache。 |
-| Favourite/Custom Recipe storage | Wenqian/Enhao 各自负责业务，涉及 User API 时与 Jiaqi 共同确认。 | format、读写 method、ownership、更新是否覆盖另一份个人数据。 |
-| `pom.xml`、Checkstyle、shared tests | 全员共用，变更通过 PR。 | dependency 版本和 style rules 一致；每个人修自己的 violation。 |
-
-#### 8. 每个人从哪里开始，以及怎样交付
-
-1. 先阅读自己的 InputData、Interactor、Presenter 和 View，找到标有本人名字的 TODO。
-2. 与相关负责人确认 input/output、Entity、session、Cards 和 storage contract；这些 placeholder
-   不是最终 API，不要为了匹配空 Class 而牺牲真实 Use Case 需要。
-3. 先定义 narrow DataAccessInterface，使用 fake DAO 编写 Interactor Unit Tests，再实现具体 DAO。
-4. Presenter 更新 ViewModel/State，View 监听后刷新；真实 navigation 在完成流程后接入。
-5. HTTP/file 工作不能阻塞 Swing EDT；后台完成后回到 EDT 更新 UI/可观察状态。
-6. 在 AppBuilder 接入自己的 dependency，运行 `mvn verify`，并手动验证完整流程。
-7. 共享 scaffold 经 review 合并后，从更新的 `main` 建个人 branch，分别用 PR 提交自己的实现。
-   每人主导至少一个完整 Use Case；不要替其他人完成主要业务逻辑。
-
-**目前还缺什么：**个人算法、真实 Cards/Details、external API、Account/session、用户数据
-Save/Load、各自 Use Case tests。Checkstyle 和现有 scaffold tests 已提供基础，不能替代这些工作。
-当前页面按钮里的 `scaffold` / `Preview` 提示应在对应真实功能实现时移除。
-
-**临时模块结束 — 最终提交前删除本模块。**
+**End of temporary guide — remove before final submission.**
