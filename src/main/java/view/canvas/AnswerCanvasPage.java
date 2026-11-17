@@ -266,6 +266,7 @@ public class AnswerCanvasPage extends CanvasPage {
             session.clear();
         } else if (targetId >= 0) {
             capture = getSharedCanvas().captureForRecalculation(targetId);
+            registerLeftovers(capture);
         }
         boolean pick = targetPick;
         targetStroke = null;
@@ -278,6 +279,21 @@ public class AnswerCanvasPage extends CanvasPage {
             readAhead();
             recognize(capture, generation);
         }
+    }
+
+    // loose ink written before the edit, bind it + queue it instead of dropping it
+    private void registerLeftovers(FormulaCapture offered) {
+        Stroke last = null;
+        for (Stroke s : session) {
+            if (!getSharedCanvas().isBound(s)) {
+                last = s;
+            }
+        }
+        if (last != null) {
+            getSharedCanvas().registerNewInk(last, session);
+            queueRest(offered);
+        }
+        session.clear();
     }
 
     // other formulas of this round got bound too, only the last one gets the popup now

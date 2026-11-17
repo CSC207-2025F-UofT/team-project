@@ -720,6 +720,24 @@ class AnswerCanvasPageTest {
         assertNull(popup(), "a pick never swaps in some other formula");
     }
 
+    @Test
+    void looseInkBeforeAnEditStillGetsRegistered() throws Exception {
+        AtomicInteger calls = new AtomicInteger();
+        shared.setFormulaRecognizer(image -> {
+            calls.incrementAndGet();
+            return "1+1";
+        });
+        openPage();
+        write();
+        waitFor(() -> calls.get() == 1, "the first read");
+        onEdt(() -> {
+            stroke(500, 300, 530, 340);            // loose bit far off
+            stroke(205, 100, 205, 150);            // then a stroke on the formula
+        });
+        waitFor(() -> canvas.getStrokes().stream().allMatch(shared::isBound), "the loose bit registered too");
+        waitFor(() -> calls.get() >= 3, "both read");
+    }
+
     private void hover(int x, int y) throws Exception {
         onEdt(() -> canvas.dispatchEvent(new MouseEvent(canvas, MouseEvent.MOUSE_MOVED, 0, 0, x, y, 0, false)));
     }
