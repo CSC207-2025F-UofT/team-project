@@ -8,7 +8,7 @@ public class UserProfile {
     private String occupation = null;
     private String biography = null;
 
-    public UserProfile(String firstName, String lastName, int age, String gender, String occupation, 
+    private UserProfile(String firstName, String lastName, int age, String gender, String occupation, 
     String biography) {
         this.firstName = firstName;
         this.lastName = lastName;

@@ -4,7 +4,7 @@ public class Organization {
     private String name;
     private String logoURL = null;
 
-    public Organization(String name, String logoURL) {
+    private Organization(String name, String logoURL) {
         this.name = name;
         this.logoURL = logoURL;
     }
