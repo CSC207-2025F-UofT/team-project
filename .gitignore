@@ -36,3 +36,6 @@ build/
 
 ### Mac OS ###
 .DS_Store
+### App data (created when you run the app) ###
+users.csv
+trips.json
