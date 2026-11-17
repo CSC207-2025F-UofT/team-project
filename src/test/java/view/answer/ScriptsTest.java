@@ -128,4 +128,18 @@ class ScriptsTest {
         List<Stroke> five = List.of(stroke(237, 164, 223, 164, 222, 177, 236, 182, 230, 194, 221, 192));
         assertTrue(Scripts.stackedOn(body, five), "flat = beside says nothing about char size");
     }
+
+    // "x+1=" 40 tall, x + "+" only x-height
+    private static List<Stroke> xPlusOne(int dy) {
+        return List.of(
+                stroke(200, 216 + dy, 220, 240 + dy), stroke(220, 216 + dy, 200, 240 + dy),
+                stroke(224, 224 + dy, 244, 224 + dy), stroke(234, 214 + dy, 234, 234 + dy),
+                stroke(252, 208 + dy, 262, 200 + dy, 262, 240 + dy),
+                stroke(272, 222 + dy, 294, 222 + dy), stroke(272, 231 + dy, 294, 231 + dy));
+    }
+
+    @Test
+    void sameSizeLowercaseLineHalfACharDownIsNot() {
+        assertFalse(Scripts.stackedOn(xPlusOne(0), xPlusOne(60)), "its 1 is full size, not a limit");
+    }
 }

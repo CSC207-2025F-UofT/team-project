@@ -30,7 +30,7 @@ public final class Scripts {
         List<Stroke> beside = new ArrayList<>(body);
         beside.removeAll(over);
         double h = AnswerLayout.tallestStroke(AnswerLayout.hasChars(beside) ? beside : body);  // just "=" beside says nothing
-        if (AnswerLayout.charHeight(script) > SMALLER * h) {
+        if (AnswerLayout.tallestStroke(script) > SMALLER * h) {  // same measure both sides, lowercase can't sneak a line in
             return false;
         }
         double gap = Math.max(s.getMinY() - column.getMaxY(), column.getMinY() - s.getMaxY());
