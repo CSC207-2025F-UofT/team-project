@@ -13,3 +13,17 @@
 {"image": "notes_20261023_19.png", "latex": "|f_n(x)|<M_n\\text{ for all }x\\text{ in }A"}
 {"image": "notes_20261023_23.png", "latex": "=\\lim_{n\\rightarrow\\infty}f_n(x)-f_n(a)\\text{.}"}
 {"image": "notes_20261023_35.png", "latex": "77\\times5=385"}
+{"image": "formulas_20261116/formulas/IMG_2219_02.png", "latex": "z=0"}
+{"image": "formulas_20261116/formulas/IMG_2219_05.png", "latex": "\\sum_{n=0}^{\\infty}\\frac{z^n}{n!}-1=\\sum_{n=1}^{\\infty}\\frac{z^n}{n!}"}
+{"image": "formulas_20261116/formulas/IMG_2219_10.png", "latex": "\\sin(z)=0"}
+{"image": "formulas_20261116/formulas/IMG_2219_11.png", "latex": "z=\\pi k"}
+{"image": "formulas_20261116/formulas/IMG_2220_09.png", "latex": "\\sin(z)=0"}
+{"image": "formulas_20261116/formulas/IMG_2220_10.png", "latex": "z=\\pi k"}
+{"image": "formulas_20261116/formulas/IMG_2221_11.png", "latex": "\\sin(z)=0"}
+{"image": "formulas_20261116/formulas/IMG_2221_12.png", "latex": "z=2k\\pi"}
+{"image": "formulas_20261116/formulas/IMG_2223_04.png", "latex": "z=0"}
+{"image": "formulas_20261116/formulas/IMG_2223_05.png", "latex": "z=2k\\pi"}
+{"image": "formulas_20261116/formulas/IMG_2223_09.png", "latex": "z=0"}
+{"image": "formulas_20261116/formulas2/formula_02.png", "latex": "f'(x)"}
+{"image": "formulas_20261116/formulas2/formula_03.png", "latex": "f'(x)"}
+{"image": "formulas_20261116/formulas2/formula_04.png", "latex": "f'(x)"}

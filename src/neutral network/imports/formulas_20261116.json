@@ -1,0 +1,574 @@
+{
+  "seed": 20261116,
+  "before": {
+    "train": 397,
+    "val": 15
+  },
+  "added": {
+    "train": 56,
+    "val": 14
+  },
+  "duplicates": [],
+  "samples": [
+    {
+      "archive": "formulas.zip",
+      "name": "IMG_2219_01.png",
+      "latex": "\\frac{e^z-1}{z}",
+      "hash": "a09ab5c1f3ee4219ee36d24c503a39d8c98e7436467f3e8cd066303d82192f74",
+      "split": "train",
+      "image": "formulas_20261116/formulas/IMG_2219_01.png"
+    },
+    {
+      "archive": "formulas.zip",
+      "name": "IMG_2219_02.png",
+      "latex": "z=0",
+      "hash": "c493ba3878b4a77f087273234442b04ab76a454740fd9f237e932020ca177525",
+      "split": "val",
+      "image": "formulas_20261116/formulas/IMG_2219_02.png"
+    },
+    {
+      "archive": "formulas.zip",
+      "name": "IMG_2219_03.png",
+      "latex": "e^0-1=0",
+      "hash": "989dfa2879b2b8394ddc1b9492a19c251508008d68a1087d7ff9ed00a6d68ea5",
+      "split": "train",
+      "image": "formulas_20261116/formulas/IMG_2219_03.png"
+    },
+    {
+      "archive": "formulas.zip",
+      "name": "IMG_2219_04.png",
+      "latex": "\\sum_{n=0}^{\\infty}\\frac{z^n}{n!}",
+      "hash": "56276898ecac12dd532e5f672021a11ee7e284c135f7a8b01c3efd92b8ca590d",
+      "split": "train",
+      "image": "formulas_20261116/formulas/IMG_2219_04.png"
+    },
+    {
+      "archive": "formulas.zip",
+      "name": "IMG_2219_05.png",
+      "latex": "\\sum_{n=0}^{\\infty}\\frac{z^n}{n!}-1=\\sum_{n=1}^{\\infty}\\frac{z^n}{n!}",
+      "hash": "3417edbc8db99fa5e9e22182ae039553e68e13586dbf10b0bd64b7636f9ff880",
+      "split": "val",
+      "image": "formulas_20261116/formulas/IMG_2219_05.png"
+    },
+    {
+      "archive": "formulas.zip",
+      "name": "IMG_2219_06.png",
+      "latex": "\\frac{\\sum_{n=1}^{\\infty}\\frac{z^n}{n!}}{z}=\\sum_{n=2}^{\\infty}\\frac{z^n}{n!}",
+      "hash": "5a449bc3a9dec7524d9011332d14110af411a8fc71d1fb43cec6735e02be265e",
+      "split": "train",
+      "image": "formulas_20261116/formulas/IMG_2219_06.png"
+    },
+    {
+      "archive": "formulas.zip",
+      "name": "IMG_2219_07.png",
+      "latex": "\\lim_{n\\to0}\\frac{z^n}{n!}=1",
+      "hash": "f75a94c433645ad1c5d95e26379494f866f820d996d3faf4aca7fa41f327d0cf",
+      "split": "train",
+      "image": "formulas_20261116/formulas/IMG_2219_07.png"
+    },
+    {
+      "archive": "formulas.zip",
+      "name": "IMG_2219_08.png",
+      "latex": "z=0\\text{ removable }f(0)=1",
+      "hash": "44661653f96830bb0d8d99697125b2df6809b69787defa5b82dd7b6c6aea4e8c",
+      "split": "train",
+      "image": "formulas_20261116/formulas/IMG_2219_08.png"
+    },
+    {
+      "archive": "formulas.zip",
+      "name": "IMG_2219_09.png",
+      "latex": "\\frac{z^2}{\\sin(z)}",
+      "hash": "13a1ae93d541b980c2e540ea9bd52d4a58693ee53d8d9951d7e4bec735873a99",
+      "split": "train",
+      "image": "formulas_20261116/formulas/IMG_2219_09.png"
+    },
+    {
+      "archive": "formulas.zip",
+      "name": "IMG_2219_10.png",
+      "latex": "\\sin(z)=0",
+      "hash": "89e5eb768ca1b0094bcdfa98f69f4ce724055b83458288b0f80fa9ea2d47f63e",
+      "split": "val",
+      "image": "formulas_20261116/formulas/IMG_2219_10.png"
+    },
+    {
+      "archive": "formulas.zip",
+      "name": "IMG_2219_11.png",
+      "latex": "z=\\pi k",
+      "hash": "b31804cf496357b719cd6b1e437d91d90b86931af781273b0f10df522e7e8291",
+      "split": "val",
+      "image": "formulas_20261116/formulas/IMG_2219_11.png"
+    },
+    {
+      "archive": "formulas.zip",
+      "name": "IMG_2219_12.png",
+      "latex": "\\pi k^2\\neq0",
+      "hash": "ba3e3b59204bc05b993026367aa0e8498fdc9552296d1488acc1fe3cde28b4e5",
+      "split": "train",
+      "image": "formulas_20261116/formulas/IMG_2219_12.png"
+    },
+    {
+      "archive": "formulas.zip",
+      "name": "IMG_2219_13.png",
+      "latex": "z=\\pi k\\text{ simple pole (order 1)}",
+      "hash": "45f3dc0b047eff2c4eb74575ec08ad692e02b1335d2a0bc9865cc987b922b808",
+      "split": "train",
+      "image": "formulas_20261116/formulas/IMG_2219_13.png"
+    },
+    {
+      "archive": "formulas.zip",
+      "name": "IMG_2219_14.png",
+      "latex": "0^2=0",
+      "hash": "1390f42bddfcc0cd03580b28b3b599250b2ee526ffa5d3876d710ca146f78f75",
+      "split": "train",
+      "image": "formulas_20261116/formulas/IMG_2219_14.png"
+    },
+    {
+      "archive": "formulas.zip",
+      "name": "IMG_2219_15.png",
+      "latex": "z=0\\text{ removable}",
+      "hash": "583256ddd291a58b6701a74f6481e9f2cfeb3b41f6e46984d7b0e2459d42a64d",
+      "split": "train",
+      "image": "formulas_20261116/formulas/IMG_2219_15.png"
+    },
+    {
+      "archive": "formulas.zip",
+      "name": "IMG_2220_01.png",
+      "latex": "\\frac{z^4-2z^2+1}{(z-1)^2}",
+      "hash": "45b9f52ba986722bd1d30c8948ca8e5492bcb01a1076ce91097884b074f75b8a",
+      "split": "train",
+      "image": "formulas_20261116/formulas/IMG_2220_01.png"
+    },
+    {
+      "archive": "formulas.zip",
+      "name": "IMG_2220_02.png",
+      "latex": "(z-1)^2=0",
+      "hash": "6e0bd5b2a7b3c5b29883f277f8cb1c5b5f437c49eedd5305ab89c802a65d0e18",
+      "split": "train",
+      "image": "formulas_20261116/formulas/IMG_2220_02.png"
+    },
+    {
+      "archive": "formulas.zip",
+      "name": "IMG_2220_03.png",
+      "latex": "z=1",
+      "hash": "3fb25615296b0b946fca25a8ca423de9102b50ad54b67ea6e6abf8b13fcca522",
+      "split": "train",
+      "image": "formulas_20261116/formulas/IMG_2220_03.png"
+    },
+    {
+      "archive": "formulas.zip",
+      "name": "IMG_2220_04.png",
+      "latex": "1-2+1=0",
+      "hash": "7a7f1263e5906bcb653cb904249283e38a53e1316be899df831f20a64a3fcee7",
+      "split": "train",
+      "image": "formulas_20261116/formulas/IMG_2220_04.png"
+    },
+    {
+      "archive": "formulas.zip",
+      "name": "IMG_2220_05.png",
+      "latex": "(z^2-1)(z^2-1)",
+      "hash": "26159a2416ce48e15eb8efb6f15ab8d9311f528eb54ea0f03518fe32c1b7ca4a",
+      "split": "train",
+      "image": "formulas_20261116/formulas/IMG_2220_05.png"
+    },
+    {
+      "archive": "formulas.zip",
+      "name": "IMG_2220_06.png",
+      "latex": "\\frac{(z-1)(z+1)(z-1)(z+1)}{(z-1)^2}=(z+1)^2=2^2=4",
+      "hash": "e11013a018b76373b2ff0221a46eae8101511da30587c705eddbaccde2e11024",
+      "split": "train",
+      "image": "formulas_20261116/formulas/IMG_2220_06.png"
+    },
+    {
+      "archive": "formulas.zip",
+      "name": "IMG_2220_07.png",
+      "latex": "z=1\\text{ removable }f(1)=4",
+      "hash": "53db45db304645f508ae295edf60f3da224770aee9f4999429cee35fd4f561d7",
+      "split": "train",
+      "image": "formulas_20261116/formulas/IMG_2220_07.png"
+    },
+    {
+      "archive": "formulas.zip",
+      "name": "IMG_2220_08.png",
+      "latex": "\\frac{\\pi\\cdot\\cos(z)}{\\sin(z)}",
+      "hash": "b35b34d7faecece4f3c50ba850abb60ec432fb99e119647e64ef80afb90c5b34",
+      "split": "train",
+      "image": "formulas_20261116/formulas/IMG_2220_08.png"
+    },
+    {
+      "archive": "formulas.zip",
+      "name": "IMG_2220_09.png",
+      "latex": "\\sin(z)=0",
+      "hash": "1d5e6ca5fa205b0e1e49b3a22a085e8369f9498dcd99f9d5acc5d50ff13d7610",
+      "split": "val",
+      "image": "formulas_20261116/formulas/IMG_2220_09.png"
+    },
+    {
+      "archive": "formulas.zip",
+      "name": "IMG_2220_10.png",
+      "latex": "z=\\pi k",
+      "hash": "6474e340eb4c80f5afddd5fa298b10633abeca8010a6a5f4100affcbe37c8019",
+      "split": "val",
+      "image": "formulas_20261116/formulas/IMG_2220_10.png"
+    },
+    {
+      "archive": "formulas.zip",
+      "name": "IMG_2220_11.png",
+      "latex": "\\pi\\cdot\\cos(\\pi k)=-\\pi\\neq0",
+      "hash": "0ceb8b2e88e8e1e5153a19b6493296d78de2e8f6dc333086d0c6cfc85c1a770c",
+      "split": "train",
+      "image": "formulas_20261116/formulas/IMG_2220_11.png"
+    },
+    {
+      "archive": "formulas.zip",
+      "name": "IMG_2220_12.png",
+      "latex": "z=\\pi k\\text{ simple pole (order 1)}",
+      "hash": "0a98ccc20ec4f1289f84e2e2f0a8e9c7731600be5d1c83f5f415eed084d6061c",
+      "split": "train",
+      "image": "formulas_20261116/formulas/IMG_2220_12.png"
+    },
+    {
+      "archive": "formulas.zip",
+      "name": "IMG_2221_01.png",
+      "latex": "\\frac{2z+1}{z+2}",
+      "hash": "499a7e024a76d39311b5217d26c492c7e3e80eae4a271df209040070337a01fd",
+      "split": "train",
+      "image": "formulas_20261116/formulas/IMG_2221_01.png"
+    },
+    {
+      "archive": "formulas.zip",
+      "name": "IMG_2221_02.png",
+      "latex": "z=-2",
+      "hash": "0c636ddbd1add55e26f26a485900baf13d4afee674ae7675abd15151f43b5487",
+      "split": "train",
+      "image": "formulas_20261116/formulas/IMG_2221_02.png"
+    },
+    {
+      "archive": "formulas.zip",
+      "name": "IMG_2221_03.png",
+      "latex": "2(-2)+1=-4",
+      "hash": "5fcf7271d260bf6c908612067f61a99935a97d253debd3a1ea73fb2d561e687b",
+      "split": "train",
+      "image": "formulas_20261116/formulas/IMG_2221_03.png"
+    },
+    {
+      "archive": "formulas.zip",
+      "name": "IMG_2221_04.png",
+      "latex": "z=-2\\text{ simple pole (order 1)}",
+      "hash": "5ec15f368bd93af14351ebdf5410b3913b9bc0b61ed3f113c9e7dc33979db3a1",
+      "split": "train",
+      "image": "formulas_20261116/formulas/IMG_2221_04.png"
+    },
+    {
+      "archive": "formulas.zip",
+      "name": "IMG_2221_05.png",
+      "latex": "\\frac{e^z-1}{e^{2z}-1}",
+      "hash": "46759eca0d21be0c5902d493c350ae51c4c33d75f7a443c9265d45e74f89ea37",
+      "split": "train",
+      "image": "formulas_20261116/formulas/IMG_2221_05.png"
+    },
+    {
+      "archive": "formulas.zip",
+      "name": "IMG_2221_06.png",
+      "latex": "e^{2z}=1",
+      "hash": "f90062ab1830db6e49212e74160a7d851807c67188f89a520b9e88ab8564cc18",
+      "split": "train",
+      "image": "formulas_20261116/formulas/IMG_2221_06.png"
+    },
+    {
+      "archive": "formulas.zip",
+      "name": "IMG_2221_07.png",
+      "latex": "2z=2\\pi ki",
+      "hash": "719216acd3ac725d051e438da3c35e294796b7ca2e8cd1ff17e5bb722a45d6ac",
+      "split": "train",
+      "image": "formulas_20261116/formulas/IMG_2221_07.png"
+    },
+    {
+      "archive": "formulas.zip",
+      "name": "IMG_2221_08.png",
+      "latex": "z=\\pi ki",
+      "hash": "8c771af0436785b53386db3805f32b479a8ba7f8d1d023d3df02694c1981c798",
+      "split": "train",
+      "image": "formulas_20261116/formulas/IMG_2221_08.png"
+    },
+    {
+      "archive": "formulas.zip",
+      "name": "IMG_2221_09.png",
+      "latex": "e^{\\pi ki}-1=\\cos(\\pi k)+i\\sin(\\pi k)-1",
+      "hash": "ad1faa00b7e47ba4f13f88e1f19d82afa70c241e208abf55cbb432f75b3c925c",
+      "split": "train",
+      "image": "formulas_20261116/formulas/IMG_2221_09.png"
+    },
+    {
+      "archive": "formulas.zip",
+      "name": "IMG_2221_10.png",
+      "latex": "\\frac{\\sin(z)}{z}",
+      "hash": "1039cb927543fa7c2393dec7eff30a2990fcdbafc32d57706cf58d7e0b4b8d01",
+      "split": "train",
+      "image": "formulas_20261116/formulas/IMG_2221_10.png"
+    },
+    {
+      "archive": "formulas.zip",
+      "name": "IMG_2221_11.png",
+      "latex": "\\sin(z)=0",
+      "hash": "b052b6041e057d3d96d340b0c09b60d88f11c71b5047fbba7898546fdcdfb971",
+      "split": "val",
+      "image": "formulas_20261116/formulas/IMG_2221_11.png"
+    },
+    {
+      "archive": "formulas.zip",
+      "name": "IMG_2221_12.png",
+      "latex": "z=2k\\pi",
+      "hash": "cfa24c386dd589fb2c48b281805f4a1f826353d0a7b2733d6a067d3ea5238e8a",
+      "split": "val",
+      "image": "formulas_20261116/formulas/IMG_2221_12.png"
+    },
+    {
+      "archive": "formulas.zip",
+      "name": "IMG_2221_13.png",
+      "latex": "\\frac{\\cos(z)z-\\sin(z)}{z^2}",
+      "hash": "1f479d8963022d9ec78d4f987c3975966119713410bbd15a6678779176a43a78",
+      "split": "train",
+      "image": "formulas_20261116/formulas/IMG_2221_13.png"
+    },
+    {
+      "archive": "formulas.zip",
+      "name": "IMG_2222_01.png",
+      "latex": "\\frac{\\cos(2k\\pi)(2k\\pi)-\\sin(2k\\pi)}{(2k\\pi)^2}\\neq0",
+      "hash": "339e4e0cc5b1364c73924139fc8a01baaadc28c24cf4bf1969fe16e1fe7e3929",
+      "split": "train",
+      "image": "formulas_20261116/formulas/IMG_2222_01.png"
+    },
+    {
+      "archive": "formulas.zip",
+      "name": "IMG_2222_02.png",
+      "latex": "z=2k\\pi\\text{ order 1 }(k\\neq0)",
+      "hash": "60901a95f1335fc1d0be3a1a6dbf196cd642e65faef268cb47c6745f451fa882",
+      "split": "train",
+      "image": "formulas_20261116/formulas/IMG_2222_02.png"
+    },
+    {
+      "archive": "formulas.zip",
+      "name": "IMG_2222_03.png",
+      "latex": "(e^z-1)^2=0",
+      "hash": "223ffe409e7a5be1c42d9141584ec19e6a53bf1cca2e8a27b16022f22b2f57d3",
+      "split": "train",
+      "image": "formulas_20261116/formulas/IMG_2222_03.png"
+    },
+    {
+      "archive": "formulas.zip",
+      "name": "IMG_2222_04.png",
+      "latex": "e^z=1",
+      "hash": "c27c143ac403a68029411ef3eb61de2d87ea080c860bdb1c402be13420affbd0",
+      "split": "train",
+      "image": "formulas_20261116/formulas/IMG_2222_04.png"
+    },
+    {
+      "archive": "formulas.zip",
+      "name": "IMG_2222_05.png",
+      "latex": "z=2\\pi ki",
+      "hash": "06d170198819bec30dd52231994aba4f859ac8288bc859994900f6356b67b77e",
+      "split": "train",
+      "image": "formulas_20261116/formulas/IMG_2222_05.png"
+    },
+    {
+      "archive": "formulas.zip",
+      "name": "IMG_2222_06.png",
+      "latex": "e^z e^{2\\pi ki}\\neq0",
+      "hash": "899f3b572db77f05169e4f3f1cd7f116b768e977fb773ab154cfab9fdfd640ed",
+      "split": "train",
+      "image": "formulas_20261116/formulas/IMG_2222_06.png"
+    },
+    {
+      "archive": "formulas.zip",
+      "name": "IMG_2222_07.png",
+      "latex": "z=2\\pi ki\\text{ order 2}",
+      "hash": "51c0821584372820492139396eec3fa4cdcc121edea7cfae95493f798c53bea9",
+      "split": "train",
+      "image": "formulas_20261116/formulas/IMG_2222_07.png"
+    },
+    {
+      "archive": "formulas.zip",
+      "name": "IMG_2222_08.png",
+      "latex": "(z^2+z-2)^3",
+      "hash": "d8e69c3da805d7f73b0eb178a98beb6f753f4e2810379b5f68f115774dd6ea81",
+      "split": "train",
+      "image": "formulas_20261116/formulas/IMG_2222_08.png"
+    },
+    {
+      "archive": "formulas.zip",
+      "name": "IMG_2222_09.png",
+      "latex": "(z+2)^3(z-1)^3",
+      "hash": "b41fb89a7ee67539af56553825d2c6da7b5c3606c50d57e7cd78a854a4c915e0",
+      "split": "train",
+      "image": "formulas_20261116/formulas/IMG_2222_09.png"
+    },
+    {
+      "archive": "formulas.zip",
+      "name": "IMG_2222_10.png",
+      "latex": "z=-2,1\\text{ order 3}",
+      "hash": "92e6893c3e8be7c84f1541264293ac3addfd1826823b702e83e8cffb6b5f5b45",
+      "split": "train",
+      "image": "formulas_20261116/formulas/IMG_2222_10.png"
+    },
+    {
+      "archive": "formulas.zip",
+      "name": "IMG_2223_01.png",
+      "latex": "((z-2)^2)^3",
+      "hash": "ce058c9ba31fc8e6f98fb6784d1127b9a6fb1bd3feac3ed01c4702056fdfac17",
+      "split": "train",
+      "image": "formulas_20261116/formulas/IMG_2223_01.png"
+    },
+    {
+      "archive": "formulas.zip",
+      "name": "IMG_2223_02.png",
+      "latex": "z=2\\text{ order 6}",
+      "hash": "a3a0704f7916b94b200010c7383d815f705715467629b8b0ac2895b2f29cabe0",
+      "split": "train",
+      "image": "formulas_20261116/formulas/IMG_2223_02.png"
+    },
+    {
+      "archive": "formulas.zip",
+      "name": "IMG_2223_03.png",
+      "latex": "z^2(1-\\cos(z))",
+      "hash": "89a9b30d885cffa79b4e6829d23e3197175f9175f8c562e33b529622691ba183",
+      "split": "train",
+      "image": "formulas_20261116/formulas/IMG_2223_03.png"
+    },
+    {
+      "archive": "formulas.zip",
+      "name": "IMG_2223_04.png",
+      "latex": "z=0",
+      "hash": "e0cf8e5ad2696a63a7d403a06017a4fcc92665e44c14e47fabc699b1a684c20d",
+      "split": "val",
+      "image": "formulas_20261116/formulas/IMG_2223_04.png"
+    },
+    {
+      "archive": "formulas.zip",
+      "name": "IMG_2223_05.png",
+      "latex": "z=2k\\pi",
+      "hash": "18025ab029c9e5610e3639f940c73790351161e543d0d72008a9e99bee6e24b6",
+      "split": "val",
+      "image": "formulas_20261116/formulas/IMG_2223_05.png"
+    },
+    {
+      "archive": "formulas.zip",
+      "name": "IMG_2223_06.png",
+      "latex": "2z",
+      "hash": "bdd3e2accf65c6c8956a5fb43b234e87e71d454c73783c80cf9de0b3d3ccdb44",
+      "split": "train",
+      "image": "formulas_20261116/formulas/IMG_2223_06.png"
+    },
+    {
+      "archive": "formulas.zip",
+      "name": "IMG_2223_07.png",
+      "latex": "\\log(1-z)=0",
+      "hash": "d759b41a544d451bf6882086cfa35c938847f3d08a58d3419a5d9472dab70a63",
+      "split": "train",
+      "image": "formulas_20261116/formulas/IMG_2223_07.png"
+    },
+    {
+      "archive": "formulas.zip",
+      "name": "IMG_2223_08.png",
+      "latex": "\\frac{-1}{1-z}",
+      "hash": "96ce8fb46e2a0b280c0db8db97df1dfcd5043eb71327cb42aa136bdb41e183f1",
+      "split": "train",
+      "image": "formulas_20261116/formulas/IMG_2223_08.png"
+    },
+    {
+      "archive": "formulas.zip",
+      "name": "IMG_2223_09.png",
+      "latex": "z=0",
+      "hash": "e58ce928dc85321c5dd198d169cd6ab121a4194b8747216271b4020908ce6a0a",
+      "split": "val",
+      "image": "formulas_20261116/formulas/IMG_2223_09.png"
+    },
+    {
+      "archive": "formulas.zip",
+      "name": "IMG_2223_10.png",
+      "latex": "\\frac{-1}{1}=1\\neq0",
+      "hash": "655e61bbaa5d420d8719da16ed51c6b00928f4d3f6fcda8e24c722a7c2281888",
+      "split": "train",
+      "image": "formulas_20261116/formulas/IMG_2223_10.png"
+    },
+    {
+      "archive": "formulas.zip",
+      "name": "IMG_2223_11.png",
+      "latex": "z=0\\text{ order 1}",
+      "hash": "af9d193364c4eed2e5f91e1645e67ab9c349bbd88fd5bd1bfa0ea98b00f97776",
+      "split": "train",
+      "image": "formulas_20261116/formulas/IMG_2223_11.png"
+    },
+    {
+      "archive": "formulas2.zip",
+      "name": "formula_01.png",
+      "latex": "f(x)=\\sqrt{x}+x^2+\\frac{x}{2}\\times x^{\\frac{1}{2}}\\div3",
+      "hash": "c052695a4b88bda2a44a999b24fc1ab20823ee7f1b9fcb2d6d0118bfb5a34b64",
+      "split": "train",
+      "image": "formulas_20261116/formulas2/formula_01.png"
+    },
+    {
+      "archive": "formulas2.zip",
+      "name": "formula_02.png",
+      "latex": "f'(x)",
+      "hash": "5f9cff4412d087a7b800a5be075f9ebba134b54d039fac7ef45ce4369413fb42",
+      "split": "val",
+      "image": "formulas_20261116/formulas2/formula_02.png"
+    },
+    {
+      "archive": "formulas2.zip",
+      "name": "formula_03.png",
+      "latex": "f'(x)",
+      "hash": "625a7b8f91a45f31ac32dc7d554ad8eae12d126ff11aaa27c49547bac0d9a347",
+      "split": "val",
+      "image": "formulas_20261116/formulas2/formula_03.png"
+    },
+    {
+      "archive": "formulas2.zip",
+      "name": "formula_04.png",
+      "latex": "f'(x)",
+      "hash": "1bcfcbc8bd9857bb868fa0f4f114c268fac53fba0d5340cfac8d08caaa1ae6cc",
+      "split": "val",
+      "image": "formulas_20261116/formulas2/formula_04.png"
+    },
+    {
+      "archive": "formulas2.zip",
+      "name": "formula_05.png",
+      "latex": "f(2)",
+      "hash": "db0836344a929cbc6af9d65ad569202c0456cbbd60bfdade5ab9744c37f134bc",
+      "split": "train",
+      "image": "formulas_20261116/formulas2/formula_05.png"
+    },
+    {
+      "archive": "formulas2.zip",
+      "name": "formula_06.png",
+      "latex": "f(5)",
+      "hash": "b7bf2a0fe2ae6f766cc7effc554043f709e98b6a260ae31d8f620ba16a4fd75a",
+      "split": "train",
+      "image": "formulas_20261116/formulas2/formula_06.png"
+    },
+    {
+      "archive": "formulas2.zip",
+      "name": "formula_07.png",
+      "latex": "f(\\sin(2x))",
+      "hash": "71d43fd22abe1dea851c3a3583b87af2dd32854e06e59fa31e28224ec321da05",
+      "split": "train",
+      "image": "formulas_20261116/formulas2/formula_07.png"
+    },
+    {
+      "archive": "formulas2.zip",
+      "name": "formula_08.png",
+      "latex": "f(\\arcsin(9\\frac{x}{\\pi}))",
+      "hash": "bededf67ff49b5287a470ee8d8db0b5b31058b5f3f5a014a07c432fcc794037d",
+      "split": "train",
+      "image": "formulas_20261116/formulas2/formula_08.png"
+    },
+    {
+      "archive": "formulas2.zip",
+      "name": "formula_09.png",
+      "latex": "f'(\\sinh(\\frac{x}{\\pi}))",
+      "hash": "4563ecef09ea99298d1f7db9502caeaa25d6951cde3acaf1dcf4545e178d2046",
+      "split": "train",
+      "image": "formulas_20261116/formulas2/formula_09.png"
+    }
+  ]
+}

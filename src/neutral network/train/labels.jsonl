@@ -395,3 +395,59 @@
 {"image": "formulas_20261112/IMG_2206_03.png", "latex": "4-4i-4i+4+4i\\pi+2\\pi i", "source": "PersonalFormulas20261112"}
 {"image": "formulas_20261112/IMG_2206_04.png", "latex": "-8i+8+6\\pi i", "source": "PersonalFormulas20261112"}
 {"image": "formulas_20261112/13_sqrt7.png", "latex": "\\sqrt{7}", "source": "PersonalFormulas20261112"}
+{"image": "formulas_20261116/formulas/IMG_2219_01.png", "latex": "\\frac{e^z-1}{z}"}
+{"image": "formulas_20261116/formulas/IMG_2219_03.png", "latex": "e^0-1=0"}
+{"image": "formulas_20261116/formulas/IMG_2219_04.png", "latex": "\\sum_{n=0}^{\\infty}\\frac{z^n}{n!}"}
+{"image": "formulas_20261116/formulas/IMG_2219_06.png", "latex": "\\frac{\\sum_{n=1}^{\\infty}\\frac{z^n}{n!}}{z}=\\sum_{n=2}^{\\infty}\\frac{z^n}{n!}"}
+{"image": "formulas_20261116/formulas/IMG_2219_07.png", "latex": "\\lim_{n\\to0}\\frac{z^n}{n!}=1"}
+{"image": "formulas_20261116/formulas/IMG_2219_08.png", "latex": "z=0\\text{ removable }f(0)=1"}
+{"image": "formulas_20261116/formulas/IMG_2219_09.png", "latex": "\\frac{z^2}{\\sin(z)}"}
+{"image": "formulas_20261116/formulas/IMG_2219_12.png", "latex": "\\pi k^2\\neq0"}
+{"image": "formulas_20261116/formulas/IMG_2219_13.png", "latex": "z=\\pi k\\text{ simple pole (order 1)}"}
+{"image": "formulas_20261116/formulas/IMG_2219_14.png", "latex": "0^2=0"}
+{"image": "formulas_20261116/formulas/IMG_2219_15.png", "latex": "z=0\\text{ removable}"}
+{"image": "formulas_20261116/formulas/IMG_2220_01.png", "latex": "\\frac{z^4-2z^2+1}{(z-1)^2}"}
+{"image": "formulas_20261116/formulas/IMG_2220_02.png", "latex": "(z-1)^2=0"}
+{"image": "formulas_20261116/formulas/IMG_2220_03.png", "latex": "z=1"}
+{"image": "formulas_20261116/formulas/IMG_2220_04.png", "latex": "1-2+1=0"}
+{"image": "formulas_20261116/formulas/IMG_2220_05.png", "latex": "(z^2-1)(z^2-1)"}
+{"image": "formulas_20261116/formulas/IMG_2220_06.png", "latex": "\\frac{(z-1)(z+1)(z-1)(z+1)}{(z-1)^2}=(z+1)^2=2^2=4"}
+{"image": "formulas_20261116/formulas/IMG_2220_07.png", "latex": "z=1\\text{ removable }f(1)=4"}
+{"image": "formulas_20261116/formulas/IMG_2220_08.png", "latex": "\\frac{\\pi\\cdot\\cos(z)}{\\sin(z)}"}
+{"image": "formulas_20261116/formulas/IMG_2220_11.png", "latex": "\\pi\\cdot\\cos(\\pi k)=-\\pi\\neq0"}
+{"image": "formulas_20261116/formulas/IMG_2220_12.png", "latex": "z=\\pi k\\text{ simple pole (order 1)}"}
+{"image": "formulas_20261116/formulas/IMG_2221_01.png", "latex": "\\frac{2z+1}{z+2}"}
+{"image": "formulas_20261116/formulas/IMG_2221_02.png", "latex": "z=-2"}
+{"image": "formulas_20261116/formulas/IMG_2221_03.png", "latex": "2(-2)+1=-4"}
+{"image": "formulas_20261116/formulas/IMG_2221_04.png", "latex": "z=-2\\text{ simple pole (order 1)}"}
+{"image": "formulas_20261116/formulas/IMG_2221_05.png", "latex": "\\frac{e^z-1}{e^{2z}-1}"}
+{"image": "formulas_20261116/formulas/IMG_2221_06.png", "latex": "e^{2z}=1"}
+{"image": "formulas_20261116/formulas/IMG_2221_07.png", "latex": "2z=2\\pi ki"}
+{"image": "formulas_20261116/formulas/IMG_2221_08.png", "latex": "z=\\pi ki"}
+{"image": "formulas_20261116/formulas/IMG_2221_09.png", "latex": "e^{\\pi ki}-1=\\cos(\\pi k)+i\\sin(\\pi k)-1"}
+{"image": "formulas_20261116/formulas/IMG_2221_10.png", "latex": "\\frac{\\sin(z)}{z}"}
+{"image": "formulas_20261116/formulas/IMG_2221_13.png", "latex": "\\frac{\\cos(z)z-\\sin(z)}{z^2}"}
+{"image": "formulas_20261116/formulas/IMG_2222_01.png", "latex": "\\frac{\\cos(2k\\pi)(2k\\pi)-\\sin(2k\\pi)}{(2k\\pi)^2}\\neq0"}
+{"image": "formulas_20261116/formulas/IMG_2222_02.png", "latex": "z=2k\\pi\\text{ order 1 }(k\\neq0)"}
+{"image": "formulas_20261116/formulas/IMG_2222_03.png", "latex": "(e^z-1)^2=0"}
+{"image": "formulas_20261116/formulas/IMG_2222_04.png", "latex": "e^z=1"}
+{"image": "formulas_20261116/formulas/IMG_2222_05.png", "latex": "z=2\\pi ki"}
+{"image": "formulas_20261116/formulas/IMG_2222_06.png", "latex": "e^z e^{2\\pi ki}\\neq0"}
+{"image": "formulas_20261116/formulas/IMG_2222_07.png", "latex": "z=2\\pi ki\\text{ order 2}"}
+{"image": "formulas_20261116/formulas/IMG_2222_08.png", "latex": "(z^2+z-2)^3"}
+{"image": "formulas_20261116/formulas/IMG_2222_09.png", "latex": "(z+2)^3(z-1)^3"}
+{"image": "formulas_20261116/formulas/IMG_2222_10.png", "latex": "z=-2,1\\text{ order 3}"}
+{"image": "formulas_20261116/formulas/IMG_2223_01.png", "latex": "((z-2)^2)^3"}
+{"image": "formulas_20261116/formulas/IMG_2223_02.png", "latex": "z=2\\text{ order 6}"}
+{"image": "formulas_20261116/formulas/IMG_2223_03.png", "latex": "z^2(1-\\cos(z))"}
+{"image": "formulas_20261116/formulas/IMG_2223_06.png", "latex": "2z"}
+{"image": "formulas_20261116/formulas/IMG_2223_07.png", "latex": "\\log(1-z)=0"}
+{"image": "formulas_20261116/formulas/IMG_2223_08.png", "latex": "\\frac{-1}{1-z}"}
+{"image": "formulas_20261116/formulas/IMG_2223_10.png", "latex": "\\frac{-1}{1}=1\\neq0"}
+{"image": "formulas_20261116/formulas/IMG_2223_11.png", "latex": "z=0\\text{ order 1}"}
+{"image": "formulas_20261116/formulas2/formula_01.png", "latex": "f(x)=\\sqrt{x}+x^2+\\frac{x}{2}\\times x^{\\frac{1}{2}}\\div3"}
+{"image": "formulas_20261116/formulas2/formula_05.png", "latex": "f(2)"}
+{"image": "formulas_20261116/formulas2/formula_06.png", "latex": "f(5)"}
+{"image": "formulas_20261116/formulas2/formula_07.png", "latex": "f(\\sin(2x))"}
+{"image": "formulas_20261116/formulas2/formula_08.png", "latex": "f(\\arcsin(9\\frac{x}{\\pi}))"}
+{"image": "formulas_20261116/formulas2/formula_09.png", "latex": "f'(\\sinh(\\frac{x}{\\pi}))"}
