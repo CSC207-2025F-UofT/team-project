@@ -39,4 +39,21 @@ public class FormattedButton extends JButton {
         this.setCursor(new Cursor(Cursor.HAND_CURSOR));
         this.setBorder(new EmptyBorder(10, 20, 10, 20));
     }
+
+    /**
+     * Gives formatted button
+     * @param text text for button to display
+     * @param bgColor background color of the button
+     */
+    public FormattedButton(String text, Color bgColor) {
+        this.setText(text);
+        this.setFont(new Font(AppTheme.FONT_NAME, Font.BOLD, AppTheme.FONT_SIZE_BUTTON));
+        this.setForeground(Color.WHITE);
+        this.setBackground(bgColor);
+        this.setFocusPainted(false);
+        this.setBorderPainted(false);
+        this.setOpaque(true);
+        this.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        this.setBorder(new EmptyBorder(10, 20, 10, 20));
+    }
 }

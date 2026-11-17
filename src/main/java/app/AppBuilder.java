@@ -69,6 +69,7 @@ public class AppBuilder {
 
         GetAllDecksController controller = new GetAllDecksController(getAllDecksInteractor);
         homescreenView.setGetAllDecksController(controller);
+        deckView.setGetAllDecksController(controller);
         return this;
     }
 
@@ -104,6 +105,6 @@ public class AppBuilder {
     public void setGUI() {
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-        } catch (Exception ignored) { }
+        } catch (Exception ignored) { /* if not supported then ignore */}
     }
 }

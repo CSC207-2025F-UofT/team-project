@@ -27,8 +27,11 @@ public class HomescreenView extends JPanel implements ActionListener, GetAllDeck
     private final CardLayout centerLayout = new CardLayout();
     private final JPanel centerPanel = new JPanel(centerLayout);
 
-    private final JButton openButton;
+    // buttons
+    private final JButton viewButton;
+    private final JButton studyButton;
 
+    // controllers
     private GetDeckController getDeckController = null;
     private GetAllDecksController getAllDecksController = null;
 
@@ -53,12 +56,12 @@ public class HomescreenView extends JPanel implements ActionListener, GetAllDeck
         this.centerPanel.setOpaque(false);
         this.centerPanel.setBorder(BorderFactory.createEmptyBorder(10, 100, 10, 100));
 
-        //title text
+        // title text
         final JLabel title = new JLabel("Select Flashcard Deck");
         title.setFont(new Font(AppTheme.FONT_NAME, Font.BOLD, AppTheme.FONT_SIZE_TITLE));
         title.setForeground(AppTheme.TEXT_PRIMARY);
 
-        //error text for when there are no available decks
+        // error text for when there are no available decks
         getAllDecksErrorField.setFont(new Font(AppTheme.FONT_NAME, Font.PLAIN, AppTheme.FONT_SIZE));
         getAllDecksErrorField.setForeground(AppTheme.TEXT_PRIMARY);
         getAllDecksErrorField.setHorizontalAlignment(SwingConstants.CENTER);
@@ -77,36 +80,50 @@ public class HomescreenView extends JPanel implements ActionListener, GetAllDeck
         scrollPane.setVisible(false);
         centerPanel.add(scrollPane, "LIST");
 
-        // open button
-        openButton = new FormattedButton("Open");
-        openButton.setEnabled(false); // Disable button until an item is selected
+        // view button
+        viewButton = new FormattedButton("View");
+        viewButton.setEnabled(false); // Disable button until an item is selected
 
-        // Enable openButton when a Deck is selected
-        deckList.addListSelectionListener(e -> {
-            if (!e.getValueIsAdjusting()) {
-                openButton.setEnabled(deckList.getSelectedValue() != null);
-            }
-        });
-
-        openButton.addActionListener(
+        viewButton.addActionListener(
                 new ActionListener() {
                     public void actionPerformed(ActionEvent evt) {
-                        getDeckController.execute(deckList.getSelectedValue().getName());
+                        getDeckController.execute(deckList.getSelectedValue().getName(), "deckView");
                     }
                 }
         );
 
+        // study button
+        studyButton = new FormattedButton("Study");
+        studyButton.setEnabled(false); // Disable button until an item is selected
+
+        studyButton.addActionListener(
+                new ActionListener() {
+                    public void actionPerformed(ActionEvent evt) {
+                        getDeckController.execute(deckList.getSelectedValue().getName(), "studyView");
+                    }
+                }
+        );
+
+        // enable viewButton and studyButton when a Deck is selected
+        deckList.addListSelectionListener(e -> {
+            if (!e.getValueIsAdjusting()) {
+                viewButton.setEnabled(deckList.getSelectedValue() != null);
+                studyButton.setEnabled(deckList.getSelectedValue() != null);
+            }
+        });
+
         // footer panel
         JPanel footerPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 0, 0));
         footerPanel.setBackground(AppTheme.BG_COLOR);
-        footerPanel.add(openButton);
+        footerPanel.add(viewButton);
+        footerPanel.add(Box.createHorizontalStrut(10));
+        footerPanel.add(studyButton);
+
+        centerLayout.show(centerPanel, "LIST");
 
         this.setLayout(new BorderLayout(100, 14));
         this.setBorder(new EmptyBorder(20, 20, 20, 20));
         this.setBackground(AppTheme.BG_COLOR);
-
-        centerLayout.show(centerPanel, "LIST");
-
         this.add(title, BorderLayout.NORTH);
         this.add(centerPanel, BorderLayout.CENTER);
         this.add(footerPanel, BorderLayout.SOUTH);

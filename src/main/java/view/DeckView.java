@@ -1,5 +1,6 @@
 package view;
 
+import interface_adapter.get_all_decks.GetAllDecksController;
 import interface_adapter.get_deck.GetDeckController;
 import interface_adapter.get_deck.GetDeckState;
 import interface_adapter.get_deck.GetDeckViewModel;
@@ -27,15 +28,19 @@ public class DeckView extends JPanel implements ActionListener, GetDeckViewModel
 
     private final CardLayout layout = new CardLayout();
 
+    // used in study view
     private int currentIndex = 0;
     private boolean isFlipped = false;
-
     private final JLabel flashcardLabel = new JLabel("", SwingConstants.CENTER);
     private final JPanel flashcard = new JPanel(new BorderLayout());
     private final JLabel whichSideLabel = new JLabel("QUESTION", SwingConstants.CENTER);
     private final JLabel currentIndexLabel = new JLabel("", SwingConstants.CENTER);
 
     private GetDeckController getDeckController = null;
+    private GetAllDecksController getAllDecksController = null;
+
+    private static final String DECK_VIEW = "deckView";
+    private static final String STUDY_VIEW = "studyView";
 
     public DeckView(GetDeckViewModel getDeckViewModel) {
         this.getDeckViewModel = getDeckViewModel;
@@ -49,48 +54,10 @@ public class DeckView extends JPanel implements ActionListener, GetDeckViewModel
         JPanel studyView = createStudyView();
 
         this.setLayout(layout);
-        this.add(deckView, "deckView");
-        this.add(studyView, "studyView");
+        this.add(deckView, DECK_VIEW);
+        this.add(studyView, STUDY_VIEW);
 
-        layout.show(this, "deckView");
-
-    }
-
-    /**
-     * React to a button click that results in evt.
-     * @param evt the ActionEvent to react to
-     */
-    public void actionPerformed(ActionEvent evt) {
-        System.out.println("Click " + evt.getActionCommand());
-    }
-
-    @Override
-    public void stateChanged() {
-        if (getDeckViewModel.getState().getDeckError() != null) {
-            JOptionPane.showMessageDialog(this, getDeckViewModel.getState().getDeckError());
-        } else {
-            layout.show(this, "deckView");
-            deckModel.clear();
-            setFields(getDeckViewModel.getState());
-            updateCardDisplay();
-        }
-    }
-
-    private void setFields(GetDeckState state) {
-        deckName.setText(state.getDeckName());
-        List<Map<String, String>> list = state.getFlashcards();
-
-        if (list != null) {
-            for (Map<String, String> flashcard : list) {
-                for (Map.Entry<String, String> f : flashcard.entrySet()) {
-                    deckModel.addElement(new DeckView.SwingDeck(f.getKey(), f.getValue()));
-                }
-            }
-        }
-    }
-
-    public void setGetDeckController(GetDeckController getDeckController) {
-        this.getDeckController = getDeckController;
+        layout.show(this, DECK_VIEW);
     }
 
     // gui for deck view which lists the flashcards
@@ -123,31 +90,26 @@ public class DeckView extends JPanel implements ActionListener, GetDeckViewModel
 
         // buttons
         JButton home = new FormattedButton();
-
         JButton study = new FormattedButton("Study");
+        DeckView viewPanel = this;
 
         home.addActionListener(
                 new ActionListener() {
                     public void actionPerformed(ActionEvent evt) {
-                        getDeckController.switchToHomescreenView();
+                        getAllDecksController.execute();
                     }
                 }
         );
 
-        DeckView viewPanel = this;
         study.addActionListener(
                 new ActionListener() {
                     public void actionPerformed(ActionEvent evt) {
-                        layout.show(viewPanel, "studyView");
+                        layout.show(viewPanel, STUDY_VIEW);
                     }
                 }
         );
 
-        JPanel deckView = new JPanel();
-        deckView.setLayout(new BorderLayout(14, 14));
-        deckView.setBorder(new EmptyBorder(20, 20, 20, 20));
-        deckView.setBackground(AppTheme.BG_COLOR);
-
+        // add everything to deckView JPanel
         JPanel toolBar = new JPanel(new BorderLayout());
         toolBar.setOpaque(false);
         JPanel buttons = new JPanel();
@@ -157,6 +119,11 @@ public class DeckView extends JPanel implements ActionListener, GetDeckViewModel
         buttons.add(Box.createVerticalStrut(10));
         buttons.add(study);
         toolBar.add(buttons, BorderLayout.NORTH);
+
+        JPanel deckView = new JPanel();
+        deckView.setLayout(new BorderLayout(14, 14));
+        deckView.setBorder(new EmptyBorder(20, 20, 20, 20));
+        deckView.setBackground(AppTheme.BG_COLOR);
 
         JPanel centerPanel = new JPanel(new BorderLayout(0, 14));
         centerPanel.setOpaque(false);
@@ -174,13 +141,21 @@ public class DeckView extends JPanel implements ActionListener, GetDeckViewModel
         studyView.setBorder(new EmptyBorder(20, 20, 20, 20));
         studyView.setBackground(AppTheme.BG_COLOR);
 
+        // make flashcard panel
         JPanel flashcardPanel = new JPanel(new BorderLayout(20, 10));
         flashcardPanel.setOpaque(false);
         flashcardPanel.setBorder(BorderFactory.createEmptyBorder(10, 28, 10, 28));
 
-//        JButton prevArrowBtn = new arrowButton("‹", true);
-//        JButton nextArrowBtn = new arrowButton("›", true);
+        // add arrows to move between cards
+        JButton backArrow = new FormattedButton("‹", new Color(160, 160, 160));
+        JButton nextArrow = new FormattedButton("›", new Color(240, 240, 240));
+        JPanel arrows = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        arrows.setOpaque(false);
 
+        arrows.add(backArrow);
+        arrows.add(nextArrow);
+
+        // make flashcard with text
         flashcard.setBorder(BorderFactory.createEmptyBorder(24, 36, 36, 36));
         flashcard.setCursor(new Cursor(Cursor.HAND_CURSOR));
         flashcard.setBackground(AppTheme.CARD_COLOR);
@@ -188,7 +163,7 @@ public class DeckView extends JPanel implements ActionListener, GetDeckViewModel
         whichSideLabel.setFont(new Font(AppTheme.FONT_NAME, Font.BOLD, 11));
         whichSideLabel.setForeground(AppTheme.TEXT_PRIMARY);
 
-        flashcardLabel.setFont(new Font(AppTheme.FONT_NAME, Font.PLAIN, 22));
+        flashcardLabel.setFont(new Font(AppTheme.FONT_NAME, Font.PLAIN, AppTheme.FONT_SIZE_TITLE));
         flashcardLabel.setForeground(AppTheme.TEXT_PRIMARY);
 
         currentIndexLabel.setFont(new Font(AppTheme.FONT_NAME, Font.PLAIN, AppTheme.FONT_SIZE));
@@ -204,39 +179,49 @@ public class DeckView extends JPanel implements ActionListener, GetDeckViewModel
         flashcard.add(flashcardLabel, BorderLayout.CENTER);
         flashcard.add(whichSideLabel, BorderLayout.NORTH);
 
-        flashcardPanel.add(currentIndexLabel, BorderLayout.SOUTH);
+        // add footPanel to flashcardPanel
+        JPanel footPanel = new JPanel();
+        footPanel.setLayout(new BoxLayout(footPanel, BoxLayout.Y_AXIS));
+        footPanel.setOpaque(false);
+
+        footPanel.add(currentIndexLabel);
+        footPanel.add(arrows);
+
+        flashcardPanel.add(footPanel, BorderLayout.SOUTH);
         flashcardPanel.add(flashcard, BorderLayout.CENTER);
 
         // buttons
         JButton home = new FormattedButton();
-        JButton back = new FormattedButton("Back");
+        JButton view = new FormattedButton("View");
 
         home.addActionListener(
                 new ActionListener() {
                     public void actionPerformed(ActionEvent evt) {
                         goHome();
-                        getDeckController.switchToHomescreenView();
+                        getAllDecksController.execute();
                     }
                 }
         );
 
         DeckView viewPanel = this;
-        back.addActionListener(
+        view.addActionListener(
                 new ActionListener() {
                     public void actionPerformed(ActionEvent evt) {
-                        layout.show(viewPanel, "deckView");
+                        layout.show(viewPanel, DECK_VIEW);
                     }
                 }
         );
 
+        // add buttons to toolBar
         JPanel toolBar = new JPanel(new BorderLayout());
         toolBar.setOpaque(false);
         JPanel buttons = new JPanel();
         buttons.setLayout(new BoxLayout(buttons, BoxLayout.Y_AXIS));
         buttons.setOpaque(false);
+
         buttons.add(home);
         buttons.add(Box.createVerticalStrut(10));
-        buttons.add(back);
+        buttons.add(view);
         toolBar.add(buttons, BorderLayout.NORTH);
 
         studyView.add(toolBar, BorderLayout.WEST);
@@ -247,22 +232,24 @@ public class DeckView extends JPanel implements ActionListener, GetDeckViewModel
 
     private void updateCardDisplay() {
         SwingDeck current = deckModel.get(currentIndex);
-        String text = !isFlipped ? current.getQuestion() : current.getAnswer();
+        String text = isFlipped ? current.getAnswer() : current.getQuestion();
 
-        whichSideLabel.setText(!isFlipped ? "QUESTION" : "ANSWER");
-        flashcardLabel.setFont(new Font(AppTheme.FONT_NAME, isFlipped ? Font.PLAIN : Font.BOLD, 22));
+        whichSideLabel.setText(isFlipped ? "ANSWER" : "QUESTION");
+        flashcardLabel.setFont(new Font(AppTheme.FONT_NAME, isFlipped ? Font.PLAIN : Font.BOLD, AppTheme.FONT_SIZE_TITLE));
         flashcardLabel.setText("<html><div style='text-align: center; line-height: 1.4;'>" + text + "</div></html>");
 
-        flashcard.setBackground(!isFlipped ? AppTheme.CARD_COLOR : AppTheme.SELECTION_BG);
+        flashcard.setBackground(isFlipped ? AppTheme.SELECTION_BG : AppTheme.CARD_COLOR);
         currentIndexLabel.setText(String.format("Card %d of %d", currentIndex + 1, deckModel.size()));
     }
 
+    // reset studying flashcards
     private void goHome() {
         currentIndex = 0;
         isFlipped = false;
         updateCardDisplay();
     }
 
+    // flip and update card
     private void flipCard() {
         isFlipped = !isFlipped;
         updateCardDisplay();
@@ -331,7 +318,6 @@ public class DeckView extends JPanel implements ActionListener, GetDeckViewModel
                 questionLabel.setFont(new Font(AppTheme.FONT_NAME, Font.BOLD, AppTheme.FONT_SIZE));
                 questionLabel.setForeground(AppTheme.PRIMARY_COLOR);
                 answerLabel.setForeground(AppTheme.PRIMARY_COLOR);
-
             } else {
                 cardPanel.setBackground(AppTheme.CARD_COLOR);
                 questionLabel.setFont(new Font(AppTheme.FONT_NAME, Font.BOLD, AppTheme.FONT_SIZE));
@@ -355,5 +341,54 @@ public class DeckView extends JPanel implements ActionListener, GetDeckViewModel
 
             return this;
         }
+    }
+
+    /**
+     * React to a button click that results in evt.
+     * @param evt the ActionEvent to react to
+     */
+    public void actionPerformed(ActionEvent evt) {
+        System.out.println("Click " + evt.getActionCommand());
+    }
+
+    @Override
+    public void stateChanged() {
+        // give error pop up if could not get deck
+        if (getDeckViewModel.getState().getDeckError() != null) {
+            JOptionPane.showMessageDialog(this, getDeckViewModel.getState().getDeckError());
+        } else {
+            deckModel.clear();
+            setFields(getDeckViewModel.getState());
+            updateCardDisplay();
+        }
+    }
+
+    private void setFields(GetDeckState state) {
+        deckName.setText(state.getDeckName());
+
+        // set which view to display
+        if (state.getViewName().equals(DECK_VIEW) || state.getViewName().equals(STUDY_VIEW)) {
+            layout.show(this, state.getViewName());
+        } else {
+            layout.show(this, DECK_VIEW);
+        }
+
+        // populate the list of flashcards
+        List<Map<String, String>> list = state.getFlashcards();
+        if (list != null) {
+            for (Map<String, String> card : list) {
+                for (Map.Entry<String, String> f : card.entrySet()) {
+                    deckModel.addElement(new DeckView.SwingDeck(f.getKey(), f.getValue()));
+                }
+            }
+        }
+    }
+
+    public void setGetDeckController(GetDeckController getDeckController) {
+        this.getDeckController = getDeckController;
+    }
+
+    public void setGetAllDecksController(GetAllDecksController getAllDecksController) {
+        this.getAllDecksController = getAllDecksController;
     }
 }
