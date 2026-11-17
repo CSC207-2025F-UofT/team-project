@@ -86,6 +86,7 @@
 ---
 ## How to Run
 [Instructions for running the program.]
+Click run
 ---
 ## Notes
 [Any additional project information.]
