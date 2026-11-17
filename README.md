@@ -28,10 +28,29 @@
 ---
 ## Use Cases
 ### Use Case 1
-### Use Case 2
+### Use Case 2: Display a new question
+#### Primary actor: 
+* Game show host
+
+#### Preconditions:
+* The game is currently running
+* There is no active question, i.e. the game is just starting or the previous question has been completed
+
+#### Trigger:
+* The host asks the system to randomly select a new question to display on the board
+#### Main success scenario:
+1. The host asks for a new question to be displayed.
+2. The system checks that there is an unused question that is available.
+3. The system randomly selects a question from the set of available questions.
+4. The system changes the active display to accommodate the new question and displays the question on the game board.
+5. The system starts a new round of play with the selected question.
+#### Extensions:
+ * #### 2a. There are no unused questions available to be played
+    i. The system explains that a new question cannot be loaded.\
+    ii. The system does not load a new question, and the use case ends.
 ### Use Case 3
-### bruh
-### bruh
+### Use Case 4
+### Use Case 5
 
 ---
 ## Minimal Viable Product (MVP)
@@ -40,11 +59,19 @@
 | Charlie Neale | Use Case |
 | Caleb Gawthroupe | Use Case |
 | Kevin Liu | Use Case |
-| Jacob Chislett | Use Case |
+| Jacob Chislett | Display a new question |
 | Eric Wu | Use Case |
 ---
 ## Entities
-### Entity 1
+### Entity 1: Question object
+#### Instance Variables:
+* -questionText: String → The main text of the question 
+* -correctAnswers: List<String> → The primary answers to the question
+* -answerVariants: List<List\<String>> → A collection of additional acceptable answers / variants on the primary answers
+* -points: List\<Integer> → The number of points allocated to a team for getting a given answer correct
+#### Relevant Methods: TODO: DEPENDING ON WHICH DESIGN PATTERN WE GO WITH FOR INSTANTIATING THESE, I THINK THE RELEVANT SETUP METHODS (setQuestion, setAnswers, setAnswerVariants, etc.) WILL BE DIFFERENT, SO I LEFT THEM BLANK FOR NOW
+* +verifyAnswer(answer: String): Integer → Return the number of points associated with a given answer, with 0 if the answer is not correct
+* +getQuestionText(): String → Return the main text of the question
 ### Entity 2
 (Add additional entities as needed.)
 ---
