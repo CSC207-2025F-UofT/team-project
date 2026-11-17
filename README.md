@@ -11,3 +11,15 @@ The readme should include information such as:
 By keeping this README up-to-date,
 your team will find it easier to prepare for the final presentation
 at the end of the term.
+
+- summary here
+
+
+- user stories and people here
+
+
+- information about apis here
+
+
+- screenshots and animations here
+
