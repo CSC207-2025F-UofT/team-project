@@ -270,7 +270,16 @@ Direction
 ## Design Diagrams
 ### UML Class Diagram
 ### Sequence Diagrams
+
+Use case 1:
+<img width="2384" height="1170" alt="image" src="https://github.com/user-attachments/assets/e82c0ba4-ba52-4add-8d24-0ba062fc6f9b" />
+Use case 2: 
 <img width="1130" height="1002" alt="image" src="https://github.com/user-attachments/assets/0ad05e10-93a0-4a55-a8a6-2d82aa4d2165" />
+Use case 3:
+<img width="2012" height="3786" alt="image" src="https://github.com/user-attachments/assets/e4fbf4b8-2571-4709-a124-92595169c247" />
+Use case 4:
+<img width="2654" height="3980" alt="image" src="https://github.com/user-attachments/assets/767b96f5-8a22-40c6-a4f5-6ff9f6e54975" />
+
 
 ---
 ## How to Run
