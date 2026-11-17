@@ -41,15 +41,15 @@ Member4: \
 
 | Name | Primary Actor | Precondition | Trigger | Extension | Success Outcome |
 | --- | --- | --- | --- | --- | --- |
-| Start Game | User | ~ | Game is Started by Player | ~ | Players and Board are initialized and cards drawn. |
+| Start Game | User | Previous games have finished by the user and no other games are running | Game is Started by Player | ~ | Players and Board are initialized and cards drawn. |
 | Save Game | User | Game must have Started | Game is Saved by User | ~ | Game is saved successfully |
 | Load Game | User | Saved Game exists | Game is Loaded by User | ~ | Game is loaded successfully |
-| End Turn | Player | ~ | Turn End Declared by Player | ~ | Win condition is checked. Card(s) (is/are) Drawn, and the next player begins their turn. |
+| End Turn | Player | Game must have Started | Turn End Declared by Player | ~ | Win condition is checked. Card(s) (is/are) Drawn, and the next player begins their turn. |
 | Shuffle Deck | Player | Cards Exist in Deck | Card Effect Trigger or Game Started | ~ | Deck is shuffled |
 | Play Card | Player | Card Exists in Hand | Player Plays Card | ~ | Card is removed from hand and put on the board |
 | Select Character | Player | Target Character has either not moved or not casted this turn | Card is selected by Player | Fail Precond: Can't be selected | Depending on context, display allowed movement tiles / casting range|
-| Confirm Move | Player | ~ | Player Picks a Movement Tile | ~ | Card is moved along with its spells to another tile on the board |
-| Confirm Cast | Player | ~ | Player Picks a Cast Direction | ~ | Casting intent is displayed to Opponent. |
+| Confirm Move | Player | Game must have Started | Player Picks a Movement Tile | ~ | Card is moved along with its spells to another tile on the board |
+| Confirm Cast | Player | Game must have Started | Player Picks a Cast Direction | ~ | Casting intent is displayed to Opponent. |
 | Cast Response | Opponent | Cast Direction was Confirmed by Player and Displayed to Opponent | Opponent Responds with Pass or a Card | ~ | Opponent Cast Response is displayed to Player. Player may respond with another Cast Response. |
 | Resolve Cast | System | ~ | A Pass is recieved as a Cast Response | ~ | Spell Effects resolve with all cast responses considered, damage is calculated, KO'd characters are updated, and cards are discarded if necessary. |
 *MORE TBA*
@@ -57,7 +57,7 @@ Member4: \
 ### Minimum Viable Product (MVP)
 | Name | Use Cases |
 | --- | --- |
-| Member1 | Start Game, Shuffle Deck, End Turn |
+| Yinghao | Start Game, Shuffle Deck, End Turn |
 | Member2 | Play Card, Confirm Move |
 | Member3 | Select Character, Confirm Cast |
 | Andy | Cast Response, Resolve Cast |
