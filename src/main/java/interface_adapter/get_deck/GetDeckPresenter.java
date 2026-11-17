@@ -29,6 +29,7 @@ public class GetDeckPresenter implements GetDeckOutputBoundary {
         final GetDeckState getDeckState = getDeckViewModel.getState();
         getDeckState.setDeckName(response.getName());
         getDeckState.setFlashcards(response.getFlashcards());
+        getDeckState.setViewName(response.getViewName());
         this.getDeckViewModel.notifyStateChanged();
 
         // clear everything from the GetAllDecksViewModel's state
@@ -45,11 +46,5 @@ public class GetDeckPresenter implements GetDeckOutputBoundary {
         final GetDeckState getDeckState = getDeckViewModel.getState();
         getDeckState.setDeckError(error);
         getDeckViewModel.notifyStateChanged();
-    }
-
-    @Override
-    public void switchToHomescreenView() {
-        viewManagerModel.setState(GetAllDecksViewModel.VIEW_NAME);
-        viewManagerModel.notifyViewChanged();
     }
 }

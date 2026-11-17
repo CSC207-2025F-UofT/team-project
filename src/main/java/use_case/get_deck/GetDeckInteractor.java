@@ -37,11 +37,9 @@ public class GetDeckInteractor implements GetDeckInputBoundary{
                 flashcardInfo.add(map);
             }
 
-            final GetDeckOutputData getDeckOutputData = new GetDeckOutputData(name, flashcardInfo);
+            final GetDeckOutputData getDeckOutputData = new GetDeckOutputData(name,
+                    flashcardInfo, getDeckInputData.getViewName());
             getDeckPresenter.prepareSuccessView(getDeckOutputData);
         }
     }
-
-    @Override
-    public void switchToHomescreenView() { getDeckPresenter.switchToHomescreenView(); }
 }

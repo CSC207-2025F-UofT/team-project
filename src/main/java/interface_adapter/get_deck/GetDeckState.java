@@ -10,12 +10,15 @@ public class GetDeckState {
     private String deckName = "";
     private List<Map<String, String>> flashcards;
     private String deckError;
+    private String viewName = "deckView";
 
     public String getDeckName() { return deckName; }
 
     public List<Map<String, String>> getFlashcards() { return flashcards; }
 
     public String getDeckError() { return deckError; }
+
+    public String getViewName() { return viewName; }
 
     public void setDeckName(String deckName) { this.deckName = deckName; }
 
@@ -30,4 +33,6 @@ public class GetDeckState {
                 + "flashcards='" + flashcards + '\''
                 + '}';
     }
+
+    public void setViewName(String viewName) { this.viewName = viewName; }
 }

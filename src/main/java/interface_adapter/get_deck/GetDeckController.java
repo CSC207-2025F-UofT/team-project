@@ -18,14 +18,9 @@ public class GetDeckController {
      * Executes the GetDeck Use Case.
      * @param deckName the name of the selected deck
      */
-    public void execute(String deckName) {
-        final GetDeckInputData getDeckInputData = new GetDeckInputData(deckName);
+    public void execute(String deckName, String viewName) {
+        final GetDeckInputData getDeckInputData = new GetDeckInputData(deckName, viewName);
 
         getDeckUseCaseInteractor.execute(getDeckInputData);
     }
-
-    /**
-     * Executes the "switch to HomescreenView" Use Case.
-     */
-    public void switchToHomescreenView() { getDeckUseCaseInteractor.switchToHomescreenView(); }
 }
