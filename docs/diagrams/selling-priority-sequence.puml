@@ -1,0 +1,37 @@
+
+@startuml
+title Generate Selling Priority Recommendations
+
+actor Seller
+
+participant SellingAssistantView as View
+participant SellingPriorityController as Controller
+participant SellingPriorityInteractor as Interactor
+participant MarketDataGateway as Gateway
+participant "eBay Browse API" as eBay
+participant SellingPriorityPresenter as Presenter
+
+Seller -> View: Enter multiple items\nand preparation times
+Seller -> View: Click Generate Recommendations
+
+View -> Controller: generateRecommendations(items)
+Controller -> Interactor: execute(inputData)
+
+loop For each item
+    Interactor -> Gateway: searchComparableListings(item)
+    Gateway -> eBay: Search active listings
+    eBay --> Gateway: Listing data
+    Gateway --> Interactor: Comparable listings
+
+    Interactor -> Interactor: Analyze market data
+    Interactor -> Interactor: Calculate Market Potential Score
+    Interactor -> Interactor: Calculate Preparation Efficiency Score
+    Interactor -> Interactor: Calculate Priority Score
+end
+
+Interactor -> Interactor: Rank items by Priority Score
+Interactor -> Presenter: present(recommendations)
+Presenter --> View: Display ranked recommendations
+View --> Seller: Show selling priority list
+
+@enduml
