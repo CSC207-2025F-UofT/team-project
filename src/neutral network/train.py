@@ -23,15 +23,13 @@ from torch.utils.data import DataLoader, Dataset, Sampler, Subset
 
 from model import vital_mini, load_vocab, load_training_weights, vocab_size, pad_id, bos_id, eos_id, max_len
 from preprocess import EmptyFormulaImageError, check_formula_image, load_formula_image
+from formula_layout import STRIDE, formula_layout, tallest_band
 from augmentation import augment_formula_image, DEFAULT_AUGMENT_PROBABILITY, AUGMENTATION_VERSION
 
 Learning_rate = 8e-5
 minimum_learning_rate = 3e-6
 EPOCHS = 5
 
-IMG_H = 128                  # 图像统一高度;vital_pixel 总步长 16,所以是 8 行格子
-STRIDE = 16                  # vital_pixel 的总下采样倍数,图像宽度要补成它的倍数
-MARGIN, MAX_W, MIN_W = 8, 1024, 64
 IMAGE_INVERT = False                 # 图片保留原始明暗，不自动反色。
 INKML = "{http://www.w3.org/2003/InkML}"
 VALIDATION_SOURCES = ("MathWriting", "UniMER", "HME100K")
@@ -93,18 +91,18 @@ def augment_strokes(strokes: list[np.ndarray], rng: random.Random) -> list[np.nd
     return [s @ m for s in strokes]
 
 def render(strokes: list[np.ndarray], stroke_px: float = 3.0, ss: int = 2) -> torch.Tensor:
-    """笔迹 -> [1,IMG_H,W],墨迹为 1、背景为 0。裁剪到墨迹外接矩形,等比缩放到固定高度;
+    """笔迹 -> [1,H,W],墨迹为 1、背景为 0。裁剪到墨迹外接矩形;缩放比例和画布尺寸与图片路径
+    共用 formula_layout.py(最高行带高 112,多行公式画布更高);
     笔画粗细按输出像素固定(不随缩放变),ss 倍超采样后缩小做抗锯齿"""
     pts = np.concatenate(strokes)
     x0, y0 = pts.min(0)
     x1, y1 = pts.max(0)
     w0, h0 = max(float(x1 - x0), 1e-3), max(float(y1 - y0), 1e-3)
-    h_eff = max(h0, 0.2 * w0)                                  # 只有一条横线时,避免被放大到离谱
-    scale = min((IMG_H - 2 * MARGIN) / h_eff, (MAX_W - 2 * MARGIN) / w0)
-    width = max(int(math.ceil((w0 * scale + 2 * MARGIN) / STRIDE)) * STRIDE, MIN_W)   # 宽度补成步长的倍数
-    off = np.array([(width - w0 * scale) / 2, (IMG_H - h0 * scale) / 2], dtype=np.float32)   # 居中
+    tallest = tallest_band([(float(s[:, 1].min()), float(s[:, 1].max())) for s in strokes], h0)
+    scale, width, height = formula_layout(w0, h0, tallest)
+    off = np.array([(width - w0 * scale) / 2, (height - h0 * scale) / 2], dtype=np.float32)   # 居中
 
-    canvas = Image.new("L", (width * ss, IMG_H * ss), 0)
+    canvas = Image.new("L", (width * ss, height * ss), 0)
     draw = ImageDraw.Draw(canvas)
     r = stroke_px * ss / 2
     for s in strokes:
@@ -114,7 +112,7 @@ def render(strokes: list[np.ndarray], stroke_px: float = 3.0, ss: int = 2) -> to
             draw.line(xy, fill=255, width=max(int(round(stroke_px * ss)), 1), joint="curve")
         for a, b in (xy[0], xy[-1]):                           # 两端补圆头,单点笔画也能画出来
             draw.ellipse((a - r, b - r, a + r, b + r), fill=255)
-    canvas = canvas.resize((width, IMG_H), Image.BOX)
+    canvas = canvas.resize((width, height), Image.BOX)
     return torch.from_numpy(np.asarray(canvas, dtype=np.float32) / 255.0).unsqueeze(0)
 
 # ---------- 图片有效性缓存 ----------
@@ -294,10 +292,10 @@ def read_manifest(path: Path):
                 raise ValueError(f"无效数据清单 {path}:{line_number}: {error}") from error
 
 def convert(images: list[torch.Tensor]) -> tuple[torch.Tensor, torch.Tensor]:
-    """图片 RGB [3,H,W_i] 或 InkML [1,H,W_i] -> [B,3,H,W_max]。
-    保留图片颜色；仅将单通道笔迹渲染复制为 3 通道。"""
+    """图片 RGB [3,H_i,W_i] 或 InkML [1,H_i,W_i] -> [B,3,H_max,W_max]，返回各图宽度。
+    高度和宽度都补到批内最大值；保留图片颜色，仅将单通道笔迹渲染复制为 3 通道。"""
     widths = torch.tensor([im.size(-1) for im in images])
-    batch = torch.zeros(len(images), 3, IMG_H, int(widths.max()))
+    batch = torch.zeros(len(images), 3, max(im.size(-2) for im in images), int(widths.max()))
     for i, im in enumerate(images):
         # 两条预处理路径都留有纯色边距，左上角就是该样本的补边颜色。
         batch[i] = im[:, :1, :1]
@@ -307,13 +305,16 @@ def convert(images: list[torch.Tensor]) -> tuple[torch.Tensor, torch.Tensor]:
 def collate(batch):
     images, ids = zip(*batch)
     image, widths = convert(list(images))
+    heights = torch.tensor([im.size(-2) for im in images])
     B = len(batch)
 
-    # memory 的 padding mask: 补出来的列 -> True。展平顺序必须和 model.vital_mini.encode 一致(先行后列)
-    gh, gw = IMG_H // STRIDE, image.size(-1) // STRIDE
+    # memory 的 padding mask: 补出来的行和列 -> True。展平顺序必须和 model.vital_mini.encode 一致(先行后列)
+    gh, gw = image.size(-2) // STRIDE, image.size(-1) // STRIDE
+    valid_rows = (heights + STRIDE - 1) // STRIDE
     valid_cols = (widths + STRIDE - 1) // STRIDE
+    row_pad = torch.arange(gh)[None, :] >= valid_rows[:, None]                     # [B,gh]
     col_pad = torch.arange(gw)[None, :] >= valid_cols[:, None]                     # [B,gw]
-    memory_mask = col_pad[:, None, :].expand(B, gh, gw).reshape(B, gh * gw)        # [B,gh*gw]
+    memory_mask = (row_pad[:, :, None] | col_pad[:, None, :]).reshape(B, gh * gw)  # [B,gh*gw]
 
     # <bos> y1..yn <eos>,右侧补 <pad>;输入去掉最后一位,目标去掉第一位(错开一位)
     L = max(len(x) for x in ids) + 2
@@ -736,7 +737,7 @@ def train(args):
     first = collate([train_ds[0]])
     with torch.no_grad():
         assert model.eval().encode_image(first[0][:1].to(device)).size(1) == first[1].size(1), \
-            "memory 的格子数与 padding mask 不一致,检查 IMG_H / STRIDE"
+            "memory 的格子数与 padding mask 不一致,检查 STRIDE"
     del first
 
     out.mkdir(parents=True, exist_ok=True)

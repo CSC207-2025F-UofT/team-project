@@ -9,7 +9,7 @@ from PIL import Image, ImageDraw
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from preprocess import EmptyFormulaImageError, check_formula_image, load_formula_image
 from start import load_image
-from train import convert
+from train import collate, convert
 
 
 class RgbPreprocessingTests(unittest.TestCase):
@@ -64,6 +64,26 @@ class RgbPreprocessingTests(unittest.TestCase):
         for operation in (check_formula_image, load_formula_image):
             with self.assertRaises(EmptyFormulaImageError):
                 operation(path)
+
+    def test_two_lines_keep_the_single_line_scale_and_make_the_canvas_taller(self):
+        single = load_formula_image(self.picture('black'), invert=False)
+        image = Image.new('RGB', (160, 160), 'white')
+        for top in (20, 90):                                  # 两个 91x41 的块，中间隔 29 行
+            ImageDraw.Draw(image).rectangle((30, top, 120, top + 40), fill='black')
+        path = self.root / 'two_lines.png'
+        image.save(path)
+        double = load_formula_image(path, invert=False)
+        self.assertEqual(single.shape[-2:], (128, 272))
+        self.assertEqual(double.shape[-2:], (320, 272))       # 同样的缩放比例和宽度，高度随行数增长
+
+    def test_collate_masks_the_padded_rows_and_columns_of_a_mixed_height_batch(self):
+        small = torch.zeros(3, 128, 64)
+        tall = torch.zeros(3, 320, 96)
+        _, memory_mask, _, _, _ = collate([(small, [5, 6]), (tall, [5])])
+        self.assertEqual(memory_mask.shape, (2, 20 * 6))
+        self.assertEqual(int((~memory_mask[0]).sum()), 8 * 4)
+        self.assertFalse(bool(memory_mask[0].reshape(20, 6)[:8, :4].any()))
+        self.assertEqual(int((~memory_mask[1]).sum()), 20 * 6)
 
     def test_mixed_inkml_and_rgb_batch_preserves_channels_and_padding(self):
         colour = load_formula_image(self.picture('red'), invert=False)

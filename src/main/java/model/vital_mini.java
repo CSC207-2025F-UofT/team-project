@@ -12,7 +12,6 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.nio.file.Path;
 
-import java.util.ArrayList;
 import ai.djl.modality.cv.ImageFactory;
 
 /**
@@ -21,7 +20,7 @@ import ai.djl.modality.cv.ImageFactory;
  * 单线程使用。先 init()；返回的 NDArray 由调用方 close，最晚在模型 close 时释放。
  */
 public final class vital_mini implements AutoCloseable {
-    public static final int VOCAB_LENGTH = 234;
+    public static final int VOCAB_LENGTH = 241;
     public static final int PAD_ID = 67, BOS_ID = 68, EOS_ID = 69, MAX_LEN = 200;
     private final Path modelPath;
     private ModelRuntime runtime;
@@ -240,9 +239,9 @@ public final class vital_mini implements AutoCloseable {
         }
     }
 
-    public String generate(BufferedImage image) throws TranslateException{
-        ArrayList<Integer> tokens = new ArrayList<>();
-        tokens.add(BOS_ID);
+    /** 束搜索生成 LaTeX；beam_width=1 等价于贪心，长度归一化指数为 0.7。 */
+    public String generate(BufferedImage image, int beam_width) throws TranslateException {
+        BeamSearch search = new BeamSearch(beam_width, MAX_LEN);
         try (NDManager scope = manager().newSubManager()) {
             NDArray image_tensor = ImageFactory.getInstance()
                     .fromImage(image)
@@ -254,23 +253,16 @@ public final class vital_mini implements AutoCloseable {
             // 图像编码只计算一次；所有 token 步骤复用 memory。
             try (NDArray encoded = cnn.forward(image_tensor);
                  NDArray memory = encodeFeatures(encoded)) {
-                while (tokens.size() < MAX_LEN) {
-                    long[] ids = tokens.stream().mapToLong(Integer::longValue).toArray();
-                    try (NDArray tokens_tensor = scope.create(ids).reshape(1, ids.length);
-                         NDArray decoded = decode(memory, tokens_tensor);
-                         NDArray last = decoded.get("0,-1,:")) {
-                        float[] scores = last.toFloatArray();
-                        int next_token = -1;
-                        float max_score = Float.NEGATIVE_INFINITY;
-                        for (int i = 0; i < scores.length; ++i) {
-                            if (i == BOS_ID || i == PAD_ID) continue;
-                            if (scores[i] >= max_score) {
-                                max_score = scores[i];
-                                next_token = i;
-                            }
+                while (!search.isDone()) {
+                    try (NDManager step = scope.newSubManager()) {
+                        NDArray tokensTensor = step.create(search.tokenIds()).reshape(search.size(), search.length());
+                        NDArray batchMemory = memory.broadcast(
+                                new Shape(search.size(), memory.getShape().get(1), memory.getShape().get(2)));
+                        batchMemory.attach(step);
+                        try (NDArray decoded = decode(batchMemory, tokensTensor);
+                             NDArray last = decoded.get(":,-1,:")) {
+                            search.advance(last.toFloatArray());
                         }
-                        if (next_token == EOS_ID) break;
-                        tokens.add(next_token);
                     }
                 }
             }
@@ -294,7 +286,7 @@ public final class vital_mini implements AutoCloseable {
 
             StringBuilder text = new StringBuilder();
             String previous = "";
-            for (int id : tokens) {
+            for (int id : search.best()) {
                 if (id == EOS_ID) break;
                 if (id == BOS_ID || id == PAD_ID) continue;
                 if (id < 0 || id >= table.length || table[id] == null) {

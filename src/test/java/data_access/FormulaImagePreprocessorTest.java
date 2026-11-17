@@ -11,7 +11,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-/** The model only accepts 128 px high images whose width is a multiple of 16. */
+/** The model accepts images whose height (at least 128) and width are multiples of 16. */
 class FormulaImagePreprocessorTest {
 
     /** An image of the given size and background with one thick line drawn in the given colour. */
@@ -33,9 +33,25 @@ class FormulaImagePreprocessorTest {
     }
 
     private static void assertModelShape(BufferedImage image) {
-        assertEquals(128, image.getHeight(), "128 px high");
+        assertEquals(0, image.getHeight() % 16, "height a multiple of 16");
+        assertTrue(image.getHeight() >= 128 && image.getHeight() <= 512, "height " + image.getHeight());
         assertEquals(0, image.getWidth() % 16, "width a multiple of 16");
-        assertTrue(image.getWidth() >= 64 && image.getWidth() <= 1024 + 16, "width " + image.getWidth());
+        assertTrue(image.getWidth() >= 64, "width " + image.getWidth());
+        assertTrue((image.getHeight() / 16) * (image.getWidth() / 16) <= 1280, "feature cells within the limit");
+    }
+
+    /** White picture with solid black blocks, each {x, y, width, height}. */
+    private static BufferedImage blocks(int width, int height, int[]... blocks) {
+        BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+        Graphics2D g = image.createGraphics();
+        g.setColor(Color.WHITE);
+        g.fillRect(0, 0, width, height);
+        g.setColor(Color.BLACK);
+        for (int[] b : blocks) {
+            g.fillRect(b[0], b[1], b[2], b[3]);
+        }
+        g.dispose();
+        return image;
     }
 
     @Test
@@ -81,11 +97,24 @@ class FormulaImagePreprocessorTest {
     }
 
     @Test
-    void veryWideFormulaIsShrunkToTheMaximumWidth() {
+    void veryWideSingleLineIsNotShrunkJustForBeingWide() {
         BufferedImage out = FormulaImagePreprocessor.prepare(
                 drawing(4000, 60, Color.WHITE, Color.BLACK, 10, 30, 3990, 30));
         assertModelShape(out);
-        assertTrue(out.getWidth() <= 1024 + 16);
+        assertEquals(128, out.getHeight());
+        assertTrue(out.getWidth() > 1024 + 16, "wider than the old 1024 limit: " + out.getWidth());
+    }
+
+    @Test
+    void twoLinesKeepTheSingleLineScaleAndMakeTheCanvasTaller() {
+        BufferedImage single = FormulaImagePreprocessor.prepare(blocks(160, 80, new int[]{30, 20, 91, 41}));
+        BufferedImage two = FormulaImagePreprocessor.prepare(
+                blocks(160, 160, new int[]{30, 20, 91, 41}, new int[]{30, 90, 91, 41}));
+        assertEquals(128, single.getHeight());
+        assertEquals(272, single.getWidth());
+        assertEquals(272, two.getWidth(), "same scale as one line");
+        assertEquals(320, two.getHeight(), "two lines of 112 px plus the gap and margins");
+        assertModelShape(two);
     }
 
     @Test
