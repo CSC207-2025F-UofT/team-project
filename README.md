@@ -115,6 +115,30 @@ Extensions:
 The system informs the user that the movie is already in their favourites.
 The system does not add the movie again.
 
+### Use Case 5
+Use Case: View movie posters
+
+Primary actor: User viewing search results or movie details
+
+Preconditions:
+The user is logged in.
+The user has searched for a movie or selected a movie to view.
+
+Trigger: The system loads the search results or the user opens a movie's details page.
+
+Success outcome: The movie poster is retrieved and displayed clearly alongside the movie information.
+
+Main success scenario:
+
+The user searches for a movie or selects a movie from the list.
+The system requests the movie poster image from the database/API.
+The system displays the movie poster to the user.
+
+Extensions:
+
+2a. The movie poster is unavailable or fails to load.
+The system displays a default placeholder image instead.
+
 ### Use Case 6
 Use Case: View past comments and movie ratings
 
@@ -149,7 +173,7 @@ the system does not display any comments or ratings
 | Syaikha Faiza Arifin | Use Case #3: Add a movie to watchlist |
 | Yuxuan Lin | Use Case #4: Add a movie to favourites |
 | Frank Li | Use Case |
-| Zhanyuan Su | Use Case |
+| Zhanyuan Su | Use Case#5：View movie posters |
 ---
 ## Entities
 ### Entity 1: Movie
