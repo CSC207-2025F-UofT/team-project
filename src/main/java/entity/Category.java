@@ -1,3 +1,4 @@
+package entity;
 
 public class Category {
 
@@ -15,7 +16,7 @@ public class Category {
 
         if (name == null || name.isBlank()) {
             throw new IllegalArgumentException(
-                    "Category name cannot be empty"
+                    "Entity.Category name cannot be empty"
             );
         }
 
@@ -51,7 +52,7 @@ public class Category {
     public void setName(String name) {
         if (name == null || name.isBlank()) {
             throw new IllegalArgumentException(
-                    "Category name cannot be empty"
+                    "Entity.Category name cannot be empty"
             );
         }
         this.name = name;

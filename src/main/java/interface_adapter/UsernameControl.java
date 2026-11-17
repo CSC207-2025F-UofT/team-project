@@ -1,3 +1,5 @@
+package interface_adapter;
+
 import org.json.JSONArray;
 import java.io.IOException;
 

@@ -24,7 +24,7 @@ abstract class JSONControl {
 
   public void writeContents() throws IOException {
     try {
-      Files.writeString(Path.of("src/main/data/" + this.fileName), this.contents.toString(4));
+      Files.writeString(Path.of("src/main/data/", this.fileName), this.contents.toString(4));
     } catch (IOException e) {
       System.out.println("Unable to write to file. Has " + this.fileName + " been removed or misnamed?");
       throw e;}

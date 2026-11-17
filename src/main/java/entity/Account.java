@@ -1,7 +1,14 @@
+package entity;
+
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.net.InetAddress;
 import java.util.Locale;
+
+import interface_adapter.AccountCreationControl;
+import interface_adapter.UserIDControl;
+import interface_adapter.UsernameControl;
+import interface_adapter.PasswordControl;
 
 
 public class Account {
@@ -27,19 +34,19 @@ public class Account {
 
       if (accountName == null || accountName.isBlank() || password == null || password.isBlank()) {
         throw new IllegalArgumentException(
-            "Account name or password cannot be empty!"
+            "Entity.Account name or password cannot be empty!"
         );
       } else if (allUsers.usernameTaken(accountName)) {
         throw new IllegalArgumentException(
-            "Account name has already been taken!"
+            "Entity.Account name has already been taken!"
         );
       } else if (!accountName.matches("[\\\\x21-\\\\x7E]+") || !password.matches("[\\\\x21-\\\\x7E]+")) {
         throw new IllegalArgumentException(
-            "Account name or password contains illegal characters, please restrict usage to only English letters, numbers, and symbols."
+            "Entity.Account name or password contains illegal characters, please restrict usage to only English letters, numbers, and symbols."
         );
       } else if (accountName.equals(password)) {
         throw new IllegalArgumentException(
-            "Account name can not be identical to the password!"
+            "Entity.Account name can not be identical to the password!"
         );
       } else if (balance < 0) {
         throw new IllegalArgumentException(
