@@ -40,6 +40,17 @@ public class SubmitApplicationInteractor implements SubmitApplicationInputBounda
             return;
         }
 
+        // Read everything the success message needs before saving, so a failure here
+        // never leaves a saved application that the adopter was not told about.
+        final String petName;
+        try {
+            petName = petDataAccess.getPetName(petId);
+        }
+        catch (RuntimeException ex) {
+            presenter.prepareFailView("The pet's details could not be loaded. Please try again.");
+            return;
+        }
+
         final Application application;
         try {
             application = new Application(UUID.randomUUID().toString(), adopterId, petId,
@@ -59,7 +70,6 @@ public class SubmitApplicationInteractor implements SubmitApplicationInputBounda
             return;
         }
 
-        presenter.prepareSuccessView(
-                new SubmitApplicationOutputData(application.getId(), petDataAccess.getPetName(petId)));
+        presenter.prepareSuccessView(new SubmitApplicationOutputData(application.getId(), petName));
     }
 }
