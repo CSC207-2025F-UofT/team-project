@@ -18,13 +18,13 @@ public class Path {
     public List<int[]> generate(int seed, TerrainMap map, double pull, double wobble) {
         Random random = new Random(seed);
         double x = start[0], y = start[1];
-        double horizon = Math.toRadians(50);
-        double baseAngle = Math.atan2(end[1]-y, end[0]-x);
+        double horizon = Math.toRadians(50); // checks whether the path passes an "event horizon" by which point it can't turn back to reach the end
+        double baseAngle = Math.atan2(end[1]-y, end[0]-x); // angle between start and end
         double currentAngle = baseAngle;
         ArrayList<int[]> path = new ArrayList<>();
 
         while (Math.abs(end[0] - x) > 1.5 || Math.abs(end[1] - y) > 1.5) {
-            double angleTo = Math.atan2(end[1] - y, end[0] - x);
+            double angleTo = Math.atan2(end[1] - y, end[0] - x); // angle between current position in path and end
 
             double chosen = normalize(angleTo - currentAngle);
             for (int tries = 0; tries < 50; tries++) {
@@ -55,13 +55,6 @@ public class Path {
         double forward =  dx * Math.cos(baseAngle) + dy * Math.sin(baseAngle);
         double lateral = -dx * Math.sin(baseAngle) + dy * Math.cos(baseAngle);
         return forward > 0 && Math.abs(lateral) <= forward * Math.tan(horizon);
-    }
-
-    public static void main(String[] args) {
-        Path path = new Path(new int[]{0, 0}, new int[]{420, 100}, 3);
-        for (int[] p : path.generate(42, new TerrainMap(1024,1024),0.1, 0.1)) {
-            System.out.println(Arrays.toString(p));
-        }
     }
 }
 
