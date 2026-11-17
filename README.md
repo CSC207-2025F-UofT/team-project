@@ -63,6 +63,30 @@ The system explains that the movie is not found.
 The system does not display the movie details.
 
 ### Use Case 2
+Use Case:View movie details
+
+Primary actor:User who wants to view the details of a searched movie
+
+Preconditions:
+
+The user is logged in. 
+The user has searched for a movie and is viewing the search results.
+Trigger:The user clicks on a specific movie item.
+
+
+Success outcome:The system displays the detailed information of the movie.
+
+Main success scenario:
+
+The user clicks on a movie item.
+The system retrieves the movie details.
+The system displays the synopsis, rating, year, and cast.
+
+Extensions:
+
+2a. The movie details cannot be retrieved.
+The system displays an error message.
+
 ### Use Case 3
 Use Case: Add a movie to the watchlist
 
