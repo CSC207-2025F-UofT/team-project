@@ -84,6 +84,10 @@ Choose race and class.
 ## Entities
 ### Entity 1
 ### Entity 2
+Direction 
+
+• Values: NORTH, SOUTH, EAST, WEST
+
 Dungeon
 
 • Instance variables: floorNumber, rooms, currentRoom
