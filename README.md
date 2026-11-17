@@ -150,6 +150,7 @@
 * -name: String → the team's name
 * -score: int → the total number of points the team has earned in this current game
 #### Relevant Methods:
+* +Team(name: String)
 * +getName(): String → return the team's name
 * +addPoints(pointsToAdd: int): void → increment the team's score by the provided number of points
 * +getScore(): int → return the team's current score
