@@ -24,6 +24,6 @@ public class PlaceholderView extends JPanel implements ActivatableView {
     @Override 
     public void onActivated() {
         activations++;
-        label.setText(title + " (shown " + activations + "x");
+        label.setText(title + " (shown " + activations + "x)");
     }
 }
