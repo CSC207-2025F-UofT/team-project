@@ -3,6 +3,8 @@ package use_case.job_grouping;
 import entity.Student;
 import entity.StudentFactory;
 
+import java.util.ArrayList;
+
 /**
  * The Change Password Interactor.
  */
@@ -26,7 +28,7 @@ public class ChangePasswordInteractor implements ChangePasswordInputBoundary {
         }
         else {
             final Student student = studentFactory.create(changePasswordInputData.getUsername(),
-                    changePasswordInputData.getPassword());
+                    changePasswordInputData.getPassword(), new ArrayList<>(), new ArrayList<>());
 
             userDataAccessObject.changePassword(student);
 
