@@ -140,9 +140,11 @@ Main Success Scenario:
 ## Minimal Viable Product (MVP)
 | Team Member | MVP Use Case |
 |-------------|--------------|
+| Grace | Use Case 1 |
 | Ema | Use Case 2 |
-| Name | Use Case |
-| Name | Use Case |
+| Ava | Use Case 3 |
+| Miray | Use Case 4|
+| Sohia | Use Case 5|
 --
 
 ## Entities
