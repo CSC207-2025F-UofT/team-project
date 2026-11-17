@@ -48,7 +48,26 @@
  * #### 2a. There are no unused questions available to be played
     i. The system explains that a new question cannot be loaded.\
     ii. The system does not load a new question, and the use case ends.
-### Use Case 3
+
+### Use Case 3: Guess Input
+#### Preconditions:
+* The game is currently running
+* There is an active question, i.e. a current question board is loaded.
+
+#### Trigger:
+* The host inputs to the system to check if the contestants answer is valid.
+#### Main success scenario:
+1. The host inputs the answer to the system.
+2. The system checks that the answer is in the list of correct answers.
+3. The system displays where that answer was along with the points for the answer.
+4. The system changes the active display to accommodate the correct and displays the answer on the game board.
+5. The system updates the teams score with their answers score.
+6. The system starts a new round of play with the selected question.
+#### Extensions:
+* #### 2a. The answer is not in the list of correct answers
+  i. The system does not reward any points.
+  ii. If the contestants now have 3 wrong answers the team swaps.
+
 ### Use Case 4
 ### Use Case 5: Start a New Game
 #### Primary actor:
