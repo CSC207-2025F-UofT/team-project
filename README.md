@@ -228,6 +228,23 @@ to the original application pages. Searches will cover only the
 configured company job boards.
 ---
 ## Design Diagrams
+### Profile — Class Diagrams
+
+![UC5 Create Profile class diagram](profile-uml/svg/03_createprofile_classes.svg)
+
+![UC6 Update Profile class diagram](profile-uml/svg/04_updateprofile_classes.svg)
+
+![UC7 Recommendations class diagram](profile-uml/svg/05_recommendation_classes.svg)
+
+### Profile — Sequence Diagrams
+
+![UC5 Create Profile sequence](profile-uml/svg/09_create_core.svg)
+
+![UC6 Load Profile sequence](profile-uml/svg/10_update_load.svg)
+
+![UC6 Save Profile Changes sequence](profile-uml/svg/11_update_save.svg)
+
+![UC7 Recommendations sequence](profile-uml/svg/12_recommendation_core.svg)
 ### UML Class Diagram
 ### Sequence Diagrams
 ---
