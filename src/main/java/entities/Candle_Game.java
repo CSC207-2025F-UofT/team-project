@@ -10,13 +10,6 @@ public class Candle_Game {
     private GameCondition gameCondition; // If the game was Won, Lost, still going
     private  List<Guess> guesses;
 
-    enum GameCondition{
-        WON,
-        LOSS,
-        QUIT,
-        TIME_ENDED,
-        ON_GOING,
-    }
 
 
     public Candle_Game(String secretCode, int maxTries) {
@@ -69,7 +62,7 @@ public class Candle_Game {
     }
 
     public static String secretCode(){
-        return
+        return secretCode();
     }
 
 
