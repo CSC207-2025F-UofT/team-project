@@ -15,7 +15,7 @@ public class BookFactory {
      * @param isbn the isbn of the book, may be null
      * @param genre the genre of the book, may be null
      * @param coverID the coverID of the book, may be null
-     * @return a new Book.
+     * @return a new Book
      */
 
     public Book create(String openLibraryId, String title, String author,
