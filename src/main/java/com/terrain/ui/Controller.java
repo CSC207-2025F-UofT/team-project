@@ -2,6 +2,7 @@ package com.terrain.ui;
 
 import com.terrain.generation.GenerationSettings;
 import com.terrain.generation.TerrainGenerator;
+import com.terrain.model.feature.Feature;
 import com.terrain.model.feature.FeatureType;
 
 // Connects the UI to generation.
@@ -14,19 +15,25 @@ public class Controller {
     public Controller(SettingsPanel settingsPanel, MapView mapView) {
         this.settingsPanel = settingsPanel;
         this.mapView = mapView;
+        settingsPanel.setWorldSettings(settings.world);
+        settingsPanel.setOnWorldChanged(this::onWorldSizeChanged);
     }
 
     // "New feature" button.
     public void onNewFeature(FeatureType type) {
         var feature = settings.addFeature(type);
         // Not sure if this is the best place for setMapSize.
-        feature.setMapSize(settings.world.width, settings.world.height);
+        feature.setMapSize(settings.world.mapWidth(), settings.world.mapHeight());
         settingsPanel.addFeatureSection(feature);
+    }
+
+    public void onRemoveFeature(Feature feature) {
+        settings.removeFeature(feature);
     }
 
     // Call after the world dimensions change so existing coordinate parameters clamp immediately.
     public void onWorldSizeChanged() {
-        settings.features.forEach(feature -> feature.setMapSize(settings.world.width, settings.world.height));
+        settings.features.forEach(feature -> feature.setMapSize(settings.world.mapWidth(), settings.world.mapHeight()));
     }
 
     // "Generate" button.

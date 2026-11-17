@@ -20,5 +20,9 @@ public class GenerationSettings {
         return feature;
     }
 
-    // TODO: remove feature, reorder features, etc. (for the UI)
+    public void removeFeature(Feature feature) {
+        features.remove(feature);
+    }
+
+    // TODO: reorder features, etc. (for the UI)
 }

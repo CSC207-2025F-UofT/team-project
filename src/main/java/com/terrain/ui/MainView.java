@@ -1,13 +1,26 @@
 package com.terrain.ui;
 
+import javafx.scene.control.SplitPane;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.VBox;
+
 // Main application window and layout
-public class MainView {
-    SettingsPanel settingsPanel = new SettingsPanel();
-    MapView mapView = new MapView();
-    Controller controller = new Controller(settingsPanel, mapView);
+public class MainView extends SplitPane {
+//    Controller controller = new Controller(settingsPanel, mapView);
 
-    // TODO: Implement the main view layout
+    private final SettingsPanel settingsPanel;
+    private final MapView mapView;
 
-    // Will wire UI events to the controller, e.g. "new feature" button calls controller.onNewFeature(...), etc.
+    public MainView() {
+        this.settingsPanel = new SettingsPanel();
+        this.mapView = new MapView();
+        Controller controller = new Controller(settingsPanel, mapView);
+        settingsPanel.setOnAddFeature(controller::onNewFeature);
+        settingsPanel.setOnRemoveFeature(controller::onRemoveFeature);
+        settingsPanel.setOnGenerate(controller::onGenerate);
 
+        // implicit SplitPane.getItems() ...
+        getItems().addAll(settingsPanel, mapView);
+        setDividerPositions(0.25);
+    }
 }
