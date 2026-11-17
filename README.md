@@ -129,7 +129,7 @@
 ### Entity 3: Team
 #### Instance Variables:
 * -name: String → the team's name
-* score: int → the total number of points the team has earned in this current game
+* -score: int → the total number of points the team has earned in this current game
 #### Relevant Methods:
 * +getName(): String → return the team's name
 * +addPoints(pointsToAdd: int): void → increment the team's score by the provided number of points
