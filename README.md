@@ -102,7 +102,7 @@
 ## Minimal Viable Product (MVP)
 | Team Member | MVP Use Case |
 |-------------|--------------|
-| Charlie Neale | Use Case |
+| Charlie Neale | Guess Input |
 | Caleb Gawthroupe | Start a New Game |
 | Kevin Liu | Use Case |
 | Jacob Chislett | Display a new question |
@@ -123,8 +123,9 @@
 ---
 ## API Usage
 **API Name: MongoDB**
-**Documentation:** [Link]
+**Documentation:** [Link](https://www.mongodb.com/docs/languages/java/)
 **How it is used in the program:**
+Stores and fetches team, question and answer data in remote database. 
 ---
 ## Design Diagrams
 ### UML Class Diagram
