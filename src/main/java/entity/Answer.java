@@ -13,7 +13,7 @@ public class Answer {
     private final int score;
 
     /**
-     * Creates a new user with the given non-empty primaryAnswer, the given positive score, and the given
+     * Creates a new Answer with the given non-empty primaryAnswer, the given positive score, and the given
      * acceptedVariants.
      * @param primaryAnswer the main answer associated with this object
      * @param acceptedVariants additional accepted answers tied to this object
