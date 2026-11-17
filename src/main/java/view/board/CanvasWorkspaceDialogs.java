@@ -30,8 +30,18 @@ public final class CanvasWorkspaceDialogs {
         this.parent = Objects.requireNonNull(parent);
     }
 
-    /** Save immediately when named; request a name only on the first save. */
-    public void save() { saveCurrent(false); }
+    /** Save immediately when named, and never overwrite an unchanged saved canvas. */
+    public void save() {
+        if (workspace.currentId().isPresent() && !hasUnsavedChanges()) return;
+        saveCurrent(false);
+    }
+
+    /** A plain, immutable state snapshot for the workspace toolbar (the domain never knows Swing). */
+    public SaveMenuState saveMenuState() {
+        if (workspace.currentId().isEmpty()) return SaveMenuState.newCanvas();
+        return new SaveMenuState(currentName, hasUnsavedChanges()
+                ? SaveMenuState.Phase.MODIFIED : SaveMenuState.Phase.SAVED);
+    }
 
     /** The caller may bind this to Shift+Ctrl/Cmd+S or a menu action. */
     public void saveAs() { saveCurrent(true); }
@@ -63,28 +73,66 @@ public final class CanvasWorkspaceDialogs {
                 !CanvasStateComparison.same(lastSavedState, current);
     }
 
+    private boolean confirmDiscardOrSave() {
+        if (!hasUnsavedChanges()) return true;
+        GlassDialogs.UnsavedDecision decision = GlassDialogs.unsavedChanges(parent, currentName);
+        return decision == GlassDialogs.UnsavedDecision.DONT_SAVE
+                || (decision == GlassDialogs.UnsavedDecision.SAVE && saveCurrent(false));
+    }
+
+    /** New is intentionally unsaved until the first Save prompts for a name. */
+    public void newCanvas() {
+        if (!confirmDiscardOrSave()) return;
+        try {
+            canvas.restoreCanvasState(new CanvasState(List.of(), List.of(), List.of(), 1, 0, 0));
+            workspace.newCanvas();
+            lastSavedState = null;
+            currentName = "Untitled canvas";
+        } catch (IOException failure) {
+            GlassNotices.showError(parent, "Can't create canvas", failure.getMessage());
+        }
+    }
+
     public void open() {
         try {
-            List<SavedCanvas> documents = workspace.all();
-            if (documents.isEmpty()) {
-                GlassDialogs.info(parent, "No saved canvases yet. Use Save to create one.");
+            SavedCanvasChooser picker = new SavedCanvasChooser(workspace.all());
+            if (!GlassDialogs.choose(parent, "", picker, "Open", picker::onDoubleClick)) return;
+            if (picker.choice() == SavedCanvasChooser.Choice.NEW) {
+                newCanvas();
                 return;
             }
-            SavedCanvasChooser picker = new SavedCanvasChooser(documents);
-            if (!GlassDialogs.choose(parent, "", picker, "Open", picker::onDoubleClick)) return;
             SavedCanvas chosen = picker.selected();
             if (chosen == null) return;
-            if (hasUnsavedChanges()) {
-                GlassDialogs.UnsavedDecision decision = GlassDialogs.unsavedChanges(parent, currentName);
-                if (decision == GlassDialogs.UnsavedDecision.CANCEL) return;
-                if (decision == GlassDialogs.UnsavedDecision.SAVE && !saveCurrent(false)) return;
+            if (picker.choice() == SavedCanvasChooser.Choice.RENAME) {
+                rename(chosen);
+                return;
             }
+            if (!confirmDiscardOrSave()) return;
             SavedCanvas opened = workspace.open(chosen.id());
             canvas.restoreCanvasState(opened.state());
             currentName = opened.name();
             lastSavedState = canvas.exportCanvasState();
         } catch (IOException | IllegalArgumentException failure) {
             GlassNotices.showError(parent, "Can't open canvas", failure.getMessage());
+        }
+    }
+
+    /** A rename updates metadata only; it does not discard or overwrite unsaved ink. */
+    private void rename(SavedCanvas chosen) {
+        String name = GlassDialogs.input(parent, "Rename Canvas", "Name", chosen.name(), "Rename");
+        if (name == null) return;
+        if (name.isBlank()) {
+            GlassDialogs.warning(parent, "Please provide a canvas name.");
+            return;
+        }
+        try {
+            SavedCanvas renamed = workspace.rename(chosen.id(), name);
+            if (workspace.currentId().filter(chosen.id()::equals).isPresent()) {
+                currentName = renamed.name();
+            }
+            GlassNotices.showSuccess(parent, "Renamed to “" + renamed.name() + "”");
+        } catch (IOException | IllegalArgumentException failure) {
+            GlassNotices.showError(parent, "Can't rename canvas", failure.getMessage());
         }
     }
 

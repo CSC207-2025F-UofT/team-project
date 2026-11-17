@@ -5,58 +5,107 @@ import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import java.awt.BasicStroke;
-import java.awt.GradientPaint;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.FontMetrics;
+import java.awt.GradientPaint;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.GridLayout;
 import java.awt.RenderingHints;
 import java.awt.geom.RoundRectangle2D;
+import java.util.Objects;
 
-/** Compact, icon-gutter-free glass menu for the two canvas save commands. View layer only. */
+/**
+ * Small liquid-glass menu for canvas persistence. The caller provides save callbacks and state;
+ * the menu neither mutates the canvas nor accesses storage. No shortcut/icon columns are reserved.
+ */
 final class GlassSaveMenu extends JPopupMenu {
-    private static final int MENU_WIDTH = 198;
-    private static final Color INK = new Color(35, 42, 54);
+    private static final Color INK = new Color(28, 35, 47);
+    private static final Color MUTED = new Color(99, 105, 117);
+    private static final int INNER_GAP = 4;
+    private final JPanel rows;
 
-    GlassSaveMenu(Runnable save, Runnable saveAs) {
+    GlassSaveMenu(SaveMenuState state, Runnable save, Runnable saveAs) {
+        Objects.requireNonNull(state);
+        Objects.requireNonNull(save);
+        Objects.requireNonNull(saveAs);
         setOpaque(false);
         setBackground(new Color(0, 0, 0, 0));
-        setBorder(BorderFactory.createEmptyBorder(5, 5, 7, 5));
-        JPanel rows = new JPanel(new GridLayout(2, 1, 0, 2)) {
-            @Override protected void paintComponent(Graphics g) {
-                Graphics2D g2 = (Graphics2D) g.create();
-                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                RoundRectangle2D shell = new RoundRectangle2D.Double(0, 0, getWidth()-1, getHeight()-1, 18, 18);
-                g2.setPaint(new GradientPaint(0, 0, new Color(255, 255, 255, 253),
-                        0, getHeight(), new Color(244, 248, 253, 246)));
-                g2.fill(shell);
-                g2.setColor(new Color(208, 215, 225, 135));
-                g2.setStroke(new BasicStroke(1f));
-                g2.draw(shell);
-                g2.dispose();
+        setBorder(BorderFactory.createEmptyBorder(5, 5, 8, 5));
+        rows = new JPanel(null) {
+            @Override protected void paintComponent(Graphics graphics) {
+                Graphics2D g = (Graphics2D) graphics.create();
+                g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                RoundRectangle2D border = new RoundRectangle2D.Double(.5, .5,
+                        getWidth() - 1.0, getHeight() - 1.0, 19, 19);
+                g.setPaint(new GradientPaint(0, 0, new Color(255, 255, 255, 253),
+                        0, getHeight(), new Color(246, 248, 253, 248)));
+                g.fill(border);
+                g.setStroke(new BasicStroke(1f));
+                g.setColor(new Color(198, 205, 216, 145));
+                g.draw(border);
+                g.dispose();
             }
         };
         rows.setOpaque(false);
-        rows.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
-        rows.add(new MenuAction("Save current canvas", "save-current-canvas", () -> {
-            setVisible(false);
-            save.run();
-        }));
-        rows.add(new MenuAction("Save As…", "save-as-new-canvas", () -> {
-            setVisible(false);
-            saveAs.run();
-        }));
+        if (state.phase() == SaveMenuState.Phase.NEW) {
+            addRow("Save New Canvas…", "Give this canvas a name", "save-current-canvas", save);
+        } else {
+            if (state.canSaveInPlace()) {
+                addRow("Save to “" + state.compactName() + "”", "Update the saved version", "save-current-canvas", save);
+            }
+            addRow("Save as New Canvas…", "Keep the original and save a copy", "save-as-new-canvas", saveAs);
+        }
+        rows.setPreferredSize(new Dimension(menuInnerWidth(), menuInnerHeight()));
         add(rows);
     }
 
-    /** A JButton rather than a JMenuItem removes the OS Look-and-Feel icon gutter. */
+    private void addRow(String label, String description, String name, Runnable action) {
+        rows.add(new MenuAction(label, description, name, () -> {
+            setVisible(false);
+            action.run();
+        }));
+    }
+
+    private int menuInnerWidth() {
+        int width = 0;
+        for (var child : rows.getComponents()) {
+            width = Math.max(width, child.getPreferredSize().width);
+        }
+        return width + 2 * INNER_GAP + 10;
+    }
+
+    private int menuInnerHeight() {
+        return rows.getComponentCount() * 58 + (rows.getComponentCount() - 1) * 1 + INNER_GAP * 2;
+    }
+
+    @Override public void doLayout() {
+        super.doLayout();
+        layoutRows();
+    }
+
+    private void layoutRows() {
+        int y = INNER_GAP;
+        for (var component : rows.getComponents()) {
+            component.setBounds(INNER_GAP, y, rows.getWidth() - INNER_GAP * 2, 58);
+            y += 59;
+        }
+    }
+
+    @Override public Dimension getPreferredSize() {
+        Dimension inner = rows.getPreferredSize();
+        return new Dimension(inner.width + 10, inner.height + 13);
+    }
+
+    /** Custom-drawn JButton avoids the default platform JMenuItem icon/shortcut gutters. */
     static final class MenuAction extends JButton {
-        MenuAction(String text, String name, Runnable action) {
-            super(text);
+        private final String description;
+        MenuAction(String title, String description, String name, Runnable action) {
+            super(title);
+            this.description = description;
             setName(name);
-            setFont(BoardTheme.font(13f));
+            setFont(BoardTheme.font(13.5f));
             setFocusable(false);
             setOpaque(false);
             setContentAreaFilled(false);
@@ -65,18 +114,29 @@ final class GlassSaveMenu extends JPopupMenu {
             setRolloverEnabled(true);
             addActionListener(e -> action.run());
         }
-        @Override public Dimension getPreferredSize() { return new Dimension(GlassSaveMenu.MENU_WIDTH - 22, 34); }
+        String getDescription() { return description; }
+        @Override public Dimension getPreferredSize() {
+            FontMetrics titleMetrics = getFontMetrics(getFont());
+            Font small = BoardTheme.font(11.3f);
+            FontMetrics detailMetrics = getFontMetrics(small);
+            return new Dimension(Math.max(170, Math.max(titleMetrics.stringWidth(getText()),
+                    detailMetrics.stringWidth(description)) + 32), 58);
+        }
         @Override protected void paintComponent(Graphics graphics) {
             Graphics2D g = (Graphics2D) graphics.create();
             g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-            if (getModel().isRollover() || getModel().isPressed()) {
-                g.setColor(getModel().isPressed() ? new Color(206, 224, 248) : new Color(233, 241, 253));
-                g.fillRoundRect(0, 0, getWidth(), getHeight(), 11, 11);
+            g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+            if (getModel().isPressed() || getModel().isRollover()) {
+                g.setColor(getModel().isPressed() ? new Color(213, 229, 251)
+                        : new Color(234, 242, 255));
+                g.fillRoundRect(2, 2, getWidth() - 4, getHeight() - 4, 12, 12);
             }
-            g.setColor(INK);
             g.setFont(getFont());
-            FontMetrics fm = g.getFontMetrics();
-            g.drawString(getText(), 11, (getHeight() + fm.getAscent() - fm.getDescent()) / 2);
+            g.setColor(INK);
+            g.drawString(getText(), 14, 25);
+            g.setFont(BoardTheme.font(11.3f));
+            g.setColor(MUTED);
+            g.drawString(description, 14, 42);
             g.dispose();
         }
     }

@@ -6,33 +6,35 @@ import view.DrawingCanvas;
 
 import javax.swing.JButton;
 import javax.swing.JPanel;
-import javax.swing.JPopupMenu;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
-/** Save and Save As must be distinct commands in the visible Save menu. */
+/** Verify the split Save menu delegates to two independent composition-root commands. */
 class BoardSaveMenuTest {
-    @Test
-    void saveMenuOffersBothActionsWithoutConfusingDestinations() {
+    @Test void dirtyCanvasMenuCallsSaveAndSaveAsSeparately() {
         AtomicInteger saved = new AtomicInteger();
         AtomicInteger savedAs = new AtomicInteger();
         BoardWindow board = new BoardWindow(new JPanel(), new DrawingCanvas(),
                 host -> new HistoryPanel(new HistoryViewModel(), host), new JPanel(),
                 id -> false, saved::incrementAndGet, savedAs::incrementAndGet, () -> { });
-        JPopupMenu menu = board.createSaveMenu();
-        assertEquals(1, menu.getComponentCount());
-        javax.swing.JPanel rows = (javax.swing.JPanel) menu.getComponent(0);
-        assertEquals(2, rows.getComponentCount());
-        JButton first = (JButton) rows.getComponent(0);
-        JButton second = (JButton) rows.getComponent(1);
-        assertEquals("save-current-canvas", first.getName());
-        assertEquals("save-as-new-canvas", second.getName());
-        first.doClick();
+        board.setSaveStateSupplier(() -> new SaveMenuState("123", SaveMenuState.Phase.MODIFIED));
+        var rows = (JPanel) board.createSaveMenu().getComponent(0);
+        ((JButton) rows.getComponent(0)).doClick();
         assertEquals(1, saved.get());
         assertEquals(0, savedAs.get());
-        second.doClick();
+        ((JButton) rows.getComponent(1)).doClick();
         assertEquals(1, saved.get());
         assertEquals(1, savedAs.get());
+    }
+
+    @Test void cleanCanvasMenuDoesNotOfferRedundantOverwrite() {
+        BoardWindow board = new BoardWindow(new JPanel(), new DrawingCanvas(),
+                host -> new HistoryPanel(new HistoryViewModel(), host), new JPanel(),
+                id -> false, () -> {}, () -> {}, () -> {});
+        board.setSaveStateSupplier(() -> new SaveMenuState("123", SaveMenuState.Phase.SAVED));
+        var rows = (JPanel) board.createSaveMenu().getComponent(0);
+        assertEquals(1, rows.getComponentCount());
+        assertEquals("save-as-new-canvas", rows.getComponent(0).getName());
     }
 }

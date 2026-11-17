@@ -44,6 +44,26 @@ class CanvasWorkspaceTest {
         assertThrows(IllegalArgumentException.class,()->uc.save(EMPTY,"  ",true));
         assertThrows(IOException.class,()->uc.open(UUID.randomUUID().toString()));
     }
+    @Test void newCanvasDetachesWithoutDestroyingPreviousFile() throws IOException {
+        var repo = new MemoryRepository(); var uc = new CanvasWorkspace(repo);
+        var original = uc.save(EMPTY, "Original", false);
+        uc.newCanvas();
+        assertTrue(uc.currentId().isEmpty());
+        var fresh = uc.save(EMPTY, "Fresh", false);
+        assertNotEquals(original.id(), fresh.id());
+        assertEquals(2, repo.saved.size());
+    }
+    @Test void renameKeepsIdStateAndActiveSelection() throws IOException {
+        var repo = new MemoryRepository(); var uc = new CanvasWorkspace(repo);
+        var first = uc.save(EMPTY, "Before", false);
+        var second = uc.save(EMPTY, "Another", true);
+        var renamed = uc.rename(first.id(), "After");
+        assertEquals(first.id(), renamed.id());
+        assertEquals(EMPTY, renamed.state());
+        assertEquals(second.id(), uc.currentId().orElseThrow());
+        assertEquals("After", uc.open(first.id()).name());
+        assertEquals(2, repo.saved.size());
+    }
     @Test void failedStorageDoesNotChangeCurrentId() {
         CanvasRepository broken=new CanvasRepository(){
             public List<SavedCanvas> list(){return List.of();}

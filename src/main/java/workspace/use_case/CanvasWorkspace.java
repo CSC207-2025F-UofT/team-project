@@ -42,5 +42,16 @@ public final class CanvasWorkspace implements CanvasWorkspaceBoundary {
         currentId = id;
         return next;
     }
-    public void forgetCurrent() { currentId = null; }
+    /** Start an unsaved document without touching any persisted canvas. */
+    @Override public void newCanvas() { currentId = null; }
+
+    /** Rename a saved document without changing its identity or the active document. */
+    @Override public SavedCanvas rename(String id, String name) throws IOException {
+        SavedCanvas previous = repository.find(Objects.requireNonNull(id))
+                .orElseThrow(() -> new IOException("Saved canvas was not found"));
+        SavedCanvas renamed = new SavedCanvas(previous.id(), name.trim(), clock.instant(), previous.state());
+        repository.write(renamed);
+        return renamed;
+    }
+    public void forgetCurrent() { newCanvas(); }
 }

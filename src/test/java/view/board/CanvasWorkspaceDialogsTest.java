@@ -18,6 +18,21 @@ import static org.junit.jupiter.api.Assertions.*;
 /** No real modal windows: verifies snapshot-aware unsaved detection after startup/open. */
 class CanvasWorkspaceDialogsTest {
     @TempDir Path temp;
+    @Test void unchangedSaveDoesNotRewriteAnExistingCanvas() throws Exception {
+        var repository = new FileCanvasRepository(temp);
+        var workspace = new CanvasWorkspace(repository);
+        var canvas = new DrawingCanvas();
+        var snapshot = workspace.save(canvas.exportCanvasState(), "Saved drawing", false);
+        var dialogs = new CanvasWorkspaceDialogs(new CanvasWorkspace(repository), canvas, new JPanel());
+        dialogs.restoreLatestAtStartup();
+        assertEquals(SaveMenuState.Phase.SAVED, dialogs.saveMenuState().phase());
+        var before = repository.find(snapshot.id()).orElseThrow();
+        dialogs.save();
+        var persisted = repository.find(snapshot.id()).orElseThrow();
+        assertEquals(before.modifiedAt(), persisted.modifiedAt(),
+                "Clicking Saved must not rewrite an unchanged canvas");
+    }
+
     @Test void startupOpenIsCleanAndEditingOrUndoUpdatesDirtyStatus() throws Exception {
         var repo = new FileCanvasRepository(temp);
         var initial = new DrawingCanvas();
@@ -30,9 +45,13 @@ class CanvasWorkspaceDialogsTest {
         var dialogs = new CanvasWorkspaceDialogs(new CanvasWorkspace(repo), restored, new JPanel());
         dialogs.restoreLatestAtStartup();
         assertFalse(dialogs.hasUnsavedChanges());
+        assertEquals(SaveMenuState.Phase.SAVED, dialogs.saveMenuState().phase());
+        assertEquals("课程笔记", dialogs.saveMenuState().name());
         restored.addHistoryAsset(drawing, "x^2", "", new Point(80, 75));
         assertTrue(dialogs.hasUnsavedChanges());
+        assertEquals(SaveMenuState.Phase.MODIFIED, dialogs.saveMenuState().phase());
         restored.undo();
         assertFalse(dialogs.hasUnsavedChanges());
+        assertEquals(SaveMenuState.Phase.SAVED, dialogs.saveMenuState().phase());
     }
 }
