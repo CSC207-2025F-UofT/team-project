@@ -34,18 +34,17 @@
 * The game is running and the user has navigated to the "Add Question" screen.
 
 #### Trigger:
-* The user selects the "Add Question" option from the menu and submits a new question with its answers and point values.
+* The user selects the "Add Question" option from the menu and submits a new question with its answers.
 #### Main success scenario:
-1. The user selects the "Add Question" from the main menu.
-2. The system displays the question creation frame.
-3. The user enters the question and answers.
-4. The user clicks the "Save" button.
-5. The system validates the input.
-6. The system create the Question entity and store it.
+1. The system displays the question creation frame.
+2. The user enters the question and answers.
+3. The system validates the input.
+4. The system creates the Question entity.
+5. The system saves the entity into the database.
 #### Extensions:
-* #### 5a: empty question or missing answers
+* #### 3a: empty question or missing answers
 * The system displays an error message. 
-* #### 5b: Duplicate Question
+* #### 3b: Duplicate Question
 * The system warns the user about the duplicate.
 
 ### Use Case 2: Display a new question
