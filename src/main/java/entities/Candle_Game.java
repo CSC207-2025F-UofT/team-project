@@ -1,6 +1,7 @@
 package entities;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class Candle_Game {
 
@@ -8,7 +9,7 @@ public class Candle_Game {
     private final String secretCode;  // holds the secret code
     private final int maxTries; // holds the max tries user can make
     private GameCondition gameCondition; // If the game was Won, Lost, still going
-    private  List<Guess> guesses;
+    private List<Guess> Guesses;
 
 
 
@@ -40,7 +41,7 @@ public class Candle_Game {
      * @return how many tries were attempted
      */
     public int getAttemptedTries() {
-        return guesses.size();
+        return Guesses.size();
     }
 
 
@@ -58,7 +59,7 @@ public class Candle_Game {
      */
     public List<Guess> getGuesses() {
 
-        return guesses;
+        return Guesses;
     }
 
     public static String secretCode(){
