@@ -1,0 +1,92 @@
+@startuml
+skinparam classAttributeIconSize 0
+
+class Bookshelf {
+  - books : List<Book>
+  + Bookshelf()
+  + getBooks() : List<Book>
+  + addBook(book : Book) : void
+  + removeBook(book : Book) : void
+  + sortBooks(comparator : Comparator<Book>) : void
+}
+
+class Book {
+  - openLibraryId : String
+  - title : String
+  - author : String
+  - isbn : String
+  - genre : String
+  - publicationYear : Integer
+  - coverID : Integer
+  - dateAdded : LocalDateTime
+  - shelved : boolean
+  - review : Review
+  + Book(openLibraryId : String, title : String, author : String, publicationYear : Integer,
+  isbn : String, genre : String, coverID : Integer, dateAdded : LocalDateTime)
+  + getOpenLibraryId() : String
+  + getTitle() : String
+  + getAuthor() : String
+  + getIsbn() : String
+  + getPublicationYear() : Integer
+  + getGenre() : String
+  + getDateAdded() : LocalDateTime
+  + isShelved() : boolean
+  + setShelved(shelved : boolean) : void
+  + getReview() : Review
+  + setReview(review : Review) : void
+  + toString() : String
+}
+
+class BookFactory {
+  + createBook(...) : Book
+}
+
+class Review {
+  + {static} MIN_RATING : int = 1
+  + {static} MAX_RATING : int = 5
+  - rating : int
+  - review : String
+  + Review(rating : int, review : String)
+  + getRating() : int
+  + getReview() : String
+}
+
+class BookDisplay {
+  - book : Book
+}
+
+interface "Comparator<Book>" as Comparator {
+  + compare(a : Book, b : Book) : int
+}
+
+class AuthorComparator {
+  + compare(a : Book, b : Book) : int
+}
+
+class DateAddedComparator {
+  + compare(a : Book, b : Book) : int
+}
+
+class RatingComparator {
+  + compare(a : Book, b : Book) : int
+}
+
+class TitleComparator {
+  + compare(a : Book, b : Book) : int
+}
+
+' realization
+AuthorComparator ..|> Comparator
+DateAddedComparator ..|> Comparator
+RatingComparator ..|> Comparator
+TitleComparator ..|> Comparator
+
+' association
+Bookshelf --> Book
+BookDisplay --> Book
+Book --> Review
+
+' creation
+BookFactory ..> Book : creates
+
+@enduml
