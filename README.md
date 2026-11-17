@@ -26,7 +26,7 @@ The goal of BookShelf is to provide users with an interactive and customizable s
 
 ## User Stories
 
-### User Story 1: Search and Add Books
+### User Story 1: Search
 
 As a user, I want to search for books by title and view their details so that I can discover books and add them to my personal bookshelf.
 
@@ -34,67 +34,62 @@ As a user, I want to search for books by title and view their details so that I 
 
 As a user, I want to rate books and write reviews or comments so that I can record and reflect on my reading experiences.
 
-### User Story 3: Manage My Bookshelf
+### User Story 3: Add Book to Shelf
+As a user, I want to add books to my personal bookshelf so that I can maintain a collection of books I have read.
 
-As a user, I want to add and remove books from my personal bookshelf so that I can maintain a collection of books I have read.
+### User Story 4: Delete Book from Shelf
+As a user, I want to delete books from my shelf as a way of managing what I own.
 
-### User Story 4: View and Organize Bookshelf
+### User Story 5: View and Organize Bookshelf
 
 As a user, I want to view my personal bookshelf in a visual layout and sort my books by different attributes so that I can easily browse and organize my collection.
-
-### User Story 5: Customize Bookshelf
-
-As a user, I want to rearrange the order of books on my bookshelf so that I can personalize its appearance according to my preferences.
 
 ---
 
 ## Use Cases
 
-### Use Case 1: Search and Add Books
+### Use Case 1: Search for Book
 
 - User enters a book title into the search bar.
 - System sends a search request to the Open Library API.
-- System displays matching books and their available information.
+- System displays matching books and their title, author, and cover.
 - User selects a book to view its details.
-- User chooses to add the book to their personal bookshelf.
-- System saves the book to the user's library and prevents duplicate entries.
 
 ### Use Case 2: Rate and Review Books
 
-- User selects a book from their bookshelf.
+- User selects a book through search or bookshelf.
 - User assigns a numerical rating (e.g., 1–5 stars).
 - User writes a review or comment.
 - System saves the rating and review alongside the book.
 - User can view their existing rating and review.
 
-### Use Case 3: Manage My Bookshelf
+### Use Case 3: Add Book
 
-- User navigates to their personal bookshelf.
-- User can view their saved books.
+- User chooses to add the book to their personal bookshelf.
+- System saves the book to the user's library and prevents duplicate entries.
+- Takes information from API, rating, review, and date added.
+- Book is displayed on bookshelf.
+
+### Use Case 4: Delete Book
 - User selects a book they want to remove.
 - User chooses the remove option.
 - System removes the selected book from their bookshelf.
+- User cannot remove book that was not on shelf previously.
 
-### Use Case 4: View and Organize Bookshelf
+### Use Case 5: View and Organize Bookshelf
 
 - User navigates to their bookshelf.
 - System retrieves the user's saved books.
 - System displays the books in a visual bookshelf layout, including their cover images.
 - User selects a sorting option.
 - Available sorting options include:
-    - Title (alphabetical order)
-    - Author (alphabetical order)
-    - Rating (highest to lowest or lowest to highest)
-    - Genre
-    - Date added (most recent first or oldest first)
+  - Title (alphabetical order)
+  - Author (alphabetical order)
+  - Rating (highest to lowest or lowest to highest)
+  - Genre
+  - Date added (most recent first or oldest first)
 - System rearranges the displayed books according to the selected criteria.
 
-### Use Case 5: Customize Bookshelf
-
-- User selects a book they want to reposition.
-- User moves the book to a different position in their bookshelf.
-- System saves the custom ordering.
-- Books are displayed in the user's preferred order.
 
 ---
 
@@ -105,11 +100,12 @@ The MVP will focus on implementing the essential functionality needed for users 
 | Team Member | MVP Use Case |
 |-------------|--------------|
 | Lanqing | Search for books using the Open Library API |
-| Name | View book details and retrieve book cover images |
-| Name | Add and remove books from the personal bookshelf |
-| Name | Rate and review books |
+| Lanqing| View book details and retrieve book cover images |
+| Allison | Add boioks to the personal bookshelf |
+| Wineta | Remove books from the personal bookshelf|
+| Evana | Rate and review books |
 | Annie | Display the bookshelf and implement sorting by title, author, and rating |
-| Name | Manage bookshelf data and integrate the application's functionality |
+| Wineta | Manage bookshelf data and integrate the application's functionality |
 
 **Post-MVP Features:**
 - Sorting by genre and date added.
