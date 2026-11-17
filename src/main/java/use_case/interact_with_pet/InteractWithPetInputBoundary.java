@@ -7,8 +7,8 @@ public interface InteractWithPetInputBoundary {
 
     /**
      * Execute the Interact_with_pet Use Case.
-     * @param interactWithPetInputBoundary the input data for this use case
+     * @param inputData the input data for this use case
      */
-    void execute(InteractWithPetInputBoundary interactWithPetInputBoundary);
+    void execute(InteractWithPetInputData inputData);
 
 }
