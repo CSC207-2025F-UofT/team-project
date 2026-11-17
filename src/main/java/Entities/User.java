@@ -27,6 +27,10 @@ public class User {
         this.password = password;
     }
 
+    public UserProfile getUserProfile() {
+        return profile;
+    }
+
     public static User UserFactory(String username, String password, UserProfile profile) throws IllegalArgumentException { 
         if (username == null) {
             throw new IllegalArgumentException("Username is required.");
