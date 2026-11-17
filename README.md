@@ -101,6 +101,22 @@ Student's guess is invalid
 1. The system detects that the guess has invalid characters.
 2. The submit button is disabled until a valid guess is detected. 
 ### Use Case 4 
+Name: Start the Candle Game 
+Primary Actor: Student
+Preconditions: Break Timer is on, student is in the right page
+Trigger: Student clicks the button linked to the break page
+Success Outcome: Game page is open, ready to work and take students input
+Main Success Scenario:
+Student clicks the button linked to the break page 
+Program checks if Break Timer is on, if it is;
+Game creates a secret code and a new game
+The system opens the game window showing the candles, Break Timer, and the tries left.
+Extensions:
+- If Break Timer is not active then the program does not let users access the game.
+- If Student clicks the quit button, program marks Game Condition as “QUIT” and student returns to the focus page
+- If Student clicks the instructions button, the program shows instructions in a pop up screen.
+- If Break Timer runs out before the end of the game, student gets back to the focus page 
+
 ### Use Case 5  Studying flashcards
 Primary Actor: Student 
 Preconditions: Flashcards are generated properly 
