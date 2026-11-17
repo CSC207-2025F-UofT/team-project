@@ -64,7 +64,7 @@ These apply to every use case below, so they are stated once here.
 
 ### Use Case 1: Create a trip with members
 
-**Lead:** _(add name)_
+**Lead:** Tamima Wadageri
 
 **Sketches:** [main flow](docs/ui-sketches/uc1-create-trip.png), [error cases](docs/ui-sketches/uc1-create-trip-errors.png)
 
@@ -106,7 +106,7 @@ These apply to every use case below, so they are stated once here.
 
 ### Use Case 2: Log a savings contribution
 
-**Lead:** 
+**Lead:** Emily Tran
 
 **Sketches:** [main flow](docs/ui-sketches/uc2-contribution.png), [alternative outcomes](docs/ui-sketches/uc2-contribution-alt.png), [error cases](docs/ui-sketches/uc2-contribution-errors.png)
 
@@ -142,7 +142,7 @@ These apply to every use case below, so they are stated once here.
 
 ### Use Case 3: Log an expense
 
-**Lead:** 
+**Lead:** Jadyn Nok Tong Mo
 
 **Sketches:** [main flow](docs/ui-sketches/uc3-log-expense.png), [error cases](docs/ui-sketches/uc3-log-expense-errors.png)
 
@@ -181,7 +181,7 @@ These apply to every use case below, so they are stated once here.
 
 ### Use Case 4: View the daily budget
 
-**Lead:**
+**Lead:** Yi Xuan (Jessica) Su
 
 **Sketches:** [main flow and alternative outcomes](docs/ui-sketches/uc4-daily-budget.png), [changing the budget](docs/ui-sketches/uc4-daily-budget-change.png)
 
@@ -224,7 +224,7 @@ These apply to every use case below, so they are stated once here.
 
 ### Use Case 5: Vote on activity ideas
 
-**Lead:** 
+**Lead:** Amelia Ha
 
 **Sketches:** [main flow](docs/ui-sketches/uc5-vote.png), [alternative flows](docs/ui-sketches/uc5-vote-alt.png)
 
@@ -264,11 +264,11 @@ All five use cases are in the MVP, and each member leads one. Sign up, log in an
 
 | Team Member | MVP Use Case |
 |-------------|--------------|
-| _(add name)_ | 1. Create a trip with members |
-| _(add name)_ | 2. Log a savings contribution |
-| _(add name)_ | 3. Log an expense |
-| _(add name)_ | 4. View the daily budget |
-| _(add name)_ | 5. Vote on activity ideas |
+| Tamima Wadageri | 1. Create a trip with members |
+| Emily Tran | 2. Log a savings contribution |
+| Jadyn Nok Tong Mo | 3. Log an expense |
+| Yi Xuan (Jessica) Su | 4. View the daily budget |
+| Amelia Ha | 5. Vote on activity ideas |
 
 Small supporting screens are needed to run these but are not use cases that anyone leads: the list of the user's trips and the trip screen that links to the five use cases, and a basic form to suggest an activity idea (so that there is something to vote on).
 
