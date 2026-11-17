@@ -3,7 +3,7 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-
+// am currently creating visual background + logo!!!
 public class Landingpage extends JFrame {
 
     public static void main(String[] args) {
