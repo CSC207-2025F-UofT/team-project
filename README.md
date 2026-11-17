@@ -87,8 +87,6 @@ The user must enter a name, select at least one base spirit, or both.
 
 ### Use Case 2 [Enhao]
 
-### Use Case 2 [Enhao]
-
 **Inputs**
 
 - An existing recipe selected from Cocktail Details, or the user's saved Custom Recipe.
