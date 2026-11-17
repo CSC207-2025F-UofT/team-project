@@ -8,26 +8,24 @@ public class LocationInfo {
     private final String county;
     private final String state;
     private final String country;
+    private final String continent;
     private final String landmark;
 
-    public LocationInfo(String city, String county, String state, String country, String landmark) {
+    public LocationInfo(String city, String county, String state, String country, String continent, String landmark) {
         this.city = city;
         this.county = county;
         this.state = state;
         this.country = country;
+        this.continent = continent;
         this.landmark = landmark;
     }
 
-    public LocationInfo(String city, String county, String state, String country) {
-        this(city, county, state, country, null);
+    public LocationInfo(String city, String county, String state, String country, String continent) {
+        this(city, county, state, country, continent, null);
     }
 
     public String getCity() {
         return city;
-    }
-
-    public String getCounty() {
-        return county;
     }
 
     public String getState() {
@@ -38,8 +36,27 @@ public class LocationInfo {
         return country;
     }
 
+    public String getContinent() {
+        return continent;
+    }
+
     public String getLandmark() {
         return landmark;
+    }
+
+    public String getInfo(LocationInfoType infoType) {
+        if (infoType == null) {
+            return null;
+        }
+
+        return switch (infoType) {
+            case CITY -> city;
+            case COUNTY -> county;
+            case STATE -> state;
+            case COUNTRY -> country;
+            case CONTINENT -> continent;
+            case LANDMARK -> landmark;
+        };
     }
 
     public String getDisplayString() {
