@@ -257,8 +257,8 @@ public class SharedCanvas {
     }
 
     /**
-     * Screenshot of the formula on the canvas (cropped, dark ink on white): the lasso selection if
-     * there is one, otherwise all the ink. Safe to call from any thread.
+     * Picture of the formula drawn from its strokes (cropped, gray dark ink on white, zoom ignored):
+     * the lasso selection if there is one, otherwise all the ink. Safe to call from any thread.
      *
      * @throws IllegalStateException if the canvas is empty
      */
