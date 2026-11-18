@@ -3,9 +3,13 @@ package view;
 import interface_adapter.adopt_pet.AdoptPetState;
 import interface_adapter.adopt_pet.AdoptPetViewModel;
 import interface_adapter.adopt_pet.AdoptPetViewModelListener;
+import interface_adapter.get_pet_picture.GetPetPictureController;
 
+import java.util.concurrent.ExecutionException;
 import javax.swing.*;
 import java.awt.*;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 
 public class AdoptPetView extends JPanel
         implements AdoptPetViewModelListener {
@@ -22,7 +26,58 @@ public class AdoptPetView extends JPanel
     private final JButton anotherPictureButton =
             new JButton("Another Picture");
     private final JButton adoptButton = new JButton("Adopt");
+    private boolean updatingFields = false;
+    private GetPetPictureController getPetPictureController;
 
+    public void setGetPetPictureController(
+            GetPetPictureController getPetPictureController) {
+        this.getPetPictureController = getPetPictureController;
+    }
+
+    private void requestAnotherPicture() {
+        AdoptPetState state = viewModel.getState();
+
+        if (state.isLoading()) {
+            return;
+        }
+
+        final String species = state.getSpecies();
+
+        state.setLoading(true);
+        state.setImageUrl("");
+        state.setErrorMessage("");
+        viewModel.notifyStateChanged();
+
+        new SwingWorker<Void, Void>() {
+            @Override
+            protected Void doInBackground() {
+                getPetPictureController.execute(species);
+                return null;
+            }
+
+            @Override
+            protected void done() {
+                try {
+                    get();
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    showRequestError("Picture request was interrupted.");
+                } catch (ExecutionException e) {
+                    showRequestError(
+                            "Could not request a picture. Please try again."
+                    );
+                }
+            }
+        }.execute();
+    }
+
+    private void showRequestError(String message) {
+        AdoptPetState state = viewModel.getState();
+        state.setLoading(false);
+        state.setImageUrl("");
+        state.setErrorMessage(message);
+        viewModel.notifyStateChanged();
+    }
     public AdoptPetView(AdoptPetViewModel viewModel) {
         this.viewModel = viewModel;
         this.viewModel.addListener(this);
@@ -56,15 +111,66 @@ public class AdoptPetView extends JPanel
         add(errorLabel);
         add(buttons);
 
+
+        speciesInput.addActionListener(evt -> {
+            if (!updatingFields) {
+                AdoptPetState state = viewModel.getState();
+                state.setSpecies((String) speciesInput.getSelectedItem());
+
+                // A picture of the previous species is no longer valid.
+                state.setImageUrl("");
+                state.setErrorMessage("");
+
+                viewModel.notifyStateChanged();
+            }
+        });
+
+        nameInput.getDocument().addDocumentListener(new DocumentListener() {
+
+            private void updateName() {
+                if (!updatingFields) {
+                    viewModel.getState().setPetName(nameInput.getText());
+                }
+            }
+
+            @Override
+            public void insertUpdate(DocumentEvent e) {
+                updateName();
+            }
+
+            @Override
+            public void removeUpdate(DocumentEvent e) {
+                updateName();
+            }
+
+            @Override
+            public void changedUpdate(DocumentEvent e) {
+                updateName();
+            }
+        });
+
+        anotherPictureButton.addActionListener(
+                evt -> requestAnotherPicture()
+        );
+        
         stateChanged();
     }
+
 
     @Override
     public void stateChanged() {
         AdoptPetState state = viewModel.getState();
 
-        speciesInput.setSelectedItem(state.getSpecies());
-        nameInput.setText(state.getPetName());
+        updatingFields = true;
+        try {
+            speciesInput.setSelectedItem(state.getSpecies());
+
+            if (!nameInput.getText().equals(state.getPetName())) {
+                nameInput.setText(state.getPetName());
+            }
+        } finally {
+            updatingFields = false;
+        }
         errorLabel.setText(state.getErrorMessage());
 
         speciesInput.setEnabled(!state.isLoading());
