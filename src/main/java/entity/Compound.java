@@ -37,7 +37,8 @@ public final class Compound {
     this.boilingPoint = boilingPoint;
     this.signal = signal;
     this.hazardStatements = List.copyOf(hazardStatements);
-    this.structureImage = structureImage;
+    // Arrays can be changed from outside, so keep our own copy.
+    this.structureImage = structureImage == null ? null : structureImage.clone();
   }
 
   public String getName() {
@@ -71,8 +72,8 @@ public final class Compound {
     return hazardStatements;
   }
 
-  /** A PNG drawing of the structure, or null if there isn't one. */
+  /** A copy of the PNG drawing of the structure, or null if there isn't one. */
   public byte[] getStructureImage() {
-    return structureImage;
+    return structureImage == null ? null : structureImage.clone();
   }
 }

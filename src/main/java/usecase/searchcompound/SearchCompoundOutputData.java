@@ -36,7 +36,7 @@ public final class SearchCompoundOutputData {
     this.meltingPoint = meltingPoint;
     this.boilingPoint = boilingPoint;
     this.signal = signal;
-    this.hazardStatements = hazardStatements;
+    this.hazardStatements = List.copyOf(hazardStatements);
     this.structureImage = structureImage;
   }
 
