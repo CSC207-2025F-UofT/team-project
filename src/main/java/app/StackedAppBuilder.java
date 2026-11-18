@@ -140,11 +140,23 @@ public class StackedAppBuilder {
             try { return drawing.toFormulaImage(); }
             catch (RuntimeException empty) { return null; }
         });
-        pdfPanel.setRegionCapture(() -> CanvasRegionCaptureController.begin(
-                page.boardArea(), drawing, image -> {
-                    pdfStudio.getLibrary().addInk("Canvas screenshot", image);
-                    pdfPanel.editor().showLibrary();
-                }));
+        java.util.concurrent.atomic.AtomicReference<Runnable> cancelCapture = new java.util.concurrent.atomic.AtomicReference<>();
+        pdfPanel.setRegionCapture(() -> {
+            if (cancelCapture.get() != null) {
+                cancelCapture.getAndSet(null).run();
+                return;
+            }
+            pdfPanel.setCaptureAreaActive(true);
+            Runnable close = CanvasRegionCaptureController.begin(
+                    page.boardArea(), drawing, image -> {
+                        pdfStudio.getLibrary().addInk("Canvas screenshot", image);
+                        pdfPanel.editor().showLibrary();
+                    }, () -> {
+                        cancelCapture.set(null);
+                        pdfPanel.setCaptureAreaActive(false);
+                    });
+            cancelCapture.set(close);
+        });
         // Save/Open are separate use-case commands; the board knows only the callbacks.
         java.util.concurrent.atomic.AtomicReference<CanvasWorkspaceDialogs> dialogs = new java.util.concurrent.atomic.AtomicReference<>();
         BoardWindow board = new BoardWindow(page, drawing,
@@ -153,7 +165,7 @@ public class StackedAppBuilder {
                 () -> dialogs.get().save(), () -> dialogs.get().saveAs(),
                 () -> dialogs.get().open());
         dialogs.set(new CanvasWorkspaceDialogs(canvases, drawing, board));
-        FloatingToolbar toolbar = new FloatingToolbar(drawing, board);
+        FloatingToolbar toolbar = new FloatingToolbar(drawing, board, pdfPanel);
         board.addFloatingToolbar(toolbar.component());
         pdfPanel.setFullscreenAction(() -> board.setPdfFullscreen(!board.isPdfFullscreen()));
         pdfStudio.onOpen(() -> board.setPdfOpen(true));
@@ -172,6 +184,14 @@ public class StackedAppBuilder {
         }
         int shortcut = Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx();
         root.registerKeyboardAction(e -> drawing.undo(), KeyStroke.getKeyStroke(KeyEvent.VK_Z, shortcut),
+                JComponent.WHEN_IN_FOCUSED_WINDOW);
+        // Canvas redo only. PDF keeps its own ribbon buttons for Undo/Redo.
+        root.registerKeyboardAction(e -> {
+            java.awt.Component focused = java.awt.KeyboardFocusManager.getCurrentKeyboardFocusManager().getFocusOwner();
+            // Do not steal Ctrl+Y from the PDF workspace or its text editor.
+            if (focused != null && SwingUtilities.isDescendingFrom(focused, pdfPanel)) return;
+            drawing.redo();
+        }, KeyStroke.getKeyStroke(KeyEvent.VK_Y, java.awt.event.InputEvent.CTRL_DOWN_MASK),
                 JComponent.WHEN_IN_FOCUSED_WINDOW);
         root.registerKeyboardAction(e -> {
             dialogs.get().save();
