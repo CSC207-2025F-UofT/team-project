@@ -927,6 +927,68 @@ class AnswerCanvasPageTest {
         assertEquals(1, calls.get(), "never read as a pick");
     }
 
+    // "1 =" written, popup up, then lasso + drag it 200 right 150 down before the pick's pause
+    private void writeAndMove(AtomicInteger calls) throws Exception {
+        shared.setFormulaRecognizer(image -> {
+            calls.incrementAndGet();
+            return "1+1=";
+        });
+        openPage();
+        writeWithEquals();
+        waitPopup("1+1=");
+        lasso(80, 80, 220, 170);
+        drag(130, 125, 330, 275);
+    }
+
+    @Test
+    void movedFormulaWithEqualsPopsUpAgain() throws Exception {
+        AtomicInteger calls = new AtomicInteger();
+        writeAndMove(calls);
+        waitPopup("1+1=");
+        assertEquals(1, calls.get(), "same ink, old read");
+    }
+
+    @Test
+    void hoverFindsTheEqualsAfterAMove() throws Exception {
+        writeAndMove(new AtomicInteger());
+        waitPopup("1+1=");
+        onEdt(() -> canvas.setTool(DrawingCanvas.Tool.PEN));
+        waitFor(() -> page.visiblePopup() == null, "popup closed");
+        hover(330, 275);  // the moved "="
+        waitPopup("1+1=");
+    }
+
+    @Test
+    void twoFormulasMovedTogetherBothStillWork() throws Exception {
+        shared.setFormulaRecognizer(image -> "1+1=");
+        openPage();
+        writeWithEqualsAt(100, 100);
+        writeWithEqualsAt(400, 100);
+        waitFor(() -> canvas.getStrokes().stream().allMatch(shared::isBound), "both bound");
+        lasso(80, 80, 520, 170);
+        drag(130, 125, 130, 325);  // both down 200
+        waitFor(() -> page.visiblePopup() != null, "a popup");
+        onEdt(() -> canvas.setTool(DrawingCanvas.Tool.PEN));
+        waitFor(() -> page.visiblePopup() == null, "popup closed");
+        hover(130, 325);
+        waitPopup("1+1=");
+        onEdt(() -> canvas.setTool(DrawingCanvas.Tool.LASSO));  // already on pen, a switch is what closes it
+        waitFor(() -> page.visiblePopup() == null, "popup closed");
+        hover(430, 325);
+        waitPopup("1+1=");
+    }
+
+    @Test
+    void undoAfterAMoveDoesNotPopUp() throws Exception {
+        writeAndMove(new AtomicInteger());
+        waitPopup("1+1=");
+        onEdt(() -> canvas.setTool(DrawingCanvas.Tool.PEN));
+        waitFor(() -> page.visiblePopup() == null, "popup closed");
+        onEdt(canvas::undo);
+        Thread.sleep(300);
+        assertNull(popup());
+    }
+
     // board page: real graph + calculate checks, graphing itself never runs
     private void openBoard() throws Exception {
         InMemoryFunctionDataAccessObject functions = new InMemoryFunctionDataAccessObject();

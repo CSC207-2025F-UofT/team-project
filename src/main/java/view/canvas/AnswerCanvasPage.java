@@ -100,6 +100,7 @@ public class AnswerCanvasPage extends CanvasPage {
         pauseTimer.setRepeats(false);
 
         sharedCanvas.addFormulaChangeListener(this::formulaChanged);
+        sharedCanvas.addFormulaMoveListener(this::formulaMoved);
         sharedCanvas.addStrokeListener(this::strokeDone);
         sharedCanvas.addPickListener(this::picked);
         sharedCanvas.addUserActionListener(this::dismiss);
@@ -192,10 +193,23 @@ public class AnswerCanvasPage extends CanvasPage {
 
     // ink of a formula changed: answer is gone already, offer again after a pause
     private void formulaChanged(long id) {
+        hover.forgetSpot(id);  // undo/redo can put it back where it was w/ the same revision
         if (id == errorFor) {
             notices.clearError();  // they're fixing it
             errorFor = -1;
         }
+        if (!inFront()) {
+            return;
+        }
+        targetStroke = null;
+        targetId = id;
+        targetPick = false;
+        restartPause();
+    }
+
+    // whole formula dragged / resized: same ink, offer it again like an edit, error card stays
+    private void formulaMoved(long id) {
+        hover.forgetSpot(id);
         if (!inFront()) {
             return;
         }
@@ -319,6 +333,11 @@ public class AnswerCanvasPage extends CanvasPage {
     }
 
     private void recognize(FormulaCapture capture, long gen) {
+        Read r = reads.get(capture.getId());
+        if (r != null && r.revision == capture.getRevision()) {
+            recognized(capture, gen, r.latex, r.problem);  // same ink, read it already
+            return;
+        }
         worker.recognize(() -> reader.read(capture),
                 (latex, problem) -> recognized(capture, gen, latex, problem));
     }
