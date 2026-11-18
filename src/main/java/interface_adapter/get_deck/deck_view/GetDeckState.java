@@ -51,7 +51,7 @@ public class GetDeckState {
     }
 
     public void setEmptyDeckError(String deckEmptyError) {
-        this.deckError = deckEmptyError;
+        this.deckEmptyError = deckEmptyError;
     }
 
     public void setViewName(String viewName) {

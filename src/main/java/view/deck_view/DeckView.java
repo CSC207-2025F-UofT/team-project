@@ -26,10 +26,10 @@ public class DeckView extends JPanel implements GetDeckViewModelListener {
     private final JLabel deckName = new JLabel();
     private final JLabel cardCount = new JLabel();
     private final JLabel emptyDeckError = new JLabel();
-    JButton study = new FormattedButton("Study");
+    private final JButton study = new FormattedButton("Study");
 
-    private final CardLayout centerLayout = new CardLayout();
-    private final JPanel centerPanel = new JPanel(centerLayout);
+    private final CardLayout flashcardLayout = new CardLayout();
+    private final JPanel flashcardPanel = new JPanel(flashcardLayout);
 
     private GetDeckController getDeckController = null;
     private GetAllDecksController getAllDecksController = null;
@@ -72,20 +72,15 @@ public class DeckView extends JPanel implements GetDeckViewModelListener {
     }
 
     public JPanel createCenterPanel() {
+        // error text
         emptyDeckError.setFont(new Font(AppTheme.FONT_NAME, Font.PLAIN, AppTheme.FONT_SIZE));
         emptyDeckError.setForeground(AppTheme.TEXT_PRIMARY);
         emptyDeckError.setHorizontalAlignment(SwingConstants.CENTER);
 
-        centerPanel.setOpaque(false);
-        centerPanel.add(createFlashcardPanel(), "DECK");
-        centerPanel.add(emptyDeckError, "EMPTY");
-        return centerPanel;
-    }
-
-    public JPanel createFlashcardPanel() {
-        // title text
+        // title panel
         deckName.setFont(new Font(AppTheme.FONT_NAME, Font.BOLD, AppTheme.FONT_SIZE_TITLE));
         deckName.setForeground(AppTheme.TEXT_PRIMARY);
+        cardCount.setFont(new Font(AppTheme.FONT_NAME, Font.PLAIN, AppTheme.FONT_SIZE));
         cardCount.setFont(new Font(AppTheme.FONT_NAME, Font.PLAIN, AppTheme.FONT_SIZE));
         cardCount.setForeground(AppTheme.TEXT_SECONDARY);
 
@@ -94,6 +89,19 @@ public class DeckView extends JPanel implements GetDeckViewModelListener {
         titlePanel.add(deckName);
         titlePanel.add(cardCount);
 
+        flashcardPanel.setOpaque(false);
+        flashcardPanel.add(createScrollPane(), "DECK");
+        flashcardPanel.add(emptyDeckError, "EMPTY");
+
+        JPanel centerPanel = new JPanel(new BorderLayout(14, 14));
+        centerPanel.setOpaque(false);
+        centerPanel.add(titlePanel, BorderLayout.NORTH);
+        centerPanel.add(flashcardPanel, BorderLayout.CENTER);
+
+        return centerPanel;
+    }
+
+    public JScrollPane createScrollPane() {
         // list of flashcards
         JList<SwingDeck> flashcards = new JList<>(deckModel) {
             // used so JList will wrap text and resize with the window
@@ -119,11 +127,7 @@ public class DeckView extends JPanel implements GetDeckViewModelListener {
         scrollPane.getVerticalScrollBar().setUnitIncrement(12); // makes scrolling smoother
         scrollPane.setBorder(null);
 
-        JPanel flashcardPanel = new JPanel(new BorderLayout(14, 14));
-        flashcardPanel.setOpaque(false);
-        flashcardPanel.add(titlePanel, BorderLayout.NORTH);
-        flashcardPanel.add(scrollPane, BorderLayout.CENTER);
-        return flashcardPanel;
+        return scrollPane;
     }
 
     /**
@@ -151,11 +155,11 @@ public class DeckView extends JPanel implements GetDeckViewModelListener {
         if (state.getDeckEmptyError() != null) {
             emptyDeckError.setText(state.getDeckEmptyError());
             study.setEnabled(false);
-            centerLayout.show(centerPanel, "EMPTY");
+            flashcardLayout.show(flashcardPanel, "EMPTY");
         } else {
             updateDeckModel(state.getFlashcards());
             study.setEnabled(true);
-            centerLayout.show(centerPanel, "DECK");
+            flashcardLayout.show(flashcardPanel, "DECK");
         }
     }
 

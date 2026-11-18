@@ -62,23 +62,35 @@ public class GetDeckPresenter implements GetDeckOutputBoundary {
 
     @Override
     public void prepareFailView(String error) {
-        final GetDeckState getDeckState = getDeckViewModel.getState();
+        final GetDeckState getDeckState = new GetDeckState();
         getDeckState.setDeckError(error);
+        getDeckViewModel.setState(getDeckState);
         getDeckViewModel.notifyStateChanged();
     }
 
+    // for when deckView is empty
     @Override
     public void prepareEmptyView(GetDeckOutputData response, String error) {
-        if (response.getViewName().equals("studyView")) {
-            prepareFailView(error);
-        }
-        getDeckViewModel.getState().setEmptyDeckError(error);
-        prepareSuccessView(response);
+        // update GetDeckViewModel
+        final GetDeckState getDeckState = new GetDeckState();
+        getDeckState.setDeckName(response.getName());
+        getDeckState.setFlashcards(response.getFlashcards());
+        getDeckState.setViewName(response.getViewName());
+        getDeckState.setEmptyDeckError(error);
+        getDeckViewModel.setState(getDeckState);
+        this.getDeckViewModel.notifyStateChanged();
+
+        // clear everything from the GetAllDecksViewModel's state
+        this.getAllDecksViewModel.setState(new GetAllDecksState());
+        this.getAllDecksViewModel.notifyStateChanged();
+
+        this.viewManagerModel.setState(GetDeckViewModel.VIEW_NAME);
+        this.viewManagerModel.notifyViewChanged();
     }
 
     @Override
     public void switchToDeckView() {
-        viewManagerModel.setState(getDeckViewModel.VIEW_NAME);
+        viewManagerModel.setState(GetDeckViewModel.VIEW_NAME);
         viewManagerModel.notifyViewChanged();
     }
 

@@ -26,36 +26,38 @@ public class GetDeckInteractor implements GetDeckInputBoundary{
         String name = getDeckInputData.getName();
         String viewName = getDeckInputData.getViewName();
 
+        // if deck does not exist show error
         boolean exists = deckDataAccessObject.deckExists(name);
         if (!exists) {
             getDeckPresenter.prepareFailView("Deck does not exist");
+            return;
+        }
+
+        Deck deck = deckDataAccessObject.getDeck(name);
+        List<Flashcard> flashcards = deck.getFlashcards();
+
+        // if going to study view with empty deck show error
+        if (flashcards.isEmpty() && viewName.equals("studyView")) {
+            getDeckPresenter.prepareFailView("There are no flashcards in this deck");
+            return;
+        }
+
+        // populate GetDeckOutputData
+        ArrayList<Map<String, String>> flashcardInfo = new ArrayList<>();
+        for (Flashcard flashcard : flashcards) {
+            Map<String, String> map = new HashMap<>();
+            map.put(flashcard.getQuestion(), flashcard.getAnswer());
+            flashcardInfo.add(map);
+        }
+        final GetDeckOutputData getDeckOutputData = new GetDeckOutputData(name,
+                flashcardInfo, getDeckInputData.getViewName());
+
+        if (flashcards.isEmpty() && viewName.equals("deckView")) {
+            getDeckPresenter.prepareEmptyView(
+                    getDeckOutputData,
+                    "There are no flashcards in this deck");
         } else {
-            Deck deck = deckDataAccessObject.getDeck(name);
-
-            List<Flashcard> flashcards = deck.getFlashcards();
-            if (flashcards.isEmpty() && viewName.equals("studyView")) {
-                getDeckPresenter.prepareFailView("There are no flashcards in this deck");
-            }
-
-            else if (flashcards.isEmpty() && viewName.equals("deckView")) {
-                GetDeckOutputData getDeckEmptyOutputData = new GetDeckOutputData(name, null, viewName);
-                getDeckPresenter.prepareEmptyView(
-                        getDeckEmptyOutputData,
-                        "There are no flashcards in this deck");
-            }
-
-            else {
-                ArrayList<Map<String, String>> flashcardInfo = new ArrayList<>();
-                for (Flashcard flashcard : flashcards) {
-                    Map<String, String> map = new HashMap<>();
-                    map.put(flashcard.getQuestion(), flashcard.getAnswer());
-                    flashcardInfo.add(map);
-                }
-
-                final GetDeckOutputData getDeckOutputData = new GetDeckOutputData(name,
-                        flashcardInfo, getDeckInputData.getViewName());
-                getDeckPresenter.prepareSuccessView(getDeckOutputData);
-            }
+            getDeckPresenter.prepareSuccessView(getDeckOutputData);
         }
     }
 
