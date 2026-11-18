@@ -22,6 +22,7 @@ import java.awt.datatransfer.StringSelection;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.MouseEvent;
+import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -87,6 +88,7 @@ public final class DocEditorPanel extends JPanel implements PdfWorkspacePort {
         });
         workspace.setBackground(DESK);
         workspace.add(pageScroll, BorderLayout.CENTER);
+        installDeleteShortcut();
         // A decorative ruler misrepresented measurements and did not scroll with the page.
         // Keep the desk clean until a real, scroll-synchronised editing ruler is added.
         setupLibrary();
@@ -186,6 +188,7 @@ public final class DocEditorPanel extends JPanel implements PdfWorkspacePort {
         command(row, RibbonButton.labeled(DocIcons::comment, "Type"), this::typeOnPage);
         command(row, RibbonButton.icon(Icons::undo, "Undo"), this::undo);
         command(row, RibbonButton.icon(DocIcons::redo, "Redo"), this::redo);
+        command(row, RibbonButton.labeled(DocIcons::deletePage, "Delete item"), this::deleteSelectedItem);
         command(row, RibbonButton.letter("B", Font.BOLD, false, false, "Bold selected note"), () -> setNoteStyle("bold"));
         command(row, RibbonButton.letter("I", Font.ITALIC, false, false, "Italic selected note"), () -> setNoteStyle("italic"));
         command(row, RibbonButton.letter("U", Font.PLAIN, true, false, "Underline selected note"), () -> setNoteStyle("underline"));
@@ -455,6 +458,26 @@ public final class DocEditorPanel extends JPanel implements PdfWorkspacePort {
         if (!controller.deletePage()) GlassDialogs.warning(this, "The document must contain one page.");
         updateStatus();
     }
+    /** Delete the selected PDF placement, never the source Canvas or Library item. */
+    private void deleteSelectedItem() {
+        if (paper.isEditingNote()) return; // Editing text must retain normal Delete/Backspace.
+        if (controller.deleteSelected()) updateStatus();
+    }
+
+    /** Shortcuts are scoped to the PDF workspace, not the whole Math Lab window. */
+    private void installDeleteShortcut() {
+        InputMap keys = workspace.getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+        ActionMap actions = workspace.getActionMap();
+        String action = "deletePdfSelection";
+        keys.put(KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0), action);
+        keys.put(KeyStroke.getKeyStroke(KeyEvent.VK_BACK_SPACE, 0), action);
+        actions.put(action, new AbstractAction() {
+            @Override public void actionPerformed(java.awt.event.ActionEvent event) {
+                deleteSelectedItem();
+            }
+        });
+    }
+
     private void undo() {paper.finishInlineEdit();controller.undo();updateStatus();}
     private void redo() {paper.finishInlineEdit();controller.redo();updateStatus();}
     private void autoLayout() {controller.autoLayout();updateStatus();}
@@ -586,7 +609,7 @@ public final class DocEditorPanel extends JPanel implements PdfWorkspacePort {
             item(menu, "Bring to front", () -> arrange(2));
             item(menu, "Send to back", () -> arrange(-2));
             menu.add(pageDestinations());
-            item(menu, "Delete selected item", () -> {controller.deleteSelected();updateStatus();});
+            item(menu, "Delete selected item", this::deleteSelectedItem);
         }
         menu.show(paper, event.getX(), event.getY());
     }

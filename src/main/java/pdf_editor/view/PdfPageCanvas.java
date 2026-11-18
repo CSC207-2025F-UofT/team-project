@@ -138,6 +138,7 @@ public final class PdfPageCanvas extends JPanel {
         this.controller = Objects.requireNonNull(controller);
         this.listener = Objects.requireNonNull(listener);
         updateSize();
+        setFocusable(true); // Own PDF-scoped Delete/Backspace when the page is selected.
         setBackground(new Color(243, 247, 253));
         setTransferHandler(new TransferHandler() {
             @Override public boolean canImport(TransferSupport support) {
@@ -174,6 +175,7 @@ public final class PdfPageCanvas extends JPanel {
         });
         MouseAdapter mouse = new MouseAdapter() {
             @Override public void mousePressed(MouseEvent e) {
+                requestFocusInWindow();
                 // Keep PPT text-box exit behaviour; don't immediately create a body on that click.
                 editingBeforePress = inlineNote != null;
                 finishInlineEdit();
