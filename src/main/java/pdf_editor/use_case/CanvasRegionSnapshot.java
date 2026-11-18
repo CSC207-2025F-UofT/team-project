@@ -16,7 +16,7 @@ public final class CanvasRegionSnapshot {
         if (clipped.width < 8 || clipped.height < 8) {
             throw new IllegalArgumentException("Select an area at least 8×8 pixels");
         }
-        BufferedImage copy = new BufferedImage(clipped.width, clipped.height, BufferedImage.TYPE_INT_RGB);
+        BufferedImage copy = new BufferedImage(clipped.width, clipped.height, BufferedImage.TYPE_INT_ARGB);
         java.awt.Graphics2D g = copy.createGraphics();
         try {
             g.drawImage(source, 0, 0, clipped.width, clipped.height,
@@ -30,8 +30,9 @@ public final class CanvasRegionSnapshot {
         for (int y = 0; y < image.getHeight(); y++) {
             for (int x = 0; x < image.getWidth(); x++) {
                 int argb = image.getRGB(x, y);
+                int alpha = (argb >>> 24) & 255;
                 int r = (argb >>> 16) & 255, g = (argb >>> 8) & 255, b = argb & 255;
-                if (Math.min(r, Math.min(g, b)) < 225) return true;
+                if (alpha > 0 && Math.min(r, Math.min(g, b)) < 225) return true;
             }
         }
         return false;

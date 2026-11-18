@@ -78,7 +78,7 @@ public final class CanvasRegionCaptureController {
                     end = null;
                     repaint();
                     try {
-                        BufferedImage shot = CanvasRegionSnapshot.crop(canvas.toImage(), inCanvas);
+                        BufferedImage shot = CanvasRegionSnapshot.crop(canvas.toTransparentInkImage(), inCanvas);
                         if (CanvasRegionSnapshot.hasVisibleInk(shot)) completed.accept(shot);
                     } catch (IllegalArgumentException ignored) { /* no ink / too small: no card */ }
                 }

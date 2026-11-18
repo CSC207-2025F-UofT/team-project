@@ -1140,7 +1140,6 @@ public class DrawingCanvas extends JPanel {
                 Math.max(1, (box.height + 2 * margin) * scale), BufferedImage.TYPE_INT_ARGB);
         Graphics2D g = image.createGraphics();
         try {
-            g.setColor(Color.WHITE); g.fillRect(0, 0, image.getWidth(), image.getHeight());
             g.scale(scale, scale); g.translate(margin - box.x, margin - box.y);
             setUpInk(g);
             for (Stroke stroke : selected) { g.setColor(colorOf(stroke)); drawStroke(g, stroke); }
@@ -1440,6 +1439,15 @@ public class DrawingCanvas extends JPanel {
         g2.fillRect(0, 0, width, height);
         paintInk(g2);
         g2.dispose();
+        return image;
+    }
+
+    /** Export visible canvas objects over transparent pixels, leaving recognition snapshots white. */
+    public BufferedImage toTransparentInkImage() {
+        int width = Math.max(1, getWidth()), height = Math.max(1, getHeight());
+        BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D g = image.createGraphics();
+        try { paintInk(g); } finally { g.dispose(); }
         return image;
     }
 
