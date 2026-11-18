@@ -25,7 +25,7 @@
 ## Project Details
 ### User Stories
 Member1 \
-*"As a player, I want to start a match against another player, then be able to save and load them."*
+*"As a player, I want to start a match against another player, then be able to save it to a file and load them."*
 
 Member2: \
 *"As a player, I want to play and move my characters around the board."*
@@ -59,7 +59,7 @@ Member4: \
 | --- | --- |
 | Yinghao | Start Game, Shuffle Deck, End Turn |
 | Member2 | Play Card, Confirm Move |
-| Member3 | Select Character, Confirm Cast |
+| Yuhang | Select Character, Confirm Cast |
 | Andy | Cast Response, Resolve Cast |
 
 ## Credits
