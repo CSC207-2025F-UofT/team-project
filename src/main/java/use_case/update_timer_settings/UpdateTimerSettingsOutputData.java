@@ -1,12 +1,13 @@
 package use_case.update_timer_settings;
 
+
+/**
+ * Output Data for the Update Timer Settings Use Case.
+ */
 public class UpdateTimerSettingsOutputData {
     private int focusDuration;
     private int breakDuration;
 
-    /**
-     * Output Data for the Update Timer Settings Use Case.
-     */
     public UpdateTimerSettingsOutputData(int focusDuration, int breakDuration) {
         this.focusDuration = focusDuration;
         this.breakDuration = breakDuration;
