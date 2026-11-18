@@ -153,7 +153,7 @@ public final class PdfPageCanvas extends JPanel {
                         java.awt.Image source = (java.awt.Image) support.getTransferable()
                                 .getTransferData(DataFlavor.imageFlavor);
                         BufferedImage image = imageAsBuffered(source);
-                        MathLibrary.Material region = MathLibrary.region("Canvas selection", image);
+                        MathLibrary.Material region = controller.library().addInk("Canvas selection", image);
                         float width = Math.min(440, Math.max(85, image.getWidth()));
                         float height = width * image.getHeight() / Math.max(1f, image.getWidth());
                         if (height > 575) { width *= 575f / height; height = 575f; }

@@ -1148,6 +1148,45 @@ public class DrawingCanvas extends JPanel {
         } finally {g.dispose();}
         return image;
     }
+    /** Can an existing ink selection begin a copy gesture at this screen position? */
+    public boolean canCopySelectedInkAt(Point screenPoint) {
+        if (tool != Tool.LASSO && tool != Tool.RECTANGLE) return false;
+        if (selection.isEmpty() || spaceDown || panFrom != null) return false;
+        Rectangle bounds = selectionBounds();
+        return bounds != null && bounds.contains(toWorld(screenPoint)) && handleAt(screenPoint) < 0;
+    }
+
+    /** Cancel the in-progress move preview when a native copy drag takes over. */
+    public void cancelSelectionMoveForCopy() {
+        moveStart = null;
+        moveDx = 0;
+        moveDy = 0;
+        repaint();
+    }
+
+    /** Export only selected ink on transparent pixels, without changing recognition screenshots. */
+    public BufferedImage selectedInkTransparentImage() {
+        List<Stroke> selected = selectedInkSnapshot();
+        if (selected.isEmpty()) throw new IllegalStateException("Select ink with Box or Lasso first.");
+        Rectangle bounds = boundsOf(selected);
+        int margin = 18;
+        int resolution = 3;
+        BufferedImage result = new BufferedImage(
+                Math.max(1, (bounds.width + margin * 2) * resolution),
+                Math.max(1, (bounds.height + margin * 2) * resolution), BufferedImage.TYPE_INT_ARGB);
+        Graphics2D ink = result.createGraphics();
+        try {
+            ink.scale(resolution, resolution);
+            ink.translate(margin - bounds.x, margin - bounds.y);
+            setUpInk(ink);
+            for (Stroke stroke : selected) {
+                ink.setColor(colorOf(stroke));
+                drawStroke(ink, stroke);
+            }
+        } finally { ink.dispose(); }
+        return result;
+    }
+
     /** The already-calculated result associated with a wholly selected formula, if any. */
     public String selectedAnswer() {
         List<Stroke> selected = selectedInkSnapshot();
