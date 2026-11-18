@@ -30,9 +30,7 @@ public class BookFactory {
             publicationYear,
             isbn,
             genre,
-            coverID,
-            LocalDateTime.now()
-    );
+            coverID);
     }
 
 
