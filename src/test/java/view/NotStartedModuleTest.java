@@ -33,7 +33,8 @@ class NotStartedModuleTest {
     DashboardViewModel viewModel = new DashboardViewModel();
     LoadDashboardController controller = new LoadDashboardController(new LoadDashboardInteractor(
         new InMemoryLabDataAccessObject(List.of(NOT_STARTED)),
-        new LoadDashboardPresenter(viewModel, Clock.systemDefaultZone())));
+        new LoadDashboardPresenter(viewModel, Clock.systemDefaultZone()),
+        ChoiceOrderer.IN_ORDER));
     List<String> texts = texts(new DashboardView(viewModel, controller, null, null,
         page -> { }));
     assertTrue(texts.contains("Modules"));
