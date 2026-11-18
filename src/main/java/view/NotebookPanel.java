@@ -2,6 +2,8 @@ package view;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Cursor;
+import java.awt.Dialog;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.Graphics;
@@ -13,7 +15,10 @@ import java.awt.font.TextAttribute;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import javax.swing.AbstractAction;
+import javax.swing.AbstractButton;
 import javax.swing.BorderFactory;
+import javax.swing.JButton;
+import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -23,16 +28,20 @@ import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
 import javax.swing.border.LineBorder;
 import javax.swing.text.AttributeSet;
+import javax.swing.text.BadLocationException;
 import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
+import javax.swing.text.StyledDocument;
 
 /**
  * The student's lab notebook: a rich-text page beside the lab that stays open for the whole
- * module. Supports bold, italic, underline and strikethrough, with Google Docs shortcuts.
+ * module. Supports bold, italic, underline and strikethrough, with Google Docs shortcuts, and
+ * chemical equations drawn from LaTeX.
  */
 class NotebookPanel extends JPanel {
   private static final Color BACKGROUND = new Color(0xF5F5F5);
   private static final Color PLACEHOLDER = new Color(0xBDBDBD);
+  private static final Color STYLE_ON = new Color(0xE0E0E0);
   /** Cmd on macOS, Ctrl elsewhere. Not from Toolkit, which throws in headless tests. */
   private static final int SHORTCUT = System.getProperty("os.name", "").startsWith("Mac")
       ? InputEvent.META_DOWN_MASK : InputEvent.CTRL_DOWN_MASK;
@@ -76,6 +85,10 @@ class NotebookPanel extends JPanel {
     addStyle(toolbar, StyleConstants.StrikeThrough, "S", "Strikethrough", KeyEvent.VK_X,
         InputEvent.SHIFT_DOWN_MASK,
         font.deriveFont(Map.of(TextAttribute.STRIKETHROUGH, TextAttribute.STRIKETHROUGH_ON)));
+    JButton equation = flat(new JButton("Equation"));
+    equation.setToolTipText("Insert a chemical equation");
+    equation.addActionListener(event -> openEquationPopup());
+    toolbar.add(equation);
     toolbar.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, PLACEHOLDER));
 
     text.setBorder(BorderFactory.createEmptyBorder(10, 12, 10, 12));
@@ -101,10 +114,8 @@ class NotebookPanel extends JPanel {
         toggle(style);
       }
     };
-    JToggleButton button = new JToggleButton(toggle);
+    JToggleButton button = flat(new JToggleButton(toggle));
     button.setFont(font);
-    // Not focusable, so clicking it leaves the caret and selection in the text.
-    button.setFocusable(false);
     button.setToolTipText(name);
     button.getAccessibleContext().setAccessibleName(name);
     toolbar.add(button);
@@ -112,6 +123,21 @@ class NotebookPanel extends JPanel {
 
     text.getInputMap().put(KeyStroke.getKeyStroke(key, SHORTCUT | extraModifiers), name);
     text.getActionMap().put(name, toggle);
+  }
+
+  /**
+   * Styles a toolbar button flat and compact, so all of them fit the column on every system.
+   * Not focusable, so clicking it leaves the caret and selection in the text.
+   */
+  private static <T extends AbstractButton> T flat(T button) {
+    button.setFocusable(false);
+    button.setOpaque(true);
+    button.setContentAreaFilled(false);
+    button.setBorderPainted(false);
+    button.setBackground(Color.WHITE);
+    button.setBorder(BorderFactory.createEmptyBorder(4, 10, 4, 10));
+    button.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+    return button;
   }
 
   /**
@@ -130,6 +156,49 @@ class NotebookPanel extends JPanel {
     refreshButtons();
   }
 
+  /**
+   * Puts a drawn equation on its own line where the caret is, replacing any selection. Own line
+   * because Swing wraps the text around a picture wrongly, letting it run past the edge.
+   *
+   * @param latex the equation's LaTeX
+   */
+  void insertEquation(String latex) {
+    SimpleAttributeSet equation = new SimpleAttributeSet();
+    StyleConstants.setIcon(equation,
+        ChemistryLatex.render(latex, EquationPanel.EQUATION_SIZE));
+    int at = text.getSelectionStart();
+    text.replaceSelection("");
+    StyledDocument doc = text.getStyledDocument();
+    try {
+      if (at > 0 && !doc.getText(at - 1, 1).equals("\n")) {
+        doc.insertString(at++, "\n", null);
+      }
+      // An icon takes the place of one character in the text.
+      doc.insertString(at, " ", equation);
+      if (at + 1 == doc.getLength() || !doc.getText(at + 1, 1).equals("\n")) {
+        doc.insertString(at + 1, "\n", null);
+      }
+    } catch (BadLocationException e) {
+      throw new IllegalStateException(e);
+    }
+    // Continue typing on the line after the equation.
+    text.setCaretPosition(at + 2);
+  }
+
+  private void openEquationPopup() {
+    JDialog dialog = new JDialog(SwingUtilities.getWindowAncestor(this), "Insert Equation",
+        Dialog.ModalityType.APPLICATION_MODAL);
+    dialog.setContentPane(new EquationPanel(latex -> {
+      insertEquation(latex);
+      dialog.dispose();
+    }, dialog::dispose));
+    dialog.pack();
+    dialog.setLocationRelativeTo(this);
+    // Blocks until the popup closes.
+    Theme.showDimmed(dialog);
+    text.requestFocusInWindow();
+  }
+
   private AttributeSet currentStyle() {
     int start = text.getSelectionStart();
     return start == text.getSelectionEnd() ? text.getInputAttributes()
@@ -138,7 +207,10 @@ class NotebookPanel extends JPanel {
 
   private void refreshButtons() {
     AttributeSet current = currentStyle();
-    buttons.forEach((style, button) ->
-        button.setSelected(Boolean.TRUE.equals(current.getAttribute(style))));
+    buttons.forEach((style, button) -> {
+      boolean on = Boolean.TRUE.equals(current.getAttribute(style));
+      button.setSelected(on);
+      button.setBackground(on ? STYLE_ON : Color.WHITE);
+    });
   }
 }

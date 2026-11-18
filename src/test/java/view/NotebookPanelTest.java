@@ -1,5 +1,6 @@
 package view;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -53,6 +54,30 @@ class NotebookPanelTest {
         shortcut | InputEvent.SHIFT_DOWN_MASK));
     assertTrue(isOn(styleAt(notebook, 0), "B"));
     assertTrue(isOn(styleAt(notebook, 0), "S"));
+  }
+
+  @Test
+  void insertedEquationReplacesTheSelectionOnItsOwnLineAndKeepsItsLatex() throws Exception {
+    NotebookPanel notebook = new NotebookPanel();
+    notebook.text.setText("a xx b");
+    notebook.text.select(2, 4);
+
+    notebook.insertEquation("\\mathrm{H_{2}O}");
+
+    // "a " + newline + equation + newline + " b"
+    assertEquals("a \n \n b", notebook.text.getDocument().getText(0, 7));
+    Object icon = StyleConstants.getIcon(styleAt(notebook, 3));
+    assertTrue(icon instanceof ChemistryLatex.EquationIcon);
+    assertEquals("\\mathrm{H_{2}O}", ((ChemistryLatex.EquationIcon) icon).getLatex());
+    assertEquals(5, notebook.text.getCaretPosition(), "caret goes to the line after");
+  }
+
+  @Test
+  void equationInAnEmptyNotebookAddsNoBlankLineAbove() throws Exception {
+    NotebookPanel notebook = new NotebookPanel();
+    notebook.insertEquation("x");
+    assertEquals(" \n", notebook.text.getDocument().getText(0, 2));
+    assertEquals(2, notebook.text.getCaretPosition());
   }
 
   private static void press(NotebookPanel notebook, KeyStroke key) {
