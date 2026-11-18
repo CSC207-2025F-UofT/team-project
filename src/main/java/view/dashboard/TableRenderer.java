@@ -5,12 +5,14 @@ import interface_adapter.dashboard.DashboardStateCatalog;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableCellRenderer;
 import java.util.List;
 
 /**
  * Render analytics table given a table state.
  */
-public class TableRenderer {
+public class TableRenderer implements DashboardRenderer<DashboardStateCatalog.TableState> {
+    @Override
     public JComponent render(DashboardStateCatalog.TableState tableState) {
         String[] columns = tableState.columns().toArray(new String[0]);
         Object[][] data = tableState.rows().stream()

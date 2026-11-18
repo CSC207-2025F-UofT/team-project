@@ -1,7 +1,6 @@
 package use_case.dashboard;
 
 import entity.LocationInfo;
-import entity.Photo;
 import entity.Trip;
 import entity.dashboard.DashboardDataCatalog;
 import use_case.list_trips.ListTripsDataAccessInterface;
@@ -33,13 +32,9 @@ public class AnalyticsUseCase implements DashboardInputBoundary {
     }
 
     private void mostVisitedCountries() {
-        try {
-            DashboardOutputData data = new DashboardOutputData(AnalyticsType.MOST_VISITED_COUNTRIES);
-            data.addDashboardItem(computeMostVisitedCountries());
-            presenter.prepareSuccessView(data);
-        } catch (RuntimeException e) {
-            presenter.prepareFailureView(e.getMessage());
-        }
+        DashboardOutputData data = new DashboardOutputData(AnalyticsType.MOST_VISITED_COUNTRIES);
+        data.addDashboardItem(computeMostVisitedCountries());
+        presenter.prepareSuccessView(data);
     }
 
     private DashboardDataCatalog.MostVisitedCountries computeMostVisitedCountries() {
@@ -57,7 +52,7 @@ public class AnalyticsUseCase implements DashboardInputBoundary {
                 .map(photo -> photo.getLocation().getInfo())
                 .collect(Collectors.groupingBy(LocationInfo::getCountry));
 
-        List<DashboardDataCatalog.CountryVisits> countryVisits = locationsByCountry
+        List<DashboardDataCatalog.CountryVisit> countryVisits = locationsByCountry
                 .entrySet()
                 .stream()
                 .map(entry -> {
@@ -71,9 +66,9 @@ public class AnalyticsUseCase implements DashboardInputBoundary {
                             .filter(trip -> getCountriesByTrip(trip).contains(country))
                             .map(trip -> trip.getStartTime().toLocalDate())
                             .toList();
-                    return new DashboardDataCatalog.CountryVisits(country, numberOfTimesVisited, dates, landmarks);
+                    return new DashboardDataCatalog.CountryVisit(country, numberOfTimesVisited, dates, landmarks);
                 })
-                .sorted(Comparator.comparingInt(DashboardDataCatalog.CountryVisits::numberOfTimesVisited).reversed())
+                .sorted(Comparator.comparingInt(DashboardDataCatalog.CountryVisit::numberOfTimesVisited).reversed())
                 .limit(RANKING_LIMIT)
                 .toList();
 

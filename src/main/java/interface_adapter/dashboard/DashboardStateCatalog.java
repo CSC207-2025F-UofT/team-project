@@ -7,7 +7,7 @@ import java.util.List;
  */
 public class DashboardStateCatalog {
     public record TableState(
-            List<String> title,
+            String title,
             List<String> columns,
             List<List<String>> rows
     ) implements DashboardItemState {}

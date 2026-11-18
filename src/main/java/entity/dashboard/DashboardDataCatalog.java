@@ -2,17 +2,16 @@ package entity.dashboard;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Map;
 
 /**
  * a static collection of records for entries inside a dashboard item.
  */
 public class DashboardDataCatalog {
     public record MostVisitedCountries(
-            List<CountryVisits> countryVisits
+            List<CountryVisit> countryVisits
     ) implements DashboardItem {}
 
-    public record CountryVisits(
+    public record CountryVisit(
             String country,
             Integer numberOfTimesVisited,
             List<LocalDate> dates,

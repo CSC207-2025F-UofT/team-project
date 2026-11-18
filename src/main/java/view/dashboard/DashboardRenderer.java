@@ -8,7 +8,7 @@ import javax.swing.*;
 /**
  * Randerer for a component on the dashboard.
  */
-public interface DashboardRenderer {
+public interface DashboardRenderer<T extends DashboardItemState> {
 
     /**
      * Render a component on the dashboard
@@ -16,5 +16,5 @@ public interface DashboardRenderer {
      * @param itemState dashboard item with data
      * @return component on the dashboard
      */
-    JComponent render(DashboardItemState itemState);
+    JComponent render(T itemState);
 }

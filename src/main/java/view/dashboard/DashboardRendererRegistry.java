@@ -1,7 +1,9 @@
 package view.dashboard;
 
+import entity.dashboard.DashboardDataCatalog;
 import entity.dashboard.DashboardItem;
 import interface_adapter.dashboard.DashboardItemState;
+import interface_adapter.dashboard.DashboardStateCatalog;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -16,7 +18,12 @@ public class DashboardRendererRegistry {
         return dashboardRenderers.get(dashboardItemType);
     }
 
-    public <T extends DashboardItemState> void register(Class<T> type, DashboardRenderer dashboardRenderer) {
+    public void registerAll() {
+        register(DashboardStateCatalog.TableState.class, new TableRenderer());
+    }
+    private <T extends DashboardItemState> void register(Class<T> type, DashboardRenderer dashboardRenderer) {
         dashboardRenderers.put(type, dashboardRenderer);
     }
+
+
 }
