@@ -239,8 +239,9 @@ public class AnswerCanvasPage extends CanvasPage {
     // whole formula dragged / resized: same ink, offer it again like an edit, error card stays
     private void formulaMoved(long id) {
         hover.forgetSpot(id);
-        if (!inFront()) {
-            return;
+        Formula f = formula(id);
+        if (!inFront() || f == null || f.getAnswer() != null) {
+            return;  // answered ones stay quiet, don't let one steal the target
         }
         targetStroke = null;
         targetId = id;
@@ -336,9 +337,8 @@ public class AnswerCanvasPage extends CanvasPage {
         if (!inFront() || capture == null || r == null || r.revision != capture.getRevision()) {
             return;
         }
-        gate.picked(id);
         generation++;
-        present(capture, r.latex, r.problem);
+        present(capture, r.latex, r.problem);  // one-shot, later edits still wait for an "="
     }
 
     // just take it down, hover keeps its state
@@ -424,11 +424,8 @@ public class AnswerCanvasPage extends CanvasPage {
 
     private void recognize(FormulaCapture capture, long gen) {
         Read r = reads.get(capture.getId());
-        if (r != null && r.revision == capture.getRevision()) {
-            recognized(capture, gen, r.latex, r.problem);  // same ink, read it already
-            return;
-        }
-        worker.recognize(() -> reader.read(capture),
+        boolean known = r != null && r.revision == capture.getRevision();  // same ink, read it already
+        worker.recognize(known ? () -> r.latex : () -> reader.read(capture),
                 (latex, problem) -> recognized(capture, gen, latex, problem));
     }
 

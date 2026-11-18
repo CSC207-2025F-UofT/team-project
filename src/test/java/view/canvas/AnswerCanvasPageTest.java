@@ -937,7 +937,7 @@ class AnswerCanvasPageTest {
         writeWithEquals();
         waitPopup("1+1=");
         lasso(80, 80, 220, 170);
-        drag(130, 125, 330, 275);
+        drag(101, 105, 301, 255);  // let go off the "=" so hover can't be what brings it back
     }
 
     @Test
@@ -1180,5 +1180,71 @@ class AnswerCanvasPageTest {
         int before = strokeCount();
         dragFrom(faint(), 0, 40);
         assertEquals(before, strokeCount());
+    }
+
+    @Test
+    void tappedChipDoesNotExemptLaterEdits() throws Exception {
+        AtomicReference<String> latex = new AtomicReference<>("1+1");
+        shared.setFormulaRecognizer(image -> latex.get());
+        openBoard();
+        write();
+        waitFaint();
+        tap(faint());
+        waitPopup("1+1");
+        onEdt(() -> canvas.setTool(DrawingCanvas.Tool.LASSO));  // closes it
+        onEdt(() -> canvas.setTool(DrawingCanvas.Tool.PEN));
+        latex.set("1+1+");
+        editFormula();  // still writing
+        Thread.sleep(600);
+        assertNull(popup(), "mid-formula, no = yet");
+    }
+
+    @Test
+    void answeredFormulaMovedWithAnUnansweredOneStillReoffersIt() throws Exception {
+        shared.setFormulaRecognizer(image -> "1+1=");
+        openPage();
+        writeWithEqualsAt(100, 100);        // older, stays unanswered
+        waitPopup("1+1=");
+        writeWithEqualsAt(400, 100);        // newer, gets answered
+        waitFor(() -> canvas.getStrokes().stream().allMatch(shared::isBound), "both bound");
+        waitPopup("1+1=");
+        clickCalculate();
+        waitFor(() -> canvas.getAnswers().size() == 1, "the answer");
+        lasso(80, 80, 520, 170);
+        drag(300, 140, 300, 340);  // let go between them, off both "="s
+        waitPopup("1+1=");
+    }
+
+    @Test
+    void movingAnAnsweredFormulaStaysQuiet() throws Exception {
+        shared.setFormulaRecognizer(image -> "1+1=");
+        openPage();
+        writeWithEquals();
+        waitPopup("1+1=");
+        clickCalculate();
+        waitFor(() -> canvas.getAnswers().size() == 1, "the answer");
+        lasso(80, 80, 220, 170);
+        drag(130, 125, 330, 275);
+        Thread.sleep(400);
+        assertNull(popup());
+    }
+
+    @Test
+    void reusedReadStillWaitsForThePendingDefinition() throws Exception {
+        shared.setFormulaRecognizer(image -> image.getHeight() < 80 ? "1+1" : "f(x)=x^{2}+2x");
+        AtomicInteger results = new AtomicInteger();
+        viewModel.addPropertyChangeListener(e -> {
+            if (MathLabViewModel.RESULT.equals(e.getPropertyName())) {
+                results.incrementAndGet();
+            }
+        });
+        openPage();
+        autoDefine();
+        onEdt(() -> page.setPopupDelay(400));
+        write();                   // f(x)=...
+        drag(400, 300, 420, 330);  // 1+1 right after, no pause
+        waitFor(this::definedShown, "the Defined message");
+        Thread.sleep(500);
+        assertEquals(1, results.get(), "saved once");
     }
 }
