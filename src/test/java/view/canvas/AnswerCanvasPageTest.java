@@ -636,6 +636,16 @@ class AnswerCanvasPageTest {
     }
 
     @Test
+    void misreadTrailingEqualsStillPopsUp() throws Exception {
+        AtomicInteger calls = new AtomicInteger();
+        shared.setFormulaRecognizer(image -> calls.incrementAndGet() == 1 ? "1-" : "1");  // whole loses =, rest is clean
+        openPage();
+        writeWithEquals();
+        waitPopup("1=");
+        assertEquals(2, calls.get());
+    }
+
+    @Test
     void writingTheEqualsBringsThePopup() throws Exception {
         AtomicReference<String> latex = new AtomicReference<>("1+1");
         shared.setFormulaRecognizer(image -> latex.get());

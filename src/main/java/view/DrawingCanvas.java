@@ -7,6 +7,7 @@ import view.answer.AnswerInk;
 import view.answer.AnswerLayout;
 import view.answer.AnswerPlacer;
 import view.answer.CanvasAnswer;
+import view.answer.EqualsSpot;
 import view.answer.MostInk;
 import interface_adapter.TextRun;
 import view.answer.Formula;
@@ -1498,7 +1499,10 @@ public class DrawingCanvas extends JPanel {
     }
 
     private FormulaCapture capture(Formula f) {
-        return new FormulaCapture(f.getId(), f.getRevision(), imageOf(inDrawingOrder(f)));
+        List<Stroke> ink = inDrawingOrder(f);
+        List<Stroke> pair = EqualsSpot.trailingPair(ink, f.getCharHeight());
+        BufferedImage rest = pair.isEmpty() ? null : imageOf(minus(ink, pair));  // in case the model loses the =
+        return new FormulaCapture(f.getId(), f.getRevision(), imageOf(ink), rest);
     }
 
     // ---------------------------------------------------------------- images

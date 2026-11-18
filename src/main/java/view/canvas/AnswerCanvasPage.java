@@ -67,6 +67,7 @@ public class AnswerCanvasPage extends CanvasPage {
     private Predicate<String> calculable = latex -> true;
     private Predicate<String> question = latex -> false;
     private final PopupGate gate = new PopupGate(latex -> question.test(latex));
+    private final CaptureReader reader = new CaptureReader(this::recognizeFormula);  // puts a lost trailing = back
 
     // no evaluate feature, just a placeholder
     public AnswerCanvasPage(SharedCanvas sharedCanvas) {
@@ -318,7 +319,7 @@ public class AnswerCanvasPage extends CanvasPage {
     }
 
     private void recognize(FormulaCapture capture, long gen) {
-        worker.recognize(() -> recognizeFormula(capture.getImage()),
+        worker.recognize(() -> reader.read(capture),
                 (latex, problem) -> recognized(capture, gen, latex, problem));
     }
 
@@ -369,7 +370,7 @@ public class AnswerCanvasPage extends CanvasPage {
             if (capture == null || r != null && r.revision == capture.getRevision()) {
                 continue;  // answered, or read already
             }
-            worker.recognize(() -> recognizeFormula(capture.getImage()), (latex, problem) -> {
+            worker.recognize(() -> reader.read(capture), (latex, problem) -> {
                 if (!getSharedCanvas().isCurrent(capture.getId(), capture.getRevision())) {
                     return;
                 }
