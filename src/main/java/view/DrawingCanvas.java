@@ -1,6 +1,7 @@
 package view;
 
 import interface_adapter.AnswerKind;
+import interface_adapter.history.CanvasHistorySelection;
 import view.answer.AnswerColor;
 import view.answer.AnswerInk;
 import view.answer.AnswerLayout;
@@ -174,7 +175,8 @@ public class DrawingCanvas extends JPanel {
     private final Map<Stroke, Color> strokeColors = new HashMap<>();
     private boolean gridVisible = true;
     private final List<Picture> pictures = new ArrayList<>();
-    private Picture selectedPicture; // imported History objects are editable, not flattened ink
+    private Picture selectedPicture; // primary imported History object for the Edit action
+    private final Set<Picture> selectedPictures = new java.util.LinkedHashSet<>(); // multi-item lasso selection
     @FunctionalInterface public interface MathAssetRenderer {
         BufferedImage render(String latex, String result, int width, int height);
     }
@@ -620,6 +622,7 @@ public class DrawingCanvas extends JPanel {
         }
         if (!imagesTouched.isEmpty()) {
             pictures.removeAll(imagesTouched);
+            selectedPictures.removeAll(imagesTouched);
             if (imagesTouched.contains(selectedPicture)) selectedPicture = null;
             fire(inkListeners);
         }
@@ -657,7 +660,12 @@ public class DrawingCanvas extends JPanel {
         // A click on a previously imported History object selects it for move/resize.
         for (int i = pictures.size() - 1; i >= 0; i--) {
             Picture asset = pictures.get(i);
-            if (asset.box.contains(p)) { selectedPicture = asset; moveStart = p; return; }
+            if (asset.box.contains(p)) {
+                selectedPicture = asset;
+                selectedPictures.add(asset);
+                moveStart = p;
+                return;
+            }
         }
         lassoPath = new ArrayList<>();
         lassoPath.add(worldPoint(e));
@@ -719,6 +727,7 @@ public class DrawingCanvas extends JPanel {
             if (lassoPath.size() >= 3) {
                 for (Picture asset : pictures) {
                     if (InkEditor.isInside(lassoPath, asset.box.getCenterX(), asset.box.getCenterY())) {
+                        selectedPictures.add(asset);
                         selectedPicture = asset;
                     }
                 }
@@ -741,23 +750,29 @@ public class DrawingCanvas extends JPanel {
     /** Replaces each selected stroke with its changed copy, as one undo step; the copies stay selected. */
     private void transformSelection(UnaryOperator<Stroke> change, UnaryOperator<CanvasAnswer> answerChange) {
         saveForUndo();
-        if (selectedPicture != null) {
-            Picture current = selectedPicture;
-            Rectangle2D rect = current.box;
-            // Match lasso moves/resizes for ink and imported Math/History objects.
-            Rectangle2D newBox;
-            if (resizeHandle >= 0) {
-                double x = resizeAnchor.getX() + (rect.getX() - resizeAnchor.getX()) * resizeFactor;
-                double y = resizeAnchor.getY() + (rect.getY() - resizeAnchor.getY()) * resizeFactor;
-                newBox = new Rectangle2D.Double(x, y, Math.max(8, rect.getWidth() * resizeFactor),
-                        Math.max(8, rect.getHeight() * resizeFactor));
-            } else {
-                newBox = new Rectangle2D.Double(rect.getX() + moveDx, rect.getY() + moveDy,
-                        rect.getWidth(), rect.getHeight());
+        if (!selectedPictures.isEmpty()) {
+            // Apply the same affine gesture to every imported History item. The
+            // underlying formula/answer recognition logic remains untouched.
+            Set<Picture> replacements = new java.util.LinkedHashSet<>();
+            for (Picture current : selectedPictures) {
+                Rectangle2D rect = current.box;
+                Rectangle2D newBox;
+                if (resizeHandle >= 0) {
+                    double x = resizeAnchor.getX() + (rect.getX() - resizeAnchor.getX()) * resizeFactor;
+                    double y = resizeAnchor.getY() + (rect.getY() - resizeAnchor.getY()) * resizeFactor;
+                    newBox = new Rectangle2D.Double(x, y, Math.max(8, rect.getWidth() * resizeFactor),
+                            Math.max(8, rect.getHeight() * resizeFactor));
+                } else {
+                    newBox = new Rectangle2D.Double(rect.getX() + moveDx, rect.getY() + moveDy,
+                            rect.getWidth(), rect.getHeight());
+                }
+                Picture next = current.withBox(newBox);
+                pictures.set(pictures.indexOf(current), next);
+                replacements.add(next);
+                if (selectedPicture == current) selectedPicture = next;
             }
-            Picture next = current.withBox(newBox);
-            pictures.set(pictures.indexOf(current), next);
-            selectedPicture = next;
+            selectedPictures.clear();
+            selectedPictures.addAll(replacements);
         }
         List<Stroke> after = new ArrayList<>();
         Map<Stroke, Stroke> copies = new HashMap<>();
@@ -838,7 +853,7 @@ public class DrawingCanvas extends JPanel {
     }
 
     private boolean nothingSelected() {
-        return selection.isEmpty() && answerPreview().isEmpty() && selectedPicture == null;
+        return selection.isEmpty() && answerPreview().isEmpty() && selectedPictures.isEmpty();
     }
 
     /** Corner i of a box: 0 top-left, 1 top-right, 2 bottom-right, 3 bottom-left. */
@@ -880,8 +895,9 @@ public class DrawingCanvas extends JPanel {
             book.remove(id);  // unbinds the formula, ink stays
         }
         selectedAnswers.clear();
-        if (selectedPicture != null) {
-            pictures.remove(selectedPicture);
+        if (!selectedPictures.isEmpty()) {
+            pictures.removeAll(selectedPictures);
+            selectedPictures.clear();
             selectedPicture = null;
         }
         List<Stroke> after = new ArrayList<>(strokes);
@@ -914,9 +930,10 @@ public class DrawingCanvas extends JPanel {
     }
 
     public void clearSelection() {
-        if (!selection.isEmpty() || !selectedAnswers.isEmpty() || selectedPicture != null) {
+        if (!selection.isEmpty() || !selectedAnswers.isEmpty() || !selectedPictures.isEmpty()) {
             selection.clear();
             selectedAnswers.clear();
+            selectedPictures.clear();
             selectedPicture = null;
             repaint();
         }
@@ -928,8 +945,8 @@ public class DrawingCanvas extends JPanel {
             return null;
         }
         Rectangle bounds = boundsOf(selectionPreview());
-        if (selectedPicture != null) {
-            Rectangle image = selectedPicture.box.getBounds();
+        for (Picture picture : selectedPictures) {
+            Rectangle image = picture.box.getBounds();
             if (bounds == null) bounds = image; else bounds.add(image);
         }
         for (CanvasAnswer a : answerPreview()) {
@@ -992,6 +1009,7 @@ public class DrawingCanvas extends JPanel {
         pictures.clear(); pictures.addAll(back.pictures);
         graphImage = back.graphImage; graphCard = back.graphCard;
         selectedPicture = null;
+        selectedPictures.clear();
         currentStroke = null;
         selection.clear(); selectedAnswers.clear();
         repaint();
@@ -1006,7 +1024,7 @@ public class DrawingCanvas extends JPanel {
         if (strokes.isEmpty() && pictures.isEmpty() && graphCard == null) return;
         fire(actionListeners);
         saveForUndo();
-        pictures.clear();selectedPicture = null;
+        pictures.clear();selectedPicture = null;selectedPictures.clear();
         graphCard = null;graphImage = null;
         strokes.clear();
         for (Formula f : book.all()) {
@@ -1178,6 +1196,28 @@ public class DrawingCanvas extends JPanel {
         if (selection.isEmpty() || spaceDown || panFrom != null) return false;
         Rectangle bounds = selectionBounds();
         return bounds != null && bounds.contains(toWorld(screenPoint)) && handleAt(screenPoint) < 0;
+    }
+
+    /** A History picture can be moved on the Canvas or copied across the PDF boundary.
+     * Read-only hit testing: the existing selection/move/resize algorithms are unchanged.
+     */
+    public boolean canCopySelectedHistoryAt(Point screenPoint) {
+        if (tool != Tool.LASSO && tool != Tool.RECTANGLE) return false;
+        if (selectedPictures.isEmpty() || spaceDown || panFrom != null) return false;
+        Rectangle bounds = selectionBounds();
+        return bounds != null && bounds.contains(toWorld(screenPoint)) && handleAt(screenPoint) < 0;
+    }
+
+    /** Retain structured text and original graph pixels instead of exporting a screenshot. */
+    public CanvasHistorySelection selectedHistoryTransfer() {
+        java.util.List<CanvasHistorySelection.Asset> assets = new ArrayList<>();
+        for (Picture p : pictures) {
+            if (selectedPictures.contains(p)) {
+                assets.add(new CanvasHistorySelection.Asset(p.image, p.latex, p.result,
+                        p.box.getX(), p.box.getY(), p.box.getWidth(), p.box.getHeight()));
+            }
+        }
+        return new CanvasHistorySelection(assets);
     }
 
     /** Cancel the in-progress move preview when a native copy drag takes over. */
@@ -1610,10 +1650,15 @@ public class DrawingCanvas extends JPanel {
         Point2D world = toWorld(new Point((int) screenTopLeft.getX(), (int) screenTopLeft.getY()));
         fire(actionListeners);
         saveForUndo();
+        boolean graph = latex == null || latex.isBlank();
+        double displayW = graph ? Math.min(340, image.getWidth() / 2.0) : image.getWidth() / 2.0;
+        double displayH = graph ? displayW * image.getHeight() / image.getWidth() : image.getHeight() / 2.0;
         Picture asset = new Picture(image, new Rectangle2D.Double(world.getX(), world.getY(),
-                Math.max(32, image.getWidth() / scale / 2), Math.max(20, image.getHeight() / scale / 2)),
+                Math.max(32, displayW / scale), Math.max(20, displayH / scale)),
                 latex == null ? "" : latex, result == null ? "" : result);
         pictures.add(asset);
+        selectedPictures.clear();
+        selectedPictures.add(asset);
         selectedPicture = asset;
         repaint();fire(inkListeners);
     }
@@ -1623,6 +1668,8 @@ public class DrawingCanvas extends JPanel {
     }
 
     public int getPictureCount() { return pictures.size(); }
+    /** Number of imported History items in the current lasso/box selection. */
+    public int getSelectedPictureCount() { return selectedPictures.size(); }
     public boolean hasSelectedHistoryAsset() { return selectedPicture != null && !selectedPicture.latex.isBlank(); }
     public String selectedHistoryFormula() { return selectedPicture == null ? "" : selectedPicture.latex; }
     public String selectedHistoryResult() { return selectedPicture == null ? "" : selectedPicture.result; }
@@ -1635,6 +1682,8 @@ public class DrawingCanvas extends JPanel {
         saveForUndo();
         Picture replacement = new Picture(preview, selectedPicture.box, latex.trim(), result == null ? "" : result.trim());
         pictures.set(pictures.indexOf(selectedPicture), replacement);
+        selectedPictures.remove(selectedPicture);
+        selectedPictures.add(replacement);
         selectedPicture = replacement;
         repaint();fire(inkListeners);
         return true;
@@ -1646,6 +1695,7 @@ public class DrawingCanvas extends JPanel {
             if (pictures.get(i).box.contains(location)) {
                 fire(actionListeners);saveForUndo();
                 Picture erased = pictures.remove(i);
+                selectedPictures.remove(erased);
                 if (selectedPicture == erased) selectedPicture = null;
                 repaint();fire(inkListeners);
                 return true;
@@ -1745,7 +1795,7 @@ public class DrawingCanvas extends JPanel {
         pictures.clear();pictures.addAll(restoredAssets);
         history.clear();redoHistory.clear();strokeWidths.clear();
         strokeWidths.putAll(restoredWidths);
-        selectedPicture = null;selection.clear();selectedAnswers.clear();
+        selectedPicture = null;selectedPictures.clear();selection.clear();selectedAnswers.clear();
         currentStroke = null;graphCard = restoredGraphBounds;graphImage = restoredGraph;
         scale = state.zoom();originX = state.offsetX();originY = state.offsetY();
         repaint();fire(inkListeners);fire(viewListeners);
@@ -1786,7 +1836,7 @@ public class DrawingCanvas extends JPanel {
             Graphics2D g = (Graphics2D) world.create();
             g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
             Rectangle2D r = p.box;
-            if (p == selectedPicture) {
+            if (selectedPictures.contains(p)) {
                 if (resizeHandle >= 0 && resizeFactor != 1) {
                     r = new Rectangle2D.Double(resizeAnchor.getX() + (r.getX()-resizeAnchor.getX())*resizeFactor,
                             resizeAnchor.getY() + (r.getY()-resizeAnchor.getY())*resizeFactor,
@@ -1801,8 +1851,12 @@ public class DrawingCanvas extends JPanel {
                 int rasterH = Math.min(800, Math.max(16, (int)Math.round(r.getHeight() * scale)));
                 if (p.rendered == null || Math.abs(p.rendered.getWidth()-rasterW) > 12
                         || Math.abs(p.rendered.getHeight()-rasterH) > 12) {
-                    try { p.rendered = mathAssetRenderer.render(p.latex, p.result, rasterW, rasterH); }
-                    catch (RuntimeException badSource) { p.rendered = p.image; }
+                    try {
+                        // The PDF renderer intentionally paints on white paper; a Canvas
+                        // material is an overlay and must keep its transparent background.
+                        p.rendered = transparentPaper(mathAssetRenderer.render(p.latex, p.result,
+                                rasterW, rasterH));
+                    } catch (RuntimeException badSource) { p.rendered = p.image; }
                 }
                 source = p.rendered;
             }
@@ -1810,6 +1864,29 @@ public class DrawingCanvas extends JPanel {
                     (int) Math.round(r.getWidth()), (int) Math.round(r.getHeight()), null);
             g.dispose();
         }
+    }
+
+    /** Make a white-backed formula image an antialiased transparent Canvas overlay.
+     * Does not modify the PDF renderer or the source/serialized image. */
+    private static BufferedImage transparentPaper(BufferedImage input) {
+        if (input == null) throw new IllegalArgumentException("Rendered image required");
+        int w = input.getWidth(), h = input.getHeight();
+        BufferedImage out = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
+        for (int y = 0; y < h; y++) {
+            for (int x = 0; x < w; x++) {
+                int pixel = input.getRGB(x, y);
+                int oldAlpha = (pixel >>> 24) & 255;
+                int r = (pixel >>> 16) & 255, g = (pixel >>> 8) & 255, b = pixel & 255;
+                int darkness = 255 - Math.min(r, Math.min(g, b));
+                int a = oldAlpha * darkness / 255;
+                // Un-premultiply the ink against white to keep antialiased edges dark.
+                int rr = a == 0 ? 0 : Math.max(0, 255 - ((255 - r) * 255 / Math.max(1, darkness)));
+                int gg = a == 0 ? 0 : Math.max(0, 255 - ((255 - g) * 255 / Math.max(1, darkness)));
+                int bb = a == 0 ? 0 : Math.max(0, 255 - ((255 - b) * 255 / Math.max(1, darkness)));
+                out.setRGB(x, y, (a << 24) | (rr << 16) | (gg << 8) | bb);
+            }
+        }
+        return out;
     }
 
     private static final class Picture {

@@ -1,6 +1,7 @@
 package pdf_editor.view;
 
 import view.DrawingCanvas;
+import interface_adapter.history.CanvasHistorySelection;
 import javax.swing.JComponent;
 import javax.swing.TransferHandler;
 import java.awt.Point;
@@ -15,6 +16,10 @@ import java.util.Objects;
 /** Swing adapter that copies a previously selected ink region through native drag and drop. */
 public final class CanvasPdfDragController {
     private static final int DRAG_THRESHOLD = 5;
+    /** Native Swing local-JVM flavor: keep formula/result and original graph pixels. */
+    public static final DataFlavor HISTORY_SELECTION_FLAVOR = new DataFlavor(
+            DataFlavor.javaJVMLocalObjectMimeType + ";class=" + CanvasHistorySelection.class.getName(),
+            "Canvas History selection");
 
     /** Canvas movement has priority until the pointer crosses the PDF boundary. */
     static boolean shouldTransfer(Point pressed, Point current, int canvasWidth) {
@@ -27,27 +32,41 @@ public final class CanvasPdfDragController {
 
     public static void install(DrawingCanvas canvas) {
         Objects.requireNonNull(canvas, "canvas");
-        TransferHandler handler = new TransferHandler() {
+        final class SelectionTransferHandler extends TransferHandler {
+            private boolean history;
             @Override protected Transferable createTransferable(JComponent source) {
-                BufferedImage image;
-                try { image = canvas.selectedInkTransparentImage(); }
-                catch (IllegalStateException noSelection) { return null; }
-                // The same translucent preview follows the pointer during a native drag.
-                setDragImage(translucentPreview(image));
-                setDragImageOffset(new Point(-12, -12));
-                return new InkTransferable(image);
+                try {
+                    if (history) {
+                        CanvasHistorySelection payload = canvas.selectedHistoryTransfer();
+                        setDragImage(translucentPreview(payload.assets().get(0).image()));
+                        setDragImageOffset(new Point(-12, -12));
+                        return new HistoryTransferable(payload);
+                    }
+                    BufferedImage image = canvas.selectedInkTransparentImage();
+                    setDragImage(translucentPreview(image));
+                    setDragImageOffset(new Point(-12, -12));
+                    return new InkTransferable(image);
+                } catch (IllegalStateException noSelection) {
+                    return null;
+                }
             }
             @Override public int getSourceActions(JComponent source) { return COPY; }
-        };
+        }
+        SelectionTransferHandler handler = new SelectionTransferHandler();
         canvas.setTransferHandler(handler);
         MouseAdapter gesture = new MouseAdapter() {
             private Point pressed;
             private boolean started;
 
             @Override public void mousePressed(MouseEvent event) {
-                pressed = event.getButton() == MouseEvent.BUTTON1
-                        && canvas.canCopySelectedInkAt(event.getPoint()) ? event.getPoint() : null;
+                pressed = null;
                 started = false;
+                if (event.getButton() != MouseEvent.BUTTON1) return;
+                // DrawingCanvas's existing listener already selected the clicked picture.
+                // A History selection wins only if the pointer is within its selection box.
+                handler.history = canvas.canCopySelectedHistoryAt(event.getPoint());
+                if (handler.history || canvas.canCopySelectedInkAt(event.getPoint()))
+                    pressed = event.getPoint();
             }
             @Override public void mouseReleased(MouseEvent event) {
                 pressed = null;
@@ -63,6 +82,24 @@ public final class CanvasPdfDragController {
         };
         canvas.addMouseListener(gesture);
         canvas.addMouseMotionListener(gesture);
+    }
+
+    /** Local History payload; unlike an ink copy it never loses LaTeX/result metadata. */
+    static final class HistoryTransferable implements Transferable {
+        private final CanvasHistorySelection selection;
+        HistoryTransferable(CanvasHistorySelection selection) {
+            this.selection = Objects.requireNonNull(selection);
+        }
+        @Override public DataFlavor[] getTransferDataFlavors() {
+            return new DataFlavor[] { HISTORY_SELECTION_FLAVOR };
+        }
+        @Override public boolean isDataFlavorSupported(DataFlavor flavor) {
+            return HISTORY_SELECTION_FLAVOR.equals(flavor);
+        }
+        @Override public Object getTransferData(DataFlavor flavor) throws UnsupportedFlavorException {
+            if (!isDataFlavorSupported(flavor)) throw new UnsupportedFlavorException(flavor);
+            return selection;
+        }
     }
 
     /** Compact translucent ghost; the source image stays full-resolution and untouched. */

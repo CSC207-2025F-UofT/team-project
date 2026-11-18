@@ -52,7 +52,15 @@ public class HistoryPanel extends JPanel {
             return dropped(picture, screenTopLeft);
         }
         default void importIntoPdf(HistoryItem item) { }
+        default void importIntoLibrary(HistoryItem item) { }
+        /** Drop target is determined by cursor, not by the artwork's offset top-left. */
+        default boolean droppedAt(HistoryItem item, BufferedImage picture,
+                                  Point previewTopLeft, Point cursorScreen) {
+            return dropped(item, picture, previewTopLeft);
+        }
         default void deleteHistory(HistoryItem item) { }
+        /** Cancel a lost mouse-release gesture without creating a dropped item. */
+        default void cancelDrag() { }
     }
 
     private final JPanel list = new JPanel();
@@ -64,7 +72,7 @@ public class HistoryPanel extends JPanel {
     public HistoryPanel(HistoryViewModel viewModel, DragHost host, Runnable undoDelete) {
         super(new BorderLayout());
         this.host = host;
-        setBackground(BoardTheme.PANEL);
+        setOpaque(false);
         list.setLayout(new BoxLayout(list, BoxLayout.Y_AXIS));
         list.setOpaque(false);
         list.setBorder(BorderFactory.createEmptyBorder(8, 16, 16, 16));
@@ -126,20 +134,13 @@ public class HistoryPanel extends JPanel {
     static BufferedImage picture(HistoryItem item) {
         if (item.isGraph()) {
             try {
-                BufferedImage image = javax.imageio.ImageIO.read(new java.io.ByteArrayInputStream(item.imagePng()));
-                if (image != null) {
-                    double scale = Math.min(220.0 / image.getWidth(), 42.0 / image.getHeight());
-                    int w = Math.max(1, (int)Math.round(image.getWidth() * scale));
-                    int h = Math.max(1, (int)Math.round(image.getHeight() * scale));
-                    BufferedImage preview = new BufferedImage(w * PICTURE_SCALE, h * PICTURE_SCALE,
-                            BufferedImage.TYPE_INT_ARGB);
-                    Graphics2D g = preview.createGraphics();
-                    g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
-                    g.drawImage(image, 0, 0, preview.getWidth(), preview.getHeight(), null);
-                    g.dispose();
-                    return preview;
-                }
-            } catch (java.io.IOException badImage) { /* domain already validates PNG signature */ }
+                // Keep the original full-resolution PNG for drag and Canvas placement.
+                // The History row scales it only at paint time; never rasterize a
+                // tiny thumbnail and later enlarge that thumbnail into pixels.
+                BufferedImage original = javax.imageio.ImageIO.read(
+                        new java.io.ByteArrayInputStream(item.imagePng()));
+                if (original != null) return original;
+            } catch (java.io.IOException badImage) { /* fall through to formula */ }
         }
         TeXIcon icon = typeset(HistoryAnswerArtwork.formulaLatex(item));
         Rectangle2D formula = formulaBox(item, icon);
@@ -155,6 +156,18 @@ public class HistoryPanel extends JPanel {
         paintContent(g, item, icon, 4, h);
         g.dispose();
         return img;
+    }
+
+    private static BufferedImage graphPreview(BufferedImage original) {
+        double factor = Math.min(440.0 / original.getWidth(), 84.0 / original.getHeight());
+        int w = Math.max(1, (int) Math.round(original.getWidth() * factor));
+        int h = Math.max(1, (int) Math.round(original.getHeight() * factor));
+        BufferedImage preview = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D g = preview.createGraphics();
+        g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
+        g.drawImage(original, 0, 0, w, h, null);
+        g.dispose();
+        return preview;
     }
 
     private static final int GAP = 10;
@@ -193,27 +206,103 @@ public class HistoryPanel extends JPanel {
         }
     }
 
+    /** The same translucent context surface used by PDF materials on all platforms. */
+    GlassContextMenu contextMenu(HistoryItem item) {
+        GlassContextMenu menu = new GlassContextMenu();
+        menu.addAction("Add to Library", () -> host.importIntoLibrary(item));
+        menu.addAction("Add to PDF", () -> host.importIntoPdf(item));
+        menu.addAction("Delete from History", () -> host.deleteHistory(item));
+        return menu;
+    }
+
     // one white capsule, drag it out by anywhere on it
     private final class Row extends JComponent {
         private final HistoryItem item;
         private final TeXIcon icon;
+        private final BufferedImage graphImage;
         private BufferedImage picture;  // made on press
-        private BufferedImage dragged;  // non-null while it's being dragged
+        private BufferedImage dragged;  // full-resolution payload while dragging
+        private BufferedImage dragPreview;  // only the screen ghost uses this low-cost preview
         private Point grab;
+        private java.awt.event.AWTEventListener releaseWatcher;
+
+        private void watchExternalRelease() {
+            if (releaseWatcher != null) return;
+            releaseWatcher = event -> {
+                if (event instanceof MouseEvent mouse && mouse.getID() == MouseEvent.MOUSE_DRAGGED
+                        && mouse.getSource() != Row.this && dragged != null && dragPreview != null) {
+                    Point screen = mouse.getLocationOnScreen();
+                    host.dragging(dragPreview, new Point(screen.x - grab.x, screen.y - grab.y));
+                } else if (event instanceof MouseEvent mouse && mouse.getID() == MouseEvent.MOUSE_RELEASED
+                        && SwingUtilities.isLeftMouseButton(mouse)) {
+                    // AWT can deliver the release to the Canvas, a popup or the window
+                    // instead of the original History row (notably on macOS).
+                    Point screen = mouse.getLocationOnScreen();
+                    SwingUtilities.invokeLater(() -> finishDrag(screen));
+                } else if (event instanceof java.awt.event.WindowEvent window
+                        && (window.getID() == java.awt.event.WindowEvent.WINDOW_DEACTIVATED
+                            || window.getID() == java.awt.event.WindowEvent.WINDOW_LOST_FOCUS)) {
+                    SwingUtilities.invokeLater(this::cancelDrag);
+                }
+            };
+            java.awt.Toolkit.getDefaultToolkit().addAWTEventListener(releaseWatcher,
+                    java.awt.AWTEvent.MOUSE_EVENT_MASK | java.awt.AWTEvent.WINDOW_EVENT_MASK
+                            | java.awt.AWTEvent.WINDOW_FOCUS_EVENT_MASK);
+        }
+
+        private void stopWatchingRelease() {
+            if (releaseWatcher != null) {
+                java.awt.Toolkit.getDefaultToolkit().removeAWTEventListener(releaseWatcher);
+                releaseWatcher = null;
+            }
+        }
+
+        private void finishDrag(Point releaseScreen) {
+            BufferedImage payload = dragged;
+            Point startingGrab = grab;
+            // Clear the view even if the host rejects the drop or throws.
+            dragged = null;
+            grab = null;
+            dragPreview = null;
+            picture = null;
+            stopWatchingRelease();
+            try {
+                if (payload != null && startingGrab != null) {
+                    host.droppedAt(item, payload,
+                            new Point(releaseScreen.x - startingGrab.x,
+                                    releaseScreen.y - startingGrab.y), releaseScreen);
+                }
+            } finally {
+                host.cancelDrag();
+                repaint();
+            }
+        }
+
+        private void cancelDrag() {
+            dragged = null;
+            grab = null;
+            picture = null;
+            dragPreview = null;
+            stopWatchingRelease();
+            host.cancelDrag();
+            repaint();
+        }
 
         Row(HistoryItem item) {
             this.item = item;
-            this.icon = typeset(HistoryAnswerArtwork.formulaLatex(item));
-            setToolTipText("Drag to Canvas / PDF. Right-click to delete, or double-click to add to PDF.");
+            this.icon = item.isGraph() ? null : typeset(HistoryAnswerArtwork.formulaLatex(item));
+            this.graphImage = item.isGraph() ? picture(item) : null;
+            setToolTipText("Drag to Canvas / PDF. Right-click for Library, PDF or Delete actions.");
             setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
             setAlignmentX(LEFT_ALIGNMENT);
             MouseAdapter m = new MouseAdapter() {
                 @Override
                 public void mousePressed(MouseEvent e) {
                     if (SwingUtilities.isLeftMouseButton(e) && e.getX() <= getWidth() - 30) {
-                        picture = picture(item);
-                        int ph = picture.getHeight() / PICTURE_SCALE;
-                        grab = new Point(e.getX() - CONTENT_X, e.getY() - (ROW_H - ph) / 2);
+                        picture = graphImage != null ? graphImage : picture(item);
+                        dragPreview = graphImage == null ? picture : graphPreview(graphImage);
+                        int previewHeight = dragPreview.getHeight() / PICTURE_SCALE;
+                        grab = new Point(e.getX() - CONTENT_X, e.getY() - (ROW_H - previewHeight) / 2);
                     }
                 }
 
@@ -224,19 +313,16 @@ public class HistoryPanel extends JPanel {
                     }
                     if (dragged == null) {
                         dragged = picture;
+                        watchExternalRelease();
                         repaint();
                     }
-                    host.dragging(dragged, topLeft(e));
+                    host.dragging(dragPreview, topLeft(e));
                 }
 
                 @Override
                 public void mouseReleased(MouseEvent e) {
-                    if (dragged != null) {
-                        host.dropped(item, dragged, topLeft(e));
-                    }
-                    dragged = null;
-                    grab = null;
-                    repaint();
+                    if (grab == null) return;
+                    finishDrag(e.getLocationOnScreen());
                 }
             };
             addMouseListener(new MouseAdapter() {
@@ -251,16 +337,14 @@ public class HistoryPanel extends JPanel {
                 @Override public void mouseReleased(MouseEvent e) { popup(e); }
                 private void popup(MouseEvent e) {
                     if (!e.isPopupTrigger()) return;
-                    javax.swing.JPopupMenu menu = new javax.swing.JPopupMenu();
-                    javax.swing.JMenuItem add = new javax.swing.JMenuItem("Add to PDF");
-                    add.addActionListener(x -> host.importIntoPdf(item));
-                    javax.swing.JMenuItem delete = new javax.swing.JMenuItem("Delete from History");
-                    delete.addActionListener(x -> host.deleteHistory(item));
-                    menu.add(add); menu.add(delete); menu.show(e.getComponent(), e.getX(), e.getY());
+                    contextMenu(item).show(e.getComponent(), e.getX(), e.getY());
                 }
             });
             addMouseListener(m);
             addMouseMotionListener(m);
+            addHierarchyListener(event -> {
+                if (!isShowing() && releaseWatcher != null) cancelDrag();
+            });
         }
 
         private Point topLeft(MouseEvent e) {
@@ -292,12 +376,7 @@ public class HistoryPanel extends JPanel {
                 g2.dispose();
                 return;
             }
-            g2.setColor(new Color(0, 0, 0, 12));
-            g2.fill(new RoundRectangle2D.Double(0.5, 2, getWidth() - 1, ROW_H - 1, ROW_H, ROW_H));
-            g2.setColor(Color.WHITE);
-            g2.fill(cap);
-            g2.setColor(BoardTheme.EDGE);
-            g2.draw(cap);
+            // A History item is transparent: no white capsule or its drop shadow.
             g2.setColor(BoardTheme.LABEL_DISABLED);
             Graphics2D grip = (Graphics2D) g2.create();
             grip.translate(20, ROW_H / 2.0);
@@ -305,9 +384,11 @@ public class HistoryPanel extends JPanel {
             grip.dispose();
             g2.clipRect(CONTENT_X, 0, getWidth() - CONTENT_X - ROW_H / 2, ROW_H);
             if (item.isGraph()) {
-                BufferedImage graph = picture(item);
-                int dw = graph.getWidth() / PICTURE_SCALE;
-                int dh = graph.getHeight() / PICTURE_SCALE;
+                BufferedImage graph = graphImage;
+                double ratio = Math.min(220.0 / graph.getWidth(), 42.0 / graph.getHeight());
+                int dw = Math.max(1, (int) Math.round(graph.getWidth() * ratio));
+                int dh = Math.max(1, (int) Math.round(graph.getHeight() * ratio));
+                g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
                 g2.drawImage(graph, CONTENT_X, (ROW_H - dh) / 2, dw, dh, null);
             } else {
                 paintContent(g2, item, icon, CONTENT_X, ROW_H);
