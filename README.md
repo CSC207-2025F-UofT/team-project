@@ -1,10 +1,10 @@
-# Math Lab
+# penTex
 
-Write math by hand. Math Lab reads it, calculates it, graphs it and exports it as a PDF.
+Write math by hand. penTex reads it, calculates it, graphs it and exports it as a PDF.
 
 ## Team Information
 
-**Project name:** Math Lab
+**Project name:** penTex
 
 ### Team Members
 - Yuanmo (Frank) Zha
@@ -20,7 +20,7 @@ Write math by hand. Math Lab reads it, calculates it, graphs it and exports it a
 
 **Education (mathematics)**
 
-Math Lab is a Java Swing desktop app for students who would rather write math than type it. The window is a single infinite canvas. A student writes a formula with the pen. When they pause after an "=", a neural network we trained reads the ink as LaTeX, and a small popup shows the typeset formula with **Calculate** and **Graph** buttons. **Calculate** writes the answer on the canvas right after the "=", in a handwriting-style font. **Graph** draws the function in a card beside the formula. Every calculation and graph is saved to a local **History** panel. Anything on the canvas or in History can be dragged into the built-in **PDF** editor and exported.
+penTex is a Java Swing desktop app for students who would rather write math than type it. The window is a single infinite canvas. A student writes a formula with the pen. When they pause after an "=", a neural network we trained reads the ink as LaTeX, and a small popup shows the typeset formula with **Calculate** and **Graph** buttons. **Calculate** writes the answer on the canvas right after the "=", in a handwriting-style font. **Graph** draws the function in a card beside the formula. Every calculation and graph is saved to a local **History** panel. Anything on the canvas or in History can be dragged into the built-in **PDF** editor and exported.
 
 **Specification (for noun/verb analysis).** A *student* draws *strokes* on a *canvas*. Strokes are grouped into *formulas*, and each formula is *recognized* as a LaTeX string. A formula can be *calculated*: evaluated to a *value*, solved as an equation or inequality in one unknown, differentiated, or saved as a *user-defined function* such as f(x) = x². The *answer* is shown next to the formula. A formula of the form y = … or f(x) = … can be *graphed* over an x range. Every calculation, defined function and graph becomes a *history entry* that is kept between sessions. History entries and canvas selections become *materials*, which the student places on the *pages* of a *PDF document* and exports. The whole canvas can be *saved* under a name and *reopened* later.
 
