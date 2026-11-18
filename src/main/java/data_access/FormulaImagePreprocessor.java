@@ -31,6 +31,11 @@ final class FormulaImagePreprocessor {
      * @throws IllegalArgumentException if there is no ink in the image
      */
     static BufferedImage prepare(BufferedImage source) {
+        return prepare(source, BandRule.TALLEST_BAND);
+    }
+
+    // same, but rule picks what height counts as one line
+    static BufferedImage prepare(BufferedImage source, BandRule rule) {
         int width = source.getWidth();
         int height = source.getHeight();
         int[] rgb = toRgb(source);
@@ -68,9 +73,9 @@ final class FormulaImagePreprocessor {
         ink.setRGB(0, 0, inkWidth, inkHeight, rgb, top * width + left, width);
 
         // Same scale and canvas as training (formula_layout.py).
-        double tallest = FormulaLayout.tallestBand(
+        double tallest = rule.lineHeight(FormulaLayout.tallestBand(
                 FormulaLayout.rowSpans(Arrays.copyOfRange(rowHasInk, top, bottom + 1)),
-                inkHeight, FormulaLayout.GAP_MIN_PX);
+                inkHeight, FormulaLayout.GAP_MIN_PX), inkHeight);
         FormulaLayout.Size layout = FormulaLayout.size(inkWidth, inkHeight, tallest);
         int resizedWidth = Math.max(1, FormulaLayout.roundHalfUp(inkWidth * layout.scale()));
         int resizedHeight = Math.max(1, FormulaLayout.roundHalfUp(inkHeight * layout.scale()));
