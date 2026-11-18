@@ -15,8 +15,10 @@ import adapter.viewmodel.DashboardViewModel;
 import adapter.viewmodel.QuizViewModel;
 import data.InMemoryLabDataAccessObject;
 import data.PubChemCompoundDataAccessObject;
+import data.RandomChoiceOrderer;
 import java.awt.GraphicsEnvironment;
 import java.time.Clock;
+import java.util.Random;
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
 import usecase.checkquiz.CheckQuizInteractor;
@@ -46,7 +48,7 @@ public class LabApp {
     DashboardViewModel dashboardViewModel = new DashboardViewModel();
     LoadDashboardController loadDashboardController = new LoadDashboardController(
         new LoadDashboardInteractor(dataAccess, new LoadDashboardPresenter(dashboardViewModel,
-            Clock.systemDefaultZone())));
+            Clock.systemDefaultZone()), new RandomChoiceOrderer(new Random())));
 
     QuizViewModel quizViewModel = new QuizViewModel();
     CheckQuizController checkQuizController = new CheckQuizController(

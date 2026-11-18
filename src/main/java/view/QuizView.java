@@ -255,7 +255,8 @@ public class QuizView extends JPanel implements PropertyChangeListener {
         button = new JRadioButton(images ? imageHtml(choice) : choice);
         group.add(button);
       }
-      button.setSelected(saved.contains(buttons.size()));
+      // Saved answers use original indexes; the buttons are in shown order.
+      button.setSelected(saved.contains(question.originalIndexOf(buttons.size())));
       button.setOpaque(false);
       button.addItemListener(event -> onChange.run());
       buttons.add(button);
@@ -265,7 +266,7 @@ public class QuizView extends JPanel implements PropertyChangeListener {
       Set<Integer> selected = new HashSet<>();
       for (int choice = 0; choice < buttons.size(); choice++) {
         if (buttons.get(choice).isSelected()) {
-          selected.add(choice);
+          selected.add(question.originalIndexOf(choice));
         }
       }
       return selected;
@@ -281,12 +282,13 @@ public class QuizView extends JPanel implements PropertyChangeListener {
   private JPanel createEquation(QuestionState question, Set<Integer> saved, Runnable onChange) {
     List<JButton> tiles = new ArrayList<>();
     JButton[] blanks = new JButton[question.getBlankCount()];
+    // filled[] holds shown tile positions; saved answers and reports use original indexes.
     int[] filled = new int[blanks.length];
     Arrays.fill(filled, -1);
     int nextBlank = 0;
-    for (int tile : new TreeSet<>(saved)) {
+    for (int original : new TreeSet<>(saved)) {
       if (nextBlank < filled.length) {
-        filled[nextBlank++] = tile;
+        filled[nextBlank++] = question.shownPositionOf(original);
       }
     }
 
@@ -329,8 +331,8 @@ public class QuizView extends JPanel implements PropertyChangeListener {
       tiles.add(button);
       tilesPanel.add(button);
     }
-    answerReaders.add(() -> Arrays.stream(filled).filter(tile -> tile >= 0).boxed()
-        .collect(Collectors.toSet()));
+    answerReaders.add(() -> Arrays.stream(filled).filter(tile -> tile >= 0)
+        .mapToObj(question::originalIndexOf).collect(Collectors.toSet()));
 
     equation.setOpaque(false);
     tilesPanel.setOpaque(false);

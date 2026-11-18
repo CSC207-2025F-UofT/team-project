@@ -5,27 +5,32 @@ import entity.QuizQuestion;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import usecase.ChoiceOrderer;
 import usecase.ModuleDataAccessInterface;
 import usecase.loaddashboard.LoadDashboardOutputData.ModuleInfo;
 import usecase.loaddashboard.LoadDashboardOutputData.QuestionInfo;
 
 /**
- * Loads every module assigned to the student.
+ * Loads every module assigned to the student. Each question's choices come back in the order
+ * the {@link ChoiceOrderer} picks every time the dashboard loads.
  */
 public class LoadDashboardInteractor implements LoadDashboardInputBoundary {
   private final ModuleDataAccessInterface dataAccess;
   private final LoadDashboardOutputBoundary presenter;
+  private final ChoiceOrderer orderer;
 
   /**
    * Creates the interactor.
    *
    * @param dataAccess where the modules are stored
    * @param presenter receives the modules
+   * @param orderer decides the order each question's choices are shown in
    */
   public LoadDashboardInteractor(ModuleDataAccessInterface dataAccess,
-      LoadDashboardOutputBoundary presenter) {
+      LoadDashboardOutputBoundary presenter, ChoiceOrderer orderer) {
     this.dataAccess = dataAccess;
     this.presenter = presenter;
+    this.orderer = orderer;
   }
 
   @Override
@@ -42,10 +47,12 @@ public class LoadDashboardInteractor implements LoadDashboardInputBoundary {
       for (int i = 0; i < module.getPreProcedureQuestions().size(); i++) {
         QuizQuestion question = module.getPreProcedureQuestions().get(i);
         boolean equation = question.getType() == QuizQuestion.Type.EQUATION;
+        List<Integer> order = orderer.orderFor(question.getChoices().size());
         questions.add(new QuestionInfo(question.getPrompt(),
             question.getType() == QuizQuestion.Type.MULTIPLE,
             question.getType() == QuizQuestion.Type.IMAGE, equation, question.getReactants(),
-            equation ? question.getBlankCount() : 0, question.getChoices(),
+            equation ? question.getBlankCount() : 0,
+            ChoiceOrderer.reorder(question.getChoices(), order), order,
             i < saved.size() && question.isCorrect(saved.get(i))));
       }
       infos.add(new ModuleInfo(module.getTitle(), module.getDueDate(), module.getOverview(),

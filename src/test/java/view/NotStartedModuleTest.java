@@ -20,6 +20,7 @@ import java.util.List;
 import javax.swing.AbstractButton;
 import javax.swing.JLabel;
 import org.junit.jupiter.api.Test;
+import usecase.ChoiceOrderer;
 import usecase.loaddashboard.LoadDashboardInteractor;
 
 class NotStartedModuleTest {

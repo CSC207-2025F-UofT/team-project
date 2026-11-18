@@ -1,6 +1,7 @@
 package adapter.viewmodel;
 
 import java.util.List;
+import usecase.ChoiceOrderer;
 
 /**
  * One quiz question as the quiz page shows it.
@@ -13,10 +14,11 @@ public final class QuestionState {
   private final String reactants;
   private final int blankCount;
   private final List<String> choices;
+  private final List<Integer> choiceOrder;
   private final boolean savedCorrect;
 
   /**
-   * Creates the question state.
+   * Creates the question state with its choices in their original order.
    *
    * @param prompt the question text
    * @param multipleChoice true if the student ticks every correct choice, false if they
@@ -32,6 +34,28 @@ public final class QuestionState {
   public QuestionState(String prompt, boolean multipleChoice, boolean imageChoices,
       boolean equation, String reactants, int blankCount, List<String> choices,
       boolean savedCorrect) {
+    this(prompt, multipleChoice, imageChoices, equation, reactants, blankCount, choices,
+        ChoiceOrderer.identity(choices.size()), savedCorrect);
+  }
+
+  /**
+   * Creates the question state with its choices in a shuffled order. Saved answers and the
+   * answers the page reports always use each choice's original index.
+   *
+   * @param prompt the question text
+   * @param multipleChoice true if the student ticks every correct choice, false if they
+   *     pick one
+   * @param imageChoices true if each choice is an image resource path, not a text label
+   * @param equation true if the student fills product tiles into blanks after the reactants
+   * @param reactants the left side of the equation, or empty when not {@code equation}
+   * @param blankCount how many blanks the equation has, or 0 when not {@code equation}
+   * @param choices the choices in the order they are shown
+   * @param choiceOrder for each shown position, the original index of the choice there
+   * @param savedCorrect whether the student's saved answer to it is correct
+   */
+  public QuestionState(String prompt, boolean multipleChoice, boolean imageChoices,
+      boolean equation, String reactants, int blankCount, List<String> choices,
+      List<Integer> choiceOrder, boolean savedCorrect) {
     this.prompt = prompt;
     this.multipleChoice = multipleChoice;
     this.imageChoices = imageChoices;
@@ -39,6 +63,7 @@ public final class QuestionState {
     this.reactants = reactants;
     this.blankCount = blankCount;
     this.choices = choices;
+    this.choiceOrder = choiceOrder;
     this.savedCorrect = savedCorrect;
   }
 
@@ -68,6 +93,27 @@ public final class QuestionState {
 
   public List<String> getChoices() {
     return choices;
+  }
+
+  /**
+   * Translates a shown position into the choice's original index, which is what answers and
+   * saved answers use.
+   *
+   * @param shown the position of a choice on screen
+   * @return the choice's original index
+   */
+  public int originalIndexOf(int shown) {
+    return choiceOrder.get(shown);
+  }
+
+  /**
+   * Translates a choice's original index into where it is shown.
+   *
+   * @param original the choice's original index
+   * @return its position on screen, or -1 if there is no such choice
+   */
+  public int shownPositionOf(int original) {
+    return choiceOrder.indexOf(original);
   }
 
   public boolean isSavedCorrect() {
