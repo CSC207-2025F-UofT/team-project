@@ -1,6 +1,7 @@
 package app;
 
 import data_access.FileUserDataAccessObject;
+import data_access.InMemoryPetDataAccessObject;
 import data_access.GoogleDesktopIdentityGateway;
 import entity.UserFactory;
 import interface_adapter.ViewManagerModel;
@@ -16,6 +17,10 @@ import interface_adapter.logout.LogoutPresenter;
 import interface_adapter.signup.SignupController;
 import interface_adapter.signup.SignupPresenter;
 import interface_adapter.signup.SignupViewModel;
+import interface_adapter.adopt_pet.AdoptPetViewModel;
+import interface_adapter.interact_with_pet.InteractWithPetController;
+import interface_adapter.interact_with_pet.InteractWithPetPresenter;
+import interface_adapter.interact_with_pet.InteractWithPetViewModel;
 import use_case.change_password.ChangePasswordInputBoundary;
 import use_case.change_password.ChangePasswordInteractor;
 import use_case.change_password.ChangePasswordOutputBoundary;
@@ -30,10 +35,14 @@ import use_case.logout.LogoutOutputBoundary;
 import use_case.signup.SignupInputBoundary;
 import use_case.signup.SignupInteractor;
 import use_case.signup.SignupOutputBoundary;
+import use_case.interact_with_pet.InteractWithPetInteractor;
 import view.LoggedInView;
 import view.LoginView;
 import view.SignupView;
 import view.ViewManager;
+import view.AdoptPetView;
+import view.InteractWithPetView;
+
 
 import javax.swing.*;
 import java.awt.*;
@@ -58,6 +67,14 @@ public class AppBuilder {
     private LoggedInViewModel loggedInViewModel;
     private LoggedInView loggedInView;
     private LoginView loginView;
+    private final InMemoryPetDataAccessObject petDataAccessObject =
+            new InMemoryPetDataAccessObject();
+
+    private AdoptPetViewModel adoptPetViewModel;
+    private InteractWithPetViewModel interactWithPetViewModel;
+
+    private AdoptPetView adoptPetView;
+    private InteractWithPetView interactWithPetView;
 
     public AppBuilder() {
         cardPanel.setLayout(cardLayout);
@@ -81,6 +98,47 @@ public class AppBuilder {
         loggedInViewModel = new LoggedInViewModel();
         loggedInView = new LoggedInView(loggedInViewModel);
         cardPanel.add(loggedInView, LoggedInViewModel.VIEW_NAME);
+        return this;
+    }
+
+    public AppBuilder addAdoptPetView() {
+        adoptPetViewModel = new AdoptPetViewModel();
+        adoptPetView = new AdoptPetView(adoptPetViewModel);
+
+        cardPanel.add(adoptPetView, AdoptPetViewModel.VIEW_NAME);
+        return this;
+    }
+
+    public AppBuilder addInteractWithPetView() {
+        interactWithPetViewModel = new InteractWithPetViewModel();
+        interactWithPetView =
+                new InteractWithPetView(interactWithPetViewModel);
+
+        cardPanel.add(
+                interactWithPetView,
+                InteractWithPetViewModel.VIEW_NAME
+        );
+        return this;
+    }
+
+    public AppBuilder addInteractWithPetUseCase() {
+        InteractWithPetPresenter presenter =
+                new InteractWithPetPresenter(
+                        adoptPetViewModel,
+                        interactWithPetViewModel,
+                        viewManagerModel
+                );
+
+        InteractWithPetInteractor interactor =
+                new InteractWithPetInteractor(
+                        petDataAccessObject,
+                        presenter
+                );
+
+        InteractWithPetController controller =
+                new InteractWithPetController(interactor);
+
+        loggedInView.setInteractWithPetController(controller);
         return this;
     }
 

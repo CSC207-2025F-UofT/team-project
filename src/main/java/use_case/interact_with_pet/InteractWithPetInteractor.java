@@ -1,12 +1,12 @@
 package use_case.interact_with_pet;
 import entity.Pet;
 
-public class InteractWithPetInreractor implements InteractWithPetInputBoundary {
+public class InteractWithPetInteractor implements InteractWithPetInputBoundary {
 
     private final PetDataAccessInterface petDataAccess;
     private InteractWithPetOutputBoundary presenter;
 
-    public InteractWithPetInreractor (
+    public InteractWithPetInteractor(
             PetDataAccessInterface petDataAccess,
             InteractWithPetOutputBoundary presenter) {
         this.petDataAccess = petDataAccess;

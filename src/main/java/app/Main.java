@@ -18,6 +18,9 @@ public class Main {
                 .addChangePasswordUseCase()
                 .addLogoutUseCase()
                 .addGoogleLoginUseCase()
+                .addAdoptPetView()
+                .addInteractWithPetView()
+                .addInteractWithPetUseCase()
                 .build();
 
         application.pack();
