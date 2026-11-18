@@ -26,47 +26,6 @@ public class TimerSettingsView extends JPanel implements TimerSettingsViewModelL
         this.viewModel = viewModel;
         viewModel.addListener(this);
 
-        Font winkle = null;
-        try {
-            winkle = Font.createFont(Font.TRUETYPE_FONT, new File("src/font/Winkle-Regular.ttf"));
-        } catch (FontFormatException e) {
-            throw new RuntimeException(e);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
-        ge.registerFont(winkle);
-
-        Font appleGaramond = null;
-        try {
-            appleGaramond = Font.createFont(Font.TRUETYPE_FONT, new File("src/font/AppleGaramond.ttf"));
-        } catch (FontFormatException e) {
-            throw new RuntimeException(e);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        ge.registerFont(appleGaramond);
-
-        Font appleGaramondBold = null;
-        try {
-            appleGaramondBold = Font.createFont(Font.TRUETYPE_FONT, new File("src/font/AppleGaramond-Bold.ttf"));
-        } catch (FontFormatException e) {
-            throw new RuntimeException(e);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        ge.registerFont(appleGaramondBold);
-
-        Font appleGaramondItalic = null;
-        try {
-            appleGaramondItalic = Font.createFont(Font.TRUETYPE_FONT, new File("src/font/AppleGaramond-LightItalic.ttf"));
-        } catch (FontFormatException e) {
-            throw new RuntimeException(e);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        ge.registerFont(appleGaramondItalic);
-
         // Main panel containing all the settings components.
         JPanel settingsPanel = new JPanel();
         settingsPanel.setLayout(new BoxLayout(settingsPanel, BoxLayout.Y_AXIS));
@@ -80,11 +39,11 @@ public class TimerSettingsView extends JPanel implements TimerSettingsViewModelL
         headingPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
 
         JLabel headingLabel = new JLabel("Your study rhythm");
-        headingLabel.setFont(appleGaramondBold.deriveFont(40f));
+        headingLabel.setFont(FontManager.getAppleGaramondBold(40f));
         headingLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
 
         JLabel subheadingLabel = new JLabel("Find a pace that feels like you.");
-        subheadingLabel.setFont(appleGaramondItalic.deriveFont(20f));
+        subheadingLabel.setFont(FontManager.getAppleGaramondItalic(20f));
         subheadingLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
 
         headingPanel.add(headingLabel);
@@ -93,7 +52,7 @@ public class TimerSettingsView extends JPanel implements TimerSettingsViewModelL
 
         // Focus slider and its label.
         JLabel focusSliderLabel = new JLabel("Focus Duration");
-        focusSliderLabel.setFont(appleGaramond.deriveFont(22f));
+        focusSliderLabel.setFont(FontManager.getAppleGaramond(22f));
         focusSliderLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
 
         JPanel focusSliderPanel = new JPanel();
@@ -103,7 +62,7 @@ public class TimerSettingsView extends JPanel implements TimerSettingsViewModelL
         JSlider focusSlider = new JSlider(0, 60, 25);
         focusSlider.setAlignmentX(Component.LEFT_ALIGNMENT);
         focusSlider.setPreferredSize(new Dimension(390, 50));
-        focusSlider.setFont(winkle.deriveFont(20f));
+        focusSlider.setFont(FontManager.getWinkle(20f));
         focusSlider.setMajorTickSpacing(5);
         focusSlider.setPaintTicks(true);
         focusSlider.setPaintLabels(true);
@@ -115,7 +74,7 @@ public class TimerSettingsView extends JPanel implements TimerSettingsViewModelL
 
         // Break slider and its label.
         JLabel breakSliderLabel = new JLabel("Break Duration");
-        breakSliderLabel.setFont(appleGaramond.deriveFont(22f));
+        breakSliderLabel.setFont(FontManager.getAppleGaramond(22f));
         breakSliderLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
 
         JPanel breakSliderPanel = new JPanel();
@@ -126,7 +85,7 @@ public class TimerSettingsView extends JPanel implements TimerSettingsViewModelL
         JSlider breakSlider = new JSlider(0, 60, 5);
         breakSlider.setAlignmentX(Component.LEFT_ALIGNMENT);
         breakSlider.setPreferredSize(new Dimension(390, 50));
-        breakSlider.setFont(winkle.deriveFont(20f));
+        breakSlider.setFont(FontManager.getWinkle(20f));
         breakSlider.setMajorTickSpacing(5);
         breakSlider.setPaintTicks(true);
         breakSlider.setPaintLabels(true);
@@ -144,7 +103,7 @@ public class TimerSettingsView extends JPanel implements TimerSettingsViewModelL
         JButton saveButton = new JButton("Save");
         saveButton.setPreferredSize(new Dimension(100, 45));
         saveButton.setMaximumSize(new Dimension(100, 45));
-        saveButton.setFont(appleGaramond.deriveFont(20f));
+        saveButton.setFont(FontManager.getAppleGaramond(20f));
         saveButton.setAlignmentX(Component.LEFT_ALIGNMENT);
 
         // Passes the focus and break durations to the Update Timer Settings controller when the user clicks Save.
@@ -177,7 +136,6 @@ public class TimerSettingsView extends JPanel implements TimerSettingsViewModelL
     public void stateChanged() {
         if (viewModel.getState().getSettingsOpen()) {
             this.showWindow();
-            viewModel.getState().setSettingsOpen(false);
         } else if (viewModel.getState().getErrorMessage() != null) {
             JOptionPane.showMessageDialog(
                     settingsFrame,
