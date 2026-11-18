@@ -1,7 +1,5 @@
 package use_case.dashboard;
 
-import data_access.TripDataAccessInterface;
-
 public interface DashboardInputBoundary {
 
     /**
