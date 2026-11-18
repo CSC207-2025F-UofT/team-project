@@ -50,6 +50,7 @@ public final class DocEditorPanel extends JPanel implements PdfWorkspacePort {
     private final JScrollPane pageScroll;
     private final JPanel ribbonHolder = new JPanel(new BorderLayout());
     private final JPanel libraryPanel = new JPanel(new BorderLayout());
+    private JButton libraryToggleButton;
     private final DefaultListModel<MathLibrary.Material> libraryModel = new DefaultListModel<>();
     private final JList<MathLibrary.Material> libraryList = new JList<>(libraryModel);
     private final JLabel pageCount = new JLabel();
@@ -114,7 +115,7 @@ public final class DocEditorPanel extends JPanel implements PdfWorkspacePort {
     }
     /** Request a temporary screenshot selection on the visible Canvas. */
     public void setRegionCapture(Runnable command) { regionCapture = Objects.requireNonNull(command); }
-    public void showLibrary() { libraryPanel.setVisible(true); workspace.revalidate(); workspace.repaint(); }
+    public void showLibrary() { setLibraryVisible(true); }
     public void close() { detachLibraryListener.run(); }
     public PdfPageCanvas pageView() { return paper; }
     public PdfEditorController documentController() { return controller; }
@@ -162,6 +163,12 @@ public final class DocEditorPanel extends JPanel implements PdfWorkspacePort {
         tabs.add(new Tab("Layout", layoutRibbon()));
         tabs.add(new Tab("View", viewRibbon()));
         for (Tab tab : tabs) names.add(tab.button);
+        // Library is a frequent workspace action, not a secondary Insert command.
+        // Keep the existing ribbon tabs and document workspace unchanged.
+        libraryToggleButton = new RoundedActionButton("Library", this::toggleLibrary, false);
+        libraryToggleButton.setName("libraryTopButton");
+        libraryToggleButton.setToolTipText("Show or hide Material Library");
+        tabsRow.add(libraryToggleButton);
         tabsRow.add(names);
         JButton export = new RoundedActionButton("Export PDF", this::export, true);
         export.setToolTipText("Save your document as a PDF file");
@@ -223,7 +230,6 @@ public final class DocEditorPanel extends JPanel implements PdfWorkspacePort {
         command(row, RibbonButton.labeled(DocIcons::comment, "Text box"), this::addNote);
         command(row, RibbonButton.labeled(DocIcons::image, "Capture area"), () -> regionCapture.run());
         command(row, RibbonButton.labeled(DocIcons::pageBreak, "New page"), this::addPage);
-        command(row, RibbonButton.labeled(Icons::library, "Library"), this::toggleLibrary);
         return row;
     }
     private JPanel layoutRibbon() {
@@ -292,7 +298,8 @@ public final class DocEditorPanel extends JPanel implements PdfWorkspacePort {
             g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
             int w = getWidth(), h = getHeight();
             Color top = primary ? (over ? new Color(41, 143, 255) : new Color(0, 122, 255))
-                    : (over ? new Color(228, 237, 249, 252) : new Color(247, 249, 253, 242));
+                    : (getModel().isSelected() ? new Color(222, 235, 254)
+                    : over ? new Color(228, 237, 249, 252) : new Color(247, 249, 253, 242));
             Color end = primary ? new Color(0, 93, 216) : new Color(239, 243, 249);
             g2.setPaint(new GradientPaint(0, 0, top, 0, h, end));
             g2.fillRoundRect(0, 0, w - 1, h - 1, 17, 17);
@@ -404,7 +411,16 @@ public final class DocEditorPanel extends JPanel implements PdfWorkspacePort {
         MathLibrary.Material selected = libraryList.getSelectedValue();
         if (selected != null) library.delete(selected.id());
     }
-    private void toggleLibrary() { libraryPanel.setVisible(!libraryPanel.isVisible()); workspace.revalidate();workspace.repaint(); }
+    private void toggleLibrary() { setLibraryVisible(!libraryPanel.isVisible()); }
+    private void setLibraryVisible(boolean visible) {
+        libraryPanel.setVisible(visible);
+        if (libraryToggleButton != null) {
+            libraryToggleButton.getModel().setSelected(visible);
+            libraryToggleButton.repaint();
+        }
+        workspace.revalidate();
+        workspace.repaint();
+    }
     private void updateStatus() {
         pageCount.setText("Page " + (controller.currentPage() + 1) + " of " + controller.pageCount());
         paper.repaint();

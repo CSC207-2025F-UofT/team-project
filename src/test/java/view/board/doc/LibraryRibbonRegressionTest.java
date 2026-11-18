@@ -8,6 +8,7 @@ import pdf_editor.use_case.DocumentEditor;
 import pdf_editor.use_case.PdfExportInteractor;
 
 import javax.swing.JToggleButton;
+import javax.swing.JButton;
 import java.awt.Component;
 import java.awt.Container;
 import java.util.ArrayList;
@@ -15,7 +16,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-/** Only Insert offers Library; View must not duplicate the command. */
+/** Library has one persistent top-level entry, not duplicated inside ribbon tabs. */
 class LibraryRibbonRegressionTest {
     private static DocEditorPanel editor() {
         DocumentEditor document = new DocumentEditor();
@@ -43,15 +44,21 @@ class LibraryRibbonRegressionTest {
                 .filter(b -> "ribbon.Library".equals(b.getName())).count();
     }
 
-    @Test void libraryAppearsInInsertButNotView() {
+    @Test void libraryHasExactlyOneTopLevelEntryAndNoRibbonDuplicates() {
         DocEditorPanel editor = editor();
         try {
-            tab(editor, "Insert");
-            assertEquals(1L, activeLibraryCommands(editor));
-            tab(editor, "View");
-            assertEquals(0L, activeLibraryCommands(editor));
-            tab(editor, "Home");
-            assertEquals(0L, activeLibraryCommands(editor));
+            JButton libraryButton = find(editor, JButton.class).stream()
+                    .filter(b -> "libraryTopButton".equals(b.getName())).findFirst().orElseThrow();
+            assertEquals("Library", libraryButton.getText());
+            for (String name : List.of("Home", "Insert", "Layout", "View")) {
+                tab(editor, name);
+                assertEquals(0L, activeLibraryCommands(editor), name + " ribbon should not duplicate Library");
+            }
+            assertFalse(editor.isLibraryVisible());
+            libraryButton.doClick();
+            assertTrue(editor.isLibraryVisible());
+            libraryButton.doClick();
+            assertFalse(editor.isLibraryVisible());
         } finally { editor.close(); }
     }
 
