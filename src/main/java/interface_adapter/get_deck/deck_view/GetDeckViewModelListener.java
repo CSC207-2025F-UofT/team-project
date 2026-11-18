@@ -1,4 +1,4 @@
-package interface_adapter.get_deck;
+package interface_adapter.get_deck.deck_view;
 
 public interface GetDeckViewModelListener {
 

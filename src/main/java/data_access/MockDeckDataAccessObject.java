@@ -83,6 +83,7 @@ public class MockDeckDataAccessObject implements GetAllDecksDataAccessInterface,
         decks.add(mockDataMakeDeck("MAT267H1"));
         decks.add(mockDataMakeDeck("CSC209H1"));
         decks.add(mockDataMakeDeck("MAT237Y1"));
+        decks.add(new Deck("ESS250H1"));
 
         return decks;
     }

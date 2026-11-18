@@ -8,16 +8,17 @@ import interface_adapter.get_all_decks.GetAllDecksPresenter;
 import interface_adapter.get_all_decks.GetAllDecksViewModel;
 import interface_adapter.get_deck.GetDeckController;
 import interface_adapter.get_deck.GetDeckPresenter;
-import interface_adapter.get_deck.GetDeckViewModel;
+import interface_adapter.get_deck.deck_view.GetDeckViewModel;
+import interface_adapter.get_deck.study_view.StudyViewModel;
 import use_case.get_all_decks.GetAllDecksInputBoundary;
 import use_case.get_all_decks.GetAllDecksInteractor;
 import use_case.get_all_decks.GetAllDecksOutputBoundary;
 import use_case.get_deck.GetDeckInputBoundary;
 import use_case.get_deck.GetDeckInteractor;
 import use_case.get_deck.GetDeckOutputBoundary;
-import view.DeckView;
-import view.HomescreenView;
-import view.ViewManager;
+import view.*;
+import view.deck_view.DeckView;
+import view.deck_view.StudyView;
 
 import javax.swing.*;
 import java.awt.*;
@@ -43,6 +44,9 @@ public class AppBuilder {
     private DeckView deckView;
     private GetDeckViewModel getDeckViewModel;
 
+    private StudyView studyView;
+    private StudyViewModel studyViewModel;
+
     public AppBuilder() {
         cardPanel.setLayout(cardLayout);
     }
@@ -61,6 +65,13 @@ public class AppBuilder {
         return this;
     }
 
+    public AppBuilder addStudyView() {
+        studyViewModel = new StudyViewModel();
+        studyView = new StudyView(studyViewModel);
+        cardPanel.add(studyView, StudyViewModel.VIEW_NAME);
+        return this;
+    }
+
     public AppBuilder addGetAllDecksUseCase() {
         final GetAllDecksOutputBoundary getAllDecksOutputBoundary = new GetAllDecksPresenter(viewManagerModel,
                 getAllDecksViewModel);
@@ -70,18 +81,20 @@ public class AppBuilder {
         GetAllDecksController controller = new GetAllDecksController(getAllDecksInteractor);
         homescreenView.setGetAllDecksController(controller);
         deckView.setGetAllDecksController(controller);
+        studyView.setGetAllDecksController(controller);
         return this;
     }
 
     public AppBuilder addGetDeckUseCase() {
         final GetDeckOutputBoundary getDeckOutputBoundary = new GetDeckPresenter(viewManagerModel,
-                getAllDecksViewModel, getDeckViewModel);
+                getAllDecksViewModel, getDeckViewModel, studyViewModel);
 
         final GetDeckInputBoundary getDeckInteractor = new GetDeckInteractor(
                 deckDataAccessObject, getDeckOutputBoundary);
 
         GetDeckController controller = new GetDeckController(getDeckInteractor);
         deckView.setGetDeckController(controller);
+        studyView.setGetDeckController(controller);
         homescreenView.setGetDeckController(controller);
         return this;
     }

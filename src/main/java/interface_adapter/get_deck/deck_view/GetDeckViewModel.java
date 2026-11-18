@@ -1,4 +1,4 @@
-package interface_adapter.get_deck;
+package interface_adapter.get_deck.deck_view;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,6 +15,7 @@ public class GetDeckViewModel {
     private GetDeckState state = new GetDeckState();
 
     public GetDeckState getState() { return this.state; }
+    public void setState(GetDeckState state) { this.state = state; }
 
     public void addListener(GetDeckViewModelListener listener) { listeners.add(listener); }
 

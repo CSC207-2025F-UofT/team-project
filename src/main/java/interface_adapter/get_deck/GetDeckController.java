@@ -23,4 +23,18 @@ public class GetDeckController {
 
         getDeckUseCaseInteractor.execute(getDeckInputData);
     }
+
+    /**
+     * Executes the switchToDeckView Use Case.
+     */
+    public void switchToDeckView() {
+        getDeckUseCaseInteractor.switchToDeckView();
+    }
+
+    /**
+     * Executes the switchToStudyView Use Case.
+     */
+    public void switchToStudyView() {
+        getDeckUseCaseInteractor.switchToStudyView();
+    }
 }

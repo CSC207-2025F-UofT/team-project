@@ -9,6 +9,7 @@ public class Main {
         JFrame application = appBuilder
                 .addHomescreenView()
                 .addDeckView()
+                .addStudyView()
                 .addGetAllDecksUseCase()
                 .addGetDeckUseCase()
                 .build();

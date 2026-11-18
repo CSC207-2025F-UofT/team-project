@@ -15,4 +15,22 @@ public interface GetDeckOutputBoundary {
      * @param errorMessage the explanation of the failure
      */
     void prepareFailView(String errorMessage);
+
+    /**
+     * Prepares the empty view for the GetDeck Use Case
+     * for when there are no flashcards in the deck
+     * @param outputData the output data
+     * @param errorMessage the explanation of the failure
+     */
+    void prepareEmptyView(GetDeckOutputData outputData, String errorMessage);
+
+    /**
+     * Switches to the Deck View.
+     */
+    void switchToDeckView();
+
+    /**
+     * Switches to the Study View.
+     */
+    void switchToStudyView();
 }
