@@ -37,7 +37,7 @@ import java.util.function.Predicate;
 
 // answer page: pause after an "=" -> popup with the read formula -> Calculate -> answer on the canvas
 public class AnswerCanvasPage extends CanvasPage {
-    static final int POPUP_DELAY_MILLIS = 1500;
+    static final int POPUP_DELAY_MILLIS = 500;
 
     /** Optional source-aware export callback. Older two-argument integrations remain supported. */
     @FunctionalInterface public interface FormulaResultSink {

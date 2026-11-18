@@ -20,8 +20,8 @@ import ai.djl.modality.cv.ImageFactory;
  * 单线程使用。先 init()；返回的 NDArray 由调用方 close，最晚在模型 close 时释放。
  */
 public final class vital_mini implements AutoCloseable {
-    public static final int VOCAB_LENGTH = 241;
-    public static final int PAD_ID = 67, BOS_ID = 68, EOS_ID = 69, MAX_LEN = 200;
+    public static final int VOCAB_LENGTH = 234;
+    public static final int PAD_ID = 67, BOS_ID = 68, EOS_ID = 69, MAX_LEN = 1000;
     private final Path modelPath;
     private ModelRuntime runtime;
     private vital_pixel cnn;

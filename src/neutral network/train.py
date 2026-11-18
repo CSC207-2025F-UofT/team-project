@@ -90,15 +90,16 @@ def augment_strokes(strokes: list[np.ndarray], rng: random.Random) -> list[np.nd
     m = (rot @ shear @ scale).T
     return [s @ m for s in strokes]
 
-def render(strokes: list[np.ndarray], stroke_px: float = 3.0, ss: int = 2) -> torch.Tensor:
+def render(strokes: list[np.ndarray], stroke_px: float = 3.0, ss: int = 2, band_scale: float = 1.0) -> torch.Tensor:
     """笔迹 -> [1,H,W],墨迹为 1、背景为 0。裁剪到墨迹外接矩形;缩放比例和画布尺寸与图片路径
     共用 formula_layout.py(最高行带高 112,多行公式画布更高);
-    笔画粗细按输出像素固定(不随缩放变),ss 倍超采样后缩小做抗锯齿"""
+    笔画粗细按输出像素固定(不随缩放变),ss 倍超采样后缩小做抗锯齿;
+    band_scale 乘在最高行带高度上(crop.py 用它试不同缩放),默认 1 即原规则"""
     pts = np.concatenate(strokes)
     x0, y0 = pts.min(0)
     x1, y1 = pts.max(0)
     w0, h0 = max(float(x1 - x0), 1e-3), max(float(y1 - y0), 1e-3)
-    tallest = tallest_band([(float(s[:, 1].min()), float(s[:, 1].max())) for s in strokes], h0)
+    tallest = tallest_band([(float(s[:, 1].min()), float(s[:, 1].max())) for s in strokes], h0) * band_scale
     scale, width, height = formula_layout(w0, h0, tallest)
     off = np.array([(width - w0 * scale) / 2, (height - h0 * scale) / 2], dtype=np.float32)   # 居中
 
@@ -299,7 +300,7 @@ def convert(images: list[torch.Tensor]) -> tuple[torch.Tensor, torch.Tensor]:
     for i, im in enumerate(images):
         # 两条预处理路径都留有纯色边距，左上角就是该样本的补边颜色。
         batch[i] = im[:, :1, :1]
-        batch[i, :, :, :im.size(-1)] = im
+        batch[i, :, :im.size(-2), :im.size(-1)] = im
     return batch, widths
 
 def collate(batch):
