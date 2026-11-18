@@ -37,7 +37,6 @@ import java.util.function.Predicate;
 // answer page: pause after an "=" -> popup with the read formula -> Calculate -> answer on the canvas
 public class AnswerCanvasPage extends CanvasPage {
     static final int POPUP_DELAY_MILLIS = 500;
-    static final int FAINT_DELAY_MILLIS = 1000;  // after the read, so ~1.5s from pen up
 
     /** Optional source-aware export callback. Older two-argument integrations remain supported. */
     @FunctionalInterface public interface FormulaResultSink {
@@ -69,10 +68,7 @@ public class AnswerCanvasPage extends CanvasPage {
     private Predicate<String> question = latex -> false;
     private final PopupGate gate = new PopupGate(latex -> question.test(latex));
     private Predicate<String> faintCheck = latex -> false;
-    private final FaintEquals faint;  // faint "=" chip for a done formula w/o one
-    private final Timer faintTimer;
-    private long faintFor = -1;       // formula the chip is about
-    private long faintGen;
+    private final FaintOffer faint;   // faint "=" chip for a done formula w/o one
     private final CaptureReader reader = new CaptureReader(this::recognizeFormula);  // puts a lost trailing = back
 
     // no evaluate feature, just a placeholder
@@ -83,7 +79,6 @@ public class AnswerCanvasPage extends CanvasPage {
         this.popup = null;
         this.pauseTimer = null;
         this.faint = null;
-        this.faintTimer = null;
         setFunctionArea(placeholder("Answer tools go here: evaluate or solve the expression on the canvas."));
     }
 
@@ -106,10 +101,8 @@ public class AnswerCanvasPage extends CanvasPage {
         addCanvasOverlay(popup);
         pauseTimer = new Timer(POPUP_DELAY_MILLIS, e -> paused());
         pauseTimer.setRepeats(false);
-        faint = new FaintEquals(sharedCanvas.getDrawingCanvas(), this::faintTapped);
-        addCanvasOverlay(faint);
-        faintTimer = new Timer(FAINT_DELAY_MILLIS, e -> showFaint());
-        faintTimer.setRepeats(false);
+        faint = new FaintOffer(sharedCanvas.getDrawingCanvas(), new FaintHost());
+        addCanvasOverlay(faint.chip());
 
         sharedCanvas.addFormulaChangeListener(this::formulaChanged);
         sharedCanvas.addFormulaMoveListener(this::formulaMoved);
@@ -118,13 +111,13 @@ public class AnswerCanvasPage extends CanvasPage {
         sharedCanvas.addUserActionListener(this::dismiss);
         sharedCanvas.addPageSwitchListener(this::dismiss);
         sharedCanvas.addViewListener(this::placePopup);
-        sharedCanvas.addViewListener(this::placeFaint);
+        sharedCanvas.addViewListener(faint::place);
         hover = new PopupHover(sharedCanvas, getCanvasArea(), new HoverHost());
         getCanvasArea().addComponentListener(new ComponentAdapter() {
             @Override
             public void componentResized(ComponentEvent e) {
                 placePopup();
-                placeFaint();
+                faint.place();
             }
         });
 
@@ -181,12 +174,12 @@ public class AnswerCanvasPage extends CanvasPage {
 
     // tests use a short wait
     void setFaintDelay(int millis) {
-        faintTimer.setInitialDelay(millis);
+        faint.setDelay(millis);
     }
 
     // null when not up
     FaintEquals visibleFaint() {
-        return faint != null && faint.isShown() ? faint : null;
+        return faint == null ? null : faint.visible();
     }
 
     // tests type ranges like the user
@@ -230,10 +223,7 @@ public class AnswerCanvasPage extends CanvasPage {
         if (!inFront()) {
             return;
         }
-        targetStroke = null;
-        targetId = id;
-        targetPick = false;
-        restartPause();
+        offerAgain(id);
     }
 
     // whole formula dragged / resized: same ink, offer it again like an edit, error card stays
@@ -243,6 +233,11 @@ public class AnswerCanvasPage extends CanvasPage {
         if (!inFront() || f == null || f.getAnswer() != null) {
             return;  // answered ones stay quiet, don't let one steal the target
         }
+        offerAgain(id);
+    }
+
+    // that formula gets the popup / chip after a pause
+    private void offerAgain(long id) {
         targetStroke = null;
         targetId = id;
         targetPick = false;
@@ -279,66 +274,7 @@ public class AnswerCanvasPage extends CanvasPage {
     private void hidePopup() {
         hover.forget();
         closePopup();
-        hideFaint();
-    }
-
-    private void hideFaint() {
-        faintTimer.stop();
-        faint.hideNow();
-    }
-
-    // read fine, no "=", but it can be worked out: faint chip after a longer wait
-    private void queueFaint(long id, long gen) {
-        faintFor = id;
-        faintGen = gen;
-        faintTimer.restart();
-    }
-
-    private void showFaint() {
-        Formula f = formula(faintFor);
-        Rectangle spot = faintSpot();
-        if (faintGen != generation || !inFront() || popup.isVisible() || f == null || f.getAnswer() != null
-                || spot == null) {
-            return;  // user moved on, or it's gone / answered
-        }
-        faint.showAt(spot);
-    }
-
-    // area box for the chip, null if the formula's gone
-    private Rectangle faintSpot() {
-        Rectangle world = getSharedCanvas().formulaBounds(faintFor);
-        Formula f = formula(faintFor);
-        if (world == null || f == null) {
-            return null;
-        }
-        return FaintEquals.spot(toArea(world), f.getCharHeight() * getSharedCanvas().getZoom());
-    }
-
-    // pan / zoom / resize, chip stays at the formula's end
-    private void placeFaint() {
-        if (faint == null || !faint.isShown()) {
-            return;
-        }
-        Rectangle spot = faintSpot();
-        if (spot == null) {
-            hideFaint();
-        } else {
-            faint.setBounds(spot);
-            getCanvasArea().repaint();
-        }
-    }
-
-    // tapped the chip: same popup a lasso pick gets, w/ the read we have
-    private void faintTapped() {
-        long id = faintFor;
-        hideFaint();
-        FormulaCapture capture = getSharedCanvas().captureForRecalculation(id);
-        Read r = reads.get(id);
-        if (!inFront() || capture == null || r == null || r.revision != capture.getRevision()) {
-            return;
-        }
-        generation++;
-        present(capture, r.latex, r.problem);  // one-shot, later edits still wait for an "="
+        faint.hide();
     }
 
     // just take it down, hover keeps its state
@@ -456,7 +392,7 @@ public class AnswerCanvasPage extends CanvasPage {
                 hover.forget();  // hovered one has no "=" after all
             }
             if (problem == null && faintCheck.test(latex)) {
-                queueFaint(capture.getId(), gen);
+                faint.queue(capture.getId(), gen);
             }
             offerNext(gen);  // no "=" yet, quietly try the next one
             return;
@@ -523,7 +459,7 @@ public class AnswerCanvasPage extends CanvasPage {
     }
 
     private void present(FormulaCapture capture, String latex, String problem) {
-        hideFaint();  // popup wins
+        faint.hide();  // popup wins
         if (problem != null) {
             hidePopup();
             showError(capture, "Can't read formula", problem);
@@ -645,6 +581,36 @@ public class AnswerCanvasPage extends CanvasPage {
             this.revision = revision;
             this.latex = latex;
             this.problem = problem;
+        }
+    }
+
+    private final class FaintHost implements FaintOffer.Host {
+        @Override
+        public boolean stillWanted(long id, long gen) {
+            Formula f = formula(id);
+            return gen == generation && inFront() && !popup.isVisible() && f != null && f.getAnswer() == null;
+        }
+
+        @Override
+        public Rectangle spotFor(long id) {
+            Rectangle world = getSharedCanvas().formulaBounds(id);
+            Formula f = formula(id);
+            if (world == null || f == null) {
+                return null;
+            }
+            return FaintEquals.spot(toArea(world), f.getCharHeight() * getSharedCanvas().getZoom());
+        }
+
+        // same popup a lasso pick gets, w/ the read we have; one-shot, later edits still wait for an "="
+        @Override
+        public void tapped(long id) {
+            FormulaCapture capture = getSharedCanvas().captureForRecalculation(id);
+            Read r = reads.get(id);
+            if (!inFront() || capture == null || r == null || r.revision != capture.getRevision()) {
+                return;
+            }
+            generation++;
+            present(capture, r.latex, r.problem);
         }
     }
 
