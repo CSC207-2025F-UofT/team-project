@@ -1933,6 +1933,7 @@ public class DrawingCanvas extends JPanel {
         for (Stroke stroke : strokes) {
             if (!selection.contains(stroke)) {
                 world.setColor(colorOf(stroke));
+                world.setStroke(penOf(stroke, 0));  // each stroke at the pen width it was written with
                 drawStroke(world, stroke);
             }
         }
@@ -2049,16 +2050,18 @@ public class DrawingCanvas extends JPanel {
 
     private void paintSelection(Graphics2D world) {
         List<Stroke> preview = selectionPreview();
+        List<Stroke> picked = new ArrayList<>(selection);  // same order as preview, widths live on these
         Graphics2D ink = (Graphics2D) world.create();
-        ink.setStroke(new BasicStroke(INK_WIDTH + 6, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
         ink.setColor(SELECTION_HALO);
-        for (Stroke stroke : preview) {
-            drawStroke(ink, stroke);
+        for (int i = 0; i < preview.size(); i++) {
+            ink.setStroke(penOf(picked.get(i), 6));
+            drawStroke(ink, preview.get(i));
         }
         setUpInk(ink);
-        for (Stroke stroke : preview) {
-            ink.setColor(colorOf(stroke));
-            drawStroke(ink, stroke);
+        for (int i = 0; i < preview.size(); i++) {
+            ink.setColor(colorOf(preview.get(i)));
+            ink.setStroke(penOf(picked.get(i), 0));
+            drawStroke(ink, preview.get(i));
         }
         ink.dispose();
         for (CanvasAnswer a : answerPreview()) {
@@ -2117,10 +2120,15 @@ public class DrawingCanvas extends JPanel {
         setUpInk(g2);
         for (Stroke stroke : strokes) {
             g2.setColor(colorOf(stroke));
-            g2.setStroke(new BasicStroke(strokeWidths.getOrDefault(stroke, INK_WIDTH),
-                    BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+            g2.setStroke(penOf(stroke, 0));
             drawStroke(g2, stroke);
         }
+    }
+
+    // round pen this stroke was written with, + extra for the selection halo
+    private BasicStroke penOf(Stroke stroke, float extra) {
+        return new BasicStroke(strokeWidths.getOrDefault(stroke, INK_WIDTH) + extra, BasicStroke.CAP_ROUND,
+                BasicStroke.JOIN_ROUND);
     }
 
     private static void setUpInk(Graphics2D g2) {
