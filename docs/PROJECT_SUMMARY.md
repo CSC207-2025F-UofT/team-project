@@ -2,6 +2,8 @@
 
 *Written for: the four team members (and as a reference when talking to the TA). Companion to the README, which is the formal template-based spec.*
 
+> **Note (README v1):** the roadmap of 12 user stories, story ownership and the dependency map now live in the [README](../README.md). Where §6 (per-person breakdown) and §8 (order of work) below differ from the README roadmap, the README wins. This document keeps the reasoning, risks, TA questions and presentation split.
+
 ---
 
 ## 1. The pitch
