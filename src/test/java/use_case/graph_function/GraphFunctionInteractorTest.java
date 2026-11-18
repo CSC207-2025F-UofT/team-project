@@ -49,6 +49,15 @@ class GraphFunctionInteractorTest {
             new GraphFunctionInteractor(new LatexFunctionParser(), renderer, presenter);
 
     @Test
+    void yOnTheRightGraphsTheSameAsYOnTheLeft() {
+        interactor.execute(new GraphFunctionInputData("y=x^2", -2, 2));
+        double[] left = renderer.received.getYs();
+        interactor.execute(new GraphFunctionInputData("x^2=y", -2, 2));
+        assertNull(presenter.error);
+        assertArrayEquals(left, renderer.received.getYs(), 1e-12);
+    }
+
+    @Test
     void successSendsSampledPointsAndReturnsImage() {
         interactor.execute(new GraphFunctionInputData("y=x^2", -2, 2));
 
