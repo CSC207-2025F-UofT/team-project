@@ -1002,6 +1002,8 @@ class AnswerCanvasPageTest {
                     java.awt.Color.WHITE);
             page.setCalculateCheck(calcCheck::canCalculate);
             page.setQuestionCheck(new QuestionCheckInteractor()::isQuestion);
+            page.setFaintEqualsCheck(calcCheck::canCalculate);
+            page.setFaintDelay(100);
             page.setPopupDelay(100);
             shared.attachTo(page);
             page.setSize(900, 560);
@@ -1057,5 +1059,126 @@ class AnswerCanvasPageTest {
         waitFor(() -> calls.get() == 1, "the read");
         Thread.sleep(300);
         assertNull(popup());
+    }
+
+    // faint "=" chip, null when not up
+    private FaintEquals faint() throws Exception {
+        AtomicReference<FaintEquals> seen = new AtomicReference<>();
+        onEdt(() -> seen.set(page.visibleFaint()));
+        return seen.get();
+    }
+
+    private void boardWith(String latex) throws Exception {
+        shared.setFormulaRecognizer(image -> latex);
+        openBoard();
+        write();
+    }
+
+    private void waitFaint() throws Exception {
+        waitFor(() -> page.visiblePopup() == null && page.visibleFaint() != null, "the faint =");
+    }
+
+    private void chipShown() throws Exception {
+        boardWith("1+1");
+        waitFaint();
+    }
+
+    private void tap(FaintEquals c) throws Exception {
+        onEdt(() -> {
+            int x = c.getWidth() / 2;
+            int y = c.getHeight() / 2;
+            c.dispatchEvent(new MouseEvent(c, MouseEvent.MOUSE_PRESSED, 0, 0, x, y, 1, false, MouseEvent.BUTTON1));
+            c.dispatchEvent(new MouseEvent(c, MouseEvent.MOUSE_RELEASED, 0, 0, x, y, 1, false, MouseEvent.BUTTON1));
+        });
+    }
+
+    private void dragFrom(FaintEquals c, int dx, int dy) throws Exception {
+        onEdt(() -> {
+            int x = c.getWidth() / 2;
+            int y = c.getHeight() / 2;
+            c.dispatchEvent(new MouseEvent(c, MouseEvent.MOUSE_PRESSED, 0, 0, x, y, 1, false, MouseEvent.BUTTON1));
+            c.dispatchEvent(new MouseEvent(c, MouseEvent.MOUSE_DRAGGED, 0, 0, x + dx / 2, y + dy / 2, 1, false, MouseEvent.BUTTON1));
+            c.dispatchEvent(new MouseEvent(c, MouseEvent.MOUSE_DRAGGED, 0, 0, x + dx, y + dy, 1, false, MouseEvent.BUTTON1));
+            c.dispatchEvent(new MouseEvent(c, MouseEvent.MOUSE_RELEASED, 0, 0, x + dx, y + dy, 1, false, MouseEvent.BUTTON1));
+        });
+    }
+
+    private int strokeCount() throws Exception {
+        AtomicInteger n = new AtomicInteger();
+        onEdt(() -> n.set(canvas.getStrokes().size()));
+        return n.get();
+    }
+
+    @Test
+    void calculableFormulaGetsTheFaintEquals() throws Exception {
+        chipShown();
+        assertTrue(faint().getX() > 200, "past the ink");
+    }
+
+    @Test
+    void noFaintEqualsWhileHalfWritten() throws Exception {
+        boardWith("1+");
+        Thread.sleep(500);
+        assertNull(faint());
+    }
+
+    @Test
+    void noFaintEqualsForAnUnknown() throws Exception {
+        boardWith("x");
+        Thread.sleep(500);
+        assertNull(faint());
+    }
+
+    @Test
+    void popupFormulasGetNoFaintEquals() throws Exception {
+        boardPopupFor("1+1=");
+        Thread.sleep(300);
+        assertNull(faint());
+    }
+
+    @Test
+    void tappingTheFaintEqualsOpensThePopup() throws Exception {
+        chipShown();
+        tap(faint());
+        waitPopup("1+1");
+        assertNull(faint());
+        assertTrue(popup().hasCalculate());
+    }
+
+    @Test
+    void draggingFromTheFaintEqualsWritesInk() throws Exception {
+        chipShown();
+        int before = strokeCount();
+        dragFrom(faint(), 30, 0);
+        assertEquals(before + 1, strokeCount());
+        assertNull(faint());
+        assertNull(popup());
+    }
+
+    @Test
+    void nextStrokeHidesTheFaintEquals() throws Exception {
+        chipShown();
+        drag(500, 300, 530, 340);
+        assertNull(faint());
+    }
+
+    @Test
+    void faintEqualsFollowsZoom() throws Exception {
+        chipShown();
+        Point before = faint().getLocation();
+        onEdt(() -> canvas.zoomAt(450, 250, 1.5));
+        assertNotNull(faint());
+        assertFalse(before.equals(faint().getLocation()), "moved w/ the formula");
+    }
+
+    @Test
+    void lassoDragFromTheFaintEqualsAddsNoStroke() throws Exception {
+        chipShown();
+        lasso(80, 80, 220, 170);
+        drag(150, 120, 150, 320);  // moved, chip comes back by it
+        waitFaint();
+        int before = strokeCount();
+        dragFrom(faint(), 0, 40);
+        assertEquals(before, strokeCount());
     }
 }
