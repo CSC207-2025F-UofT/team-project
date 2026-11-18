@@ -9,8 +9,10 @@ public class UITest {
         frame.setMinimumSize(new java.awt.Dimension(666, 1000));
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.pack();
-        frame.setVisible(true);
+
 
         frame.add(new HomeUI());
+
+        frame.setVisible(true);
     }
 }
