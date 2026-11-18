@@ -32,6 +32,16 @@ class FormulaImagePreprocessorTest {
         return image.getRGB(x, y) & 0xFF;
     }
 
+    private static void assertGray(BufferedImage image) {
+        for (int y = 0; y < image.getHeight(); y++) {
+            for (int x = 0; x < image.getWidth(); x++) {
+                int rgb = image.getRGB(x, y);
+                assertEquals(rgb & 0xFF, (rgb >> 8) & 0xFF);
+                assertEquals(rgb & 0xFF, (rgb >> 16) & 0xFF);
+            }
+        }
+    }
+
     private static void assertModelShape(BufferedImage image) {
         assertEquals(0, image.getHeight() % 16, "height a multiple of 16");
         assertTrue(image.getHeight() >= 128 && image.getHeight() <= 512, "height " + image.getHeight());
@@ -118,36 +128,51 @@ class FormulaImagePreprocessorTest {
     }
 
     @Test
-    void darkBackgroundKeepsItsColourToo() {
+    void darkBackgroundComesOutWhiteWithDarkInk() {
         BufferedImage out = FormulaImagePreprocessor.prepare(
                 drawing(300, 120, Color.BLACK, Color.WHITE, 20, 60, 280, 60));
-        assertEquals(0, gray(out, 0, 0));
+        assertEquals(255, gray(out, 0, 0));
+        assertTrue(gray(out, out.getWidth() / 2, 64) < 80, "ink flipped dark");
     }
 
     @Test
-    void colouredInkKeepsDistinctRgbChannelsIncludingYellow() {
+    void colouredInkTurnsDarkGrayEvenYellow() {
         for (Color colour : new Color[]{Color.RED, Color.BLUE, Color.YELLOW}) {
             BufferedImage out = FormulaImagePreprocessor.prepare(
                     drawing(300, 120, Color.WHITE, colour, 20, 60, 280, 60));
             assertModelShape(out);
-            int pixel = out.getRGB(out.getWidth() / 2, 64) & 0xFFFFFF;
-            assertEquals(colour.getRGB() & 0xFFFFFF, pixel, "ink colour must be preserved");
+            int pixel = out.getRGB(out.getWidth() / 2, 64);
+            assertEquals(0, pixel & 0xFF, "darkest channel kept as the ink");
+            assertGray(out);
             assertEquals(0xFFFFFF, out.getRGB(0, 0) & 0xFFFFFF);
         }
     }
 
     @Test
-    void transparentPixelsAreCompositedOntoWhiteWithoutLosingColour() {
+    void transparentPixelsAreCompositedOntoWhite() {
         BufferedImage image = new BufferedImage(100, 60, BufferedImage.TYPE_INT_ARGB);
         Graphics2D g = image.createGraphics();
         g.setColor(new Color(255, 0, 0, 128));
         g.fillRect(20, 20, 60, 20);
         g.dispose();
         BufferedImage out = FormulaImagePreprocessor.prepare(image);
-        int pixel = out.getRGB(out.getWidth() / 2, 64);
-        assertEquals(255, (pixel >>> 16) & 0xFF);
-        assertTrue(Math.abs(((pixel >>> 8) & 0xFF) - 127) <= 1);
-        assertEquals((pixel >>> 8) & 0xFF, pixel & 0xFF);
+        assertTrue(Math.abs(gray(out, out.getWidth() / 2, 64) - 127) <= 1, "half see-through = mid gray");
+        assertEquals(255, gray(out, 0, 0));
+        assertGray(out);
+    }
+
+    @Test
+    void antialiasedEdgesSurviveNoThresholding() {
+        BufferedImage out = FormulaImagePreprocessor.prepare(
+                drawing(300, 120, Color.WHITE, Color.BLACK, 20, 30, 280, 90));  // slanted -> soft edges
+        boolean midTone = false;
+        for (int y = 0; y < out.getHeight() && !midTone; y++) {
+            for (int x = 0; x < out.getWidth() && !midTone; x++) {
+                int v = gray(out, x, y);
+                midTone = v > 40 && v < 215;
+            }
+        }
+        assertTrue(midTone, "some in-between grays left");
     }
 
     @Test
