@@ -413,4 +413,56 @@ class DrawingCanvasHooksTest {
     void smallInkOffToTheSideOfASumStaysApart() {
         assertStaysApartFromSum(new int[][]{{500, 240, 500, 270}});
     }
+
+    // d over a bar over dx, both d's full size, nothing beside it to tie the rows
+    private static final int[][] DDX = {
+        {85, 40, 86, 100, 87, 140, 91, 152},                    // d stem
+        {75, 105, 60, 125, 52, 145, 60, 150, 75, 135, 80, 110},  // d bowl
+        {27, 170, 131, 170},                                    // bar
+        {70, 180, 70, 230, 69, 290},                            // d stem
+        {60, 235, 37, 240, 34, 260, 35, 280, 50, 272, 62, 250},  // d bowl
+        {77, 275, 95, 252, 117, 246},                           // x
+        {90, 247, 100, 257, 107, 274},
+    };
+
+    // (x^3/2 - x^2) = after the d/dx
+    private static final int[][] REST = {
+        {177, 97, 170, 150, 171, 210, 180, 250, 189, 260},      // (
+        {225, 117, 240, 112, 262, 147}, {272, 112, 255, 130, 239, 147},  // x
+        {280, 77, 297, 80, 290, 90, 300, 97, 292, 105, 280, 104},  // 3
+        {216, 168, 305, 169},                                   // bar
+        {242, 202, 275, 200, 260, 225, 242, 237, 287, 240},      // 2
+        {336, 165, 360, 165},                                   // -
+        {392, 155, 405, 150, 427, 194}, {430, 156, 415, 170, 400, 189},  // x
+        {435, 134, 450, 135, 442, 142, 452, 144},               // 2
+        {464, 89, 472, 140, 472, 180, 460, 225, 433, 257},      // )
+        {493, 164, 513, 164}, {493, 185, 513, 185},             // =
+    };
+
+    @Test
+    void fractionWrittenAloneStaysOneFormula() {
+        List<Stroke> ddx = writeAll(DDX);
+        assertEquals(DDX.length, strokesIn(canvas.registerNewInk(last(), ddx)));
+        assertEquals(1, canvas.getFormulas().size());
+    }
+
+    @Test
+    void pauseAfterTheFractionKeepsItInTheFormula() {
+        List<Stroke> ddx = writeAll(DDX);
+        canvas.registerNewInk(last(), ddx);
+        List<Stroke> rest = writeAll(REST);
+        canvas.registerNewInk(last(), rest);
+        assertEquals(DDX.length + REST.length, canvas.getFormulas().stream()
+                .filter(f -> f.getStrokes().contains(last())).findFirst().orElseThrow().getStrokes().size());
+        assertEquals(1, canvas.getFormulas().size());
+    }
+
+    @Test
+    void dashUnderAFormulaWithNothingUnderItIsNoFraction() {
+        List<Stroke> one = writeAll(new int[][]{{100, 100, 100, 140}});  // 1
+        canvas.registerNewInk(last(), one);
+        writeAll(new int[][]{{80, 160, 120, 160}});                    // next line's "-", nothing under it
+        canvas.registerNewInk(last(), List.of(last()));
+        assertEquals(2, canvas.getFormulas().size());
+    }
 }

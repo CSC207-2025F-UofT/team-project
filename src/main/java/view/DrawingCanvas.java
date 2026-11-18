@@ -11,6 +11,7 @@ import view.answer.MostInk;
 import interface_adapter.TextRun;
 import view.answer.Formula;
 import view.answer.FormulaBook;
+import view.answer.Fractions;
 import view.answer.Scripts;
 import entity.InkEditor;
 import entity.InkPoint;
@@ -1348,7 +1349,7 @@ public class DrawingCanvas extends JPanel {
         return capture(mine);
     }
 
-    // seed's row, plus any limits stacked over/under it (or the row it's a limit of)
+    // seed's row, plus any limits stacked over/under it (or the row it's a limit of), or a fraction's other half
     private Set<Stroke> looseGroup(Stroke seed, double h) {
         Set<Stroke> group = looseRow(seed, h, Set.of());
         boolean grew = true;
@@ -1359,7 +1360,8 @@ public class DrawingCanvas extends JPanel {
                     continue;
                 }
                 Set<Stroke> other = looseRow(s, h, group);
-                if (Scripts.stackedOn(group, other) || Scripts.stackedOn(other, group)) {
+                if (Scripts.stackedOn(group, other) || Scripts.stackedOn(other, group)
+                        || Fractions.across(group, other, h)) {
                     group.addAll(other);
                     grew = true;
                 }
