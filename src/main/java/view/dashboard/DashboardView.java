@@ -17,7 +17,7 @@ public class DashboardView extends JPanel implements PropertyChangeListener {
     private final DashboardViewModel dashboardViewModel;
     private final DashboardController controller;
     private static final Map<String, AnalyticsType> TYPES = Map.of(
-            "Most Visited Cities", AnalyticsType.MOST_VISITED_CITIES
+            "Most Visited Countries", AnalyticsType.MOST_VISITED_COUNTRIES
     );
     private final JPanel optionPanel = new JPanel();
     private final JPanel analyticsPanel = new JPanel();
