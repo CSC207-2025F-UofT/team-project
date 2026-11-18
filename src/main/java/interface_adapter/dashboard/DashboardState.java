@@ -17,4 +17,7 @@ public class DashboardState {
     public List<DashboardItemState> getItemStates() {
         return this.itemStates;
     }
+    public void removeAllStates() {
+        this.itemStates.clear();
+    }
 }

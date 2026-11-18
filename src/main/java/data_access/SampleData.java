@@ -28,9 +28,9 @@ public final class SampleData {
         addTrip(dao, 2, "trip-vancouver", "Vancouver",
                 LocalDateTime.of(2025, 06, 10, 10, 0), 4,
                 49.2827, -123.1207, new LocationInfo("Vancouver", null, "British Columbia", "Canada", "North America", "Stanley Park"));
-        addTrip(dao, 1, "trip-tokyo", "Tokyo",
+        addTrip(dao, 1, "trip-osaka", "Osaka Trip",
                 LocalDateTime.of(2025, 11, 12, 10, 0), 6,
-                35.6762, 139.6503, new LocationInfo("Tokyo", null, "Tokyo", "Japan", "Asia", "The Shibuya Crossing"));
+                35.6762, 139.6503, new LocationInfo("Osaka", null, "Osaka", "Japan", "Asia", "The Shibuya Crossing"));
         addTrip(dao, 1, "trip-canton", "Guangzhou",
                 LocalDateTime.of(2027, 3, 1, 10, 0), 6,
                 23.10902, 113.31915, new LocationInfo("guangzhou", null, "Guangzhou", "China", "Asia", "Canton Tower"));
