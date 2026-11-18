@@ -62,6 +62,8 @@ public final class DocEditorPanel extends JPanel implements PdfWorkspacePort {
     private final Runnable detachLibraryListener;
     private Supplier<BufferedImage> canvasCapture = () -> null;
     private Runnable regionCapture = this::insertCanvasInk;
+    private RibbonButton captureButton;
+    private boolean capturing;
     private boolean updatingZoom;
     private Runnable toggleFullscreen = () -> { };
     public void setFullscreenAction(Runnable callback) { toggleFullscreen = Objects.requireNonNull(callback); }
@@ -115,6 +117,11 @@ public final class DocEditorPanel extends JPanel implements PdfWorkspacePort {
     }
     /** Request a temporary screenshot selection on the visible Canvas. */
     public void setRegionCapture(Runnable command) { regionCapture = Objects.requireNonNull(command); }
+    public void setCaptureAreaActive(boolean active) {
+        capturing = active;
+        if (captureButton != null) captureButton.setActive(active);
+    }
+    public boolean isCaptureAreaActive() { return capturing; }
     public void showLibrary() { setLibraryVisible(true); }
     public void close() { detachLibraryListener.run(); }
     public PdfPageCanvas pageView() { return paper; }
@@ -228,7 +235,8 @@ public final class DocEditorPanel extends JPanel implements PdfWorkspacePort {
         JPanel row = ribbon();
         command(row, RibbonButton.labeled(DocIcons::formula, "Formula"), this::insertFormula);
         command(row, RibbonButton.labeled(DocIcons::comment, "Text box"), this::addNote);
-        command(row, RibbonButton.labeled(DocIcons::image, "Capture area"), () -> regionCapture.run());
+        captureButton = command(row, RibbonButton.labeled(DocIcons::image, "Capture area"), () -> regionCapture.run());
+        captureButton.setActive(capturing);
         command(row, RibbonButton.labeled(DocIcons::pageBreak, "New page"), this::addPage);
         return row;
     }

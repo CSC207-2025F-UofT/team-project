@@ -25,31 +25,34 @@ import java.util.function.Consumer;
 public final class CanvasRegionCaptureController {
     private CanvasRegionCaptureController() { }
 
-    public static void begin(JComponent canvasArea, DrawingCanvas canvas, Consumer<BufferedImage> completed) {
+    public static Runnable begin(JComponent canvasArea, DrawingCanvas canvas, Consumer<BufferedImage> completed, Runnable onClosed) {
         Objects.requireNonNull(canvasArea);
         Objects.requireNonNull(canvas);
         Objects.requireNonNull(completed);
         // The event-catching overlay stops the underlying canvas from drawing extra pen strokes.
-        CaptureOverlay overlay = new CaptureOverlay(canvasArea, canvas, completed);
+        CaptureOverlay overlay = new CaptureOverlay(canvasArea, canvas, completed, onClosed);
         canvasArea.add(overlay, 0);
         overlay.setBounds(0, 0, canvasArea.getWidth(), canvasArea.getHeight());
         canvasArea.revalidate();
         canvasArea.repaint();
+        return overlay::close;
     }
 
     private static final class CaptureOverlay extends JComponent {
         private final JComponent area;
         private final DrawingCanvas canvas;
         private final Consumer<BufferedImage> completed;
+        private final Runnable onClosed;
         private Point start;
         private Point end;
         private final ComponentAdapter resizing;
         private boolean finished;
 
-        CaptureOverlay(JComponent area, DrawingCanvas canvas, Consumer<BufferedImage> completed) {
+        CaptureOverlay(JComponent area, DrawingCanvas canvas, Consumer<BufferedImage> completed, Runnable onClosed) {
             this.area = area;
             this.canvas = canvas;
             this.completed = completed;
+            this.onClosed = Objects.requireNonNull(onClosed);
             setOpaque(false);
             setCursor(Cursor.getPredefinedCursor(Cursor.CROSSHAIR_CURSOR));
             setToolTipText("Drag a screenshot rectangle; right-click or Esc to cancel");
@@ -71,7 +74,9 @@ public final class CanvasRegionCaptureController {
                     Rectangle selected = rectangle(start, end);
                     // Convert overlay coordinates to canvas coordinates, not world/ink coordinates.
                     Rectangle inCanvas = SwingUtilities.convertRectangle(CaptureOverlay.this, selected, canvas);
-                    close();
+                    start = null;
+                    end = null;
+                    repaint();
                     try {
                         BufferedImage shot = CanvasRegionSnapshot.crop(canvas.toImage(), inCanvas);
                         if (CanvasRegionSnapshot.hasVisibleInk(shot)) completed.accept(shot);
@@ -90,6 +95,7 @@ public final class CanvasRegionCaptureController {
             area.remove(this);
             area.revalidate();
             area.repaint();
+            onClosed.run();
         }
         private static Rectangle rectangle(Point a, Point b) {
             int x = Math.min(a.x, b.x), y = Math.min(a.y, b.y);

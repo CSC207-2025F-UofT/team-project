@@ -140,11 +140,23 @@ public class StackedAppBuilder {
             try { return drawing.toFormulaImage(); }
             catch (RuntimeException empty) { return null; }
         });
-        pdfPanel.setRegionCapture(() -> CanvasRegionCaptureController.begin(
-                page.boardArea(), drawing, image -> {
-                    pdfStudio.getLibrary().addInk("Canvas screenshot", image);
-                    pdfPanel.editor().showLibrary();
-                }));
+        java.util.concurrent.atomic.AtomicReference<Runnable> cancelCapture = new java.util.concurrent.atomic.AtomicReference<>();
+        pdfPanel.setRegionCapture(() -> {
+            if (cancelCapture.get() != null) {
+                cancelCapture.getAndSet(null).run();
+                return;
+            }
+            pdfPanel.setCaptureAreaActive(true);
+            Runnable close = CanvasRegionCaptureController.begin(
+                    page.boardArea(), drawing, image -> {
+                        pdfStudio.getLibrary().addInk("Canvas screenshot", image);
+                        pdfPanel.editor().showLibrary();
+                    }, () -> {
+                        cancelCapture.set(null);
+                        pdfPanel.setCaptureAreaActive(false);
+                    });
+            cancelCapture.set(close);
+        });
         // Save/Open are separate use-case commands; the board knows only the callbacks.
         java.util.concurrent.atomic.AtomicReference<CanvasWorkspaceDialogs> dialogs = new java.util.concurrent.atomic.AtomicReference<>();
         BoardWindow board = new BoardWindow(page, drawing,

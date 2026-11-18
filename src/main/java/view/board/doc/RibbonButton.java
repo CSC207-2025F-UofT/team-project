@@ -31,6 +31,7 @@ class RibbonButton extends JComponent {
     private final boolean dropdown;
     private final int minWidth;
     private Color underline;   // colour bar under "A" / highlighter
+    private boolean active;
     private boolean hover;
     private boolean pressed;
     private Runnable action;
@@ -71,6 +72,8 @@ class RibbonButton extends JComponent {
         };
         addMouseListener(m);
     }
+
+    void setActive(boolean active) { this.active = active; repaint(); }
 
     RibbonButton onClick(Runnable callback) {
         action = java.util.Objects.requireNonNull(callback);
@@ -153,8 +156,8 @@ class RibbonButton extends JComponent {
             g2.fill(shape);
             g2.setColor(hover ? new Color(0, 0, 0, 60) : BOX);
             g2.draw(shape);
-        } else if (pressed || hover) {
-            g2.setColor(pressed ? PRESS : HOVER);
+        } else if (active || pressed || hover) {
+            g2.setColor(active ? new Color(43, 81, 133, 55) : pressed ? PRESS : HOVER);
             g2.fill(shape);
         }
         g2.setColor(BoardTheme.LABEL);
