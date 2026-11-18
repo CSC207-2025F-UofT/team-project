@@ -60,6 +60,43 @@ public class FormulaBook {
         return null;
     }
 
+    // a + b's formulas hold nothing but them (an "=" written on its own)
+    public boolean holdsOnly(Stroke a, Stroke b) {
+        for (Stroke bar : List.of(a, b)) {
+            Formula f = holding(bar);
+            if (f == null) {
+                return false;
+            }
+            for (Stroke s : f.getStrokes()) {
+                if (s != a && s != b) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    // nearest unanswered formula on the bars' row ending just left of them (up to 3 bar widths), null if none
+    public Formula leftOfPair(Stroke a, Stroke b) {
+        Rectangle pair = AnswerLayout.bounds(List.of(a, b));
+        double w = (AnswerLayout.bounds(List.of(a)).width + AnswerLayout.bounds(List.of(b)).width) / 2.0;
+        Formula best = null;
+        double bestGap = 0;
+        for (Formula f : formulas.values()) {
+            if (f.getAnswer() != null || f.getStrokes().contains(a) || f.getStrokes().contains(b)) {
+                continue;
+            }
+            Rectangle box = AnswerLayout.bounds(f.getStrokes());
+            double gap = pair.x - box.getMaxX();
+            boolean sameRow = box.getMinY() <= pair.getCenterY() && pair.getCenterY() <= box.getMaxY();
+            if (sameRow && gap >= -0.5 * w && gap <= 3 * w && (best == null || gap < bestGap)) {
+                best = f;
+                bestGap = gap;
+            }
+        }
+        return best;
+    }
+
     public void put(Formula f) {
         formulas.put(f.getId(), f);
     }

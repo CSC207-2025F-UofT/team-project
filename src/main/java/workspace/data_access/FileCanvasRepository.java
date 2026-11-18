@@ -10,7 +10,8 @@ import java.util.*;
 
 /** Versioned binary document format, bounded reads, atomic replacement; no Java object deserialization. */
 public final class FileCanvasRepository implements CanvasRepository {
-    private static final int MAGIC = 0x4d4c4333; // MLC3: per-stroke pen widths
+    private static final int MAGIC = 0x4d4c4334; // MLC4: typeset answer latex
+    private static final int LEGACY_V3 = 0x4d4c4333; // MLC3: per-stroke pen widths
     private static final int LEGACY_V2 = 0x4d4c4332;
     private static final int MAX_STROKES = 100000, MAX_POINTS = 1000000, MAX_ASSETS = 1000;
     private final Path directory;
@@ -66,6 +67,7 @@ public final class FileCanvasRepository implements CanvasRepository {
                     out.writeFloat(formula.fontSize());out.writeInt(formula.color());
                     out.writeInt(formula.textParts().size());
                     for (var part : formula.textParts()) {out.writeUTF(part.text());out.writeBoolean(part.superscript());}
+                    out.writeUTF(formula.latex());
                 }
                 out.writeInt(state.assets().size());
                 for (var asset : state.assets()) {
@@ -92,7 +94,7 @@ public final class FileCanvasRepository implements CanvasRepository {
         if (Files.size(file) > 150L * 1024 * 1024) throw new IOException("Canvas file too large");
         try (DataInputStream in = new DataInputStream(new BufferedInputStream(Files.newInputStream(file)))) {
             int format=in.readInt();
-            if (format != MAGIC && format != LEGACY_V2 && format != 0x4d4c4331)
+            if (format != MAGIC && format != LEGACY_V3 && format != LEGACY_V2 && format != 0x4d4c4331)
                 throw new IOException("Unsupported canvas file format");
             String id = in.readUTF(), name = in.readUTF();
             Instant modified = Instant.ofEpochMilli(in.readLong());
@@ -101,7 +103,7 @@ public final class FileCanvasRepository implements CanvasRepository {
             int remaining = MAX_POINTS;
             for (int i=count(in,MAX_STROKES);i>0;i--) {
                 int rgb = in.readInt();
-                float width = format == MAGIC ? in.readFloat() : 4f;
+                float width = format == MAGIC || format == LEGACY_V3 ? in.readFloat() : 4f;
                 int len = count(in,remaining);
                 if (len == 0) throw new IOException("Empty stroke");
                 remaining -= len;
@@ -121,16 +123,17 @@ public final class FileCanvasRepository implements CanvasRepository {
                 double fx=in.readDouble(),fy=in.readDouble(),fw=in.readDouble(),fh=in.readDouble();
                 float fs=in.readFloat();int color=in.readInt();
                 List<CanvasState.TextPart> parts=new ArrayList<>();
-                if (format == MAGIC || format == LEGACY_V2) {
+                if (format == MAGIC || format == LEGACY_V3 || format == LEGACY_V2) {
                     for (int j=count(in,10000);j>0;j--) parts.add(new CanvasState.TextPart(in.readUTF(),in.readBoolean()));
                 }
-                formulas.add(new CanvasState.Formula(ids,answer,error,fx,fy,fw,fh,fs,color,parts));
+                String latex = format == MAGIC ? in.readUTF() : "";
+                formulas.add(new CanvasState.Formula(ids,answer,error,fx,fy,fw,fh,fs,color,parts,latex));
             }
             List<CanvasState.Asset> assets = new ArrayList<>();
             for (int i=count(in,MAX_ASSETS);i>0;i--) {
                 String latex=in.readUTF(),result=in.readUTF();
                 double ax=in.readDouble(),ay=in.readDouble(),aw=in.readDouble(),ah=in.readDouble();
-                boolean isGraph=(format == MAGIC || format == LEGACY_V2) && in.readBoolean();
+                boolean isGraph=(format == MAGIC || format == LEGACY_V3 || format == LEGACY_V2) && in.readBoolean();
                 int size=in.readInt();
                 if (size<1 || size>12*1024*1024) throw new IOException("Invalid image size");
                 byte[] png=new byte[size];in.readFully(png);

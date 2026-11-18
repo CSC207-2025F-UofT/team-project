@@ -16,6 +16,35 @@ class SkeletonTest {
         }
     }
 
+    // 2px thick "/" from (5,34) up to (34,5)
+    private static boolean[] thickSlash() {
+        boolean[] g = new boolean[W * H];
+        line(g, 5, 34, 34, 5);
+        line(g, 6, 34, 35, 5);
+        return g;
+    }
+
+    private static int count(boolean[] g) {
+        int n = 0;
+        for (boolean b : g) {
+            n += b ? 1 : 0;
+        }
+        return n;
+    }
+
+    @Test
+    void plainZhangSuenLosesA2pxSlash() {
+        assertTrue(count(Skeleton.thin(thickSlash(), W, H)) < 5, "the known zhang-suen hole");
+    }
+
+    @Test
+    void luWangKeepsIt() {
+        boolean[] out = Skeleton.thinKeepingDiagonals(thickSlash(), W, H);
+        assertTrue(count(out) >= 25, "whole slash still there: " + count(out));
+        assertTrue(out[34 * W + 5] || out[34 * W + 6], "bottom end");
+        assertTrue(out[5 * W + 34] || out[5 * W + 35], "top end");
+    }
+
     @Test
     void spurIntoCornerBecomesPoint() {
         // spur off a fork out to the tip, like the middle of a 3

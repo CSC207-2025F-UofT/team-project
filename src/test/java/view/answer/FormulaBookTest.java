@@ -210,4 +210,37 @@ class FormulaBookTest {
         assertEquals(100f, a.getFontSize(), 0.01);
         assertEquals(40, a.getBox().getWidth(), 0.01);
     }
+
+    @Test
+    void barsAloneInTheirFormulas() {
+        Stroke top = stroke(135, 101, 165, 101);
+        Stroke bottom = stroke(135, 115, 165, 115);
+        book.add(List.of(top), 1);
+        book.add(List.of(bottom), 2);
+        assertTrue(book.holdsOnly(top, bottom));
+        book.add(List.of(top, bottom, stroke(170, 100, 170, 116)), 3);
+        assertFalse(book.holdsOnly(top, bottom), "something else is in there");
+    }
+
+    @Test
+    void formulaLeftOfAPairOnItsRow() {
+        Formula left = book.add(List.of(stroke(100, 100, 100, 116), stroke(110, 100, 110, 116)), 1);
+        Stroke top = stroke(135, 101, 165, 101);
+        Stroke bottom = stroke(135, 115, 165, 115);
+        book.add(List.of(top, bottom), 2);
+        assertEquals(left.getId(), book.leftOfPair(top, bottom).getId());
+    }
+
+    @Test
+    void noFormulaLeftOfAPairOnAnotherRowOrFarOff() {
+        book.add(List.of(stroke(100, 100, 100, 116), stroke(110, 100, 110, 116)), 1);
+        assertNull(book.leftOfPair(stroke(135, 201, 165, 201), stroke(135, 215, 165, 215)));
+        assertNull(book.leftOfPair(stroke(300, 101, 330, 101), stroke(300, 115, 330, 115)));
+    }
+
+    @Test
+    void answeredFormulaIsNeverLeftOfAPair() {
+        answered(stroke(100, 100, 100, 116), stroke(110, 100, 110, 116));
+        assertNull(book.leftOfPair(stroke(135, 101, 165, 101), stroke(135, 115, 165, 115)));
+    }
 }

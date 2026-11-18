@@ -7,9 +7,13 @@ import view.answer.AnswerInk;
 import view.answer.AnswerLayout;
 import view.answer.AnswerPlacer;
 import view.answer.CanvasAnswer;
+import view.answer.EqualsSpot;
+import view.answer.MostInk;
 import interface_adapter.TextRun;
 import view.answer.Formula;
 import view.answer.FormulaBook;
+import view.answer.Fractions;
+import view.answer.Scripts;
 import entity.InkEditor;
 import entity.InkPoint;
 import entity.Stroke;
@@ -54,6 +58,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.LongConsumer;
 import java.util.function.UnaryOperator;
 
@@ -92,6 +97,8 @@ public class DrawingCanvas extends JPanel {
     private static final float INK_WIDTH = 4f;
     private static final Color INK_COLOR = Color.BLACK;
     private static final int FORMULA_MARGIN = 16;  // white space kept around the ink in toFormulaImage()
+    static final double READABLE_MIN_HEIGHT = 30;   // char heights the model reads fine w/ pen 4, outside gets scaled
+    static final double READABLE_MAX_HEIGHT = 240;
     /** toFormulaImage() is always at least this many times as wide as it is tall. */
     public static final double FORMULA_MIN_ASPECT = 2.0;
     private static final int PRECISE_ERASER_RADIUS = 12;  // on screen, whatever the zoom
@@ -126,6 +133,7 @@ public class DrawingCanvas extends JPanel {
     private FormulaBook book = new FormulaBook();  // calculated formulas + their answers
     private long revisions;                       // only goes up, undo too
     private final List<LongConsumer> formulaListeners = new ArrayList<>();
+    private final List<LongConsumer> moveListeners = new ArrayList<>();  // whole formula moved/resized, same ink
     private final List<Consumer<Stroke>> strokeListeners = new ArrayList<>();
     private final List<Runnable> inkListeners = new ArrayList<>();
     private final List<Runnable> actionListeners = new ArrayList<>();  // user started doing something
@@ -603,7 +611,7 @@ public class DrawingCanvas extends JPanel {
         List<Long> rubbed = new ArrayList<>();
         for (Formula f : book.all()) {
             CanvasAnswer a = f.getAnswer();
-            if (a != null && AnswerInk.touches(a, INK_WIDTH, from.getX(), from.getY(), to.getX(), to.getY(), radius)) {
+            if (a != null && AnswerInk.touches(a, a.getPenWidth(), from.getX(), from.getY(), to.getX(), to.getY(), radius)) {
                 rubbed.add(f.getId());  // the ink, not the empty bits of its box
             }
         }
@@ -810,6 +818,11 @@ public class DrawingCanvas extends JPanel {
         inkChanged(removed, added);  // partly moved formulas count as edited
         selection.clear();
         selection.addAll(copies.values());
+        for (long id : moved) {
+            for (LongConsumer l : new ArrayList<>(moveListeners)) {
+                l.accept(id);
+            }
+        }
     }
 
     /** The selected strokes as they look right now, including a move or resize being dragged. */
@@ -848,7 +861,7 @@ public class DrawingCanvas extends JPanel {
 
     // pen width doesn't scale, like strokes
     private static CanvasAnswer resized(CanvasAnswer a, Point2D anchor, double factor) {
-        return AnswerInk.refit(a.scaled(anchor.getX(), anchor.getY(), factor), INK_WIDTH);
+        return AnswerInk.refit(a.scaled(anchor.getX(), anchor.getY(), factor), a.getPenWidth());
     }
 
     private boolean nothingSelected() {
@@ -1142,6 +1155,11 @@ public class DrawingCanvas extends JPanel {
         formulaListeners.add(listener);
     }
 
+    // fires per whole formula moved or resized (not on undo)
+    public void addFormulaMoveListener(LongConsumer listener) {
+        moveListeners.add(listener);
+    }
+
     // pen stroke finished (after the formula check)
     public void addStrokeListener(Consumer<Stroke> listener) {
         strokeListeners.add(listener);
@@ -1290,66 +1308,67 @@ public class DrawingCanvas extends JPanel {
         return f == null ? null : boundsOf(f.getStrokes());
     }
 
-    // Bind a new pen session, including small limits written above/below a formula.
-    // Distinct writing lines remain independent; a confirmed nearby limit invalidates
-    // an existing answer, because its recognition input has changed.
+    // bind loose ink near last as one formula (other session groups too); null if last gone/bound
     public FormulaCapture registerNewInk(Stroke last, Collection<Stroke> session) {
         if (!strokes.contains(last) || book.isBound(last)) {
             return null;
         }
+        // char size from everything written this round, a lone "-" would make it tiny
         List<Stroke> pool = new ArrayList<>();
         for (Stroke s : strokes) {
             if (!book.isBound(s) && (s == last || session.contains(s))) {
                 pool.add(s);
             }
         }
-        double typicalHeight = AnswerLayout.strokeHeight(pool);
-        double groupingHeight = Math.max(typicalHeight,
-                Math.min(AnswerLayout.tallestStroke(pool), typicalHeight * 2));
-        FormulaCapture primary = null;
-        for (Stroke seed : pool) {
-            if (!strokes.contains(seed) || book.isBound(seed)) continue;
-            Set<Stroke> group = looseGroup(seed, groupingHeight);
-            Formula target = limitOwner(group);
-            if (target != null) {
-                Set<Stroke> joined = new LinkedHashSet<>(target.getStrokes());
-                joined.addAll(group);
-                Formula updated = book.add(joined, nextRevision());
-                notifyChanged(target.getId());
-                if (group.contains(last)) primary = capture(updated);
-            } else {
-                Formula created = book.add(group, nextRevision());
-                if (group.contains(last)) primary = capture(created);
+        double h = AnswerLayout.strokeHeight(pool);
+        bindGroup(looseGroup(last, h));
+        for (Stroke s : session) {
+            if (strokes.contains(s) && !book.isBound(s)) {
+                bindGroup(looseGroup(s, h));
             }
         }
-        // A limit may be connected through another stroke that was grouped first.
-        // The capture must always describe the current, complete formula.
-        Formula owner = book.holding(last);
-        return owner == null ? primary : capture(owner);
+        List<Stroke> round = new ArrayList<>(session);
+        round.add(last);
+        joinLoneEquals(round);
+        return capture(book.holding(last));  // after all of it, a later limit may have merged it again
     }
 
-    /** A vertically adjacent, horizontally aligned annotation belongs to the formula. */
-    private Formula limitOwner(Collection<Stroke> added) {
-        Rectangle ink = boundsOf(added);
-        if (ink == null) return null;
-        Formula closest = null;
-        double bestGap = Double.POSITIVE_INFINITY;
-        for (Formula existing : book.all()) {
-            Rectangle original = boundsOf(existing.getStrokes());
-            if (original == null) continue;
-            double h = existing.getCharHeight();
-            double gapX = Math.max(0, Math.max(original.getMinX() - ink.getMaxX(),
-                    ink.getMinX() - original.getMaxX()));
-            double gapY = Math.max(0, Math.max(original.getMinY() - ink.getMaxY(),
-                    ink.getMinY() - original.getMaxY()));
-            if (gapX > h * 0.5 || gapY > Math.max(12, h * 0.28)) continue;
-            // Do not merge a separate full-height writing line underneath a sum.
-            if (ink.getMinY() > original.getMaxY() && gapY > h * 0.15
-                    && ink.height > h * 0.75) continue;
-            double distance = gapX + gapY;
-            if (distance < bestGap) {closest = existing; bestGap = distance;}
+    // an "=" on its own this round joins the formula just left of it, even far off or bigger than its ink
+    private void joinLoneEquals(List<Stroke> round) {
+        List<Stroke> fresh = new ArrayList<>();
+        for (Stroke s : round) {
+            if (strokes.contains(s) && book.isBound(s) && !fresh.contains(s)) {
+                fresh.add(s);
+            }
         }
-        return closest;
+        for (int i = 0; i < fresh.size(); i++) {
+            for (int j = i + 1; j < fresh.size(); j++) {
+                Stroke a = fresh.get(i);
+                Stroke b = fresh.get(j);
+                if (!EqualsSpot.isEqualsPair(List.of(a, b)) || !book.holdsOnly(a, b)) {
+                    continue;
+                }
+                Formula left = book.leftOfPair(a, b);
+                if (left != null) {
+                    Set<Stroke> both = new LinkedHashSet<>(left.getStrokes());
+                    both.add(a);
+                    both.add(b);
+                    book.add(both, nextRevision());
+                }
+            }
+        }
+    }
+
+    // limits written after the pause join the formula they sit on, judged as a whole row; else a new one
+    private Formula bindGroup(Set<Stroke> group) {
+        for (Formula f : book.all()) {
+            if (Scripts.stackedOn(f.getStrokes(), group)) {  // one way only, old formula is never the new ink's limit
+                Set<Stroke> both = new LinkedHashSet<>(f.getStrokes());
+                both.addAll(group);
+                return book.add(both, nextRevision());
+            }
+        }
+        return book.add(group, nextRevision());
     }
 
     // Lasso over one answered formula plus extra ink means correct the grouping.
@@ -1373,15 +1392,36 @@ public class DrawingCanvas extends JPanel {
         return capture(mine);
     }
 
-    // unbound strokes near seed, grown until nothing else joins
+    // seed's row, plus any limits stacked over/under it (or the row it's a limit of), or a fraction's other half
     private Set<Stroke> looseGroup(Stroke seed, double h) {
+        Set<Stroke> group = looseRow(seed, h, Set.of());
+        boolean grew = true;
+        while (grew) {
+            grew = false;
+            for (Stroke s : strokes) {
+                if (group.contains(s) || book.isBound(s)) {
+                    continue;
+                }
+                Set<Stroke> other = looseRow(s, h, group);
+                if (Scripts.stackedOn(group, other) || Scripts.stackedOn(other, group)
+                        || Fractions.across(group, other, h)) {
+                    group.addAll(other);
+                    grew = true;
+                }
+            }
+        }
+        return group;
+    }
+
+    // unbound strokes on seed's line, grown until nothing else joins
+    private Set<Stroke> looseRow(Stroke seed, double h, Set<Stroke> skip) {
         Set<Stroke> group = new LinkedHashSet<>(List.of(seed));
         boolean grew = true;
         while (grew) {
             grew = false;
             Rectangle box = boundsOf(group);
             for (Stroke s : strokes) {
-                Rectangle b = group.contains(s) || book.isBound(s) ? null : boundsOf(List.of(s));
+                Rectangle b = group.contains(s) || skip.contains(s) || book.isBound(s) ? null : boundsOf(List.of(s));
                 if (b != null && box != null && AnswerLayout.sameNewFormula(box, h, b)) {
                     group.add(s);
                     grew = true;
@@ -1445,22 +1485,33 @@ public class DrawingCanvas extends JPanel {
 
     // false if the formula is gone or changed since capture
     public boolean showAnswer(long id, long revision, AnswerKind kind, String text, boolean error) {
-        return placeAnswer(id, revision, kind, text, null, error);
+        return placeAnswer(id, revision, f -> AnswerPlacer.place(inDrawingOrder(f), kind, text, null, error,
+                answerPen(f.getStrokes(), strokeWidths), box -> hitsOtherInk(box, f)));
     }
 
     // same spot rules, text w/ raised exponents
     public boolean showAnswer(long id, long revision, AnswerKind kind, List<TextRun> runs, boolean error) {
-        return placeAnswer(id, revision, kind, TextRun.plain(runs), runs, error);
+        return placeAnswer(id, revision, f -> AnswerPlacer.place(inDrawingOrder(f), kind, TextRun.plain(runs), runs,
+                error, answerPen(f.getStrokes(), strokeWidths), box -> hitsOtherInk(box, f)));
     }
 
-    private boolean placeAnswer(long id, long revision, AnswerKind kind, String text, List<TextRun> runs,
-                                boolean error) {
+    // typeset: fractions stacked, powers raised; text is the readable copy that gets saved
+    public boolean showTypesetAnswer(long id, long revision, AnswerKind kind, String text, String latex) {
+        return placeAnswer(id, revision, f -> AnswerPlacer.placeTypeset(inDrawingOrder(f), kind, text, latex, false,
+                answerPen(f.getStrokes(), strokeWidths), box -> hitsOtherInk(box, f)));
+    }
+
+    // answer's written w/ the pen most of its formula was
+    private static float answerPen(Collection<Stroke> formula, Map<Stroke, Float> widths) {
+        return MostInk.of(formula, s -> widths.getOrDefault(s, INK_WIDTH), INK_WIDTH);
+    }
+
+    private boolean placeAnswer(long id, long revision, Function<Formula, CanvasAnswer> placer) {
         Formula f = book.get(id);
         if (f == null || f.getRevision() != revision) {
             return false;
         }
-        CanvasAnswer answer = AnswerPlacer.place(inDrawingOrder(f), kind, text, runs, error, INK_WIDTH,
-                box -> hitsOtherInk(box, f)).withColor(AnswerColor.of(f.getStrokes(), this::colorOf, INK_COLOR));
+        CanvasAnswer answer = placer.apply(f).withColor(AnswerColor.of(f.getStrokes(), this::colorOf, INK_COLOR));
         book.put(f.withAnswer(answer));
         if (!busy()) {
             bringIntoView(answer.getBox(), answer.getBox());
@@ -1490,7 +1541,34 @@ public class DrawingCanvas extends JPanel {
     }
 
     private FormulaCapture capture(Formula f) {
-        return new FormulaCapture(f.getId(), f.getRevision(), imageOf(inDrawingOrder(f)));
+        List<Stroke> ink = inDrawingOrder(f);
+        List<Stroke> pair = EqualsSpot.trailingPair(ink, f.getCharHeight());
+        double k = recognitionScale(AnswerLayout.tallestStroke(ink));  // median would be x height for lowercase
+        BufferedImage rest = pair.isEmpty() ? null : imageOf(readable(minus(ink, pair), k));  // in case the model loses the =
+        return new FormulaCapture(f.getId(), f.getRevision(), imageOf(readable(ink, k)), rest);
+    }
+
+    // how much to blow up / shrink ink so pen 4 looks like what the model reads ok (probed 25..240)
+    static double recognitionScale(double charHeight) {
+        if (charHeight < READABLE_MIN_HEIGHT) {
+            return READABLE_MIN_HEIGHT / charHeight;
+        }
+        if (charHeight > READABLE_MAX_HEIGHT) {
+            return READABLE_MAX_HEIGHT / charHeight;
+        }
+        return 1;
+    }
+
+    // scaled copies, same list if k is 1 so normal ink renders exactly as before
+    private static List<Stroke> readable(List<Stroke> ink, double k) {
+        if (k == 1) {
+            return ink;
+        }
+        List<Stroke> copies = new ArrayList<>();
+        for (Stroke s : ink) {
+            copies.add(InkEditor.scale(s, 0, 0, k));
+        }
+        return copies;
     }
 
     // ---------------------------------------------------------------- images
@@ -1733,7 +1811,8 @@ public class DrawingCanvas extends JPanel {
                     a == null ? 0 : a.getWidth(), a == null ? 0 : a.getHeight(),
                     a == null ? 0 : a.getFontSize(), a == null ? Color.BLACK.getRGB() : a.getColor().getRGB(),
                     a == null || a.getRuns() == null ? List.of() : a.getRuns().stream()
-                            .map(run -> new CanvasState.TextPart(run.getText(),run.isRaised())).toList()));
+                            .map(run -> new CanvasState.TextPart(run.getText(),run.isRaised())).toList(),
+                    a == null || !a.isTypeset() ? "" : a.getLatex()));
         }
         List<CanvasState.Asset> assets = new ArrayList<>();
         for (Picture p : pictures) assets.add(new CanvasState.Asset(p.latex, p.result, png(p.image),
@@ -1773,7 +1852,10 @@ public class DrawingCanvas extends JPanel {
             Formula f = restoredBook.add(group, nextRevision());
             if (!info.answer().isBlank()) {
                 CanvasAnswer a;
-                if (info.textParts().isEmpty()) {
+                if (!info.latex().isEmpty()) {
+                    a = CanvasAnswer.typeset(info.answer(), info.latex(), info.error(), info.x(), info.y(),
+                            info.width(), info.height(), info.fontSize());
+                } else if (info.textParts().isEmpty()) {
                     a = new CanvasAnswer(info.answer(), info.error(), info.x(), info.y(),
                             info.width(), info.height(), info.fontSize());
                 } else {
@@ -1782,7 +1864,9 @@ public class DrawingCanvas extends JPanel {
                     a = new CanvasAnswer(runs, info.error(), info.x(), info.y(),
                             info.width(), info.height(), info.fontSize());
                 }
-                restoredBook.put(f.withAnswer(a.withColor(new Color(info.color(),true))));
+                float pen = answerPen(group, restoredWidths);  // box refit, older saves drew every answer at 4
+                restoredBook.put(f.withAnswer(AnswerInk.refit(a.withColor(new Color(info.color(),true))
+                        .withPenWidth(pen), pen)));
             }
         }
         List<Picture> restoredAssets = new ArrayList<>();
@@ -1929,6 +2013,7 @@ public class DrawingCanvas extends JPanel {
         for (Stroke stroke : strokes) {
             if (!selection.contains(stroke)) {
                 world.setColor(colorOf(stroke));
+                world.setStroke(penOf(stroke, 0));  // each stroke at the pen width it was written with
                 drawStroke(world, stroke);
             }
         }
@@ -2045,16 +2130,18 @@ public class DrawingCanvas extends JPanel {
 
     private void paintSelection(Graphics2D world) {
         List<Stroke> preview = selectionPreview();
+        List<Stroke> picked = new ArrayList<>(selection);  // same order as preview, widths live on these
         Graphics2D ink = (Graphics2D) world.create();
-        ink.setStroke(new BasicStroke(INK_WIDTH + 6, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
         ink.setColor(SELECTION_HALO);
-        for (Stroke stroke : preview) {
-            drawStroke(ink, stroke);
+        for (int i = 0; i < preview.size(); i++) {
+            ink.setStroke(penOf(picked.get(i), 6));
+            drawStroke(ink, preview.get(i));
         }
         setUpInk(ink);
-        for (Stroke stroke : preview) {
-            ink.setColor(colorOf(stroke));
-            drawStroke(ink, stroke);
+        for (int i = 0; i < preview.size(); i++) {
+            ink.setColor(colorOf(preview.get(i)));
+            ink.setStroke(penOf(picked.get(i), 0));
+            drawStroke(ink, preview.get(i));
         }
         ink.dispose();
         for (CanvasAnswer a : answerPreview()) {
@@ -2106,17 +2193,22 @@ public class DrawingCanvas extends JPanel {
     }
 
     private static void drawAnswer(Graphics2D world, CanvasAnswer a) {
-        AnswerInk.paint(world, a, a.isError() ? ANSWER_ERROR : a.getColor(), INK_WIDTH);
+        AnswerInk.paint(world, a, a.isError() ? ANSWER_ERROR : a.getColor(), a.getPenWidth());
     }
 
     private void drawStrokes(Graphics2D g2) {
         setUpInk(g2);
         for (Stroke stroke : strokes) {
             g2.setColor(colorOf(stroke));
-            g2.setStroke(new BasicStroke(strokeWidths.getOrDefault(stroke, INK_WIDTH),
-                    BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+            g2.setStroke(penOf(stroke, 0));
             drawStroke(g2, stroke);
         }
+    }
+
+    // round pen this stroke was written with, + extra for the selection halo
+    private BasicStroke penOf(Stroke stroke, float extra) {
+        return new BasicStroke(strokeWidths.getOrDefault(stroke, INK_WIDTH) + extra, BasicStroke.CAP_ROUND,
+                BasicStroke.JOIN_ROUND);
     }
 
     private static void setUpInk(Graphics2D g2) {

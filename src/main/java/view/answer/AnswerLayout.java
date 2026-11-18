@@ -65,10 +65,15 @@ public final class AnswerLayout {
 
     // top-left of an answer right of the formula, centred on its last glyph
     public static Point2D.Double rightOf(Collection<Stroke> formula, double charHeight, double answerHeight) {
+        return rightOfAt(formula, charHeight, answerHeight / 2);
+    }
+
+    // same, but this far down the answer lands on the last glyph's middle (a fraction bar, not the box centre)
+    public static Point2D.Double rightOfAt(Collection<Stroke> formula, double charHeight, double answerMiddle) {
         Rectangle all = bounds(formula);
         List<Rectangle> glyphs = glyphs(formula);
         Rectangle last = glyphs.get(glyphs.size() - 1);
-        return new Point2D.Double(all.getMaxX() + GAP_RIGHT * charHeight, last.getCenterY() - answerHeight / 2);
+        return new Point2D.Double(all.getMaxX() + GAP_RIGHT * charHeight, last.getCenterY() - answerMiddle);
     }
 
     // top-left of an answer under the formula

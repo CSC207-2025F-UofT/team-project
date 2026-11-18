@@ -636,6 +636,16 @@ class AnswerCanvasPageTest {
     }
 
     @Test
+    void misreadTrailingEqualsStillPopsUp() throws Exception {
+        AtomicInteger calls = new AtomicInteger();
+        shared.setFormulaRecognizer(image -> calls.incrementAndGet() == 1 ? "1-" : "1");  // whole loses =, rest is clean
+        openPage();
+        writeWithEquals();
+        waitPopup("1=");
+        assertEquals(2, calls.get());
+    }
+
+    @Test
     void writingTheEqualsBringsThePopup() throws Exception {
         AtomicReference<String> latex = new AtomicReference<>("1+1");
         shared.setFormulaRecognizer(image -> latex.get());
@@ -917,6 +927,68 @@ class AnswerCanvasPageTest {
         assertEquals(1, calls.get(), "never read as a pick");
     }
 
+    // "1 =" written, popup up, then lasso + drag it 200 right 150 down before the pick's pause
+    private void writeAndMove(AtomicInteger calls) throws Exception {
+        shared.setFormulaRecognizer(image -> {
+            calls.incrementAndGet();
+            return "1+1=";
+        });
+        openPage();
+        writeWithEquals();
+        waitPopup("1+1=");
+        lasso(80, 80, 220, 170);
+        drag(101, 105, 301, 255);  // let go off the "=" so hover can't be what brings it back
+    }
+
+    @Test
+    void movedFormulaWithEqualsPopsUpAgain() throws Exception {
+        AtomicInteger calls = new AtomicInteger();
+        writeAndMove(calls);
+        waitPopup("1+1=");
+        assertEquals(1, calls.get(), "same ink, old read");
+    }
+
+    @Test
+    void hoverFindsTheEqualsAfterAMove() throws Exception {
+        writeAndMove(new AtomicInteger());
+        waitPopup("1+1=");
+        onEdt(() -> canvas.setTool(DrawingCanvas.Tool.PEN));
+        waitFor(() -> page.visiblePopup() == null, "popup closed");
+        hover(330, 275);  // the moved "="
+        waitPopup("1+1=");
+    }
+
+    @Test
+    void twoFormulasMovedTogetherBothStillWork() throws Exception {
+        shared.setFormulaRecognizer(image -> "1+1=");
+        openPage();
+        writeWithEqualsAt(100, 100);
+        writeWithEqualsAt(400, 100);
+        waitFor(() -> canvas.getStrokes().stream().allMatch(shared::isBound), "both bound");
+        lasso(80, 80, 520, 170);
+        drag(130, 125, 130, 325);  // both down 200
+        waitFor(() -> page.visiblePopup() != null, "a popup");
+        onEdt(() -> canvas.setTool(DrawingCanvas.Tool.PEN));
+        waitFor(() -> page.visiblePopup() == null, "popup closed");
+        hover(130, 325);
+        waitPopup("1+1=");
+        onEdt(() -> canvas.setTool(DrawingCanvas.Tool.LASSO));  // already on pen, a switch is what closes it
+        waitFor(() -> page.visiblePopup() == null, "popup closed");
+        hover(430, 325);
+        waitPopup("1+1=");
+    }
+
+    @Test
+    void undoAfterAMoveDoesNotPopUp() throws Exception {
+        writeAndMove(new AtomicInteger());
+        waitPopup("1+1=");
+        onEdt(() -> canvas.setTool(DrawingCanvas.Tool.PEN));
+        waitFor(() -> page.visiblePopup() == null, "popup closed");
+        onEdt(canvas::undo);
+        Thread.sleep(300);
+        assertNull(popup());
+    }
+
     // board page: real graph + calculate checks, graphing itself never runs
     private void openBoard() throws Exception {
         InMemoryFunctionDataAccessObject functions = new InMemoryFunctionDataAccessObject();
@@ -930,6 +1002,8 @@ class AnswerCanvasPageTest {
                     java.awt.Color.WHITE);
             page.setCalculateCheck(calcCheck::canCalculate);
             page.setQuestionCheck(new QuestionCheckInteractor()::isQuestion);
+            page.setFaintEqualsCheck(calcCheck::canCalculate);
+            page.setFaintDelay(100);
             page.setPopupDelay(100);
             shared.attachTo(page);
             page.setSize(900, 560);
@@ -985,5 +1059,192 @@ class AnswerCanvasPageTest {
         waitFor(() -> calls.get() == 1, "the read");
         Thread.sleep(300);
         assertNull(popup());
+    }
+
+    // faint "=" chip, null when not up
+    private FaintEquals faint() throws Exception {
+        AtomicReference<FaintEquals> seen = new AtomicReference<>();
+        onEdt(() -> seen.set(page.visibleFaint()));
+        return seen.get();
+    }
+
+    private void boardWith(String latex) throws Exception {
+        shared.setFormulaRecognizer(image -> latex);
+        openBoard();
+        write();
+    }
+
+    private void waitFaint() throws Exception {
+        waitFor(() -> page.visiblePopup() == null && page.visibleFaint() != null, "the faint =");
+    }
+
+    private void chipShown() throws Exception {
+        boardWith("1+1");
+        waitFaint();
+    }
+
+    private void tap(FaintEquals c) throws Exception {
+        onEdt(() -> {
+            int x = c.getWidth() / 2;
+            int y = c.getHeight() / 2;
+            c.dispatchEvent(new MouseEvent(c, MouseEvent.MOUSE_PRESSED, 0, 0, x, y, 1, false, MouseEvent.BUTTON1));
+            c.dispatchEvent(new MouseEvent(c, MouseEvent.MOUSE_RELEASED, 0, 0, x, y, 1, false, MouseEvent.BUTTON1));
+        });
+    }
+
+    private void dragFrom(FaintEquals c, int dx, int dy) throws Exception {
+        onEdt(() -> {
+            int x = c.getWidth() / 2;
+            int y = c.getHeight() / 2;
+            c.dispatchEvent(new MouseEvent(c, MouseEvent.MOUSE_PRESSED, 0, 0, x, y, 1, false, MouseEvent.BUTTON1));
+            c.dispatchEvent(new MouseEvent(c, MouseEvent.MOUSE_DRAGGED, 0, 0, x + dx / 2, y + dy / 2, 1, false, MouseEvent.BUTTON1));
+            c.dispatchEvent(new MouseEvent(c, MouseEvent.MOUSE_DRAGGED, 0, 0, x + dx, y + dy, 1, false, MouseEvent.BUTTON1));
+            c.dispatchEvent(new MouseEvent(c, MouseEvent.MOUSE_RELEASED, 0, 0, x + dx, y + dy, 1, false, MouseEvent.BUTTON1));
+        });
+    }
+
+    private int strokeCount() throws Exception {
+        AtomicInteger n = new AtomicInteger();
+        onEdt(() -> n.set(canvas.getStrokes().size()));
+        return n.get();
+    }
+
+    @Test
+    void calculableFormulaGetsTheFaintEquals() throws Exception {
+        chipShown();
+        assertTrue(faint().getX() > 200, "past the ink");
+    }
+
+    @Test
+    void noFaintEqualsWhileHalfWritten() throws Exception {
+        boardWith("1+");
+        Thread.sleep(500);
+        assertNull(faint());
+    }
+
+    @Test
+    void noFaintEqualsForAnUnknown() throws Exception {
+        boardWith("x");
+        Thread.sleep(500);
+        assertNull(faint());
+    }
+
+    @Test
+    void popupFormulasGetNoFaintEquals() throws Exception {
+        boardPopupFor("1+1=");
+        Thread.sleep(300);
+        assertNull(faint());
+    }
+
+    @Test
+    void tappingTheFaintEqualsOpensThePopup() throws Exception {
+        chipShown();
+        tap(faint());
+        waitPopup("1+1");
+        assertNull(faint());
+        assertTrue(popup().hasCalculate());
+    }
+
+    @Test
+    void draggingFromTheFaintEqualsWritesInk() throws Exception {
+        chipShown();
+        int before = strokeCount();
+        dragFrom(faint(), 30, 0);
+        assertEquals(before + 1, strokeCount());
+        assertNull(faint());
+        assertNull(popup());
+    }
+
+    @Test
+    void nextStrokeHidesTheFaintEquals() throws Exception {
+        chipShown();
+        drag(500, 300, 530, 340);
+        assertNull(faint());
+    }
+
+    @Test
+    void faintEqualsFollowsZoom() throws Exception {
+        chipShown();
+        Point before = faint().getLocation();
+        onEdt(() -> canvas.zoomAt(450, 250, 1.5));
+        assertNotNull(faint());
+        assertFalse(before.equals(faint().getLocation()), "moved w/ the formula");
+    }
+
+    @Test
+    void lassoDragFromTheFaintEqualsAddsNoStroke() throws Exception {
+        chipShown();
+        lasso(80, 80, 220, 170);
+        drag(150, 120, 150, 320);  // moved, chip comes back by it
+        waitFaint();
+        int before = strokeCount();
+        dragFrom(faint(), 0, 40);
+        assertEquals(before, strokeCount());
+    }
+
+    @Test
+    void tappedChipDoesNotExemptLaterEdits() throws Exception {
+        AtomicReference<String> latex = new AtomicReference<>("1+1");
+        shared.setFormulaRecognizer(image -> latex.get());
+        openBoard();
+        write();
+        waitFaint();
+        tap(faint());
+        waitPopup("1+1");
+        onEdt(() -> canvas.setTool(DrawingCanvas.Tool.LASSO));  // closes it
+        onEdt(() -> canvas.setTool(DrawingCanvas.Tool.PEN));
+        latex.set("1+1+");
+        editFormula();  // still writing
+        Thread.sleep(600);
+        assertNull(popup(), "mid-formula, no = yet");
+    }
+
+    @Test
+    void answeredFormulaMovedWithAnUnansweredOneStillReoffersIt() throws Exception {
+        shared.setFormulaRecognizer(image -> "1+1=");
+        openPage();
+        writeWithEqualsAt(100, 100);        // older, stays unanswered
+        waitPopup("1+1=");
+        writeWithEqualsAt(400, 100);        // newer, gets answered
+        waitFor(() -> canvas.getStrokes().stream().allMatch(shared::isBound), "both bound");
+        waitPopup("1+1=");
+        clickCalculate();
+        waitFor(() -> canvas.getAnswers().size() == 1, "the answer");
+        lasso(80, 80, 520, 170);
+        drag(300, 140, 300, 340);  // let go between them, off both "="s
+        waitPopup("1+1=");
+    }
+
+    @Test
+    void movingAnAnsweredFormulaStaysQuiet() throws Exception {
+        shared.setFormulaRecognizer(image -> "1+1=");
+        openPage();
+        writeWithEquals();
+        waitPopup("1+1=");
+        clickCalculate();
+        waitFor(() -> canvas.getAnswers().size() == 1, "the answer");
+        lasso(80, 80, 220, 170);
+        drag(130, 125, 330, 275);
+        Thread.sleep(400);
+        assertNull(popup());
+    }
+
+    @Test
+    void reusedReadStillWaitsForThePendingDefinition() throws Exception {
+        shared.setFormulaRecognizer(image -> image.getHeight() < 80 ? "1+1" : "f(x)=x^{2}+2x");
+        AtomicInteger results = new AtomicInteger();
+        viewModel.addPropertyChangeListener(e -> {
+            if (MathLabViewModel.RESULT.equals(e.getPropertyName())) {
+                results.incrementAndGet();
+            }
+        });
+        openPage();
+        autoDefine();
+        onEdt(() -> page.setPopupDelay(400));
+        write();                   // f(x)=...
+        drag(400, 300, 420, 330);  // 1+1 right after, no pause
+        waitFor(this::definedShown, "the Defined message");
+        Thread.sleep(500);
+        assertEquals(1, results.get(), "saved once");
     }
 }

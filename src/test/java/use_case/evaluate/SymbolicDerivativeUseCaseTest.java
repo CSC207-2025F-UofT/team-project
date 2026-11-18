@@ -2,7 +2,6 @@ package use_case.evaluate;
 
 import data_access.InMemoryFunctionDataAccessObject;
 import entity.Interval;
-import interface_adapter.TextRun;
 import entity.value.Value;
 import interface_adapter.MathLabState;
 import interface_adapter.MathLabViewModel;
@@ -13,8 +12,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class SymbolicDerivativeUseCaseTest {
@@ -65,22 +62,20 @@ class SymbolicDerivativeUseCaseTest {
     }
 
     @Test
-    void runsComeWithTheAnswer() {
+    void texComesWithTheAnswer() {
         show("\\frac{d}{dx}(x^3)");
-        List<TextRun> runs = viewModel.getState().getAnswerRuns();
-        assertNotNull(runs);
-        assertEquals("= 3x2", TextRun.plain(runs));
-        assertTrue(runs.get(runs.size() - 1).isRaised());
+        assertEquals("= 3x^{2}", viewModel.getState().getAnswerLatex());
+        assertEquals("= 3x2", viewModel.getState().getAnswerText());
     }
 
     @Test
-    void numericAfterSymbolicHasNoRuns() {
+    void numericAfterSymbolicDropsItsTex() {
         show("\\frac{d}{dx}(x^3)");
         show("1+1");
-        assertNull(viewModel.getState().getAnswerRuns());
+        assertEquals("= 2", viewModel.getState().getAnswerLatex());
         show("\\frac{d}{dx}(x^3)");
         show("\\frac{d}{dx}|x|");
-        assertNull(viewModel.getState().getAnswerRuns());
+        assertEquals("", viewModel.getState().getAnswerLatex());
     }
 
     @Test

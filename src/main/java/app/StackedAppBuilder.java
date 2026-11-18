@@ -145,6 +145,7 @@ public class StackedAppBuilder {
         page.setDefinitionCheck(definitionCheck::isDefinition);
         page.setCalculateCheck(calculateCheck::canCalculate);
         page.setQuestionCheck(questionCheck::isQuestion);
+        page.setFaintEqualsCheck(calculateCheck::canCalculate);
         sharedCanvas.attachTo(page);
         PdfPanel pdfPanel = pdfStudio.createPanel();
         // Use the live selection (lasso or whole ink), not an outdated startup screenshot.
