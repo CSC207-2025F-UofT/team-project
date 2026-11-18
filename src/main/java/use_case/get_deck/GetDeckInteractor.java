@@ -24,23 +24,48 @@ public class GetDeckInteractor implements GetDeckInputBoundary{
     @Override
     public void execute(GetDeckInputData getDeckInputData) {
         String name = getDeckInputData.getName();
+        String viewName = getDeckInputData.getViewName();
+
         boolean exists = deckDataAccessObject.deckExists(name);
         if (!exists) {
             getDeckPresenter.prepareFailView("Deck does not exist");
         } else {
             Deck deck = deckDataAccessObject.getDeck(name);
 
-            ArrayList<Map<String, String>> flashcardInfo = new ArrayList<>();
             List<Flashcard> flashcards = deck.getFlashcards();
-            for (Flashcard flashcard: flashcards) {
-                Map<String, String> map = new HashMap<>();
-                map.put(flashcard.getQuestion(), flashcard.getAnswer());
-                flashcardInfo.add(map);
+            if (flashcards.isEmpty() && viewName.equals("studyView")) {
+                getDeckPresenter.prepareFailView("There are no flashcards in this deck");
             }
 
-            final GetDeckOutputData getDeckOutputData = new GetDeckOutputData(name,
-                    flashcardInfo, getDeckInputData.getViewName());
-            getDeckPresenter.prepareSuccessView(getDeckOutputData);
+            else if (flashcards.isEmpty() && viewName.equals("deckView")) {
+                GetDeckOutputData getDeckEmptyOutputData = new GetDeckOutputData(name, null, viewName);
+                getDeckPresenter.prepareEmptyView(
+                        getDeckEmptyOutputData,
+                        "There are no flashcards in this deck");
+            }
+
+            else {
+                ArrayList<Map<String, String>> flashcardInfo = new ArrayList<>();
+                for (Flashcard flashcard : flashcards) {
+                    Map<String, String> map = new HashMap<>();
+                    map.put(flashcard.getQuestion(), flashcard.getAnswer());
+                    flashcardInfo.add(map);
+                }
+
+                final GetDeckOutputData getDeckOutputData = new GetDeckOutputData(name,
+                        flashcardInfo, getDeckInputData.getViewName());
+                getDeckPresenter.prepareSuccessView(getDeckOutputData);
+            }
         }
+    }
+
+    @Override
+    public void switchToDeckView() {
+        getDeckPresenter.switchToDeckView();
+    }
+
+    @Override
+    public void switchToStudyView() {
+        getDeckPresenter.switchToStudyView();
     }
 }

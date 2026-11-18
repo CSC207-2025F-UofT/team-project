@@ -76,6 +76,9 @@ public class GetDeckInteractorTest {
             public void prepareFailView(String error) {
                 fail("Use case failure is unexpected.");
             }
+
+            @Override
+            public void prepareEmptyView(String error) { fail("Use case success is unexpected."); }
         };
 
         GetDeckInputBoundary interactor = new GetDeckInteractor(deck, successPresenter);
@@ -98,6 +101,9 @@ public class GetDeckInteractorTest {
             public void prepareFailView(String error) {
                 assertNotNull(error);
             }
+
+            @Override
+            public void prepareEmptyView(String error) { fail("Use case success is unexpected."); }
         };
 
         GetDeckInputBoundary interactor = new GetDeckInteractor(decks, emptyPresenter);
