@@ -11,13 +11,11 @@ import view.DrawingCanvas;
 
 import javax.swing.SwingUtilities;
 import java.awt.event.MouseEvent;
-import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BooleanSupplier;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -98,22 +96,23 @@ class AnswerCanvasPageDerivativeTest {
     void derivativeIsWrittenOnTheCanvas() throws Exception {
         CanvasAnswer a = calculate("\\frac{d}{dy}(3y^{2})=");
         assertEquals("6y", a.getText());
-        assertNotNull(a.getRuns());
+        assertEquals("6y", a.getLatex());
         assertTrue(a.getX() > 200, "x " + a.getX());
         assertEquals("= 6y", pdfResult.get());
     }
 
     @Test
-    void noEqualsGetsAnEqualsRun() throws Exception {
+    void noEqualsGetsAnEquals() throws Exception {
         CanvasAnswer a = calculate("\\frac{d}{dx}(x^3)");
         assertEquals("= 3x2", a.getText());
-        assertTrue(a.getRuns().get(a.getRuns().size() - 1).isRaised());
+        assertEquals("= 3x^{2}", a.getLatex());
     }
 
     @Test
-    void numericAnswerStaysPlain() throws Exception {
+    void numericAnswerIsTypesetToo() throws Exception {
         CanvasAnswer a = calculate("1+1=");
         assertEquals("2", a.getText());
+        assertEquals("2", a.getLatex());
         assertNull(a.getRuns());
     }
 
@@ -121,7 +120,6 @@ class AnswerCanvasPageDerivativeTest {
     void negativeLeadsWithMinusSign() throws Exception {
         CanvasAnswer a = calculate("\\frac{d}{dx}(\\cos x)=");
         assertEquals("−sin x", a.getText());
-        List<?> runs = a.getRuns();
-        assertEquals(1, runs.size());
+        assertEquals("-\\sin x", a.getLatex());
     }
 }

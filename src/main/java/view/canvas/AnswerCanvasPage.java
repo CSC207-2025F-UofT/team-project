@@ -2,7 +2,6 @@ package view.canvas;
 
 import interface_adapter.AnswerKind;
 import entity.Stroke;
-import interface_adapter.TextRun;
 import interface_adapter.MathLabViewModel;
 import interface_adapter.evaluate.EvaluateController;
 import interface_adapter.graph.GraphController;
@@ -485,7 +484,6 @@ public class AnswerCanvasPage extends CanvasPage {
     private void deliver(FormulaCapture capture, String latex, CalculationOutcome outcome) {
         AnswerKind kind = outcome.kind;
         String result = outcome.result;
-        List<TextRun> runs = outcome.answerRuns;
         String error = outcome.error;
         if (--running == 0) {
             calculating.run();  // all back, before the result card shows
@@ -502,9 +500,8 @@ public class AnswerCanvasPage extends CanvasPage {
             // Definitions have no numeric answer but are still explicitly requested work.
             publishFormulaOnly(capture, latex);
         } else {
-            boolean drawn = runs == null
-                    ? getSharedCanvas().showAnswer(capture.getId(), capture.getRevision(), kind, outcome.answerText, false)
-                    : getSharedCanvas().showAnswer(capture.getId(), capture.getRevision(), kind, runs, false);
+            boolean drawn = getSharedCanvas().showTypesetAnswer(capture.getId(), capture.getRevision(), kind,
+                    outcome.answerText, outcome.answerLatex);
             if (drawn) {
                 notices.clearError();  // answer's on the canvas, that's the success
             }
