@@ -70,8 +70,8 @@ class ListTripsInteractorTest {
         public void prepareFailView(String errorMessage) { failure = errorMessage; }
     }
 
-    private static final LocationInfo MONTREAL = new LocationInfo("Montreal", null, "Quebec", "Canada");
-    private static final LocationInfo QUEBEC = new LocationInfo("Quebec City", null, "Quebec", "Canada");
+    private static final LocationInfo MONTREAL = new LocationInfo("Montreal", null, "Quebec", "Canada", "North America");
+    private static final LocationInfo QUEBEC = new LocationInfo("Quebec City", null, "Quebec", "Canada", "North America");
 
     private FakeDataAccess dao;
     private CapturingPresenter presenter;

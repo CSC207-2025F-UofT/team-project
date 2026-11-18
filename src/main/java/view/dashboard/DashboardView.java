@@ -41,6 +41,7 @@ public class DashboardView extends JPanel implements PropertyChangeListener {
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
         DashboardState dashboardState = dashboardViewModel.getState();
+        this.analytics.clear();
         addAnalytics(dashboardState);
         refreshAnalyticsPanel();
     }
