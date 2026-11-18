@@ -28,6 +28,10 @@ public final class FloatingToolbar {
     private final GlassBar bar;
     private final GlassBar.Item[] tools = new GlassBar.Item[4];
     private final GlassBar.Item pen;
+    private final ToolOptionsPopup options;
+    private DrawingCanvas.Tool lastClicked;
+    private boolean toolClickArmed;
+    private boolean optionsOpen;
     private final Spring sx = new Spring();
     private final Spring sy = new Spring();
     private final Timer timer = new Timer(FRAME_MS, e -> step());
@@ -59,28 +63,11 @@ public final class FloatingToolbar {
                 drop();
             }
         });
-        pen = tools[0] = bar.segment("Pen", Icons::pencil, 1, () -> use(DrawingCanvas.Tool.PEN));
-        tools[1] = bar.segment("Eraser", Icons::eraser, 1, () -> use(DrawingCanvas.Tool.ERASER));
-        tools[2] = bar.segment("Lasso", Icons::lasso, 1, () -> use(DrawingCanvas.Tool.LASSO));
-        tools[3] = bar.segment("Box", Icons::rectangleSelect, 1, () -> use(DrawingCanvas.Tool.RECTANGLE));
-        bar.separator();
-        GlassBar.Item first = null;
-        for (Color c : BoardTheme.SWATCHES) {
-            GlassBar.Item[] self = new GlassBar.Item[1];
-            self[0] = bar.swatch(c, 2, () -> useColor(self[0].getColor()));
-            if (first == null) {
-                first = self[0];
-            }
-        }
-        GlassBar.Item[] custom = new GlassBar.Item[1];
-        custom[0] = bar.customSwatch(2, () -> {
-            Color chosen = JColorChooser.showDialog(area, "Choose Color", canvas.getInkColor());
-            if (chosen == null) {
-                return false;  // cancelled, keep the old one
-            }
-            custom[0].setColor(chosen);
-            return useColor(chosen);
-        });
+        options = new ToolOptionsPopup(canvas, this::useColor);
+        pen = tools[0] = bar.segment("Pen", Icons::pencil, 1, () -> chooseTool(DrawingCanvas.Tool.PEN));
+        tools[1] = bar.segment("Eraser", Icons::eraser, 1, () -> chooseTool(DrawingCanvas.Tool.ERASER));
+        tools[2] = bar.segment("Lasso", Icons::lasso, 1, () -> chooseTool(DrawingCanvas.Tool.LASSO));
+        tools[3] = bar.segment("Box", Icons::rectangleSelect, 1, () -> chooseTool(DrawingCanvas.Tool.RECTANGLE));
         bar.separator();
         bar.action("Undo", Icons::undo, canvas::undo, canvas::canUndo);
         bar.action("Redo", Icons::redo, canvas::redo, canvas::canRedo);
@@ -88,17 +75,18 @@ public final class FloatingToolbar {
         bar.separator();
         bar.segment("Draw on PDF", Icons::pencil, 3, () -> {
             drawingOnPdf = !drawingOnPdf;
-            pdfPanel.editor().pageView().configurePdfDrawing(drawingOnPdf, canvas::getTool, canvas::getInkColor);
+            pdfPanel.editor().pageView().configurePdfDrawing(drawingOnPdf, canvas::getTool, canvas::getInkColor, canvas::getPenWidth);
             if (!drawingOnPdf) bar.deselect(3);
             return drawingOnPdf;
         });
         bar.finish();
         bar.select(tools[canvas.getTool().ordinal()]);
-        bar.select(first);
-        canvas.setInkColor(first.getColor());
+        bar.setHoverToolLabels(true, this::relayout);
 
         canvas.addPropertyChangeListener(DrawingCanvas.TOOL_PROPERTY, e -> {
             bar.select(tools[((DrawingCanvas.Tool) e.getNewValue()).ordinal()]);
+            optionsOpen = false;
+            if (options.isVisible()) options.setVisible(false);
             bar.repaint();
         });
         canvas.addUserActionListener(() -> SwingUtilities.invokeLater(bar::repaint));  // Undo / Clear greys
@@ -129,22 +117,37 @@ public final class FloatingToolbar {
         relayout();
     }
 
-    private boolean use(DrawingCanvas.Tool tool) {
-        canvas.setTool(tool);
+    private boolean chooseTool(DrawingCanvas.Tool tool) {
+        if (toolClickArmed && lastClicked == tool && canvas.getTool() == tool) {
+            // Swing may dismiss a popup on mouse press, before our tool's release callback.
+            // Track explicit clicks, not isVisible(), so every click really toggles.
+            optionsOpen = !optionsOpen;
+            if (optionsOpen) {
+                int x = Math.max(0, (bar.getWidth() - 335) / 2);
+                options.showFor(tool, bar, x, -285);
+            } else {
+                options.setVisible(false);
+            }
+        } else {
+            optionsOpen = false;
+            options.setVisible(false);
+            canvas.setTool(tool);
+        }
+        toolClickArmed = true;
+        lastClicked = tool;
         return true;
     }
 
     // picking a colour recolours a lasso pick, else goes back to the pen
-    private boolean useColor(Color c) {
+    private void useColor(Color c) {
         canvas.setInkColor(c);
         if (canvas.recolorSelection(c)) {
-            return true;
+            return;
         }
         if (canvas.getTool() != DrawingCanvas.Tool.PEN) {
             canvas.setTool(DrawingCanvas.Tool.PEN);
             bar.select(pen);
         }
-        return true;
     }
 
     // stands up on the side edges; narrow room: labels off, then squeezes; then to the remembered spot

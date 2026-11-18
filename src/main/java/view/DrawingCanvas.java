@@ -9,7 +9,6 @@ import view.answer.CanvasAnswer;
 import interface_adapter.TextRun;
 import view.answer.Formula;
 import view.answer.FormulaBook;
-import view.answer.Scripts;
 import entity.InkEditor;
 import entity.InkPoint;
 import entity.Stroke;
@@ -168,6 +167,9 @@ public class DrawingCanvas extends JPanel {
 
     // one-board look: pen colour per stroke (screen only), no grid, pictures from history
     private Color inkColor = INK_COLOR;
+    private float penWidth = INK_WIDTH;
+    private int eraserSize = 16;
+    private final Map<Stroke, Float> strokeWidths = new HashMap<>();
     private final Map<Stroke, Color> strokeColors = new HashMap<>();
     private boolean gridVisible = true;
     private final List<Picture> pictures = new ArrayList<>();
@@ -310,8 +312,6 @@ public class DrawingCanvas extends JPanel {
         bindKey("BACK_SPACE", "deleteSelection", this::deleteSelection);
         bindKey("ESCAPE", "clearSelection", this::clearSelection);
         bindKey("ctrl Z", "undo", this::undo);
-        bindKey("ctrl Y", "redo", this::redo);
-        bindKey("ctrl shift Z", "redoShift", this::redo);
         bindKey("pressed SPACE", "panOn", () -> setSpaceDown(true));
         bindKey("released SPACE", "panOff", () -> setSpaceDown(false));
     }
@@ -537,6 +537,18 @@ public class DrawingCanvas extends JPanel {
         fire(actionListeners);
     }
 
+    public float getPenWidth() {
+        return penWidth;
+    }
+
+    /** Width used for subsequently drawn strokes, in canvas units. */
+    public void setPenWidth(float width) {
+        if (!Float.isFinite(width) || width < 1 || width > 16) {
+            throw new IllegalArgumentException("Pen width must be between 1 and 16");
+        }
+        penWidth = width;
+    }
+
     public EraserMode getEraserMode() {
         return eraserMode;
     }
@@ -552,9 +564,17 @@ public class DrawingCanvas extends JPanel {
         fire(actionListeners);
     }
 
-    /** The eraser's radius on screen; it stays the same size however far you zoom. */
+    /** Eraser size in screen pixels, independent of canvas zoom. */
+    public int getEraserSize() { return eraserSize; }
+
+    public void setEraserSize(int size) {
+        if (size < 4 || size > 48) throw new IllegalArgumentException("Unsupported eraser size");
+        eraserSize = size;
+        repaint();
+    }
+
     private int eraserRadius() {
-        return eraserMode == EraserMode.PRECISE ? PRECISE_ERASER_RADIUS : STROKE_ERASER_RADIUS;
+        return eraserMode == EraserMode.PRECISE ? eraserSize : Math.max(3, eraserSize / 2);
     }
 
     private void startStroke(MouseEvent e) {
@@ -562,6 +582,7 @@ public class DrawingCanvas extends JPanel {
         saveForUndo();
         currentStroke = new Stroke();
         strokeColors.put(currentStroke, inkColor);
+        strokeWidths.put(currentStroke, penWidth);
         strokes.add(currentStroke);
         record(e);
     }
@@ -745,6 +766,7 @@ public class DrawingCanvas extends JPanel {
                 after.add(copy);
                 copies.put(stroke, copy);
                 strokeColors.put(copy, colorOf(stroke));
+                strokeWidths.put(copy, strokeWidths.getOrDefault(stroke, INK_WIDTH));
             } else {
                 after.add(stroke);
             }
@@ -941,18 +963,17 @@ public class DrawingCanvas extends JPanel {
         return strokes.isEmpty() && pictures.isEmpty() && graphCard == null;
     }
 
-    /** Undoes the last Canvas edit and records the current state for Redo. */
+    /** Steps back one change without destroying the redo chain. */
     public void undo() {
         if (history.isEmpty()) return;
         redoHistory.push(snapshot());
         restore(history.pop());
     }
 
-    /** Reapplies the last undone Canvas edit. A new edit invalidates this history. */
+    /** Reapplies a change undone by undo(). */
     public void redo() {
         if (redoHistory.isEmpty()) return;
         history.push(snapshot());
-        if (history.size() > HISTORY_LIMIT) history.removeLast();
         restore(redoHistory.pop());
     }
 
@@ -960,22 +981,21 @@ public class DrawingCanvas extends JPanel {
         return !redoHistory.isEmpty();
     }
 
-    private void restore(Snapshot state) {
-        replaceStrokes(state.strokes);
+    private void restore(Snapshot back) {
+        replaceStrokes(back.strokes);
         strokeColors.clear();
-        strokeColors.putAll(state.colors);
-        book = state.book.copy();
-        pictures.clear();
-        pictures.addAll(state.pictures);
-        graphImage = state.graphImage;
-        graphCard = state.graphCard;
+        strokeColors.putAll(back.colors);
+        strokeWidths.clear();
+        strokeWidths.putAll(back.widths);
+        book = back.book.copy();
+        pictures.clear(); pictures.addAll(back.pictures);
+        graphImage = back.graphImage; graphCard = back.graphCard;
         selectedPicture = null;
         currentStroke = null;
-        selection.clear();
-        selectedAnswers.clear();
+        selection.clear(); selectedAnswers.clear();
         repaint();
-        for (Formula formula : book.all()) {
-            if (formula.getAnswer() == null) notifyChanged(formula.getId());
+        for (Formula f : book.all()) {
+            if (f.getAnswer() == null) notifyChanged(f.getId());
         }
         fire(actionListeners);
         fire(inkListeners);
@@ -999,14 +1019,16 @@ public class DrawingCanvas extends JPanel {
     }
 
     private Snapshot snapshot() {
-        return new Snapshot(new ArrayList<>(strokes), colorsNow(), book.copy(),
-                new ArrayList<>(pictures), graphImage, graphCard);
+        return new Snapshot(new ArrayList<>(strokes), colorsNow(), new HashMap<>(strokeWidths),
+                book.copy(), new ArrayList<>(pictures), graphImage, graphCard);
     }
 
     private void saveForUndo() {
         redoHistory.clear();
         history.push(snapshot());
-        if (history.size() > HISTORY_LIMIT) history.removeLast();
+        if (history.size() > HISTORY_LIMIT) {
+            history.removeLast();
+        }
     }
 
     private void replaceStrokes(List<Stroke> newStrokes) {
@@ -1077,15 +1099,17 @@ public class DrawingCanvas extends JPanel {
     private static final class Snapshot {
         final List<Stroke> strokes;
         final Map<Stroke, Color> colors;
+        final Map<Stroke, Float> widths;
         final FormulaBook book;
         final List<Picture> pictures;
         final BufferedImage graphImage;
         final Rectangle2D graphCard;
 
-        Snapshot(List<Stroke> strokes, Map<Stroke, Color> colors, FormulaBook book,
-                 List<Picture> pictures, BufferedImage graphImage, Rectangle2D graphCard) {
+        Snapshot(List<Stroke> strokes, Map<Stroke, Color> colors, Map<Stroke, Float> widths,
+                 FormulaBook book, List<Picture> pictures, BufferedImage graphImage, Rectangle2D graphCard) {
             this.strokes = strokes;
             this.colors = colors;
+            this.widths = widths;
             this.book = book;
             this.pictures = pictures;
             this.graphImage = graphImage;
@@ -1239,28 +1263,16 @@ public class DrawingCanvas extends JPanel {
             }
         }
         double h = AnswerLayout.strokeHeight(pool);
-        bindGroup(looseGroup(last, h));
+        Formula mine = book.add(looseGroup(last, h), nextRevision());
         for (Stroke s : session) {
             if (strokes.contains(s) && !book.isBound(s)) {
-                bindGroup(looseGroup(s, h));
+                book.add(looseGroup(s, h), nextRevision());
             }
         }
-        return capture(book.holding(last));  // after all of it, a later limit may have merged it again
+        return capture(mine);
     }
 
-    // limits written after the pause join the formula they sit on, judged as a whole row; else a new one
-    private Formula bindGroup(Set<Stroke> group) {
-        for (Formula f : book.all()) {
-            if (Scripts.stackedOn(f.getStrokes(), group)) {  // one way only, old formula is never the new ink's limit
-                Set<Stroke> both = new LinkedHashSet<>(f.getStrokes());
-                both.addAll(group);
-                return book.add(both, nextRevision());
-            }
-        }
-        return book.add(group, nextRevision());
-    }
-
-    // lasso pick -> one formula, gaps and all; null if empty, already answered, or 2+ answered (moving them)
+    // lasso pick -> one formula, gaps and all; null if empty or answered
     public FormulaCapture registerSelection() {
         List<Stroke> picked = selectedInkSnapshot();
         if (picked.isEmpty()) {
@@ -1271,51 +1283,26 @@ public class DrawingCanvas extends JPanel {
                 return captureForRecalculation(f.getId());  // already one formula, keep it
             }
         }
-        Set<Long> answered = new HashSet<>();
         for (Stroke s : picked) {
             Formula f = book.holding(s);
             if (f != null && f.getAnswer() != null) {
-                answered.add(f.getId());
+                return null;
             }
         }
-        if (answered.size() > 1) {
-            return null;
-        }
-        // one answered + more/less ink = they're fixing its grouping, old answer goes
         Formula mine = book.add(picked, nextRevision());
         repaint();
         return capture(mine);
     }
 
-    // seed's row, plus any limits stacked over/under it (or the row it's a limit of)
+    // unbound strokes near seed, grown until nothing else joins
     private Set<Stroke> looseGroup(Stroke seed, double h) {
-        Set<Stroke> group = looseRow(seed, h, Set.of());
-        boolean grew = true;
-        while (grew) {
-            grew = false;
-            for (Stroke s : strokes) {
-                if (group.contains(s) || book.isBound(s)) {
-                    continue;
-                }
-                Set<Stroke> other = looseRow(s, h, group);
-                if (Scripts.stackedOn(group, other) || Scripts.stackedOn(other, group)) {
-                    group.addAll(other);
-                    grew = true;
-                }
-            }
-        }
-        return group;
-    }
-
-    // unbound strokes on seed's line, grown until nothing else joins
-    private Set<Stroke> looseRow(Stroke seed, double h, Set<Stroke> skip) {
         Set<Stroke> group = new LinkedHashSet<>(List.of(seed));
         boolean grew = true;
         while (grew) {
             grew = false;
             Rectangle box = boundsOf(group);
             for (Stroke s : strokes) {
-                Rectangle b = group.contains(s) || skip.contains(s) || book.isBound(s) ? null : boundsOf(List.of(s));
+                Rectangle b = group.contains(s) || book.isBound(s) ? null : boundsOf(List.of(s));
                 if (b != null && box != null && AnswerLayout.sameNewFormula(box, h, b)) {
                     group.add(s);
                     grew = true;
@@ -1643,7 +1630,8 @@ public class DrawingCanvas extends JPanel {
             List<CanvasState.Point> pts = stroke.getPoints().stream()
                     .map(p -> new CanvasState.Point(p.getX(), p.getY(), p.getTimeMillis())).toList();
             index.put(stroke, ink.size());
-            ink.add(new CanvasState.Ink(pts, colorOf(stroke).getRGB()));
+            ink.add(new CanvasState.Ink(pts, colorOf(stroke).getRGB(),
+                    strokeWidths.getOrDefault(stroke, INK_WIDTH)));
         }
         List<CanvasState.Formula> formulas = new ArrayList<>();
         for (Formula f : book.all()) {
@@ -1679,10 +1667,12 @@ public class DrawingCanvas extends JPanel {
         java.util.Objects.requireNonNull(state);
         List<Stroke> restoredInk = new ArrayList<>();
         Map<Stroke, Color> restoredColors = new HashMap<>();
+        Map<Stroke, Float> restoredWidths = new HashMap<>();
         for (CanvasState.Ink sample : state.ink()) {
             Stroke stroke = new Stroke();
             for (CanvasState.Point p : sample.points()) stroke.addPoint(new InkPoint(p.x(),p.y(),p.timeMillis()));
             restoredInk.add(stroke);restoredColors.put(stroke,new Color(sample.argb(),true));
+            restoredWidths.put(stroke, sample.width());
         }
         FormulaBook restoredBook = new FormulaBook();
         for (CanvasState.Formula info : state.formulas()) {
@@ -1721,7 +1711,9 @@ public class DrawingCanvas extends JPanel {
         strokeColors.clear();strokeColors.putAll(restoredColors);
         book = restoredBook;
         pictures.clear();pictures.addAll(restoredAssets);
-        history.clear();redoHistory.clear();selectedPicture = null;selection.clear();selectedAnswers.clear();
+        history.clear();redoHistory.clear();strokeWidths.clear();
+        strokeWidths.putAll(restoredWidths);
+        selectedPicture = null;selection.clear();selectedAnswers.clear();
         currentStroke = null;graphCard = restoredGraphBounds;graphImage = restoredGraph;
         scale = state.zoom();originX = state.offsetX();originY = state.offsetY();
         repaint();fire(inkListeners);fire(viewListeners);
@@ -1752,6 +1744,7 @@ public class DrawingCanvas extends JPanel {
             }
             if (best != null) {
                 strokeColors.put(piece, colorOf(best));
+                strokeWidths.put(piece, strokeWidths.getOrDefault(best, INK_WIDTH));
             }
         }
     }
@@ -2004,6 +1997,8 @@ public class DrawingCanvas extends JPanel {
         setUpInk(g2);
         for (Stroke stroke : strokes) {
             g2.setColor(colorOf(stroke));
+            g2.setStroke(new BasicStroke(strokeWidths.getOrDefault(stroke, INK_WIDTH),
+                    BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
             drawStroke(g2, stroke);
         }
     }

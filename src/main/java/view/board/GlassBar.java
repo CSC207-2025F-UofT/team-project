@@ -168,6 +168,16 @@ public class GlassBar extends JComponent {
     private boolean vertical;     // standing up on a side edge; drawn as a flipped horizontal bar
     private static final AffineTransform FLIP = new AffineTransform(0, 1, 1, 0, 0, 0);  // swaps x and y
     private GripListener gripListener;
+    private boolean hoverToolLabels;
+    private Runnable hoverLayoutListener = () -> { };
+
+    /** Compact tool icons expand their own label only while hovered. */
+    public void setHoverToolLabels(boolean enabled, Runnable onLayout) {
+        hoverToolLabels = enabled;
+        hoverLayoutListener = Objects.requireNonNull(onLayout);
+        finish();
+    }
+
 
     private Item hoverItem;
     private Item pressItem;
@@ -274,7 +284,14 @@ public class GlassBar extends JComponent {
             @Override
             public void mouseMoved(MouseEvent e) {
                 mouseX = mainOf(e);
-                hoverItem = itemAt(mainOf(e));
+                Item next = itemAt(mainOf(e));
+                if (hoverToolLabels && next != hoverItem) {
+                    hoverItem = next;
+                    finish();
+                    hoverLayoutListener.run();
+                } else {
+                    hoverItem = next;
+                }
                 boolean onGrip = hoverItem != null && hoverItem.kind == Kind.GRIP;
                 setCursor(Cursor.getPredefinedCursor(onGrip ? Cursor.MOVE_CURSOR : Cursor.DEFAULT_CURSOR));
                 timer.start();
@@ -283,6 +300,10 @@ public class GlassBar extends JComponent {
             @Override
             public void mouseExited(MouseEvent e) {
                 hoverItem = null;
+                if (hoverToolLabels) {
+                    finish();
+                    hoverLayoutListener.run();
+                }
                 timer.start();
             }
         };
@@ -339,13 +360,14 @@ public class GlassBar extends JComponent {
         float x = 0;
         for (Item it : items) {
             if (it.kind == Kind.SEGMENT || it.kind == Kind.ACTION) {
-                if (compact || vertical || it.label == null) {
+                if ((hoverToolLabels && hoverItem != it) || compact || vertical || it.label == null) {
                     it.w = Math.max(minWidth(it), (it.splitGroup >= 0 && it.label == null ? SPLIT_CHEVRON_W : COMPACT_W) * squeeze);
                 } else {
                     float text = (float) font.getStringBounds(it.label, frc).getWidth();
                     it.w = it.splitGroup >= 0
                             ? ICON + ICON_GAP + text + SPLIT_LABEL_PADDING
-                            : Math.max(84, ITEM_PAD_X * 2 + ICON + ICON_GAP + text);
+                            : Math.max(hoverToolLabels ? 73 : 84,
+                                    (hoverToolLabels ? 23 : ITEM_PAD_X * 2) + ICON + ICON_GAP + text);
                 }
             } else {
                 it.w = Math.max(minWidth(it), it.base * squeeze);
@@ -421,11 +443,13 @@ public class GlassBar extends JComponent {
         FontRenderContext frc = new FontRenderContext(null, true, true);
         for (Item it : items) {
             if (it.kind == Kind.SEGMENT || it.kind == Kind.ACTION) {
-                x += compact || it.label == null ? (it.splitGroup >= 0 && it.label == null ? SPLIT_CHEVRON_W : COMPACT_W)
+                x += (hoverToolLabels && hoverItem != it) || compact || it.label == null
+                        ? (it.splitGroup >= 0 && it.label == null ? SPLIT_CHEVRON_W : COMPACT_W)
                         : (it.splitGroup >= 0
                         ? ICON + ICON_GAP + SPLIT_LABEL_PADDING
                                 + (float) font.getStringBounds(it.label, frc).getWidth()
-                        : Math.max(84, ITEM_PAD_X * 2 + ICON + ICON_GAP
+                        : Math.max(hoverToolLabels ? 73 : 84,
+                                (hoverToolLabels ? 23 : ITEM_PAD_X * 2) + ICON + ICON_GAP
                                 + (float) font.getStringBounds(it.label, frc).getWidth()));
             } else {
                 x += it.base;  // natural width, not squeezed
@@ -483,7 +507,7 @@ public class GlassBar extends JComponent {
         if (it == null || it.label == null || !contains(e.getPoint())) {
             return null;
         }
-        return compact || vertical ? it.label : null;
+        return compact || vertical || (hoverToolLabels && hoverItem != it) ? it.label : null;
     }
 
     // ---- interaction
@@ -736,6 +760,7 @@ public class GlassBar extends JComponent {
             }
         }
         h = h * 31 + (compact ? 1 : 0) + (vertical ? 2 : 0);
+        if (hoverToolLabels) h = h * 31 + (hoverItem == null ? 0 : System.identityHashCode(hoverItem));
         h = h * 31 + version.getAsLong();
         Point o = origin();
         h = h * 31 + o.x;
@@ -898,7 +923,7 @@ public class GlassBar extends JComponent {
                 Color c = !it.enabled.getAsBoolean() ? BoardTheme.LABEL_DISABLED
                         : selected.get(it.group) == it ? BoardTheme.LABEL_SELECTED : BoardTheme.LABEL;
                 g2.setColor(c);
-                boolean iconOnly = compact || vertical || it.label == null;
+                boolean iconOnly = (hoverToolLabels && hoverItem != it) || compact || vertical || it.label == null;
                 float textW = iconOnly ? 0 : fm.stringWidth(it.label);
                 double total = iconOnly ? ICON * scale : (ICON + ICON_GAP) * scale + textW;
                 double x0 = b.getCenterX() - total / 2;
@@ -913,6 +938,10 @@ public class GlassBar extends JComponent {
                 if (!iconOnly) {
                     g2.drawString(it.label, (float) (x0 + (ICON + ICON_GAP) * scale),
                             (float) (b.getCenterY() - fm.getHeight() / 2.0 + fm.getAscent()));
+                    if (hoverToolLabels && hoverItem == it) {
+                        g2.drawString("⌃", (float) (b.getMaxX() - 15 * scale),
+                                (float) (b.getCenterY() - fm.getHeight() / 2.0 + fm.getAscent()));
+                    }
                 }
             } else if (it.kind == Kind.SWATCH) {
                 paintSwatch(g2, it, b.getCenterX(), b.getCenterY(), scale);

@@ -15,8 +15,15 @@ public record CanvasState(List<Ink> ink, List<Formula> formulas, List<Asset> ass
             throw new IllegalArgumentException("Invalid canvas viewport");
     }
     public record Point(int x, int y, long timeMillis) { }
-    public record Ink(List<Point> points, int argb) {
-        public Ink { points = List.copyOf(points); if (points.isEmpty()) throw new IllegalArgumentException("Empty stroke"); }
+    public record Ink(List<Point> points, int argb, float width) {
+        public Ink(List<Point> points, int argb) {
+            this(points, argb, 4f); // Compatible with old saved documents.
+        }
+        public Ink {
+            points = List.copyOf(points);
+            if (points.isEmpty() || !Float.isFinite(width) || width < 1 || width > 16)
+                throw new IllegalArgumentException("Invalid stroke");
+        }
     }
     public record Formula(List<Integer> strokes, String answer, boolean error,
                           double x, double y, double width, double height, float fontSize, int color,

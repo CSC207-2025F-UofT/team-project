@@ -137,11 +137,14 @@ public final class PdfPageCanvas extends JPanel {
     private boolean drawingOnPdf;
     private java.util.function.Supplier<view.DrawingCanvas.Tool> drawingTool = () -> view.DrawingCanvas.Tool.PEN;
     private java.util.function.Supplier<Color> drawingColor = () -> Color.BLACK;
+    private java.util.function.Supplier<Float> drawingWidth = () -> 2.5f;
     private final java.util.List<java.awt.geom.Point2D.Float> inkPreview = new java.util.ArrayList<>();
     /** Input routing is View-only; stored ink is an immutable PDF material placement. */
     public void configurePdfDrawing(boolean enabled,
                                     java.util.function.Supplier<view.DrawingCanvas.Tool> tool,
-                                    java.util.function.Supplier<Color> color) {
+                                    java.util.function.Supplier<Color> color,
+                                    java.util.function.Supplier<Float> width) {
+        drawingWidth = java.util.Objects.requireNonNull(width);
         drawingOnPdf = enabled;
         drawingTool = java.util.Objects.requireNonNull(tool);
         drawingColor = java.util.Objects.requireNonNull(color);
@@ -193,7 +196,7 @@ public final class PdfPageCanvas extends JPanel {
         try {
             g.scale(quality,quality);
             g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,RenderingHints.VALUE_ANTIALIAS_ON);
-            g.setStroke(new BasicStroke(2.5f,BasicStroke.CAP_ROUND,BasicStroke.JOIN_ROUND));
+            g.setStroke(new BasicStroke(Math.max(1f, drawingWidth.get()),BasicStroke.CAP_ROUND,BasicStroke.JOIN_ROUND));
             g.setColor(drawingColor.get());
             java.awt.geom.Path2D.Float path=new java.awt.geom.Path2D.Float();
             boolean first=true;
@@ -355,7 +358,7 @@ public final class PdfPageCanvas extends JPanel {
                 }
             }
             if (!inkPreview.isEmpty()) {
-                g2.setStroke(new BasicStroke(2.5f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+                g2.setStroke(new BasicStroke(Math.max(1f, drawingWidth.get()), BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
                 g2.setColor(drawingColor.get());
                 java.awt.geom.Path2D.Float path = new java.awt.geom.Path2D.Float();
                 boolean first = true;
