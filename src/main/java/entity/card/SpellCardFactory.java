@@ -1,8 +1,10 @@
 package entity.card;
 
+import entity.Player;
+
 public class SpellCardFactory implements CardFactory {
     @Override
-    public SpellCard create(String owner, String cardName) {
+    public SpellCard create(Player owner, String cardName) {
         return switch (cardName) {
             case "Magic Missiles" -> new SpellCardBuilder(owner, cardName)
                     .damage(50)

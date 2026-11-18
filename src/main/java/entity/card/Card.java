@@ -1,14 +1,16 @@
 package entity.card;
 
+import entity.Player;
+
 public abstract class Card {
-    private final String owner;
+    private final Player owner;
     private final String name;
 
-    protected Card(String owner, String name) {
-        this.owner = name;
-        this.name = name;
+    protected Card(Player owner, String name) {
+        this.owner = owner;
+        this.name = name; //name is the name of the card
     }
 
     public String getName() {return name;}
-    public String getOwner() {return owner;}
+    public Player getOwner() {return owner;}
 }

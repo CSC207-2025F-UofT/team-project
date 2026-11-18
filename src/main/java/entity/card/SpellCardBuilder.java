@@ -1,9 +1,11 @@
 package entity.card;
 
+import entity.Player;
+
 public class SpellCardBuilder {
     private final SpellCard spellCard;
 
-    public SpellCardBuilder(String owner, String name) {
+    public SpellCardBuilder(Player owner, String name) {
         this.spellCard = new SpellCard(owner, name);
     }
 

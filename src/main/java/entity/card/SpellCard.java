@@ -1,5 +1,7 @@
 package entity.card;
 
+import entity.Player;
+
 public class SpellCard extends Card {
     private int range = 0;
     private int damage = 0;
@@ -7,7 +9,7 @@ public class SpellCard extends Card {
     private int AoE = 0;
     private int charges = 0;
 
-    public SpellCard(String owner, String name) {
+    public SpellCard(Player owner, String name) {
         super(owner, name);
     }
 

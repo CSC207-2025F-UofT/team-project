@@ -1,5 +1,6 @@
 package entity.board;
 
+import entity.Player;
 import entity.card.Card;
 import entity.card.CharacterCard;
 import entity.card.SorceryCard;
@@ -49,9 +50,9 @@ public class Board {
     }
 
     /// Calculates the HP score on the board of all Character cards that belong to this player
-    /// @param playerName The name of the player for which the score is calculated
+    /// @param player The name of the player for which the score is calculated
     /// @return The score, in current HP of all character cards.
-    public int calculateScore(String playerName){
+    public int calculateScore(Player player){
         int score = 0;
         for(int i = 0; i < 6; i++){
             for(int j = 0; j < 6; j++){

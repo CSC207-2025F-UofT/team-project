@@ -1,8 +1,10 @@
 package entity.card;
 
+import entity.Player;
+
 public class SorceryCardFactory implements CardFactory {
     @Override
-    public SorceryCard create(String owner, String cardName) {
+    public SorceryCard create(Player owner, String cardName) {
         return switch (cardName) {
             case "Mirror", "Portal" -> new SorceryCard(owner, cardName, true);
 

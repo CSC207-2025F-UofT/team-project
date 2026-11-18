@@ -1,8 +1,10 @@
 package entity.card;
 
+import entity.Player;
+
 public class CharacterCardFactory implements CardFactory {
     @Override
-    public CharacterCard create(String owner, String cardName) {
+    public CharacterCard create(Player owner, String cardName) {
         return switch (cardName) {
             case "Aki", "Kia" -> new CharacterCard(owner, cardName, 200, 3);
             case "Cadence" -> new CharacterCard(owner, cardName, 250, 2);

@@ -1,9 +1,10 @@
 package entity.deck;
 
+import entity.Player;
 import entity.card.*;
 
 public class DeckFactory {
-    public static Deck createDeck(String owner) {
+    public static Deck createDeck(Player owner) {
         Deck deck = new Deck();
         SpellCardFactory spellFactory = new SpellCardFactory();
         CharacterCardFactory charFactory = new CharacterCardFactory();
@@ -21,7 +22,7 @@ public class DeckFactory {
         return deck;
     }
 
-    private static void addCopies(Deck deck, CardFactory cardFactory, String owner, String name, int amount) {
+    private static void addCopies(Deck deck, CardFactory cardFactory, Player owner, String name, int amount) {
         for (int i = 0; i <= amount; i++) {
             Card card = cardFactory.create(owner, name);
             deck.addCard(card);

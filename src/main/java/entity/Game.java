@@ -9,15 +9,15 @@ import java.util.HashMap;
 
 public class Game {
     private Board board;
-    private HashMap<String, Deck> drawPiles;
-    private HashMap<String, Deck> discardPiles;
-    private HashMap<String, Deck> handPiles;
+    private HashMap<Player, Deck> drawPiles;
+    private HashMap<Player, Deck> discardPiles;
+    private HashMap<Player, Deck> handPiles;
     private int turn;
     private int maxTurn;
 
     /// Initializes a new Game
     /// @param playerNames An ArrayList of the names of the players that will be playing this game
-    public Game(ArrayList<String> playerNames) {
+    public Game(ArrayList<Player> playerNames) {
         board = new Board();
         drawPiles = new HashMap<>();
         discardPiles = new HashMap<>();
@@ -26,12 +26,12 @@ public class Game {
         turn = 0;
         maxTurn = playerNames.size();
 
-        for (String playerName : playerNames) {
-            discardPiles.put(playerName, new Deck());
-            handPiles.put(playerName, new Deck());
+        for (Player player : playerNames) {
+            discardPiles.put(player, new Deck());
+            handPiles.put(player, new Deck());
 
             // The only non-empty deck should be the draw pile deck
-            drawPiles.put(playerName, DeckFactory.createDeck(playerName));
+            drawPiles.put(player, DeckFactory.createDeck(player));
         }
     }
 

@@ -1,12 +1,14 @@
 package entity.card;
 
+import entity.Player;
+
 public class CharacterCard extends Card {
     private final int HP;
     private int currentHP;
     private final int speed;
     private boolean KOd;
 
-    public CharacterCard(String owner, String name, int hp, int speed) {
+    public CharacterCard(Player owner, String name, int hp, int speed) {
         super(owner, name);
         this.HP = hp;
         this.currentHP = hp;
