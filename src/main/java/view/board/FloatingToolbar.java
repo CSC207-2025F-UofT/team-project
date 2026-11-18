@@ -1,6 +1,7 @@
 package view.board;
 
 import view.DrawingCanvas;
+import view.board.PdfPanel;
 
 import javax.swing.JColorChooser;
 import javax.swing.JComponent;
@@ -22,6 +23,8 @@ public final class FloatingToolbar {
 
     private final DrawingCanvas canvas;
     private final JComponent area;
+    private final PdfPanel pdfPanel;
+    private boolean drawingOnPdf;
     private final GlassBar bar;
     private final GlassBar.Item[] tools = new GlassBar.Item[4];
     private final GlassBar.Item pen;
@@ -35,7 +38,8 @@ public final class FloatingToolbar {
     private Point pointer;   // mouse in area coords while dragging
 
     // area = where the bar floats, same coords as the canvas
-    public FloatingToolbar(DrawingCanvas canvas, JComponent area) {
+    public FloatingToolbar(DrawingCanvas canvas, JComponent area, PdfPanel pdfPanel) {
+        this.pdfPanel = java.util.Objects.requireNonNull(pdfPanel);
         this.canvas = canvas;
         this.area = area;
         bar = new GlassBar(BoardTheme.font(14f), canvas, canvas::paintContent, canvas::contentVersion);
@@ -81,6 +85,13 @@ public final class FloatingToolbar {
         bar.action("Undo", Icons::undo, canvas::undo, canvas::canUndo);
         bar.action("Redo", Icons::redo, canvas::redo, canvas::canRedo);
         bar.action("Clear", Icons::trash, canvas::clear, () -> !canvas.isBlank());
+        bar.separator();
+        bar.segment("Draw on PDF", Icons::pencil, 3, () -> {
+            drawingOnPdf = !drawingOnPdf;
+            pdfPanel.editor().pageView().configurePdfDrawing(drawingOnPdf, canvas::getTool, canvas::getInkColor);
+            if (!drawingOnPdf) bar.deselect(3);
+            return drawingOnPdf;
+        });
         bar.finish();
         bar.select(tools[canvas.getTool().ordinal()]);
         bar.select(first);

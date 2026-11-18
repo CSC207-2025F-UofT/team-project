@@ -165,7 +165,7 @@ public class StackedAppBuilder {
                 () -> dialogs.get().save(), () -> dialogs.get().saveAs(),
                 () -> dialogs.get().open());
         dialogs.set(new CanvasWorkspaceDialogs(canvases, drawing, board));
-        FloatingToolbar toolbar = new FloatingToolbar(drawing, board);
+        FloatingToolbar toolbar = new FloatingToolbar(drawing, board, pdfPanel);
         board.addFloatingToolbar(toolbar.component());
         pdfPanel.setFullscreenAction(() -> board.setPdfFullscreen(!board.isPdfFullscreen()));
         pdfStudio.onOpen(() -> board.setPdfOpen(true));

@@ -134,11 +134,85 @@ public final class PdfPageCanvas extends JPanel {
         }
     }
 
+    private boolean drawingOnPdf;
+    private java.util.function.Supplier<view.DrawingCanvas.Tool> drawingTool = () -> view.DrawingCanvas.Tool.PEN;
+    private java.util.function.Supplier<Color> drawingColor = () -> Color.BLACK;
+    private final java.util.List<java.awt.geom.Point2D.Float> inkPreview = new java.util.ArrayList<>();
+    /** Input routing is View-only; stored ink is an immutable PDF material placement. */
+    public void configurePdfDrawing(boolean enabled,
+                                    java.util.function.Supplier<view.DrawingCanvas.Tool> tool,
+                                    java.util.function.Supplier<Color> color) {
+        drawingOnPdf = enabled;
+        drawingTool = java.util.Objects.requireNonNull(tool);
+        drawingColor = java.util.Objects.requireNonNull(color);
+        inkPreview.clear();
+        setCursor(enabled ? java.awt.Cursor.getPredefinedCursor(java.awt.Cursor.CROSSHAIR_CURSOR)
+                : java.awt.Cursor.getDefaultCursor());
+        repaint();
+    }
+    public boolean isPdfDrawingEnabled() { return drawingOnPdf; }
+    private boolean validPagePoint(java.awt.geom.Point2D.Float p) {
+        return p.x >= 0 && p.y >= 0 && p.x <= PdfDocument.PAGE_WIDTH && p.y <= PdfDocument.PAGE_HEIGHT;
+    }
+    private java.awt.geom.Point2D.Float pagePoint(java.awt.Point screen) {
+        return new java.awt.geom.Point2D.Float(toPageX(screen.x), toPageY(screen.y));
+    }
+    private void beginPdfStroke(MouseEvent e) {
+        inkPreview.clear();
+        if (!SwingUtilities.isLeftMouseButton(e)) return;
+        java.awt.geom.Point2D.Float p = pagePoint(e.getPoint());
+        if (!validPagePoint(p)) return;
+        if (drawingTool.get() == view.DrawingCanvas.Tool.ERASER) {
+            controller.selectAt(p.x, p.y);
+            PdfDocument.Placement chosen = controller.selected();
+            if (chosen != null && !chosen.isNote() && "PDF ink stroke".equals(chosen.material().title()))
+                controller.deleteSelected();
+            repaint();
+        } else if (drawingTool.get() == view.DrawingCanvas.Tool.PEN) {
+            inkPreview.add(p);
+        }
+    }
+    private void continuePdfStroke(MouseEvent e) {
+        if (inkPreview.isEmpty()) return;
+        java.awt.geom.Point2D.Float p = pagePoint(e.getPoint());
+        if (validPagePoint(p)) { inkPreview.add(p); repaint(); }
+    }
+    private void completePdfStroke() {
+        if (inkPreview.isEmpty()) return;
+        float minX=Float.MAX_VALUE,minY=Float.MAX_VALUE,maxX=-Float.MAX_VALUE,maxY=-Float.MAX_VALUE;
+        for (var p : inkPreview) {minX=Math.min(minX,p.x);minY=Math.min(minY,p.y);
+            maxX=Math.max(maxX,p.x);maxY=Math.max(maxY,p.y);}
+        float pad=5f;
+        float x=Math.max(0,minX-pad), y=Math.max(0,minY-pad);
+        float w=Math.min(PdfDocument.PAGE_WIDTH-x, Math.max(10,maxX-x+pad));
+        float h=Math.min(PdfDocument.PAGE_HEIGHT-y, Math.max(10,maxY-y+pad));
+        int quality=3;
+        BufferedImage image=new BufferedImage(Math.max(1,(int)Math.ceil(w*quality)),
+                Math.max(1,(int)Math.ceil(h*quality)),BufferedImage.TYPE_INT_ARGB);
+        Graphics2D g=image.createGraphics();
+        try {
+            g.scale(quality,quality);
+            g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,RenderingHints.VALUE_ANTIALIAS_ON);
+            g.setStroke(new BasicStroke(2.5f,BasicStroke.CAP_ROUND,BasicStroke.JOIN_ROUND));
+            g.setColor(drawingColor.get());
+            java.awt.geom.Path2D.Float path=new java.awt.geom.Path2D.Float();
+            boolean first=true;
+            for (var point : inkPreview) {if(first){path.moveTo(point.x-x,point.y-y);first=false;}
+                else path.lineTo(point.x-x,point.y-y);}
+            g.draw(path);
+            if(inkPreview.size()==1)g.fillOval(Math.round(inkPreview.get(0).x-x)-1,
+                    Math.round(inkPreview.get(0).y-y)-1,3,3);
+        } finally {g.dispose();}
+        controller.place(MathLibrary.region("PDF ink stroke",image),x,y,w,h);
+        controller.clearSelection();
+        inkPreview.clear();repaint();
+    }
+
     public PdfPageCanvas(PdfEditorController controller, Listener listener) {
         this.controller = Objects.requireNonNull(controller);
         this.listener = Objects.requireNonNull(listener);
         updateSize();
-        setFocusable(true); // Own PDF-scoped Delete/Backspace when the page is selected.
+        setFocusable(true);
         setBackground(new Color(243, 247, 253));
         setTransferHandler(new TransferHandler() {
             @Override public boolean canImport(TransferSupport support) {
@@ -176,6 +250,7 @@ public final class PdfPageCanvas extends JPanel {
         MouseAdapter mouse = new MouseAdapter() {
             @Override public void mousePressed(MouseEvent e) {
                 requestFocusInWindow();
+                if (drawingOnPdf) {beginPdfStroke(e);return;}
                 // Keep PPT text-box exit behaviour; don't immediately create a body on that click.
                 editingBeforePress = inlineNote != null;
                 finishInlineEdit();
@@ -192,6 +267,7 @@ public final class PdfPageCanvas extends JPanel {
                 repaint();
             }
             @Override public void mouseDragged(MouseEvent e) {
+                if (drawingOnPdf) {continuePdfStroke(e);return;}
                 if (controller.selected() == null || anchor == null) return;
                 float dx = PageCoordinateMapper.deltaToPage(e.getX() - anchor.x, zoom());
                 float dy = PageCoordinateMapper.deltaToPage(e.getY() - anchor.y, zoom());
@@ -204,10 +280,12 @@ public final class PdfPageCanvas extends JPanel {
                 repaint();
             }
             @Override public void mouseReleased(MouseEvent e) {
+                if (drawingOnPdf) {completePdfStroke();return;}
                 anchor = null; dragStarted = false;
                 if (e.isPopupTrigger()) listener.contextMenu(e);
             }
             @Override public void mouseClicked(MouseEvent e) {
+                if (drawingOnPdf) return;
                 if (SwingUtilities.isLeftMouseButton(e) && e.getClickCount() == 1 && !editingBeforePress) {
                     var chosen = controller.selected();
                     float x=toPageX(e.getX()), y=toPageY(e.getY());
@@ -275,6 +353,17 @@ public final class PdfPageCanvas extends JPanel {
                     g2.drawRect(x, y, width, height);
                     g2.fillRect(x + width - 9, y + height - 9, 9, 9);
                 }
+            }
+            if (!inkPreview.isEmpty()) {
+                g2.setStroke(new BasicStroke(2.5f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+                g2.setColor(drawingColor.get());
+                java.awt.geom.Path2D.Float path = new java.awt.geom.Path2D.Float();
+                boolean first = true;
+                for (var point : inkPreview) {
+                    if (first) {path.moveTo(point.x + MARGIN, point.y + MARGIN);first=false;}
+                    else path.lineTo(point.x + MARGIN, point.y + MARGIN);
+                }
+                g2.draw(path);
             }
         } finally { g2.dispose(); }
     }
