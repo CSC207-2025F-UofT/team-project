@@ -131,6 +131,7 @@ public class DrawingCanvas extends JPanel {
     private FormulaBook book = new FormulaBook();  // calculated formulas + their answers
     private long revisions;                       // only goes up, undo too
     private final List<LongConsumer> formulaListeners = new ArrayList<>();
+    private final List<LongConsumer> moveListeners = new ArrayList<>();  // whole formula moved/resized, same ink
     private final List<Consumer<Stroke>> strokeListeners = new ArrayList<>();
     private final List<Runnable> inkListeners = new ArrayList<>();
     private final List<Runnable> actionListeners = new ArrayList<>();  // user started doing something
@@ -815,6 +816,11 @@ public class DrawingCanvas extends JPanel {
         inkChanged(removed, added);  // partly moved formulas count as edited
         selection.clear();
         selection.addAll(copies.values());
+        for (long id : moved) {
+            for (LongConsumer l : new ArrayList<>(moveListeners)) {
+                l.accept(id);
+            }
+        }
     }
 
     /** The selected strokes as they look right now, including a move or resize being dragged. */
@@ -1145,6 +1151,11 @@ public class DrawingCanvas extends JPanel {
     // fires per edited formula id, not on undo
     public void addFormulaChangeListener(LongConsumer listener) {
         formulaListeners.add(listener);
+    }
+
+    // fires per whole formula moved or resized (not on undo)
+    public void addFormulaMoveListener(LongConsumer listener) {
+        moveListeners.add(listener);
     }
 
     // pen stroke finished (after the formula check)

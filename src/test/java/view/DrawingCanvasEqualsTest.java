@@ -5,19 +5,25 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.awt.event.MouseEvent;
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 // "=" handling on the canvas: capture w/o it, lone = joining, moves, readable size
 class DrawingCanvasEqualsTest {
     private final DrawingCanvas canvas = new DrawingCanvas();
+    private final List<Long> moved = new ArrayList<>();
+    private final List<Long> changed = new ArrayList<>();
 
     @BeforeEach
     void setUp() {
         canvas.setSize(900, 500);
+        canvas.addFormulaMoveListener(moved::add);
+        canvas.addFormulaChangeListener(changed::add);
     }
 
     private void drag(int... xy) {
@@ -55,6 +61,49 @@ class DrawingCanvasEqualsTest {
     private int firstFormulaSize() {
         return canvas.getFormulas().stream().filter(f -> f.getStrokes().contains(canvas.getStrokes().get(0)))
                 .findFirst().orElseThrow().getStrokes().size();
+    }
+
+    // "1 =" at x 100..145, y 100..150, bound; its id
+    private long writeAndBindOneEquals() {
+        drag(100, 100, 100, 150);
+        drag(115, 120, 145, 120);
+        drag(115, 130, 145, 130);
+        return bindAll().getId();
+    }
+
+    private void boxSelectIt() {
+        canvas.setTool(DrawingCanvas.Tool.RECTANGLE);
+        drag(80, 80, 220, 170);
+    }
+
+    @Test
+    void movingAWholeFormulaTellsMoveListeners() {
+        long id = writeAndBindOneEquals();
+        long rev = canvas.getFormulas().get(0).getRevision();
+        boxSelectIt();
+        drag(130, 125, 230, 225);
+        assertEquals(List.of(id), moved);
+        assertEquals(rev, canvas.getFormulas().get(0).getRevision());
+        assertTrue(changed.isEmpty());
+    }
+
+    @Test
+    void resizingAWholeFormulaTellsMoveListeners() {
+        long id = writeAndBindOneEquals();
+        boxSelectIt();
+        drag(153, 158, 183, 188);  // bottom-right handle: ink box + 8 pad
+        assertEquals(List.of(id), moved);
+        assertTrue(canvas.getFormulas().get(0).getCharHeight() > 50, "it got bigger");
+    }
+
+    @Test
+    void undoAfterAMoveTellsNoOne() {
+        writeAndBindOneEquals();
+        boxSelectIt();
+        drag(130, 125, 230, 225);
+        moved.clear();
+        canvas.undo();
+        assertTrue(moved.isEmpty());
     }
 
     @Test

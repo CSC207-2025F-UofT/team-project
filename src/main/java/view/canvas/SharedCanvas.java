@@ -184,6 +184,11 @@ public class SharedCanvas {
         canvas.addFormulaChangeListener(listener);
     }
 
+    // whole formula moved / resized, ink same
+    public void addFormulaMoveListener(LongConsumer listener) {
+        canvas.addFormulaMoveListener(listener);
+    }
+
     public List<CanvasAnswer> getAnswers() {
         return canvas.getAnswers();
     }
