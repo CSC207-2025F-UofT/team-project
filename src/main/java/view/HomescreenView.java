@@ -17,7 +17,7 @@ import java.util.Map;
 /**
  * The View for when the user is viewing all the flashcard decks.
  */
-public class HomescreenView extends JPanel implements ActionListener, GetAllDecksViewModelListener {
+public class HomescreenView extends JPanel implements GetAllDecksViewModelListener {
 
     private final GetAllDecksViewModel getAllDecksViewModel;
 
@@ -166,14 +166,6 @@ public class HomescreenView extends JPanel implements ActionListener, GetAllDeck
             ));
             return this;
         }
-    }
-
-    /**
-     * React to a button click that results in evt.
-     * @param evt the ActionEvent to react to
-     */
-    public void actionPerformed(ActionEvent evt) {
-        System.out.println("Click " + evt.getActionCommand());
     }
 
     @Override

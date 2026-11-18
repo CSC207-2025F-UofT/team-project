@@ -22,4 +22,6 @@ public final class AppTheme {
     public static final Integer FONT_SIZE_BUTTON = 13;
     public static final Integer FONT_SIZE_SMALL = 12;
     public static final Integer FONT_SIZE_TITLE = 18;
+
+    private AppTheme() {}
 }

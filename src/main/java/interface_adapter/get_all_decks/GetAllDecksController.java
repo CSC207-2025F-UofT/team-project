@@ -1,7 +1,6 @@
 package interface_adapter.get_all_decks;
 
 import use_case.get_all_decks.GetAllDecksInputBoundary;
-import use_case.get_all_decks.GetAllDecksInputData;
 
 /**
  * The controller for the GetAllDecks Use Case.
@@ -18,8 +17,6 @@ public class GetAllDecksController {
      * Executes the GetAllDecks Use Case.
      */
     public void execute() {
-        final GetAllDecksInputData getAllDecksInputData = new GetAllDecksInputData();
-
-        getAllDecksUseCaseInteractor.execute(getAllDecksInputData);
+        getAllDecksUseCaseInteractor.execute();
     }
 }

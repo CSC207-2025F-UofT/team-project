@@ -22,10 +22,7 @@ public class StudyView extends JPanel implements StudyViewModelListener {
     private final JLabel flashcardLabel = new JLabel("", SwingConstants.CENTER);
     private final JLabel whichSideLabel = new JLabel("QUESTION", SwingConstants.CENTER);
     private final JLabel currentIndexLabel = new JLabel("", SwingConstants.CENTER);
-    private final JLabel emptyDeckError = new JLabel();
 
-    private final CardLayout centerLayout = new CardLayout();
-    private final JPanel center = new JPanel(centerLayout);
     private final JPanel flashcard = new JPanel(new BorderLayout());
 
     private GetDeckController getDeckController = null;
@@ -146,14 +143,6 @@ public class StudyView extends JPanel implements StudyViewModelListener {
         flashcardPanel.add(flashcard, BorderLayout.CENTER);
 
         return flashcardPanel;
-    }
-
-    /**
-     * React to a button click that results in evt.
-     * @param evt the ActionEvent to react to
-     */
-    public void actionPerformed(ActionEvent evt) {
-        System.out.println("Click " + evt.getActionCommand());
     }
 
     @Override

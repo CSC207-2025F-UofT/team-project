@@ -1,7 +1,5 @@
 package interface_adapter.get_deck.study_view;
 
-import interface_adapter.get_deck.deck_view.GetDeckViewModelListener;
-
 import java.util.ArrayList;
 import java.util.List;
 

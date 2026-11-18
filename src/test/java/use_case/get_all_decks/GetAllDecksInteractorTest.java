@@ -44,7 +44,6 @@ public class GetAllDecksInteractorTest {
         list.add(deck1);
         list.add(deck2);
 
-        GetAllDecksInputData inputData = new GetAllDecksInputData();
         GetAllDecksDataAccessInterface decks = new TestMockDeckDataAccessObject(list);
 
         GetAllDecksOutputBoundary successPresenter = new GetAllDecksOutputBoundary() {
@@ -64,13 +63,12 @@ public class GetAllDecksInteractorTest {
         };
 
         GetAllDecksInputBoundary interactor = new GetAllDecksInteractor(decks, successPresenter);
-        interactor.execute(inputData);
+        interactor.execute();
     }
 
 
     @Test
     void noAvailableDecksTest() {
-        GetAllDecksInputData inputData = new GetAllDecksInputData();
         GetAllDecksDataAccessInterface decks = new TestMockDeckDataAccessObject(new ArrayList<>());
 
         GetAllDecksOutputBoundary emptyPresenter = new GetAllDecksOutputBoundary() {
@@ -86,6 +84,6 @@ public class GetAllDecksInteractorTest {
         };
 
         GetAllDecksInputBoundary interactor = new GetAllDecksInteractor(decks, emptyPresenter);
-        interactor.execute(inputData);
+        interactor.execute();
     }
 }

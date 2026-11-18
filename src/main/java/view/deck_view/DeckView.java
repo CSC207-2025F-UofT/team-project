@@ -156,14 +156,6 @@ public class DeckView extends JPanel implements GetDeckViewModelListener {
         return scrollPane;
     }
 
-    /**
-     * React to a button click that results in evt.
-     * @param evt the ActionEvent to react to
-     */
-    public void actionPerformed(ActionEvent evt) {
-        System.out.println("Click " + evt.getActionCommand());
-    }
-
     @Override
     public void stateChanged() {
         GetDeckState state = getDeckViewModel.getState();

@@ -7,7 +7,6 @@ public interface GetAllDecksInputBoundary {
 
     /**
      * Executes the GetAllDecks use case.
-     * @param getAllDecksInputData the input data
      */
-    void execute(GetAllDecksInputData getAllDecksInputData);
+    void execute();
 }
