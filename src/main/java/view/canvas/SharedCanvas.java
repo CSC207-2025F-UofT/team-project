@@ -185,6 +185,10 @@ public class SharedCanvas {
         return canvas.showAnswer(id, revision, kind, runs, error);
     }
 
+    public boolean showTypesetAnswer(long id, long revision, AnswerKind kind, String text, String latex) {
+        return canvas.showTypesetAnswer(id, revision, kind, text, latex);
+    }
+
     public void addFormulaChangeListener(LongConsumer listener) {
         canvas.addFormulaChangeListener(listener);
     }

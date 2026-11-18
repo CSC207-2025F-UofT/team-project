@@ -65,6 +65,10 @@ public final class AnswerInk {
     }
 
     public static void paint(Graphics2D world, CanvasAnswer a, Color color, double penWidth) {
+        if (a.isTypeset()) {
+            TexAnswer.paint(world, a, color);  // filled glyphs, no pen
+            return;
+        }
         Graphics2D g = (Graphics2D) world.create();
         g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         g.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_PURE);
@@ -77,6 +81,9 @@ public final class AnswerInk {
     // eraser dragged from (x1,y1) to (x2,y2) w/ this radius hits actual ink, not just the box
     public static boolean touches(CanvasAnswer a, double penWidth, double x1, double y1, double x2, double y2,
                                   double radius) {
+        if (a.isTypeset()) {
+            return TexAnswer.touches(a, x1, y1, x2, y2, radius);
+        }
         Rectangle2D box = a.getBox();
         box.setRect(box.getX() - radius, box.getY() - radius, box.getWidth() + 2 * radius,
                 box.getHeight() + 2 * radius);
@@ -96,7 +103,8 @@ public final class AnswerInk {
 
     // same answer after a resize, box refit since the pen width doesn't scale
     public static CanvasAnswer refit(CanvasAnswer a, double penWidth) {
-        Rectangle2D b = bounds(a.getText(), a.getRuns(), a.getFontSize(), penWidth);
+        Rectangle2D b = a.isTypeset() ? TexAnswer.bounds(a.getLatex(), a.getFontSize())
+                : bounds(a.getText(), a.getRuns(), a.getFontSize(), penWidth);
         return a.sized(b.getWidth(), b.getHeight());
     }
 

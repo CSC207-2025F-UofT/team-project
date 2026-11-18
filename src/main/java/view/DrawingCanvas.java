@@ -55,6 +55,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.LongConsumer;
 import java.util.function.UnaryOperator;
 
@@ -1438,22 +1439,28 @@ public class DrawingCanvas extends JPanel {
 
     // false if the formula is gone or changed since capture
     public boolean showAnswer(long id, long revision, AnswerKind kind, String text, boolean error) {
-        return placeAnswer(id, revision, kind, text, null, error);
+        return placeAnswer(id, revision, f -> AnswerPlacer.place(inDrawingOrder(f), kind, text, null, error,
+                INK_WIDTH, box -> hitsOtherInk(box, f)));
     }
 
     // same spot rules, text w/ raised exponents
     public boolean showAnswer(long id, long revision, AnswerKind kind, List<TextRun> runs, boolean error) {
-        return placeAnswer(id, revision, kind, TextRun.plain(runs), runs, error);
+        return placeAnswer(id, revision, f -> AnswerPlacer.place(inDrawingOrder(f), kind, TextRun.plain(runs), runs,
+                error, INK_WIDTH, box -> hitsOtherInk(box, f)));
     }
 
-    private boolean placeAnswer(long id, long revision, AnswerKind kind, String text, List<TextRun> runs,
-                                boolean error) {
+    // typeset: fractions stacked, powers raised; text is the readable copy that gets saved
+    public boolean showTypesetAnswer(long id, long revision, AnswerKind kind, String text, String latex) {
+        return placeAnswer(id, revision, f -> AnswerPlacer.placeTypeset(inDrawingOrder(f), kind, text, latex, false,
+                INK_WIDTH, box -> hitsOtherInk(box, f)));
+    }
+
+    private boolean placeAnswer(long id, long revision, Function<Formula, CanvasAnswer> placer) {
         Formula f = book.get(id);
         if (f == null || f.getRevision() != revision) {
             return false;
         }
-        CanvasAnswer answer = AnswerPlacer.place(inDrawingOrder(f), kind, text, runs, error, INK_WIDTH,
-                box -> hitsOtherInk(box, f)).withColor(AnswerColor.of(f.getStrokes(), this::colorOf, INK_COLOR));
+        CanvasAnswer answer = placer.apply(f).withColor(AnswerColor.of(f.getStrokes(), this::colorOf, INK_COLOR));
         book.put(f.withAnswer(answer));
         if (!busy()) {
             bringIntoView(answer.getBox(), answer.getBox());
