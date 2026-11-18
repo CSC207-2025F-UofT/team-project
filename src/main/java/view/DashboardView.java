@@ -7,6 +7,7 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Container;
 import java.awt.Dialog;
+import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.awt.KeyboardFocusManager;
@@ -182,12 +183,18 @@ public class DashboardView extends JPanel implements PropertyChangeListener {
   }
 
   private JPanel createNextScene() {
-    // TODO: build the next scene of the pre-lab; for now it's a blank page.
-    JPanel scene = new JPanel(new FlowLayout(FlowLayout.LEFT, 24, 24));
-    scene.setBackground(Color.WHITE);
+    // TODO: build the lab manual and fume hood; for now the lab is blank apart from the notebook.
+    JPanel lab = new JPanel(new FlowLayout(FlowLayout.LEFT, 24, 24));
+    lab.setBackground(Color.WHITE);
     JButton back = new JButton("Back to Dashboard");
     back.addActionListener(event -> showDashboard());
-    scene.add(back);
+    lab.add(back);
+
+    NotebookPanel notebook = new NotebookPanel();
+    notebook.setPreferredSize(new Dimension(320, 0));
+    JPanel scene = new JPanel(new BorderLayout());
+    scene.add(lab, BorderLayout.CENTER);
+    scene.add(notebook, BorderLayout.EAST);
     return scene;
   }
 
