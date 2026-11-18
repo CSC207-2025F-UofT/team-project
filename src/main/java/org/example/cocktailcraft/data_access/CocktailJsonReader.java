@@ -7,6 +7,8 @@ import com.google.gson.JsonParseException;
 import org.example.cocktailcraft.entity.Cocktail;
 import org.example.cocktailcraft.entity.RecipeIngredient;
 import org.example.cocktailcraft.use_case.click.ClickDataAccessInterface;
+import org.example.cocktailcraft.entity.Tags;
+import org.example.cocktailcraft.entity.Tags.BaseSpirit;
 
 import java.io.IOException;
 import java.io.BufferedReader;
@@ -17,10 +19,14 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.HashSet;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.EnumSet;
 import java.util.Set;
 
 public class CocktailJsonReader implements ClickDataAccessInterface {
     public static final String DATASET_INDEX = "/bar-assistant/cocktail-index.txt";
+    private final Map<String, String> ingredientParents = new HashMap<>();
 
     /** Reads the bundled dataset once per call; callers should retain the result. */
     public List<Cocktail> readAll() throws IOException {
@@ -58,9 +64,11 @@ public class CocktailJsonReader implements ClickDataAccessInterface {
             String id = json.get("_id").getAsString();
             String name = json.get("name").getAsString();
             List<RecipeIngredient> ingredients = new ArrayList<>();
+            Set<BaseSpirit> baseSpirits = EnumSet.noneOf(BaseSpirit.class);
 
             for (JsonElement element : json.getAsJsonArray("ingredients")) {
                 JsonObject ingredient = element.getAsJsonObject();
+                baseSpirits.addAll(readBaseSpirits(ingredient.get("_id").getAsString()));
 
                 ingredients.add(new RecipeIngredient(
                         ingredient.get("name").getAsString(),
@@ -69,11 +77,55 @@ public class CocktailJsonReader implements ClickDataAccessInterface {
                 ));
             }
 
-            return new Cocktail(id, name, ingredients);
+            return new Cocktail(id, name, ingredients, new Tags(baseSpirits));
         } catch (JsonParseException | IllegalStateException | NullPointerException
                  | UnsupportedOperationException exception) {
             throw new IOException("Invalid cocktail JSON: " + resourcePath, exception);
         }
+    }
+
+    private Set<BaseSpirit> readBaseSpirits(String ingredientId) throws IOException {
+        Set<String> visited = new HashSet<>();
+        String currentId = ingredientId;
+        while (currentId != null) {
+            if (!visited.add(currentId)) {
+                throw new IOException("Ingredient parent cycle: " + ingredientId);
+            }
+            switch (currentId) {
+                case "gin":
+                    return Set.of(BaseSpirit.GIN);
+                case "vodka":
+                    return Set.of(BaseSpirit.VODKA);
+                case "rum":
+                    return Set.of(BaseSpirit.RUM);
+                case "tequila":
+                    return Set.of(BaseSpirit.TEQUILA);
+                case "whiskey":
+                    return Set.of(BaseSpirit.WHISKEY);
+                case "brandy":
+                    return Set.of(BaseSpirit.BRANDY);
+                case "spirits":
+                    return Set.of(BaseSpirit.OTHER);
+                default:
+                    currentId = readParentId(currentId);
+            }
+        }
+        return Set.of();
+    }
+
+    private String readParentId(String ingredientId) throws IOException {
+        if (!ingredientParents.containsKey(ingredientId)) {
+            String path = "/bar-assistant/data/ingredients/" + ingredientId + "/data.json";
+            try (Reader reader = openResource(path)) {
+                JsonObject json = JsonParser.parseReader(reader).getAsJsonObject();
+                JsonElement parent = json.get("_parent_id");
+                ingredientParents.put(ingredientId, parent.isJsonNull() ? null : parent.getAsString());
+            } catch (JsonParseException | IllegalStateException | NullPointerException
+                     | UnsupportedOperationException exception) {
+                throw new IOException("Invalid ingredient JSON: " + path, exception);
+            }
+        }
+        return ingredientParents.get(ingredientId);
     }
 
     private Reader openResource(String resourcePath) throws IOException {

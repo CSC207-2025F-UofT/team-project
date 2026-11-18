@@ -1,6 +1,7 @@
 package org.example.cocktailcraft.data_access;
 
 import org.example.cocktailcraft.entity.Cocktail;
+import org.example.cocktailcraft.entity.Tags.BaseSpirit;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -10,6 +11,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.jar.JarEntry;
 import java.util.jar.JarOutputStream;
@@ -32,6 +34,7 @@ class CocktailJsonReaderTest {
             assertTrue(ids.add(cocktail.getId()), cocktail.getId());
             assertTrue(!cocktail.getName().isBlank());
             assertTrue(!cocktail.getIngredients().isEmpty());
+            assertNotNull(cocktail.getTags());
         }
         assertThrows(UnsupportedOperationException.class, cocktails::clear);
     }
@@ -46,6 +49,37 @@ class CocktailJsonReaderTest {
         assertEquals("60", cocktail.getIngredients().get(0).getAmount());
         assertEquals("ml", cocktail.getIngredients().get(0).getUnit());
         assertEquals("22.5", cocktail.getIngredients().get(1).getAmount());
+        assertEquals(Set.of(BaseSpirit.RUM), cocktail.getTags().getBaseSpirits());
+    }
+
+    @Test
+    void mapsAllSevenFamiliesUsingIngredientAncestors() throws IOException {
+        Map<String, BaseSpirit> examples = Map.of(
+                "negroni", BaseSpirit.GIN,
+                "moscow-mule", BaseSpirit.VODKA,
+                "daiquiri", BaseSpirit.RUM,
+                "margarita", BaseSpirit.TEQUILA,
+                "old-fashioned", BaseSpirit.WHISKEY,
+                "sidecar", BaseSpirit.BRANDY,
+                "2-to-2", BaseSpirit.OTHER);
+        for (Map.Entry<String, BaseSpirit> example : examples.entrySet()) {
+            Cocktail cocktail = reader.read("/bar-assistant/data/cocktails/" + example.getKey() + "/data.json");
+            assertEquals(Set.of(example.getValue()), cocktail.getTags().getBaseSpirits(), example.getKey());
+        }
+    }
+
+    @Test
+    void preservesMultipleFamiliesAndReturnsImmutableTags() throws IOException {
+        Cocktail cocktail = reader.read("/bar-assistant/data/cocktails/long-island-ice-tea/data.json");
+        Set<BaseSpirit> spirits = cocktail.getTags().getBaseSpirits();
+        assertEquals(Set.of(BaseSpirit.GIN, BaseSpirit.VODKA, BaseSpirit.RUM, BaseSpirit.TEQUILA), spirits);
+        assertThrows(UnsupportedOperationException.class, () -> spirits.add(BaseSpirit.OTHER));
+    }
+
+    @Test
+    void doesNotTreatLiqueursAsOtherSpirits() throws IOException {
+        Cocktail cocktail = reader.read("/bar-assistant/data/cocktails/8-amaro-sazerac/data.json");
+        assertEquals(Set.of(), cocktail.getTags().getBaseSpirits());
     }
 
     @Test
@@ -91,6 +125,15 @@ class CocktailJsonReaderTest {
                     recipe.transferTo(out);
                 }
                 out.closeEntry();
+                Path resources = Paths.get("src/main/resources");
+                try (var paths = Files.walk(resources.resolve("bar-assistant/data/ingredients"))) {
+                    for (Path path : (Iterable<Path>) paths.filter(Files::isRegularFile)::iterator) {
+                        String entry = resources.relativize(path).toString().replace('\\', '/');
+                        out.putNextEntry(new JarEntry(entry));
+                        Files.copy(path, out);
+                        out.closeEntry();
+                    }
+                }
             }
             // Child loader isolates Reader so its classpath resource lookup includes this JAR.
             var classes = CocktailJsonReader.class.getProtectionDomain().getCodeSource().getLocation();
@@ -103,6 +146,10 @@ class CocktailJsonReaderTest {
                         .invoke(instance, "/jar-only/index.txt");
                 assertEquals(1, result.size());
                 assertEquals("Daiquiri", result.get(0).getClass().getMethod("getName").invoke(result.get(0)));
+                Object tags = result.get(0).getClass().getMethod("getTags").invoke(result.get(0));
+                Set<?> spirits = (Set<?>) tags.getClass().getMethod("getBaseSpirits").invoke(tags);
+                assertEquals(1, spirits.size());
+                assertEquals("RUM", spirits.iterator().next().toString());
             }
         } finally {
             Files.deleteIfExists(jar);
