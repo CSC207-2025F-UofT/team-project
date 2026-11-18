@@ -5,10 +5,7 @@ import java.net.URL;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
 
-import entity.Location;
-import entity.LocationInfo;
-import entity.Photo;
-import entity.Trip;
+import entity.*;
 
 /** Seeds a DAO with demo trips so GUI dev isn't blocked on file imports */
 public final class SampleData {
@@ -37,7 +34,7 @@ public final class SampleData {
         for (int i = 0; i < photoCount; i++) {
             // Spread photos ~ every 7 hours and a few hundred meters apart
             Location loc = new Location(lat + i * 0.003, lon + i * 0.004, info);
-            Photo photo = new Photo("photo-" + (++photoCounter), loc, start.plusHours(i * 7L));
+            Photo photo = new Photo("photo-" + (++photoCounter), ImageType.JPEG, loc, start.plusHours(i * 7L));
 
             dao.savePhoto(photo, resourcePath(IMAGES[i % IMAGES.length]));
             trip.addPhoto(photo);

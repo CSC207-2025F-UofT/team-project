@@ -16,7 +16,7 @@ import entity.Trip;
  * In-memory storage for trips and photos. Implements each use case's
  * data-access interface as those use cases are added.
  */
-public class InMemoryTripDataAcessObject {
+public class InMemoryTripDataAcessObject implements TripDataAccessInterface {
     private final Map<String, Trip> trips = new LinkedHashMap<>();
     private final Map<String, Photo> photos = new HashMap<>();
     private final Map<String, String> photoPaths = new HashMap<>();

@@ -40,7 +40,7 @@ public class ReverseGeocoder implements ReverseGeocoderInterface {
             HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
 
             if (response.statusCode() != 200) {
-                throw new LocationServiceException("OSM Nominatim API failed [Status " + response.statusCode() + "]: " + response.body());
+                throw new ReverseGeocodeException("OSM Nominatim API failed [Status " + response.statusCode() + "]: " + response.body());
             }
 
             JSONObject body = new JSONObject(response.body());

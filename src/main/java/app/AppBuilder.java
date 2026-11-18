@@ -12,9 +12,14 @@ import data_access.InMemoryTripDataAcessObject;
 import data_access.SampleData;
 import interface_adapter.ViewManagerModel;
 import interface_adapter.ViewNames;
+import interface_adapter.dashboard.DashboardController;
+import interface_adapter.dashboard.DashboardPresenter;
+import interface_adapter.dashboard.DashboardViewModel;
+import use_case.dashboard.AnalyticsUseCase;
 import view.NavigationBar;
 import view.PlaceholderView;
 import view.ViewManager;
+import view.dashboard.DashboardView;
 
 /**
  * Composition Root. Only place that creates concrete classes and connects them.
@@ -43,7 +48,11 @@ public class AppBuilder {
     }
 
     public AppBuilder addDashBoardView() {
-        return addScreen("Dashboard", ViewNames.DASHBOARD, new PlaceholderView("Dashboard"));
+        DashboardViewModel dashboardViewModel = new DashboardViewModel();
+        DashboardPresenter dashboardPresenter = new DashboardPresenter(dashboardViewModel);
+        AnalyticsUseCase analyticsUseCase = new AnalyticsUseCase(tripDao, dashboardPresenter);
+        DashboardController dashboardController = new DashboardController(analyticsUseCase);
+        return addScreen("Dashboard", ViewNames.DASHBOARD, new DashboardView(dashboardViewModel, dashboardController));
     }
 
     private AppBuilder addScreen(String label, String viewName, JComponent view) {
