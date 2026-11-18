@@ -1,5 +1,7 @@
 package app;
 
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 
 import javax.swing.JFrame;
@@ -22,12 +24,13 @@ public final class ManagePetsDemo {
      * @param args optional first argument for the local JSON file path
      */
     public static void main(String[] args) {
-        final Path dataPath = Path.of(args.length == 0 ? "pets-demo.json" : args[0]);
+        final Path dataPath = Path.of(args.length == 0 ? "target/pets-demo.json" : args[0]).toAbsolutePath();
         SwingUtilities.invokeLater(() -> start(dataPath));
     }
 
     private static void start(Path dataPath) {
         try {
+            Files.createDirectories(dataPath.getParent());
             final FilePetDataAccessObject petDataAccess = new FilePetDataAccessObject(dataPath);
             final ManagePetView petManagement = new AppBuilder().buildPetManagement(petDataAccess);
             final JFrame frame = new JFrame(TITLE);
@@ -37,8 +40,8 @@ public final class ManagePetsDemo {
             frame.setLocationRelativeTo(null);
             frame.setVisible(true);
         }
-        catch (IllegalStateException exception) {
-            JOptionPane.showMessageDialog(null, "Could not load the pet listings from " + dataPath + ".",
+        catch (IOException | IllegalStateException exception) {
+            JOptionPane.showMessageDialog(null, "Could not open the pet listings at " + dataPath + ".",
                     TITLE, JOptionPane.ERROR_MESSAGE);
         }
     }
