@@ -4,7 +4,6 @@ import interface_adapter.AnswerKind;
 import view.answer.CanvasAnswer;
 import view.answer.Formula;
 import entity.Stroke;
-import interface_adapter.TextRun;
 import interface_adapter.recognize.FormulaRecognizer;
 import view.DrawingCanvas;
 import view.FormulaCapture;
@@ -175,14 +174,6 @@ public class SharedCanvas {
 
     public boolean isCurrent(long id, long revision) {
         return canvas.isCurrent(id, revision);
-    }
-
-    public boolean showAnswer(long id, long revision, AnswerKind kind, String text, boolean error) {
-        return canvas.showAnswer(id, revision, kind, text, error);
-    }
-
-    public boolean showAnswer(long id, long revision, AnswerKind kind, List<TextRun> runs, boolean error) {
-        return canvas.showAnswer(id, revision, kind, runs, error);
     }
 
     public boolean showTypesetAnswer(long id, long revision, AnswerKind kind, String text, String latex) {
