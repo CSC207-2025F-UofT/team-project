@@ -98,6 +98,12 @@ public abstract class CanvasPage extends JPanel {
         canvasArea.repaint();
     }
 
+    // floats over the ink but under the docks + popups (the live graph card)
+    protected final void addCanvasUnderlay(JComponent underlay) {
+        canvasArea.add(underlay, canvasArea.getComponentZOrder(canvasSlot));
+        canvasArea.repaint();
+    }
+
     // area the overlay lives in (same coords as the canvas)
     protected final JComponent getCanvasArea() {
         return canvasArea;

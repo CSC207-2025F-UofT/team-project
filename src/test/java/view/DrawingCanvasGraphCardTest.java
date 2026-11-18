@@ -120,4 +120,27 @@ class DrawingCanvasGraphCardTest {
         assertEquals(450, card.getCenterX(), 1);
         assertEquals(250, card.getCenterY(), 1);
     }
+
+    @Test
+    void cardCanBeMovedAndResizedOnScreen() {
+        canvas.showGraph(CHART, new java.awt.Rectangle(100, 100, 50, 50), "live");
+        Rectangle2D before = canvas.getGraphCardOnScreen();
+        canvas.moveGraphBy(30, -20);
+        Rectangle2D after = canvas.getGraphCardOnScreen();
+        assertEquals(before.getX() + 30, after.getX(), 1e-6);
+        assertEquals(before.getY() - 20, after.getY(), 1e-6);
+        canvas.resizeGraphTo(500, 320);
+        assertEquals(500, canvas.getGraphCardOnScreen().getWidth(), 1e-6);
+        assertEquals(after.getX(), canvas.getGraphCardOnScreen().getX(), 1e-6, "top-left stays");
+        assertEquals("live", canvas.getGraphTag());
+    }
+
+    @Test
+    void tagGoesAwayWithTheCard() {
+        canvas.showGraph(CHART, new java.awt.Rectangle(100, 100, 50, 50), "live");
+        canvas.removeGraph();
+        assertNull(canvas.getGraphTag());
+        canvas.showGraph(CHART);
+        assertNull(canvas.getGraphTag(), "plain picture has no owner");
+    }
 }

@@ -10,7 +10,7 @@ import pdf_editor.view.CanvasRegionCaptureController;
 import pdf_editor.view.CanvasLibrarySelectionMenu;
 import pdf_editor.adapter.SelectedInkRegistry;
 import pdf_editor.use_case.SelectionToLibrary;
-import data_access.QuickChartGraphRenderer;
+import data_access.InMemoryGraphSessionDataAccessObject;
 import entity.LatexFunctionParser;
 import interface_adapter.MathLabViewModel;
 import interface_adapter.evaluate.CalculateCheckController;
@@ -19,9 +19,12 @@ import interface_adapter.evaluate.EvaluateController;
 import interface_adapter.evaluate.EvaluatePresenter;
 import interface_adapter.evaluate.QuestionCheckController;
 import interface_adapter.graph.GraphController;
+import interface_adapter.graph.GraphExploreController;
 import interface_adapter.graph.GraphPresenter;
 import interface_adapter.graph.GraphState;
 import interface_adapter.graph.GraphViewModel;
+import use_case.explore_graph.ExploreGraphInteractor;
+import view.graph.GraphSnapshot;
 import interface_adapter.graph_check.GraphCheckController;
 import interface_adapter.history.HistoryViewModel;
 import interface_adapter.recognize.FormulaRecognizer;
@@ -94,15 +97,21 @@ public class StackedAppBuilder {
         // graph, graphs also go to PDF Studio like before
         GraphViewModel graphViewModel = new GraphViewModel();
         graphViewModel.addPropertyChangeListener(event -> {
+            // only brand new graphs, pans / zooms come as VIEW and would spam the library
             if (GraphViewModel.STATE_PROPERTY.equals(event.getPropertyName())) {
                 GraphState state = graphViewModel.getState();
-                if (state.getError() == null && state.getGraphImage() != null) {
-                    pdfStudio.addGraph(state.getLatex(), state.getGraphImage());
+                if (state.getError() == null && state.hasGraph()) {
+                    pdfStudio.addGraph(state.getLatex(), GraphSnapshot.render(state, 880, 600));
                 }
             }
         });
+        // graphs drawn in plain java now, one session shared by graphing + exploring
+        InMemoryGraphSessionDataAccessObject graphSession = new InMemoryGraphSessionDataAccessObject();
+        GraphPresenter graphPresenter = new GraphPresenter(graphViewModel);
         GraphController graph = new GraphController(new GraphFunctionInteractor(
-                new LatexFunctionParser(), new QuickChartGraphRenderer(), new GraphPresenter(graphViewModel)));
+                new LatexFunctionParser(), graphSession, graphPresenter));
+        GraphExploreController graphExplore = new GraphExploreController(
+                new ExploreGraphInteractor(graphSession, graphPresenter));
         GraphCheckController graphCheck = new GraphCheckController(new GraphCheckInteractor(new LatexFunctionParser()));
 
         // history
@@ -129,7 +138,7 @@ public class StackedAppBuilder {
                 new SelectionToLibrary(sharedCanvas::recognizeFormula, pdfStudio.getLibrary()),
                 new SelectedInkRegistry(drawing, pdfStudio.getLibrary()));
         AnswerCanvasPage page = new AnswerCanvasPage(sharedCanvas, evaluate, mathViewModel, results,
-                graph, graphViewModel, graphCheck::canGraph, BoardTheme.CANVAS);
+                graph, graphExplore, graphViewModel, graphCheck::canGraph, BoardTheme.CANVAS);
         page.setDefinitionCheck(definitionCheck::isDefinition);
         page.setCalculateCheck(calculateCheck::canCalculate);
         page.setQuestionCheck(questionCheck::isQuestion);

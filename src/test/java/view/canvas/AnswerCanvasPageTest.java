@@ -7,6 +7,7 @@ import interface_adapter.evaluate.DefinitionCheckController;
 import interface_adapter.evaluate.EvaluateController;
 import interface_adapter.evaluate.EvaluatePresenter;
 import interface_adapter.graph.GraphController;
+import interface_adapter.graph.GraphExploreController;
 import interface_adapter.graph.GraphViewModel;
 import entity.LatexFunctionParser;
 import org.junit.jupiter.api.Test;
@@ -926,7 +927,8 @@ class AnswerCanvasPageTest {
         CalculateCheckInteractor calcCheck = new CalculateCheckInteractor(functions);
         SwingUtilities.invokeAndWait(() -> {
             page = new AnswerCanvasPage(shared, controller, viewModel, (id, latex, result) -> { },
-                    new GraphController(input -> { }), new GraphViewModel(), graphCheck::canGraph,
+                    new GraphController(input -> { }),
+                    new GraphExploreController(new NoExplore()), new GraphViewModel(), graphCheck::canGraph,
                     java.awt.Color.WHITE);
             page.setCalculateCheck(calcCheck::canCalculate);
             page.setQuestionCheck(new QuestionCheckInteractor()::isQuestion);
@@ -985,5 +987,14 @@ class AnswerCanvasPageTest {
         waitFor(() -> calls.get() == 1, "the read");
         Thread.sleep(300);
         assertNull(popup());
+    }
+
+    // graph never runs here, nothing to explore
+    private static final class NoExplore implements use_case.explore_graph.ExploreGraphInputBoundary {
+        @Override public void pan(double dx, double dy) { }
+        @Override public void zoom(double cx, double cy, double fx, double fy) { }
+        @Override public void reset() { }
+        @Override public void trace(double x, double y, double snapX) { }
+        @Override public void endTrace() { }
     }
 }

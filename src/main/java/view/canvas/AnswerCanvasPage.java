@@ -6,6 +6,7 @@ import interface_adapter.TextRun;
 import interface_adapter.MathLabViewModel;
 import interface_adapter.evaluate.EvaluateController;
 import interface_adapter.graph.GraphController;
+import interface_adapter.graph.GraphExploreController;
 import interface_adapter.graph.GraphViewModel;
 import view.FormulaCapture;
 import view.answer.AnswerLayout;
@@ -125,12 +126,14 @@ public class AnswerCanvasPage extends CanvasPage {
     // one board: popup has Calculate + Graph, no function area
     public AnswerCanvasPage(SharedCanvas sharedCanvas, EvaluateController controller, MathLabViewModel viewModel,
                             FormulaResultSink resultSink, GraphController graphController,
+                            GraphExploreController graphExplore,
                             GraphViewModel graphViewModel, Predicate<String> graphable,
                             java.awt.Color background) {
         this(sharedCanvas, controller, viewModel, resultSink);
         this.graphable = graphable;
-        graphing = new PopupGraphing(sharedCanvas, graphController, graphViewModel, notices,
+        graphing = new PopupGraphing(sharedCanvas, graphController, graphExplore, graphViewModel, notices,
                 getCanvasArea(), this::publishFormulaOnly);
+        addCanvasUnderlay(graphing.graphCard());
         addCanvasOverlay(graphing.rangeBar());
         useBoardLook(background);
     }

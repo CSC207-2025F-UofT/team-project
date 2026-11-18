@@ -158,6 +158,7 @@ public class DrawingCanvas extends JPanel {
     private Rectangle2D graphCard;
     private double graphPadding;
     private boolean overGraphClose;
+    private Object graphTag;          // who owns the card (the live graph view), null for a restored picture
 
     private int resizeHandle = -1;    // corner being dragged to resize (0 top-left, clockwise), or -1
     private Point2D resizeAnchor;     // the opposite corner, which stays put
@@ -395,6 +396,12 @@ public class DrawingCanvas extends JPanel {
      *                was captured); null puts the card in the middle of the view
      */
     public void showGraph(BufferedImage image, Rectangle formula) {
+        showGraph(image, formula, null);
+    }
+
+    // same, tagged so the live graph view knows the card is still its own
+    public void showGraph(BufferedImage image, Rectangle formula, Object tag) {
+        graphTag = tag;
         double viewWidth = (getWidth() > 0 ? getWidth() : getPreferredSize().width) / scale;
         double imageWidth = viewWidth * GRAPH_CARD_WIDTH;
         double imageHeight = imageWidth * image.getHeight() / image.getWidth();
@@ -423,6 +430,7 @@ public class DrawingCanvas extends JPanel {
         }
         graphImage = null;
         graphCard = null;
+        graphTag = null;
         overGraphClose = false;
         setCursor(Cursor.getPredefinedCursor(Cursor.CROSSHAIR_CURSOR));
         repaint();
@@ -430,6 +438,40 @@ public class DrawingCanvas extends JPanel {
 
     public boolean hasGraph() {
         return graphCard != null;
+    }
+
+    // whoever showed the card last (null after a restore / clear)
+    public Object getGraphTag() {
+        return graphCard == null ? null : graphTag;
+    }
+
+    // drag the card around, screen px, issue #45
+    public void moveGraphBy(double dxScreen, double dyScreen) {
+        if (graphCard == null) {
+            return;
+        }
+        graphCard = new Rectangle2D.Double(graphCard.getX() + dxScreen / scale, graphCard.getY() + dyScreen / scale,
+                graphCard.getWidth(), graphCard.getHeight());
+        repaint();
+    }
+
+    // new size in screen px, top-left stays
+    public void resizeGraphTo(double widthScreen, double heightScreen) {
+        if (graphCard == null || !(widthScreen > 0) || !(heightScreen > 0)) {
+            return;
+        }
+        graphCard = new Rectangle2D.Double(graphCard.getX(), graphCard.getY(), widthScreen / scale, heightScreen / scale);
+        repaint();
+    }
+
+    // fresh picture for the same card (after pan / zoom), so save + pdf get what's on screen
+    public void replaceGraphImage(BufferedImage image) {
+        if (graphCard == null || image == null) {
+            return;
+        }
+        graphImage = image;
+        graphPadding = 0;   // live snapshots already draw their own card
+        repaint();
     }
 
     /** Where the graph card is on screen right now, or null if there is none. */
@@ -489,7 +531,7 @@ public class DrawingCanvas extends JPanel {
                 world.getWidth() * scale, world.getHeight() * scale);
     }
 
-    /** A smooth, smaller copy of a big image (QuickChart sends 1600 px), so it draws cleanly. */
+    /** A smooth, smaller copy of a big image, so it draws cleanly. */
     private static BufferedImage downscaled(BufferedImage image, int maxWidth) {
         if (image.getWidth() <= maxWidth || maxWidth <= 0) {
             return image;
@@ -945,7 +987,7 @@ public class DrawingCanvas extends JPanel {
             strokeColors.putAll(back.colors);  // undoes a recolour
             book = back.book;  // answers come back as they were, no recalc
             pictures.clear();pictures.addAll(back.pictures);
-            graphImage = back.graphImage;graphCard = back.graphCard;
+            graphImage = back.graphImage;graphCard = back.graphCard;graphTag = back.graphTag;graphPadding = back.graphPadding;
             selectedPicture = null;
             currentStroke = null;
             selection.clear();
@@ -966,7 +1008,7 @@ public class DrawingCanvas extends JPanel {
         fire(actionListeners);
         saveForUndo();
         pictures.clear();selectedPicture = null;
-        graphCard = null;graphImage = null;
+        graphCard = null;graphImage = null;graphTag = null;
         strokes.clear();
         for (Formula f : book.all()) {
             book.remove(f.getId());
@@ -980,7 +1022,7 @@ public class DrawingCanvas extends JPanel {
 
     private void saveForUndo() {
         history.push(new Snapshot(new ArrayList<>(strokes), colorsNow(), book.copy(),
-                new ArrayList<>(pictures), graphImage, graphCard));
+                new ArrayList<>(pictures), graphImage, graphCard, graphTag, graphPadding));
         if (history.size() > HISTORY_LIMIT) {
             history.removeLast();
         }
@@ -1058,15 +1100,20 @@ public class DrawingCanvas extends JPanel {
         final List<Picture> pictures;
         final BufferedImage graphImage;
         final Rectangle2D graphCard;
+        final Object graphTag;
+        final double graphPadding;
 
         Snapshot(List<Stroke> strokes, Map<Stroke, Color> colors, FormulaBook book,
-                 List<Picture> pictures, BufferedImage graphImage, Rectangle2D graphCard) {
+                 List<Picture> pictures, BufferedImage graphImage, Rectangle2D graphCard,
+                 Object graphTag, double graphPadding) {
             this.strokes = strokes;
             this.colors = colors;
             this.book = book;
             this.pictures = pictures;
             this.graphImage = graphImage;
             this.graphCard = graphCard;
+            this.graphTag = graphTag;
+            this.graphPadding = graphPadding;
         }
     }
 
@@ -1634,7 +1681,7 @@ public class DrawingCanvas extends JPanel {
         book = restoredBook;
         pictures.clear();pictures.addAll(restoredAssets);
         history.clear();selectedPicture = null;selection.clear();selectedAnswers.clear();
-        currentStroke = null;graphCard = restoredGraphBounds;graphImage = restoredGraph;
+        currentStroke = null;graphCard = restoredGraphBounds;graphImage = restoredGraph;graphTag = null;graphPadding = 0;
         scale = state.zoom();originX = state.offsetX();originY = state.offsetY();
         repaint();fire(inkListeners);fire(viewListeners);
     }
