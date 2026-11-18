@@ -344,9 +344,9 @@ class AnswerCanvasPageTest {
         assertTrue(answers().isEmpty());
     }
 
-    // A f(x)=x^2+2x (50 tall), B f(2)= (30 tall) far away
+    // A f(x)=x^2+2x (50 tall, 240 px), B f(2)= (30 tall, 160 px) far away
     private void defineThenCall() {
-        shared.setFormulaRecognizer(image -> image.getHeight() < 80 ? "f(2)=" : "f(x)=x^{2}+2x");
+        shared.setFormulaRecognizer(image -> image.getHeight() < 200 ? "f(2)=" : "f(x)=x^{2}+2x");
     }
 
     private void autoDefine() throws Exception {
@@ -498,7 +498,7 @@ class AnswerCanvasPageTest {
 
     @Test
     void answerAfterAnErrorClearsTheCard() throws Exception {
-        shared.setFormulaRecognizer(image -> image.getHeight() < 80 ? "1+1=" : "x+1=");
+        shared.setFormulaRecognizer(image -> image.getHeight() < 200 ? "1+1=" : "x+1=");
         openPage();
         write();
         waitPopup("x+1=");
@@ -597,7 +597,7 @@ class AnswerCanvasPageTest {
         waitFor(() -> answerIs("2"), "A's answer");
 
         drag(400, 300, 420, 330);                    // B: 30 tall, far away
-        waitFor(() -> page.visiblePopup() != null && seen.get().getHeight() == 30 + 1 + 2 * 18, "B's popup");
+        waitFor(() -> page.visiblePopup() != null && seen.get().getHeight() == 160, "B's popup");
         assertTrue(popup().getX() > 300, "popup sits by B");
         clickCalculate();
         waitFor(() -> canvas.getAnswers().size() == 2, "both answers");

@@ -91,9 +91,8 @@ public class DrawingCanvas extends JPanel {
 
     private static final float INK_WIDTH = 4f;
     private static final Color INK_COLOR = Color.BLACK;
-    private static final int FORMULA_MARGIN = 16;  // white space kept around the ink in toFormulaImage()
-    /** toFormulaImage() is always at least this many times as wide as it is tall. */
-    public static final double FORMULA_MIN_ASPECT = 2.0;
+    // draws the recognition picture straight from the strokes, same pen as the screen
+    private static final FormulaImageRenderer FORMULA_RENDERER = new FormulaImageRenderer(INK_WIDTH);
     private static final int PRECISE_ERASER_RADIUS = 12;  // on screen, whatever the zoom
     private static final int STROKE_ERASER_RADIUS = 6;  // only has to touch a stroke
     private static final Color STROKE_ERASER_OUTLINE = new Color(220, 38, 38);
@@ -1406,13 +1405,10 @@ public class DrawingCanvas extends JPanel {
     }
 
     /**
-     * Screenshot of just the formula: the lasso selection if there is one, otherwise all the ink,
-     * cropped to its bounding box with a white margin, dark strokes on white, at 100% whatever the
-     * current zoom. This is the image handed to handwriting recognition.
-     *
-     * <p>The image is always a landscape rectangle, at least {@value #FORMULA_MIN_ASPECT} times as
-     * wide as it is tall, like a line of formula; narrow ink (a single tall symbol, a fraction) is
-     * centred with extra white space on its left and right.
+     * Picture of just the formula: the lasso selection if there is one, otherwise all the ink.
+     * Rendered from the strokes at a fixed scale whatever the zoom, cropped to the ink plus the pen
+     * width, black on white in gray, at least 8 px of margin, padded (never stretched) to multiples
+     * of 16. This is the image handed to handwriting recognition.
      *
      * @throws IllegalStateException if nothing has been written
      */
@@ -1425,22 +1421,7 @@ public class DrawingCanvas extends JPanel {
 
     // cropped picture of some strokes, answers never included
     private BufferedImage imageOf(List<Stroke> formula) {
-        Rectangle ink = boundsOf(formula);
-        int margin = FORMULA_MARGIN + (int) Math.ceil(INK_WIDTH / 2);
-        int inkWidth = ink.width + 1 + 2 * margin;
-        int height = ink.height + 1 + 2 * margin;
-        int width = Math.max(inkWidth, (int) Math.ceil(FORMULA_MIN_ASPECT * height));
-        BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
-        Graphics2D g2 = image.createGraphics();
-        g2.setColor(Color.WHITE);
-        g2.fillRect(0, 0, width, height);
-        g2.translate(margin - ink.x + (width - inkWidth) / 2, margin - ink.y);
-        setUpInk(g2);
-        for (Stroke stroke : formula) {
-            drawStroke(g2, stroke);
-        }
-        g2.dispose();
-        return image;
+        return FORMULA_RENDERER.render(formula);
     }
 
     /** Draws the ink (no background) as it appears on screen, e.g. onto a copy of the canvas elsewhere. */
@@ -1947,15 +1928,6 @@ public class DrawingCanvas extends JPanel {
     }
 
     private static void drawStroke(Graphics2D g2, Stroke stroke) {
-        List<InkPoint> points = stroke.getPoints();
-        if (points.isEmpty()) {
-            return;
-        }
-        // A single point (a tap, e.g. a decimal point) is drawn as a dot by the round cap.
-        InkPoint previous = points.get(0);
-        for (InkPoint point : points) {
-            g2.drawLine(previous.getX(), previous.getY(), point.getX(), point.getY());
-            previous = point;
-        }
+        FormulaImageRenderer.trace(g2, stroke);
     }
 }

@@ -158,7 +158,7 @@ class DrawingCanvasAnswersTest {
         answer(AnswerKind.AFTER_EQUALS, "2");
         drag(100, 300, 140, 330);
         FormulaCapture second = calculateOne();
-        assertEquals(30 + 1 + 2 * 18, second.getImage().getHeight());
+        assertEquals(160, second.getImage().getHeight());  // (30 + pen 4) * 4 + 16 = 152, padded to 160
         assertEquals(2, canvas.getFormulas().size());
         assertEquals(1, canvas.getAnswers().size());
     }
@@ -297,7 +297,7 @@ class DrawingCanvasAnswersTest {
         lasso(176, 90, 260, 150);
         assertTrue(canvas.hasSelection());
         FormulaCapture c = calculateOne();
-        assertEquals(30 + 1 + 2 * 18, c.getImage().getHeight());
+        assertEquals(160, c.getImage().getHeight());  // (30 + pen 4) * 4 + 16 = 152, padded to 160
         canvas.getFormulas().forEach(f -> assertFalse(f.getStrokes().isEmpty()));
         assertEquals(2, canvas.getFormulas().size());
     }
