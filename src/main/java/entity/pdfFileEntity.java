@@ -6,9 +6,9 @@ import java.time.LocalDateTime;
  * Represents one PDF user has uploaded
  * Stores information about the file (name, size, owner, date)
  *
- * Used by: UploadePdf, AssociatePdfToPaper, OpenPdf, DeletePdf
+ * Used by: UploadPdf, AssociatePdfToPaper, OpenPdf, DeletePdf
  */
-public class PdfFile {
+public class pdfFileEntity {
     public static final long MAX_SIZE_BYTES = 50L * 1024 * 1024; // 50 MB Max Size
 
     private final String id;
@@ -18,7 +18,7 @@ public class PdfFile {
     private final LocalDateTime uploadedAt;
 
     // Constructor
-    public PdfFile(String id, String ownerId, String fileName, long sizeBytes, LocalDateTime uploadedAt) {
+    public pdfFileEntity(String id, String ownerId, String fileName, long sizeBytes, LocalDateTime uploadedAt) {
         // Check Business Rules
         if (!isPdf(fileName)) {
             throw new IllegalArgumentException("Only PDF files are supported.");
