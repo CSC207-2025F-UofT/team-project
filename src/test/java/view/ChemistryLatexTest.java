@@ -24,6 +24,20 @@ class ChemistryLatexTest {
   }
 
   @Test
+  void aChargeWithANumberNeedsACaret() {
+    assertEquals("\\mathrm{Fe^{2+}}", ChemistryLatex.toLatex("Fe^2+"));
+    assertEquals("\\mathrm{NH_{4}^{+}}", ChemistryLatex.toLatex("NH4+"));
+    // Without "^", Fe2+ looks just like NH4+, so the 2 is read as a subscript.
+    assertEquals("\\mathrm{Fe_{2}^{+}}", ChemistryLatex.toLatex("Fe2+"));
+  }
+
+  @Test
+  void caretWithNoNumberOrSignIsLeftAsTyped() {
+    assertEquals("\\mathrm{x^a}", ChemistryLatex.toLatex("x^a"));
+    assertEquals("\\mathrm{x^{-}}", ChemistryLatex.toLatex("x^-"));
+  }
+
+  @Test
   void arrowsAndButtonSymbolsBecomeLatex() {
     assertTrue(ChemistryLatex.toLatex("A <=> B").contains("\\rightleftharpoons"));
     assertTrue(ChemistryLatex.toLatex("A <- B").contains("\\leftarrow"));

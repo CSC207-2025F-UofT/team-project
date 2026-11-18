@@ -29,9 +29,6 @@ import javax.swing.SwingUtilities;
  * from {@link DashboardViewModel}, filled in by the LoadDashboard use case.
  */
 public class DashboardView extends JPanel implements PropertyChangeListener {
-  /** Testing only: run with -Dlab.skipQuiz=true and Start goes straight to the lab. */
-  private static final boolean SKIP_QUIZ = Boolean.getBoolean("lab.skipQuiz");
-
   private final DashboardViewModel viewModel;
   private final LoadDashboardController loadDashboard;
   private final QuizView quizView;
@@ -171,10 +168,6 @@ public class DashboardView extends JPanel implements PropertyChangeListener {
   }
 
   private void openQuiz(ModuleState module) {
-    if (SKIP_QUIZ) {
-      showLab(module);
-      return;
-    }
     HeaderBar header = new HeaderBar("Pre-Procedure Quiz", this::showCompoundSearch, null);
     quizView.open(module, this::showDashboard, () -> showQuizComplete(module));
     JScrollPane scroll = new JScrollPane(quizView);

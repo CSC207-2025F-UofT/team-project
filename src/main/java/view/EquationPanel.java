@@ -80,6 +80,7 @@ class EquationPanel extends JPanel {
     body.add(left(new JLabel("Type it the way you'd write it:")));
     body.add(left(input));
     body.add(left(hint("Examples:  2H2 + O2 -> 2H2O     Na+ + Cl-     Cu^2+(aq)     A <=> B")));
+    body.add(left(hint("A charge with a number needs ^, like Fe^2+ or SO4^2-")));
     body.add(Box.createVerticalStrut(8));
     body.add(left(symbols));
     body.add(Box.createVerticalStrut(12));

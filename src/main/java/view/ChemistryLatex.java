@@ -27,8 +27,12 @@ final class ChemistryLatex {
 
   /**
    * Converts plain-text chemistry to LaTeX. Digits after an element or ")" become subscripts,
-   * a "+" or "-" right after a formula (e.g. {@code Na+}) or after "^" (e.g. {@code Cu^2+})
-   * becomes a charge, and {@code ->} / {@code <=>} become arrows. Everything else is kept.
+   * a "+" or "-" right after a formula (e.g. {@code Na+}) or a number and sign after "^"
+   * (e.g. {@code Cu^2+}) becomes a charge, and {@code ->} / {@code <=>} become arrows.
+   * Everything else is kept, so LaTeX like {@code x^a} or {@code H_{2}} still works.
+   *
+   * <p>A charge with a number needs "^": {@code Fe2+} reads as Fe&#8322;&#8314;, because it
+   * looks exactly like {@code NH4+} (NH&#8324;&#8314;), where the 4 must be a subscript.
    *
    * @param plain what the student typed
    * @return the LaTeX for it
@@ -46,17 +50,14 @@ final class ChemistryLatex {
       char c = plain.charAt(i);
       char prev = i > 0 ? plain.charAt(i - 1) : ' ';
       char next = i + 1 < plain.length() ? plain.charAt(i + 1) : ' ';
+      int chargeEnd = c == '^' ? chargeEnd(plain, i + 1) : i;
       if (Character.isDigit(c) && (Character.isLetter(prev) || prev == ')' || prev == ']')) {
         int end = digitsEnd(plain, i);
         out.append("_{").append(plain, i, end).append('}');
         i = end;
-      } else if (c == '^' && next != '{') {
-        int end = digitsEnd(plain, i + 1);
-        if (end < plain.length() && (plain.charAt(end) == '+' || plain.charAt(end) == '-')) {
-          end++;
-        }
-        out.append("^{").append(plain, i + 1, end).append('}');
-        i = end;
+      } else if (chargeEnd > i + 1) {
+        out.append("^{").append(plain, i + 1, chargeEnd).append('}');
+        i = chargeEnd;
       } else if ((c == '+' || c == '-') && (Character.isLetterOrDigit(prev) || prev == ')')
           && (next == ' ' || next == '(' || i + 1 == plain.length())) {
         out.append("^{").append(c).append('}');
@@ -123,6 +124,15 @@ final class ChemistryLatex {
       }
     }
     return null;
+  }
+
+  /** Where a charge like "2+", "-" or "3" starting at start ends; start if there is none. */
+  private static int chargeEnd(String text, int start) {
+    int end = digitsEnd(text, start);
+    if (end < text.length() && (text.charAt(end) == '+' || text.charAt(end) == '-')) {
+      end++;
+    }
+    return end;
   }
 
   private static int digitsEnd(String text, int start) {
