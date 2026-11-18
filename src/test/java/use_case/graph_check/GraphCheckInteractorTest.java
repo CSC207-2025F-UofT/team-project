@@ -32,4 +32,12 @@ class GraphCheckInteractorTest {
         assertFalse(check.canGraph(""));
         assertFalse(check.canGraph(null));
     }
+
+    @Test
+    void surfacesGetTheGraphButtonToo() {
+        assertTrue(check.canGraph("z=x^2+y^2"));
+        assertTrue(check.canGraph("f(x,y)=\\sin x\\cos y"));
+        assertTrue(check.canGraph("xy=z"));
+        assertFalse(check.canGraph("z=x+w"));
+    }
 }

@@ -1,25 +1,40 @@
 package use_case.graph_function;
 
-import entity.GraphData;
+import data_access.InMemoryGraphSessionDataAccessObject;
 import entity.LatexFunctionParser;
+import entity.graph.CurvePlot;
+import entity.graph.SurfacePlot;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 class GraphFunctionInteractorTest {
 
-    /** Records what the use case reported. */
-    private static class RecordingPresenter implements GraphFunctionOutputBoundary {
-        GraphFunctionOutputData success;
+    // remembers what came back
+    static class RecordingPresenter implements GraphFunctionOutputBoundary {
+        CurveOutputData curve;
+        SurfaceOutputData surface;
+        TraceOutputData trace;
+        boolean traceCleared;
+        Boolean fresh;
         String error;
 
         @Override
-        public void prepareSuccessView(GraphFunctionOutputData outputData) {
-            success = outputData;
+        public void prepareCurveView(CurveOutputData data, boolean fresh) {
+            curve = data;
+            this.fresh = fresh;
+        }
+
+        @Override
+        public void prepareSurfaceView(SurfaceOutputData data, boolean fresh) {
+            surface = data;
+            this.fresh = fresh;
+        }
+
+        @Override
+        public void prepareTraceView(TraceOutputData data) {
+            trace = data;
+            traceCleared = data == null;
         }
 
         @Override
@@ -28,112 +43,105 @@ class GraphFunctionInteractorTest {
         }
     }
 
-    /** Stands in for QuickChart: remembers the data and returns fixed bytes. */
-    private static class FakeRenderer implements GraphRendererGateway {
-        GraphData received;
-        boolean fail;
+    private final RecordingPresenter presenter = new RecordingPresenter();
+    private final InMemoryGraphSessionDataAccessObject session = new InMemoryGraphSessionDataAccessObject();
+    private final GraphFunctionInteractor interactor =
+            new GraphFunctionInteractor(new LatexFunctionParser(), session, presenter);
 
-        @Override
-        public byte[] render(GraphData graphData) throws GraphRenderException {
-            if (fail) {
-                throw new GraphRenderException("offline");
-            }
-            received = graphData;
-            return new byte[]{1, 2, 3};
-        }
+    private static int gaps(CurveOutputData data) {
+        return data.getPieces().size() - 1;
     }
 
-    private final RecordingPresenter presenter = new RecordingPresenter();
-    private final FakeRenderer renderer = new FakeRenderer();
-    private final GraphFunctionInteractor interactor =
-            new GraphFunctionInteractor(new LatexFunctionParser(), renderer, presenter);
+    @Test
+    void curveComesBackAsLinePiecesInItsWindow() {
+        interactor.execute(new GraphFunctionInputData("y=x^2", -2, 2));
+
+        assertNull(presenter.error);
+        assertTrue(presenter.fresh);
+        CurveOutputData data = presenter.curve;
+        assertEquals("y=x^2", data.getLatex());
+        assertEquals(-2, data.getXMin(), 1e-9);
+        assertEquals(2, data.getXMax(), 1e-9);
+        assertTrue(data.getYMin() < 0 && data.getYMax() > 4);
+        assertEquals(1, data.getPieces().size());
+        double[][] piece = data.getPieces().get(0);
+        assertEquals(piece[0][100] * piece[0][100], piece[1][100], 1e-9, "points are the real f(x)");
+        assertTrue(session.current() instanceof CurvePlot);
+    }
 
     @Test
     void yOnTheRightGraphsTheSameAsYOnTheLeft() {
         interactor.execute(new GraphFunctionInputData("y=x^2", -2, 2));
-        double[] left = renderer.received.getYs();
+        double[] left = presenter.curve.getPieces().get(0)[1];
         interactor.execute(new GraphFunctionInputData("x^2=y", -2, 2));
         assertNull(presenter.error);
-        assertArrayEquals(left, renderer.received.getYs(), 1e-12);
+        assertArrayEquals(left, presenter.curve.getPieces().get(0)[1], 1e-12);
     }
 
     @Test
-    void successSendsSampledPointsAndReturnsImage() {
-        interactor.execute(new GraphFunctionInputData("y=x^2", -2, 2));
-
-        assertNull(presenter.error);
-        assertNotNull(presenter.success);
-        assertArrayEquals(new byte[]{1, 2, 3}, presenter.success.getImageBytes());
-        assertEquals("y=x^2", presenter.success.getLatex());
-
-        GraphData data = renderer.received;
-        assertEquals(-2, data.getXMin(), 1e-9);
-        assertEquals(2, data.getXMax(), 1e-9);
-        assertEquals(GraphFunctionInteractor.SAMPLE_COUNT + 1, data.getXs().length);
-        assertTrue(data.getYMin() < 0 && data.getYMax() > 4);
+    void keyPointsComeAlong() {
+        interactor.execute(new GraphFunctionInputData("y=x^2-1", -3, 3));
+        assertTrue(presenter.curve.getKeyPoints().size() >= 3, "two roots + the low / intercept");
     }
 
     @Test
     void asymptoteIsClippedAndBroken() {
         interactor.execute(new GraphFunctionInputData("\\tan x"));
-
-        GraphData data = renderer.received;
-        assertTrue(data.getYMax() < 1000, "window should ignore values near the asymptotes");
-        int gaps = 0;
-        for (double y : data.getYs()) {
-            if (Double.isNaN(y)) {
-                gaps++;
-            }
-        }
-        assertTrue(gaps >= 6, "tan x on [-10, 10] has 6 asymptotes");
+        assertTrue(presenter.curve.getYMax() < 1000, "window should ignore values near the asymptotes");
+        assertTrue(gaps(presenter.curve) >= 6, "tan x on [-10, 10] has 6 asymptotes");
     }
 
     @Test
     void constantFunctionGetsANonEmptyWindow() {
         interactor.execute(new GraphFunctionInputData("y=5"));
-        assertTrue(renderer.received.getYMin() < 5 && renderer.received.getYMax() > 5);
+        assertTrue(presenter.curve.getYMin() < 5 && presenter.curve.getYMax() > 5);
     }
 
     @Test
-    void givenYRangeIsUsedExactlyAndPointsOutsideAreHidden() {
+    void givenYRangeIsUsedExactly() {
         interactor.execute(new GraphFunctionInputData("y=x^2", -10, 10, 0, 25));
-
-        GraphData data = renderer.received;
-        assertEquals(0, data.getYMin(), 1e-9);
-        assertEquals(25, data.getYMax(), 1e-9);
-        for (double y : data.getYs()) {
-            assertTrue(Double.isNaN(y) || (y >= 0 && y <= 25), "no point outside [0, 25]: " + y);
-        }
-        assertNotNull(presenter.success);
+        assertEquals(0, presenter.curve.getYMin(), 1e-9);
+        assertEquals(25, presenter.curve.getYMax(), 1e-9);
     }
 
     @Test
-    void automaticYRangeIsStillTheDefault() {
-        GraphFunctionInputData input = new GraphFunctionInputData("y=x^2", -2, 2);
-        assertTrue(input.isYAutomatic());
-        interactor.execute(input);
-        assertTrue(renderer.received.getYMin() < 0, "automatic window has padding below 0");
+    void surfaceIsGraphedIn3d() {
+        interactor.execute(new GraphFunctionInputData("z=x^2+y^2", -2, 2));
+        assertNull(presenter.error);
+        assertNull(presenter.curve);
+        SurfaceOutputData data = presenter.surface;
+        assertEquals(-2, data.getYMin(), 1e-9, "no y range typed: same as x");
+        assertEquals(8, data.getZ()[0][0], 1e-9);
+        assertTrue(data.getZMin() <= 0.1 && data.getZMax() >= 7.9);
+        assertTrue(session.current() instanceof SurfacePlot);
+    }
+
+    @Test
+    void surfaceUsesATypedYRange() {
+        interactor.execute(new GraphFunctionInputData("f(x,y)=xy", -1, 1, 0, 3));
+        assertEquals(0, presenter.surface.getYMin(), 1e-9);
+        assertEquals(3, presenter.surface.getYMax(), 1e-9);
     }
 
     @Test
     void invalidYRangeIsReported() {
         interactor.execute(new GraphFunctionInputData("y=x", -10, 10, 5, 5));
-        assertNull(presenter.success);
+        assertNull(presenter.curve);
         assertTrue(presenter.error.contains("y range"));
     }
 
     @Test
     void curveEntirelyOutsideTheYRangeIsReported() {
         interactor.execute(new GraphFunctionInputData("y=x^2+100", -10, 10, -5, 5));
-        assertNull(presenter.success);
+        assertNull(presenter.curve);
         assertTrue(presenter.error.contains("outside the y range"));
     }
 
     @Test
     void parseErrorIsReported() {
         interactor.execute(new GraphFunctionInputData("y=ax+b"));
-        assertNull(presenter.success);
-        assertTrue(presenter.error.contains("Unknown variable 'a'"));
+        assertNull(presenter.curve);
+        assertTrue(presenter.error.contains("Unknown variable 'a'"), presenter.error);
     }
 
     @Test
@@ -146,18 +154,13 @@ class GraphFunctionInteractorTest {
     void undefinedEverywhereIsReported() {
         interactor.execute(new GraphFunctionInputData("\\sqrt{x}", -5, -1));
         assertTrue(presenter.error.contains("undefined"));
+        interactor.execute(new GraphFunctionInputData("z=\\sqrt{-x^2-y^2-1}", -5, 5));
+        assertTrue(presenter.error.contains("undefined everywhere"));
     }
 
     @Test
     void invalidRangeIsReported() {
         interactor.execute(new GraphFunctionInputData("x", 3, 3));
         assertTrue(presenter.error.contains("x range"));
-    }
-
-    @Test
-    void rendererFailureIsReported() {
-        renderer.fail = true;
-        interactor.execute(new GraphFunctionInputData("x"));
-        assertEquals("Could not draw the graph: offline", presenter.error);
     }
 }
