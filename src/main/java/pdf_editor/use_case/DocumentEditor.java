@@ -60,7 +60,13 @@ public final class DocumentEditor {
         PdfDocument.Placement p = PdfDocument.Placement.note(text,
                 clamp(x, 0, PdfDocument.PAGE_WIDTH - 260), clamp(y, 0, PdfDocument.PAGE_HEIGHT - 95), 260, 95);
         checkpoint();
-        document.add(page, p);
+        // Text is the default background layer: newly inserted notes must not
+        // cover existing History materials, including a full-page body text box.
+        // Explicit Arrange commands remain free to change this ordering later.
+        List<PdfDocument.Placement> existing = document.placements(page);
+        int insertAt = 0;
+        while (insertAt < existing.size() && existing.get(insertAt).isNote()) insertAt++;
+        document.insert(page, insertAt, p);
         return p;
     }
     public PdfDocument.Placement updateNote(int page, String id, String text, int style, int size) {
