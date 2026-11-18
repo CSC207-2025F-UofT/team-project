@@ -24,9 +24,8 @@ public final class FloatingToolbar {
     private final DrawingCanvas canvas;
     private final JComponent area;
     private final PdfPanel pdfPanel;
-    private boolean drawingOnPdf;
     private final GlassBar bar;
-    private final GlassBar.Item[] tools = new GlassBar.Item[4];
+    private final GlassBar.Item[] tools = new GlassBar.Item[3];
     private final GlassBar.Item pen;
     private final ToolOptionsPopup options;
     private DrawingCanvas.Tool lastClicked;
@@ -67,24 +66,18 @@ public final class FloatingToolbar {
         pen = tools[0] = bar.segment("Pen", Icons::pencil, 1, () -> chooseTool(DrawingCanvas.Tool.PEN));
         tools[1] = bar.segment("Eraser", Icons::eraser, 1, () -> chooseTool(DrawingCanvas.Tool.ERASER));
         tools[2] = bar.segment("Lasso", Icons::lasso, 1, () -> chooseTool(DrawingCanvas.Tool.LASSO));
-        tools[3] = bar.segment("Box", Icons::rectangleSelect, 1, () -> chooseTool(DrawingCanvas.Tool.RECTANGLE));
         bar.separator();
         bar.action("Undo", Icons::undo, canvas::undo, canvas::canUndo);
         bar.action("Redo", Icons::redo, canvas::redo, canvas::canRedo);
         bar.action("Clear", Icons::trash, canvas::clear, () -> !canvas.isBlank());
-        bar.separator();
-        bar.segment("Draw on PDF", Icons::pencil, 3, () -> {
-            drawingOnPdf = !drawingOnPdf;
-            pdfPanel.editor().pageView().configurePdfDrawing(drawingOnPdf, canvas::getTool, canvas::getInkColor, canvas::getPenWidth);
-            if (!drawingOnPdf) bar.deselect(3);
-            return drawingOnPdf;
-        });
         bar.finish();
-        bar.select(tools[canvas.getTool().ordinal()]);
+        bar.select(itemFor(canvas.getTool()));
+        pdfPanel.editor().pageView().configurePdfDrawing(true, canvas::getTool,
+                canvas::getInkColor, canvas::getPenWidth, canvas::getEraserMode, canvas::getEraserSize);
         bar.setHoverToolLabels(true, this::relayout);
 
         canvas.addPropertyChangeListener(DrawingCanvas.TOOL_PROPERTY, e -> {
-            bar.select(tools[((DrawingCanvas.Tool) e.getNewValue()).ordinal()]);
+            bar.select(itemFor((DrawingCanvas.Tool) e.getNewValue()));
             optionsOpen = false;
             if (options.isVisible()) options.setVisible(false);
             bar.repaint();
@@ -117,14 +110,20 @@ public final class FloatingToolbar {
         relayout();
     }
 
+    private GlassBar.Item itemFor(DrawingCanvas.Tool tool) {
+        return tools[tool == DrawingCanvas.Tool.RECTANGLE ? 2 : tool.ordinal()];
+    }
+
     private boolean chooseTool(DrawingCanvas.Tool tool) {
-        if (toolClickArmed && lastClicked == tool && canvas.getTool() == tool) {
+        boolean sameSelection = tool == DrawingCanvas.Tool.LASSO
+                && canvas.getTool() == DrawingCanvas.Tool.RECTANGLE;
+        if (toolClickArmed && lastClicked == tool && (canvas.getTool() == tool || sameSelection)) {
             // Swing may dismiss a popup on mouse press, before our tool's release callback.
             // Track explicit clicks, not isVisible(), so every click really toggles.
             optionsOpen = !optionsOpen;
             if (optionsOpen) {
                 int x = Math.max(0, (bar.getWidth() - 335) / 2);
-                options.showFor(tool, bar, x, -285);
+                options.showFor(canvas.getTool(), bar, x, -285);
             } else {
                 options.setVisible(false);
             }
