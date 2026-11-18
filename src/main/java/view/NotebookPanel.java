@@ -42,7 +42,6 @@ class NotebookPanel extends JPanel {
   private static final Color BACKGROUND = new Color(0xF5F5F5);
   private static final Color PLACEHOLDER = new Color(0xBDBDBD);
   private static final Color STYLE_ON = new Color(0xE0E0E0);
-  /** Cmd on macOS, Ctrl elsewhere. Not from Toolkit, which throws in headless tests. */
   private static final int SHORTCUT = System.getProperty("os.name", "").startsWith("Mac")
       ? InputEvent.META_DOWN_MASK : InputEvent.CTRL_DOWN_MASK;
 

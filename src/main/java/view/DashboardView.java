@@ -14,6 +14,7 @@ import java.awt.KeyboardFocusManager;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JDialog;
@@ -70,7 +71,7 @@ public class DashboardView extends JPanel implements PropertyChangeListener {
     cardsHolder.add(cards, BorderLayout.CENTER);
     JPanel top = new JPanel(new BorderLayout());
     top.add(cardsHolder, BorderLayout.NORTH);
-    add(new HeaderBar("", this::showCompoundSearch), BorderLayout.NORTH);
+    add(new HeaderBar("", this::showCompoundSearch, this::showNotebooks), BorderLayout.NORTH);
     add(new JScrollPane(top), BorderLayout.CENTER);
     loadDashboard.execute();
   }
@@ -134,8 +135,20 @@ public class DashboardView extends JPanel implements PropertyChangeListener {
           openQuiz(module);
         },
         () -> {
-          // TODO: clear the student's saved progress for this module.
+          // TODO: clear the student's saved progress and notebook for this module.
         }));
+    dialog.pack();
+    dialog.setLocationRelativeTo(this);
+    Theme.showDimmed(dialog);
+  }
+
+  /** The View Lab Notebook popup: the student's notebooks, to read and edit outside the lab. */
+  private void showNotebooks() {
+    JDialog dialog = new JDialog(SwingUtilities.getWindowAncestor(this), "Your Lab Notebooks",
+        Dialog.ModalityType.APPLICATION_MODAL);
+    // TODO: list only the modules that have a saved notebook, once notebooks are saved.
+    dialog.setContentPane(new NotebookListPanel(viewModel.getModules().stream()
+        .map(ModuleState::getTitle).collect(Collectors.toList())));
     dialog.pack();
     dialog.setLocationRelativeTo(this);
     Theme.showDimmed(dialog);
@@ -162,7 +175,7 @@ public class DashboardView extends JPanel implements PropertyChangeListener {
       showLab(module);
       return;
     }
-    HeaderBar header = new HeaderBar("Pre-Procedure Quiz", this::showCompoundSearch);
+    HeaderBar header = new HeaderBar("Pre-Procedure Quiz", this::showCompoundSearch, null);
     quizView.open(module, this::showDashboard, () -> showQuizComplete(module));
     JScrollPane scroll = new JScrollPane(quizView);
     scroll.getVerticalScrollBar().setUnitIncrement(16);
@@ -189,7 +202,7 @@ public class DashboardView extends JPanel implements PropertyChangeListener {
   }
 
   private void showLab(ModuleState module) {
-    showPage.accept(new HeaderBar(module.getTitle(), this::showCompoundSearch)
+    showPage.accept(new HeaderBar(module.getTitle(), this::showCompoundSearch, null)
         .above(createNextScene()));
   }
 
