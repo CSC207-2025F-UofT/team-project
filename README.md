@@ -86,8 +86,6 @@ The user must enter a name, select at least one base spirit, or both.
 - If the catalog cannot be accessed, the system reports the failure and allows retry.
 
 
-### Use Case 2 [Enhao]
-
 **Inputs**
 
 - An existing recipe selected from Cocktail Details, or the user's saved Custom Recipe.
