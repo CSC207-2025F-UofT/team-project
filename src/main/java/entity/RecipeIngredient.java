@@ -25,4 +25,15 @@ public class RecipeIngredient {
     public String getDisplayName() {
         return this.name.getDisplayName();
     }
+
+    
+    /**
+     * Returns the ingredient name as a value object, so ingredients can be
+     * compared with IngredientName.equals instead of raw strings.
+     *
+     * @return the ingredient name
+     */
+    public IngredientName getName() {
+        return this.name;
+    }
 }
