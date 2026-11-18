@@ -140,11 +140,26 @@ public final class PdfPageCanvas extends JPanel {
     private java.util.function.Supplier<Float> drawingWidth = () -> 2.5f;
     private final java.util.List<java.awt.geom.Point2D.Float> inkPreview = new java.util.ArrayList<>();
     private final java.util.List<java.awt.geom.Point2D.Float> erasePreview = new java.util.ArrayList<>();
+    /** Temporary raster previews only; commit the finished gesture once for a single Undo step. */
+    private final java.util.Map<String, BufferedImage> liveErasedInk = new java.util.HashMap<>();
+    private view.DrawingCanvas.Tool cursorTool;
+    private Cursor pdfToolCursor;
     private java.awt.Point selectionBoxStart;
     private java.awt.Point selectionBoxEnd;
     private boolean selectingBox;
+    // Match DrawingCanvas selection styling: same blue, translucent halo and dash cadence.
+    private static final Color SELECTION_BLUE = new Color(37, 99, 235);
+    private static final Color SELECTION_HALO = new Color(37, 99, 235, 60);
+    private static final float[] SELECTION_DASH = {5f, 4f};
+
+    private static BasicStroke selectionOutlineStroke() {
+        return new BasicStroke(1.2f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_ROUND,
+                10f, SELECTION_DASH, 0f);
+    }
+
     private final java.util.List<Point> lassoScreenPath = new java.util.ArrayList<>();
     private final java.util.Set<String> selectedGroup = new java.util.LinkedHashSet<>();
+    private final java.util.Set<String> selectionCandidates = new java.util.LinkedHashSet<>();
     private final java.util.Map<String, PdfDocument.Placement> groupDragOriginal = new java.util.LinkedHashMap<>();
     /** Input routing is View-only; stored ink is an immutable PDF material placement. */
     public void configurePdfDrawing(boolean enabled,
@@ -170,8 +185,9 @@ public final class PdfPageCanvas extends JPanel {
         drawingOnPdf = enabled;
         drawingTool = java.util.Objects.requireNonNull(tool);
         drawingColor = java.util.Objects.requireNonNull(color);
-        inkPreview.clear(); erasePreview.clear();
-        setCursor(java.awt.Cursor.getDefaultCursor());
+        inkPreview.clear(); erasePreview.clear(); liveErasedInk.clear();
+        cursorTool = null;
+        updateToolCursor();
         repaint();
     }
     public boolean isPdfDrawingEnabled() { return drawingOnPdf; }
@@ -189,13 +205,65 @@ public final class PdfPageCanvas extends JPanel {
         return drawingOnPdf && (drawingTool.get() == view.DrawingCanvas.Tool.LASSO
                 || drawingTool.get() == view.DrawingCanvas.Tool.RECTANGLE);
     }
+    /** Show provisional lasso membership before mouse release, not just the selection outline. */
+    private void refreshSelectionCandidates() {
+        selectionCandidates.clear();
+        if (selectionBoxStart == null || selectionBoxEnd == null) return;
+        java.awt.Shape region;
+        if (drawingTool.get() == view.DrawingCanvas.Tool.LASSO && lassoScreenPath.size() > 2) {
+            java.awt.geom.Path2D.Float path = new java.awt.geom.Path2D.Float();
+            path.moveTo(lassoScreenPath.get(0).x, lassoScreenPath.get(0).y);
+            for (int i = 1; i < lassoScreenPath.size(); i++)
+                path.lineTo(lassoScreenPath.get(i).x, lassoScreenPath.get(i).y);
+            path.closePath();
+            region = path;
+        } else {
+            region = new Rectangle(Math.min(selectionBoxStart.x, selectionBoxEnd.x),
+                    Math.min(selectionBoxStart.y, selectionBoxEnd.y),
+                    Math.abs(selectionBoxStart.x - selectionBoxEnd.x),
+                    Math.abs(selectionBoxStart.y - selectionBoxEnd.y));
+        }
+        for (PdfDocument.Placement item : controller.placements()) {
+            int cx = Math.round((item.x() + item.width() / 2) * (float) zoom()) + MARGIN;
+            int cy = Math.round((item.y() + item.height() / 2) * (float) zoom()) + MARGIN;
+            int left = Math.round(item.x() * (float) zoom()) + MARGIN;
+            int top = Math.round(item.y() * (float) zoom()) + MARGIN;
+            int width = Math.max(1, Math.round(item.width() * (float) zoom()));
+            int height = Math.max(1, Math.round(item.height() * (float) zoom()));
+            if (region.contains(cx, cy) || region.intersects(left, top, width, height))
+                selectionCandidates.add(item.id());
+        }
+    }
+    private void updateToolCursor() {
+        view.DrawingCanvas.Tool current = drawingOnPdf ? drawingTool.get() : null;
+        if (cursorTool == current && pdfToolCursor != null) return;
+        cursorTool = current;
+        pdfToolCursor = PdfToolCursors.forTool(current);
+        setCursor(pdfToolCursor);
+    }
+    private void refreshErasePreview() {
+        liveErasedInk.clear();
+        if (erasePreview.isEmpty()) return;
+        float radius = eraserSize.get() / 2f;
+        for (PdfDocument.Placement placement : controller.placements()) {
+            if (!isPdfInk(placement) || !PdfInkRasterEraser.touches(placement, erasePreview, radius)) continue;
+            if (eraserMode.get() == view.DrawingCanvas.EraserMode.STROKE) {
+                liveErasedInk.put(placement.id(), new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB));
+            } else {
+                BufferedImage image = PdfInkRasterEraser.erase(placement, erasePreview, radius);
+                if (image != null) liveErasedInk.put(placement.id(), image);
+            }
+        }
+    }
     private void beginPdfStroke(MouseEvent e) {
-        inkPreview.clear(); erasePreview.clear();
+        inkPreview.clear(); erasePreview.clear(); liveErasedInk.clear();
         if (!SwingUtilities.isLeftMouseButton(e)) return;
         java.awt.geom.Point2D.Float p = pagePoint(e.getPoint());
         if (!validPagePoint(p)) return;
         if (drawingTool.get() == view.DrawingCanvas.Tool.ERASER) {
             erasePreview.add(p);
+            refreshErasePreview();
+            repaint();
         } else if (drawingTool.get() == view.DrawingCanvas.Tool.PEN) {
             inkPreview.add(p);
         }
@@ -204,13 +272,16 @@ public final class PdfPageCanvas extends JPanel {
         java.awt.geom.Point2D.Float p = pagePoint(e.getPoint());
         if (!validPagePoint(p)) return;
         if (!inkPreview.isEmpty()) inkPreview.add(p);
-        if (!erasePreview.isEmpty()) erasePreview.add(p);
+        if (!erasePreview.isEmpty()) {
+            erasePreview.add(p);
+            refreshErasePreview();
+        }
         repaint();
     }
     private void completePdfEraser() {
         if (erasePreview.isEmpty()) return;
         java.util.List<java.awt.geom.Point2D.Float> path = java.util.List.copyOf(erasePreview);
-        erasePreview.clear();
+        erasePreview.clear(); liveErasedInk.clear();
         if (eraserMode.get() == view.DrawingCanvas.EraserMode.STROKE) {
             // Erase only PDF-origin ink strokes, never formulas or other library items.
             for (var placement : java.util.List.copyOf(controller.placements())) {
@@ -303,7 +374,10 @@ public final class PdfPageCanvas extends JPanel {
             }
         });
         MouseAdapter mouse = new MouseAdapter() {
+            @Override public void mouseEntered(MouseEvent e) { updateToolCursor(); }
+            @Override public void mouseMoved(MouseEvent e) { updateToolCursor(); }
             @Override public void mousePressed(MouseEvent e) {
+                updateToolCursor();
                 requestFocusInWindow();
                 if (inkToolActive()) {beginPdfStroke(e);return;}
                 // Keep PPT text-box exit behaviour; don't immediately create a body on that click.
@@ -317,6 +391,7 @@ public final class PdfPageCanvas extends JPanel {
                 selectionBoxEnd = selectionBoxStart;
                 lassoScreenPath.clear();
                 if (selectingBox) {
+                    selectionCandidates.clear();
                     selectedGroup.clear();
                     lassoScreenPath.add(e.getPoint());
                 }
@@ -340,10 +415,12 @@ public final class PdfPageCanvas extends JPanel {
                 repaint();
             }
             @Override public void mouseDragged(MouseEvent e) {
+                updateToolCursor();
                 if (inkToolActive()) {continuePdfStroke(e);return;}
                 if (selectingBox) {
                     selectionBoxEnd = e.getPoint();
                     lassoScreenPath.add(e.getPoint());
+                    refreshSelectionCandidates();
                     repaint(); return;
                 }
                 if (controller.selected() == null || anchor == null) return;
@@ -389,10 +466,17 @@ public final class PdfPageCanvas extends JPanel {
                         for (var item : controller.placements()) {
                             int cx = Math.round((item.x() + item.width()/2) * (float)zoom()) + MARGIN;
                             int cy = Math.round((item.y() + item.height()/2) * (float)zoom()) + MARGIN;
-                            if (region.contains(cx, cy)) selectedGroup.add(item.id());
+                            int left = Math.round(item.x() * (float) zoom()) + MARGIN;
+                            int top = Math.round(item.y() * (float) zoom()) + MARGIN;
+                            int width = Math.max(1, Math.round(item.width() * (float) zoom()));
+                            int height = Math.max(1, Math.round(item.height() * (float) zoom()));
+                            if (region.contains(cx, cy) || region.intersects(left, top, width, height))
+                                selectedGroup.add(item.id());
                         }
                         if (!selectedGroup.isEmpty()) controller.select(selectedGroup.iterator().next());
                     }
+                    // Keep the selected items highlighted after the lasso gesture ends.
+                    selectionCandidates.clear();
                     selectionBoxStart = null; selectionBoxEnd = null; lassoScreenPath.clear();
                     repaint();
                 }
@@ -436,24 +520,7 @@ public final class PdfPageCanvas extends JPanel {
         Graphics2D g2 = (Graphics2D) g.create();
         try {
             g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-            if (selectingBox && selectionBoxStart != null && selectionBoxEnd != null) {
-                int rx = Math.min(selectionBoxStart.x, selectionBoxEnd.x);
-                int ry = Math.min(selectionBoxStart.y, selectionBoxEnd.y);
-                int rw = Math.abs(selectionBoxStart.x - selectionBoxEnd.x);
-                int rh = Math.abs(selectionBoxStart.y - selectionBoxEnd.y);
-                g2.setColor(new Color(0, 122, 255, 24)); g2.fillRect(rx, ry, rw, rh);
-                g2.setColor(new Color(0, 122, 255, 180));
-                g2.setStroke(new BasicStroke(1.5f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER,
-                        10f, new float[]{5f, 4f}, 0f));
-                if (selectionToolActive() && drawingTool.get() == view.DrawingCanvas.Tool.LASSO
-                        && lassoScreenPath.size() >= 2) {
-                    java.awt.geom.Path2D.Float outline = new java.awt.geom.Path2D.Float();
-                    outline.moveTo(lassoScreenPath.get(0).x, lassoScreenPath.get(0).y);
-                    for (int i=1;i<lassoScreenPath.size();i++)
-                        outline.lineTo(lassoScreenPath.get(i).x, lassoScreenPath.get(i).y);
-                    g2.draw(outline);
-                } else g2.drawRect(rx, ry, rw, rh);
-            }
+            java.awt.geom.AffineTransform screenTransform = g2.getTransform();
             // Page and placements share the same physical view transform.
             g2.translate(MARGIN, MARGIN);
             g2.scale(zoom(), zoom());
@@ -478,13 +545,26 @@ public final class PdfPageCanvas extends JPanel {
                 int rasterWidth = Math.min(3200, Math.max(8, (int) Math.ceil(width * deviceScale)));
                 int rasterHeight = Math.min(3200, Math.max(8, (int) Math.ceil(height * deviceScale)));
                 g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
-                g2.drawImage(p.isNote() ? NoteRenderer.render(p, rasterWidth, rasterHeight)
-                        : MaterialRenderer.render(p.material(), rasterWidth, rasterHeight),
-                        x, y, width, height, null);
-                if ((selected != null && selected.id().equals(p.id())) || selectedGroup.contains(p.id())) {
-                    g2.setColor(new Color(33, 110, 220)); g2.setStroke(new BasicStroke(2));
-                    g2.drawRect(x, y, width, height);
+                BufferedImage preview = liveErasedInk.get(p.id());
+                if (preview == null) {
+                    g2.drawImage(p.isNote() ? NoteRenderer.render(p, rasterWidth, rasterHeight)
+                            : MaterialRenderer.render(p.material(), rasterWidth, rasterHeight),
+                            x, y, width, height, null);
+                } else if (preview.getWidth() > 1 || preview.getHeight() > 1) {
+                    g2.drawImage(preview, x, y, width, height, null);
+                }
+                if ((selected != null && selected.id().equals(p.id())) || selectedGroup.contains(p.id())
+                        || selectionCandidates.contains(p.id())) {
+                    g2.setColor(SELECTION_HALO);
+                    g2.fillRoundRect(x, y, width, height, 8, 8);
+                    g2.setColor(SELECTION_BLUE);
+                    g2.setStroke(selectionOutlineStroke());
+                    g2.drawRoundRect(x, y, width, height, 8, 8);
+                    g2.setStroke(new BasicStroke(1.5f));
+                    g2.setColor(Color.WHITE);
                     g2.fillRect(x + width - 9, y + height - 9, 9, 9);
+                    g2.setColor(SELECTION_BLUE);
+                    g2.drawRect(x + width - 9, y + height - 9, 9, 9);
                 }
             }
             if (!inkPreview.isEmpty()) {
@@ -497,6 +577,36 @@ public final class PdfPageCanvas extends JPanel {
                     else path.lineTo(point.x + MARGIN, point.y + MARGIN);
                 }
                 g2.draw(path);
+            }
+            // The lasso overlay MUST be rendered above the opaque PDF page.
+            // Painting it before the page background made its blue fill invisible.
+            g2.setTransform(screenTransform);
+            if (selectingBox && selectionBoxStart != null && selectionBoxEnd != null) {
+                int rx = Math.min(selectionBoxStart.x, selectionBoxEnd.x);
+                int ry = Math.min(selectionBoxStart.y, selectionBoxEnd.y);
+                int rw = Math.abs(selectionBoxStart.x - selectionBoxEnd.x);
+                int rh = Math.abs(selectionBoxStart.y - selectionBoxEnd.y);
+                if (selectionToolActive() && drawingTool.get() == view.DrawingCanvas.Tool.LASSO
+                        && lassoScreenPath.size() >= 2) {
+                    java.awt.geom.Path2D.Float outline = new java.awt.geom.Path2D.Float();
+                    outline.moveTo(lassoScreenPath.get(0).x, lassoScreenPath.get(0).y);
+                    for (int i = 1; i < lassoScreenPath.size(); i++)
+                        outline.lineTo(lassoScreenPath.get(i).x, lassoScreenPath.get(i).y);
+                    // Match Canvas: close the filled region, then draw a thin dashed blue boundary.
+                    java.awt.geom.Path2D.Float fill = (java.awt.geom.Path2D.Float) outline.clone();
+                    fill.closePath();
+                    g2.setColor(SELECTION_HALO);
+                    g2.fill(fill);
+                    g2.setColor(SELECTION_BLUE);
+                    g2.setStroke(selectionOutlineStroke());
+                    g2.draw(fill);
+                } else {
+                    g2.setColor(SELECTION_HALO);
+                    g2.fillRoundRect(rx, ry, rw, rh, 8, 8);
+                    g2.setColor(SELECTION_BLUE);
+                    g2.setStroke(selectionOutlineStroke());
+                    g2.drawRoundRect(rx, ry, rw, rh, 8, 8);
+                }
             }
         } finally { g2.dispose(); }
     }

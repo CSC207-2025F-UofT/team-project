@@ -185,6 +185,14 @@ public class StackedAppBuilder {
         int shortcut = Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx();
         root.registerKeyboardAction(e -> drawing.undo(), KeyStroke.getKeyStroke(KeyEvent.VK_Z, shortcut),
                 JComponent.WHEN_IN_FOCUSED_WINDOW);
+        // Canvas redo only. PDF keeps its own ribbon buttons for Undo/Redo.
+        root.registerKeyboardAction(e -> {
+            java.awt.Component focused = java.awt.KeyboardFocusManager.getCurrentKeyboardFocusManager().getFocusOwner();
+            // Do not steal Ctrl+Y from the PDF workspace or its text editor.
+            if (focused != null && SwingUtilities.isDescendingFrom(focused, pdfPanel)) return;
+            drawing.redo();
+        }, KeyStroke.getKeyStroke(KeyEvent.VK_Y, java.awt.event.InputEvent.CTRL_DOWN_MASK),
+                JComponent.WHEN_IN_FOCUSED_WINDOW);
         root.registerKeyboardAction(e -> {
             dialogs.get().save();
             board.refreshSaveState();
