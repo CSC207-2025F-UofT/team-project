@@ -1345,10 +1345,10 @@ public class DrawingCanvas extends JPanel {
             for (int j = i + 1; j < fresh.size(); j++) {
                 Stroke a = fresh.get(i);
                 Stroke b = fresh.get(j);
-                if (!EqualsSpot.isEqualsPair(List.of(a, b)) || !aloneIn(a, b)) {
+                if (!EqualsSpot.isEqualsPair(List.of(a, b)) || !book.holdsOnly(a, b)) {
                     continue;
                 }
-                Formula left = leftOf(a, b);
+                Formula left = book.leftOfPair(a, b);
                 if (left != null) {
                     Set<Stroke> both = new LinkedHashSet<>(left.getStrokes());
                     both.add(a);
@@ -1357,43 +1357,6 @@ public class DrawingCanvas extends JPanel {
                 }
             }
         }
-    }
-
-    // the bars' formulas hold nothing but them
-    private boolean aloneIn(Stroke a, Stroke b) {
-        for (Stroke bar : List.of(a, b)) {
-            Formula f = book.holding(bar);
-            if (f == null) {
-                return false;
-            }
-            for (Stroke s : f.getStrokes()) {
-                if (s != a && s != b) {
-                    return false;
-                }
-            }
-        }
-        return true;
-    }
-
-    // nearest unanswered formula on the bars' row ending just left of them, null if none
-    private Formula leftOf(Stroke a, Stroke b) {
-        Rectangle pair = boundsOf(List.of(a, b));
-        double w = (boundsOf(List.of(a)).width + boundsOf(List.of(b)).width) / 2.0;
-        Formula best = null;
-        double bestGap = 0;
-        for (Formula f : book.all()) {
-            if (f.getAnswer() != null || f.getStrokes().contains(a) || f.getStrokes().contains(b)) {
-                continue;
-            }
-            Rectangle box = boundsOf(f.getStrokes());
-            double gap = pair.x - box.getMaxX();
-            boolean sameRow = box.getMinY() <= pair.getCenterY() && pair.getCenterY() <= box.getMaxY();
-            if (sameRow && gap >= -0.5 * w && gap <= 3 * w && (best == null || gap < bestGap)) {
-                best = f;
-                bestGap = gap;
-            }
-        }
-        return best;
     }
 
     // limits written after the pause join the formula they sit on, judged as a whole row; else a new one
