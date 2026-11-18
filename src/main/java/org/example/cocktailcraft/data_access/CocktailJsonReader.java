@@ -6,6 +6,7 @@ import com.google.gson.JsonParser;
 import com.google.gson.JsonParseException;
 import org.example.cocktailcraft.entity.Cocktail;
 import org.example.cocktailcraft.entity.RecipeIngredient;
+import org.example.cocktailcraft.use_case.click.ClickDataAccessInterface;
 
 import java.io.IOException;
 import java.io.BufferedReader;
@@ -18,7 +19,7 @@ import java.util.List;
 import java.util.HashSet;
 import java.util.Set;
 
-public class CocktailJsonReader {
+public class CocktailJsonReader implements ClickDataAccessInterface {
     public static final String DATASET_INDEX = "/bar-assistant/cocktail-index.txt";
 
     /** Reads the bundled dataset once per call; callers should retain the result. */
@@ -84,5 +85,25 @@ public class CocktailJsonReader {
             throw new IOException("Resource not found: " + resourcePath);
         }
         return new InputStreamReader(stream, StandardCharsets.UTF_8);
+    }
+
+    @Override
+    public Cocktail get(String cocktailId){
+        try {
+            for (Cocktail cocktail : readAll()) {
+                if (cocktail.getId().equals(cocktailId)) {
+                    return cocktail;
+                }
+            }
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to read cocktail dataset", e);
+        }
+
+        return null;
+    }
+
+    @Override
+    public boolean existsByID(String cocktailId){
+        return get(cocktailId) != null;
     }
 }

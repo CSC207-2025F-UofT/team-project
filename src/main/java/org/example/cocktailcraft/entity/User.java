@@ -5,7 +5,7 @@ import java.util.ArrayList;
 public class User {
     private final String id;
     private final String name;
-    private final List<Cocktail> favourite;
+    private final List<String> favourite;
 
     public User(String id, String name) {
         this.id = id;
@@ -21,11 +21,16 @@ public class User {
         return name;
     }
 
-    public List<Cocktail> getFavourite() {
+    public List<String> getFavourite() {
         return List.copyOf(favourite);
     }
 
-    public void addFavourite(Cocktail cocktail){favourite.add(cocktail);}
+    public void favourite(String cocktailId) {
+        if (favourite.contains(cocktailId)) {
+            favourite.remove(cocktailId);
+        } else {
+            favourite.add(cocktailId);
+        }
+    }
 
-    public void removeFavourite(Cocktail cocktail){favourite.remove(cocktail);}
 }
