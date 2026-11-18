@@ -35,7 +35,8 @@ class NotStartedModuleTest {
         new InMemoryLabDataAccessObject(List.of(NOT_STARTED)),
         new LoadDashboardPresenter(viewModel, Clock.systemDefaultZone()),
         ChoiceOrderer.IN_ORDER));
-    List<String> texts = texts(new DashboardView(viewModel, controller, null, page -> { }));
+    List<String> texts = texts(new DashboardView(viewModel, controller, null, null,
+        page -> { }));
     assertTrue(texts.contains("Modules"));
     assertTrue(texts.contains("Progress:"));
     assertTrue(texts.contains("0%"));
@@ -43,9 +44,10 @@ class NotStartedModuleTest {
 
   @Test
   void headerShowsCourseAndNotebookLink() {
-    List<String> texts = texts(new HeaderBar("Pre-lab 3"));
+    List<String> texts = texts(new HeaderBar("Pre-lab 3", () -> { }));
     assertTrue(texts.contains("CHM136 Virtual Lab"));
     assertTrue(texts.contains("Pre-lab 3"));
+    assertTrue(texts.contains("Compound Lookup"));
     assertTrue(texts.contains("View Lab Notebook"));
   }
 

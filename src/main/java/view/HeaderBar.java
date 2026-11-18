@@ -12,7 +12,7 @@ import javax.swing.SwingConstants;
 
 /**
  * The green bar along the top of every page: the course name on the left, an optional page
- * title in the middle and the View Lab Notebook link on the right.
+ * title in the middle and the Compound Lookup and View Lab Notebook links on the right.
  */
 class HeaderBar extends JPanel {
 
@@ -20,8 +20,9 @@ class HeaderBar extends JPanel {
    * Builds the bar.
    *
    * @param title the page title shown in the middle, or "" for none
+   * @param openCompoundLookup opens the compound search when its link is clicked
    */
-  HeaderBar(String title) {
+  HeaderBar(String title, Runnable openCompoundLookup) {
     // Equal thirds keep the title centered however wide the two sides are.
     super(new GridLayout(1, 3));
     setBackground(Theme.GREEN);
@@ -37,12 +38,15 @@ class HeaderBar extends JPanel {
     page.setFont(Theme.SANS_REGULAR.deriveFont(Theme.HEADER_SIZE));
     add(page);
 
+    JButton compoundLookup = Theme.linkButton("Compound Lookup", Theme.ON_GREEN);
+    compoundLookup.addActionListener(event -> openCompoundLookup.run());
     JButton notebook = Theme.linkButton("View Lab Notebook", Theme.ON_GREEN);
     notebook.addActionListener(event -> {
       // TODO: open the student's lab notebook once it exists.
     });
     JPanel right = new JPanel(new FlowLayout(FlowLayout.RIGHT, 0, 0));
     right.setOpaque(false);
+    right.add(compoundLookup);
     right.add(notebook);
     add(right);
   }

@@ -9,6 +9,7 @@ import java.awt.Container;
 import java.awt.Dialog;
 import java.awt.FlowLayout;
 import java.awt.GridLayout;
+import java.awt.KeyboardFocusManager;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.function.Consumer;
@@ -29,6 +30,7 @@ public class DashboardView extends JPanel implements PropertyChangeListener {
   private final DashboardViewModel viewModel;
   private final LoadDashboardController loadDashboard;
   private final QuizView quizView;
+  private final CompoundSearchView compoundSearch;
   private final Consumer<Container> showPage;
   private final JPanel cards = new JPanel(new GridLayout(0, 3, 24, 24));
   private final JLabel message = new JLabel();
@@ -39,14 +41,16 @@ public class DashboardView extends JPanel implements PropertyChangeListener {
    * @param viewModel where the modules to show appear
    * @param loadDashboard reloads the modules, e.g. after the student saves progress
    * @param quizView the page Start opens
+   * @param compoundSearch what the header's Compound Lookup link opens
    * @param showPage shows a page in the app window
    */
   public DashboardView(DashboardViewModel viewModel, LoadDashboardController loadDashboard,
-      QuizView quizView, Consumer<Container> showPage) {
+      QuizView quizView, CompoundSearchView compoundSearch, Consumer<Container> showPage) {
     super(new BorderLayout());
     this.viewModel = viewModel;
     this.loadDashboard = loadDashboard;
     this.quizView = quizView;
+    this.compoundSearch = compoundSearch;
     this.showPage = showPage;
     viewModel.addPropertyChangeListener(this);
 
@@ -62,7 +66,7 @@ public class DashboardView extends JPanel implements PropertyChangeListener {
     cardsHolder.add(cards, BorderLayout.CENTER);
     JPanel top = new JPanel(new BorderLayout());
     top.add(cardsHolder, BorderLayout.NORTH);
-    add(new HeaderBar(""), BorderLayout.NORTH);
+    add(new HeaderBar("", this::showCompoundSearch), BorderLayout.NORTH);
     add(new JScrollPane(top), BorderLayout.CENTER);
     loadDashboard.execute();
   }
@@ -133,8 +137,24 @@ public class DashboardView extends JPanel implements PropertyChangeListener {
     Theme.showDimmed(dialog);
   }
 
+  /**
+   * The compound search popup. It's the same panel every time, so the last result is still
+   * there when the student opens it again.
+   */
+  private void showCompoundSearch() {
+    // The dashboard isn't on screen while the quiz is, so ask for the window that's in front
+    // instead of the dashboard's own.
+    JDialog dialog = new JDialog(
+        KeyboardFocusManager.getCurrentKeyboardFocusManager().getActiveWindow(),
+        "Compound Lookup", Dialog.ModalityType.APPLICATION_MODAL);
+    dialog.setContentPane(compoundSearch);
+    dialog.pack();
+    dialog.setLocationRelativeTo(dialog.getOwner());
+    Theme.showDimmed(dialog);
+  }
+
   private void openQuiz(ModuleState module) {
-    HeaderBar header = new HeaderBar("Pre-Procedure Quiz");
+    HeaderBar header = new HeaderBar("Pre-Procedure Quiz", this::showCompoundSearch);
     quizView.open(module, this::showDashboard, () -> showQuizComplete(module));
     JScrollPane scroll = new JScrollPane(quizView);
     scroll.getVerticalScrollBar().setUnitIncrement(16);
@@ -150,7 +170,8 @@ public class DashboardView extends JPanel implements PropertyChangeListener {
         Dialog.ModalityType.APPLICATION_MODAL);
     Runnable[] next = {this::showDashboard};
     dialog.setContentPane(new QuizCompletePanel(dialog::dispose, dialog::dispose, () -> {
-      next[0] = () -> showPage.accept(new HeaderBar(module.getTitle()).above(createNextScene()));
+      next[0] = () -> showPage.accept(new HeaderBar(module.getTitle(), this::showCompoundSearch)
+          .above(createNextScene()));
       dialog.dispose();
     }));
     dialog.pack();
