@@ -4,7 +4,7 @@ import entity.SurfaceFunction;
 
 // z = f(x, y) over an x / y window, the viewport is the floor of the box
 public final class SurfacePlot implements Plot {
-    static final int GRID = 44;
+    static final int GRID = 56;
 
     private final SurfaceFunction function;
     private final Viewport viewport;
