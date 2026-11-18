@@ -7,6 +7,7 @@ import view.answer.AnswerInk;
 import view.answer.AnswerLayout;
 import view.answer.AnswerPlacer;
 import view.answer.CanvasAnswer;
+import view.answer.MostInk;
 import interface_adapter.TextRun;
 import view.answer.Formula;
 import view.answer.FormulaBook;
@@ -605,7 +606,7 @@ public class DrawingCanvas extends JPanel {
         List<Long> rubbed = new ArrayList<>();
         for (Formula f : book.all()) {
             CanvasAnswer a = f.getAnswer();
-            if (a != null && AnswerInk.touches(a, INK_WIDTH, from.getX(), from.getY(), to.getX(), to.getY(), radius)) {
+            if (a != null && AnswerInk.touches(a, a.getPenWidth(), from.getX(), from.getY(), to.getX(), to.getY(), radius)) {
                 rubbed.add(f.getId());  // the ink, not the empty bits of its box
             }
         }
@@ -850,7 +851,7 @@ public class DrawingCanvas extends JPanel {
 
     // pen width doesn't scale, like strokes
     private static CanvasAnswer resized(CanvasAnswer a, Point2D anchor, double factor) {
-        return AnswerInk.refit(a.scaled(anchor.getX(), anchor.getY(), factor), INK_WIDTH);
+        return AnswerInk.refit(a.scaled(anchor.getX(), anchor.getY(), factor), a.getPenWidth());
     }
 
     private boolean nothingSelected() {
@@ -1440,19 +1441,24 @@ public class DrawingCanvas extends JPanel {
     // false if the formula is gone or changed since capture
     public boolean showAnswer(long id, long revision, AnswerKind kind, String text, boolean error) {
         return placeAnswer(id, revision, f -> AnswerPlacer.place(inDrawingOrder(f), kind, text, null, error,
-                INK_WIDTH, box -> hitsOtherInk(box, f)));
+                answerPen(f.getStrokes(), strokeWidths), box -> hitsOtherInk(box, f)));
     }
 
     // same spot rules, text w/ raised exponents
     public boolean showAnswer(long id, long revision, AnswerKind kind, List<TextRun> runs, boolean error) {
         return placeAnswer(id, revision, f -> AnswerPlacer.place(inDrawingOrder(f), kind, TextRun.plain(runs), runs,
-                error, INK_WIDTH, box -> hitsOtherInk(box, f)));
+                error, answerPen(f.getStrokes(), strokeWidths), box -> hitsOtherInk(box, f)));
     }
 
     // typeset: fractions stacked, powers raised; text is the readable copy that gets saved
     public boolean showTypesetAnswer(long id, long revision, AnswerKind kind, String text, String latex) {
         return placeAnswer(id, revision, f -> AnswerPlacer.placeTypeset(inDrawingOrder(f), kind, text, latex, false,
-                INK_WIDTH, box -> hitsOtherInk(box, f)));
+                answerPen(f.getStrokes(), strokeWidths), box -> hitsOtherInk(box, f)));
+    }
+
+    // answer's written w/ the pen most of its formula was
+    private static float answerPen(Collection<Stroke> formula, Map<Stroke, Float> widths) {
+        return MostInk.of(formula, s -> widths.getOrDefault(s, INK_WIDTH), INK_WIDTH);
     }
 
     private boolean placeAnswer(long id, long revision, Function<Formula, CanvasAnswer> placer) {
@@ -1786,7 +1792,9 @@ public class DrawingCanvas extends JPanel {
                     a = new CanvasAnswer(runs, info.error(), info.x(), info.y(),
                             info.width(), info.height(), info.fontSize());
                 }
-                restoredBook.put(f.withAnswer(a.withColor(new Color(info.color(),true))));
+                float pen = answerPen(group, restoredWidths);  // box refit, older saves drew every answer at 4
+                restoredBook.put(f.withAnswer(AnswerInk.refit(a.withColor(new Color(info.color(),true))
+                        .withPenWidth(pen), pen)));
             }
         }
         List<Picture> restoredAssets = new ArrayList<>();
@@ -2113,7 +2121,7 @@ public class DrawingCanvas extends JPanel {
     }
 
     private static void drawAnswer(Graphics2D world, CanvasAnswer a) {
-        AnswerInk.paint(world, a, a.isError() ? ANSWER_ERROR : a.getColor(), INK_WIDTH);
+        AnswerInk.paint(world, a, a.isError() ? ANSWER_ERROR : a.getColor(), a.getPenWidth());
     }
 
     private void drawStrokes(Graphics2D g2) {

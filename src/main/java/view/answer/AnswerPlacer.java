@@ -23,18 +23,21 @@ public final class AnswerPlacer {
         double w = text2d.getWidth();
         double ht = text2d.getHeight();
         Point2D at = spot(ink, kind, h, w, ht, ht / 2, hitsOtherInk);
-        return runs == null ? new CanvasAnswer(text, error, at.getX(), at.getY(), w, ht, size)
+        CanvasAnswer a = runs == null ? new CanvasAnswer(text, error, at.getX(), at.getY(), w, ht, size)
                 : new CanvasAnswer(runs, error, at.getX(), at.getY(), w, ht, size);
+        return a.withPenWidth(penWidth);
     }
 
-    // typeset answer, same spot rules; "0" as tall as the pen-ink one so old + new match
+    // typeset answer, same spot rules + same pen; "0" as tall as the pen-ink one
     public static CanvasAnswer placeTypeset(List<Stroke> ink, AnswerKind kind, String text, String latex,
                                             boolean error, double penWidth, Predicate<Rectangle2D> hitsOtherInk) {
         double h = AnswerLayout.charHeight(ink);
-        float size = TexAnswer.sizeFor(h + penWidth);
-        Rectangle2D box = TexAnswer.bounds(latex, size);
-        Point2D at = spot(ink, kind, h, box.getWidth(), box.getHeight(), TexAnswer.middle(latex, size), hitsOtherInk);
-        return CanvasAnswer.typeset(text, latex, error, at.getX(), at.getY(), box.getWidth(), box.getHeight(), size);
+        float size = AnswerInk.typesetSizeFor(h);
+        Rectangle2D box = AnswerInk.typesetBounds(latex, size, penWidth);
+        Point2D at = spot(ink, kind, h, box.getWidth(), box.getHeight(), AnswerInk.typesetMiddle(latex, size, penWidth),
+                hitsOtherInk);
+        return CanvasAnswer.typeset(text, latex, error, at.getX(), at.getY(), box.getWidth(), box.getHeight(), size)
+                .withPenWidth(penWidth);
     }
 
     // below if theres room, else right w/ its middle on the last glyph's

@@ -72,6 +72,27 @@ class DrawingCanvasTypesetAnswerTest {
     }
 
     @Test
+    void answerUsesThePenTheFormulaWasWrittenWith() throws Exception {
+        canvas.setPenWidth(9);
+        FormulaCapture c = writeOneEquals();
+        canvas.setPenWidth(2);  // switched after writing, answer still matches the formula
+        canvas.showTypesetAnswer(c.getId(), c.getRevision(), AnswerKind.AFTER_EQUALS, "2", "2");
+        assertEquals(9, canvas.getAnswers().get(0).getPenWidth());
+        DrawingCanvas reopened = new DrawingCanvas();
+        reopened.restoreCanvasState(canvas.exportCanvasState());
+        assertEquals(9, reopened.getAnswers().get(0).getPenWidth());
+        assertEquals(canvas.getAnswers().get(0).getBox(), reopened.getAnswers().get(0).getBox());
+    }
+
+    @Test
+    void plainAnswersGetThePenToo() {
+        canvas.setPenWidth(7);
+        FormulaCapture c = writeOneEquals();
+        canvas.showAnswer(c.getId(), c.getRevision(), AnswerKind.AFTER_EQUALS, "2", false);
+        assertEquals(7, canvas.getAnswers().get(0).getPenWidth());
+    }
+
+    @Test
     void eraserTakesItOff() {
         FormulaCapture c = writeOneEquals();
         canvas.showTypesetAnswer(c.getId(), c.getRevision(), AnswerKind.AFTER_EQUALS, "2", "2");

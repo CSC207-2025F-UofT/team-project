@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-// answer text drawn like pen ink: kalam's centre line traced w/ the same round pen
+// answer text drawn like pen ink: kalam (or the typeset tex) centre line traced w/ the same round pen
 public final class AnswerInk {
     static final float REF = 240f;  // font size the centre lines get traced at
     private static final int PAD = 2;
@@ -32,6 +32,7 @@ public final class AnswerInk {
         }
     };
     private static double digitRatio;  // centre line height of "0" per point
+    private static double texDigitRatio;  // same for typeset
 
     private AnswerInk() {
     }
@@ -44,15 +45,37 @@ public final class AnswerInk {
         return (float) (charHeight / digitRatio);
     }
 
+    // tex size whose "0" centre line is charHeight tall
+    public static synchronized float typesetSizeFor(double charHeight) {
+        if (texDigitRatio == 0) {
+            texDigitRatio = centerline("", null, "0").getBounds2D().getHeight() / REF;
+        }
+        return (float) (charHeight / texDigitRatio);
+    }
+
     // ink box at (0,0): centre line box + half a pen all round
     public static Rectangle2D bounds(String text, List<TextRun> runs, float size, double penWidth) {
-        Rectangle2D line = scaled(text, runs, size).getBounds2D();
-        return new Rectangle2D.Double(0, 0, line.getWidth() + penWidth, line.getHeight() + penWidth);
+        return box(scaled(text, runs, null, size), penWidth);
+    }
+
+    public static Rectangle2D typesetBounds(String latex, float size, double penWidth) {
+        return box(scaled("", null, latex, size), penWidth);
+    }
+
+    // ink box top down to the fraction bar line, that's what lines up w/ the formula's middle
+    public static double typesetMiddle(String latex, float size, double penWidth) {
+        double lineTop = centerline("", null, latex).getBounds2D().getY() * size / REF;
+        return TexAnswer.axis(latex, size) - lineTop + penWidth / 2;
+    }
+
+    private static Rectangle2D box(Path2D line, double penWidth) {
+        Rectangle2D b = line.getBounds2D();
+        return new Rectangle2D.Double(0, 0, b.getWidth() + penWidth, b.getHeight() + penWidth);
     }
 
     // centre line where the answer sits, world coords
     public static Path2D placed(CanvasAnswer a, double penWidth) {
-        Path2D line = scaled(a.getText(), a.getRuns(), a.getFontSize());
+        Path2D line = scaled(a.getText(), a.getRuns(), a.getLatex(), a.getFontSize());
         Rectangle2D b = line.getBounds2D();
         line.transform(AffineTransform.getTranslateInstance(a.getX() + penWidth / 2 - b.getX(),
                 a.getY() + penWidth / 2 - b.getY()));
@@ -65,10 +88,6 @@ public final class AnswerInk {
     }
 
     public static void paint(Graphics2D world, CanvasAnswer a, Color color, double penWidth) {
-        if (a.isTypeset()) {
-            TexAnswer.paint(world, a, color);  // filled glyphs, no pen
-            return;
-        }
         Graphics2D g = (Graphics2D) world.create();
         g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         g.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_PURE);
@@ -81,9 +100,6 @@ public final class AnswerInk {
     // eraser dragged from (x1,y1) to (x2,y2) w/ this radius hits actual ink, not just the box
     public static boolean touches(CanvasAnswer a, double penWidth, double x1, double y1, double x2, double y2,
                                   double radius) {
-        if (a.isTypeset()) {
-            return TexAnswer.touches(a, x1, y1, x2, y2, radius);
-        }
         Rectangle2D box = a.getBox();
         box.setRect(box.getX() - radius, box.getY() - radius, box.getWidth() + 2 * radius,
                 box.getHeight() + 2 * radius);
@@ -103,8 +119,7 @@ public final class AnswerInk {
 
     // same answer after a resize, box refit since the pen width doesn't scale
     public static CanvasAnswer refit(CanvasAnswer a, double penWidth) {
-        Rectangle2D b = a.isTypeset() ? TexAnswer.bounds(a.getLatex(), a.getFontSize())
-                : bounds(a.getText(), a.getRuns(), a.getFontSize(), penWidth);
+        Rectangle2D b = box(scaled(a.getText(), a.getRuns(), a.getLatex(), a.getFontSize()), penWidth);
         return a.sized(b.getWidth(), b.getHeight());
     }
 
@@ -113,21 +128,42 @@ public final class AnswerInk {
     }
 
     // centre line at this size, fresh copy
-    private static Path2D scaled(String text, List<TextRun> runs, float size) {
-        Path2D line = new Path2D.Double(centerline(text, runs));
+    private static Path2D scaled(String text, List<TextRun> runs, String latex, float size) {
+        Path2D line = new Path2D.Double(centerline(text, runs, latex));
         line.transform(AffineTransform.getScaleInstance(size / REF, size / REF));
         return line;
     }
 
-    // traced once per text at REF size, baseline origin
-    static synchronized Path2D centerline(String text, List<TextRun> runs) {
-        Key key = new Key(text, runs);
+    static Path2D centerline(String text, List<TextRun> runs) {
+        return centerline(text, runs, null);
+    }
+
+    // traced once per answer at REF size; text has a baseline origin, tex its box top-left
+    static synchronized Path2D centerline(String text, List<TextRun> runs, String latex) {
+        Key key = new Key(text, runs, latex);
         Path2D line = LINES.get(key);
         if (line == null) {
-            line = runs == null ? trace(AnswerFont.outline(text, REF), REF) : traceEachSize(runs);
+            if (latex != null) {
+                line = traceTex(latex);
+            } else {
+                line = runs == null ? trace(AnswerFont.outline(text, REF), REF) : traceEachSize(runs);
+            }
             LINES.put(key, line);
         }
         return line;
+    }
+
+    // tex painted filled at REF then thinned like kalam is; fraction bars + roots come out as single lines
+    private static Path2D traceTex(String latex) {
+        Rectangle2D b = TexAnswer.bounds(latex, REF);
+        int w = (int) Math.ceil(b.getWidth()) + 2 * PAD;
+        int h = (int) Math.ceil(b.getHeight()) + 2 * PAD;
+        BufferedImage img = new BufferedImage(w, h, BufferedImage.TYPE_BYTE_GRAY);
+        Graphics2D g = img.createGraphics();
+        g.translate(PAD, PAD);
+        TexAnswer.paint(g, latex, REF, Color.WHITE);
+        g.dispose();
+        return thinned(lit(img), w, h, -PAD, -PAD, REF, true);
     }
 
     // exponents traced apart, their twigs are 0.6x
@@ -144,15 +180,21 @@ public final class AnswerInk {
         Rectangle2D b = outline.getBounds2D();
         int w = (int) Math.ceil(b.getWidth()) + 2 * PAD;
         int h = (int) Math.ceil(b.getHeight()) + 2 * PAD;
-        Path2D line = new Path2D.Double();
         if (b.isEmpty()) {
-            return line;
+            return new Path2D.Double();
         }
-        boolean[] filled = Pinholes.fill(raster(outline, b, w, h), w, h, PINHOLE);
-        boolean[] thin = Skeleton.thin(filled, w, h);
+        return thinned(raster(outline, b, w, h), w, h, b.getX() - PAD, b.getY() - PAD, glyphSize, false);
+    }
+
+    // filled px -> 1px centre line; px (0,0) sits at (left, top); tex has dead straight 45deg strokes
+    private static Path2D thinned(boolean[] lit, int w, int h, double left, double top, float glyphSize,
+                                  boolean straightDiagonals) {
+        Path2D line = new Path2D.Double();
+        boolean[] filled = Pinholes.fill(lit, w, h, PINHOLE);
+        boolean[] thin = straightDiagonals ? Skeleton.thinKeepingDiagonals(filled, w, h) : Skeleton.thin(filled, w, h);
         boolean[] on = Skeleton.sharpen(thin, w, h, (int) Math.round(TWIG * glyphSize));
-        double ox = b.getX() - PAD + 0.5;
-        double oy = b.getY() - PAD + 0.5;
+        double ox = left + 0.5;
+        double oy = top + 0.5;
         for (int y = 0; y < h; y++) {
             for (int x = 0; x < w; x++) {
                 if (!on[y * w + x]) {
@@ -209,8 +251,13 @@ public final class AnswerInk {
         g.setColor(Color.WHITE);
         g.fill(outline);
         g.dispose();
-        boolean[] on = new boolean[w * h];
-        for (int y = 0; y < h; y++) {
+        return lit(img);
+    }
+
+    private static boolean[] lit(BufferedImage img) {
+        int w = img.getWidth();
+        boolean[] on = new boolean[w * img.getHeight()];
+        for (int y = 0; y < img.getHeight(); y++) {
             for (int x = 0; x < w; x++) {
                 on[y * w + x] = img.getRaster().getSample(x, y, 0) > 127;
             }
@@ -221,20 +268,23 @@ public final class AnswerInk {
     private static final class Key {
         private final String text;
         private final List<TextRun> runs;
+        private final String latex;
 
-        Key(String text, List<TextRun> runs) {
+        Key(String text, List<TextRun> runs, String latex) {
             this.text = text;
             this.runs = runs;
+            this.latex = latex;
         }
 
         @Override
         public boolean equals(Object o) {
-            return o instanceof Key && text.equals(((Key) o).text) && Objects.equals(runs, ((Key) o).runs);
+            return o instanceof Key && text.equals(((Key) o).text) && Objects.equals(runs, ((Key) o).runs)
+                    && Objects.equals(latex, ((Key) o).latex);
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(text, runs);
+            return Objects.hash(text, runs, latex);
         }
     }
 }
