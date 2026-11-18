@@ -61,5 +61,4 @@ public class Trip {
     public List<String> getPhotoIds() {
         return List.copyOf(this.photoIds);
     }
-
 }
