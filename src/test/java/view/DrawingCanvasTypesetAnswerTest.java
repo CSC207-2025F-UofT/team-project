@@ -61,6 +61,17 @@ class DrawingCanvasTypesetAnswerTest {
     }
 
     @Test
+    void savedAndReopenedStaysTypeset() throws Exception {
+        FormulaCapture c = writeOneEquals();
+        canvas.showTypesetAnswer(c.getId(), c.getRevision(), AnswerKind.AFTER_EQUALS, "1/3", "\\frac{1}{3}");
+        DrawingCanvas reopened = new DrawingCanvas();
+        reopened.restoreCanvasState(canvas.exportCanvasState());
+        CanvasAnswer a = reopened.getAnswers().get(0);
+        assertEquals("\\frac{1}{3}", a.getLatex());
+        assertEquals(canvas.getAnswers().get(0).getBox(), a.getBox());
+    }
+
+    @Test
     void eraserTakesItOff() {
         FormulaCapture c = writeOneEquals();
         canvas.showTypesetAnswer(c.getId(), c.getRevision(), AnswerKind.AFTER_EQUALS, "2", "2");

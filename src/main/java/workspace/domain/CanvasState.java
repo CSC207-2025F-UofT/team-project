@@ -25,17 +25,23 @@ public record CanvasState(List<Ink> ink, List<Formula> formulas, List<Asset> ass
                 throw new IllegalArgumentException("Invalid stroke");
         }
     }
+    /** latex = typeset answer source, "" for older pen-ink answers. */
     public record Formula(List<Integer> strokes, String answer, boolean error,
                           double x, double y, double width, double height, float fontSize, int color,
-                          List<TextPart> textParts) {
+                          List<TextPart> textParts, String latex) {
         public Formula(List<Integer> strokes, String answer, boolean error,
                        double x, double y, double width, double height, float fontSize, int color) {
             this(strokes, answer, error, x, y, width, height, fontSize, color, List.of());
+        }
+        public Formula(List<Integer> strokes, String answer, boolean error, double x, double y, double width,
+                       double height, float fontSize, int color, List<TextPart> textParts) {
+            this(strokes, answer, error, x, y, width, height, fontSize, color, textParts, "");
         }
         public Formula {
             strokes = List.copyOf(strokes);
             textParts = List.copyOf(Objects.requireNonNull(textParts));
             answer = Objects.requireNonNull(answer);
+            latex = Objects.requireNonNull(latex);
             if (strokes.isEmpty() || !Double.isFinite(x) || !Double.isFinite(y)
                     || !Double.isFinite(width) || !Double.isFinite(height) || width < 0 || height < 0
                     || !Float.isFinite(fontSize) || fontSize < 0) throw new IllegalArgumentException("Invalid formula");

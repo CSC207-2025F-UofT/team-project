@@ -1733,7 +1733,8 @@ public class DrawingCanvas extends JPanel {
                     a == null ? 0 : a.getWidth(), a == null ? 0 : a.getHeight(),
                     a == null ? 0 : a.getFontSize(), a == null ? Color.BLACK.getRGB() : a.getColor().getRGB(),
                     a == null || a.getRuns() == null ? List.of() : a.getRuns().stream()
-                            .map(run -> new CanvasState.TextPart(run.getText(),run.isRaised())).toList()));
+                            .map(run -> new CanvasState.TextPart(run.getText(),run.isRaised())).toList(),
+                    a == null || !a.isTypeset() ? "" : a.getLatex()));
         }
         List<CanvasState.Asset> assets = new ArrayList<>();
         for (Picture p : pictures) assets.add(new CanvasState.Asset(p.latex, p.result, png(p.image),
@@ -1773,7 +1774,10 @@ public class DrawingCanvas extends JPanel {
             Formula f = restoredBook.add(group, nextRevision());
             if (!info.answer().isBlank()) {
                 CanvasAnswer a;
-                if (info.textParts().isEmpty()) {
+                if (!info.latex().isEmpty()) {
+                    a = CanvasAnswer.typeset(info.answer(), info.latex(), info.error(), info.x(), info.y(),
+                            info.width(), info.height(), info.fontSize());
+                } else if (info.textParts().isEmpty()) {
                     a = new CanvasAnswer(info.answer(), info.error(), info.x(), info.y(),
                             info.width(), info.height(), info.fontSize());
                 } else {
