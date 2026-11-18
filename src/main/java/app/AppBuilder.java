@@ -1,3 +1,28 @@
+package app;
+import java.nio.file.Paths;
+import javax.swing.JFrame;
+
+//Access interfaces
+import use_case.recipe.*;
+import use_case.favorite_recipe.*;
+
+//Data Access Implementations
+import data_access.*;
+
+//Use Cases
+import use_case.search_recipe.*;
+import use_case.view_recipe.*;
+import use_case.filter_recipe.*;
+
+//Interface Adapters
+import interface_adapter.search_recipe.*;
+import interface_adapter.view_recipe.*;
+import interface_adapter.filter_recipe.*;
+import interface_adapter.favorite_recipe.*;
+
+//GUI
+import view.*;
+
 public class AppBuilder {
     //Data Access Objects
     private final RecipeDataAccessInterface recipeDAO;

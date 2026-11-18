@@ -65,7 +65,7 @@ Users can search for recipes, view recipe details, filter results, and save reci
 - The user has selected a recipe from search or filter results.
 - A valid recipe ID is available.
 
-**Main Success Scenario:**
+**app.Main Success Scenario:**
     1. The user clicks "View Details" on a recipe.
     2. The system receives the selected recipe ID.
     3. The system retrieves the recipe details from TheMealDB API.
@@ -92,7 +92,7 @@ Users can search for recipes, view recipe details, filter results, and save reci
 - The user is on the recipe search or browsing page.
 - Recipe data and available filtering options can be accessed.
 
-**Main Success Scenario:**
+**app.Main Success Scenario:**
 1. The user selects a category or dietary preference from the available filter options.
 2. The system receives the selected filter criteria.
 3. The system retrieves recipe data from TheMealDB API and applies the selected filters.
