@@ -16,6 +16,6 @@ public class ConfigureBotController {
      *
      */
     public void execute() {
-        //TODO: implement this after implementing ConfigureBotInputData
+        //TODO: implement this after implementing ConfigureBotInteractor
     }
 }
