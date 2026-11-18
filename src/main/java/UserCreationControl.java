@@ -16,12 +16,17 @@ public class UserCreationControl extends AccountCreationControl {
     return getContents().getJSONArray("accounts");
   }
 
+  public JSONArray returnImages() {
+    return getContents().getJSONArray("profilePicture");
+  }
+
   public void addData(String country, String IP, LocalDateTime time, String email, JSONArray accounts) throws IOException{
     returnCreatedCountry().put(country);
     returnCreatedIP().put(IP);
     returnCreatedAt().put(time.toString());
     returnAccounts().put(accounts);
     returnEmail().put(email);
+    returnImages().put("src/main/profile_images/default_profile.png");
     writeContents();
   }
 

@@ -1,5 +1,7 @@
+import org.json.JSONException;
 import org.json.JSONObject;
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.Set;
 
 public class CurrencyControl extends JSONControl {
@@ -37,6 +39,22 @@ public class CurrencyControl extends JSONControl {
     getContents().getJSONArray("defaultCurrency").put(userID, newCurrency);
     writeContents();
   }
+
+  public void refreshCurrency(LocalDate date) throws IOException, InterruptedException {
+    Set<String> currencyCodes = returnCurrencies().keySet();
+    JSONObject currencies = returnCurrencies();
+
+    for (String currency : currencyCodes) {
+      if (!(currency.equals("CAD"))) {
+      try{
+        CurrencyAPI metric = new CurrencyAPI(currency, date);
+        currencies.put(currency, metric.getResponse());}
+      catch (JSONException ignored) {
+      }
+      }
+      }
+    writeContents();
+    }
 
   public String returnCurrency(int userID) {
     return getContents().getJSONArray("defaultCurrency").getString(userID);

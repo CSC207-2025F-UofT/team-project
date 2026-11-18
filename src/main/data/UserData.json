@@ -1,10 +1,11 @@
 {
-  "usernames": [],
-  "userID": [],
-  "passwords": [],
-  "createdCountry": [],
-  "createdIP": [],
-  "createdAt": [],
-  "emails" : [],
-  "accounts" : []
+    "emails": ["test@example.com"],
+    "createdAt": ["2026-11-18T13:48:20.063169600"],
+    "profilePicture": ["src\\main\\profile_images\\0.png"],
+    "passwords": ["password123"],
+    "createdIP": ["100.71.94.15"],
+    "createdCountry": ["United States"],
+    "usernames": ["TestUser"],
+    "accounts": [[]],
+    "userID": [0]
 }

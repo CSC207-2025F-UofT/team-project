@@ -1,8 +1,12 @@
 import org.json.JSONArray;
 
+import javax.swing.*;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -17,6 +21,7 @@ public class UserProfile {
     private final String createdIPAddress;
     private String password;
     private ArrayList<Integer> accounts;
+    private String profileImage;
 
     public UserProfile(String name,
                        String email, String password) throws IOException {
@@ -40,6 +45,7 @@ public class UserProfile {
         PasswordControl allPasswords = new PasswordControl(userDatabase);
         this.password = password;
         allPasswords.addPassword(password);
+        this.profileImage = "src/main/profile_images/default_profile.png";
     }
 
     public void addAccount (Account newAccount) throws IOException {
@@ -75,6 +81,19 @@ public class UserProfile {
         }
       }
       return balance;
+    }
+
+    public ImageIcon uploadProfileImage(String imageSource) throws IOException {
+      ImageIcon profileImage = new ImageIcon(imageSource);
+      Path source = Path.of(imageSource);
+      Path destination = Path.of("src/main/profile_images", this.userID + ".png");
+      Files.createDirectories(destination.getParent());
+      Files.copy(source, destination, StandardCopyOption.REPLACE_EXISTING);
+      this.profileImage = String.valueOf(destination);
+      UserCreationControl imageUpdator = new UserCreationControl("UserData.json");
+      imageUpdator.returnImages().put(this.userID, this.profileImage);
+      imageUpdator.writeContents();
+      return profileImage;
     }
 
     public int getNumAccounts() {
