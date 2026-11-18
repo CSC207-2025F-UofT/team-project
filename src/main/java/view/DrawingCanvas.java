@@ -1580,7 +1580,7 @@ public class DrawingCanvas extends JPanel {
     private FormulaCapture capture(Formula f) {
         List<Stroke> ink = inDrawingOrder(f);
         List<Stroke> pair = EqualsSpot.trailingPair(ink, f.getCharHeight());
-        double k = recognitionScale(f.getCharHeight());
+        double k = recognitionScale(AnswerLayout.tallestStroke(ink));  // median would be x height for lowercase
         BufferedImage rest = pair.isEmpty() ? null : imageOf(readable(minus(ink, pair), k));  // in case the model loses the =
         return new FormulaCapture(f.getId(), f.getRevision(), imageOf(readable(ink, k)), rest);
     }

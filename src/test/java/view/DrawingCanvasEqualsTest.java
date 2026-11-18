@@ -174,6 +174,18 @@ class DrawingCanvasEqualsTest {
     }
 
     @Test
+    void normalSizeLowercaseIsNotRescaled() {
+        drag(100, 110, 120, 130);              // x, 20 tall like lowercase
+        drag(120, 110, 100, 130);
+        drag(130, 120, 150, 120);              // +
+        drag(140, 110, 140, 130);
+        drag(160, 110, 170, 130, 165, 140);    // y w/ its tail, 30 tall
+        drag(170, 110, 160, 135);
+        BufferedImage asToday = canvas.toFormulaImage();
+        assertImagesEqual(asToday, bindAll().getImage());
+    }
+
+    @Test
     void shrunkFormulaIsCapturedBigger() {
         drag(100, 100, 100, 110);  // 10 tall
         drag(105, 100, 105, 110);
