@@ -28,6 +28,10 @@ public class LocationInfo {
         return city;
     }
 
+    public String getCounty() {
+        return county;
+    }
+
     public String getState() {
         return state;
     }

@@ -85,7 +85,7 @@ class ListTripsInteractorTest {
     }
 
     private static Photo photo(String id, LocalDateTime time, LocationInfo info) {
-        return new Photo(id, info == null ? null : new Location(45, -73, info), time);
+        return new Photo(id, null, info == null ? null : new Location(45, -73, info), time);
     }
 
     private static LocalDateTime day(int d) {

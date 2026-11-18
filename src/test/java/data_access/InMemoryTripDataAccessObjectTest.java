@@ -37,7 +37,7 @@ class InMemoryTripDataAcessObjectTest {
 
     @Test 
     void deleteTripKeepsPhotos() {
-        Photo p = new Photo("p1", null, T0);
+        Photo p = new Photo("p1", null, null, T0);
         dao.savePhoto(p, "/x.jpg");
         Trip trip = new Trip("t1", "Trip", null, null);
         trip.addPhoto(p);
@@ -64,11 +64,11 @@ class InMemoryTripDataAcessObjectTest {
 
     @Test 
     void getTripPhotosSkipsUnknownIds() {
-        Photo known = new Photo("p1", null, T0);
+        Photo known = new Photo("p1", null, null, T0);
         dao.savePhoto(known, "/x.jpg");
         Trip trip = new Trip("t1", "Trip", null, null);
         trip.addPhoto(known);
-        trip.addPhoto(new Photo("ghost", null, T0));
+        trip.addPhoto(new Photo("ghost", null, null, T0));
         dao.saveTrip(trip);
 
         assertEquals(List.of(known), dao.getTripPhotos("t1"));
