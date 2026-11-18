@@ -62,6 +62,14 @@ Member4: \
 | Yuhang | Select Character, Confirm Cast |
 | Andy | Cast Response, Resolve Cast |
 
+## UML Diagrams
+### Entities
+![UML_Diagram.png](src/main/resources/Misc_Images/UML_Diagram.png)
+
+## API
+### Java Websockets
+We will be using Java Websockets to host and join multiplayer (2 player) games. 
+
 ## Credits
 **Artwork & Original Design by** \
 *Andy Li —@Ilost333times/andsty*
