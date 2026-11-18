@@ -6,6 +6,8 @@ import javax.swing.*;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.MatteBorder;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.Utilities;
 import java.awt.*;
 
 /**
@@ -83,4 +85,38 @@ public class SwingDeckRenderer extends JPanel implements ListCellRenderer<SwingD
 
         return this;
     }
+
+    public String getWordAtPoint(JList<? extends SwingDeck> list, SwingDeck deck,
+                                 int index, Point clickPoint, Rectangle cellBounds) {
+        // make JList render the selected flashcard
+        getListCellRendererComponent(list, deck, index, true, false);
+        setBounds(cellBounds);
+        doLayout();
+
+        // convert point relative to flashcard panel
+        int rowX = clickPoint.x - cellBounds.x;
+        int rowY = clickPoint.y - cellBounds.y;
+
+        int cardX = rowX - cardPanel.getX();
+        int cardY = rowY - cardPanel.getY();
+
+        Component target = cardPanel.getComponentAt(cardX, cardY);
+
+        // extract the word
+        if (target instanceof JTextArea) {
+            JTextArea textArea = (JTextArea) target;
+            try {
+                Point textPoint = new Point(cardX - textArea.getX(), cardY - textArea.getY());
+                int offset = textArea.viewToModel2D(textPoint);
+                int start = Utilities.getWordStart(textArea, offset);
+                int end = Utilities.getWordEnd(textArea, offset);
+                // strip punctuation
+                return textArea.getText(start, end - start).replaceAll("[^a-zA-Z0-9-]", "").trim();
+            } catch (BadLocationException ex) {
+                return null;
+            }
+        }
+        return null;
+    }
+
 }

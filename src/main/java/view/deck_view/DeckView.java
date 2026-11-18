@@ -121,6 +121,32 @@ public class DeckView extends JPanel implements GetDeckViewModelListener {
             }
         });
 
+        flashcards.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent e) {
+                if (SwingUtilities.isRightMouseButton(e)) {
+                    // get closest index in JList to mouseclick
+                    int index = flashcards.locationToIndex(e.getPoint());
+                    if (index == -1) return;
+
+                    // check if mouseclick is within list item
+                    Rectangle cellBounds = flashcards.getCellBounds(index, index);
+                    if (cellBounds == null || !cellBounds.contains(e.getPoint())) return;
+
+                    // get word from SwingDeckRenderer
+                    SwingDeck deck = deckModel.getElementAt(index);
+                    SwingDeckRenderer renderer = (SwingDeckRenderer) flashcards.getCellRenderer();
+                    String clickedWord = renderer.getWordAtPoint(
+                            flashcards, deck, index, e.getPoint(), cellBounds
+                    );
+
+                    // check that clickedWord is not whitespace
+                    if (clickedWord != null && !clickedWord.isEmpty()) {
+                        showDefinePopup(flashcards, e.getX(), e.getY(), clickedWord);
+                }
+            }
+        }});
+
         // scroll pane
         JScrollPane scrollPane = new JScrollPane(flashcards);
         scrollPane.setBorder(BorderFactory.createLineBorder(AppTheme.BORDER_COLOR, 1));
@@ -177,5 +203,23 @@ public class DeckView extends JPanel implements GetDeckViewModelListener {
 
     public void setGetAllDecksController(GetAllDecksController getAllDecksController) {
         this.getAllDecksController = getAllDecksController;
+    }
+
+    private void showDefinePopup(Component invoker, int x, int y, String word) {
+        JPopupMenu popupMenu = new JPopupMenu();
+
+        JMenuItem defineWordItem = new JMenuItem("Define \"" + word + "\"");
+        defineWordItem.setFont(new Font(AppTheme.FONT_NAME, Font.PLAIN, AppTheme.FONT_SIZE_BUTTON));
+        defineWordItem.setForeground(AppTheme.TEXT_SECONDARY);
+        defineWordItem.setBackground(AppTheme.BG_SECONDARY);
+        defineWordItem.setOpaque(true);
+
+        defineWordItem.addActionListener(event -> {
+            // TODO: call controller here to execute API use case
+            System.out.println("Dictionary API for " + word);
+        });
+
+        popupMenu.add(defineWordItem);
+        popupMenu.show(invoker, x, y);
     }
 }
