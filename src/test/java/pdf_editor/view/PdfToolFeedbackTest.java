@@ -92,8 +92,10 @@ class PdfToolFeedbackTest {
             assertEquals(32, img.getWidth());
             assertTrue(hasVisiblePixels(img));
         }
-        assertNotEquals(PdfToolCursors.imageFor(DrawingCanvas.Tool.PEN).getRGB(23, 23),
-                PdfToolCursors.imageFor(DrawingCanvas.Tool.ERASER).getRGB(23, 23));
+        BufferedImage pen = PdfToolCursors.imageFor(DrawingCanvas.Tool.PEN);
+        BufferedImage eraser = PdfToolCursors.imageFor(DrawingCanvas.Tool.ERASER);
+        assertTrue(imagesDiffer(pen, eraser),
+                "Pen and eraser should have different cursor artwork, not just different names");
     }
 
     @Test void lassoFillIsVisibleAboveOpaquePdfPageWhileDragging() {
@@ -139,6 +141,16 @@ class PdfToolFeedbackTest {
         }
     }
 
+
+    private static boolean imagesDiffer(BufferedImage first, BufferedImage second) {
+        if (first.getWidth() != second.getWidth() || first.getHeight() != second.getHeight()) return true;
+        for (int y = 0; y < first.getHeight(); y++) {
+            for (int x = 0; x < first.getWidth(); x++) {
+                if (first.getRGB(x, y) != second.getRGB(x, y)) return true;
+            }
+        }
+        return false;
+    }
 
     private static boolean hasVisiblePixels(BufferedImage img) {
         for (int y = 0; y < img.getHeight(); y++) for (int x = 0; x < img.getWidth(); x++)

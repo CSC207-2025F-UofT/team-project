@@ -1250,45 +1250,84 @@ public class DrawingCanvas extends JPanel {
         return f == null ? null : boundsOf(f.getStrokes());
     }
 
-    // bind loose ink near last as one formula (other session groups too); null if last gone/bound
+    // Bind a new pen session, including small limits written above/below a formula.
+    // Distinct writing lines remain independent; a confirmed nearby limit invalidates
+    // an existing answer, because its recognition input has changed.
     public FormulaCapture registerNewInk(Stroke last, Collection<Stroke> session) {
         if (!strokes.contains(last) || book.isBound(last)) {
             return null;
         }
-        // char size from everything written this round, a lone "-" would make it tiny
         List<Stroke> pool = new ArrayList<>();
         for (Stroke s : strokes) {
             if (!book.isBound(s) && (s == last || session.contains(s))) {
                 pool.add(s);
             }
         }
-        double h = AnswerLayout.strokeHeight(pool);
-        Formula mine = book.add(looseGroup(last, h), nextRevision());
-        for (Stroke s : session) {
-            if (strokes.contains(s) && !book.isBound(s)) {
-                book.add(looseGroup(s, h), nextRevision());
+        double typicalHeight = AnswerLayout.strokeHeight(pool);
+        double groupingHeight = Math.max(typicalHeight,
+                Math.min(AnswerLayout.tallestStroke(pool), typicalHeight * 2));
+        FormulaCapture primary = null;
+        for (Stroke seed : pool) {
+            if (!strokes.contains(seed) || book.isBound(seed)) continue;
+            Set<Stroke> group = looseGroup(seed, groupingHeight);
+            Formula target = limitOwner(group);
+            if (target != null) {
+                Set<Stroke> joined = new LinkedHashSet<>(target.getStrokes());
+                joined.addAll(group);
+                Formula updated = book.add(joined, nextRevision());
+                notifyChanged(target.getId());
+                if (group.contains(last)) primary = capture(updated);
+            } else {
+                Formula created = book.add(group, nextRevision());
+                if (group.contains(last)) primary = capture(created);
             }
         }
-        return capture(mine);
+        // A limit may be connected through another stroke that was grouped first.
+        // The capture must always describe the current, complete formula.
+        Formula owner = book.holding(last);
+        return owner == null ? primary : capture(owner);
     }
 
-    // lasso pick -> one formula, gaps and all; null if empty or answered
+    /** A vertically adjacent, horizontally aligned annotation belongs to the formula. */
+    private Formula limitOwner(Collection<Stroke> added) {
+        Rectangle ink = boundsOf(added);
+        if (ink == null) return null;
+        Formula closest = null;
+        double bestGap = Double.POSITIVE_INFINITY;
+        for (Formula existing : book.all()) {
+            Rectangle original = boundsOf(existing.getStrokes());
+            if (original == null) continue;
+            double h = existing.getCharHeight();
+            double gapX = Math.max(0, Math.max(original.getMinX() - ink.getMaxX(),
+                    ink.getMinX() - original.getMaxX()));
+            double gapY = Math.max(0, Math.max(original.getMinY() - ink.getMaxY(),
+                    ink.getMinY() - original.getMaxY()));
+            if (gapX > h * 0.5 || gapY > Math.max(12, h * 0.28)) continue;
+            // Do not merge a separate full-height writing line underneath a sum.
+            if (ink.getMinY() > original.getMaxY() && gapY > h * 0.15
+                    && ink.height > h * 0.75) continue;
+            double distance = gapX + gapY;
+            if (distance < bestGap) {closest = existing; bestGap = distance;}
+        }
+        return closest;
+    }
+
+    // Lasso over one answered formula plus extra ink means correct the grouping.
+    // A lasso spanning multiple answered formulas must not merge them accidentally.
     public FormulaCapture registerSelection() {
         List<Stroke> picked = selectedInkSnapshot();
-        if (picked.isEmpty()) {
-            return null;
-        }
+        if (picked.isEmpty()) return null;
         for (Formula f : book.all()) {
             if (f.getStrokes().equals(new HashSet<>(picked))) {
-                return captureForRecalculation(f.getId());  // already one formula, keep it
+                return captureForRecalculation(f.getId());
             }
         }
+        Set<Long> answered = new HashSet<>();
         for (Stroke s : picked) {
             Formula f = book.holding(s);
-            if (f != null && f.getAnswer() != null) {
-                return null;
-            }
+            if (f != null && f.getAnswer() != null) answered.add(f.getId());
         }
+        if (answered.size() > 1) return null;
         Formula mine = book.add(picked, nextRevision());
         repaint();
         return capture(mine);
