@@ -357,4 +357,60 @@ class DrawingCanvasHooksTest {
         assertEquals(9, strokesIn(canvas.registerNewInk(last(), session)));
         assertEquals(1, canvas.getFormulas().size());
     }
+
+    // Σ 120 tall + "n+1" 60 tall
+    private static final int[][] SUM = {
+        {220, 100, 100, 100, 160, 160, 100, 220, 220, 220},
+        {240, 130, 240, 190, 280, 130, 280, 190},
+        {300, 160, 340, 160}, {320, 140, 320, 180},
+        {360, 130, 360, 190},
+    };
+
+    private List<Stroke> writeAll(int[][] ink) {
+        List<Stroke> out = new ArrayList<>();
+        for (int[] s : ink) {
+            write(s);
+            out.add(last());
+        }
+        return out;
+    }
+
+    // body + more ink in one go, no pause; more ink should stay its own formula
+    private void assertStaysApartFromSum(int[][] more) {
+        List<Stroke> session = writeAll(SUM);
+        session.addAll(writeAll(more));
+        canvas.registerNewInk(last(), session);
+        assertEquals(2, canvas.getFormulas().size());
+        Stroke sigma = session.get(0);
+        assertEquals(SUM.length, canvas.getFormulas().stream()
+                .filter(f -> f.getStrokes().contains(sigma)).findFirst().orElseThrow().getStrokes().size());
+    }
+
+    @Test
+    void lowerLimitHalfACharUnderASumAfterThePauseJoinsIt() {
+        List<Stroke> sum = writeAll(SUM);
+        assertNotNull(canvas.registerNewInk(last(), sum));
+        List<Stroke> later = writeAll(new int[][]{
+            {120, 250, 120, 280, 140, 250},                    // n, 30 under the Σ
+            {150, 260, 170, 260}, {150, 270, 170, 270},        // =
+            {180, 250, 200, 280, 180, 280},                    // 0
+        });
+        assertEquals(9, strokesIn(canvas.registerNewInk(last(), later)));
+        assertEquals(1, canvas.getFormulas().size());
+    }
+
+    @Test
+    void fullSizeLineUnderASumStaysApart() {
+        assertStaysApartFromSum(new int[][]{{120, 260, 120, 320}, {160, 260, 160, 320}});
+    }
+
+    @Test
+    void lonelyDashUnderASumStaysApart() {
+        assertStaysApartFromSum(new int[][]{{120, 250, 200, 250}});  // next line's "-"
+    }
+
+    @Test
+    void smallInkOffToTheSideOfASumStaysApart() {
+        assertStaysApartFromSum(new int[][]{{500, 240, 500, 270}});
+    }
 }

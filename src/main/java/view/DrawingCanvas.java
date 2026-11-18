@@ -9,6 +9,7 @@ import view.answer.CanvasAnswer;
 import interface_adapter.TextRun;
 import view.answer.Formula;
 import view.answer.FormulaBook;
+import view.answer.Scripts;
 import entity.InkEditor;
 import entity.InkPoint;
 import entity.Stroke;
@@ -1250,66 +1251,38 @@ public class DrawingCanvas extends JPanel {
         return f == null ? null : boundsOf(f.getStrokes());
     }
 
-    // Bind a new pen session, including small limits written above/below a formula.
-    // Distinct writing lines remain independent; a confirmed nearby limit invalidates
-    // an existing answer, because its recognition input has changed.
+    // bind loose ink near last as one formula (other session groups too); null if last gone/bound
     public FormulaCapture registerNewInk(Stroke last, Collection<Stroke> session) {
         if (!strokes.contains(last) || book.isBound(last)) {
             return null;
         }
+        // char size from everything written this round, a lone "-" would make it tiny
         List<Stroke> pool = new ArrayList<>();
         for (Stroke s : strokes) {
             if (!book.isBound(s) && (s == last || session.contains(s))) {
                 pool.add(s);
             }
         }
-        double typicalHeight = AnswerLayout.strokeHeight(pool);
-        double groupingHeight = Math.max(typicalHeight,
-                Math.min(AnswerLayout.tallestStroke(pool), typicalHeight * 2));
-        FormulaCapture primary = null;
-        for (Stroke seed : pool) {
-            if (!strokes.contains(seed) || book.isBound(seed)) continue;
-            Set<Stroke> group = looseGroup(seed, groupingHeight);
-            Formula target = limitOwner(group);
-            if (target != null) {
-                Set<Stroke> joined = new LinkedHashSet<>(target.getStrokes());
-                joined.addAll(group);
-                Formula updated = book.add(joined, nextRevision());
-                notifyChanged(target.getId());
-                if (group.contains(last)) primary = capture(updated);
-            } else {
-                Formula created = book.add(group, nextRevision());
-                if (group.contains(last)) primary = capture(created);
+        double h = AnswerLayout.strokeHeight(pool);
+        bindGroup(looseGroup(last, h));
+        for (Stroke s : session) {
+            if (strokes.contains(s) && !book.isBound(s)) {
+                bindGroup(looseGroup(s, h));
             }
         }
-        // A limit may be connected through another stroke that was grouped first.
-        // The capture must always describe the current, complete formula.
-        Formula owner = book.holding(last);
-        return owner == null ? primary : capture(owner);
+        return capture(book.holding(last));  // after all of it, a later limit may have merged it again
     }
 
-    /** A vertically adjacent, horizontally aligned annotation belongs to the formula. */
-    private Formula limitOwner(Collection<Stroke> added) {
-        Rectangle ink = boundsOf(added);
-        if (ink == null) return null;
-        Formula closest = null;
-        double bestGap = Double.POSITIVE_INFINITY;
-        for (Formula existing : book.all()) {
-            Rectangle original = boundsOf(existing.getStrokes());
-            if (original == null) continue;
-            double h = existing.getCharHeight();
-            double gapX = Math.max(0, Math.max(original.getMinX() - ink.getMaxX(),
-                    ink.getMinX() - original.getMaxX()));
-            double gapY = Math.max(0, Math.max(original.getMinY() - ink.getMaxY(),
-                    ink.getMinY() - original.getMaxY()));
-            if (gapX > h * 0.5 || gapY > Math.max(12, h * 0.28)) continue;
-            // Do not merge a separate full-height writing line underneath a sum.
-            if (ink.getMinY() > original.getMaxY() && gapY > h * 0.15
-                    && ink.height > h * 0.75) continue;
-            double distance = gapX + gapY;
-            if (distance < bestGap) {closest = existing; bestGap = distance;}
+    // limits written after the pause join the formula they sit on, judged as a whole row; else a new one
+    private Formula bindGroup(Set<Stroke> group) {
+        for (Formula f : book.all()) {
+            if (Scripts.stackedOn(f.getStrokes(), group)) {  // one way only, old formula is never the new ink's limit
+                Set<Stroke> both = new LinkedHashSet<>(f.getStrokes());
+                both.addAll(group);
+                return book.add(both, nextRevision());
+            }
         }
-        return closest;
+        return book.add(group, nextRevision());
     }
 
     // Lasso over one answered formula plus extra ink means correct the grouping.
@@ -1333,15 +1306,35 @@ public class DrawingCanvas extends JPanel {
         return capture(mine);
     }
 
-    // unbound strokes near seed, grown until nothing else joins
+    // seed's row, plus any limits stacked over/under it (or the row it's a limit of)
     private Set<Stroke> looseGroup(Stroke seed, double h) {
+        Set<Stroke> group = looseRow(seed, h, Set.of());
+        boolean grew = true;
+        while (grew) {
+            grew = false;
+            for (Stroke s : strokes) {
+                if (group.contains(s) || book.isBound(s)) {
+                    continue;
+                }
+                Set<Stroke> other = looseRow(s, h, group);
+                if (Scripts.stackedOn(group, other) || Scripts.stackedOn(other, group)) {
+                    group.addAll(other);
+                    grew = true;
+                }
+            }
+        }
+        return group;
+    }
+
+    // unbound strokes on seed's line, grown until nothing else joins
+    private Set<Stroke> looseRow(Stroke seed, double h, Set<Stroke> skip) {
         Set<Stroke> group = new LinkedHashSet<>(List.of(seed));
         boolean grew = true;
         while (grew) {
             grew = false;
             Rectangle box = boundsOf(group);
             for (Stroke s : strokes) {
-                Rectangle b = group.contains(s) || book.isBound(s) ? null : boundsOf(List.of(s));
+                Rectangle b = group.contains(s) || skip.contains(s) || book.isBound(s) ? null : boundsOf(List.of(s));
                 if (b != null && box != null && AnswerLayout.sameNewFormula(box, h, b)) {
                     group.add(s);
                     grew = true;
