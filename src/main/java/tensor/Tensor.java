@@ -1,7 +1,7 @@
-
 package tensor;
 import tensor.storage.Storage;
 import tensor.storage.StorageFactory;
+import tensor.backend.BackendFactory;
 import java.util.*;
 
 
@@ -80,9 +80,7 @@ public class Tensor {
         Tensor out = new Tensor(shapeCopy, stridesCopy, this.storage, this.requiresGrad);
 
         if (this.requiresGrad) {
-            out.setBackward(() -> {
-                this.addGrad(out.getGrad().transpose());
-            }, this);
+            out.setBackward(() -> this.addGrad(out.getGrad().transpose()), this);
         }
 
         return out;
@@ -141,22 +139,9 @@ public class Tensor {
 
         if (this.grad == null) {
             this.grad = Tensor.zeroes(this.shape, this.getDevice(), false);
-            this.resetGrad();
         }
 
-        int[] idx = new int[this.shape.length];
-        int dim = flatDimension(this.shape);
-
-        for (int i = 0; i < dim; i++) {
-            int remainder = i;
-
-            for (int j = this.shape.length - 1; j >= 0; j--) {
-                idx[j] = remainder % this.shape[j];
-                remainder /= this.shape[j];
-            }
-
-            this.grad.set(idx, this.grad.get(idx) + gradient.get(idx));
-        }
+        BackendFactory.backendFor(this.getDevice()).add_(this.grad, gradient);
     }
 
     private void resetGrad() {
@@ -164,19 +149,7 @@ public class Tensor {
             return;
         }
 
-        int[] idx = new int[this.shape.length];
-        int dim = flatDimension(this.shape);
-
-        for (int i = 0; i < dim; i++) {
-            int remainder = i;
-
-            for (int j = this.shape.length - 1; j >= 0; j--) {
-                idx[j] = remainder % this.shape[j];
-                remainder /= this.shape[j];
-            }
-
-            this.grad.set(idx, 0.0f);
-        }
+        this.grad = Tensor.zeroes(this.shape, this.getDevice(), false);
     }
 
     private static void buildTopo(
