@@ -83,26 +83,15 @@ public class HomescreenView extends JPanel implements ActionListener, GetAllDeck
         // view button
         viewButton = new FormattedButton("View");
         viewButton.setEnabled(false); // Disable button until an item is selected
-
-        viewButton.addActionListener(
-                new ActionListener() {
-                    public void actionPerformed(ActionEvent evt) {
-                        getDeckController.execute(deckList.getSelectedValue().getName(), "deckView");
-                    }
-                }
-        );
+        viewButton.addActionListener(evt ->
+                getDeckController.execute(deckList.getSelectedValue().getName(), "deckView"));
 
         // study button
         studyButton = new FormattedButton("Study");
         studyButton.setEnabled(false); // Disable button until an item is selected
+        studyButton.addActionListener(evt ->
+                getDeckController.execute(deckList.getSelectedValue().getName(), "studyView"));
 
-        studyButton.addActionListener(
-                new ActionListener() {
-                    public void actionPerformed(ActionEvent evt) {
-                        getDeckController.execute(deckList.getSelectedValue().getName(), "studyView");
-                    }
-                }
-        );
 
         // enable viewButton and studyButton when a Deck is selected
         deckList.addListSelectionListener(e -> {

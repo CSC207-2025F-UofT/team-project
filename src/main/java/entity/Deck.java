@@ -1,6 +1,7 @@
 package entity;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * An entity representing a Deck. Decks have a name and flashcards.
@@ -39,7 +40,7 @@ public class Deck {
         this.name = name;
     }
 
-    public ArrayList<Flashcard> getFlashcards() {
+    public List<Flashcard> getFlashcards() {
         return new ArrayList<>(flashcards);
     }
 

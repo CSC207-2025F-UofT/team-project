@@ -44,11 +44,12 @@ public class FormattedButton extends JButton {
      * Gives formatted button
      * @param text text for button to display
      * @param bgColor background color of the button
+     * @param textColor color of the text
      */
-    public FormattedButton(String text, Color bgColor) {
+    public FormattedButton(String text, Color bgColor, Color textColor) {
         this.setText(text);
         this.setFont(new Font(AppTheme.FONT_NAME, Font.BOLD, AppTheme.FONT_SIZE_BUTTON));
-        this.setForeground(Color.WHITE);
+        this.setForeground(textColor);
         this.setBackground(bgColor);
         this.setFocusPainted(false);
         this.setBorderPainted(false);

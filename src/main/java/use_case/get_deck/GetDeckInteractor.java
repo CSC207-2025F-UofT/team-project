@@ -5,6 +5,7 @@ import entity.Flashcard;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -30,7 +31,7 @@ public class GetDeckInteractor implements GetDeckInputBoundary{
             Deck deck = deckDataAccessObject.getDeck(name);
 
             ArrayList<Map<String, String>> flashcardInfo = new ArrayList<>();
-            ArrayList<Flashcard> flashcards = deck.getFlashcards();
+            List<Flashcard> flashcards = deck.getFlashcards();
             for (Flashcard flashcard: flashcards) {
                 Map<String, String> map = new HashMap<>();
                 map.put(flashcard.getQuestion(), flashcard.getAnswer());

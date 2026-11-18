@@ -16,7 +16,6 @@ public final class AppTheme {
     public static final Color BORDER_COLOR = new Color(225, 235, 230); // Light Gray
     public static final Color TEXT_SECONDARY = new Color(100, 116, 139); // Light Gray
 
-
     // Text
     public static final String FONT_NAME = "Segoe UI";
     public static final Integer FONT_SIZE = 14;

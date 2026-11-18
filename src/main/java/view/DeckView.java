@@ -91,23 +91,9 @@ public class DeckView extends JPanel implements ActionListener, GetDeckViewModel
         // buttons
         JButton home = new FormattedButton();
         JButton study = new FormattedButton("Study");
-        DeckView viewPanel = this;
 
-        home.addActionListener(
-                new ActionListener() {
-                    public void actionPerformed(ActionEvent evt) {
-                        getAllDecksController.execute();
-                    }
-                }
-        );
-
-        study.addActionListener(
-                new ActionListener() {
-                    public void actionPerformed(ActionEvent evt) {
-                        layout.show(viewPanel, STUDY_VIEW);
-                    }
-                }
-        );
+        home.addActionListener(evt -> getAllDecksController.execute());
+        study.addActionListener(evt -> layout.show(this, STUDY_VIEW));
 
         // add everything to deckView JPanel
         JPanel toolBar = new JPanel(new BorderLayout());
@@ -147,10 +133,15 @@ public class DeckView extends JPanel implements ActionListener, GetDeckViewModel
         flashcardPanel.setBorder(BorderFactory.createEmptyBorder(10, 28, 10, 28));
 
         // add arrows to move between cards
-        JButton backArrow = new FormattedButton("‹", new Color(160, 160, 160));
-        JButton nextArrow = new FormattedButton("›", new Color(240, 240, 240));
+        JButton backArrow = new FormattedButton("\u2190 Last", AppTheme.BG_SECONDARY, AppTheme.TEXT_PRIMARY);
+        JButton nextArrow = new FormattedButton("Next \u2192", AppTheme.BG_SECONDARY, AppTheme.TEXT_PRIMARY);
+
+        backArrow.addActionListener(evt -> lastCard());
+        nextArrow.addActionListener(evt -> nextCard());
+
         JPanel arrows = new JPanel(new FlowLayout(FlowLayout.CENTER));
         arrows.setOpaque(false);
+        arrows.setAlignmentX(Component.CENTER_ALIGNMENT);
 
         arrows.add(backArrow);
         arrows.add(nextArrow);
@@ -168,6 +159,7 @@ public class DeckView extends JPanel implements ActionListener, GetDeckViewModel
 
         currentIndexLabel.setFont(new Font(AppTheme.FONT_NAME, Font.PLAIN, AppTheme.FONT_SIZE));
         currentIndexLabel.setForeground(AppTheme.TEXT_SECONDARY);
+        currentIndexLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
 
         flashcard.addMouseListener(new MouseAdapter() {
             @Override
@@ -194,23 +186,15 @@ public class DeckView extends JPanel implements ActionListener, GetDeckViewModel
         JButton home = new FormattedButton();
         JButton view = new FormattedButton("View");
 
-        home.addActionListener(
-                new ActionListener() {
-                    public void actionPerformed(ActionEvent evt) {
-                        goHome();
-                        getAllDecksController.execute();
-                    }
-                }
-        );
+        home.addActionListener(evt -> {
+            goHome();
+            getAllDecksController.execute();
+        });
 
-        DeckView viewPanel = this;
-        view.addActionListener(
-                new ActionListener() {
-                    public void actionPerformed(ActionEvent evt) {
-                        layout.show(viewPanel, DECK_VIEW);
-                    }
-                }
-        );
+        view.addActionListener(evt -> {
+            goHome();
+            layout.show(this, DECK_VIEW);
+        });
 
         // add buttons to toolBar
         JPanel toolBar = new JPanel(new BorderLayout());
@@ -252,6 +236,18 @@ public class DeckView extends JPanel implements ActionListener, GetDeckViewModel
     // flip and update card
     private void flipCard() {
         isFlipped = !isFlipped;
+        updateCardDisplay();
+    }
+
+    private void nextCard() {
+        currentIndex = (currentIndex + 1) % deckModel.size();
+        isFlipped = false;
+        updateCardDisplay();
+    }
+
+    private void lastCard() {
+        currentIndex = (currentIndex - 1 + deckModel.size()) % deckModel.size();
+        isFlipped = false;
         updateCardDisplay();
     }
 

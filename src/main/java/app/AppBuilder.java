@@ -50,14 +50,14 @@ public class AppBuilder {
     public AppBuilder addHomescreenView() {
         getAllDecksViewModel = new GetAllDecksViewModel();
         homescreenView = new HomescreenView(getAllDecksViewModel);
-        cardPanel.add(homescreenView, getAllDecksViewModel.VIEW_NAME);
+        cardPanel.add(homescreenView, GetAllDecksViewModel.VIEW_NAME);
         return this;
     }
 
     public AppBuilder addDeckView() {
         getDeckViewModel = new GetDeckViewModel();
         deckView = new DeckView(getDeckViewModel);
-        cardPanel.add(deckView, getDeckViewModel.VIEW_NAME);
+        cardPanel.add(deckView, GetDeckViewModel.VIEW_NAME);
         return this;
     }
 
