@@ -25,7 +25,7 @@
 ## Project Details
 ### User Stories
 Member1 \
-*"As a player, I want to start a match against another player, then be able to save and load them."*
+*"As a player, I want to start a match against another player, then be able to save it to a file and load them."*
 
 Member2: \
 *"As a player, I want to play and move my characters around the board."*
