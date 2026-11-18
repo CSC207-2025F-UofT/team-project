@@ -122,6 +122,7 @@ public class DrawingCanvas extends JPanel {
 
     private final List<Stroke> strokes = new ArrayList<>();
     private final Deque<Snapshot> history = new ArrayDeque<>();
+    private final Deque<Snapshot> redoHistory = new ArrayDeque<>();
     private FormulaBook book = new FormulaBook();  // calculated formulas + their answers
     private long revisions;                       // only goes up, undo too
     private final List<LongConsumer> formulaListeners = new ArrayList<>();
@@ -309,6 +310,8 @@ public class DrawingCanvas extends JPanel {
         bindKey("BACK_SPACE", "deleteSelection", this::deleteSelection);
         bindKey("ESCAPE", "clearSelection", this::clearSelection);
         bindKey("ctrl Z", "undo", this::undo);
+        bindKey("ctrl Y", "redo", this::redo);
+        bindKey("ctrl shift Z", "redoShift", this::redo);
         bindKey("pressed SPACE", "panOn", () -> setSpaceDown(true));
         bindKey("released SPACE", "panOff", () -> setSpaceDown(false));
     }
@@ -938,28 +941,44 @@ public class DrawingCanvas extends JPanel {
         return strokes.isEmpty() && pictures.isEmpty() && graphCard == null;
     }
 
-    /** Steps back one change: a stroke, an erase, a lasso move or delete, or Clear. */
+    /** Undoes the last Canvas edit and records the current state for Redo. */
     public void undo() {
-        if (!history.isEmpty()) {
-            Snapshot back = history.pop();
-            replaceStrokes(back.strokes);
-            strokeColors.putAll(back.colors);  // undoes a recolour
-            book = back.book;  // answers come back as they were, no recalc
-            pictures.clear();pictures.addAll(back.pictures);
-            graphImage = back.graphImage;graphCard = back.graphCard;
-            selectedPicture = null;
-            currentStroke = null;
-            selection.clear();
-            selectedAnswers.clear();
-            repaint();
-            for (Formula f : book.all()) {
-                if (f.getAnswer() == null) {
-                    notifyChanged(f.getId());  // came back without its answer, get one
-                }
-            }
-            fire(actionListeners);  // after the notes above, so listeners can drop them
-            fire(inkListeners);
+        if (history.isEmpty()) return;
+        redoHistory.push(snapshot());
+        restore(history.pop());
+    }
+
+    /** Reapplies the last undone Canvas edit. A new edit invalidates this history. */
+    public void redo() {
+        if (redoHistory.isEmpty()) return;
+        history.push(snapshot());
+        if (history.size() > HISTORY_LIMIT) history.removeLast();
+        restore(redoHistory.pop());
+    }
+
+    public boolean canRedo() {
+        return !redoHistory.isEmpty();
+    }
+
+    private void restore(Snapshot state) {
+        replaceStrokes(state.strokes);
+        strokeColors.clear();
+        strokeColors.putAll(state.colors);
+        book = state.book.copy();
+        pictures.clear();
+        pictures.addAll(state.pictures);
+        graphImage = state.graphImage;
+        graphCard = state.graphCard;
+        selectedPicture = null;
+        currentStroke = null;
+        selection.clear();
+        selectedAnswers.clear();
+        repaint();
+        for (Formula formula : book.all()) {
+            if (formula.getAnswer() == null) notifyChanged(formula.getId());
         }
+        fire(actionListeners);
+        fire(inkListeners);
     }
 
     public void clear() {
@@ -979,12 +998,15 @@ public class DrawingCanvas extends JPanel {
         fire(inkListeners);
     }
 
+    private Snapshot snapshot() {
+        return new Snapshot(new ArrayList<>(strokes), colorsNow(), book.copy(),
+                new ArrayList<>(pictures), graphImage, graphCard);
+    }
+
     private void saveForUndo() {
-        history.push(new Snapshot(new ArrayList<>(strokes), colorsNow(), book.copy(),
-                new ArrayList<>(pictures), graphImage, graphCard));
-        if (history.size() > HISTORY_LIMIT) {
-            history.removeLast();
-        }
+        redoHistory.clear();
+        history.push(snapshot());
+        if (history.size() > HISTORY_LIMIT) history.removeLast();
     }
 
     private void replaceStrokes(List<Stroke> newStrokes) {
@@ -1652,7 +1674,7 @@ public class DrawingCanvas extends JPanel {
         strokeColors.clear();strokeColors.putAll(restoredColors);
         book = restoredBook;
         pictures.clear();pictures.addAll(restoredAssets);
-        history.clear();selectedPicture = null;selection.clear();selectedAnswers.clear();
+        history.clear();redoHistory.clear();selectedPicture = null;selection.clear();selectedAnswers.clear();
         currentStroke = null;graphCard = restoredGraphBounds;graphImage = restoredGraph;
         scale = state.zoom();originX = state.offsetX();originY = state.offsetY();
         repaint();fire(inkListeners);fire(viewListeners);

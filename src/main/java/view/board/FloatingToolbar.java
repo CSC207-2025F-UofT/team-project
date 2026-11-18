@@ -79,6 +79,7 @@ public final class FloatingToolbar {
         });
         bar.separator();
         bar.action("Undo", Icons::undo, canvas::undo, canvas::canUndo);
+        bar.action("Redo", Icons::redo, canvas::redo, canvas::canRedo);
         bar.action("Clear", Icons::trash, canvas::clear, () -> !canvas.isBlank());
         bar.finish();
         bar.select(tools[canvas.getTool().ordinal()]);

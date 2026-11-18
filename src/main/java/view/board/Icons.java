@@ -169,6 +169,17 @@ public final class Icons {
         g.draw(head);
     }
 
+    /** Redo is the mirrored Undo glyph. */
+    public static void redo(Graphics2D g) {
+        AffineTransform previous = g.getTransform();
+        try {
+            g.scale(-1, 1);
+            undo(g);
+        } finally {
+            g.setTransform(previous);
+        }
+    }
+
     public static void trash(Graphics2D g) {
         prep(g);
         g.draw(new Line2D.Double(-7.5, -5.5, 7.5, -5.5));
