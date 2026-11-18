@@ -1,6 +1,8 @@
 package pdf_editor.view;
 
 import pdf_editor.adapter.PdfEditorController;
+import pdf_editor.adapter.CanvasHistoryImporter;
+import interface_adapter.history.CanvasHistorySelection;
 import pdf_editor.adapter.PageZoomModel;
 import pdf_editor.adapter.PageCoordinateMapper;
 import pdf_editor.data_access.MaterialRenderer;
@@ -89,10 +91,35 @@ public final class PdfPageCanvas extends JPanel {
         }, () -> growInlineNote());
         setLayout(null);
         positionInlineEditor(note);
+        // The actual JTextPane is a Swing child above the whole page. While
+        // editing a large body note, let clicks on higher PDF materials reach
+        // this page instead of being swallowed by that child component.
+        inlineNote.setPassThroughHit(local -> {
+            InlineNoteEditor editing = inlineNote;
+            return editing != null && materialAboveEditingNoteAt(
+                    editing.getX() + local.x, editing.getY() + local.y);
+        });
         add(inlineNote, 0);
         revalidate(); repaint();
         SwingUtilities.invokeLater(() -> { if (inlineNote != null) inlineNote.requestFocusInWindow(); });
         return true;
+    }
+    /** Only materials explicitly ABOVE the currently edited note get pointer priority. */
+    private boolean materialAboveEditingNoteAt(int viewX, int viewY) {
+        if (editingId == null) return false;
+        List<PdfDocument.Placement> placements = controller.placements();
+        int noteIndex = -1;
+        for (int i = 0; i < placements.size(); i++) {
+            if (editingId.equals(placements.get(i).id())) { noteIndex = i; break; }
+        }
+        if (noteIndex < 0) return false;
+        float x = toPageX(viewX), y = toPageY(viewY);
+        for (int i = placements.size() - 1; i > noteIndex; i--) {
+            PdfDocument.Placement p = placements.get(i);
+            if (!p.isNote() && x >= p.x() && x <= p.x() + p.width()
+                    && y >= p.y() && y <= p.y() + p.height()) return true;
+        }
+        return false;
     }
     public boolean isEditingNote() { return inlineNote != null; }
     public void toggleInlineStyle(Object style) { if (inlineNote != null) inlineNote.toggleStyle(style); }
@@ -342,13 +369,25 @@ public final class PdfPageCanvas extends JPanel {
         setBackground(new Color(243, 247, 253));
         setTransferHandler(new TransferHandler() {
             @Override public boolean canImport(TransferSupport support) {
-                return support.isDataFlavorSupported(DataFlavor.stringFlavor)
+                return support.isDataFlavorSupported(CanvasPdfDragController.HISTORY_SELECTION_FLAVOR)
+                        || support.isDataFlavorSupported(DataFlavor.stringFlavor)
                         || support.isDataFlavorSupported(DataFlavor.imageFlavor);
             }
             @Override public boolean importData(TransferSupport support) {
                 if (!canImport(support)) return false;
                 try {
                     Point location = support.getDropLocation().getDropPoint();
+                    // A live inline note editor is a Swing child covering the page.
+                    // Commit/remove it before inserting the dropped History material.
+                    finishInlineEdit();
+                    if (support.isDataFlavorSupported(CanvasPdfDragController.HISTORY_SELECTION_FLAVOR)) {
+                        CanvasHistorySelection selection = (CanvasHistorySelection) support.getTransferable()
+                                .getTransferData(CanvasPdfDragController.HISTORY_SELECTION_FLAVOR);
+                        CanvasHistoryImporter.importAt(selection, controller,
+                                toPageX(location.x), toPageY(location.y));
+                        repaint();
+                        return true;
+                    }
                     if (support.isDataFlavorSupported(DataFlavor.imageFlavor)) {
                         java.awt.Image source = (java.awt.Image) support.getTransferable()
                                 .getTransferData(DataFlavor.imageFlavor);

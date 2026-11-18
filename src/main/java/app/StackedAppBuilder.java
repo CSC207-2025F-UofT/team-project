@@ -121,10 +121,22 @@ public class StackedAppBuilder {
                         new pdf_editor.domain.PdfMaterial("Canvas History", latex, result, null, 0, 0) { },
                         width, height));
         CanvasPdfDragController.install(drawing);
+        // Reuse the existing US2 evaluation use case with a dedicated view model, so
+        // editing History does not race with the Canvas answer worker's view-model updates.
+        MathLabViewModel historyEditModel = new MathLabViewModel();
+        pdf_editor.adapter.HistoryFormulaCalculator historyEditCalculator =
+                new pdf_editor.adapter.HistoryFormulaCalculator(
+                        new EvaluateController(new EvaluateInteractor(
+                                functions, new EvaluatePresenter(historyEditModel))), historyEditModel);
         CanvasHistoryEditMenu.install(drawing, (latex, result) ->
                 pdf_editor.data_access.MaterialRenderer.render(
                         new pdf_editor.domain.PdfMaterial("Edited Math", latex, result, null, 0, 0) { },
-                        800, 190));
+                        800, 190), historyEditCalculator::calculate,
+                (latex, result) -> {
+                    if (latex.isBlank()) return;
+                    if (result.isBlank()) pdfStudio.getLibrary().addFormula(latex);
+                    else pdfStudio.getLibrary().addCalculation(latex, result);
+                });
         CanvasLibrarySelectionMenu.install(drawing,
                 new SelectionToLibrary(sharedCanvas::recognizeFormula, pdfStudio.getLibrary()),
                 new SelectedInkRegistry(drawing, pdfStudio.getLibrary()));

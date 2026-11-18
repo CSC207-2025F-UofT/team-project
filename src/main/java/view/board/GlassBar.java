@@ -34,6 +34,7 @@ import java.awt.image.ConvolveOp;
 import java.awt.image.Kernel;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -72,7 +73,7 @@ public class GlassBar extends JComponent {
     private static final float HOVER_EDGE_BAND = 11f;
     private static final float HOVER_EDGE_K = 9f;
     private static final float HOVER_DISPERSION = 0.45f;
-    private static final int FRAME_MS = 5;
+    private static final int FRAME_MS = 16;
     private static final float REF_MS = 16f;
 
     public enum Kind { SEGMENT, ACTION, SWATCH, SEPARATOR, GRIP }
@@ -154,6 +155,8 @@ public class GlassBar extends JComponent {
         BufferedImage img;
     }
 
+    private record CachedScene(BufferedImage glass, BufferedImage scene, int[] pixels) { }
+
     private final Supplier<Point> origin;
     private final Consumer<Graphics2D> backdrop;
     private final LongSupplier version;
@@ -195,12 +198,18 @@ public class GlassBar extends JComponent {
 
     private final Timer timer = new Timer(FRAME_MS, e -> step());
     private long lastNanos;
-    private final Map<Double, BufferedImage> shadowCaches = new HashMap<>();
-    private long prevKey;
     private long glassKey;
-    private long sceneKey;
     private BufferedImage glassCache;
     private BufferedImage sceneCache;
+    private int[] scenePixels;
+    // Switching between Pen / Eraser / Lasso reuses both the refractive surface
+    // and its magnified backdrop; no per-hover gaussian / halo regeneration.
+    // Bound the Retina-sized image cache so moving/drawing cannot grow memory forever.
+    private final Map<Long, CachedScene> glassScenes = new LinkedHashMap<>(16, 0.75f, true) {
+        @Override protected boolean removeEldestEntry(Map.Entry<Long, CachedScene> eldest) {
+            return size() > 10;
+        }
+    };
     private final Map<Double, Blurred> blurCaches = new HashMap<>();
 
     public GlassBar(Font font, JComponent reference, Consumer<Graphics2D> backdrop, LongSupplier version) {
@@ -381,7 +390,6 @@ public class GlassBar extends JComponent {
             e.getValue().x.x = t.x;
             e.getValue().w.x = t.w;
         }
-        shadowCaches.clear();
         setSize(getPreferredSize());
         repaint();
     }
@@ -692,45 +700,34 @@ public class GlassBar extends JComponent {
 
         long key = stateKey(s);
         if (glassCache == null || glassKey != key) {
-            glassCache = renderGlass(s, pw, ph, backdropImage(s, pw, ph, 0, 0), 0, 0);
+            CachedScene cached = glassScenes.get(key);
+            if (cached == null) {
+                // Render the actual refractive capsule once per changed backing scene.
+                // The hover droplet magnifies this *same* image, avoiding an entire
+                // second (1.28x, Retina-scale) glass render on the Swing event thread.
+                BufferedImage raw = backdropImage(s, pw, ph, 0, 0);
+                BufferedImage glass = renderGlass(s, pw, ph, raw, 0, 0);
+                BufferedImage sceneImage = new BufferedImage(pw, ph, BufferedImage.TYPE_INT_ARGB);
+                Graphics2D scene = sceneImage.createGraphics();
+                scene.drawImage(raw, 0, 0, null);
+                scene.drawImage(glass, 0, 0, null);
+                scene.dispose();
+                cached = new CachedScene(glass, sceneImage,
+                        sceneImage.getRGB(0, 0, pw, ph, null, 0, pw));
+                glassScenes.put(key, cached);
+            }
+            glassCache = cached.glass();
+            sceneCache = cached.scene();
+            scenePixels = cached.pixels();
             glassKey = key;
         }
         g2.drawImage(glassCache, 0, 0, bw, bh, null);
-
         if (lensAlpha > 0.01f) {
-            long hoverSceneKey = key * 31 + (hoverItem == null ? -1 : System.identityHashCode(hoverItem));
-            double ls = s * HOVER_MAG;
-            RoundRectangle2D.Float lens = lensShape();
-            if (sceneCache != null && sceneKey == hoverSceneKey) {
-                paintHoverLens(g2, s, ls, sceneCache, 0, 0, lens);
-            } else if (key == prevKey) {
-                sceneCache = renderScene(ls, (int) Math.ceil(bw * ls), (int) Math.ceil(bh * ls), 0, 0);
-                sceneKey = hoverSceneKey;
-                paintHoverLens(g2, s, ls, sceneCache, 0, 0, lens);
-            } else {
-                int pad = (int) Math.ceil(HOVER_EDGE_K * (1 + HOVER_DISPERSION)) + 3;
-                int ox = Math.max(0, (int) Math.floor((lens.x - pad) * ls));
-                int oy = Math.max(0, (int) Math.floor((lens.y - pad) * ls));
-                int cw = Math.min((int) Math.ceil(bw * ls), (int) Math.ceil((lens.x + lens.width + pad) * ls)) - ox;
-                int ch = Math.min((int) Math.ceil(bh * ls), (int) Math.ceil((lens.y + lens.height + pad) * ls)) - oy;
-                if (cw > 0 && ch > 0) {
-                    paintHoverLens(g2, s, ls, renderScene(ls, cw, ch, ox, oy), ox, oy, lens);
-                }
-            }
+            // The optical refraction, dispersion, 1.28x magnification, rim and gloss
+            // remain intact. Only the oversized source image is reused.
+            paintHoverLens(g2, s, s, sceneCache, 0, 0, lensShape());
         }
-        prevKey = key;
         g2.dispose();
-    }
-
-    private BufferedImage renderScene(double ls, int cw, int ch, int ox, int oy) {
-        BufferedImage raw = backdropImage(ls, cw, ch, ox, oy);
-        BufferedImage glass = renderGlass(ls, cw, ch, raw, ox, oy);
-        BufferedImage scene = new BufferedImage(cw, ch, BufferedImage.TYPE_INT_ARGB);
-        Graphics2D sg = scene.createGraphics();
-        sg.drawImage(raw, 0, 0, null);
-        sg.drawImage(glass, 0, 0, null);
-        sg.dispose();
-        return scene;
     }
 
     // where this bar sits in the backdrop's coords
@@ -835,12 +832,6 @@ public class GlassBar extends JComponent {
         int pw = raw.getWidth();
         int ph = raw.getHeight();
 
-        BufferedImage shadow = shadowCaches.computeIfAbsent(s, this::buildShadow);
-        int sw = Math.min(pw, shadow.getWidth() - ox);
-        int sh = Math.min(ph, shadow.getHeight() - oy);
-        if (sw > 0 && sh > 0) {
-            drawPx(g2, shadow.getSubimage(ox, oy, sw, sh), s, ox, oy);
-        }
         Point o = origin();
         long bk = Objects.hash(ox, oy, pw, ph, version.getAsLong(), o.x, o.y, getWidth());
         Blurred bl = blurCaches.computeIfAbsent(s, k -> new Blurred());
@@ -869,9 +860,8 @@ public class GlassBar extends JComponent {
             g2.fill(cap);
         }
 
-        g2.setStroke(new BasicStroke(1f));
-        g2.setColor(BoardTheme.EDGE);
-        g2.draw(inset(cap, 0.5f));
+        // The dark stroke reads as a black floating border on light themes.
+        // Keep only the luminous optical rim; refraction/gloss remain intact.
         g2.setStroke(new BasicStroke(1.4f));
         g2.setPaint(rimPaint(cap, BoardTheme.RIM_TOP, BoardTheme.RIM_BOTTOM));
         g2.draw(inset(cap, 1.2f));
@@ -1004,19 +994,12 @@ public class GlassBar extends JComponent {
         g2.setComposite(AlphaComposite.SrcOver.derive(baseAlpha * lensAlpha));
         hints(g2);
 
-        for (int i = 4; i >= 1; i--) {
-            g2.setColor(new Color(0f, 0f, 0f, BoardTheme.SHADOW * 0.16f));
-            g2.fill(new RoundRectangle2D.Float(lens.x - i, lens.y + 2 - i + 3, lens.width + 2 * i,
-                    lens.height + 2 * i, lens.height + 2 * i, lens.height + 2 * i));
-        }
-
         int pw = (int) Math.ceil(lw() * s);
         int ph = (int) Math.ceil(lh() * s);
         int sw = scene.getWidth();
         int sh = scene.getHeight();
         double r = ls / s;
-        int[] in = scene.getRGB(0, 0, sw, sh, null, 0, sw);
-        int[] out = new int[pw * ph];
+        int[] in = scenePixels;
         double cx = lcx * s;
         double cy = lcy * s;
         double radius = lh / 2.0 * s;
@@ -1028,6 +1011,13 @@ public class GlassBar extends JComponent {
         int yMax = Math.min(ph, (int) Math.ceil(cy + radius) + 1);
         int xMin = Math.max(0, (int) (x0 - radius) - 1);
         int xMax = Math.min(pw, (int) Math.ceil(x1 + radius) + 1);
+        if (xMin >= xMax || yMin >= yMax) {
+            g2.setComposite(base);
+            return;
+        }
+        int lensPixelWidth = xMax - xMin;
+        int lensPixelHeight = yMax - yMin;
+        int[] out = new int[lensPixelWidth * lensPixelHeight];
         for (int y = yMin; y < yMax; y++) {
             double py = y + 0.5;
             for (int x = xMin; x < xMax; x++) {
@@ -1058,19 +1048,17 @@ public class GlassBar extends JComponent {
                 int cg = bilinear(in, sw, sh, bx + nx * off * r - 0.5, by + ny * off * r - 0.5);
                 int cb = bilinear(in, sw, sh, bx + nx * oB * r - 0.5, by + ny * oB * r - 0.5);
                 int a = (int) Math.round(255 * coverage);
-                out[y * pw + x] = (a << 24) | (cr & 0xFF0000) | (cg & 0xFF00) | (cb & 0xFF);
+                out[(y - yMin) * lensPixelWidth + (x - xMin)] = (a << 24) | (cr & 0xFF0000) | (cg & 0xFF00) | (cb & 0xFF);
             }
         }
-        BufferedImage img = new BufferedImage(pw, ph, BufferedImage.TYPE_INT_ARGB);
-        img.setRGB(0, 0, pw, ph, out, 0, pw);
-        g2.drawImage(img, 0, 0, lw(), lh(), null);
+        BufferedImage img = new BufferedImage(lensPixelWidth, lensPixelHeight, BufferedImage.TYPE_INT_ARGB);
+        img.setRGB(0, 0, lensPixelWidth, lensPixelHeight, out, 0, lensPixelWidth);
+        drawPx(g2, img, s, xMin, yMin);
 
         g2.setPaint(new GradientPaint(0, lens.y, new Color(255, 255, 255, 40),
                 0, lens.y + lens.height * 0.5f, new Color(255, 255, 255, 0)));
         g2.fill(lens);
-        g2.setStroke(new BasicStroke(1f));
-        g2.setColor(new Color(0, 0, 0, 30));
-        g2.draw(inset(lens, 0.5f));
+        // A light refractive rim is enough; the dark perimeter looked like a shadow.
         g2.setStroke(new BasicStroke(1.6f));
         g2.setPaint(rimPaint(lens, 255, 170));
         g2.draw(inset(lens, 1.3f));
@@ -1252,37 +1240,6 @@ public class GlassBar extends JComponent {
             r |= ((int) Math.round(v) & 0xFF) << sh;
         }
         return r;
-    }
-
-    private BufferedImage buildShadow(double s) {
-        int pw = Math.max(1, (int) Math.ceil(lw() * s));
-        int ph = Math.max(1, (int) Math.ceil(lh() * s));
-        BufferedImage out = new BufferedImage(pw, ph, BufferedImage.TYPE_INT_ARGB);
-        Graphics2D g = out.createGraphics();
-        g.drawImage(shadowLayer(pw, ph, s, 0f, 1.5f, BoardTheme.SHADOW * 0.5f), 0, 0, null);
-        g.drawImage(shadowLayer(pw, ph, s, 6f, 8f, BoardTheme.SHADOW), 0, 0, null);
-        g.dispose();
-        // cut the capsule out so the shadow doesn't darken what's under the glass
-        Graphics2D c = out.createGraphics();
-        c.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-        c.scale(s, s);
-        c.setComposite(AlphaComposite.Clear);
-        c.fill(capsule(0));
-        c.dispose();
-        return out;
-    }
-
-    private BufferedImage shadowLayer(int pw, int ph, double s, float dy, float sigma, float alpha) {
-        BufferedImage img = new BufferedImage(pw, ph, BufferedImage.TYPE_INT_ARGB);
-        Graphics2D g = img.createGraphics();
-        g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-        g.scale(s, s);
-        g.setColor(new Color(0f, 0f, 0f, Math.min(1f, alpha)));
-        RoundRectangle2D.Float c = capsule(0);
-        c.y += dy;
-        g.fill(c);
-        g.dispose();
-        return gaussian(img, (float) (sigma * s));
     }
 
     // separable gaussian, edges extended

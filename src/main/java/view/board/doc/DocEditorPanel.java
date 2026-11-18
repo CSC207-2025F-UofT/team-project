@@ -3,6 +3,7 @@ package view.board.doc;
 import view.glass.GlassDialogs;
 
 import history.adapter.HistoryMaterialMapper;
+import pdf_editor.adapter.HistoryLibraryImporter;
 import interface_adapter.history.HistoryItem;
 import pdf_editor.MathLibrary;
 import pdf_editor.adapter.PdfEditorController;
@@ -459,22 +460,39 @@ public final class DocEditorPanel extends JPanel implements PdfWorkspacePort {
         if (w > 0 && h > 0) zoom(paper.fitZoom(w, h));
     }
     private void addMaterial(PdfMaterial material, float x, float y) {
+        // Imported History must be clickable immediately: an active JTextPane
+        // otherwise remains above the page and intercepts mouse input.
+        paper.finishInlineEdit();
         float w = material.isGraph() ? 280 : 320;
         float h = material.isGraph() ? Math.max(65, w * material.imageHeight() / Math.max(1f, material.imageWidth())) : 90;
         if (h > 600) {w *= 600f / h;h = 600;}
         controller.place(material, x, y, w, h);
         updateStatus();
     }
+    @Override public void addHistoryToLibrary(HistoryItem item) {
+        HistoryLibraryImporter.importRecord(item, library);
+        showLibrary();
+    }
     @Override public void addHistoryItem(HistoryItem item) {
         Objects.requireNonNull(item);
         addMaterial(HistoryMaterialMapper.toPdfMaterial(item.entry()), 75, 108);
     }
-    @Override public boolean dropHistoryItem(HistoryItem item, Point screenTopLeft) {
-        if (!paper.isShowing()) {addHistoryItem(item);return true;}
-        Point spot = new Point(screenTopLeft);
-        SwingUtilities.convertPointFromScreen(spot, paper);
-        addMaterial(HistoryMaterialMapper.toPdfMaterial(item.entry()),
-                Math.max(0, paper.pageX(spot.x)), Math.max(0, paper.pageY(spot.y)));
+    /**
+     * A History drop is a single import: the same structured material appears in
+     * both the PDF document and its Library. Graphs retain the original PNG.
+     * Regular Add to PDF (via the History context menu) remains unchanged.
+     */
+    @Override public boolean dropHistoryItem(HistoryItem item, Point cursorScreen) {
+        Objects.requireNonNull(item, "item");
+        Objects.requireNonNull(cursorScreen, "cursorScreen");
+        Point spot = new Point(cursorScreen);
+        if (paper.isShowing()) SwingUtilities.convertPointFromScreen(spot, paper);
+        float x = paper.isShowing() ? Math.max(0, paper.pageX(spot.x)) : 75;
+        float y = paper.isShowing() ? Math.max(0, paper.pageY(spot.y)) : 108;
+        // Store the structured formula/result (or original graph pixels), not the
+        // dragged thumbnail. Use the imported Library object for PDF placement.
+        MathLibrary.Material material = HistoryLibraryImporter.importRecord(item, library);
+        addMaterial(material, x, y);
         return true;
     }
     private void addPage() {paper.finishInlineEdit();controller.addPage();updateStatus();}

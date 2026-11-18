@@ -102,6 +102,21 @@ public final class Icons {
         g.draw(new Line2D.Double(-4, 2.2, 4, 2.2));
     }
 
+    /** Ordinary pointer/selection cursor, separate from freehand Lasso and Rectangle. */
+    public static void pointer(Graphics2D g) {
+        prep(g);
+        Path2D arrow = new Path2D.Double();
+        arrow.moveTo(-7.5, -9);
+        arrow.lineTo(-7.5, 8);
+        arrow.lineTo(-2.7, 4.2);
+        arrow.lineTo(0.6, 10);
+        arrow.lineTo(3.7, 8.4);
+        arrow.lineTo(0.4, 2.7);
+        arrow.lineTo(6.8, 2.1);
+        arrow.closePath();
+        g.draw(arrow);
+    }
+
     public static void pencil(Graphics2D g) {
         prep(g);
         AffineTransform t = g.getTransform();

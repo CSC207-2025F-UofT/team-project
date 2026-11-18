@@ -11,6 +11,14 @@ import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
+import javax.swing.JLayeredPane;
+import javax.swing.JRootPane;
+import javax.swing.SwingUtilities;
+import java.awt.AWTEvent;
+import java.awt.Point;
+import java.awt.Toolkit;
+import java.awt.event.AWTEventListener;
+import java.awt.event.MouseEvent;
 import javax.swing.SwingConstants;
 import java.awt.BasicStroke;
 import java.awt.Color;
@@ -32,8 +40,17 @@ final class ToolOptionsPopup extends JPopupMenu {
     private static final Color TRACK = new Color(0xF0F0F4);
     private static final Color SELECTED = new Color(0xEAF2FF);
     private static final int WIDTH = 352;
+    // GlassBar reserves MARGIN around the visual capsule. Anchor to its visible
+    // edge, not the outer component bounds, to avoid an exaggerated empty gap.
+    static final int TOOLBAR_GAP = 5;
     private final DrawingCanvas canvas;
     private final Consumer<Color> colorChanged;
+    // A native/heavyweight macOS popup can paint an opaque rectangular backing even
+    // when JPopupMenu and the rounded content are non-opaque.  Use the root's
+    // existing layered pane on macOS instead of allocating a native popup window.
+    private JPanel macOverlay;
+    private JLayeredPane macLayer;
+    private AWTEventListener outsidePress;
 
     ToolOptionsPopup(DrawingCanvas canvas, Consumer<Color> colorChanged) {
         this.canvas = canvas;
@@ -48,7 +65,72 @@ final class ToolOptionsPopup extends JPopupMenu {
 
     void showFor(DrawingCanvas.Tool tool, Component anchor, int x, int y) {
         rebuild(tool);
-        show(anchor, x, -getPreferredSize().height - 9);
+        if (BoardTheme.MAC && anchor.isShowing()) {
+            JRootPane root = SwingUtilities.getRootPane(anchor);
+            if (root != null) {
+                // All painting now belongs to the existing window's transparent
+                // Swing layer: no heavyweight white rectangle on Retina/Aqua.
+                JLayeredPane layer = root.getLayeredPane();
+                if (macOverlay == null) {
+                    macOverlay = new JPanel(new java.awt.BorderLayout());
+                    macOverlay.setOpaque(false);
+                    macOverlay.setBackground(new Color(0, 0, 0, 0));
+                }
+                Component content = getComponent(0);
+                remove(content);
+                macOverlay.removeAll();
+                macOverlay.add(content, java.awt.BorderLayout.CENTER);
+                if (macLayer != null && macLayer != layer) macLayer.remove(macOverlay);
+                macLayer = layer;
+                java.awt.Dimension size = macOverlay.getPreferredSize();
+                Point location = SwingUtilities.convertPoint(anchor, x, GlassBar.MARGIN, layer);
+                int left = Math.max(0, Math.min(location.x, layer.getWidth() - size.width));
+                int top = Math.max(0, location.y - size.height - TOOLBAR_GAP);
+                macOverlay.setBounds(left, top, size.width, size.height);
+                layer.add(macOverlay, JLayeredPane.POPUP_LAYER);
+                macOverlay.setVisible(true);
+                macOverlay.revalidate();
+                macOverlay.repaint();
+                listenForOutsidePress();
+                return;
+            }
+        }
+        show(anchor, x, GlassBar.MARGIN - getPreferredSize().height - TOOLBAR_GAP);
+    }
+
+    private void listenForOutsidePress() {
+        if (outsidePress != null) return;
+        outsidePress = event -> {
+            if (event instanceof MouseEvent mouse && mouse.getID() == MouseEvent.MOUSE_PRESSED
+                    && mouse.getSource() instanceof Component source
+                    && macOverlay != null && !SwingUtilities.isDescendingFrom(source, macOverlay)) {
+                setVisible(false);
+            }
+        };
+        Toolkit.getDefaultToolkit().addAWTEventListener(outsidePress, AWTEvent.MOUSE_EVENT_MASK);
+    }
+
+    @Override public boolean isVisible() {
+        return super.isVisible() || (macOverlay != null && macOverlay.isVisible()
+                && macOverlay.getParent() != null);
+    }
+
+    @Override public void setVisible(boolean visible) {
+        if (!visible) {
+            if (outsidePress != null) {
+                Toolkit.getDefaultToolkit().removeAWTEventListener(outsidePress);
+                outsidePress = null;
+            }
+            if (macOverlay != null) {
+                macOverlay.setVisible(false);
+                if (macLayer != null) {
+                    macLayer.remove(macOverlay);
+                    macLayer.repaint();
+                    macLayer = null;
+                }
+            }
+        }
+        super.setVisible(visible);
     }
 
     private void rebuild(DrawingCanvas.Tool tool) {
@@ -64,9 +146,16 @@ final class ToolOptionsPopup extends JPopupMenu {
             case LASSO, RECTANGLE -> selectionOptions(body, tool);
         }
         surface.add(body);
-        add(surface);
-        revalidate();
-        repaint();
+        if (macLayer != null && macOverlay != null) {
+            macOverlay.removeAll();
+            macOverlay.add(surface, java.awt.BorderLayout.CENTER);
+            macOverlay.revalidate();
+            macOverlay.repaint();
+        } else {
+            add(surface);
+            revalidate();
+            repaint();
+        }
     }
 
     private void penOptions(JPanel body) {
@@ -315,8 +404,8 @@ final class ToolOptionsPopup extends JPopupMenu {
             Graphics2D g=graphics2(graphics);
             int cardBottom = getHeight() - 17;
             int center = getWidth() / 2;
-            g.setColor(new Color(26,35,58,22));
-            g.fillRoundRect(3,5,getWidth()-6,cardBottom,24,24);
+            // No artificial drop shadow or dark backing rectangle. Retain the
+            // rounded card and the small white tip, including on Retina/Aqua.
             g.setColor(Color.WHITE);
             g.fillRoundRect(1,1,getWidth()-2,cardBottom-1,23,23);
             Path2D tip = new Path2D.Double();

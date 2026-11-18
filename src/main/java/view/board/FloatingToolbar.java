@@ -18,19 +18,21 @@ import java.awt.event.ComponentEvent;
  * on its end; it docks to the middle of the nearest edge (standing up on the left / right) and remembers it.
  */
 public final class FloatingToolbar {
-    private static final int FRAME_MS = 5;
+    private static final int FRAME_MS = 16;
     private static final float REF_MS = 16f;
 
     private final DrawingCanvas canvas;
     private final JComponent area;
     private final PdfPanel pdfPanel;
     private final GlassBar bar;
-    private final GlassBar.Item[] tools = new GlassBar.Item[3];
+    private final GlassBar.Item[] tools = new GlassBar.Item[4];
     private final GlassBar.Item pen;
     private final ToolOptionsPopup options;
     private DrawingCanvas.Tool lastClicked;
     private boolean toolClickArmed;
     private boolean optionsOpen;
+    /** PDF pointer restores the editor's native selection/double-click behavior. */
+    private boolean pdfPointerMode;
     private final Spring sx = new Spring();
     private final Spring sy = new Spring();
     private final Timer timer = new Timer(FRAME_MS, e -> step());
@@ -63,6 +65,7 @@ public final class FloatingToolbar {
             }
         });
         options = new ToolOptionsPopup(canvas, this::useColor);
+        tools[3] = bar.segment("Pointer", Icons::pointer, 1, this::choosePointer);
         pen = tools[0] = bar.segment("Pen", Icons::pencil, 1, () -> chooseTool(DrawingCanvas.Tool.PEN));
         tools[1] = bar.segment("Eraser", Icons::eraser, 1, () -> chooseTool(DrawingCanvas.Tool.ERASER));
         tools[2] = bar.segment("Lasso", Icons::lasso, 1, () -> chooseTool(DrawingCanvas.Tool.LASSO));
@@ -72,11 +75,13 @@ public final class FloatingToolbar {
         bar.action("Clear", Icons::trash, canvas::clear, () -> !canvas.isBlank());
         bar.finish();
         bar.select(itemFor(canvas.getTool()));
-        pdfPanel.editor().pageView().configurePdfDrawing(true, canvas::getTool,
+        pdfPanel.editor().pageView().configurePdfDrawing(true,
+                () -> pdfPointerMode ? null : canvas.getTool(),
                 canvas::getInkColor, canvas::getPenWidth, canvas::getEraserMode, canvas::getEraserSize);
         bar.setHoverToolLabels(true, this::relayout);
 
         canvas.addPropertyChangeListener(DrawingCanvas.TOOL_PROPERTY, e -> {
+            pdfPointerMode = false;
             bar.select(itemFor((DrawingCanvas.Tool) e.getNewValue()));
             optionsOpen = false;
             if (options.isVisible()) options.setVisible(false);
@@ -114,7 +119,22 @@ public final class FloatingToolbar {
         return tools[tool == DrawingCanvas.Tool.RECTANGLE ? 2 : tool.ordinal()];
     }
 
+    private boolean choosePointer() {
+        // The ordinary pointer belongs to the PDF interaction mode; Canvas keeps
+        // its existing safe selection behavior without modifying teammates' code.
+        canvas.setTool(DrawingCanvas.Tool.LASSO);
+        pdfPointerMode = true;
+        optionsOpen = false;
+        options.setVisible(false);
+        bar.select(tools[3]);
+        pdfPanel.editor().pageView().setCursor(java.awt.Cursor.getDefaultCursor());
+        toolClickArmed = false;
+        lastClicked = null;
+        return true;
+    }
+
     private boolean chooseTool(DrawingCanvas.Tool tool) {
+        pdfPointerMode = false;
         boolean sameSelection = tool == DrawingCanvas.Tool.LASSO
                 && canvas.getTool() == DrawingCanvas.Tool.RECTANGLE;
         if (toolClickArmed && lastClicked == tool && (canvas.getTool() == tool || sameSelection)) {
