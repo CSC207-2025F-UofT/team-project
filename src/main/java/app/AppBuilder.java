@@ -1,23 +1,31 @@
 package app;
 
-import data_access.InMemoryUpdateTimerSettingsDataAccess;
+import data_access.InMemoryTimerDataAccess;
 import entities.TimerSessionFactory;
 import interface_adapters.ViewManagerModel;
-import interface_adapters.flashcard_generator.FlashcardGeneratorViewModel;
+import interface_adapters.cancel_timer.CancelTimerController;
+import interface_adapters.cancel_timer.CancelTimerPresenter;
 import interface_adapters.home.HomeViewModel;
 import interface_adapters.open_settings.OpenSettingsController;
 import interface_adapters.open_settings.OpenSettingsPresenter;
+import interface_adapters.start_timer.StartTimerController;
+import interface_adapters.start_timer.StartTimerPresenter;
 import interface_adapters.update_timer_settings.UpdateTimerSettingsController;
 import interface_adapters.update_timer_settings.UpdateTimerSettingsPresenter;
 import interface_adapters.update_timer_settings.TimerSettingsViewModel;
+import use_case.cancel_timer.CancelTimerInputBoundary;
+import use_case.cancel_timer.CancelTimerInteractor;
+import use_case.cancel_timer.CancelTimerOutputBoundary;
 import use_case.open_settings.OpenSettingsInputBoundary;
 import use_case.open_settings.OpenSettingsInteractor;
 import use_case.open_settings.OpenSettingsOutputBoundary;
-import use_case.update_timer_settings.UpdateTimerSettingsDataAccessInterface;
+import use_case.start_timer.StartTimerInputBoundary;
+import use_case.start_timer.StartTimerInteractor;
+import use_case.start_timer.StartTimerOutputBoundary;
 import use_case.update_timer_settings.UpdateTimerSettingsInputBoundary;
 import use_case.update_timer_settings.UpdateTimerSettingsInteractor;
 import use_case.update_timer_settings.UpdateTimerSettingsOutputBoundary;
-import view.FlashcardGeneratorView;
+import view.FontManager;
 import view.HomeView;
 import view.TimerSettingsView;
 
@@ -33,7 +41,7 @@ public class AppBuilder {
     TimerSessionFactory sessionFactory = new TimerSessionFactory();
     final ViewManagerModel viewManagerModel = new ViewManagerModel();
 
-    UpdateTimerSettingsDataAccessInterface dataAccessInterface = new InMemoryUpdateTimerSettingsDataAccess(sessionFactory);
+    InMemoryTimerDataAccess timerDataAccess = new InMemoryTimerDataAccess(sessionFactory);
 
     private TimerSettingsView timerSettingsView;
     private TimerSettingsViewModel timerSettingsViewModel;
@@ -76,7 +84,7 @@ public class AppBuilder {
         final OpenSettingsInputBoundary openSettingsInteractor = new OpenSettingsInteractor(openSettingsPresenter);
 
         OpenSettingsController controller = new OpenSettingsController(openSettingsInteractor);
-        homeView.setController(controller);
+        homeView.setSettingsController(controller);
         return this;
     }
 
@@ -87,10 +95,32 @@ public class AppBuilder {
     public AppBuilder addUpdateTimerSettingsUseCase() {
         final UpdateTimerSettingsOutputBoundary saveSessionPresenter = new UpdateTimerSettingsPresenter(timerSettingsViewModel, homeViewModel);
         final UpdateTimerSettingsInputBoundary saveSessionInteractor = new UpdateTimerSettingsInteractor(
-                saveSessionPresenter, dataAccessInterface, sessionFactory);
+                saveSessionPresenter, timerDataAccess, sessionFactory);
 
         UpdateTimerSettingsController controller = new UpdateTimerSettingsController(saveSessionInteractor);
         timerSettingsView.setController(controller);
+        return this;
+    }
+
+    /**
+     * Adds the Start Timer Settings Use Case to the application.
+     * @return this builder
+     */
+    public AppBuilder addStartTimerUseCase() {
+        final StartTimerOutputBoundary startTimerPresenter = new StartTimerPresenter(homeViewModel);
+        final StartTimerInputBoundary startTimerInteractor = new StartTimerInteractor(startTimerPresenter, timerDataAccess);
+
+        StartTimerController startTimerController = new StartTimerController(startTimerInteractor);
+        homeView.setStartTimerController(startTimerController);
+        return this;
+    }
+
+    public AppBuilder addCancelTimerUseCase() {
+        final CancelTimerOutputBoundary cancelTimerPresenter = new CancelTimerPresenter(homeViewModel);
+        final CancelTimerInputBoundary cancelTimerInteractor = new CancelTimerInteractor(cancelTimerPresenter, timerDataAccess);
+
+        CancelTimerController cancelTimerController = new CancelTimerController(cancelTimerInteractor);
+        homeView.setCancelTimerController(cancelTimerController);
         return this;
     }
 
@@ -111,20 +141,18 @@ public class AppBuilder {
         return application;
     }
 
-    public AppBuilder addFlashcardGeneratorView(){
-
-
-        return this;
-    }
-
     // MOVE TO MAIN LATER
     public static void main(String[] args) {
+        FontManager.loadFonts();
+
         AppBuilder appBuilder = new AppBuilder();
         JFrame application = appBuilder
                 .addTimerSettingsView()
                 .addHomeView()
                 .addUpdateTimerSettingsUseCase()
                 .addOpenSettingsUseCase()
+                .addStartTimerUseCase()
+                .addCancelTimerUseCase()
                 .build();
 
         application.setLocationRelativeTo(null);

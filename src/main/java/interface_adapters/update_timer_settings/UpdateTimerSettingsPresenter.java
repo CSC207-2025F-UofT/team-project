@@ -31,6 +31,7 @@ public class UpdateTimerSettingsPresenter implements UpdateTimerSettingsOutputBo
 
         TimerSettingsState sessionState = sessionViewModel.getState();
         sessionState.setErrorMessage(null);
+        sessionState.setSettingsOpen(false);
         sessionViewModel.setState(sessionState);
         sessionViewModel.notifyStateChanged();
     }

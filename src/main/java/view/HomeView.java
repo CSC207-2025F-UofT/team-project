@@ -1,15 +1,15 @@
 package view;
 
+import interface_adapters.cancel_timer.CancelTimerController;
 import interface_adapters.home.HomeViewModel;
 import interface_adapters.home.HomeViewModelListener;
 import interface_adapters.open_settings.OpenSettingsController;
+import interface_adapters.start_timer.StartTimerController;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.File;
-import java.io.IOException;
 
 /**
  * The View for when the user first enters the program.
@@ -18,33 +18,19 @@ import java.io.IOException;
 public class HomeView extends JPanel implements HomeViewModelListener {
 
     private HomeViewModel viewModel;
-    private OpenSettingsController controller = null;
-    JLabel timerLabel = new JLabel();
+    private OpenSettingsController settingsController = null;
+    private StartTimerController startTimerController = null;
+    private CancelTimerController cancelTimerController = null;
+
+    private JLabel timerLabel = new JLabel();
+
+    private JButton startButton;
+    private JButton adjustButton;
+    private JButton cancelButton;
 
     public HomeView(HomeViewModel viewModel) {
         this.viewModel = viewModel;
         viewModel.addListener(this);
-
-        Font winkle = null;
-        try {
-            winkle = Font.createFont(Font.TRUETYPE_FONT, new File("src/font/Winkle-Regular.ttf"));
-        } catch (FontFormatException e) {
-            throw new RuntimeException(e);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
-        ge.registerFont(winkle);
-
-        Font appleGaramond = null;
-        try {
-            appleGaramond = Font.createFont(Font.TRUETYPE_FONT, new File("src/font/AppleGaramond.ttf"));
-        } catch (FontFormatException e) {
-            throw new RuntimeException(e);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        ge.registerFont(appleGaramond);
 
         // Main panel containing all sections of the home view.
         JPanel mainTimerPanel = new JPanel();
@@ -57,9 +43,30 @@ public class HomeView extends JPanel implements HomeViewModelListener {
         topPanel.setPreferredSize(new Dimension(800, 220));
         topPanel.setBackground(Color.WHITE);
 
+        JPanel middlePanel = new JPanel();
+        middlePanel.setPreferredSize(new Dimension(800, 280));
+        middlePanel.setBackground(Color.WHITE);
+
         JPanel bottomPanel = new JPanel();
-        bottomPanel.setPreferredSize(new Dimension(800, 310));
+        bottomPanel.setPreferredSize(new Dimension(800, 30));
         bottomPanel.setBackground(Color.WHITE);
+
+        cancelButton = new JButton("Press to Cancel");
+        cancelButton.setFont(FontManager.getAppleGaramond(24f));
+
+        cancelButton.setBorderPainted(false);
+        cancelButton.setContentAreaFilled(false);
+        cancelButton.setFocusPainted(false);
+        cancelButton.setVisible(false);
+
+        cancelButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                cancelTimerController.execute();
+            }
+        });
+
+        bottomPanel.add(cancelButton);
 
         // Panel reserved for navigation components.
         JPanel navigationPanel = new JPanel();
@@ -67,7 +74,7 @@ public class HomeView extends JPanel implements HomeViewModelListener {
         navigationPanel.setBackground(Color.WHITE);
 
         JLabel focusTextLabel = new JLabel("Focus");
-        focusTextLabel.setFont(appleGaramond.deriveFont(30f));
+        focusTextLabel.setFont(FontManager.getAppleGaramond(24f));
         focusTextLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
 
         // Panel containing the timer display and adjustment button.
@@ -76,28 +83,40 @@ public class HomeView extends JPanel implements HomeViewModelListener {
         timerPanel.setBackground(Color.WHITE);
 
         timerLabel = new JLabel("00:00");
-        timerLabel.setFont(winkle.deriveFont(100f));
+        timerLabel.setFont(FontManager.getWinkle(100f));
         timerLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
 
         // Creates the button used to access timer adjustment settings.
         ImageIcon adjustIcon = new ImageIcon("src/images/AdjustIcon.png");
-        JButton adjustButton = new JButton(adjustIcon);
+        adjustButton = new JButton(adjustIcon);
         adjustButton.setBorderPainted(false);
         adjustButton.setFocusPainted(false);
         adjustButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                controller.execute();
+                settingsController.execute();
             }
         });
 
+        JPanel buttonWrapper = new JPanel(new BorderLayout());
+        buttonWrapper.setBackground(Color.WHITE);
+        buttonWrapper.setPreferredSize(new Dimension(90, 90));
+        buttonWrapper.add(adjustButton, BorderLayout.CENTER);
+
         timerPanel.add(Box.createHorizontalStrut(90));
         timerPanel.add(timerLabel);
-        timerPanel.add(adjustButton);
+        timerPanel.add(buttonWrapper);
 
-        JButton startButton = new JButton("Start");
-        startButton.setFont(winkle.deriveFont(48f));
+        startButton = new JButton("Start");
+        startButton.setFont(FontManager.getWinkle(48f));
         startButton.setAlignmentX(Component.CENTER_ALIGNMENT);
+        startButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                startTimerController.execute("focus");
+            }
+        });
+
 
         topPanel.add(Box.createVerticalStrut(20));
         topPanel.add(focusTextLabel);
@@ -106,6 +125,7 @@ public class HomeView extends JPanel implements HomeViewModelListener {
         topPanel.add(Box.createVerticalGlue());
 
         mainTimerPanel.add(topPanel);
+        mainTimerPanel.add(middlePanel);
         mainTimerPanel.add(bottomPanel);
         mainTimerPanel.add(navigationPanel);
 
@@ -114,12 +134,20 @@ public class HomeView extends JPanel implements HomeViewModelListener {
 
     }
 
+    public void setStartTimerController(StartTimerController startTimerController) {
+        this.startTimerController = startTimerController;
+    }
+
     /**
-     * Assign the controller to the Home View.
-     * @param controller Open Settings Controller
+     * Assign the settingsController to the Home View.
+     * @param settingsController Open Settings Controller
      */
-    public void setController(OpenSettingsController controller) {
-        this.controller = controller;
+    public void setSettingsController(OpenSettingsController settingsController) {
+        this.settingsController = settingsController;
+    }
+
+    public void setCancelTimerController(CancelTimerController cancelTimerController) {
+        this.cancelTimerController = cancelTimerController;
     }
 
     /**
@@ -127,6 +155,14 @@ public class HomeView extends JPanel implements HomeViewModelListener {
      */
     @Override
     public void stateChanged() {
-        timerLabel.setText(viewModel.getState().getTimerDisplay());
+        String timerDisplay = viewModel.getState().getTimerDisplay();
+        boolean isTimerRunning = viewModel.getState().isTimerRunning();
+
+        timerLabel.setText(timerDisplay);
+
+        // Enables start and adjust button when timer isn't running
+        startButton.setVisible(!isTimerRunning);
+        adjustButton.setVisible(!isTimerRunning);
+        cancelButton.setVisible(isTimerRunning);
     }
 }
