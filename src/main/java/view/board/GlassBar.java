@@ -938,10 +938,6 @@ public class GlassBar extends JComponent {
                 if (!iconOnly) {
                     g2.drawString(it.label, (float) (x0 + (ICON + ICON_GAP) * scale),
                             (float) (b.getCenterY() - fm.getHeight() / 2.0 + fm.getAscent()));
-                    if (hoverToolLabels && hoverItem == it) {
-                        g2.drawString("⌃", (float) (b.getMaxX() - 15 * scale),
-                                (float) (b.getCenterY() - fm.getHeight() / 2.0 + fm.getAscent()));
-                    }
                 }
             } else if (it.kind == Kind.SWATCH) {
                 paintSwatch(g2, it, b.getCenterX(), b.getCenterY(), scale);

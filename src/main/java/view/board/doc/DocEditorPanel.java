@@ -12,6 +12,7 @@ import pdf_editor.domain.PdfMaterial;
 import pdf_editor.view.FormulaEditDialog;
 import pdf_editor.view.PdfPageCanvas;
 import view.board.BoardTheme;
+import view.board.GlassContextMenu;
 import view.board.Icons;
 import view.board.PdfWorkspacePort;
 
@@ -377,7 +378,7 @@ public final class DocEditorPanel extends JPanel implements PdfWorkspacePort {
             private void popup(MouseEvent e) {
                 if (!e.isPopupTrigger()) return;
                 libraryList.setSelectedIndex(libraryList.locationToIndex(e.getPoint()));
-                JPopupMenu menu = new JPopupMenu();
+                JPopupMenu menu = new GlassContextMenu();
                 item(menu, "Add to PDF", () -> {
                     MathLibrary.Material selected = libraryList.getSelectedValue();
                     if (selected != null) addMaterial(selected, 85, 110);
@@ -613,7 +614,7 @@ public final class DocEditorPanel extends JPanel implements PdfWorkspacePort {
         menu.show(this, Math.max(12, getWidth() / 3), 106);
     }
     private void contextMenu(MouseEvent event) {
-        JPopupMenu menu = new JPopupMenu();
+        JPopupMenu menu = new GlassContextMenu();
         PdfDocument.Placement selected = controller.selected();
         if (selected == null) {
             item(menu, "Type here", () -> {
@@ -632,13 +633,19 @@ public final class DocEditorPanel extends JPanel implements PdfWorkspacePort {
             item(menu, "Send backward one layer", () -> arrange(-1));
             item(menu, "Bring to front", () -> arrange(2));
             item(menu, "Send to back", () -> arrange(-2));
-            menu.add(pageDestinations());
+            ((GlassContextMenu) menu).addSubmenu(pageDestinations());
             item(menu, "Delete selected item", this::deleteSelectedItem);
         }
         menu.show(paper, event.getX(), event.getY());
     }
     private static void item(JPopupMenu menu, String title, Runnable action) {
-        JMenuItem entry = new JMenuItem(title);entry.addActionListener(e -> action.run());menu.add(entry);
+        if (menu instanceof GlassContextMenu glass) {
+            glass.addAction(title, action);
+        } else {
+            JMenuItem entry = new JMenuItem(title);
+            entry.addActionListener(e -> action.run());
+            menu.add(entry);
+        }
     }
     private void preview() {
         try {

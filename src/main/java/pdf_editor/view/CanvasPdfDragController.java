@@ -16,6 +16,13 @@ import java.util.Objects;
 public final class CanvasPdfDragController {
     private static final int DRAG_THRESHOLD = 5;
 
+    /** Canvas movement has priority until the pointer crosses the PDF boundary. */
+    static boolean shouldTransfer(Point pressed, Point current, int canvasWidth) {
+        return pressed != null && current != null
+                && pressed.distance(current) >= DRAG_THRESHOLD
+                && current.x >= canvasWidth;
+    }
+
     private CanvasPdfDragController() { }
 
     public static void install(DrawingCanvas canvas) {
@@ -47,7 +54,7 @@ public final class CanvasPdfDragController {
                 started = false;
             }
             @Override public void mouseDragged(MouseEvent event) {
-                if (pressed == null || started || pressed.distance(event.getPoint()) < DRAG_THRESHOLD) return;
+                if (started || !shouldTransfer(pressed, event.getPoint(), canvas.getWidth())) return;
                 started = true;
                 canvas.cancelSelectionMoveForCopy();
                 handler.exportAsDrag(canvas, event, TransferHandler.COPY);

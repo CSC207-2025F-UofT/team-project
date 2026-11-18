@@ -4,6 +4,7 @@ import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
+import javax.swing.plaf.basic.BasicPopupMenuUI;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -30,8 +31,10 @@ final class GlassSaveMenu extends JPopupMenu {
         Objects.requireNonNull(state);
         Objects.requireNonNull(save);
         Objects.requireNonNull(saveAs);
+        setUI(new BasicPopupMenuUI());
         setOpaque(false);
         setBackground(new Color(0, 0, 0, 0));
+        setLightWeightPopupEnabled(true);
         setBorder(BorderFactory.createEmptyBorder(5, 5, 8, 5));
         rows = new JPanel(null) {
             @Override protected void paintComponent(Graphics graphics) {

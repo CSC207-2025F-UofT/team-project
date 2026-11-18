@@ -6,6 +6,7 @@ import pdf_editor.use_case.SelectionToLibrary;
 import view.DrawingCanvas;
 import view.glass.GlassDialogs;
 import javax.swing.*;
+import javax.swing.plaf.basic.BasicPopupMenuUI;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -89,7 +90,10 @@ public final class CanvasLibrarySelectionMenu {
         };
 
         GlassSelectionMenu() {
+            setUI(new BasicPopupMenuUI());
             setOpaque(false);
+            setBackground(new Color(0, 0, 0, 0));
+            setLightWeightPopupEnabled(true);
             setBorder(BorderFactory.createEmptyBorder(5, 5, 8, 5));
             surface.setOpaque(false);
             surface.setPreferredSize(new Dimension(WIDTH, INSET * 2 + ROW_HEIGHT * 2));
