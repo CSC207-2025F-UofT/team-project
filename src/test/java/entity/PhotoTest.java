@@ -8,9 +8,9 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 class PhotoTest {
-    private final Photo early = new Photo("a", null, LocalDateTime.of(2026, 11, 12, 22, 0));
-    private final Photo late = new Photo("b", null, LocalDateTime.of(2026, 11, 13, 22, 0));
-    private final Photo noTime = new Photo("c", null, null);
+    private final Photo early = new Photo("a", ImageType.JPEG, null, LocalDateTime.of(2026, 11, 12, 22, 0));
+    private final Photo late = new Photo("b", ImageType.JPEG, null, LocalDateTime.of(2026, 11, 13, 22, 0));
+    private final Photo noTime = new Photo("c", ImageType.JPEG, null, null);
 
     @Test
     void ordersByTime() {
@@ -27,6 +27,6 @@ class PhotoTest {
 
     @Test
     void twoNullTimesCompareEqual() {
-        assertEquals(0, noTime.compareTo(new Photo("d", null, null)));
+        assertEquals(0, noTime.compareTo(new Photo("d", ImageType.JPEG, null, null)));
     }
 }

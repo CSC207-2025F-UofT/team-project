@@ -9,7 +9,7 @@ class TripTest {
     private static final LocalDateTime T0 = LocalDateTime.of(2026, 11, 12, 22, 0);
 
     private Photo photoAt(String id, LocalDateTime time) {
-        return new Photo(id, null, time);
+        return new Photo(id, ImageType.JPEG, null, time);
     }
 
     @Test
