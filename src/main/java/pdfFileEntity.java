@@ -38,6 +38,18 @@ public class PdfFile {
      * - isPdf() checks if file ends with .pdf and returns true if it does
      * - isWithinSizeLimit() checks if file is within the 50MB size limit
      * - belongsTo() checks if PDF belongs to the user, which is 4.3
+     * /**
+     *      * Business Rules:
+     *      * - isPdf() checks if file ends with .pdf and returns true if it does
+     *      * - isWithinSizeLimit() checks if file is within the 50MB size limit
+     *      * - belongsTo() checks if PDF belongs to the user, which is 4.3
+     *      *
+     *      * Getter methods:
+     *      * - getId()
+     *      * - getOwnerId()
+     *      * - getFileName()
+     *      * - getSizeBytes()
+     *      * - getUploadedAt()
      *
      * Getter methods:
      * - getId()
