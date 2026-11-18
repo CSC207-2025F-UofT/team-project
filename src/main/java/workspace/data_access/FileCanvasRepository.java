@@ -38,6 +38,9 @@ public final class FileCanvasRepository implements CanvasRepository {
         Path file = path(id);
         return Files.exists(file) ? Optional.of(read(file)) : Optional.empty();
     }
+    @Override public void delete(String id) throws IOException {
+        if (!Files.deleteIfExists(path(id))) throw new IOException("Saved canvas not found");
+    }
     @Override public void write(SavedCanvas canvas) throws IOException {
         Files.createDirectories(directory);
         Path target = path(canvas.id());

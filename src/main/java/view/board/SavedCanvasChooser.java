@@ -55,10 +55,11 @@ public final class SavedCanvasChooser extends JPanel {
     public enum Choice { OPEN, NEW, RENAME }
     private Choice choice = Choice.OPEN;
     private Runnable openSelected = () -> { };
+    private java.util.function.Consumer<SavedCanvas> deleteSelected = canvas -> { };
 
     public SavedCanvasChooser(List<SavedCanvas> canvases) {
         super(new BorderLayout(0, 10));
-        this.all = List.copyOf(canvases);
+        this.all = new java.util.ArrayList<>(canvases);
         setOpaque(false);
         setPreferredSize(new Dimension(540, 440));
         setBorder(BorderFactory.createEmptyBorder(4, 2, 0, 2));
@@ -84,6 +85,13 @@ public final class SavedCanvasChooser extends JPanel {
         list.setBorder(BorderFactory.createEmptyBorder(4, 3, 4, 3));
         list.addMouseListener(new MouseAdapter() {
             @Override public void mouseClicked(MouseEvent e) {
+                int index = list.locationToIndex(e.getPoint());
+                if (index >= 0 && list.getCellBounds(index, index) != null
+                        && list.getCellBounds(index, index).contains(e.getPoint())
+                        && e.getX() >= list.getWidth() - 44) {
+                    deleteSelected.accept(results.get(index));
+                    return;
+                }
                 if (e.getClickCount() == 2 && list.locationToIndex(e.getPoint()) >= 0
                         && list.getCellBounds(list.locationToIndex(e.getPoint()), list.locationToIndex(e.getPoint()))
                                 .contains(e.getPoint())) openSelected.run();
@@ -121,6 +129,13 @@ public final class SavedCanvasChooser extends JPanel {
     }
 
     /** The enclosing modal registers its submit callback; no persistence or navigation is performed here. */
+    public void onDelete(java.util.function.Consumer<SavedCanvas> callback) {
+        deleteSelected = java.util.Objects.requireNonNull(callback);
+    }
+    public void removeSaved(String id) {
+        all.removeIf(canvas -> canvas.id().equals(id));
+        filter();
+    }
     public void onDoubleClick(Runnable callback) { openSelected = callback == null ? () -> { } : callback; }
     public SavedCanvas selected() { return list.getSelectedValue(); }
     public Choice choice() { return choice; }
@@ -160,6 +175,12 @@ public final class SavedCanvasChooser extends JPanel {
             labels.add(date);
             labels.add(Box.createVerticalGlue());
             panel.add(labels, BorderLayout.CENTER);
+            JLabel remove = new JLabel("×", SwingConstants.CENTER);
+            remove.setToolTipText("Delete saved canvas");
+            remove.setFont(BoardTheme.font(20f));
+            remove.setForeground(new Color(125, 133, 148));
+            remove.setPreferredSize(new Dimension(32, 48));
+            panel.add(remove, BorderLayout.EAST);
             return panel;
         }
     }

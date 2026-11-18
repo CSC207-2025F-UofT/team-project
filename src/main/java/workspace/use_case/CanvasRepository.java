@@ -10,4 +10,7 @@ public interface CanvasRepository {
     List<SavedCanvas> list() throws IOException;
     Optional<SavedCanvas> find(String id) throws IOException;
     void write(SavedCanvas canvas) throws IOException;
+    default void delete(String id) throws IOException {
+        throw new UnsupportedOperationException("Repository does not support deletion");
+    }
 }
