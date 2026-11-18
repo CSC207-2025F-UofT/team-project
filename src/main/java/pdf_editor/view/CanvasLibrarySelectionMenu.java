@@ -6,6 +6,15 @@ import pdf_editor.use_case.SelectionToLibrary;
 import view.DrawingCanvas;
 import view.glass.GlassDialogs;
 import javax.swing.*;
+import java.awt.BasicStroke;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.FontMetrics;
+import java.awt.GradientPaint;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.RenderingHints;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
@@ -22,8 +31,8 @@ public final class CanvasLibrarySelectionMenu {
             @Override public void mouseReleased(MouseEvent event) { popup(event); }
             private void popup(MouseEvent event) {
                 if (!event.isPopupTrigger() || canvas.selectedInkSnapshot().isEmpty()) return;
-                JPopupMenu menu = new JPopupMenu();
-                JMenuItem formula = new JMenuItem("Recognize selection → Library");
+                GlassSelectionMenu menu = new GlassSelectionMenu();
+                JButton formula = menu.addAction("Recognize selection → Library");
                 formula.addActionListener(e -> {
                     List<Stroke> strokes = canvas.selectedInkSnapshot();
                     BufferedImage image = canvas.selectedInkImage();
@@ -46,16 +55,86 @@ public final class CanvasLibrarySelectionMenu {
                         }
                     }.execute();
                 });
-                JMenuItem ink = new JMenuItem("Add selected ink image → Library");
+                JButton ink = menu.addAction("Add selected ink image → Library");
                 ink.addActionListener(e -> {
                     List<Stroke> strokes = canvas.selectedInkSnapshot();
                     if (!strokes.isEmpty()) {
                         registry.track(action.addInk(canvas.selectedInkColorImage()).id(), strokes);
                     }
                 });
-                menu.add(formula);menu.add(ink);
                 menu.show(canvas, event.getX(), event.getY());
             }
         });
     }
+
+    /** View-only menu: identical on Windows and macOS, no native JMenuItem styling. */
+    private static final class GlassSelectionMenu extends JPopupMenu {
+        private static final int ROW_HEIGHT = 39;
+        private static final int INSET = 6;
+        private static final int WIDTH = 250;
+        private final JPanel surface = new JPanel(null) {
+            @Override protected void paintComponent(Graphics graphics) {
+                Graphics2D g = (Graphics2D) graphics.create();
+                g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                int w = getWidth() - 1;
+                int h = getHeight() - 1;
+                g.setPaint(new GradientPaint(0, 0, new Color(255, 255, 255, 252),
+                        0, getHeight(), new Color(240, 244, 252, 249)));
+                g.fillRoundRect(0, 0, w, h, 18, 18);
+                g.setStroke(new BasicStroke(1f));
+                g.setColor(new Color(187, 198, 214, 180));
+                g.drawRoundRect(0, 0, w, h, 18, 18);
+                g.dispose();
+            }
+        };
+
+        GlassSelectionMenu() {
+            setOpaque(false);
+            setBorder(BorderFactory.createEmptyBorder(5, 5, 8, 5));
+            surface.setOpaque(false);
+            surface.setPreferredSize(new Dimension(WIDTH, INSET * 2 + ROW_HEIGHT * 2));
+            add(surface);
+        }
+
+        JButton addAction(String title) {
+            int row = surface.getComponentCount();
+            JButton button = new GlassAction(title);
+            button.setBounds(INSET, INSET + row * ROW_HEIGHT,
+                    WIDTH - 2 * INSET, ROW_HEIGHT);
+            button.addActionListener(e -> setVisible(false));
+            surface.add(button);
+            return button;
+        }
+
+        private static final class GlassAction extends JButton {
+            GlassAction(String title) {
+                super(title);
+                setFont(new Font(Font.DIALOG, Font.PLAIN, 12));
+                setFocusable(false);
+                setOpaque(false);
+                setContentAreaFilled(false);
+                setBorderPainted(false);
+                setBorder(BorderFactory.createEmptyBorder());
+                setRolloverEnabled(true);
+            }
+
+            @Override protected void paintComponent(Graphics graphics) {
+                Graphics2D g = (Graphics2D) graphics.create();
+                g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING,
+                        RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+                if (getModel().isRollover() || getModel().isPressed()) {
+                    g.setColor(getModel().isPressed() ? new Color(210, 224, 247)
+                            : new Color(228, 238, 253));
+                    g.fillRoundRect(2, 2, getWidth() - 4, getHeight() - 4, 12, 12);
+                }
+                g.setColor(isEnabled() ? new Color(35, 43, 56) : new Color(145, 151, 161));
+                FontMetrics fm = g.getFontMetrics(getFont());
+                g.setFont(getFont());
+                g.drawString(getText(), 12, (getHeight() + fm.getAscent() - fm.getDescent()) / 2);
+                g.dispose();
+            }
+        }
+    }
+
 }
