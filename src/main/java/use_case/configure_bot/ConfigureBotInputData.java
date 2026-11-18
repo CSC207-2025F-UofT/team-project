@@ -1,5 +1,8 @@
 package use_case.configure_bot;
 
+/**
+ * The input data for the Configure Bot Use Case.
+ */
 public class ConfigureBotInputData {
 
     private final String styleName;
