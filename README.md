@@ -59,7 +59,7 @@ Member4: \
 | --- | --- |
 | Yinghao | Start Game, Shuffle Deck, End Turn |
 | Member2 | Play Card, Confirm Move |
-| Member3 | Select Character, Confirm Cast |
+| Yuhang | Select Character, Confirm Cast |
 | Andy | Cast Response, Resolve Cast |
 
 ## Credits
