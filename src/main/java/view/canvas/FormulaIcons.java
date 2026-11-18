@@ -1,5 +1,6 @@
 package view.canvas;
 
+import entity.EquationDisplay;
 import org.scilab.forge.jlatexmath.TeXConstants;
 import org.scilab.forge.jlatexmath.TeXFormula;
 import org.scilab.forge.jlatexmath.TeXIcon;
@@ -23,7 +24,7 @@ final class FormulaIcons {
             return null;
         }
         try {
-            TeXIcon icon = new TeXFormula(latex).createTeXIcon(TeXConstants.STYLE_DISPLAY, SIZE);  // readable ½
+            TeXIcon icon = new TeXFormula(EquationDisplay.typeset(latex)).createTeXIcon(TeXConstants.STYLE_DISPLAY, SIZE);  // readable ½
             icon.setForeground(INK);
             lineUp(icon);
             return icon;

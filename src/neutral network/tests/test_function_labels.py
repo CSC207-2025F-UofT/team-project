@@ -35,7 +35,7 @@ class FunctionLabelsTests(unittest.TestCase):
     def test_preserve_ambiguous_words_and_commands(self):
         for raw in ('since', 'cost', 'distance', 'logistic', 'arcsinh', 'limsup', 'colim',
                     's i n c e', r'\sinx', r'\operatorname{colim}', r'\mathrm{cost}',
-                    r'\begin{cases}x\end{cases}'):
+                    r'\begin{matrix}x\end{matrix}'):
             with self.subTest(raw=raw):
                 self.assertEqual(tokenize_label(raw), TOKEN_RE.findall(raw))
 

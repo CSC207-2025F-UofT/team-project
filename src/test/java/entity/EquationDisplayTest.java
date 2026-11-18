@@ -23,6 +23,20 @@ class EquationDisplayTest {
         assertEquals("x=1 = true", EquationDisplay.equation("x=1", "true"));
         assertEquals("y=x", EquationDisplay.equation("y=x", ""));
     }
+    @Test void plainBracketsAroundMatrixAreStretched() {
+        assertEquals("a=\\left(\\begin{matrix}1&4\\\\2&3\\end{matrix}\\right)",
+                EquationDisplay.typeset("a=(\\begin{matrix}1&4\\\\2&3\\end{matrix})"));
+        assertEquals("\\left[\\begin{matrix}1\\end{matrix}\\right]",
+                EquationDisplay.typeset("[\\begin{matrix}1\\end{matrix}]"));
+    }
+    @Test void alreadySizedOrUnrelatedLatexIsUnchanged() {
+        String pmatrix = "\\begin{pmatrix}1\\\\2\\end{pmatrix}";
+        assertEquals(pmatrix, EquationDisplay.typeset(pmatrix));
+        String sized = "\\left(\\begin{matrix}1\\end{matrix}\\right)";
+        assertEquals(sized, EquationDisplay.typeset(sized));
+        assertEquals("(x+1)", EquationDisplay.typeset("(x+1)"));
+        assertNull(EquationDisplay.typeset(null));
+    }
     @Test void separatorAgreesWithTransformationPredicate() {
         assertTrue(EquationDisplay.isTransformation("3x=6", "x=2"));
         assertFalse(EquationDisplay.isTransformation("y=x", ""));

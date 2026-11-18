@@ -14,7 +14,7 @@ class EmptyFormulaImageError(ValueError):
 
 def _read_formula_image(path: Path) -> tuple[Image.Image, bool, tuple[int, int, int, int], np.ndarray]:
     """保留 RGB；根据任一颜色通道与黑/白背景的差异定位笔迹。
-    最后一项是裁剪范围内每一行是否有笔迹，用来切行带。"""
+    最后一项是裁剪到笔迹包围盒的二值笔迹图 [H,W]，用来切行带。"""
     with Image.open(path) as source:
         rgba = ImageOps.exif_transpose(source).convert("RGBA")
         background = Image.new("RGBA", rgba.size, "white")
@@ -28,7 +28,7 @@ def _read_formula_image(path: Path) -> tuple[Image.Image, bool, tuple[int, int, 
     bounds = Image.fromarray(ink_mask).getbbox()
     if bounds is None:
         raise EmptyFormulaImageError(f"图片中没有可识别的笔迹: {path}")
-    return rgb, light_background, bounds, ink_mask[bounds[1]:bounds[3]].any(axis=1)
+    return rgb, light_background, bounds, ink_mask[bounds[1]:bounds[3], bounds[0]:bounds[2]]
 
 
 def check_formula_image(path: Path) -> None:
@@ -36,16 +36,22 @@ def check_formula_image(path: Path) -> None:
     _read_formula_image(path)
 
 
-def load_formula_image(path: Path, invert: bool | None = None) -> torch.Tensor:
+def formula_ink_mask(path: Path) -> np.ndarray:
+    """与加载时相同的笔迹检测 -> 裁剪到包围盒的二值图 [H,W]（True 为笔迹）。"""
+    return _read_formula_image(path)[3]
+
+
+def load_formula_image(path: Path, invert: bool | None = None, band_scale: float = 1.0) -> torch.Tensor:
     """单张公式图 -> RGB [3, H, W]；H 至少 128，多行公式更高，H、W 都是 16 的倍数。
-    缩放和画布尺寸见 formula_layout.py；invert=None 自动判断，否则强制开/关反色。"""
-    rgb, light_background, bounds, rows = _read_formula_image(path)
+    缩放和画布尺寸见 formula_layout.py；invert=None 自动判断，否则强制开/关反色。
+    band_scale 乘在规则算出的最高行带高度上（crop.py 用它试不同缩放），默认 1 即原规则。"""
+    rgb, light_background, bounds, mask = _read_formula_image(path)
     should_invert = light_background if invert is None else invert
     # 裁切始终根据原图背景定位笔迹，不受输出是否反色影响。
     ink = (ImageOps.invert(rgb) if should_invert else rgb).crop(bounds)
 
     width, ink_height = ink.size
-    tallest = tallest_band(row_spans(rows), ink_height, GAP_MIN_PX)
+    tallest = tallest_band(row_spans(mask.any(axis=1)), ink_height, GAP_MIN_PX) * band_scale
     scale, canvas_width, canvas_height = formula_layout(width, ink_height, tallest)
     resized_width = max(1, round_half_up(width * scale))
     resized_height = max(1, round_half_up(ink_height * scale))

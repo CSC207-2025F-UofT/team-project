@@ -1,5 +1,6 @@
 package view.canvas;
 
+import entity.EquationDisplay;
 import org.scilab.forge.jlatexmath.TeXConstants;
 import org.scilab.forge.jlatexmath.TeXFormula;
 import org.scilab.forge.jlatexmath.TeXIcon;
@@ -174,7 +175,7 @@ public class AnswerPopup extends JPanel {
 
     private static TeXIcon typeset(String latex) {
         try {
-            return new TeXFormula(latex).createTeXIcon(TeXConstants.STYLE_DISPLAY, TEX_SIZE);
+            return new TeXFormula(EquationDisplay.typeset(latex)).createTeXIcon(TeXConstants.STYLE_DISPLAY, TEX_SIZE);
         } catch (RuntimeException | Error bad) {  // bad latex -> plain text
             return null;
         }

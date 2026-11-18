@@ -81,7 +81,7 @@ public final class MaterialRenderer {
         }
     }
     private static TeXIcon latexIcon(String text, float size) {
-        try { return new TeXFormula(text).createTeXIcon(TeXConstants.STYLE_DISPLAY, size); }
+        try { return new TeXFormula(EquationDisplay.typeset(text)).createTeXIcon(TeXConstants.STYLE_DISPLAY, size); }
         catch (RuntimeException e) { return null; }
     }
     private static TeXIcon[] fittedPair(String left, String right, int width, int height) {

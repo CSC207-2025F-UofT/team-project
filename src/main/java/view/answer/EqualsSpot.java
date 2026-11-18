@@ -1,5 +1,6 @@
 package view.answer;
 
+import entity.EquationDisplay;
 import entity.Stroke;
 import org.scilab.forge.jlatexmath.TeXConstants;
 import org.scilab.forge.jlatexmath.TeXFormula;
@@ -85,7 +86,7 @@ public final class EqualsSpot {
         if (latex.isBlank()) {
             return 0;
         }
-        return new TeXFormula(latex).createTeXIcon(TeXConstants.STYLE_DISPLAY, TEX_SIZE).getIconWidth();
+        return new TeXFormula(EquationDisplay.typeset(latex)).createTeXIcon(TeXConstants.STYLE_DISPLAY, TEX_SIZE).getIconWidth();
     }
 
     // two flat strokes stacked close, roughly same span = an "="
