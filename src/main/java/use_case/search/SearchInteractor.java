@@ -1,7 +1,5 @@
 package use_case.search;
 
-import entity.UserFactory;
-
 import java.util.List;
 
 public class SearchInteractor implements SearchInputBoundary {

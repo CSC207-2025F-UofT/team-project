@@ -160,7 +160,7 @@ The Open Library API will be used to search for books and retrieve relevant book
 
 ### UML Class Diagram
 
-(To be added)
+![UML Diagram.png](docs/UML%20Diagram.png)
 
 ### Sequence Diagrams
 
