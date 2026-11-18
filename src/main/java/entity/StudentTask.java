@@ -2,6 +2,17 @@ package entity;
 
 import java.time.LocalDate;
 
+/**
+ * Represents a Student's Task.
+ * <p>
+ * Class Invariants:
+ *   The owning user's ID is nonzero.
+ *   The deadline is non-null and may be in the past.
+ *   The estimated hours are finite and greater than zero.
+ *   The completion progress is between 0 and 100, inclusive.
+ *   The title is not null. An empty title is allowed.
+ *
+ */
 public class StudentTask extends Task{
 
     private String title;
@@ -36,6 +47,12 @@ public class StudentTask extends Task{
         this.description = newDescription;
     }
 
+    /**
+     * Update the deadline. Past dates are allowed for this.
+     *
+     * @param newDeadline is the new deadline for this task, newDeadline should not be null.
+     * @throws IllegalArgumentException if the new deadline is null.
+     */
     public void setDeadline(LocalDate newDeadline) {
         if (!fieldsValidation()) {
             throw new IllegalStateException("The task has invalid fields.");
@@ -50,6 +67,12 @@ public class StudentTask extends Task{
 
     }
 
+    /**
+     * Update the estimated hours to complete this task.
+     *
+     * @param newEstimatedHoursToCompleteTask is the new estimated hour. This is a double that must be finite and positive.
+     * @throws IllegalArgumentException if the new estimated hour is not finite or is not positive.
+     */
     public void setEstimatedHoursToCompleteTask(double newEstimatedHoursToCompleteTask) {
         if (!fieldsValidation()) {
             throw new IllegalStateException("The task has invalid fields.");
@@ -63,6 +86,12 @@ public class StudentTask extends Task{
         }
     }
 
+    /**
+     * Update the completion progress of this task.
+     *
+     * @param newCompletionProgress is the new completion progress for this task. This should be between 0 and 100, inclusively.
+     * @throws IllegalArgumentException if the updated information is less than 0 or greater than 100.
+     */
     public void setCompletionProgress(byte newCompletionProgress) {
         if (!fieldsValidation()) {
             throw new IllegalStateException("The task has invalid fields.");
@@ -80,8 +109,8 @@ public class StudentTask extends Task{
         this.difficultyLevel = newDifficultyLevel;
     }
 
-    /*
-    ** Check if all fields entered are valid, if not, throw an error.
+    /**
+     * Check if all fields entered are valid, if not, throw an error.
      */
     public boolean fieldsValidation() {
         return inputValidation(
