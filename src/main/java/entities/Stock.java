@@ -13,6 +13,10 @@ public class Stock {
    * @param ticker The ticker of the stock
    */
   public Stock(String ticker) {
+    if ("".equals(ticker)) {
+      throw new IllegalArgumentException("Ticker cannot be empty");
+    }
+
     this.ticker = ticker;
   }
 
