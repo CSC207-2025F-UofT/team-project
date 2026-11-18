@@ -27,7 +27,7 @@
 Member1 \
 *"As a player, I want to start a match against another player, then be able to save it to a file and load them."*
 
-Member2: \
+Shuai Shao: \
 *"As a player, I want to play and move my characters around the board."*
 
 Member3: \
@@ -58,7 +58,7 @@ Member4: \
 | Name | Use Cases |
 | --- | --- |
 | Yinghao | Start Game, Shuffle Deck, End Turn |
-| Member2 | Play Card, Confirm Move |
+| Shuai Shao | Play Card, Confirm Move |
 | Yuhang | Select Character, Confirm Cast |
 | Andy | Cast Response, Resolve Cast |
 
