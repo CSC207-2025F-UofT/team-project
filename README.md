@@ -194,9 +194,19 @@ How we are using it: The user can select the exercises they want from the API an
 
 ---
 
+## Development setup
+
+Install JDK 25 (LTS) and open `pom.xml` as a Maven project. The Maven wrapper downloads Maven automatically.
+
+- `./mvnw test`: check style and run unit tests.
+- `./mvnw verify`: also build the JAR and generate coverage at `target/site/jacoco/index.html`.
+
+On Windows PowerShell, use `.\mvnw.cmd` instead of `./mvnw`.
+Tests belong in `src/test/java`. GitHub Actions runs the checks on pushes and pull requests.
+
 ## How to Run
 
-[Instructions for running the program.]
+No application entry point has been implemented yet.
 
 ---
 
