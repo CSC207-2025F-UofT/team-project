@@ -5,6 +5,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.awt.event.MouseEvent;
+import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -142,6 +143,42 @@ class DrawingCanvasEqualsTest {
         drag(135, 115, 165, 115);
         bindAll();
         assertEquals(1, canvas.getFormulas().size());
+    }
+
+    private static void assertImagesEqual(BufferedImage a, BufferedImage b) {
+        assertEquals(a.getWidth(), b.getWidth());
+        assertEquals(a.getHeight(), b.getHeight());
+        for (int y = 0; y < a.getHeight(); y++) {
+            for (int x = 0; x < a.getWidth(); x++) {
+                assertEquals(a.getRGB(x, y), b.getRGB(x, y), "pixel " + x + "," + y);
+            }
+        }
+    }
+
+    @Test
+    void scaleOnlyOutsideTheReadableRange() {
+        double lo = DrawingCanvas.READABLE_MIN_HEIGHT;
+        double hi = DrawingCanvas.READABLE_MAX_HEIGHT;
+        assertEquals(1, DrawingCanvas.recognitionScale((lo + hi) / 2), 1e-9);
+        assertEquals(lo / 10.0, DrawingCanvas.recognitionScale(10), 1e-9);
+        assertEquals(hi / 400.0, DrawingCanvas.recognitionScale(400), 1e-9);
+    }
+
+    @Test
+    void normalSizeCaptureIsPixelIdentical() {
+        drag(100, 100, 100, 150);  // 50 tall, inside the range
+        drag(115, 120, 145, 120);
+        drag(115, 130, 145, 130);
+        BufferedImage asToday = canvas.toFormulaImage();
+        assertImagesEqual(asToday, bindAll().getImage());
+    }
+
+    @Test
+    void shrunkFormulaIsCapturedBigger() {
+        drag(100, 100, 100, 110);  // 10 tall
+        drag(105, 100, 105, 110);
+        BufferedImage asToday = canvas.toFormulaImage();
+        assertTrue(bindAll().getImage().getHeight() > asToday.getHeight());
     }
 
     @Test

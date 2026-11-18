@@ -97,6 +97,8 @@ public class DrawingCanvas extends JPanel {
     private static final float INK_WIDTH = 4f;
     private static final Color INK_COLOR = Color.BLACK;
     private static final int FORMULA_MARGIN = 16;  // white space kept around the ink in toFormulaImage()
+    static final double READABLE_MIN_HEIGHT = 30;   // char heights the model reads fine w/ pen 4, outside gets scaled
+    static final double READABLE_MAX_HEIGHT = 240;
     /** toFormulaImage() is always at least this many times as wide as it is tall. */
     public static final double FORMULA_MIN_ASPECT = 2.0;
     private static final int PRECISE_ERASER_RADIUS = 12;  // on screen, whatever the zoom
@@ -1578,8 +1580,32 @@ public class DrawingCanvas extends JPanel {
     private FormulaCapture capture(Formula f) {
         List<Stroke> ink = inDrawingOrder(f);
         List<Stroke> pair = EqualsSpot.trailingPair(ink, f.getCharHeight());
-        BufferedImage rest = pair.isEmpty() ? null : imageOf(minus(ink, pair));  // in case the model loses the =
-        return new FormulaCapture(f.getId(), f.getRevision(), imageOf(ink), rest);
+        double k = recognitionScale(f.getCharHeight());
+        BufferedImage rest = pair.isEmpty() ? null : imageOf(readable(minus(ink, pair), k));  // in case the model loses the =
+        return new FormulaCapture(f.getId(), f.getRevision(), imageOf(readable(ink, k)), rest);
+    }
+
+    // how much to blow up / shrink ink so pen 4 looks like what the model reads ok (probed 25..240)
+    static double recognitionScale(double charHeight) {
+        if (charHeight < READABLE_MIN_HEIGHT) {
+            return READABLE_MIN_HEIGHT / charHeight;
+        }
+        if (charHeight > READABLE_MAX_HEIGHT) {
+            return READABLE_MAX_HEIGHT / charHeight;
+        }
+        return 1;
+    }
+
+    // scaled copies, same list if k is 1 so normal ink renders exactly as before
+    private static List<Stroke> readable(List<Stroke> ink, double k) {
+        if (k == 1) {
+            return ink;
+        }
+        List<Stroke> copies = new ArrayList<>();
+        for (Stroke s : ink) {
+            copies.add(InkEditor.scale(s, 0, 0, k));
+        }
+        return copies;
     }
 
     // ---------------------------------------------------------------- images
