@@ -161,6 +161,16 @@ https://annexcatrescue.ca/
 
 `./gradlew run`
 
+### Pet management MVP
+
+Run `mvn test` from the repository root. To open the standalone admin demo, run
+`app.ManagePetsDemo` from `src/test/java` in IntelliJ. The demo opens the management
+screen directly while the team builds login. The **Available Pets** preview shows
+the public listings after each change.
+
+Listings are stored in `pets-demo.json`. A photo is optional and references a
+local image file, so keep that file in place to see it after restarting the demo.
+
 ---
 ## Notes
 [Any additional project information.]
