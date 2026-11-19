@@ -133,7 +133,6 @@ public class Book {
         ", title:" + title +
         " author:" + author +
         ", isbn:" + isbn +
-        ", genre:" + genre +
         ", publicationYear:" + publicationYear +
         ", coverID:" + coverID +
         ", dateAdded:" + dateAdded +
