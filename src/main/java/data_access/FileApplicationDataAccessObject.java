@@ -15,11 +15,13 @@ import org.json.JSONObject;
 import entity.Application;
 import entity.ApplicationStatus;
 import use_case.submit_application.SubmitApplicationDataAccessInterface;
+import use_case.track_applications.TrackApplicationsDataAccessInterface;
 
 /**
  * DAO for applications, stored in a JSON file so they are kept between runs of the program.
  */
-public class FileApplicationDataAccessObject implements SubmitApplicationDataAccessInterface {
+public class FileApplicationDataAccessObject implements SubmitApplicationDataAccessInterface,
+        TrackApplicationsDataAccessInterface {
 
     private final Path jsonPath;
     private final List<Application> applications = new ArrayList<>();
@@ -102,11 +104,7 @@ public class FileApplicationDataAccessObject implements SubmitApplicationDataAcc
         }
     }
 
-    /**
-     * Returns every application submitted by the adopter.
-     * @param adopterId the adopter
-     * @return the adopter's applications, possibly empty
-     */
+    @Override
     public List<Application> getApplicationsByAdopter(String adopterId) {
         final List<Application> result = new ArrayList<>();
         for (Application application : applications) {
