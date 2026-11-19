@@ -263,6 +263,8 @@ public final class DocEditorPanel extends JPanel implements PdfWorkspacePort {
         command(row, RibbonButton.labeled(Icons::preview, "Preview"), this::preview);
         command(row, RibbonButton.labeled(Icons::fullScreen, "Full screen"), () -> toggleFullscreen.run());
         command(row, RibbonButton.labeled(DocIcons::fitPage, "Fit page"), this::fitWhenOpened);
+        command(row, RibbonButton.labeled(DocIcons::layers, "Image Layout…"), this::showImageLayoutMenu);
+        command(row, RibbonButton.labeled(Icons::pointer, "Select all"), this::selectAllPdfObjects);
         command(row, RibbonButton.letter("−", Font.PLAIN, false, false, "Zoom out"), () -> zoom(paper.zoom() / 1.15));
         command(row, RibbonButton.letter("+", Font.PLAIN, false, false, "Zoom in"), () -> zoom(paper.zoom() * 1.15));
         return row;
@@ -443,7 +445,12 @@ public final class DocEditorPanel extends JPanel implements PdfWorkspacePort {
         pageCount.setText("Page " + (controller.currentPage() + 1) + " of " + controller.pageCount());
         paper.repaint();
     }
-    private void changePage(int target) {paper.finishInlineEdit();controller.switchPage(target);updateStatus();}
+    private void changePage(int target) {
+        paper.finishInlineEdit();
+        controller.switchPage(target);
+        paper.clearPageSelection();
+        updateStatus();
+    }
     private void zoom(double z) {
         double actual = paper.setZoom(z);
         updatingZoom = true;
@@ -522,6 +529,18 @@ public final class DocEditorPanel extends JPanel implements PdfWorkspacePort {
         String action = "deletePdfSelection";
         keys.put(KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0), action);
         keys.put(KeyStroke.getKeyStroke(KeyEvent.VK_BACK_SPACE, 0), action);
+        int shortcut = GraphicsEnvironment.isHeadless() ? KeyEvent.CTRL_DOWN_MASK
+                : java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx();
+        keys.put(KeyStroke.getKeyStroke(KeyEvent.VK_A, shortcut), "selectAllPdfObjects");
+        actions.put("selectAllPdfObjects", new AbstractAction() {
+            @Override public void actionPerformed(java.awt.event.ActionEvent event) {
+                if (!paper.isEditingNote()) selectAllPdfObjects();
+            }
+        });
+        keys.put(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), "clearPdfSelection");
+        actions.put("clearPdfSelection", new AbstractAction() {
+            @Override public void actionPerformed(java.awt.event.ActionEvent event) { paper.clearPageSelection(); }
+        });
         actions.put(action, new AbstractAction() {
             @Override public void actionPerformed(java.awt.event.ActionEvent event) {
                 deleteSelectedItem();
@@ -549,6 +568,32 @@ public final class DocEditorPanel extends JPanel implements PdfWorkspacePort {
         }
     }
     private void autoLayout() {controller.autoLayout();updateStatus();}
+    private void selectAllPdfObjects() {
+        paper.finishInlineEdit();
+        controller.selectAll();
+        updateStatus();
+    }
+    private void changeImageLayout(boolean front) {
+        paper.finishInlineEdit();
+        if (controller.layoutSelectedMaterials(front)) updateStatus();
+    }
+    /** A single Liquid Glass menu for the ribbon. No unsupported text-flow options are advertised. */
+    private void showImageLayoutMenu() {
+        if (controller.selectedIds().stream().noneMatch(id -> controller.placements().stream()
+                .anyMatch(p -> p.id().equals(id) && !p.isNote()))) {
+            GlassDialogs.warning(this, "Select an image, graph or formula first.");
+            return;
+        }
+        GlassContextMenu menu = new GlassContextMenu();
+        addImageLayoutActions(menu);
+        menu.show(this, Math.max(14, getWidth() / 3), 105);
+    }
+    private void addImageLayoutActions(GlassContextMenu menu) {
+        item(menu, "In Front of Text", () -> changeImageLayout(true));
+        item(menu, "Behind Text", () -> changeImageLayout(false));
+        // All PDF placements are currently page-fixed. Inline/wrap require a text-flow engine.
+        menu.addAction("✓ Fixed position on page", () -> {}).setEnabled(false);
+    }
     /** Normal document body starts at 1-inch margins. Text boxes stay a separate Insert tool. */
     public void typeOnPage() {
         paper.finishInlineEdit();
@@ -653,21 +698,14 @@ public final class DocEditorPanel extends JPanel implements PdfWorkspacePort {
         item(menu, "Move to page…", this::moveToPageMenu);
         menu.show(this, Math.max(12, getWidth() / 3), 100);
     }
-    /** Build destinations once for the ribbon and the document context menu. */
-    private JMenu pageDestinations() {
-        JMenu destinations = new JMenu("Move to page");
+    /** Append native-feeling page targets directly to the shared glass menu, not a legacy JMenu. */
+    private void addPageDestinations(GlassContextMenu menu) {
         for (int i = 0; i < controller.pageCount(); i++) {
+            if (i == controller.currentPage()) continue;
             final int destination = i;
-            if (i != controller.currentPage()) {
-                JMenuItem target = new JMenuItem("Page " + (i + 1));
-                target.addActionListener(e -> moveSelectedToPage(destination));
-                destinations.add(target);
-            }
+            item(menu, "Move to Page " + (i + 1), () -> moveSelectedToPage(destination));
         }
-        JMenuItem newPage = new JMenuItem("New page");
-        newPage.addActionListener(e -> moveSelectedToPage(-1));
-        destinations.add(newPage);
-        return destinations;
+        item(menu, "Move to New Page", () -> moveSelectedToPage(-1));
     }
     private void moveSelectedToPage(int destination) {
         paper.finishInlineEdit();
@@ -705,8 +743,11 @@ public final class DocEditorPanel extends JPanel implements PdfWorkspacePort {
             item(menu, "Send backward one layer", () -> arrange(-1));
             item(menu, "Bring to front", () -> arrange(2));
             item(menu, "Send to back", () -> arrange(-2));
-            menu.addSubmenu(pageDestinations());
-            item(menu, "Delete selected item", this::deleteSelectedItem);
+            if (controller.selectedIds().stream().anyMatch(id -> controller.placements().stream()
+                    .anyMatch(p -> p.id().equals(id) && !p.isNote()))) addImageLayoutActions(menu);
+            addPageDestinations(menu);
+            item(menu, controller.selectedIds().size() > 1 ? "Delete selected items" : "Delete selected item",
+                    this::deleteSelectedItem);
         }
         menu.show(paper, event.getX(), event.getY());
     }

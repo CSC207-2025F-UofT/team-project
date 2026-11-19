@@ -183,6 +183,43 @@ public final class DocumentEditor {
         if (document.find(page, id) == null) return false;
         checkpoint(); return document.remove(page, id);
     }
+    /** An entire multi-selection is one atomic, undoable deletion. */
+    public int deleteMany(int page, java.util.Collection<String> ids) {
+        validatePage(page);
+        Objects.requireNonNull(ids);
+        java.util.LinkedHashSet<String> existing = new java.util.LinkedHashSet<>();
+        for (PdfDocument.Placement p : placements(page)) if (ids.contains(p.id())) existing.add(p.id());
+        if (existing.isEmpty()) return 0;
+        checkpoint();
+        for (String id : existing) document.remove(page, id);
+        return existing.size();
+    }
+
+    /** Adjust PDF z-order relative to text without creating a second rendering/layout model.
+     * Fixed page coordinates and original relative image order are preserved. */
+    public boolean layoutMaterialsRelativeToText(int page, java.util.Collection<String> ids, boolean front) {
+        validatePage(page);
+        Objects.requireNonNull(ids);
+        List<PdfDocument.Placement> original = placements(page);
+        List<PdfDocument.Placement> moved = new java.util.ArrayList<>();
+        List<PdfDocument.Placement> rest = new java.util.ArrayList<>();
+        for (PdfDocument.Placement p : original) {
+            if (!p.isNote() && ids.contains(p.id())) moved.add(p);
+            else rest.add(p);
+        }
+        if (moved.isEmpty()) return false;
+        int position = front ? rest.size() : 0;
+        if (front) {
+            for (int i=0; i<rest.size(); i++) if (rest.get(i).isNote()) position = i + 1;
+        } else {
+            for (int i=0; i<rest.size(); i++) if (rest.get(i).isNote()) { position = i; break; }
+        }
+        rest.addAll(position, moved);
+        if (rest.equals(original)) return false;
+        checkpoint();
+        for (int i=0; i<rest.size(); i++) document.reorder(page, rest.get(i).id(), i);
+        return true;
+    }
     /** One checkpoint per drag gesture, not per mouse movement. */
     /** Start a grouped selection move as one Undo operation. */
     public void beginGroupTransform(int page, java.util.Set<String> ids) {

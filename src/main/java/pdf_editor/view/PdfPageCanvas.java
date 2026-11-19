@@ -62,6 +62,7 @@ public final class PdfPageCanvas extends JPanel {
     private boolean resizing;
     private boolean dragStarted;
     private boolean editingBeforePress;
+    private boolean clearedSelectionOnPress;
     private InlineNoteEditor inlineNote;
     private String editingId;
     private int liveEditorHeight;
@@ -185,7 +186,6 @@ public final class PdfPageCanvas extends JPanel {
     }
 
     private final java.util.List<Point> lassoScreenPath = new java.util.ArrayList<>();
-    private final java.util.Set<String> selectedGroup = new java.util.LinkedHashSet<>();
     private final java.util.Set<String> selectionCandidates = new java.util.LinkedHashSet<>();
     private final java.util.Map<String, PdfDocument.Placement> groupDragOriginal = new java.util.LinkedHashMap<>();
     /** Input routing is View-only; stored ink is an immutable PDF material placement. */
@@ -264,9 +264,26 @@ public final class PdfPageCanvas extends JPanel {
     private void updateToolCursor() {
         view.DrawingCanvas.Tool current = drawingOnPdf ? drawingTool.get() : null;
         if (cursorTool == current && pdfToolCursor != null) return;
+        // A tool switch must not strand a previous lasso's blue selection overlay.
+        if (cursorTool != current) {
+            controller.clearSelection();
+            selectionCandidates.clear();
+            repaint();
+        }
         cursorTool = current;
         pdfToolCursor = PdfToolCursors.forTool(current);
         setCursor(pdfToolCursor);
+    }
+    /** Escape deselects even when the view isn't redrawn by a document operation. */
+    public void clearPageSelection() {
+        controller.clearSelection();
+        selectionCandidates.clear();
+        groupDragOriginal.clear();
+        selectingBox = false;
+        selectionBoxStart = null; selectionBoxEnd = null;
+        lassoScreenPath.clear();
+        anchor = null;
+        repaint();
     }
     private void refreshErasePreview() {
         liveErasedInk.clear();
@@ -422,31 +439,38 @@ public final class PdfPageCanvas extends JPanel {
                 // Keep PPT text-box exit behaviour; don't immediately create a body on that click.
                 editingBeforePress = inlineNote != null;
                 finishInlineEdit();
-                controller.selectAt(toPageX(e.getX()), toPageY(e.getY()));
-                PdfDocument.Placement p = controller.selected();
+                clearedSelectionOnPress = !controller.selectedIds().isEmpty();
+                PdfDocument.Placement hit = controller.hitAt(toPageX(e.getX()), toPageY(e.getY()));
+                boolean additive = e.isShiftDown() || e.isControlDown() || e.isMetaDown();
                 anchor = null; dragStarted = false;
-                selectingBox = selectionToolActive() && p == null && SwingUtilities.isLeftMouseButton(e);
+                selectingBox = selectionToolActive() && hit == null && SwingUtilities.isLeftMouseButton(e);
                 selectionBoxStart = selectingBox ? e.getPoint() : null;
                 selectionBoxEnd = selectionBoxStart;
                 lassoScreenPath.clear();
+                groupDragOriginal.clear();
                 if (selectingBox) {
                     selectionCandidates.clear();
-                    selectedGroup.clear();
                     lassoScreenPath.add(e.getPoint());
+                    if (!additive) controller.clearSelection();
+                } else if (hit == null) {
+                    controller.clearSelection();
+                } else if (additive && SwingUtilities.isLeftMouseButton(e)) {
+                    controller.toggleSelection(hit.id());
+                } else if (!controller.isSelected(hit.id())) {
+                    controller.select(hit.id());
                 }
-                groupDragOriginal.clear();
-                if (p != null && selectionToolActive()) {
-                    if (!selectedGroup.contains(p.id())) selectedGroup.clear();
-                    selectedGroup.add(p.id());
-                    if (selectedGroup.size() > 1) {
-                        for (var element : controller.placements()) {
-                            if (selectedGroup.contains(element.id())) groupDragOriginal.put(element.id(), element);
-                        }
+                PdfDocument.Placement p = controller.selected();
+                // Preserve the entire selected group when starting a drag on any member.
+                if (hit != null && controller.isSelected(hit.id()) && !additive) {
+                    for (var element : controller.placements()) {
+                        if (controller.isSelected(element.id())) groupDragOriginal.put(element.id(), element);
                     }
+                    p = hit;
                 }
-                if (p != null) {
+                if (p != null && !additive) {
                     oldX = p.x(); oldY = p.y(); oldW = p.width(); oldH = p.height();
-                    resizing = toPageX(e.getX()) > p.x() + p.width() - 18 / zoom()
+                    resizing = controller.selectedIds().size() == 1 &&
+                            toPageX(e.getX()) > p.x() + p.width() - 18 / zoom()
                             && toPageY(e.getY()) > p.y() + p.height() - 18 / zoom();
                     if (SwingUtilities.isLeftMouseButton(e)) anchor = e.getPoint();
                 }
@@ -501,7 +525,7 @@ public final class PdfPageCanvas extends JPanel {
                                     Math.abs(selectionBoxStart.x - selectionBoxEnd.x),
                                     Math.abs(selectionBoxStart.y - selectionBoxEnd.y));
                         }
-                        selectedGroup.clear();
+                        java.util.Set<String> chosen = new java.util.LinkedHashSet<>();
                         for (var item : controller.placements()) {
                             int cx = Math.round((item.x() + item.width()/2) * (float)zoom()) + MARGIN;
                             int cy = Math.round((item.y() + item.height()/2) * (float)zoom()) + MARGIN;
@@ -510,11 +534,11 @@ public final class PdfPageCanvas extends JPanel {
                             int width = Math.max(1, Math.round(item.width() * (float) zoom()));
                             int height = Math.max(1, Math.round(item.height() * (float) zoom()));
                             if (region.contains(cx, cy) || region.intersects(left, top, width, height))
-                                selectedGroup.add(item.id());
+                                chosen.add(item.id());
                         }
-                        if (!selectedGroup.isEmpty()) controller.select(selectedGroup.iterator().next());
+                        controller.setSelection(chosen, e.isShiftDown() || e.isControlDown() || e.isMetaDown());
                     }
-                    // Keep the selected items highlighted after the lasso gesture ends.
+                    // Keep multi-selection visible until Escape, blank click or tool/page switch.
                     selectionCandidates.clear();
                     selectionBoxStart = null; selectionBoxEnd = null; lassoScreenPath.clear();
                     repaint();
@@ -524,7 +548,8 @@ public final class PdfPageCanvas extends JPanel {
             }
             @Override public void mouseClicked(MouseEvent e) {
                 if (inkToolActive() || selectionToolActive()) return;
-                if (SwingUtilities.isLeftMouseButton(e) && e.getClickCount() == 1 && !editingBeforePress) {
+                if (SwingUtilities.isLeftMouseButton(e) && e.getClickCount() == 1 && !editingBeforePress
+                        && !clearedSelectionOnPress && !e.isShiftDown() && !e.isControlDown() && !e.isMetaDown()) {
                     var chosen = controller.selected();
                     float x=toPageX(e.getX()), y=toPageY(e.getY());
                     if (x>=0 && y>=0 && x<PdfDocument.PAGE_WIDTH && y<PdfDocument.PAGE_HEIGHT) {
@@ -539,9 +564,14 @@ public final class PdfPageCanvas extends JPanel {
                     } else if (controller.selected().isNote()) listener.editNote();
                     else if (!controller.selected().material().isGraph()) listener.editFormula();
                 }
+                clearedSelectionOnPress = false;
             }
         };
         addMouseListener(mouse); addMouseMotionListener(mouse);
+        getInputMap(JComponent.WHEN_FOCUSED).put(KeyStroke.getKeyStroke("ESCAPE"), "pdfClearSelection");
+        getActionMap().put("pdfClearSelection", new AbstractAction() {
+            @Override public void actionPerformed(java.awt.event.ActionEvent e) { clearPageSelection(); }
+        });
     }
     private static java.awt.image.BufferedImage imageAsBuffered(java.awt.Image image) {
         if (image instanceof java.awt.image.BufferedImage buffered) return buffered;
@@ -592,8 +622,7 @@ public final class PdfPageCanvas extends JPanel {
                 } else if (preview.getWidth() > 1 || preview.getHeight() > 1) {
                     g2.drawImage(preview, x, y, width, height, null);
                 }
-                if ((selected != null && selected.id().equals(p.id())) || selectedGroup.contains(p.id())
-                        || selectionCandidates.contains(p.id())) {
+                if (controller.isSelected(p.id()) || selectionCandidates.contains(p.id())) {
                     g2.setColor(SELECTION_HALO);
                     g2.fillRoundRect(x, y, width, height, 8, 8);
                     g2.setColor(SELECTION_BLUE);

@@ -1,7 +1,6 @@
 package view.board;
 
 import org.junit.jupiter.api.Test;
-import javax.swing.JMenu;
 import java.awt.image.BufferedImage;
 import java.util.concurrent.atomic.AtomicInteger;
 import static org.junit.jupiter.api.Assertions.*;
@@ -20,16 +19,14 @@ class GlassContextMenuTest {
         graphics.dispose();
         assertEquals(0, (canvas.getRGB(0, 0) >>> 24) & 255, "rounded corner must be transparent");
     }
-    @Test void actionsAndNestedPageSubmenuStillWork() {
+    @Test void actionsInFlatGlassMenuStillWork() {
         GlassContextMenu menu = new GlassContextMenu();
         AtomicInteger count = new AtomicInteger();
         var button = menu.addAction("Delete selected item", count::incrementAndGet);
         button.doClick();
         assertEquals(1, count.get());
-        JMenu pages = new JMenu("Move to page");
-        pages.add("Page 1");
-        menu.addSubmenu(pages);
-        assertEquals(1, pages.getItemCount());
-        assertFalse(pages.getPopupMenu().isOpaque());
+        menu.addAction("Move to Page 1", count::incrementAndGet).doClick();
+        assertEquals(2, count.get());
+        assertEquals(2, menu.getComponentCount());
     }
 }

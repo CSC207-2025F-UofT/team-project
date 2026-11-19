@@ -52,7 +52,9 @@ final class GlassSaveMenu extends JPopupMenu {
             }
         };
         rows.setOpaque(false);
-        if (state.phase() == SaveMenuState.Phase.NEW) {
+        if (state.phase() == SaveMenuState.Phase.SAVING) {
+            addRow("Saving…", "Changes are being saved", "saving-canvas", () -> {});
+        } else if (state.phase() == SaveMenuState.Phase.NEW) {
             addRow("Save New Canvas…", "Give this canvas a name", "save-current-canvas", save);
         } else {
             if (state.canSaveInPlace()) {
