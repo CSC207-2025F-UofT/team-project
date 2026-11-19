@@ -28,6 +28,22 @@ final class PlotFrame {
         return area;
     }
 
+    double xMin() {
+        return xMin;
+    }
+
+    double xMax() {
+        return xMax;
+    }
+
+    double yMin() {
+        return yMin;
+    }
+
+    double yMax() {
+        return yMax;
+    }
+
     double px(double x) {
         return area.getX() + (x - xMin) / (xMax - xMin) * area.getWidth();
     }

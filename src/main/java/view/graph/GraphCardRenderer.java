@@ -4,6 +4,7 @@ import interface_adapter.graph.GraphState;
 import interface_adapter.graph.GraphTrace;
 
 import java.awt.BasicStroke;
+import java.awt.Color;
 import java.awt.FontMetrics;
 import java.awt.GradientPaint;
 import java.awt.Graphics2D;
@@ -16,7 +17,7 @@ import java.awt.geom.Path2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.geom.RoundRectangle2D;
 
-// paints the whole card (header w/ function name + plot), live card + saved snapshot both use this
+// paints the whole card (header w/ function name + plot), live cards + saved snapshots all use this
 final class GraphCardRenderer {
     static final double BASE_WIDTH = 440;
     static final int NO_BUTTON = 0;
@@ -57,9 +58,31 @@ final class GraphCardRenderer {
         return new Rectangle2D.Double(w - size, h - size, size, size);
     }
 
+    // what goes in the plot area under the header
+    interface PlotLayer {
+        void paint(Graphics2D g, Rectangle2D plot, float ui);
+    }
+
     // live = draw buttons + grip; scene may be null, then it's built here
     static void paint(Graphics2D g0, GraphState s, double w, double h, OrbitCamera camera, SurfaceScene scene,
                       GraphTrace hover, GraphTrace pinned, boolean live, int hotButton) {
+        boolean surface = s.getKind() == GraphState.Kind.SURFACE;
+        // colour dot like the notes app: orange line, ramp for a surface
+        Color dotLow = surface ? GraphTheme.surface(0, 1, 255) : GraphTheme.CURVE;
+        Color dotHigh = surface ? GraphTheme.surface(1, 1, 255) : null;
+        paintCard(g0, w, h, s.getLatex(), surface ? "3D" : "2D", dotLow, dotHigh, live, hotButton, (g, plot, ui) -> {
+            if (s.getKind() == GraphState.Kind.CURVE) {
+                CurvePainter.paint(g, s, plot, ui, hover, pinned);
+            } else if (surface) {
+                SurfacePainter.paint(g, s, scene != null ? scene : SurfaceScene.build(s, camera, plot),
+                        ui, hover, pinned);
+            }
+        });
+    }
+
+    // the card itself: rounded white body, plot, header w/ dot + typeset title + badge + buttons, grip
+    static void paintCard(Graphics2D g0, double w, double h, String latex, String badge, Color dotLow, Color dotHigh,
+                          boolean live, int hotButton, PlotLayer layer) {
         Graphics2D g = (Graphics2D) g0.create();
         try {
             g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -71,14 +94,8 @@ final class GraphCardRenderer {
             g.setColor(GraphTheme.CARD);
             g.fill(card);
             g.clip(card);
-            Rectangle2D plot = plotArea(w, h);
-            if (s.getKind() == GraphState.Kind.CURVE) {
-                CurvePainter.paint(g, s, plot, ui, hover, pinned);
-            } else if (s.getKind() == GraphState.Kind.SURFACE) {
-                SurfacePainter.paint(g, s, scene != null ? scene : SurfaceScene.build(s, camera, plot),
-                        ui, hover, pinned);
-            }
-            header(g, s, w, ui, live, hotButton);
+            layer.paint(g, plotArea(w, h), ui);
+            header(g, latex, badge, dotLow, dotHigh, w, ui, live, hotButton);
             if (live) {
                 grip(g, w, h, ui);
             }
@@ -91,7 +108,8 @@ final class GraphCardRenderer {
         }
     }
 
-    private static void header(Graphics2D g, GraphState s, double w, float ui, boolean live, int hot) {
+    private static void header(Graphics2D g, String latex, String badge, Color dotLow, Color dotHigh, double w,
+                               float ui, boolean live, int hot) {
         double hh = headerHeight(w);
         g.setColor(GraphTheme.HEADER);
         g.fill(new Rectangle2D.Double(0, 0, w, hh));
@@ -99,20 +117,18 @@ final class GraphCardRenderer {
         g.setStroke(new BasicStroke(1f));
         g.draw(new Line2D.Double(0, hh - 0.5, w, hh - 0.5));
 
-        // colour dot like the notes app: orange line, ramp for a surface
         double r = 5 * ui;
         double dotX = 12 * ui;
         Ellipse2D dot = new Ellipse2D.Double(dotX, hh / 2 - r, 2 * r, 2 * r);
-        if (s.getKind() == GraphState.Kind.SURFACE) {
-            g.setPaint(new GradientPaint((float) dotX, (float) (hh / 2 + r), GraphTheme.surface(0, 1, 255),
-                    (float) (dotX + 2 * r), (float) (hh / 2 - r), GraphTheme.surface(1, 1, 255)));
+        if (dotHigh != null) {
+            g.setPaint(new GradientPaint((float) dotX, (float) (hh / 2 + r), dotLow,
+                    (float) (dotX + 2 * r), (float) (hh / 2 - r), dotHigh));
         } else {
-            g.setColor(GraphTheme.CURVE);
+            g.setColor(dotLow);
         }
         g.fill(dot);
 
-        // 2D / 3D badge, then the buttons on the right
-        String badge = s.getKind() == GraphState.Kind.SURFACE ? "3D" : "2D";
+        // badge, then the buttons on the right
         g.setFont(GraphTheme.bold(10 * ui));
         FontMetrics m = g.getFontMetrics();
         double right = live ? resetButton(w).getX() - 6 * ui : w - 10 * ui;
@@ -125,7 +141,7 @@ final class GraphCardRenderer {
         g.drawString(badge, (float) (bx + 5 * ui), (float) (hh / 2 - bh / 2 + (bh - m.getHeight()) / 2 + m.getAscent()));
 
         double titleX = dotX + 2 * r + 8 * ui;
-        GraphTitle.paint(g, s.getLatex(), titleX, hh / 2, bx - titleX - 8 * ui, 14 * ui);
+        GraphTitle.paint(g, latex, titleX, hh / 2, bx - titleX - 8 * ui, 14 * ui);
 
         if (live) {
             button(g, resetButton(w), hot == RESET_BUTTON, ui, true);
