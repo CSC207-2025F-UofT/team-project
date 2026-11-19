@@ -40,15 +40,26 @@ class NotStartedModuleTest {
     assertTrue(texts.contains("Modules"));
     assertTrue(texts.contains("Progress:"));
     assertTrue(texts.contains("0%"));
+    assertTrue(texts.contains("View Lab Notebook"), "the dashboard header links the notebooks");
   }
 
   @Test
   void headerShowsCourseAndNotebookLink() {
-    List<String> texts = texts(new HeaderBar("Pre-lab 3", () -> { }));
+    boolean[] opened = {false};
+    HeaderBar header = new HeaderBar("Pre-lab 3", () -> { }, () -> opened[0] = true);
+    List<String> texts = texts(header);
     assertTrue(texts.contains("CHM136 Virtual Lab"));
     assertTrue(texts.contains("Pre-lab 3"));
     assertTrue(texts.contains("Compound Lookup"));
-    assertTrue(texts.contains("View Lab Notebook"));
+    button(header, "View Lab Notebook").doClick();
+    assertTrue(opened[0]);
+  }
+
+  @Test
+  void headerInsideAModuleHasNoNotebookLink() {
+    List<String> texts = texts(new HeaderBar("Pre-lab 3", () -> { }, null));
+    assertTrue(texts.contains("Compound Lookup"));
+    assertFalse(texts.contains("View Lab Notebook"));
   }
 
   @Test
