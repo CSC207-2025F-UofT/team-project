@@ -62,7 +62,7 @@ public class FinanceTracker extends JFrame {
 
     setLocationRelativeTo(null);
 
-    // Main panel
+    // app.Main panel
     JPanel mainPanel = new JPanel(new BorderLayout(0, 25));
     mainPanel.setBackground(backgroundColor);
     mainPanel.setBorder(new EmptyBorder(30, 40, 35, 40));
