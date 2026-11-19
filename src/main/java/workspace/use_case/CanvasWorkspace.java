@@ -53,5 +53,9 @@ public final class CanvasWorkspace implements CanvasWorkspaceBoundary {
         repository.write(renamed);
         return renamed;
     }
+    @Override public void delete(String id) throws IOException {
+        repository.delete(Objects.requireNonNull(id));
+        if (Objects.equals(currentId, id)) currentId = null;
+    }
     public void forgetCurrent() { newCanvas(); }
 }

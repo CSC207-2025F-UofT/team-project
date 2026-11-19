@@ -34,12 +34,17 @@ final class FormulaImagePreprocessor {
      * @throws IllegalArgumentException if there is no ink in the image
      */
     static BufferedImage prepare(BufferedImage source) {
+        return prepare(source, BandRule.TALLEST_BAND);
+    }
+
+    // same, but rule picks what height counts as one line
+    static BufferedImage prepare(BufferedImage source, BandRule rule) {
         GrayInk gray = GrayInk.of(source);
         Rectangle box = gray.bounds();
         if (box == null) {
             throw new IllegalArgumentException("The image has no handwriting in it.");
         }
-        double tallest = lineHeight(gray, box);
+        double tallest = lineHeight(gray, box, rule);
         FormulaLayout.Size layout = FormulaLayout.size(box.width, box.height, tallest);
         int resizedWidth = Math.max(1, FormulaLayout.roundHalfUp(box.width * layout.scale()));
         int resizedHeight = Math.max(1, FormulaLayout.roundHalfUp(box.height * layout.scale()));
@@ -54,10 +59,10 @@ final class FormulaImagePreprocessor {
         return canvas;
     }
 
-    // tallest band, unless its all dots/dashes, then a normal char height so they dont fill the canvas
-    private static double lineHeight(GrayInk gray, Rectangle box) {
-        double tallest = FormulaLayout.tallestBand(
-                FormulaLayout.rowSpans(gray.rowsWithInk(box)), box.height, FormulaLayout.GAP_MIN_PX);
+    // rule's line height (tallest band by default), unless its all dots/dashes, then a normal char height
+    private static double lineHeight(GrayInk gray, Rectangle box, BandRule rule) {
+        double tallest = rule.lineHeight(FormulaLayout.tallestBand(
+                FormulaLayout.rowSpans(gray.rowsWithInk(box)), box.height, FormulaLayout.GAP_MIN_PX), box.height);
         double pen = gray.penWidth(box);
         return tallest < MARK_PENS * pen ? GLYPH_PENS * pen : tallest;
     }

@@ -61,14 +61,15 @@ def row_spans(occupied: Iterable[bool]) -> list[tuple[int, int]]:
     return spans
 
 
-def tallest_band(spans: Iterable[tuple[float, float]], ink_height: float, min_gap: float = 0.0) -> float:
-    """把竖直范围合并成行带，返回最高带的高度。
+def band_heights(spans: Iterable[tuple[float, float]], ink_height: float, min_gap: float = 0.0,
+                 gap_fraction: float = GAP_FRACTION) -> list[float]:
+    """把竖直范围合并成行带，按从上到下的顺序返回每个带的高度。
 
-    spans 是 (上, 下) 范围，下不含；相邻范围之间的空白小于 max(GAP_FRACTION*ink_height, min_gap)
+    spans 是 (上, 下) 范围，下不含；相邻范围之间的空白小于 max(gap_fraction*ink_height, min_gap)
     就并成同一个带。像素图片传 min_gap=GAP_MIN_PX，笔画坐标不传。
     """
-    gap = max(GAP_FRACTION * ink_height, min_gap)
-    best = 0.0
+    gap = max(gap_fraction * ink_height, min_gap)
+    heights = []
     start = end = None
     for top, bottom in sorted(spans):
         if start is None:
@@ -76,11 +77,16 @@ def tallest_band(spans: Iterable[tuple[float, float]], ink_height: float, min_ga
         elif top - end < gap:
             end = max(end, bottom)
         else:
-            best = max(best, end - start)
+            heights.append(end - start)
             start, end = top, bottom
     if start is not None:
-        best = max(best, end - start)
-    return best
+        heights.append(end - start)
+    return heights
+
+
+def tallest_band(spans: Iterable[tuple[float, float]], ink_height: float, min_gap: float = 0.0) -> float:
+    """最高行带的高度，合并规则见 band_heights。"""
+    return max(band_heights(spans, ink_height, min_gap), default=0.0)
 
 
 def formula_layout(ink_width: float, ink_height: float, tallest: float) -> FormulaLayout:

@@ -7,5 +7,7 @@ import java.awt.Point;
 public interface PdfWorkspacePort {
     void fitWhenOpened();
     void addHistoryItem(HistoryItem item);
+    /** Import a saved calculation as structured LaTeX/answer, not as a screenshot. */
+    default void addHistoryToLibrary(HistoryItem item) { }
     boolean dropHistoryItem(HistoryItem item, Point screenTopLeft);
 }

@@ -161,10 +161,22 @@ public class StackedAppBuilder {
                         new pdf_editor.domain.PdfMaterial("Canvas History", latex, result, null, 0, 0) { },
                         width, height));
         CanvasPdfDragController.install(drawing);
+        // Reuse the existing US2 evaluation use case with a dedicated view model, so
+        // editing History does not race with the Canvas answer worker's view-model updates.
+        MathLabViewModel historyEditModel = new MathLabViewModel();
+        pdf_editor.adapter.HistoryFormulaCalculator historyEditCalculator =
+                new pdf_editor.adapter.HistoryFormulaCalculator(
+                        new EvaluateController(new EvaluateInteractor(
+                                functions, new EvaluatePresenter(historyEditModel))), historyEditModel);
         CanvasHistoryEditMenu.install(drawing, (latex, result) ->
                 pdf_editor.data_access.MaterialRenderer.render(
                         new pdf_editor.domain.PdfMaterial("Edited Math", latex, result, null, 0, 0) { },
-                        800, 190));
+                        800, 190), historyEditCalculator::calculate,
+                (latex, result) -> {
+                    if (latex.isBlank()) return;
+                    if (result.isBlank()) pdfStudio.getLibrary().addFormula(latex);
+                    else pdfStudio.getLibrary().addCalculation(latex, result);
+                });
         CanvasLibrarySelectionMenu.install(drawing,
                 new SelectionToLibrary(sharedCanvas::recognizeFormula, pdfStudio.getLibrary()),
                 new SelectedInkRegistry(drawing, pdfStudio.getLibrary()));
@@ -173,6 +185,7 @@ public class StackedAppBuilder {
         page.setDefinitionCheck(definitionCheck::isDefinition);
         page.setCalculateCheck(calculateCheck::canCalculate);
         page.setQuestionCheck(questionCheck::isQuestion);
+        page.setFaintEqualsCheck(calculateCheck::canCalculate);
         page.enablePhasePortrait(phase, phaseExplore, phaseViewModel, phaseCheck::isDifferentialEquation);
         sharedCanvas.attachTo(page);
         PdfPanel pdfPanel = pdfStudio.createPanel();
@@ -181,11 +194,23 @@ public class StackedAppBuilder {
             try { return drawing.toFormulaImage(); }
             catch (RuntimeException empty) { return null; }
         });
-        pdfPanel.setRegionCapture(() -> CanvasRegionCaptureController.begin(
-                page.boardArea(), drawing, image -> {
-                    pdfStudio.getLibrary().addInk("Canvas screenshot", image);
-                    pdfPanel.editor().showLibrary();
-                }));
+        java.util.concurrent.atomic.AtomicReference<Runnable> cancelCapture = new java.util.concurrent.atomic.AtomicReference<>();
+        pdfPanel.setRegionCapture(() -> {
+            if (cancelCapture.get() != null) {
+                cancelCapture.getAndSet(null).run();
+                return;
+            }
+            pdfPanel.setCaptureAreaActive(true);
+            Runnable close = CanvasRegionCaptureController.begin(
+                    page.boardArea(), drawing, image -> {
+                        pdfStudio.getLibrary().addInk("Canvas screenshot", image);
+                        pdfPanel.editor().showLibrary();
+                    }, () -> {
+                        cancelCapture.set(null);
+                        pdfPanel.setCaptureAreaActive(false);
+                    });
+            cancelCapture.set(close);
+        });
         // Save/Open are separate use-case commands; the board knows only the callbacks.
         java.util.concurrent.atomic.AtomicReference<CanvasWorkspaceDialogs> dialogs = new java.util.concurrent.atomic.AtomicReference<>();
         BoardWindow board = new BoardWindow(page, drawing,
@@ -194,7 +219,7 @@ public class StackedAppBuilder {
                 () -> dialogs.get().save(), () -> dialogs.get().saveAs(),
                 () -> dialogs.get().open());
         dialogs.set(new CanvasWorkspaceDialogs(canvases, drawing, board));
-        FloatingToolbar toolbar = new FloatingToolbar(drawing, board);
+        FloatingToolbar toolbar = new FloatingToolbar(drawing, board, pdfPanel);
         board.addFloatingToolbar(toolbar.component());
         pdfPanel.setFullscreenAction(() -> board.setPdfFullscreen(!board.isPdfFullscreen()));
         pdfStudio.onOpen(() -> board.setPdfOpen(true));
@@ -213,6 +238,14 @@ public class StackedAppBuilder {
         }
         int shortcut = Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx();
         root.registerKeyboardAction(e -> drawing.undo(), KeyStroke.getKeyStroke(KeyEvent.VK_Z, shortcut),
+                JComponent.WHEN_IN_FOCUSED_WINDOW);
+        // Canvas redo only. PDF keeps its own ribbon buttons for Undo/Redo.
+        root.registerKeyboardAction(e -> {
+            java.awt.Component focused = java.awt.KeyboardFocusManager.getCurrentKeyboardFocusManager().getFocusOwner();
+            // Do not steal Ctrl+Y from the PDF workspace or its text editor.
+            if (focused != null && SwingUtilities.isDescendingFrom(focused, pdfPanel)) return;
+            drawing.redo();
+        }, KeyStroke.getKeyStroke(KeyEvent.VK_Y, java.awt.event.InputEvent.CTRL_DOWN_MASK),
                 JComponent.WHEN_IN_FOCUSED_WINDOW);
         root.registerKeyboardAction(e -> {
             dialogs.get().save();

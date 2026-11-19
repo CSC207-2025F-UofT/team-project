@@ -400,27 +400,49 @@ public class BoardWindow extends JPanel implements HistoryPanel.DragHost {
         }
     }
     @Override public void deleteHistory(HistoryItem item) { deleteHistory.apply(item.getId()); }
+    @Override public void importIntoLibrary(HistoryItem item) {
+        if (pdf instanceof PdfWorkspacePort panel) {
+            panel.addHistoryToLibrary(item);
+            setPdfOpen(true);
+        }
+    }
 
     @Override public boolean dropped(HistoryItem item, BufferedImage picture, Point screenTopLeft) {
+        return droppedAt(item, picture, screenTopLeft, screenTopLeft);
+    }
+
+    @Override public boolean droppedAt(HistoryItem item, BufferedImage picture,
+                                       Point previewTopLeft, Point cursorScreen) {
         ghost.clear();
-        if (pdf instanceof PdfWorkspacePort panel && pdfOpen && pdf.isShowing()) {
-            Point onPdf = new Point(screenTopLeft);
-            SwingUtilities.convertPointFromScreen(onPdf, pdf);
-            if (onPdf.x >= 0 && onPdf.x < pdf.getWidth() && onPdf.y >= 0 && onPdf.y < pdf.getHeight()) {
-                return panel.dropHistoryItem(item, screenTopLeft);
-            }
+        // Hit-test against the board's actual PDF bounds, not the nested editor's
+        // transient Swing showing state (which can change while dragging).
+        Point onBoard = new Point(cursorScreen);
+        SwingUtilities.convertPointFromScreen(onBoard, this);
+        if (pdf instanceof PdfWorkspacePort panel && isPdfDropTarget(onBoard)) {
+            return panel.dropHistoryItem(item, cursorScreen);
         }
-        ghost.clear();
-        Point onCanvas = new Point(screenTopLeft);
-        SwingUtilities.convertPointFromScreen(onCanvas, canvas);
-        Point onPage = new Point(screenTopLeft);
+        Point onPage = new Point(cursorScreen);
         SwingUtilities.convertPointFromScreen(onPage, page);
         if (!canvas.isShowing() || onPage.x < 0 || onPage.x >= page.getWidth()
                 || onPage.y < 0 || onPage.y >= page.getHeight()) return false;
+        // Preserve the pointer's grab offset inside the placed object when there is room.
+        Point position = new Point(previewTopLeft);
+        SwingUtilities.convertPointFromScreen(position, canvas);
+        Point cursor = new Point(cursorScreen);
+        SwingUtilities.convertPointFromScreen(cursor, canvas);
+        position.x = Math.max(0, Math.min(position.x, cursor.x));
+        position.y = Math.max(0, Math.min(position.y, cursor.y));
         canvas.addHistoryAsset(picture, item.isGraph() ? "" : item.getLatex(),
-                item.isGraph() ? "" : item.getAnswer(), onCanvas);
+                item.isGraph() ? "" : item.getAnswer(), position);
         return true;
     }
+
+    /** Package-private for regression tests: PDF takes precedence over Canvas. */
+    boolean isPdfDropTarget(Point boardPoint) {
+        return pdfOpen && pdf.isVisible() && pdf.getBounds().contains(boardPoint);
+    }
+
+    @Override public void cancelDrag() { ghost.clear(); }
 
     // ---- dragging a history row onto the canvas
 
@@ -449,17 +471,37 @@ public class BoardWindow extends JPanel implements HistoryPanel.DragHost {
     // picture following the mouse while a history row is dragged
     private static final class Ghost extends JComponent {
         private BufferedImage picture;
+
+        Ghost() { setOpaque(false); }
         private Point at;
 
         void showPicture(BufferedImage picture, Point at) {
+            java.awt.Rectangle previous = dirtyBounds();
             this.picture = picture;
             this.at = at;
-            repaint();
+            repaintDirty(previous);
+            repaintDirty(dirtyBounds());
         }
 
         void clear() {
+            if (picture == null) return;
+            java.awt.Rectangle previous = dirtyBounds();
             picture = null;
-            repaint();
+            at = null;
+            repaintDirty(previous);
+            if (getParent() != null && previous != null) getParent().repaint(
+                    previous.x, previous.y, previous.width, previous.height);
+        }
+
+        private java.awt.Rectangle dirtyBounds() {
+            if (picture == null || at == null) return null;
+            return new java.awt.Rectangle(at.x - 3, at.y - 3,
+                    Math.max(1, picture.getWidth() / 2) + 6,
+                    Math.max(1, picture.getHeight() / 2) + 6);
+        }
+
+        private void repaintDirty(java.awt.Rectangle bounds) {
+            if (bounds != null) repaint(bounds.x, bounds.y, bounds.width, bounds.height);
         }
 
         @Override

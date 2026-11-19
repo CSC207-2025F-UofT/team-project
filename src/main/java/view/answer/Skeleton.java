@@ -12,6 +12,15 @@ final class Skeleton {
 
     // row-major w*h grid, true = ink; returns a new grid
     static boolean[] thin(boolean[] grid, int w, int h) {
+        return thin(grid, w, h, 2);
+    }
+
+    // lu-wang: min 3 neighbours keeps 2px "/" diagonals that plain zhang-suen wipes out (tex x arms)
+    static boolean[] thinKeepingDiagonals(boolean[] grid, int w, int h) {
+        return thin(grid, w, h, 3);
+    }
+
+    private static boolean[] thin(boolean[] grid, int w, int h, int minNeighbours) {
         boolean[] on = grid.clone();
         boolean[] kill = new boolean[on.length];
         boolean changed = true;
@@ -21,7 +30,7 @@ final class Skeleton {
                 boolean any = false;
                 for (int y = 1; y < h - 1; y++) {
                     for (int x = 1; x < w - 1; x++) {
-                        if (on[y * w + x] && removable(on, w, x, y, pass == 0)) {
+                        if (on[y * w + x] && removable(on, w, x, y, pass == 0, minNeighbours)) {
                             kill[y * w + x] = true;
                             any = true;
                         }
@@ -238,7 +247,7 @@ final class Skeleton {
     private static final int[][] RING = {{0, -1}, {1, -1}, {1, 0}, {1, 1}, {0, 1}, {-1, 1}, {-1, 0}, {-1, -1}};
     private static final int[][] DIRS = {{0, -1}, {1, 0}, {0, 1}, {-1, 0}, {1, -1}, {1, 1}, {-1, 1}, {-1, -1}};
 
-    private static boolean removable(boolean[] on, int w, int x, int y, boolean first) {
+    private static boolean removable(boolean[] on, int w, int x, int y, boolean first, int minNeighbours) {
         // p2..p9 clockwise from north
         boolean[] p = {
             on[(y - 1) * w + x], on[(y - 1) * w + x + 1], on[y * w + x + 1], on[(y + 1) * w + x + 1],
@@ -250,7 +259,7 @@ final class Skeleton {
             count += p[i] ? 1 : 0;
             flips += !p[i] && p[(i + 1) % 8] ? 1 : 0;
         }
-        if (count < 2 || count > 6 || flips != 1) {
+        if (count < minNeighbours || count > 6 || flips != 1) {
             return false;
         }
         boolean n = p[0];

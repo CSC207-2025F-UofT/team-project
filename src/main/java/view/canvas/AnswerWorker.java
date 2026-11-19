@@ -65,7 +65,7 @@ final class AnswerWorker {
         }
         MathLabState state = (MathLabState) event.getNewValue();
         finish(new CalculationOutcome(state.getResultText(), state.getAnswerKind(), state.getAnswerText(),
-                state.getAnswerRuns(), state.getErrorTitle(), state.getErrorText(), state.isDefinition(),
+                state.getAnswerLatex(), state.getErrorTitle(), state.getErrorText(), state.isDefinition(),
                 state.getDefinedLatex()));
     }
 

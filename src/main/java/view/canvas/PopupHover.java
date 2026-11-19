@@ -71,6 +71,15 @@ final class PopupHover {
         hideTimer.stop();
     }
 
+    // formula moved / resized, revision didn't change so its cached = spot is stale
+    void forgetSpot(long id) {
+        spots.remove(id);
+        if (under == id && offered != id) {
+            under = -1;  // it jumped away from the mouse, next move decides again
+            showTimer.stop();
+        }
+    }
+
     long offered() {
         return offered;
     }

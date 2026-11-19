@@ -6,7 +6,6 @@ import entity.value.FiniteSetValue;
 import entity.value.NumberValue;
 import entity.value.VectorValue;
 import interface_adapter.MathLabViewModel;
-import interface_adapter.TextRun;
 import use_case.evaluate.FormulaShape;
 import use_case.evaluate.InvalidOutputData;
 import use_case.evaluate.OutputDataMapper;
@@ -95,10 +94,23 @@ class EvaluatePresenterTest {
         presenter.prepareFormulaShape(FormulaShape.ENDS_WITH_EQUALS);
         presenter.prepareValuesView(List.of(OutputDataMapper.of(new NumberValue(-5e20))));
         assertEquals("= -5×10^20", viewModel.getState().getResultText());
-        assertEquals(List.of(new TextRun("−5×10", false), new TextRun("20", true)),
-                viewModel.getState().getAnswerRuns());
+        assertEquals("-5\\times 10^{20}", viewModel.getState().getAnswerLatex());
         presenter.prepareValuesView(List.of(OutputDataMapper.of(new NumberValue(7))));
-        assertEquals(null, viewModel.getState().getAnswerRuns());
+        assertEquals("7", viewModel.getState().getAnswerLatex());
+    }
+
+    @Test
+    void fractionsAreStackedOnTheCanvas() {
+        presenter.prepareSolutionsView("x", List.of(1.0 / 3, 5.0 / 3));
+        assertEquals("x = 1/3 or x = 5/3", viewModel.getState().getResultText(), "pdf keeps its text");
+        assertEquals("x = \\frac{1}{3} \\text{ or } x = \\frac{5}{3}", viewModel.getState().getAnswerLatex());
+    }
+
+    @Test
+    void errorsHaveNothingToTypeset() {
+        presenter.prepareValuesView(List.of(OutputDataMapper.of(new NumberValue(2))));
+        presenter.prepareInvalidView(new InvalidOutputData("EMPTY", List.of()));
+        assertEquals("", viewModel.getState().getAnswerLatex());
     }
 
     @Test
@@ -120,12 +132,10 @@ class EvaluatePresenterTest {
         presenter.prepareFormulaShape(FormulaShape.ENDS_WITH_EQUALS);
         presenter.prepareValuesView(List.of(OutputDataMapper.of(new NumberValue(-1e-13))));
         assertEquals("= -1×10^-13", viewModel.getState().getResultText());
-        assertEquals(List.of(new TextRun("−1×10", false), new TextRun("−13", true)),
-                viewModel.getState().getAnswerRuns());
+        assertEquals("-1\\times 10^{-13}", viewModel.getState().getAnswerLatex());
         presenter.prepareFormulaShape(FormulaShape.PLAIN);
         presenter.prepareValuesView(List.of(OutputDataMapper.of(new NumberValue(3e-14))));
-        assertEquals(List.of(new TextRun("= 3×10", false), new TextRun("−14", true)),
-                viewModel.getState().getAnswerRuns());
+        assertEquals("= 3\\times 10^{-14}", viewModel.getState().getAnswerLatex());
     }
 
     @Test

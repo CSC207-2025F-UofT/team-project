@@ -14,5 +14,8 @@ public interface CanvasWorkspaceBoundary {
     SavedCanvas open(String id) throws IOException;
     void newCanvas();
     SavedCanvas rename(String id, String name) throws IOException;
+    default void delete(String id) throws IOException {
+        throw new UnsupportedOperationException("Workspace does not support deletion");
+    }
     SavedCanvas save(CanvasState state, String name, boolean saveAs) throws IOException;
 }
