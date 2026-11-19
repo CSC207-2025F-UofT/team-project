@@ -14,7 +14,7 @@ import org.json.JSONArray;
  */
 public class FileWatchlistDataAccessObject {
   // TODO: After we add data access interfaces to our use cases, make this class implement them.
-  final Path watchlistFile;
+  private final Path watchlistFile;
 
   /**
    * Returns the directory used to store app-specific configuration/preference files, following
