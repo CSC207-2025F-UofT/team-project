@@ -3,16 +3,16 @@ package use_case;
 import java.lang.RuntimeException;
 import java.nio.file.Path;
 
-public class PhotoImportException extends RuntimeException {
+public class ImageImportException extends RuntimeException {
     private final Path offendingPath;
 
-    public PhotoImportException(Path offendingPath, String reason, Throwable cause) {
+    public ImageImportException(Path offendingPath, String reason, Throwable cause) {
         super("Import failed for path \"" + offendingPath + "\": " + reason, cause);
 
         this.offendingPath = offendingPath;
     }
 
-    public PhotoImportException(Path offendingPath, String reason) {
+    public ImageImportException(Path offendingPath, String reason) {
         this(offendingPath, reason, null);
     }
 
