@@ -1,4 +1,4 @@
-package use_case;
+package use_case.import_photos;
 
 import entity.Location;
 
