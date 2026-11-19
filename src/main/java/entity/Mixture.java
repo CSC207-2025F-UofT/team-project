@@ -81,8 +81,8 @@ public class Mixture {
    */
   public void mix(int times) {
     if (times < FULL_MIX) {
-        // not mixed enough -> just a general check.
-        // Follows CA because it's a business rule and should be in entity layer, not view
+      // not mixed enough -> just a general check.
+      // Follows CA because it's a business rule and should be in entity layer, not view
       return;                                                
     }
     double aqueousMl = volumeOf(Phase.AQUEOUS);
