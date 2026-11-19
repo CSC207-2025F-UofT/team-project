@@ -3,6 +3,9 @@ package interface_adaptor.search;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * The ViewModel for the Search View.
+ */
 public class SearchViewModel {
     private final List<SearchViewModelListener> listeners = new ArrayList<>();
 
