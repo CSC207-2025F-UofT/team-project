@@ -6,6 +6,7 @@ import interface_adapters.flashcard_studying.FlashcardStudyingViewModelListener;
 import interface_adapters.flashcard_studying.FlashcardStudyingState;
 
 import javax.swing.*;
+import javax.swing.border.Border;
 import javax.swing.text.*;
 import javax.swing.text.StyleConstants;
 import java.awt.*;
@@ -19,10 +20,9 @@ public class FlashcardStudyingView extends JPanel implements ActionListener, Fla
 
     private final JLabel title;
     private final JLabel deckTitle;
-//    private final JLabel question;
-//    private final JLabel answer;
-    private final JButton knewIt;
-    private final JButton stillLearning;
+    private final JLabel displayText;
+    private final JButton knewItButton;
+    private final JButton stillLearningButton;
     private final JButton flipButton;
 
     /**
@@ -52,26 +52,40 @@ public class FlashcardStudyingView extends JPanel implements ActionListener, Fla
         flipButton = new JButton("Flip");
         flipButton.setBounds(100,410, 600,60);
         flipButton.setFont(new Font("Chalkduster", Font.PLAIN, 30));
-        flipButton.setBackground(Color.LIGHT_GRAY);
+        flipButton.setBackground(Color.BLUE);
         flipButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
         flipButton.addActionListener(this);
         this.add(flipButton);
 
-        knewIt = new JButton("Knew it!");
-        knewIt.setBounds(400,470, 300,60);
-        knewIt.setFont(new Font("Chalkduster", Font.PLAIN, 30));
-        knewIt.setBackground(Color.GREEN);
-        knewIt.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        knewIt.addActionListener(this);
-        this.add(knewIt);
+        knewItButton = new JButton("Knew it!");
+        knewItButton.setBounds(400,470, 300,60);
+        knewItButton.setFont(new Font("Chalkduster", Font.PLAIN, 30));
+        knewItButton.setBackground(Color.GREEN);
+        knewItButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        knewItButton.addActionListener(this);
+        this.add(knewItButton);
 
-        stillLearning = new JButton("Still learning...");
-        stillLearning.setBounds(100,470, 300,60);
-        stillLearning.setFont(new Font("Chalkduster", Font.PLAIN, 30));
-        stillLearning.setBackground(Color.RED);
-        stillLearning.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        stillLearning.addActionListener(this);
-        this.add(stillLearning);
+        stillLearningButton = new JButton("Still learning...");
+        stillLearningButton.setBounds(100,470, 300,60);
+        stillLearningButton.setFont(new Font("Chalkduster", Font.PLAIN, 30));
+        stillLearningButton.setBackground(Color.RED);
+        stillLearningButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        stillLearningButton.addActionListener(this);
+        this.add(stillLearningButton);
+
+        displayText = new JLabel();
+        displayText.setHorizontalAlignment(SwingConstants.CENTER);
+        displayText.setVerticalAlignment(SwingConstants.CENTER);
+        displayText.setBounds(100,100,600,300);
+        displayText.setFont(new Font("Chalkduster",Font.BOLD, 30));
+        displayText.setAlignmentX(Component.CENTER_ALIGNMENT);
+        Border border = BorderFactory.createLineBorder(Color.BLACK, 2);
+        displayText.setOpaque(true);
+        displayText.setBackground(Color.LIGHT_GRAY);
+        displayText.setForeground(Color.BLACK);
+        displayText.setBorder(border);
+        this.add(displayText);
+
 
 
 
@@ -84,22 +98,22 @@ public class FlashcardStudyingView extends JPanel implements ActionListener, Fla
 
     @Override
     public void actionPerformed(ActionEvent e) {
-//        if (e.getSource() == boldButton) {
-//            toggleBold();
-//            System.out.println("Click " + evt.getActionCommand());
-//        }
-//        else if (e.getSource() == generateButton){
-//            String text = textInput.getText();
-//
-//
-//        }
+        if (e.getSource() == flipButton) {
+            System.out.println("Click " + e.getActionCommand());
+            final FlashcardStudyingState currentState = viewModel.getState();
+        }
+        else if (e.getSource() == knewItButton) {
+            System.out.println("Click " + e.getActionCommand());
+        } else if (e.getSource() == stillLearningButton) {
+            System.out.println("Click " + e.getActionCommand());
+        }
 
 
     }
 
     @Override
     public void stateChanged() {
-//      setFields(viewModel.getState());
+        displayText.setText(viewModel.getState().getFront());
         title.setText(viewModel.getState().getDeckTitle());
     }
 
