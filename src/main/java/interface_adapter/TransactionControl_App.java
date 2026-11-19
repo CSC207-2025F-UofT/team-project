@@ -1,7 +1,6 @@
 package interface_adapter;
 
 import java.io.IOException;
-
 import org.json.JSONArray;
 import org.json.JSONObject;
 import java.util.ArrayList;
