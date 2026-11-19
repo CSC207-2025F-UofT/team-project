@@ -12,8 +12,6 @@ final class BeamSearch {
     private final int maxLength;
     private int[][] tokens = {{vital_mini.BOS_ID}};
     private double[] scores = {0};
-    /** 每条活跃假设来自上一步的第几条；decoder_step 用它重排 KV 缓存。 */
-    private long[] parents = {0};
     private int[] bestFinished;
     private double bestFinishedScore = Double.NEGATIVE_INFINITY;
     private int finishedCount;
@@ -39,18 +37,6 @@ final class BeamSearch {
             for (int id : sequence) ids[offset++] = id;
         }
         return ids;
-    }
-
-    /** 每条活跃假设的最后一个 token，按 [K] 展平；有 KV 缓存时只需把它们送进 decoder。 */
-    long[] lastTokenIds() {
-        long[] ids = new long[size()];
-        for (int i = 0; i < ids.length; i++) ids[i] = tokens[i][tokens[i].length - 1];
-        return ids;
-    }
-
-    /** 每条活跃假设来自上一次 advance 前的第几条假设；第一步为 {0}。 */
-    long[] parentIds() {
-        return parents.clone();
     }
 
     /** 输入每条活跃假设最后一位的 logits，按 [K,V] 展平。 */
@@ -88,7 +74,6 @@ final class BeamSearch {
                 .thenComparingInt(Candidate::parent));
         List<int[]> nextTokens = new ArrayList<>();
         List<Double> nextScores = new ArrayList<>();
-        List<Long> nextParents = new ArrayList<>();
         int count = (int) Math.min(2L * width, candidates.size());
         for (int rank = 0; rank < count; rank++) {
             Candidate candidate = candidates.get(rank);
@@ -112,7 +97,6 @@ final class BeamSearch {
                 sequence[prefix.length] = candidate.token();
                 nextTokens.add(sequence);
                 nextScores.add(candidate.score());
-                nextParents.add((long) candidate.parent());
                 if (nextTokens.size() == width) break;
             }
         }
@@ -123,7 +107,6 @@ final class BeamSearch {
         }
         tokens = nextTokens.toArray(int[][]::new);
         scores = nextScores.stream().mapToDouble(Double::doubleValue).toArray();
-        parents = nextParents.stream().mapToLong(Long::longValue).toArray();
         // 与 Python 相同的长度限制及启发式提前停止规则。
         done = length() >= maxLength || (finishedCount >= width
                 && normalize(scores[0], length() - 1) <= bestFinishedScore);

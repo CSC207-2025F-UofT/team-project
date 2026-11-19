@@ -55,23 +55,9 @@ class ExportEncoderTests(unittest.TestCase):
         x, memory = torch.randn(2, 5, 256), torch.randn(2, 9, 256)
         tm, mm = torch.zeros(2, 5, dtype=torch.bool), torch.zeros(2, 9, dtype=torch.bool)
         tm[:, -1], mm[:, -2:] = True, True
-        empty = torch.empty(0, dtype=torch.bool)
         for name in DECODER_PREFIXES:
             torch.testing.assert_close(getattr(self.exported, name)(x, memory, tm, mm),
                                        getattr(self.model, name)(x, memory, tm, mm), rtol=1e-5, atol=1e-5)
-            # Java 用零元素 BOOL 张量代替 None
-            torch.testing.assert_close(getattr(self.exported, name)(x, memory, empty, empty),
-                                       getattr(self.model, name)(x, memory), rtol=1e-5, atol=1e-5)
-
-    def test_block_internals_are_not_exported_as_separate_layers(self):
-        methods = set(self.exported._c._method_names())
-        self.assertIn('head', methods)
-        self.assertIn('cnn', methods)
-        self.assertFalse(any(name.startswith(('cnn_', 'decoder1_', 'encoder1_', 'judge_decoder_')) for name in methods))
-
-    def test_cnn_is_exported_as_one_block(self):
-        image = torch.rand(2, 3, 128, 64)
-        torch.testing.assert_close(self.exported.cnn(image), self.model.cnn(image), rtol=1e-5, atol=1e-5)
 
 
 if __name__ == '__main__':

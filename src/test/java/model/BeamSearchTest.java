@@ -129,29 +129,6 @@ class BeamSearchTest {
     }
 
     @Test
-    void reportsParentsAndLastTokensForCachedDecoding() {
-        BeamSearch search = new BeamSearch(2, 10);
-        assertArrayEquals(new long[]{0}, search.parentIds());
-        assertArrayEquals(new long[]{BOS}, search.lastTokenIds());
-        float[] first = logits(1);
-        probability(first, 0, A, 0.5);
-        probability(first, 0, B, 0.5);              // 平分时较大的 token 在前
-        search.advance(first);
-        assertArrayEquals(new long[]{0, 0}, search.parentIds());
-        assertArrayEquals(new long[]{B, A}, search.lastTokenIds());
-
-        // 每行各自做 softmax：第一条把概率分散到 10 个 token，两条新假设都来自第二条 (A)
-        float[] second = logits(2);
-        for (int token = 10; token < 20; token++) probability(second, 0, token, 0.1);
-        probability(second, 1, C, 0.7);
-        probability(second, 1, A, 0.3);
-        search.advance(second);
-        assertArrayEquals(new long[]{1, 1}, search.parentIds());
-        assertArrayEquals(new long[]{C, A}, search.lastTokenIds());
-        assertArrayEquals(new long[]{BOS, A, C, BOS, A, A}, search.tokenIds());
-    }
-
-    @Test
     void rejectsInvalidWidthBeforeLoadingModel() {
         assertThrows(IllegalArgumentException.class, () -> new BeamSearch(0, 10));
         try (vital_mini model = new vital_mini()) {

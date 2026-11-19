@@ -4,8 +4,7 @@ from pathlib import Path
 import torch
 
 from model import ids_to_latex, load_vocab, vital_mini, complete_judge_weights
-from preprocess import formula_ink_mask, load_formula_image
-from crop_scale import DEFAULT_PATH as CROP_SCALE_PATH, CropScale
+from preprocess import load_formula_image
 
 # 使用脚本位置定位项目根目录，避免 IDE 的工作目录影响权重路径。
 WEIGHTS_PATH = Path(__file__).resolve().parents[2] / "checkpoints" / "model.pt"
@@ -13,10 +12,8 @@ val_path = Path(__file__).resolve().parents[0] / "val"
 IMAGE_EXTENSIONS = {".png", ".jpg", ".jpeg", ".bmp", ".webp", ".tif", ".tiff"}
 
 
-def load_image(path: Path, invert: bool | None = None, crop_scale: CropScale | None = None) -> torch.Tensor:
-    """与训练相同的预处理；有缩放模型时按它选的系数 m 缩放（train.py 默认也用同一份模型）。"""
-    band_scale = crop_scale.band_scale(formula_ink_mask(path)) if crop_scale is not None else 1.0
-    return load_formula_image(path, invert, band_scale=band_scale).unsqueeze(0)
+def load_image(path: Path, invert: bool | None = None) -> torch.Tensor:
+    return load_formula_image(path, invert).unsqueeze(0)
 
 
 def main():
@@ -53,12 +50,10 @@ def main():
     model.eval()
     print(f"已加载模型权重: {WEIGHTS_PATH} | device: {device}")
     table = load_vocab()
-    crop_scale = CropScale(CROP_SCALE_PATH) if CROP_SCALE_PATH.is_file() else None
-    print(f"缩放模型: {crop_scale.path if crop_scale else '无（原规则 m=1）'}")
     with torch.inference_mode():
         for path in image_paths:
             try:
-                image = load_image(path, invert=image_invert, crop_scale=crop_scale)
+                image = load_image(path, invert=image_invert)
             except (OSError, ValueError) as error:
                 print(f"{path.name}: 跳过，{error}", flush=True)
                 continue

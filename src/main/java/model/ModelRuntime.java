@@ -16,10 +16,12 @@ import java.util.Set;
 
 /** 内部基础设施：加载一份 .pt，管理张量和调用器；不编排网络计算流程。 */
 final class ModelRuntime implements AutoCloseable {
-    private static final Set<String> PIXEL_METHODS = Set.of("cnn");
+    private static final Set<String> PIXEL_METHODS = Set.of(
+            "cnn_conv", "cnn_norm", "cnn_conv2", "cnn_norm2", "cnn_conv3", "cnn_norm3",
+            "cnn_con4", "cnn_norm4", "cnn_con5", "cnn_norm5", "silu");
     private static final Set<String> MINI_METHODS = Set.of(
             "encoder1", "encoder2", "decoder1", "decoder2", "decoder3", "decoder4", "decoder5", "final_norm", "head",
-            "judge_decoder", "judge_norm", "process", "silu", "test", "decoder_start", "decoder_step");
+            "judge_decoder", "judge_norm", "process", "silu", "test");
 
     private final Model model;
     private final Predictor<NDList, NDList> predictor;
@@ -58,36 +60,28 @@ final class ModelRuntime implements AutoCloseable {
 
     NDArray callPixel(NDManager scope, String method, NDArray... arguments) throws TranslateException {
         if (!PIXEL_METHODS.contains(method)) throw new IllegalArgumentException("不是 vital_pixel 的层: " + method);
-        return single(method, invoke(scope, method, arguments));
+        return invoke(scope, method, arguments);
     }
 
     NDArray callMini(NDManager scope, String method, NDArray... arguments) throws TranslateException {
-        return single(method, callMiniList(scope, method, arguments));
-    }
-
-    /** 返回多个 Tensor 的方法（如 decoder_start / decoder_step），按导出时的元组顺序。 */
-    NDList callMiniList(NDManager scope, String method, NDArray... arguments) throws TranslateException {
         if (!MINI_METHODS.contains(method)) throw new IllegalArgumentException("不是 vital_mini 的层: " + method);
         return invoke(scope, method, arguments);
     }
 
-    private static NDArray single(String method, NDList outputs) {
-        if (outputs.size() != 1) {
-            outputs.close();
-            throw new IllegalStateException(method + " 应返回一个 Tensor");
-        }
-        return outputs.singletonOrThrow();
-    }
-
-    private NDList invoke(NDManager scope, String method, NDArray... arguments) throws TranslateException {
+    private NDArray invoke(NDManager scope, String method, NDArray... arguments) throws TranslateException {
         manager();
         try (NDArray marker = scope.create(0)) {
             marker.setName("module_method:" + method);
             NDList inputs = new NDList(marker);
             for (NDArray argument : arguments) inputs.add(argument);
             NDList outputs = predictor.predict(inputs);
-            outputs.attach(scope);
-            return outputs;
+            if (outputs.size() != 1) {
+                outputs.close();
+                throw new IllegalStateException(method + " 应返回一个 Tensor");
+            }
+            NDArray output = outputs.singletonOrThrow();
+            output.attach(scope);
+            return output;
         }
     }
 

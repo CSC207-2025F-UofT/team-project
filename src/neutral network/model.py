@@ -100,24 +100,8 @@ def load_training_weights(model: nn.Module, state_dict: dict) -> bool:
         extended = torch.cat((old, new_rows), dim=0)
         for key in keys:
             state_dict[key] = extended
-    model.load_state_dict(complete_cnn_residual_weights(model, state_dict), strict=True)
+    model.load_state_dict(state_dict, strict=True)
     return expanded
-
-
-def complete_cnn_residual_weights(model: nn.Module, state_dict: dict) -> dict:
-    """没有 CNN 残差块的旧权重:补上零初始化的残差块(输出与旧模型一致);残差块不完整仍报错。"""
-    prefix = "cnn.res_"
-    defaults = {key: value for key, value in model.state_dict().items() if key.startswith(prefix)}
-    present = {key for key in state_dict if key.startswith(prefix)}
-    if present:
-        if present != defaults.keys():
-            raise ValueError(f"CNN 残差块权重不完整: {sorted(defaults.keys() - present)}")
-        return state_dict
-    model.cnn.reset_residual()
-    state_dict = dict(state_dict)
-    state_dict.update({key: value.detach().clone() for key, value in model.state_dict().items()
-                       if key.startswith(prefix)})
-    return state_dict
 
 @dataclass
 class BeamState:
@@ -127,7 +111,6 @@ class BeamState:
     finished: list = field(default_factory=list)   # 已生成 <eos> 的序列: [(归一化得分, [token id])]
     done: bool = False
     length_alpha: float = 0.7
-    parents: torch.Tensor | None = None            # [k] 每条活跃假设来自上一步的第几条,用来重排 KV 缓存
 
     @staticmethod
     def start(device, length_alpha: float = 0.7) -> "BeamState":
@@ -194,7 +177,7 @@ def parse_tokens(logits: torch.Tensor, state: BeamState | None = None, beam_widt
     parent = torch.tensor([src[r] for r in keep], device=dev)
     tokens = torch.cat([state.tokens[parent], torch.tensor([[tok[r]] for r in keep], device=dev)], dim=1)
     scores = top_scores[torch.tensor(keep, device=dev)]
-    new = BeamState(tokens, scores, finished, False, state.length_alpha, parent)
+    new = BeamState(tokens, scores, finished, False, state.length_alpha)
 
     # 4) 停止条件: 到达最大长度;或(启发式)已有 beam_width 条完成,且最好的活跃假设已追不上最好的完成序列
     if tokens.size(1) >= max_steps:
@@ -205,7 +188,14 @@ def parse_tokens(logits: torch.Tensor, state: BeamState | None = None, beam_widt
     return new
 
 class vital_pixel(nn.Module):
-    # 不写类级别的子模块注解: TorchScript 整块导出时会把它们当成不支持的类型
+    conv : nn.Conv2d
+    conv2 : nn.Conv2d
+    conv3 : nn.Conv2d
+    conv4 : nn.Conv2d
+    norm : nn.BatchNorm2d
+    norm2 : nn.BatchNorm2d
+    norm3 : nn.BatchNorm2d
+
     def __init__(self):
         super(vital_pixel, self).__init__()
         self.conv = nn.Conv2d(3, 16, kernel_size=5, stride=1, padding=2, padding_mode="replicate")
@@ -218,33 +208,25 @@ class vital_pixel(nn.Module):
         self.con5 = nn.Conv2d(128, d_model, kernel_size=5, stride=1, padding=2)
         self.norm4 = nn.BatchNorm2d(128)
         self.norm5 = nn.BatchNorm2d(d_model)
-        # con4 之后的残差块(128 通道,1/16 分辨率): x + norm_b(conv_b(silu(norm_a(conv_a(x)))))
-        self.res_conv1 = nn.Conv2d(128, 128, kernel_size=3, stride=1, padding=1)
-        self.res_norm1 = nn.BatchNorm2d(128)
-        self.res_conv2 = nn.Conv2d(128, 128, kernel_size=3, stride=1, padding=1)
-        self.res_norm2 = nn.BatchNorm2d(128)
-        self.reset_residual()
 
-    def reset_residual(self):
-        """残差分支末尾 BN 的 γ、β 置零: 分支输出恒为 0,加入残差块不改变原有 CNN 的输出(训练和推理模式都一样)。"""
-        nn.init.zeros_(self.res_norm2.weight)
-        nn.init.zeros_(self.res_norm2.bias)
-
-    @staticmethod
-    def encode_positions(n: int, half: int, x: torch.Tensor) -> torch.Tensor:  # -> [n, half]
-        pos = torch.arange(n, device=x.device, dtype=x.dtype).unsqueeze(1)
-        freq = torch.exp(torch.arange(0, half, 2, device=x.device, dtype=x.dtype) * (-math.log(10000.0) / half))
-        ang = pos * freq
-        return torch.stack([torch.sin(ang), torch.cos(ang)], dim=2).flatten(1)
 
     def position_embedding(self, x: torch.Tensor) -> torch.Tensor:
         # 2D sinusoidal encoding: first half of channels encodes the row, second half the column
         _, c, h, w = x.shape
         half = c // 2
-        row = self.encode_positions(h, half, x).t().unsqueeze(2).expand(half, h, w)
-        col = self.encode_positions(w, half, x).t().unsqueeze(1).expand(half, h, w)
-        return x + torch.cat([row, col], dim=0).unsqueeze(0)
 
+        def encode(n: int) -> torch.Tensor:  # [n, half]
+            pos = torch.arange(n, device=x.device, dtype=x.dtype).unsqueeze(1)
+            freq = torch.exp(torch.arange(0, half, 2, device=x.device, dtype=x.dtype) * (-math.log(10000.0) / half))
+            ang = pos * freq
+            return torch.stack([torch.sin(ang), torch.cos(ang)], dim=2).flatten(1)
+
+        row = encode(h).t().unsqueeze(2).expand(half, h, w)
+        col = encode(w).t().unsqueeze(1).expand(half, h, w)
+        return x + torch.cat([row, col], dim=0).unsqueeze(0)
+ 
+        
+    
     def forward(self, x: torch.Tensor):
         x = self.conv(x)
         x = self.norm(x)
@@ -261,8 +243,6 @@ class vital_pixel(nn.Module):
         x = self.con4(x)
         x = self.norm4(x)
         x = F.silu(x)
-        branch = F.silu(self.res_norm1(self.res_conv1(x)))
-        x = x + self.res_norm2(self.res_conv2(branch))      # 相加后不再接激活,保证零初始化时等价于原网络
         x = self.con5(x)
         x = self.norm5(x)
         x = self.position_embedding(x)
@@ -280,23 +260,23 @@ class attention_module(nn.Module):
         self.out_proj = nn.Linear(d_model, d_model)
         self.dropout = nn.Dropout(dropout)
         self.norm = nn.LayerNorm(d_model)
-        self.heads = attention_heads
-        self.width = d_model
 
-    def split_heads(self, x: torch.Tensor) -> torch.Tensor:
-        b, t, _ = x.shape
-        return x.view(b, t, self.heads, self.head_dim).transpose(1, 2)                  # [B,T,d] -> [B,H,T,hd]
+    def forward(self, x: torch.Tensor, memory: torch.Tensor | None = None,
+                attn_mask: torch.Tensor | None = None,
+                key_padding_mask: torch.Tensor | None = None) -> torch.Tensor:
+        # x [B,Tq,d]; memory [B,Tk,d] for cross-attention (None -> self-attention)
+        # attn_mask [Tq,Tk] and key_padding_mask [B,Tk] are bool, True = do not attend
 
-    def project_kv(self, kv: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor]:
-        # kv [B,Tk,d] -> K, V 各 [B,H,Tk,hd];逐 token 解码时缓存的就是它们
-        return self.split_heads(self.k_proj(kv)), self.split_heads(self.v_proj(kv))
+        residual = x
+        x = self.norm(x)
+        kv = x if memory is None else memory
+        b, tq, _ = x.shape
+        tk = kv.size(1)
 
-    def attend(self, residual: torch.Tensor, normalised: torch.Tensor, k: torch.Tensor, v: torch.Tensor,
-               attn_mask: torch.Tensor | None = None,
-               key_padding_mask: torch.Tensor | None = None) -> torch.Tensor:
-        # normalised [B,Tq,d] 是 norm(residual);k/v [B或1,H,Tk,hd],batch 为 1 时按广播共享
-        b, tq, _ = normalised.shape
-        q = self.split_heads(self.q_proj(normalised))                                  # [B,H,Tq,hd]
+        q = self.q_proj(x).view(b, tq, attention_heads, self.head_dim).transpose(1, 2)   # [B,H,Tq,hd]
+        k = self.k_proj(kv).view(b, tk, attention_heads, self.head_dim).transpose(1, 2)  # [B,H,Tk,hd]
+        v = self.v_proj(kv).view(b, tk, attention_heads, self.head_dim).transpose(1, 2)  # [B,H,Tk,hd]
+
         scores = q @ k.transpose(-2, -1) / math.sqrt(self.head_dim)                     # [B,H,Tq,Tk] q*k^T / sqrt(d_k)
 
         if attn_mask is not None:
@@ -305,32 +285,9 @@ class attention_module(nn.Module):
             scores = scores.masked_fill(key_padding_mask[:, None, None, :], float("-inf"))
 
         attn = self.dropout(F.softmax(scores, dim=-1))
-        out = (attn @ v).transpose(1, 2).reshape(b, tq, self.width)                     # merge heads
+        out = (attn @ v).transpose(1, 2).reshape(b, tq, d_model)                        # merge heads
         out = self.dropout(self.out_proj(out))
         return residual + out  # residual connection
-
-    def forward(self, x: torch.Tensor, memory: torch.Tensor | None = None,
-                attn_mask: torch.Tensor | None = None,
-                key_padding_mask: torch.Tensor | None = None) -> torch.Tensor:
-        # x [B,Tq,d]; memory [B,Tk,d] for cross-attention (None -> self-attention)
-        # attn_mask [Tq,Tk] and key_padding_mask [B,Tk] are bool, True = do not attend
-        normalised = self.norm(x)
-        k, v = self.project_kv(normalised if memory is None else memory)
-        return self.attend(x, normalised, k, v, attn_mask, key_padding_mask)
-
-    def forward_cached(self, x: torch.Tensor, past_k: torch.Tensor,
-                       past_v: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
-        """因果自注意力的增量版本: x [B,N,d] 是接在已缓存的 P 个位置后面的新 token,
-        past_k/past_v [B,H,P,hd](P 可为 0) -> (输出 [B,N,d], 拼上新 token 的 K, V [B,H,P+N,hd])"""
-        normalised = self.norm(x)
-        new_k, new_v = self.project_kv(normalised)
-        k, v = torch.cat((past_k, new_k), dim=2), torch.cat((past_v, new_v), dim=2)
-        n, total = x.size(1), k.size(2)
-        causal: torch.Tensor | None = None
-        if n > 1:                                      # 只有一个新 token 时它本来就能看全部缓存
-            rows = torch.arange(n, device=x.device).unsqueeze(1) + (total - n)
-            causal = torch.arange(total, device=x.device).unsqueeze(0) > rows
-        return self.attend(x, normalised, k, v, causal), k, v
 
 class FFN(nn.Module):
 
@@ -366,8 +323,10 @@ class encoder(nn.Module):
         return self.ffn(x)
 
 class decoder(nn.Module):
-    # 不写 self_attention: attention_module 这类类级注解:TorchScript 会把它当属性类型解析而报错,
-    # 导出脚本直接 script 这个类。
+
+    self_attention : attention_module
+    cross_attention : attention_module
+    ffn : FFN
 
     def __init__(self):
         super(decoder, self).__init__()
@@ -388,65 +347,6 @@ class decoder(nn.Module):
         # 交叉注意力: 去图像里找下一个该写什么;图像一次给全,所以不用因果 mask
         x = self.cross_attention(x, memory=memory, key_padding_mask=memory_key_padding_mask)
         return self.ffn(x)
-
-    def cross_kv(self, memory: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor]:
-        """图像特征 memory [B,S,d] 在交叉注意力里的 K, V;逐 token 解码时整张图只算一次"""
-        return self.cross_attention.project_kv(memory)
-
-    def step(self, x: torch.Tensor, self_k: torch.Tensor, self_v: torch.Tensor,
-             cross_k: torch.Tensor, cross_v: torch.Tensor,
-             memory_key_padding_mask: torch.Tensor | None = None
-             ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
-        """forward 的增量版本(只做推理): x [B,N,d] 是新 token;self_k/self_v 是之前位置的缓存,
-        cross_k/cross_v 来自 cross_kv -> (输出 [B,N,d], 更新后的 self_k, self_v)"""
-        x, self_k, self_v = self.self_attention.forward_cached(x, self_k, self_v)
-        x = self.cross_attention.attend(x, self.cross_attention.norm(x), cross_k, cross_v,
-                                        None, memory_key_padding_mask)
-        return self.ffn(x), self_k, self_v
-
-
-class incremental_decoder(nn.Module):
-    """vital_mini 五个 decoder 的逐 token 推理:缓存自注意力的 K/V,图像的 K/V 只算一次。
-    结果与 vital_mini.decode 对整条序列取最后一位相同,但每步只计算新 token。
-    不持有新参数,只引用 vital_mini 的层;generate 和 TorchScript 导出共用这一份实现。
-    缓存: 自注意力 [L,2,B,H,T,hd](2 = K/V,T = 已解码的位置数);图像 [L,2,B,H,S,hd],B 为 1 时广播给所有假设。"""
-
-    def __init__(self, model: "vital_mini"):
-        super().__init__()
-        self.layers = nn.ModuleList(model.decoder_layers())
-        self.token_embedding = model.token_embedding
-        self.embed_dropout = model.embed_dropout
-        self.final_norm = model.final_norm
-        self.head = model.head
-        self.register_buffer("token_pos", model.token_pos, persistent=False)
-        self.scale = math.sqrt(d_model)
-
-    def start(self, memory: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor]:
-        """memory [B,S,d] -> (图像缓存 [L,2,B,H,S,hd], 空的自注意力缓存 [L,2,B,H,0,hd])"""
-        cross = []
-        for layer in self.layers:
-            k, v = layer.cross_kv(memory)
-            cross.append(torch.stack((k, v)))
-        cross_cache = torch.stack(cross)
-        empty = cross_cache.new_zeros((cross_cache.size(0), 2, cross_cache.size(2), cross_cache.size(3),
-                                       0, cross_cache.size(5)))
-        return cross_cache, empty
-
-    def forward(self, tokens: torch.Tensor, self_cache: torch.Tensor, cross_cache: torch.Tensor,
-                memory_key_padding_mask: torch.Tensor | None = None) -> tuple[torch.Tensor, torch.Tensor]:
-        """tokens [B,N] 接在缓存的位置之后(逐步解码时 N = 1)
-        -> (最后一个新位置的 logits [B,vocab], 更新后的自注意力缓存 [L,2,B,H,T+N,hd])"""
-        start, n = self_cache.size(4), tokens.size(1)
-        if start + n > self.token_pos.size(1):
-            raise ValueError("token sequence is longer than max_len")
-        x = self.token_embedding(tokens) * self.scale + self.token_pos[:, start:start + n]
-        x = self.embed_dropout(x)
-        caches = []
-        for i, layer in enumerate(self.layers):
-            x, k, v = layer.step(x, self_cache[i, 0], self_cache[i, 1], cross_cache[i, 0], cross_cache[i, 1],
-                                 memory_key_padding_mask)
-            caches.append(torch.stack((k, v)))
-        return self.head(self.final_norm(x[:, -1])), torch.stack(caches)
 
 
 class vital_mini(nn.Module):
@@ -505,10 +405,6 @@ class vital_mini(nn.Module):
 
     def encode(self, x: torch.Tensor) -> torch.Tensor:#[B,C,H,W] -> [B,H*W,C]
         # [B,C,h,w] -> [B,h*w,C]: flatten h,w row-major, then move channels last
-        if x.requires_grad:
-            # transpose 的反向梯度是 channels-last 布局的非连续张量；PyTorch 2.11 在 CPU 上 batch=1 时
-            # 拿它反传 CNN 会算错参数梯度（CUDA 正常）。训练按画布分子批后单张子批更常见，先转成连续内存。
-            x.register_hook(torch.Tensor.contiguous)
         return x.flatten(2).transpose(1, 2)
 
     def encode_image(self, image: torch.Tensor,
@@ -571,23 +467,20 @@ class vital_mini(nn.Module):
     def generate(self, image: torch.Tensor, beam_width: int = 3, max_steps: int = max_len,
                  length_alpha: float = 0.7) -> list[list[int]]:
         # image [B,3,H,W] -> B 条 token id 序列(不含 <bos>/<eos>);转成字符串用 ids_to_latex
-        # 每一轮循环: 只把每条假设新选的 token 喂进去,decoder 的 KV 缓存记住前面的位置
-        # -> parse_tokens 选出新的 k 条假设 -> 按 parents 重排缓存
+        # 每一轮循环: decode 出 logits -> parse_tokens 选出新的 k 条假设 -> 下一轮把它们整条重新喂进去
         was_training = self.training
         self.eval()                                           # 关 dropout;BatchNorm 使用滑动统计
-        stepper = incremental_decoder(self)
         results = []
         for i in range(image.size(0)):                        # 每张图各做一次 beam search
             memory = self.encode_image(image[i:i + 1])        # 每张图只过一次 CNN 和视觉 encoder
-            cross_cache, cache = stepper.start(memory)        # 图像 K/V 只算一次,batch 1 广播给各假设
             tokens = torch.full((1, 1), bos_id, dtype=torch.long, device=image.device)
             state = None
             while True:
-                logits, cache = stepper(tokens[:, -1:], cache, cross_cache)
+                k = tokens.size(0)                            # 当前活跃假设数,k 条拼成一个 batch
+                logits = self.decode(tokens, memory.expand(k, -1, -1))[:, -1]
                 state = parse_tokens(logits, state, beam_width, max_steps, length_alpha)
                 if state.done:
                     break
-                cache = cache.index_select(2, state.parents)
                 tokens = state.tokens
             results.append(state.best())
         self.train(was_training)
