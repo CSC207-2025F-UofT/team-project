@@ -17,12 +17,14 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import use_case.generate_shopping_list.PantryReader;
 import use_case.load_pantry.LoadPantryDataAccessInterface;
+import use_case.update_stock_level.UpdateStockLevelDataAccessInterface;
 
 /**
  * Persists the user's pantry in a JSON file.
  */
 public class FilePantryDataAccessObject
-        implements LoadPantryDataAccessInterface, PantryReader {
+        implements LoadPantryDataAccessInterface, PantryReader,
+        UpdateStockLevelDataAccessInterface {
     private static final String KEY_ITEMS = "items";
     private static final String KEY_NAME = "name";
     private static final String KEY_EXPIRY_DATE = "expiryDate";

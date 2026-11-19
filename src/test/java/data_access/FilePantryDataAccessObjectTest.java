@@ -12,6 +12,10 @@ import entity.PantryItem;
 import entity.StockLevel;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import use_case.update_stock_level.UpdateStockLevelInputData;
+import use_case.update_stock_level.UpdateStockLevelInteractor;
+import use_case.update_stock_level.UpdateStockLevelOutputBoundary;
+import use_case.update_stock_level.UpdateStockLevelOutputData;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -115,7 +119,41 @@ class FilePantryDataAccessObjectTest {
         assertThrows(NullPointerException.class, () -> dataAccess.savePantry(null));
     }
 
+    @Test
+    void updateStockLevelUseCasePersistsThroughFileDao() {
+        final Path filePath = tempDirectory.resolve("pantry.json");
+        final FilePantryDataAccessObject dataAccess =
+                new FilePantryDataAccessObject(filePath);
+        final Pantry pantry = new Pantry();
+        pantry.add(item("Milk", null, StockLevel.ENOUGH));
+        dataAccess.savePantry(pantry);
+        final RecordingPresenter presenter = new RecordingPresenter();
+        final UpdateStockLevelInteractor interactor =
+                new UpdateStockLevelInteractor(dataAccess, presenter);
+
+        interactor.execute(new UpdateStockLevelInputData("milk", StockLevel.LOW));
+
+        final Pantry reloaded = new FilePantryDataAccessObject(filePath).loadPantry();
+        assertFalse(presenter.outputData.isUseCaseFailed());
+        assertEquals(StockLevel.LOW, reloaded.find(
+                IngredientName.fromRawName("Milk")).orElseThrow().getStockLevel());
+    }
+
     private PantryItem item(String name, LocalDate expiryDate, StockLevel stockLevel) {
         return new PantryItem(IngredientName.fromRawName(name), expiryDate, stockLevel);
+    }
+
+    private static final class RecordingPresenter implements UpdateStockLevelOutputBoundary {
+        private UpdateStockLevelOutputData outputData;
+
+        @Override
+        public void prepareSuccessView(UpdateStockLevelOutputData outputData) {
+            this.outputData = outputData;
+        }
+
+        @Override
+        public void prepareFailView(UpdateStockLevelOutputData outputData) {
+            this.outputData = outputData;
+        }
     }
 }
