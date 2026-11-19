@@ -6,19 +6,19 @@ public class TripListItem {
     private final String name;
     private final String dateRange;
     private final String details;
-    private final String coverPhotoPath;
+    private final String coverPhotoId;
 
-    public TripListItem(String tripId, String name, String dateRange, String details, String coverPhotoPath) {
+    public TripListItem(String tripId, String name, String dateRange, String details, String coverPhotoId) {
         this.tripId = tripId;
         this.name = name;
         this.dateRange = dateRange;
         this.details = details;
-        this.coverPhotoPath = coverPhotoPath;
+        this.coverPhotoId = coverPhotoId;
     }
 
     public String getTripId() { return tripId; }
     public String getName() { return name; }
     public String getDateRange() { return dateRange; }
     public String getDetails() { return details; }
-    public String getCoverPhotoPath() { return coverPhotoPath; }
+    public String getCoverPhotoId() { return coverPhotoId; }
 }
