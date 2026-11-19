@@ -1,18 +1,18 @@
 package org.example.cocktailcraft.entity;
 
 public class RecipeIngredient {
-    private final String name;
+    private final Ingredient ingredient;
     private final String amount;
     private final String unit;
 
-    public RecipeIngredient(String name, String amount, String unit) {
-        this.name = name;
+    public RecipeIngredient(Ingredient ingredient, String amount, String unit) {
+        this.ingredient = ingredient;
         this.amount = amount;
         this.unit = unit;
     }
 
-    public String getName() {
-        return name;
+    public Ingredient getIngredient() {
+        return ingredient;
     }
 
     public String getAmount() {
