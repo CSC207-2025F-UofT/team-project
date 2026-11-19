@@ -13,13 +13,21 @@ final class TraceBubble {
 
     // bubble up-right of (ax, ay), flips to stay inside bounds
     static void draw(Graphics2D g, double ax, double ay, String caption, String text, float ui, Rectangle2D bounds) {
+        draw(g, ax, ay, caption, text, null, ui, bounds);
+    }
+
+    // same w/ a small third line under the value (detail may be null)
+    static void draw(Graphics2D g, double ax, double ay, String caption, String text, String detail, float ui,
+                     Rectangle2D bounds) {
         Font capFont = GraphTheme.font(11 * ui);
         Font textFont = GraphTheme.bold(13 * ui);
         FontMetrics cap = g.getFontMetrics(capFont);
         FontMetrics main = g.getFontMetrics(textFont);
         double pad = 8 * ui;
-        double w = Math.max(main.stringWidth(text), caption == null ? 0 : cap.stringWidth(caption)) + 2 * pad;
-        double h = main.getHeight() + (caption == null ? 0 : cap.getHeight()) + 1.2 * pad;
+        double w = Math.max(main.stringWidth(text), Math.max(caption == null ? 0 : cap.stringWidth(caption),
+                detail == null ? 0 : cap.stringWidth(detail))) + 2 * pad;
+        double h = main.getHeight() + (caption == null ? 0 : cap.getHeight())
+                + (detail == null ? 0 : cap.getHeight()) + 1.2 * pad;
         double gap = 12 * ui;
         double x = ax + gap;
         double y = ay - h - gap;
@@ -43,6 +51,11 @@ final class TraceBubble {
         g.setFont(textFont);
         g.setColor(GraphTheme.BUBBLE_TEXT);
         g.drawString(text, (float) (x + pad), (float) baseline);
+        if (detail != null) {
+            g.setFont(capFont);
+            g.setColor(GraphTheme.BUBBLE_CAPTION);
+            g.drawString(detail, (float) (x + pad), (float) (baseline + main.getDescent() + cap.getAscent()));
+        }
     }
 
     // small value tag centred on (cx, cy), kept inside bounds

@@ -56,6 +56,8 @@ class PhasePresenterTest {
         presenter.prepareTraceView(new PhaseTraceOutputData(1.5, -2, -2, -0.5, false, null, List.of()));
         PhaseReadout r = viewModel.getState().getTrace();
         assertEquals("(1.5, -2)", r.getText());
+        assertEquals("1.5", r.getHText());
+        assertEquals(PhaseMarker.Role.SADDLE, PhasePresenter.role(Equilibrium.Type.SADDLE));
         assertEquals("θ′ = -2,  θ″ = -0.5", r.getDetail());
         assertEquals("Trajectory through", r.getCaption());
         presenter.prepareTraceView(null);
@@ -71,6 +73,14 @@ class PhasePresenterTest {
         PhaseReadout r = viewModel.getState().getTrace();
         assertEquals("slope y′ = 0", r.getDetail());
         assertEquals("Stable equilibrium  y = 1", r.getCaption());
+    }
+
+    @Test
+    void systemTitleGoesOnOneLine() {
+        assertEquals("x'=y,\\quad y'=-x", PhasePresenter.title("\\begin{matrix}x'=y\\\\y'=-x\\end{matrix}"));
+        assertEquals("x'=y,\\quad y'=-x",
+                PhasePresenter.title("\\left\\{\\begin{array}{l}x'=y\\\\y'=-x\\end{array}\\right."));
+        assertEquals("y'=x", PhasePresenter.title("y'=x"));
     }
 
     @Test

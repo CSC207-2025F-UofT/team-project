@@ -25,6 +25,16 @@ final class GraphTheme {
     static final Color BUTTON_HOVER = new Color(0, 0, 0, 20);
     static final Color BADGE = new Color(232, 232, 237);
     static final Color FLOOR = new Color(236, 237, 242);
+    // phase portraits
+    static final Color PHASE = new Color(88, 86, 214);
+    static final Color SLOPE = new Color(88, 86, 214, 150);
+    static final Color ATTRACTOR = new Color(52, 199, 89);
+    static final Color REPELLER = new Color(255, 59, 48);
+    static final Color SADDLE = new Color(255, 149, 0);
+    static final Color CENTER = new Color(0, 122, 255);
+    static final Color NEUTRAL = new Color(142, 142, 147);
+    private static final Color[] SPEED = {
+            new Color(120, 130, 225), new Color(150, 90, 220), new Color(232, 62, 120)};
 
     // surface height ramp, low -> high
     private static final float[] STOPS = {0f, 0.35f, 0.68f, 1f};
@@ -42,6 +52,21 @@ final class GraphTheme {
 
     static Font bold(float size) {
         return Fonts.ui(Font.BOLD, size);
+    }
+
+    static Font italic(float size) {
+        return Fonts.ui(Font.ITALIC, size);
+    }
+
+    // arrow colour by how fast the field is there, 0 slow -> 1 fast
+    static Color speed(double t, int alpha) {
+        double s = Math.max(0, Math.min(1, t)) * (SPEED.length - 1);
+        int k = Math.min(SPEED.length - 2, (int) s);
+        double f = s - k;
+        Color a = SPEED[k];
+        Color b = SPEED[k + 1];
+        return new Color(mix(a.getRed(), b.getRed(), f, 1), mix(a.getGreen(), b.getGreen(), f, 1),
+                mix(a.getBlue(), b.getBlue(), f, 1), alpha);
     }
 
     // level 0..1 -> ramp colour, light 0..1 darkens it

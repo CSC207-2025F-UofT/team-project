@@ -31,13 +31,13 @@ public class PhasePresenter implements PhasePortraitOutputBoundary {
             state.setRevision(state.getRevision() + 1);
         }
         state.setKind(data.isSlopeField() ? PhaseState.Kind.SLOPE_FIELD : PhaseState.Kind.PHASE_PLANE);
-        state.setLatex(data.getLatex());
+        state.setLatex(title(data.getLatex()));
         state.setWindow(data.getXMin(), data.getXMax(), data.getYMin(), data.getYMax());
         state.setLabels(label(data.getHorizontalName()), label(data.getVerticalName()));
         state.setArrows(data.getArrows());
         List<PhaseMarker> markers = new ArrayList<>();
         for (EquilibriumOutputData e : data.getEquilibria()) {
-            markers.add(new PhaseMarker(e.getH(), e.getV(), e.isLine(), stable(e.getType()), name(e.getType())));
+            markers.add(new PhaseMarker(e.getH(), e.getV(), e.isLine(), role(e.getType()), name(e.getType())));
         }
         state.setMarkers(markers);
         state.setSolutions(data.getSolutions());
@@ -69,7 +69,9 @@ public class PhasePresenter implements PhasePortraitOutputBoundary {
 
     // "(1.5, -2)", then the arrow: y' = 0.5 on a slope field, x' = 1, y' = -2 on a phase plane
     private static PhaseReadout readout(PhaseState s, PhaseTraceOutputData d) {
-        String point = "(" + GraphNumbers.format(d.getH()) + ", " + GraphNumbers.format(d.getV()) + ")";
+        String hText = GraphNumbers.format(d.getH());
+        String vText = GraphNumbers.format(d.getV());
+        String point = "(" + hText + ", " + vText + ")";
         String detail;
         if (d.isSlopeField()) {
             detail = "slope " + derivative(s.getVerticalLabel()) + " = " + GraphNumbers.format(d.getDv());
@@ -86,7 +88,18 @@ public class PhasePresenter implements PhasePortraitOutputBoundary {
         } else {
             caption = d.isSlopeField() ? "Solution through" : "Trajectory through";
         }
-        return new PhaseReadout(d.getH(), d.getV(), d.getDh(), d.getDv(), caption, point, detail, d.getPath());
+        return new PhaseReadout(d.getH(), d.getV(), d.getDh(), d.getDv(), caption, point, detail, hText, vText,
+                d.getPath());
+    }
+
+    // a system goes on one line in the title bar: x' = y,  y' = -x
+    static String title(String latex) {
+        if (latex == null || !latex.contains("\\\\")) {
+            return latex;
+        }
+        String flat = latex.replaceAll("\\\\(begin|end)\\{[a-zA-Z*]*\\}(\\{[a-z|]*\\})?", "")
+                .replace("\\left\\{", "").replace("\\right.", "").replace("\\{", "").replace("&", "");
+        return flat.replace("\\\\", ",\\quad ").trim();
     }
 
     // \theta' -> θ′, y'' stays y″
@@ -104,9 +117,24 @@ public class PhasePresenter implements PhasePortraitOutputBoundary {
         return label + "′";
     }
 
-    static boolean stable(Equilibrium.Type type) {
-        return type == Equilibrium.Type.STABLE_NODE || type == Equilibrium.Type.STABLE_SPIRAL
-                || type == Equilibrium.Type.STABLE_LINE || type == Equilibrium.Type.CENTER;
+    static PhaseMarker.Role role(Equilibrium.Type type) {
+        switch (type) {
+            case STABLE_NODE:
+            case STABLE_SPIRAL:
+            case STABLE_LINE:
+                return PhaseMarker.Role.ATTRACTOR;
+            case UNSTABLE_NODE:
+            case UNSTABLE_SPIRAL:
+            case UNSTABLE_LINE:
+                return PhaseMarker.Role.REPELLER;
+            case SADDLE:
+            case SEMI_STABLE_LINE:
+                return PhaseMarker.Role.SADDLE;
+            case CENTER:
+                return PhaseMarker.Role.CENTER;
+            default:
+                return PhaseMarker.Role.NEUTRAL;
+        }
     }
 
     static String name(Equilibrium.Type type) {
