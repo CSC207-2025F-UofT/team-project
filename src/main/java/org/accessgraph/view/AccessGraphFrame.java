@@ -8,15 +8,16 @@ import java.awt.event.WindowEvent;
 /** Desktop window; Swing components are constructed and updated on the event dispatch thread. */
 public final class AccessGraphFrame extends JFrame {
     public AccessGraphFrame(AccessGraphPanel content) {
-        super("AccessGraph — Interface prototype");
+        super("AccessGraph");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setContentPane(content);
         addWindowListener(new WindowAdapter() {
+            @Override public void windowOpened(WindowEvent event) { content.focusSignIn(); }
             @Override public void windowClosing(WindowEvent event) { content.close(); }
             @Override public void windowClosed(WindowEvent event) { content.close(); }
         });
-        setMinimumSize(new Dimension(1024, 760));
-        setSize(1200, 920);
+        setMinimumSize(new Dimension(740, 520));
+        setSize(1050, 700);
         setLocationRelativeTo(null);
     }
 }

@@ -1,178 +1,144 @@
 package org.accessgraph.view;
 
-import org.accessgraph.interface_adapter.PrototypeController;
-import org.accessgraph.interface_adapter.PrototypeState;
-import org.accessgraph.interface_adapter.PrototypeState.Screen;
-import org.accessgraph.data_access.BundledStationRepository;
-import org.accessgraph.data_access.BrowserLocationGateway;
-import org.accessgraph.use_case.station_map.MapImage;
+import org.accessgraph.data_access.DemoAccount;
+import org.accessgraph.entity.GeoPosition;
+import org.accessgraph.use_case.sign_in.SignIn;
+import org.accessgraph.use_case.station_map.LocationGateway;
+import org.accessgraph.use_case.station_map.MapRequest;
+import org.accessgraph.use_case.station_map.MapSession;
 import org.accessgraph.use_case.station_map.MapViewport;
 import org.junit.jupiter.api.Test;
 
 import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JComboBox;
-import javax.swing.JComponent;
-import javax.swing.JList;
-import javax.swing.JSpinner;
-import javax.swing.JScrollPane;
+import javax.swing.JLabel;
+import javax.swing.JPasswordField;
 import javax.swing.JTabbedPane;
-import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
+import java.awt.Graphics2D;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseWheelEvent;
 import java.awt.image.BufferedImage;
-import java.io.IOException;
+import java.net.URI;
+import java.time.Clock;
+import java.time.Instant;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 class AccessGraphPanelTest {
-    @Test
-    void swingControlsSupportTheCompleteSessionWorkflow() throws Exception {
-        SwingUtilities.invokeAndWait(() -> {
-            PrototypeState state = new PrototypeState();
-            AccessGraphPanel panel = panel(state, new PrototypeController(state));
-            assertEquals(5, find(panel, JTabbedPane.class).get(0).getTabCount());
-            assertEquals("Plan journey", find(panel, JTabbedPane.class).get(0).getTitleAt(0));
-            assertEquals(Screen.STATION_MAP, state.getScreen());
-            button(panel, "Find route").doClick();
-            assertTrue(state.isError(Screen.PLANNER));
-
-            List<JComboBox> stations = find(panel, JComboBox.class);
-            stations.get(0).setSelectedItem("Union");
-            stations.get(1).setSelectedItem("Finch");
-            button(panel, "Swap stations").doClick();
-            assertEquals("Finch", state.getOrigin());
-            button(panel, "Find route").doClick();
-            assertTrue(state.isRequestReviewed());
-
-            named(panel, JTextField.class, "Trip name (session only)").setText("Home");
-            button(panel, "Save station pair").doClick();
-            assertEquals(1, state.getSavedTrips().size());
-            button(panel, "Edit preferences").doClick();
-            assertEquals(Screen.PROFILE, state.getScreen());
-            JCheckBox wheelchair = checkbox(panel, "Require wheelchair-accessible connections");
-            JCheckBox stairs = checkbox(panel, "Allow connections that require stairs");
-            assertFalse(stairs.isEnabled());
-            wheelchair.doClick();
-            stairs.doClick();
-            button(panel, "Apply preferences").doClick();
-            assertTrue(state.getProfile().isStairsAllowed());
-            assertFalse(state.isRequestReviewed());
-
-            find(panel, JTabbedPane.class).get(0).setSelectedIndex(Screen.SAVED_TRIPS.ordinal());
-            assertFalse(button(panel, "Load selected trip").isEnabled());
-            named(panel, JList.class, "Saved station pairs").setSelectedIndex(0);
-            button(panel, "Load selected trip").doClick();
-            assertEquals(Screen.PLANNER, state.getScreen());
-            assertTrue(state.isRequestReviewed());
-            assertTrue(state.getProfile().isStairsAllowed());
-
-            find(panel, JTabbedPane.class).get(0).setSelectedIndex(Screen.DISRUPTIONS.ordinal());
-            named(panel, JCheckBox.class, "Sample elevator connection: mark unavailable").doClick();
-            assertEquals(1, state.getActiveDisruptionCount());
-            assertFalse(state.isRequestReviewed());
-            button(panel, "Restore all sample connections").doClick();
-            assertEquals(0, state.getActiveDisruptionCount());
-
-            find(panel, JTabbedPane.class).get(0).setSelectedIndex(Screen.SAVED_TRIPS.ordinal());
-            named(panel, JList.class, "Saved station pairs").setSelectedIndex(0);
-            button(panel, "Delete selected trip").doClick();
-            assertTrue(state.getSavedTrips().isEmpty());
-            assertFalse(button(panel, "Delete selected trip").isEnabled());
-        });
-    }
+    private static final Instant NOW = Instant.parse("2026-11-19T16:00:00Z");
+    private static final Color TILE = new Color(0xA9B6A7);
+    private static final GeoPosition UNION = new GeoPosition(43.6455, -79.3797, 17, NOW);
 
     @Test
-    void invalidTypedTransferLimitDoesNotReplaceAppliedPreferences() throws Exception {
-        SwingUtilities.invokeAndWait(() -> {
-            PrototypeState state = new PrototypeState();
-            AccessGraphPanel panel = panel(state, new PrototypeController(state));
-            JSpinner spinner = find(panel, JSpinner.class).get(0);
-            for (String invalid : new String[]{"7", "-1", "abc", "1.5"}) {
-                ((JSpinner.DefaultEditor) spinner.getEditor()).getTextField().setText(invalid);
-                button(panel, "Apply preferences").doClick();
-                assertEquals(2, state.getProfile().getMaxTransfers());
-            }
-        });
-    }
-
-    @Test
-    void resizingScreensKeepsParagraphsVisibleAndPagesWithinTheViewport() throws Exception {
-        SwingUtilities.invokeAndWait(() -> {
-            PrototypeState state = new PrototypeState();
-            PrototypeController controller = new PrototypeController(state);
-            AccessGraphPanel panel = panel(state, controller);
-            controller.selectJourney("Union", "Bloor–Yonge");
-            controller.requestRoute();
-            controller.saveTrip("Campus");
-            for (Screen screen : Screen.values()) {
-                controller.navigate(screen);
-                for (int width : new int[]{1200, 1024}) {
-                    panel.setSize(width, 880);
-                    for (int pass = 0; pass < 6; pass++) { layoutTree(panel); }
-                    for (JTextArea text : find(panel, JTextArea.class)) {
-                        if (visibleInPanel(text, panel)) {
-                            assertTrue(text.getHeight() >= text.getPreferredSize().height,
-                                    "Wrapped text was clipped: " + text.getText());
-                        }
-                    }
-                    for (JScrollPane scroll : find(panel, JScrollPane.class)) {
-                        if (visibleInPanel(scroll, panel) && !(scroll.getViewport().getView() instanceof JList)) {
-                            assertEquals(scroll.getViewport().getExtentSize().width,
-                                    scroll.getViewport().getView().getWidth());
-                        }
-                    }
-                }
-            }
-        });
-    }
-
-    private static boolean visibleInPanel(Component component, Container root) {
-        for (Component current = component; current != root; current = current.getParent()) {
-            if (current == null || !current.isVisible()) { return false; }
-        }
-        return true;
-    }
-
-    private static AccessGraphPanel panel(PrototypeState state, PrototypeController controller) {
+    void signInGatesMapAndLocationAndFreshFixOpensTheNeighborhoodView() throws Exception {
+        Fixture demo = new Fixture();
         try {
-            return new AccessGraphPanel(state, controller, new StationMapPanel(new BundledStationRepository().load(),
-                    request -> new MapImage(new BufferedImage(8, 8, BufferedImage.TYPE_INT_RGB),
-                            new MapViewport(11, 0, 0)), ignored -> { },
-                    new BrowserLocationGateway()));
-        } catch (IOException exception) {
-            throw new AssertionError("Could not load the test station catalogue.", exception);
+            SwingUtilities.invokeAndWait(() -> {
+                assertTrue(demo.login().isVisible());
+                assertFalse(demo.map().isVisible());
+                assertTrue(find(demo.panel, JTabbedPane.class).isEmpty());
+                assertEquals(0, demo.locations.started);
+                demo.signIn("wrong");
+                assertTrue(demo.login().isVisible());
+                assertEquals(0, demo.locations.started);
+                assertTrue(find(demo.login(), JLabel.class).stream()
+                        .anyMatch(label -> "Check your username and password.".equals(label.getText())));
+                demo.signIn(DemoAccount.PASSWORD);
+                assertFalse(demo.login().isVisible());
+                assertTrue(demo.map().isVisible());
+                assertEquals(1, demo.locations.started);
+                assertEquals(FakeLocations.PAGE, demo.opened.get());
+            });
+            assertEquals(14, demo.nextViewport().getZoom());
+
+            demo.locations.listener.onPosition(new GeoPosition(50, -79, 12, NOW.minusSeconds(90)));
+            SwingUtilities.invokeAndWait(() -> assertNull(demo.session.getPosition(NOW)));
+            demo.locations.listener.onPosition(UNION);
+            MapViewport centered = demo.nextViewport();
+            assertEquals(16, centered.getZoom());
+            MapViewport.Pixel pin = centered.screenPoint(UNION.getLatitude(), UNION.getLongitude());
+            assertEquals(centered.getWidth() / 2.0, pin.x, 0.5);
+            assertEquals(centered.getHeight() / 2.0, pin.y, 0.5);
+            demo.awaitPaint(Color.decode("#246BD5"));
+
+            SwingUtilities.invokeAndWait(() -> {
+                JButton minus = button(demo.map(), "−");
+                minus.doClick();
+            });
+            assertEquals(15, demo.nextViewport().getZoom());
+            SwingUtilities.invokeAndWait(() -> {
+                MouseWheelEvent wheel = new MouseWheelEvent(demo.canvas(), MouseWheelEvent.MOUSE_WHEEL, 0,
+                        0, 200, 200, 200, 200, 0, false, MouseWheelEvent.WHEEL_UNIT_SCROLL, 1, -1, -1);
+                demo.canvas().dispatchEvent(wheel);
+                assertTrue(wheel.isConsumed());
+            });
+            MapViewport zoomed = demo.nextViewport();
+            assertEquals(16, zoomed.getZoom());
+            SwingUtilities.invokeAndWait(() -> {
+                MapCanvas canvas = demo.canvas();
+                canvas.dispatchEvent(new MouseEvent(canvas, MouseEvent.MOUSE_PRESSED, 0, 0, 200, 200, 1,
+                        false, MouseEvent.BUTTON1));
+                canvas.dispatchEvent(new MouseEvent(canvas, MouseEvent.MOUSE_DRAGGED, 0, 0, 250, 230, 0,
+                        false, MouseEvent.NOBUTTON));
+                canvas.dispatchEvent(new MouseEvent(canvas, MouseEvent.MOUSE_RELEASED, 0, 0, 250, 230, 1,
+                        false, MouseEvent.BUTTON1));
+            });
+            MapViewport panned = demo.nextViewport();
+            assertEquals(zoomed.getLeft() - 50, panned.getLeft());
+            assertEquals(zoomed.getTop() - 30, panned.getTop());
+            SwingUtilities.invokeAndWait(() -> button(demo.map(), "My location").doClick());
+            MapViewport recentered = demo.nextViewport();
+            assertEquals(centered.getLeft(), recentered.getLeft());
+            assertEquals(centered.getTop(), recentered.getTop());
+
+            SwingUtilities.invokeAndWait(() -> {
+                button(demo.map(), "Stop sharing").doClick();
+                assertNull(demo.session.getPosition(NOW));
+                button(demo.map(), "Sign out").doClick();
+                assertTrue(demo.login().isVisible());
+                assertFalse(demo.map().isVisible());
+                assertEquals(1, demo.locations.stopped);
+            });
+            demo.locations.listener.onPosition(UNION);
+            SwingUtilities.invokeAndWait(() -> assertNull(demo.session.getPosition(NOW)));
+        } finally {
+            demo.close();
         }
     }
 
-    private static void layoutTree(Container container) {
-        container.invalidate();
-        container.doLayout();
-        for (Component child : container.getComponents()) {
-            if (child instanceof Container && child.isVisible()) { layoutTree((Container) child); }
+    @Test
+    void denyingPermissionKeepsTheTorontoMapAndLocationCanBeRetried() throws Exception {
+        Fixture demo = new Fixture();
+        try {
+            SwingUtilities.invokeAndWait(() -> demo.signIn(DemoAccount.PASSWORD));
+            assertEquals(14, demo.nextViewport().getZoom());
+            demo.awaitPaint(TILE);
+            demo.locations.listener.onFailure(LocationGateway.Failure.PERMISSION_DENIED);
+            SwingUtilities.invokeAndWait(() -> {
+                assertTrue(demo.map().isVisible());
+                assertEquals(14, demo.session.getViewport().getZoom());
+                assertTrue(find(demo.map(), JLabel.class).stream()
+                        .anyMatch(label -> "Location permission denied.".equals(label.getText())));
+                button(demo.map(), "My location").doClick();
+                assertEquals(2, demo.locations.started);
+            });
+        } finally {
+            demo.close();
         }
     }
 
-    private static JButton button(Container root, String text) {
-        return find(root, JButton.class).stream().filter(button -> text.equals(button.getText()))
-                .findFirst().orElseThrow(() -> new AssertionError("Missing button: " + text));
-    }
-
-    private static JCheckBox checkbox(Container root, String text) {
-        return find(root, JCheckBox.class).stream().filter(check -> text.equals(check.getText()))
-                .findFirst().orElseThrow(() -> new AssertionError("Missing checkbox: " + text));
-    }
-
-    private static <T extends JComponent> T named(Container root, Class<T> type, String name) {
-        return find(root, type).stream().filter(component -> name.equals(
-                component.getAccessibleContext().getAccessibleName())).findFirst()
-                .orElseThrow(() -> new AssertionError("Missing control: " + name));
+    private static JButton button(Container root, String label) {
+        return find(root, JButton.class).stream().filter(item -> label.equals(item.getText())).findFirst().orElseThrow();
     }
 
     private static <T> List<T> find(Container root, Class<T> type) {
@@ -182,5 +148,92 @@ class AccessGraphPanelTest {
             if (child instanceof Container) { results.addAll(find((Container) child, type)); }
         }
         return results;
+    }
+
+    private static void layout(Container container) {
+        container.doLayout();
+        for (Component child : container.getComponents()) {
+            if (child instanceof Container) { layout((Container) child); }
+        }
+    }
+
+    private static final class Fixture {
+        private final FakeLocations locations = new FakeLocations();
+        private final AtomicReference<URI> opened = new AtomicReference<>();
+        private final LinkedBlockingQueue<MapRequest> requests = new LinkedBlockingQueue<>();
+        private final MapSession session = new MapSession(List.of());
+        private AccessGraphPanel panel;
+
+        Fixture() throws Exception {
+            SwingUtilities.invokeAndWait(() -> {
+                panel = new AccessGraphPanel(new SignIn(new DemoAccount()), DemoAccount.USERNAME, DemoAccount.PASSWORD,
+                        session, request -> {
+                            assertFalse(SwingUtilities.isEventDispatchThread());
+                            MapViewport viewport = request.getViewport();
+                            BufferedImage image = new BufferedImage(viewport.getWidth(), viewport.getHeight(),
+                                    BufferedImage.TYPE_INT_RGB);
+                            Graphics2D graphics = image.createGraphics();
+                            graphics.setColor(TILE);
+                            graphics.fillRect(0, 0, image.getWidth(), image.getHeight());
+                            graphics.dispose();
+                            requests.add(request);
+                            return image;
+                        }, locations, opened::set, Clock.fixed(NOW, ZoneOffset.UTC));
+                panel.setSize(740, 520);
+                layout(panel);
+            });
+        }
+
+        LoginPanel login() { return (LoginPanel) panel.getComponent(0); }
+        MapPanel map() { return (MapPanel) panel.getComponent(1); }
+        MapCanvas canvas() { return find(map(), MapCanvas.class).get(0); }
+
+        void signIn(String password) {
+            find(login(), JTextField.class).get(0).setText(DemoAccount.USERNAME);
+            find(login(), JPasswordField.class).get(0).setText(password);
+            button(login(), "Sign in").doClick();
+            layout(panel);
+        }
+
+        MapViewport nextViewport() throws InterruptedException {
+            MapRequest request = requests.poll(3, TimeUnit.SECONDS);
+            assertNotNull(request, "Expected the map to render.");
+            return request.getViewport();
+        }
+
+        void awaitPaint(Color color) throws Exception {
+            long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(3);
+            AtomicReference<Color> pixel = new AtomicReference<>();
+            do {
+                SwingUtilities.invokeAndWait(() -> {
+                    BufferedImage image = new BufferedImage(canvas().getWidth(), canvas().getHeight(),
+                            BufferedImage.TYPE_INT_RGB);
+                    Graphics2D graphics = image.createGraphics();
+                    canvas().paint(graphics);
+                    graphics.dispose();
+                    pixel.set(new Color(image.getRGB(image.getWidth() / 2, image.getHeight() / 2)));
+                });
+                if (color.equals(pixel.get())) { return; }
+                Thread.sleep(20);
+            } while (System.nanoTime() < deadline);
+            assertEquals(color, pixel.get());
+        }
+
+        void close() throws Exception { SwingUtilities.invokeAndWait(panel::close); }
+    }
+
+    private static final class FakeLocations implements LocationGateway {
+        private static final URI PAGE = URI.create("http://127.0.0.1:8080/#demo");
+        private Listener listener;
+        private int started;
+        private int stopped;
+
+        @Override public URI start(Listener listener) {
+            this.listener = listener;
+            started++;
+            return PAGE;
+        }
+
+        @Override public void stop() { stopped++; }
     }
 }

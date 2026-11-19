@@ -10,20 +10,15 @@
 <body>
 <main>
     <p class="brand">AccessGraph</p>
-    <h1>Use your live location</h1>
-    <p>This local page shares your device location with the AccessGraph desktop app after you allow it
-        in your browser. Keep this page open while sharing.</p>
-    <p>AccessGraph keeps your coordinates in memory and draws the position pin on your device. OpenStreetMap
-        receives requests for the map tiles in view. If you open transit directions, Apple Maps receives a fresh
-        position when available. Your browser or operating system may use its own location services.</p>
+    <h1>Center the map on you</h1>
+    <p>Share your location, then return to AccessGraph. Keep this page open while sharing.</p>
     <div class="actions">
         <button id="start" type="button">Start sharing location</button>
         <button id="stop" type="button" disabled>Stop sharing</button>
     </div>
     <p id="status" role="status" aria-live="polite">Choose Start sharing location, then allow location access.</p>
     <p id="accuracy"></p>
-    <p>You can stop sharing here or in AccessGraph. If you deny permission, you can still enter a
-        destination address and open transit directions.</p>
+    <p>You can stop sharing here or in AccessGraph.</p>
 </main>
 </body>
 </html>

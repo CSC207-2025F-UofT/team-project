@@ -8,7 +8,7 @@
     <artifactId>TeamProject</artifactId>
     <version>1.0-SNAPSHOT</version>
     <name>AccessGraph</name>
-    <description>Accessibility-aware TTC journey planner — Swing interface prototype.</description>
+    <description>AccessGraph desktop map demo for accessible TTC stations.</description>
 
     <properties>
         <maven.compiler.source>11</maven.compiler.source>
@@ -18,11 +18,6 @@
     </properties>
 
     <dependencies>
-        <dependency>
-            <groupId>org.json</groupId>
-            <artifactId>json</artifactId>
-            <version>20250517</version>
-        </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>
@@ -60,20 +55,6 @@
                         </manifest>
                     </archive>
                 </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-shade-plugin</artifactId>
-                <version>3.6.2</version>
-                <executions>
-                    <execution>
-                        <phase>package</phase>
-                        <goals><goal>shade</goal></goals>
-                        <configuration>
-                            <createDependencyReducedPom>false</createDependencyReducedPom>
-                        </configuration>
-                    </execution>
-                </executions>
             </plugin>
         </plugins>
     </build>

@@ -1,5 +1,6 @@
 package org.accessgraph.app;
 
+import org.accessgraph.data_access.DemoAccount;
 import org.accessgraph.view.AccessGraphFrame;
 
 import javax.swing.SwingUtilities;
@@ -10,11 +11,9 @@ public final class Main {
 
     public static void main(String[] args) {
         if (args.length == 1 && ("--help".equals(args[0]) || "-h".equals(args[0]))) {
-            System.out.println("AccessGraph Swing interface prototype\nRun: java -jar target/accessgraph.jar\n"
-                    + "Requires Java 11+ and a graphical desktop. Routing is not connected.\n"
-                    + "Home: destination addresses, accessible station map, and permission-based device location.\n"
-                    + "The OpenStreetMap basemap loads at startup without an API key.\n"
-                    + "Use my location opens a local browser permission page; no location is collected at startup.");
+            System.out.println("AccessGraph map demo\nRun java -jar target/accessgraph.jar with Java 11 or newer.\n"
+                    + "Demo username " + DemoAccount.USERNAME + ", password " + DemoAccount.PASSWORD + ".\n"
+                    + "Allow location in your browser to center the map on your device.");
             return;
         }
         if (GraphicsEnvironment.isHeadless()) {
