@@ -1,4 +1,4 @@
-package use_case_layer.flashcard_generator;
+package use_case.flashcard_generator;
 
 import java.util.List;
 //import java.util.SequencedCollection;
@@ -31,6 +31,10 @@ public class FlashcardGeneratorInputData {
 
         }
         public List<TextPiece> getListTextPiece(){ return this.listTextPiece;}
+
+        public TextPiece getTextPiece(int index){
+        return this.listTextPiece.get(index);
+    }
 
 
     }

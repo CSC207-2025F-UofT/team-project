@@ -2,9 +2,9 @@ package interface_adapters.flashcard_generator;
 
 import java.util.List;
 
-import use_case_layer.flashcard_generator.FlashcardGeneratorInputBoundary;
-import use_case_layer.flashcard_generator.FlashcardGeneratorInputData;
-import use_case_layer.flashcard_generator.FlashcardGeneratorInputData.TextPiece;
+import use_case.flashcard_generator.FlashcardGeneratorInputBoundary;
+import use_case.flashcard_generator.FlashcardGeneratorInputData;
+import use_case.flashcard_generator.FlashcardGeneratorInputData.TextPiece;
 
 
 public class FlashcardGeneratorController {

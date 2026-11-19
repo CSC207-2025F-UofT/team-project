@@ -1,4 +1,4 @@
-package use_case_layer.flashcard_generator;
+package use_case.flashcard_generator;
 
 public class FlashcardGeneratorOutpuData {
 }
