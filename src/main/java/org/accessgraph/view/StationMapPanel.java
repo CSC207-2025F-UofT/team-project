@@ -1,6 +1,6 @@
 package org.accessgraph.view;
 
-import org.accessgraph.interface_adapter.GoogleMapsLinks;
+import org.accessgraph.interface_adapter.MapLinks;
 import org.accessgraph.entity.Station;
 import org.accessgraph.entity.GeoPosition;
 import org.accessgraph.interface_adapter.BrowserGateway;
@@ -8,7 +8,6 @@ import org.accessgraph.use_case.station_map.MapImageGateway;
 import org.accessgraph.use_case.station_map.MapRequest;
 import org.accessgraph.use_case.station_map.LocationGateway;
 
-import javax.imageio.ImageIO;
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
@@ -34,7 +33,6 @@ import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
 import java.awt.event.HierarchyEvent;
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.URI;
 import java.time.format.DateTimeFormatter;
@@ -45,11 +43,12 @@ import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
-import java.util.stream.Collectors;
 
 /** Map-first journey view. Device location requires permission; all image requests run off Swing's thread. */
 public final class StationMapPanel extends JPanel implements AutoCloseable {
     private static final URI TTC_ALERTS = URI.create("https://www.ttc.ca/service-alerts?accessibility");
+    private static final URI MAP_LICENCE = URI.create("https://www.openstreetmap.org/copyright");
+    private static final URI REPORT_MAP_ISSUE = URI.create("https://www.openstreetmap.org/fixthemap");
     private static final DateTimeFormatter DATE = DateTimeFormatter.ofPattern("MMM d, uuuu", Locale.CANADA);
     private final List<Station> stations;
     private final MapImageGateway maps;
@@ -60,7 +59,7 @@ public final class StationMapPanel extends JPanel implements AutoCloseable {
     private final JButton useLocation = Ui.button("Use my location", false);
     private final JButton stopSharing = Ui.button("Stop sharing", false);
     private final JButton showDestination = Ui.button("Show destination on map", true);
-    private final JButton openJourney = Ui.button("Open journey in Google Maps", false);
+    private final JButton openJourney = Ui.button("Open transit directions in Apple Maps", false);
     private final JTextField search = new JTextField();
     private final JCheckBox confirmedOnly = new JCheckBox("Wheelchair-accessible listings only", true);
     private final DefaultListModel<Station> listModel = new DefaultListModel<>();
@@ -70,10 +69,8 @@ public final class StationMapPanel extends JPanel implements AutoCloseable {
     private final JTextArea notice = Ui.text("");
     private final JButton showAll = Ui.button("Show listed stations", true);
     private final JButton focus = Ui.button("Focus selected station", false);
-    private final JButton google = Ui.button("Open selected in Google Maps", false);
+    private final JButton openStation = Ui.button("Open selected in OpenStreetMap", false);
     private final JButton source = Ui.button("View TTC station details", false);
-    private final JButton mapSettings = Ui.button("Map settings", false);
-    private Runnable openSettings = () -> { };
     private final MapCanvas canvas = new MapCanvas();
     private SwingWorker<BufferedImage, Void> activeWorker;
     private final Timer locationTimer = new Timer(1000, event -> locationTick());
@@ -115,9 +112,9 @@ public final class StationMapPanel extends JPanel implements AutoCloseable {
         list.addListSelectionListener(event -> updateSelection());
         showAll.addActionListener(event -> loadMap(null));
         focus.addActionListener(event -> loadMap(list.getSelectedValue()));
-        google.addActionListener(event -> {
+        openStation.addActionListener(event -> {
             Station station = list.getSelectedValue();
-            if (station != null) { openBrowser(GoogleMapsLinks.station(station)); }
+            if (station != null) { openBrowser(MapLinks.station(station)); }
         });
         source.addActionListener(event -> {
             Station station = list.getSelectedValue();
@@ -136,7 +133,7 @@ public final class StationMapPanel extends JPanel implements AutoCloseable {
         addHierarchyListener(event -> {
             if ((event.getChangeFlags() & HierarchyEvent.SHOWING_CHANGED) != 0 && isShowing() && !initialMapRequested) {
                 initialMapRequested = true;
-                if (maps.isConfigured()) { loadMap(null); }
+                loadMap(null);
             }
         });
         filterStations();
@@ -196,22 +193,14 @@ public final class StationMapPanel extends JPanel implements AutoCloseable {
         listScroll.setMaximumSize(new Dimension(Integer.MAX_VALUE, 220));
         Ui.add(catalogue, listScroll, 16);
         Ui.add(catalogue, details, 16);
-        Ui.add(catalogue, google, 10);
+        Ui.add(catalogue, openStation, 10);
         Ui.add(catalogue, source, 0);
         return catalogue;
     }
 
     private JPanel buildMap() {
         JPanel map = Ui.card();
-        JPanel title = new JPanel(new BorderLayout(10, 0));
-        title.setOpaque(false);
-        title.add(Ui.label("Google Maps", 20, true), BorderLayout.WEST);
-        mapSettings.setFont(Ui.BODY.deriveFont(13f));
-        mapSettings.setMargin(new java.awt.Insets(6, 10, 6, 10));
-        mapSettings.setEnabled(false);
-        mapSettings.addActionListener(event -> openSettings.run());
-        title.add(mapSettings, BorderLayout.EAST);
-        Ui.add(map, title, 8);
+        Ui.add(map, Ui.label("TTC station map", 20, true), 8);
         Ui.add(map, notice, 14);
         JPanel actions = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
         actions.setOpaque(false);
@@ -231,15 +220,12 @@ public final class StationMapPanel extends JPanel implements AutoCloseable {
                 + "This is a dated station listing, not live elevator status or a verified journey."), 0);
         JPanel policies = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 10));
         policies.setOpaque(false);
-        for (String[] link : new String[][]{
-                {"Google Maps terms", "https://maps.google.com/help/terms_maps/"},
-                {"Google privacy", "https://policies.google.com/privacy"}}) {
-            JButton button = Ui.button(link[0], false);
-            button.setFont(Ui.BODY.deriveFont(12f));
-            button.setMargin(new java.awt.Insets(4, 8, 4, 8));
-            button.addActionListener(event -> openBrowser(URI.create(link[1])));
-            policies.add(button);
-        }
+        JButton licence = Ui.button("Map data and licence", false);
+        licence.addActionListener(event -> openBrowser(MAP_LICENCE));
+        policies.add(licence);
+        JButton report = Ui.button("Report a map issue", false);
+        report.addActionListener(event -> openBrowser(REPORT_MAP_ISSUE));
+        policies.add(report);
         Ui.add(map, policies, 0);
         return map;
     }
@@ -256,22 +242,18 @@ public final class StationMapPanel extends JPanel implements AutoCloseable {
                 .forEach(listModel::addElement);
         if (selected != null && listModel.contains(selected)) { list.setSelectedValue(selected, true); }
         count.setText(listModel.size() + " of " + stations.size() + " stations listed");
-        canvas.clear(listModel.isEmpty() ? "No matching stations" : maps.isConfigured()
-                ? "Choose Show listed stations to load the map" : "Google Maps API key required for this view");
-        Ui.notice(notice, maps.isConfigured()
-                ? "Maps load on request. Filtering clears the previous map so its pins match the list."
-                : "Add your API key in Settings → Google Maps to display this map. "
-                        + "Destination entry, device location, and Google Maps browser links work without a key.", false);
+        canvas.clear(listModel.isEmpty() ? "No matching stations" : "Choose Show listed stations to load the map");
+        Ui.notice(notice, "Choose Show listed stations to display the filtered station pins.", false);
         updateSelection();
     }
 
     private void updateSelection() {
         Station selected = list.getSelectedValue();
-        google.setEnabled(selected != null);
+        openStation.setEnabled(selected != null);
         source.setEnabled(selected != null);
-        showAll.setEnabled(maps.isConfigured() && !listModel.isEmpty() && activeWorker == null);
-        focus.setEnabled(maps.isConfigured() && selected != null && activeWorker == null);
-        showDestination.setEnabled(maps.isConfigured() && !destinationAddress.getText().isBlank() && activeWorker == null);
+        showAll.setEnabled(!listModel.isEmpty() && activeWorker == null);
+        focus.setEnabled(selected != null && activeWorker == null);
+        showDestination.setEnabled(!destinationAddress.getText().isBlank() && activeWorker == null);
         openJourney.setEnabled(!destinationAddress.getText().isBlank());
         details.setText(selected == null
                 ? "Select a station for its accessibility listing and browser links."
@@ -288,18 +270,17 @@ public final class StationMapPanel extends JPanel implements AutoCloseable {
     }
 
     private List<Station> visibleStations() {
-        return java.util.Collections.list(listModel.elements()).stream().collect(Collectors.toList());
+        return java.util.Collections.list(listModel.elements());
     }
 
     private void destinationEdited() {
-        cancelLoad();
-        appliedDestination = "";
-        autoRefresh = false;
-        canvas.clear(maps.isConfigured() ? "Choose Show destination on map" : "Google Maps API key required for this view");
-        Ui.notice(notice, maps.isConfigured()
-                ? "Destination changed. Choose Show destination on map to update its pin."
-                : "Add a key in Settings → Google Maps, or open your destination in Google Maps without a key.",
-                false);
+        if (!appliedDestination.isEmpty()) {
+            cancelLoad();
+            appliedDestination = "";
+            autoRefresh = false;
+            canvas.clear("Choose Show destination on map to update its pin");
+            Ui.notice(notice, "Destination changed. Choose Show destination on map to update its pin.", false);
+        }
         updateSelection();
     }
 
@@ -312,10 +293,6 @@ public final class StationMapPanel extends JPanel implements AutoCloseable {
     private void showDestination() {
         try {
             appliedDestination = destination();
-            if (!maps.isConfigured()) {
-                Ui.notice(notice, "Add a key in Settings → Google Maps, or choose Open journey in Google Maps.", false);
-                return;
-            }
             cancelLoad();
             loadMap(null);
         } catch (IllegalArgumentException exception) {
@@ -325,7 +302,7 @@ public final class StationMapPanel extends JPanel implements AutoCloseable {
 
     private void openJourney() {
         try {
-            openBrowser(GoogleMapsLinks.journey(recentPosition(), destination()));
+            openBrowser(MapLinks.journey(recentPosition(), destination()));
         } catch (IllegalArgumentException exception) {
             Ui.notice(notice, exception.getMessage(), true);
         }
@@ -355,7 +332,7 @@ public final class StationMapPanel extends JPanel implements AutoCloseable {
                         position = fix;
                         locationDirty |= moved;
                         updateLocationNotice();
-                        if (firstFix && autoRefresh && maps.isConfigured()) {
+                        if (firstFix && autoRefresh) {
                             cancelLoad();
                             loadMap(null);
                         }
@@ -374,6 +351,7 @@ public final class StationMapPanel extends JPanel implements AutoCloseable {
                             position = null;
                             cancelLoad();
                             canvas.clear("Waiting for a fresh device location");
+                            updateSelection();
                             Ui.notice(locationNotice, "A fresh device location is unavailable. Waiting for an update; "
                                     + "you can stop sharing and try again.", false);
                         }
@@ -406,16 +384,18 @@ public final class StationMapPanel extends JPanel implements AutoCloseable {
             position = null;
             cancelLoad();
             canvas.clear("Device location expired; waiting for an update");
+            updateSelection();
             Ui.notice(locationNotice, "Last position expired after 60 seconds. Waiting for a fresh device location.", false);
         }
         updateLocationNotice();
-        if (autoRefresh && locationDirty && recentPosition() != null && activeWorker == null && maps.isConfigured()
+        if (autoRefresh && locationDirty && recentPosition() != null && activeWorker == null
                 && System.nanoTime() - lastMapRequest >= java.util.concurrent.TimeUnit.SECONDS.toNanos(30)) {
             loadMap(null);
         }
     }
 
     private void stopLocation(String message) {
+        boolean hadPosition = position != null;
         ++locationSession;
         tracking = false;
         autoRefresh = false;
@@ -423,8 +403,10 @@ public final class StationMapPanel extends JPanel implements AutoCloseable {
         position = null;
         locationTimer.stop();
         locations.stop();
-        cancelLoad();
-        canvas.clear("Location cleared. Choose a map action to reload station pins.");
+        if (hadPosition) {
+            cancelLoad();
+            canvas.clear("Location cleared. Choose a map action to reload station pins.");
+        }
         useLocation.setEnabled(true);
         stopSharing.setEnabled(false);
         Ui.notice(locationNotice, message, false);
@@ -432,31 +414,13 @@ public final class StationMapPanel extends JPanel implements AutoCloseable {
     }
 
     @Override
-    public void close() { stopLocation("Location sharing ended."); }
-
-    public void setOpenSettingsAction(Runnable action) {
-        openSettings = java.util.Objects.requireNonNull(action);
-        mapSettings.setEnabled(true);
-    }
-
-    /** Called on Swing's event dispatch thread when a key is replaced or removed. */
-    public void configurationChanged() {
+    public void close() {
         cancelLoad();
-        autoRefresh = false;
-        initialMapRequested = false;
-        canvas.clear(maps.isConfigured() ? "Map configuration updated" : "Add an API key in Map settings");
-        Ui.notice(notice, maps.isConfigured()
-                ? "Google Maps key updated. Open Plan journey or choose a map action to load the map."
-                : "No Google Maps key is configured. Choose Map settings to add one.", false);
-        updateSelection();
-        if (maps.isConfigured() && isShowing()) {
-            initialMapRequested = true;
-            loadMap(null);
-        }
+        stopLocation("Location sharing ended.");
     }
 
     private void loadMap(Station selected) {
-        if (activeWorker != null || !maps.isConfigured()) { return; }
+        if (activeWorker != null) { return; }
         List<Station> visible = List.copyOf(visibleStations());
         GeoPosition currentPosition = recentPosition();
         if (visible.isEmpty() && currentPosition == null && appliedDestination.isEmpty()) { return; }
@@ -464,15 +428,12 @@ public final class StationMapPanel extends JPanel implements AutoCloseable {
         autoRefresh = selected == null && tracking;
         locationDirty = false;
         lastMapRequest = System.nanoTime();
-        canvas.clear("Loading Google Maps…");
+        canvas.clear("Loading OpenStreetMap…");
         Ui.notice(notice, "Loading " + visible.size() + " station pins…", false);
         activeWorker = new SwingWorker<BufferedImage, Void>() {
             @Override
             protected BufferedImage doInBackground() throws IOException, InterruptedException {
-                byte[] bytes = maps.fetch(request);
-                BufferedImage image = ImageIO.read(new ByteArrayInputStream(bytes));
-                if (image == null) { throw new IOException("Google Maps did not return a readable map image."); }
-                return image;
+                return maps.fetch(request);
             }
 
             @Override
@@ -484,7 +445,7 @@ public final class StationMapPanel extends JPanel implements AutoCloseable {
                     String message = selected == null ? "Showing all " + visible.size() + " listed station pins."
                             : "Focused on " + selected.getName() + ". Other pins may be outside this view.";
                     if (!request.getDestination().isEmpty()) {
-                        message += " D is Google's match for “" + request.getDestination() + "”; check its location.";
+                        message += " D is the address match for “" + request.getDestination() + "”. Check its location.";
                     }
                     if (request.getPosition() != null) {
                         message += " U uses the device fix from " + localTime(request.getPosition().getObservedAt())
@@ -500,7 +461,7 @@ public final class StationMapPanel extends JPanel implements AutoCloseable {
                     canvas.clear("Map unavailable");
                     Throwable cause = exception.getCause();
                     Ui.notice(notice, cause instanceof IOException ? cause.getMessage()
-                            : "The map could not be loaded. Try again or open the selected station in Google Maps.", true);
+                            : "The map could not be loaded. Try again or open the selected station in OpenStreetMap.", true);
                 }
                 updateSelection();
                 revalidate();
@@ -526,16 +487,16 @@ public final class StationMapPanel extends JPanel implements AutoCloseable {
         }
     }
 
-    /** Draw the complete image, retaining Google's logo and attribution without overlays or cropping. */
+    /** Fits the complete image so the map credit stays visible at every window size. */
     private static final class MapCanvas extends JPanel {
         private BufferedImage image;
-        private String message = "Google Maps has not been loaded";
+        private String message = "Map has not been loaded";
 
         MapCanvas() {
             setPreferredSize(new Dimension(640, 400));
             setMaximumSize(new Dimension(Integer.MAX_VALUE, 400));
             setBackground(Ui.BACKGROUND);
-            getAccessibleContext().setAccessibleName("Google station map");
+            getAccessibleContext().setAccessibleName("OpenStreetMap station map");
         }
 
         void clear(String text) {
@@ -547,7 +508,7 @@ public final class StationMapPanel extends JPanel implements AutoCloseable {
 
         void showImage(BufferedImage value) {
             image = value;
-            getAccessibleContext().setAccessibleDescription("Google Maps station pins. "
+            getAccessibleContext().setAccessibleDescription("Station pins on a map credited to OpenStreetMap contributors. "
                     + "Use the station directory for a text alternative and station details.");
             repaint();
         }

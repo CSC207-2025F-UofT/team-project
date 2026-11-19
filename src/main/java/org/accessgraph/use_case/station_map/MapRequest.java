@@ -27,9 +27,8 @@ public final class MapRequest {
 
     public static String validateDestination(String value) {
         String address = value == null ? "" : value.trim();
-        if (address.length() > 200 || address.indexOf('|') >= 0
-                || address.chars().anyMatch(Character::isISOControl)) {
-            throw new IllegalArgumentException("Use an address of up to 200 characters without line breaks or |.");
+        if (address.length() > 200 || address.chars().anyMatch(Character::isISOControl)) {
+            throw new IllegalArgumentException("Use an address of up to 200 characters without line breaks.");
         }
         return address;
     }

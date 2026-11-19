@@ -13,7 +13,7 @@ public final class Main {
             System.out.println("AccessGraph Swing interface prototype\nRun: java -jar target/accessgraph.jar\n"
                     + "Requires Java 11+ and a graphical desktop. Routing is not connected.\n"
                     + "Home: destination addresses, accessible station map, and permission-based device location.\n"
-                    + "Embedded Google map: Settings → Google Maps → Save key (or set GOOGLE_MAPS_API_KEY).\n"
+                    + "The OpenStreetMap basemap loads at startup without an API key.\n"
                     + "Use my location opens a local browser permission page; no location is collected at startup.");
             return;
         }

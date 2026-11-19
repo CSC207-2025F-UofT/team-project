@@ -13,9 +13,9 @@
     <h1>Use your live location</h1>
     <p>This local page shares your device location with the AccessGraph desktop app after you allow it
         in your browser. Keep this page open while sharing.</p>
-    <p>Your location is kept in memory. Displaying a Google map or opening a Google Maps journey also sends
-        the requested coordinates to Google. Your browser or operating system may use
-        its own location services.</p>
+    <p>AccessGraph keeps your coordinates in memory and draws the position pin on your device. OpenStreetMap
+        receives requests for the map tiles in view. If you open transit directions, Apple Maps receives a fresh
+        position when available. Your browser or operating system may use its own location services.</p>
     <div class="actions">
         <button id="start" type="button">Start sharing location</button>
         <button id="stop" type="button" disabled>Stop sharing</button>
@@ -23,7 +23,7 @@
     <p id="status" role="status" aria-live="polite">Choose Start sharing location, then allow location access.</p>
     <p id="accuracy"></p>
     <p>You can stop sharing here or in AccessGraph. If you deny permission, you can still enter a
-        destination address and open the journey in Google Maps.</p>
+        destination address and open transit directions.</p>
 </main>
 </body>
 </html>

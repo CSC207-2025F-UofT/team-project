@@ -3,10 +3,8 @@ package org.accessgraph.view;
 import org.accessgraph.interface_adapter.PrototypeController;
 import org.accessgraph.interface_adapter.PrototypeState;
 import org.accessgraph.interface_adapter.PrototypeState.Screen;
-import org.accessgraph.interface_adapter.ApiKeySettings;
 import org.accessgraph.data_access.BundledStationRepository;
 import org.accessgraph.data_access.BrowserLocationGateway;
-import org.accessgraph.data_access.GoogleStaticMapsGateway;
 import org.junit.jupiter.api.Test;
 
 import javax.swing.JButton;
@@ -22,8 +20,8 @@ import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 import java.awt.Component;
 import java.awt.Container;
+import java.awt.image.BufferedImage;
 import java.io.IOException;
-import java.net.http.HttpClient;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -142,10 +140,9 @@ class AccessGraphPanelTest {
 
     private static AccessGraphPanel panel(PrototypeState state, PrototypeController controller) {
         try {
-            ApiKeySettings settings = ApiKeySettings.sessionOnly("");
             return new AccessGraphPanel(state, controller, new StationMapPanel(new BundledStationRepository().load(),
-                    new GoogleStaticMapsGateway(HttpClient.newHttpClient(), settings::keyForRequest), ignored -> { },
-                    new BrowserLocationGateway()), settings);
+                    request -> new BufferedImage(8, 8, BufferedImage.TYPE_INT_RGB), ignored -> { },
+                    new BrowserLocationGateway()));
         } catch (IOException exception) {
             throw new AssertionError("Could not load the test station catalogue.", exception);
         }

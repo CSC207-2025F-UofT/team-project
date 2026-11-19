@@ -6,11 +6,11 @@ AccessGraph is a planned Java desktop application that helps TTC passengers find
 
 **Team:** Hayk Danghyan, Dean Wu, Hongbo Wang, and Adrian Lau — Group 17.
 
-**Project status:** Runnable Java 11 / Swing prototype with a map-first home page, destination-address entry, permission-based device location, a TTC station directory, and session-only journey management. The embedded map uses a configurable Maps Static API key and a dated official TTC station catalogue. Graph routing, route accessibility evaluation, rerouting, and persistent storage are not implemented yet. Google responses and actual device location still need verification with your own key, browser, and OS permissions; automated tests simulate those inputs. TTC realtime integration remains planned. The specification below describes the eventual course MVP.
+**Project status:** Runnable Java 11 / Swing prototype with a map-first home page, destination-address entry, permission-based device location, a TTC station directory, and session-only journey management. The embedded map uses OpenStreetMap tiles and a dated official TTC station catalogue. Graph routing, route accessibility evaluation, rerouting, and persistent storage are not implemented yet. Actual device location depends on your browser and OS permissions. TTC realtime integration remains planned. The specification below describes the eventual course MVP.
 
 ## Run the interface prototype
 
-Requirements: a JDK **11 or newer**, Maven **3.6.3 or newer**, and a graphical desktop. Building and browsing the station directory need no API key. The embedded Google map needs the optional configuration below. There are no third-party runtime libraries; Maven downloads build plugins and JUnit on the first build.
+Requirements: a JDK **11 or newer**, Maven **3.6.3 or newer**, and a graphical desktop. The app requires no API key or billing account. An internet connection is needed to load map tiles and look up a destination. Maven downloads build plugins and dependencies on the first build and packages the JSON library in the runnable JAR.
 
 ```sh
 mvn clean package
@@ -28,46 +28,39 @@ java -jar target/accessgraph.jar --help
 
 | Screen | Prototype behaviour | Still to implement |
 | --- | --- | --- |
-| Plan journey (home) | Google map with station data, typed destination addresses, and a permission-based device-position pin; open a transit journey in Google Maps. The inner Stations tab provides the searchable directory. | AccessGraph routing, address-match verification, entrance-level navigation, and live elevator status. Embedded maps need an API key. |
+| Plan journey (home) | OpenStreetMap basemap with TTC stations, typed destination addresses, and a permission-based device-position pin. Open transit directions in Apple Maps. The inner Stations tab provides the searchable directory. | AccessGraph routing, address-match verification, entrance-level navigation, and live elevator status. |
 | Station pairs | Select sample stations, swap endpoints, validate inputs, review a journey request, and name/save a station pair. | Graph search, constraint evaluation, station sequences, travel times, and real results. |
 | Accessibility preferences | Edit wheelchair requirements, stair/escalator permissions, and a transfer limit from 0–5; apply or restore defaults. Wheelchair mode excludes stairs and escalators. | Saving/restoring a profile from local storage and enforcing it during routing. |
 | Disruption simulation | Mark either of two fictional connections unavailable and restore them; update the displayed simulation count. | Actual connection mapping, graph updates, rerouting, and before/after comparison. |
 | Saved trips | Name, load, and delete station pairs within the current session. Loading reviews the pair with the current applied profile. | Persistent journeys and a fresh route search when loading. |
 
-The **Station pairs** sample picker contains **Bloor–Yonge, Eglinton, Finch, Osgoode, Queen's Park, St Andrew, St George, and Union**. These are prototype routing inputs, separate from the larger station-map catalogue. The two simulation connections are fictional. With a configured key, the home map loads once when first shown, on explicit map actions, and for changed live positions at most once every 30 seconds while sharing. Opening a browser link also accesses that external service. The app does not write preferences, trips, device positions, destination addresses, or map images to disk.
+The **Station pairs** sample picker contains **Bloor–Yonge, Eglinton, Finch, Osgoode, Queen's Park, St Andrew, St George, and Union**. These are prototype routing inputs, separate from the larger station-map catalogue. The two simulation connections are fictional. The home map loads when first shown, on explicit map actions, and for changed live positions at most once every 30 seconds while sharing. Preferences, trips, exact device positions, destination addresses, and rendered overlays stay in memory.
 
 “Find route” validates the station pair and displays that routing is not connected. It never returns a sample route as a real result. Duration and transfers remain uncalculated, accessibility remains unknown, and route comparison stays disabled. Preferences, saved trips, and simulation settings reset when the application closes.
 
-### Configure Google Maps
+### Use the map
 
-1. Create a Google Cloud project with billing enabled, enable **Maps Static API**, and create a key restricted to that API. See [Google's setup guide](https://developers.google.com/maps/documentation/maps-static/get-api-key) and [usage/billing documentation](https://developers.google.com/maps/documentation/maps-static/usage-and-billing).
-2. Set the key in your local environment before launching the application. In IntelliJ, add it under the run configuration's **Environment variables**. The app reads the environment variable directly; it does not load `.env` files.
+1. Open **Plan journey**. The TTC map loads automatically and defaults to the 103 stations that TTC lists as wheelchair-accessible.
+2. Enter an address such as **100 Queen St W, Toronto**, then select **Show destination on map**. The red **D** pin marks the address match. Check that it is the intended location.
+3. Use **Stations** to search the 109-location directory. Select **Show listed stations** to fit the filtered list, or select a station and choose **Focus selected station**. Clear the accessibility filter to see limited and unknown listings in separate colours.
+4. **Open transit directions in Apple Maps** uses the typed address and a fresh device position when available. You can choose an origin in Apple Maps. **Open selected in OpenStreetMap** opens the selected station. The app's accessibility preferences apply to AccessGraph's planned routing. [Apple Maps link format](https://developer.apple.com/documentation/mapkit/unified-map-urls)
 
-```sh
-export GOOGLE_MAPS_API_KEY='your-local-key'
-mvn clean package
-java -jar target/accessgraph.jar
-```
+The app requests only tiles needed for the current view, follows the provider's HTTP caching instructions, and displays OpenStreetMap attribution on the map. Raw tiles and their cache metadata are stored in `~/.accessgraph/tiles`. Tiles identify the displayed area. AccessGraph draws the station and device pins locally from exact coordinates. [OpenStreetMap tile policy](https://operations.osmfoundation.org/policies/tiles/), [OSMF privacy policy](https://osmfoundation.org/wiki/Privacy_Policy)
 
-3. The application opens on **Plan journey** and loads the Google overview when a key is configured. Enter an address such as **100 Queen St W, Toronto**, then select **Show destination on map**. The red **D** pin is Google's address match; check that it is the intended location. No separate Geocoding API key is needed: [Maps Static API supports address-based markers](https://developers.google.com/maps/documentation/maps-static/start).
-4. Use the inner **Stations** tab to search the 109-location directory. The default filter includes all 103 affirmative wheelchair-accessibility listings. Select **Show listed stations** to fit the filtered list, or select a station and choose **Focus selected station**. Turn off the filter to include limited and unknown listings in separate marker colours.
+An explicit destination search sends the address to Photon's public geocoder. The latest successful match is reused in memory. Typing alone sends no search request. Directions opened in Apple Maps send it the address and a fresh origin when available. [Photon](https://github.com/komoot/photon)
 
-The embedded view is a static Google image with station, destination, and device-position pins. **Open journey in Google Maps** opens interactive transit directions using the typed address and a fresh device position when available. Without a position, Google Maps lets the user choose an origin. **Open selected in Google Maps** opens the selected station. Both browser actions work without a key using [Google Maps URLs](https://developers.google.com/maps/documentation/urls/get-started). These external directions are not an accessibility-validated AccessGraph route. Network requests run off Swing's event dispatch thread; changing a filter or destination cancels an outstanding request and clears outdated pins. Typing does not itself send address or search requests.
-
-Map loads can incur Google charges. The app keeps the key out of source code, the JAR, and user-facing transport errors. Keep your key local and configure restrictions and quotas in Google Cloud. Without a key, map loading is disabled and the screen explains the setup.
-
-Google receives the requested station/device coordinates, applied destination address, configured API key, and the connection's network information when a map is loaded. Browser directions also send the entered destination and a fresh origin when available. Accessibility preferences and saved trips are not sent. The complete map image, including Google's attribution, is retained in memory for display and is not saved to disk. Google Maps features/content are subject to the [Google Maps terms](https://maps.google.com/help/terms_maps/) and [Google privacy policy](https://policies.google.com/privacy), also linked in the map screen.
+Both public services are intended here for light prototype use and have best-effort availability. To point the app to different compatible services, set the JVM properties `accessgraph.tiles.url` (base URL for `/{z}/{x}/{y}.png`) and `accessgraph.geocoder.url` (Photon search endpoint). [OpenStreetMap tile policy](https://operations.osmfoundation.org/policies/tiles/), [Photon public service guidance](https://github.com/komoot/photon#readme)
 
 ### Use your live location
 
 1. On **Plan journey → Your journey**, choose **Use my location**. This starts a local permission page in your default browser; it does not guess your location from an IP address.
 2. On that page, choose **Start sharing location**, then allow the browser/operating-system location prompt. Keep the page open and return to Swing. If the browser or OS blocks location, the app gives a message and destination entry/browser directions remain available.
-3. Swing shows the actual device coordinates, reported accuracy, and observation time. A blue **U** pin is added to the embedded map when a key is configured. Position fixes update as the device reports changes; the page also requests a fresh fix every 30 seconds for stationary devices. Changed map positions refresh at most every 30 seconds, while the text status updates immediately. Unchanged coordinates do not trigger repeated map downloads.
+3. Swing shows the actual device coordinates, reported accuracy, and observation time. A blue **U** pin is added to the embedded map. Position fixes update as the device reports changes; the page also requests a fresh fix every 30 seconds for stationary devices. Changed map positions refresh at most every 30 seconds, while the text status updates immediately. Unchanged coordinates do not trigger repeated map downloads.
 4. Choose **Stop sharing** in Swing or the browser to end the session. Closing the helper page also stops its device watch. Closing AccessGraph shuts down the local receiver; the helper page detects the ended session and stops. Old and late callbacks are ignored, and stopping clears the device position and the map image containing it.
 
 Swing has no built-in browser-style location permission API, so `BrowserLocationGateway` serves the bundled helper only on `127.0.0.1` at an ephemeral port. The helper uses [`watchPosition`](https://developer.mozilla.org/en-US/docs/Web/API/Geolocation/watchPosition), which requires explicit user permission; modern browsers treat [loopback origins as trustworthy contexts](https://developer.mozilla.org/en-US/docs/Web/Security/Defenses/Secure_Contexts). Sessions use a random fragment token, same-origin checks, and bounded validated updates. There is no location-history storage or public network listener. The browser/OS may use its own network location provider, and its reported accuracy may vary.
 
-Fixes older than **60 seconds** are not presented as current and are not used in Google Maps directions. The timestamp is the device observation time, not a made-up refresh time. The embedded map and device permission flow are tested with simulated positions and local HTTP requests; actual Google rendering and OS/browser device-location behavior still need a manual check on your computer.
+Fixes older than **60 seconds** are excluded from the map and the transit directions link. The displayed timestamp is the device observation time. Automated tests simulate the device permission flow. Check actual OS and browser location permissions on your computer.
 
 ### Station accessibility evidence and coverage
 
@@ -75,7 +68,7 @@ The bundled snapshot was checked on **November 9, 2026** and contains **109 stat
 
 Accessibility comes from each station's official TTC page, whose URL and check date are retained in every catalogue row. The downloaded GTFS marks **all 114 parent station records** with `wheelchair_boarding=1`, including known incomplete/limited stations, so that field is not used as accessibility evidence. Only a TTC “Accessible” station feature or affirmative overview qualifies. Conflicting details remain unknown: College and Lawrence currently have an accessible badge alongside an overview saying “No”, so neither is included by the default filter. Islington, King, Museum, and Old Mill have limited listings. These conservative classifications describe the source records, not an independent accessibility audit.
 
-Station pages are paired to GTFS parents through their boarding stop codes. Five unmatched retired Line 3 locations (Ellesmere, Lawrence East, McCowan, Midland, and Scarborough Centre) are omitted. Google coordinates represent station locations, **not verified accessible entrances**. Elevator outages, partial platform access, construction, and other disability-specific requirements can change whether a journey is usable. Use **View TTC station details** and **Check TTC elevator alerts** for current information.
+Station pages are paired to GTFS parents through their boarding stop codes. Five unmatched retired Line 3 locations (Ellesmere, Lawrence East, McCowan, Midland, and Scarborough Centre) are omitted. The TTC GTFS coordinates identify station locations. The TTC station details pages provide entrance information where available. Elevator outages, partial platform access, construction, and other disability-specific requirements can change whether a journey is usable. Use **View TTC station details** and **Check TTC elevator alerts** for current information.
 
 To regenerate the snapshot, use Python **3.9+** (standard library only), then rebuild:
 
@@ -95,7 +88,7 @@ src/main/java/org/accessgraph/
   entity/              AccessibilityProfile, Station, and timestamped GeoPosition value objects
   interface_adapter/   PrototypeController and observable session presentation state
   use_case/station_map/ Map/location gateway boundaries and map display request data
-  data_access/         Station reader, Google HTTP adapter, local permission bridge, and browser adapter
+  data_access/         Station reader, OpenStreetMap renderer, tile cache, local permission bridge, and browser adapter
   view/                Swing window, five screen panels, and shared styling
 src/main/resources/data/
   ttc-stations.tsv     Dated station locations, status, source URLs, and check dates
@@ -108,7 +101,7 @@ src/test/java/org/accessgraph/
 scripts/               Catalogue updater, parser checks, and simulated browser-location checks
 ```
 
-The current controller coordinates presentation actions only. It does not implement the four final journey use cases. The Google adapter uses Java 11's HTTP client behind `MapImageGateway`; `MapRequest` carries stations, an optional device fix, and a destination address, and the adapter returns encoded image bytes. `LocationGateway` isolates the local HTTP/browser provider from Swing. Concrete adapters are injected in `AppFactory`, and the window closes location resources on exit. When routing development starts, introduce Swing-independent interactors with input/output boundaries and graph entities. Keep routing, JSON storage, and API response formats out of the views and domain entities.
+The current controller coordinates presentation actions only. It does not implement the four final journey use cases. The map adapter uses Java 11's HTTP client behind `MapImageGateway`. It renders tiles and overlays from the stations, optional device fix, and destination address in `MapRequest`. `LocationGateway` isolates the local HTTP/browser provider from Swing. Concrete adapters are injected in `AppFactory`, and the window closes location resources on exit. When routing development starts, introduce Swing-independent interactors with input/output boundaries and graph entities. Keep routing, JSON storage, and API response formats out of the views and domain entities.
 
 ## Project specification
 
@@ -194,13 +187,14 @@ The following sources support either the station map or planned routing integrat
 | Source | Intended use | Validation needed |
 | --- | --- | --- |
 | [Toronto Open Data: TTC GTFS](https://open.toronto.ca/dataset/merged-gtfs-ttc-routes-and-schedules/) | Station-map coordinates and identifiers; later, travel connections. | Inspected feed `S1000544`; parent accessibility flags are unsuitable on their own. Routing graph still to implement. |
-| [Google Maps Static API](https://developers.google.com/maps/documentation/maps-static/start) | Embedded Google basemap with categorized station pins. | Adapter implemented and tested against local HTTP fixtures; real API credentials/billing and a live response still need verification. |
+| [OpenStreetMap raster tiles](https://operations.osmfoundation.org/policies/tiles/) | Keyless basemap with locally rendered station pins. | Live TTC overview verified. Local fixtures cover cache reuse, revalidation, and marker rendering. |
+| [Photon](https://github.com/komoot/photon) | Keyless forward geocoding for destination pins. | Toronto City Hall lookup verified live. Local fixtures cover missing matches and malformed responses. |
 | Official TTC station pages | Station-level wheelchair-accessibility evidence and source links. | Dated snapshot checked November 9, 2026; two contradictory records remain unknown. No live elevator assessment. |
 | [Toronto Open Data: TTC GTFS-Realtime](https://open.toronto.ca/dataset/ttc-gtfs-realtime-gtfs-rt) | Candidate external API for service and accessibility disruptions. | Verify endpoint access from Java, authentication, format, alert coverage, and mapping to specific connections. |
 | [TTC elevators and escalators](https://www.ttc.ca/accessibility/Easier-access-on-the-TTC/Elevators-and-Escalators) | Reference for accessibility information and elevator locations or status. | Determine what information can be reliably incorporated and attributed. |
 | [GTFS accessibility documentation](https://gtfs.org/getting-started/features/accessibility/) | Interpret accessibility-related fields. | Check which documented fields the selected TTC data actually supplies. |
 
-The MVP must include at least one verified, working external API integration. Downloaded static files and offline HTTP fixtures alone do not complete that requirement. Configure and verify the Google map with a real key before claiming its integration is complete. The proposed TTC realtime source still requires validation for disruption data.
+The MVP must include at least one verified, working external API integration. Downloaded static files and offline HTTP fixtures alone do not complete that requirement. Launch the app online and confirm the TTC overview and a destination pin render from the live services. The proposed TTC realtime source still requires validation for disruption data.
 
 An elevator outage must affect only the connections supported by the data, rather than automatically disabling an entire station. Ambiguous alerts must be identified as such. Deterministic fixtures and clearly labelled simulated conditions will support testing and demonstrations when a live feed is unavailable.
 
@@ -245,12 +239,12 @@ Work will proceed through issues, feature branches, implementation and tests, pu
 Build and launch using the commands above. A repeatable offline interface demonstration is:
 
 1. Open **Station pairs** and select **Find route** with no stations to see validation. Choose **Union** and **Bloor–Yonge**, swap them, and select **Find route** again to see the unconnected search state.
-2. Open **Accessibility preferences**, change the transfer limit, and select **Apply preferences**. Return to **Station pairs** to see the applied summary and invalidated request.
+2. Open **Settings**, change the transfer limit, and select **Apply preferences**. Return to **Station pairs** to see the applied summary and invalidated request.
 3. Give the station pair a name and select **Save station pair**. In **Saved trips**, select the entry and load it. The planner reviews the pair with the current profile and still reports that routing is not connected.
 4. In **Disruption simulation**, mark a sample connection unavailable. The planner's simulation count changes; no route is recalculated. Restore the sample connections afterwards.
 5. Delete the saved trip or close and reopen the app to observe that session data is cleared.
 
-For the main page, enter **100 Queen St W, Toronto** under **Plan journey → Your journey**, then show the destination or open its Google Maps journey. Choose **Use my location** and follow the browser permission step to see a device position. For the station directory, open the inner **Stations** tab, search **Union**, and open Google Maps or TTC details. Search **Old Mill** to see that the default filter excludes it; turn the filter off to inspect its limited listing.
+For the main page, enter **100 Queen St W, Toronto** under **Plan journey → Your journey**, then show the destination or open transit directions in Apple Maps. Choose **Use my location** and follow the browser permission step to see a device position. For the station directory, open the inner **Stations** tab, search **Union**, and open OpenStreetMap or TTC details. Search **Old Mill** to see that the default filter excludes it; turn the filter off to inspect its limited listing.
 
 JUnit tests cover these interactions without opening a desktop window or contacting external services. Map/location transport tests use loopback HTTP servers; Swing tests use simulated map, device, and browser gateways. Python tests check station-page classification, and Node's built-in runner tests the browser's start/deny/stop/heartbeat flows with a simulated device:
 
@@ -260,7 +254,7 @@ python3 -m unittest discover -s scripts -p 'test_*.py'
 node --test scripts/test_location_bridge.cjs
 ```
 
-Node is only needed for the JavaScript tests; it is not an application runtime dependency. Actual location permissions and a live Google response still require a manual check. Completed routing and realtime elevator demonstrations remain future work.
+Node is only needed for the JavaScript tests; it is not an application runtime dependency. Actual location permissions depend on the browser and operating system. Completed routing and realtime elevator demonstrations remain future work.
 
 ## Course references
 

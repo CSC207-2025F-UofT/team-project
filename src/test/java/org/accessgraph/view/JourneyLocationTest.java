@@ -8,12 +8,10 @@ import org.accessgraph.use_case.station_map.MapImageGateway;
 import org.accessgraph.use_case.station_map.MapRequest;
 import org.junit.jupiter.api.Test;
 
-import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayOutputStream;
 import java.net.URI;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -48,8 +46,8 @@ class JourneyLocationTest {
         locations.listener.onPosition(new GeoPosition(43.1, -79.1, 30, Instant.now().minusSeconds(10)));
         SwingUtilities.invokeAndWait(() -> {
             assertTrue(find(view.get(), JTextArea.class).stream().anyMatch(text -> text.getText().contains("±17 m")));
-            button(view.get(), "Open journey in Google Maps").doClick();
-            assertTrue(opened.get().getQuery().contains("origin=43.65,-79.38"), "Older fixes must not replace newer positions.");
+            button(view.get(), "Open transit directions in Apple Maps").doClick();
+            assertTrue(opened.get().getQuery().contains("source=43.65,-79.38"), "Older fixes must not replace newer positions.");
             button(view.get(), "Stop sharing").doClick();
             assertTrue(locations.stopped);
             assertFalse(button(view.get(), "Stop sharing").isEnabled());
@@ -57,8 +55,8 @@ class JourneyLocationTest {
         });
         locations.listener.onPosition(new GeoPosition(44, -79, 10, Instant.now()));
         SwingUtilities.invokeAndWait(() -> {
-            button(view.get(), "Open journey in Google Maps").doClick();
-            assertFalse(opened.get().getQuery().contains("origin="), "Stopped callbacks must not restore location.");
+            button(view.get(), "Open transit directions in Apple Maps").doClick();
+            assertFalse(opened.get().getQuery().contains("source="), "Stopped callbacks must not restore location.");
             view.get().close();
         });
     }
@@ -70,13 +68,11 @@ class JourneyLocationTest {
         AtomicReference<StationMapPanel> view = new AtomicReference<>();
         List<Station> stations = new BundledStationRepository().load();
         SwingUtilities.invokeAndWait(() -> {
-            StationMapPanel panel = new StationMapPanel(stations, new MapImageGateway() {
-                @Override public boolean isConfigured() { return false; }
-                @Override public byte[] fetch(List<Station> rows, Station focus) { throw new AssertionError(); }
-            }, opened::set, locations);
+            StationMapPanel panel = new StationMapPanel(stations, request -> { throw new AssertionError(); },
+                    opened::set, locations);
             view.set(panel);
-            destination(panel).setText("Toronto|unexpected marker");
-            button(panel, "Open journey in Google Maps").doClick();
+            destination(panel).setText("Toronto".repeat(40));
+            button(panel, "Open transit directions in Apple Maps").doClick();
             assertNull(opened.get());
             destination(panel).setText("100 Queen St W, Toronto");
             button(panel, "Use my location").doClick();
@@ -85,9 +81,10 @@ class JourneyLocationTest {
         SwingUtilities.invokeAndWait(() -> {
             assertTrue(find(view.get(), JTextArea.class).stream()
                     .anyMatch(text -> text.getText().startsWith("Location permission denied")));
-            button(view.get(), "Open journey in Google Maps").doClick();
-            assertEquals("www.google.com", opened.get().getHost());
-            assertFalse(opened.get().getQuery().contains("origin="));
+            button(view.get(), "Open transit directions in Apple Maps").doClick();
+            assertEquals("maps.apple.com", opened.get().getHost());
+            assertTrue(opened.get().getQuery().contains("destination=100 Queen St W, Toronto"));
+            assertFalse(opened.get().getQuery().contains("source="));
             assertTrue(locations.stopped);
             view.get().close();
         });
@@ -121,14 +118,10 @@ class JourneyLocationTest {
 
     private static final class FakeMaps implements MapImageGateway {
         private final AtomicReference<MapRequest> last = new AtomicReference<>();
-        @Override public boolean isConfigured() { return true; }
-        @Override public byte[] fetch(List<Station> rows, Station focus) { throw new AssertionError(); }
-        @Override public byte[] fetch(MapRequest request) throws java.io.IOException {
+        @Override public BufferedImage fetch(MapRequest request) {
             assertFalse(SwingUtilities.isEventDispatchThread());
             last.set(request);
-            ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-            ImageIO.write(new BufferedImage(8, 8, BufferedImage.TYPE_INT_RGB), "png", bytes);
-            return bytes.toByteArray();
+            return new BufferedImage(8, 8, BufferedImage.TYPE_INT_RGB);
         }
     }
 

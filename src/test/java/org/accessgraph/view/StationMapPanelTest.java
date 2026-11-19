@@ -4,9 +4,9 @@ import org.accessgraph.data_access.BundledStationRepository;
 import org.accessgraph.data_access.BrowserLocationGateway;
 import org.accessgraph.entity.Station;
 import org.accessgraph.use_case.station_map.MapImageGateway;
+import org.accessgraph.use_case.station_map.MapRequest;
 import org.junit.jupiter.api.Test;
 
-import javax.imageio.ImageIO;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JList;
@@ -16,7 +16,6 @@ import javax.swing.SwingUtilities;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
@@ -36,32 +35,55 @@ class StationMapPanelTest {
         List<Station> stations = new BundledStationRepository().load();
         AtomicReference<URI> opened = new AtomicReference<>();
         SwingUtilities.invokeAndWait(() -> {
-            StationMapPanel panel = new StationMapPanel(stations, new FakeMaps(false), opened::set, new BrowserLocationGateway());
+            StationMapPanel panel = new StationMapPanel(stations, new FakeMaps(), opened::set, new BrowserLocationGateway());
             JList<?> list = find(panel, JList.class).get(0);
             assertEquals(stations.stream().filter(s -> s.getAccessibility() == Station.Accessibility.CONFIRMED)
                     .count(), list.getModel().getSize());
-            assertFalse(button(panel, "Show listed stations").isEnabled());
-            assertFalse(button(panel, "Open selected in Google Maps").isEnabled());
+            assertTrue(button(panel, "Show listed stations").isEnabled());
+            assertFalse(button(panel, "Open selected in OpenStreetMap").isEnabled());
             search(panel).setText("Union");
             assertEquals(1, list.getModel().getSize());
             list.setSelectedIndex(0);
-            button(panel, "Open selected in Google Maps").doClick();
-            assertEquals("www.google.com", opened.get().getHost());
+            button(panel, "Open selected in OpenStreetMap").doClick();
+            assertEquals("www.openstreetmap.org", opened.get().getHost());
             button(panel, "View TTC station details").doClick();
             assertTrue(opened.get().getPath().endsWith("/union-station"));
 
             search(panel).setText("Old Mill");
             assertEquals(0, list.getModel().getSize(), "Limited stations are excluded by default.");
-            assertFalse(button(panel, "Open selected in Google Maps").isEnabled());
+            assertFalse(button(panel, "Open selected in OpenStreetMap").isEnabled());
             find(panel, JCheckBox.class).get(0).doClick();
             assertEquals(1, list.getModel().getSize());
         });
     }
 
     @Test
+    void firstShowingLoadsTheMapWithoutAnActionOrCredential() throws Exception {
+        List<Station> stations = new BundledStationRepository().load();
+        FakeMaps gateway = new FakeMaps();
+        AtomicReference<StationMapPanel> view = new AtomicReference<>();
+        SwingUtilities.invokeAndWait(() -> {
+            StationMapPanel panel = new StationMapPanel(stations, gateway, ignored -> { }, new BrowserLocationGateway());
+            view.set(panel);
+            panel.addNotify();
+        });
+        try {
+            assertTrue(gateway.started.await(3, TimeUnit.SECONDS));
+            SwingUtilities.invokeAndWait(() -> view.get().removeNotify());
+            gateway.release.countDown();
+            awaitNotice(view.get(), "Showing all 103 listed station pins.");
+        } finally {
+            SwingUtilities.invokeAndWait(() -> {
+                if (view.get().isDisplayable()) { view.get().removeNotify(); }
+                view.get().close();
+            });
+        }
+    }
+
+    @Test
     void mapLoadingRunsOffTheEventThreadAndFiltersCancelStaleLoads() throws Exception {
         List<Station> stations = new BundledStationRepository().load();
-        FakeMaps gateway = new FakeMaps(true);
+        FakeMaps gateway = new FakeMaps();
         AtomicReference<StationMapPanel> view = new AtomicReference<>();
         SwingUtilities.invokeAndWait(() -> {
             StationMapPanel panel = new StationMapPanel(stations, gateway, ignored -> { }, new BrowserLocationGateway());
@@ -85,7 +107,7 @@ class StationMapPanelTest {
     @Test
     void completedMapsAndNetworkErrorsUpdateTheUiWithoutLosingTheDirectory() throws Exception {
         for (boolean fail : new boolean[]{false, true}) {
-            FakeMaps gateway = new FakeMaps(true);
+            FakeMaps gateway = new FakeMaps();
             gateway.fail = fail;
             gateway.release.countDown();
             AtomicReference<StationMapPanel> view = new AtomicReference<>();
@@ -117,24 +139,19 @@ class StationMapPanelTest {
     }
 
     private static final class FakeMaps implements MapImageGateway {
-        private final boolean configured;
         private final CountDownLatch started = new CountDownLatch(1);
         private final CountDownLatch release = new CountDownLatch(1);
         private final CountDownLatch finished = new CountDownLatch(1);
         private final AtomicBoolean calledOnEdt = new AtomicBoolean();
         private boolean fail;
 
-        FakeMaps(boolean configured) { this.configured = configured; }
-        @Override public boolean isConfigured() { return configured; }
-        @Override public byte[] fetch(List<Station> stations, Station focus) throws IOException, InterruptedException {
+        @Override public BufferedImage fetch(MapRequest request) throws IOException, InterruptedException {
             calledOnEdt.set(SwingUtilities.isEventDispatchThread());
             started.countDown();
             try {
                 if (!release.await(3, TimeUnit.SECONDS)) { throw new IOException("Test request timed out"); }
                 if (fail) { throw new IOException("Test map unavailable"); }
-                ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-                ImageIO.write(new BufferedImage(8, 8, BufferedImage.TYPE_INT_RGB), "png", bytes);
-                return bytes.toByteArray();
+                return new BufferedImage(8, 8, BufferedImage.TYPE_INT_RGB);
             } finally {
                 finished.countDown();
             }
