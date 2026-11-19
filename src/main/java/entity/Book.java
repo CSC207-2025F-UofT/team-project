@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
  * Represents a single book.
  */
 public class Book {
+    private final String openLibraryId;
     private final String title;
     private final String author;
     private final String isbn;
@@ -15,9 +16,10 @@ public class Book {
     private Review review;
 
 
-    public Book(String title, String author,
+    public Book(String openLibraryId, String title, String author,
                  Integer publicationYear, String isbn,
                 Integer coverID){
+        this.openLibraryId = openLibraryId;
         this.title =title;
         this.author =author;
         this.isbn =isbn;
@@ -28,6 +30,13 @@ public class Book {
         this.review = null;
     }
 
+    /**
+     * Returns the OpenLibraryID of the Book.
+     * @return the OpenLibraryID of the Book.
+     */
+    public String getOpenLibraryId(){
+        return openLibraryId;
+    }
 
     /**
      * Returns the title of the Book.
@@ -120,6 +129,7 @@ public class Book {
     @Override
     public String toString(){
         return "Book{" +
+        "openLibraryId: " + openLibraryId +
         ", title:" + title +
         " author:" + author +
         ", isbn:" + isbn +
@@ -144,7 +154,7 @@ public class Book {
         if (!(obj instanceof Book)){
             return false;
         }
-        return isbn.equals(((Book) obj).getIsbn());
+        return openLibraryId.equals(((Book) obj).getOpenLibraryId());
     }
 
 
