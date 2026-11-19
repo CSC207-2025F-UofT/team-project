@@ -45,6 +45,8 @@ The **Station pairs** sample picker contains **Bloor–Yonge, Eglinton, Finch, O
 3. Use **Stations** to search the 109-location directory. Select **Show listed stations** to fit the filtered list, or select a station and choose **Focus selected station**. Clear the accessibility filter to see limited and unknown listings in separate colours.
 4. **Open transit directions in Apple Maps** uses the typed address and a fresh device position when available. You can choose an origin in Apple Maps. **Open selected in OpenStreetMap** opens the selected station. The app's accessibility preferences apply to AccessGraph's planned routing. [Apple Maps link format](https://developer.apple.com/documentation/mapkit/unified-map-urls)
 
+Scroll up over the map to zoom in around the pointer, or scroll down to zoom out. Select **Show listed stations** to return to the station overview.
+
 The app requests only tiles needed for the current view, follows the provider's HTTP caching instructions, and displays OpenStreetMap attribution on the map. Raw tiles and their cache metadata are stored in `~/.accessgraph/tiles`. Tiles identify the displayed area. AccessGraph draws the station and device pins locally from exact coordinates. [OpenStreetMap tile policy](https://operations.osmfoundation.org/policies/tiles/), [OSMF privacy policy](https://osmfoundation.org/wiki/Privacy_Policy)
 
 An explicit destination search sends the address to Photon's public geocoder. The latest successful match is reused in memory. Typing alone sends no search request. Directions opened in Apple Maps send it the address and a fresh origin when available. [Photon](https://github.com/komoot/photon)

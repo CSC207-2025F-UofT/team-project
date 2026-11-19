@@ -2,8 +2,10 @@ package org.accessgraph.data_access;
 
 import org.accessgraph.entity.GeoPosition;
 import org.accessgraph.entity.Station;
+import org.accessgraph.use_case.station_map.MapImage;
 import org.accessgraph.use_case.station_map.MapImageGateway;
 import org.accessgraph.use_case.station_map.MapRequest;
+import org.accessgraph.use_case.station_map.MapViewport;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -33,14 +35,15 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import static org.accessgraph.use_case.station_map.MapViewport.HEIGHT;
+import static org.accessgraph.use_case.station_map.MapViewport.TILE_SIZE;
+import static org.accessgraph.use_case.station_map.MapViewport.WIDTH;
+
 /** Composites visible OSM tiles and renders TTC and journey pins locally. */
 public final class OpenStreetMapGateway implements MapImageGateway {
     private static final String USER_AGENT = "AccessGraph/1.0 (+https://github.com/probably-dean-wu/group-17)";
     private static final String DEFAULT_TILE_URL = "https://tile.openstreetmap.org";
     private static final String DEFAULT_SEARCH_URL = "https://photon.komoot.io/api";
-    private static final int TILE_SIZE = 256;
-    private static final int WIDTH = 640;
-    private static final int HEIGHT = 400;
     private static final int PADDING = 36;
     private static final int FOCUS_ZOOM = 15;
     private static final int MAX_ADDRESS_BYTES = 64 * 1024;
@@ -68,7 +71,7 @@ public final class OpenStreetMapGateway implements MapImageGateway {
     }
 
     @Override
-    public BufferedImage fetch(MapRequest request) throws IOException, InterruptedException {
+    public MapImage fetch(MapRequest request) throws IOException, InterruptedException {
         Point2D.Double destination = request.getDestination().isEmpty() ? null : geocode(request.getDestination());
         List<Pin> pins = new ArrayList<>();
         Pin focus = null;
@@ -89,7 +92,8 @@ public final class OpenStreetMapGateway implements MapImageGateway {
             pins.add(new Pin(focus.longitude, focus.latitude, new Color(0xAC2737), "S"));
         }
 
-        Viewport viewport = viewOf(pins, focus);
+        MapViewport viewport = request.getViewport();
+        if (viewport == null) { viewport = viewOf(pins, focus); }
         BufferedImage image = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_INT_RGB);
         Graphics2D graphics = image.createGraphics();
         try {
@@ -107,7 +111,7 @@ public final class OpenStreetMapGateway implements MapImageGateway {
         } finally {
             graphics.dispose();
         }
-        return image;
+        return new MapImage(image, viewport);
     }
 
     private static Pin stationPin(Station station) {
@@ -120,7 +124,7 @@ public final class OpenStreetMapGateway implements MapImageGateway {
         return new Pin(station.getLongitude(), station.getLatitude(), color, "");
     }
 
-    private static Viewport viewOf(List<Pin> pins, Pin focus) {
+    private static MapViewport viewOf(List<Pin> pins, Pin focus) {
         if (focus != null) {
             Point2D.Double center = project(focus.longitude, focus.latitude, FOCUS_ZOOM);
             return centeredAt(FOCUS_ZOOM, center.x, center.y);
@@ -145,8 +149,8 @@ public final class OpenStreetMapGateway implements MapImageGateway {
         return centeredAt(zoom, Math.scalb((west + east) / 2, zoom), Math.scalb((north + south) / 2, zoom));
     }
 
-    private static Viewport centeredAt(int zoom, double x, double y) {
-        return new Viewport(zoom, (int) Math.round(x - WIDTH / 2.0), (int) Math.round(y - HEIGHT / 2.0));
+    private static MapViewport centeredAt(int zoom, double x, double y) {
+        return new MapViewport(zoom, x - WIDTH / 2.0, y - HEIGHT / 2.0);
     }
 
     private static Point2D.Double project(double longitude, double latitude, int zoom) {
@@ -158,17 +162,19 @@ public final class OpenStreetMapGateway implements MapImageGateway {
         return new Point2D.Double(x, y);
     }
 
-    private void drawTiles(Graphics2D graphics, Viewport view) throws IOException, InterruptedException {
-        int tileCount = 1 << view.zoom;
-        int firstX = Math.floorDiv(view.left, TILE_SIZE);
-        int lastX = Math.floorDiv(view.left + WIDTH - 1, TILE_SIZE);
-        int firstY = Math.max(0, Math.floorDiv(view.top, TILE_SIZE));
-        int lastY = Math.min(tileCount - 1, Math.floorDiv(view.top + HEIGHT - 1, TILE_SIZE));
+    private void drawTiles(Graphics2D graphics, MapViewport view) throws IOException, InterruptedException {
+        int tileCount = 1 << view.getZoom();
+        int left = view.getLeft();
+        int top = view.getTop();
+        int firstX = Math.floorDiv(left, TILE_SIZE);
+        int lastX = Math.floorDiv(left + WIDTH - 1, TILE_SIZE);
+        int firstY = Math.max(0, Math.floorDiv(top, TILE_SIZE));
+        int lastY = Math.min(tileCount - 1, Math.floorDiv(top + HEIGHT - 1, TILE_SIZE));
         for (int y = firstY; y <= lastY; y++) {
             for (int x = firstX; x <= lastX; x++) {
                 if (Thread.interrupted()) { throw new InterruptedException(); }
-                graphics.drawImage(tile(view.zoom, Math.floorMod(x, tileCount), y),
-                        x * TILE_SIZE - view.left, y * TILE_SIZE - view.top, null);
+                graphics.drawImage(tile(view.getZoom(), Math.floorMod(x, tileCount), y),
+                        x * TILE_SIZE - left, y * TILE_SIZE - top, null);
             }
         }
     }
@@ -215,10 +221,12 @@ public final class OpenStreetMapGateway implements MapImageGateway {
         return image;
     }
 
-    private static void drawPin(Graphics2D graphics, Viewport view, Pin pin) {
-        Point2D.Double point = project(pin.longitude, pin.latitude, view.zoom);
-        int x = (int) Math.round(point.x) - view.left;
-        int y = (int) Math.round(point.y) - view.top;
+    private static void drawPin(Graphics2D graphics, MapViewport view, Pin pin) {
+        Point2D.Double point = project(pin.longitude, pin.latitude, view.getZoom());
+        int worldWidth = TILE_SIZE << view.getZoom();
+        int x = (int) Math.round(point.x) - view.getLeft();
+        x += Math.round((WIDTH / 2.0 - x) / worldWidth) * worldWidth;
+        int y = (int) Math.round(point.y) - view.getTop();
         int radius = pin.label.isEmpty() ? 4 : 10;
         graphics.setColor(Color.WHITE);
         graphics.fillOval(x - radius - 1, y - radius - 1, 2 * radius + 2, 2 * radius + 2);
@@ -299,18 +307,6 @@ public final class OpenStreetMapGateway implements MapImageGateway {
             this.latitude = latitude;
             this.color = color;
             this.label = label;
-        }
-    }
-
-    private static final class Viewport {
-        private final int zoom;
-        private final int left;
-        private final int top;
-
-        private Viewport(int zoom, int left, int top) {
-            this.zoom = zoom;
-            this.left = left;
-            this.top = top;
         }
     }
 }

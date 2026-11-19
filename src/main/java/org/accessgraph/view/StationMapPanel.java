@@ -4,8 +4,10 @@ import org.accessgraph.interface_adapter.MapLinks;
 import org.accessgraph.entity.Station;
 import org.accessgraph.entity.GeoPosition;
 import org.accessgraph.interface_adapter.BrowserGateway;
+import org.accessgraph.use_case.station_map.MapImage;
 import org.accessgraph.use_case.station_map.MapImageGateway;
 import org.accessgraph.use_case.station_map.MapRequest;
+import org.accessgraph.use_case.station_map.MapViewport;
 import org.accessgraph.use_case.station_map.LocationGateway;
 
 import javax.swing.DefaultListCellRenderer;
@@ -30,9 +32,11 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Rectangle;
 import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
 import java.awt.event.HierarchyEvent;
+import java.awt.event.MouseWheelEvent;
 import java.io.IOException;
 import java.net.URI;
 import java.time.format.DateTimeFormatter;
@@ -72,8 +76,12 @@ public final class StationMapPanel extends JPanel implements AutoCloseable {
     private final JButton openStation = Ui.button("Open selected in OpenStreetMap", false);
     private final JButton source = Ui.button("View TTC station details", false);
     private final MapCanvas canvas = new MapCanvas();
-    private SwingWorker<BufferedImage, Void> activeWorker;
+    private SwingWorker<MapImage, Void> activeWorker;
     private final Timer locationTimer = new Timer(1000, event -> locationTick());
+    private final Timer zoomTimer = new Timer(120, event -> renderZoom());
+    private MapViewport manualViewport;
+    private Station displayedFocus;
+    private double wheelRotation;
     private GeoPosition position;
     private String appliedDestination = "";
     private boolean tracking;
@@ -90,6 +98,8 @@ public final class StationMapPanel extends JPanel implements AutoCloseable {
         this.maps = maps;
         this.browser = browser;
         this.locations = locations;
+        zoomTimer.setRepeats(false);
+        canvas.addMouseWheelListener(this::zoomMap);
         JPanel columns = new JPanel(new BorderLayout(20, 0));
         columns.setOpaque(false);
         JTabbedPane inputs = new JTabbedPane();
@@ -210,6 +220,7 @@ public final class StationMapPanel extends JPanel implements AutoCloseable {
         Ui.add(map, actions, 14);
         Ui.add(map, Ui.text("Green: TTC lists accessible access. Amber: limited access. "
                 + "Grey: unknown or conflicting details. Blue U: your device position. Red D: destination; S: selected station."), 14);
+        Ui.add(map, Ui.text("Scroll over the map to zoom."), 8);
         Ui.add(map, canvas, 14);
         JButton alerts = Ui.button("Check TTC elevator alerts", false);
         alerts.addActionListener(event -> openBrowser(TTC_ALERTS));
@@ -333,8 +344,7 @@ public final class StationMapPanel extends JPanel implements AutoCloseable {
                         locationDirty |= moved;
                         updateLocationNotice();
                         if (firstFix && autoRefresh) {
-                            cancelLoad();
-                            loadMap(null);
+                            refreshLocationMap();
                         }
                     });
                 }
@@ -390,7 +400,7 @@ public final class StationMapPanel extends JPanel implements AutoCloseable {
         updateLocationNotice();
         if (autoRefresh && locationDirty && recentPosition() != null && activeWorker == null
                 && System.nanoTime() - lastMapRequest >= java.util.concurrent.TimeUnit.SECONDS.toNanos(30)) {
-            loadMap(null);
+            refreshLocationMap();
         }
     }
 
@@ -421,18 +431,62 @@ public final class StationMapPanel extends JPanel implements AutoCloseable {
 
     private void loadMap(Station selected) {
         if (activeWorker != null) { return; }
+        cancelLoad();
+        renderMap(selected, null);
+    }
+
+    private void zoomMap(MouseWheelEvent event) {
+        Rectangle bounds = canvas.map == null ? null : canvas.imageBounds();
+        if (bounds == null || !bounds.contains(event.getPoint())) {
+            // A wheel listener stops Swing's automatic forwarding to the page scroll pane.
+            JScrollPane page = (JScrollPane) SwingUtilities.getAncestorOfClass(JScrollPane.class, canvas);
+            if (page != null) { page.dispatchEvent(SwingUtilities.convertMouseEvent(canvas, event, page)); }
+            return;
+        }
+        event.consume();
+        wheelRotation -= event.getPreciseWheelRotation();
+        int steps = (int) wheelRotation;
+        wheelRotation -= steps;
+        if (steps == 0) { return; }
+
+        MapViewport start = manualViewport == null ? canvas.map.getViewport() : manualViewport;
+        BufferedImage image = canvas.map.getImage();
+        double x = (event.getX() - bounds.x) * (double) image.getWidth() / bounds.width;
+        double y = (event.getY() - bounds.y) * (double) image.getHeight() / bounds.height;
+        MapViewport next = start.zoomAt(steps, x, y);
+        if (next != start) {
+            manualViewport = next;
+            zoomTimer.restart();
+        }
+    }
+
+    private void renderZoom() {
+        if (manualViewport == null) { return; }
+        cancelWorker();
+        renderMap(displayedFocus, manualViewport);
+    }
+
+    private void refreshLocationMap() {
+        if (zoomTimer.isRunning()) { return; }
+        cancelWorker();
+        renderMap(null, manualViewport);
+    }
+
+    private void renderMap(Station selected, MapViewport viewport) {
         List<Station> visible = List.copyOf(visibleStations());
         GeoPosition currentPosition = recentPosition();
         if (visible.isEmpty() && currentPosition == null && appliedDestination.isEmpty()) { return; }
-        MapRequest request = new MapRequest(visible, selected, currentPosition, appliedDestination);
+        MapRequest request = new MapRequest(visible, selected, currentPosition, appliedDestination, viewport);
         autoRefresh = selected == null && tracking;
         locationDirty = false;
         lastMapRequest = System.nanoTime();
-        canvas.clear("Loading OpenStreetMap…");
-        Ui.notice(notice, "Loading " + visible.size() + " station pins…", false);
-        activeWorker = new SwingWorker<BufferedImage, Void>() {
+        if (viewport == null) {
+            canvas.clear("Loading OpenStreetMap…");
+            Ui.notice(notice, "Loading " + visible.size() + " station pins…", false);
+        }
+        activeWorker = new SwingWorker<MapImage, Void>() {
             @Override
-            protected BufferedImage doInBackground() throws IOException, InterruptedException {
+            protected MapImage doInBackground() throws IOException, InterruptedException {
                 return maps.fetch(request);
             }
 
@@ -440,9 +494,12 @@ public final class StationMapPanel extends JPanel implements AutoCloseable {
             protected void done() {
                 if (activeWorker != this) { return; }
                 activeWorker = null;
+                if (viewport != manualViewport) { return; }
                 try {
                     canvas.showImage(get());
-                    String message = selected == null ? "Showing all " + visible.size() + " listed station pins."
+                    displayedFocus = selected;
+                    String message = viewport != null ? "Zoom level " + viewport.getZoom() + ". Showing pins in this area."
+                            : selected == null ? "Showing all " + visible.size() + " listed station pins."
                             : "Focused on " + selected.getName() + ". Other pins may be outside this view.";
                     if (!request.getDestination().isEmpty()) {
                         message += " D is the address match for “" + request.getDestination() + "”. Check its location.";
@@ -458,7 +515,8 @@ public final class StationMapPanel extends JPanel implements AutoCloseable {
                     Thread.currentThread().interrupt();
                     canvas.clear("Map load interrupted");
                 } catch (ExecutionException exception) {
-                    canvas.clear("Map unavailable");
+                    if (viewport == null) { canvas.clear("Map unavailable"); }
+                    else { manualViewport = canvas.map.getViewport(); }
                     Throwable cause = exception.getCause();
                     Ui.notice(notice, cause instanceof IOException ? cause.getMessage()
                             : "The map could not be loaded. Try again or open the selected station in OpenStreetMap.", true);
@@ -472,10 +530,16 @@ public final class StationMapPanel extends JPanel implements AutoCloseable {
     }
 
     private void cancelLoad() {
-        if (activeWorker != null) {
-            activeWorker.cancel(true);
-            activeWorker = null;
-        }
+        zoomTimer.stop();
+        manualViewport = null;
+        wheelRotation = 0;
+        cancelWorker();
+    }
+
+    private void cancelWorker() {
+        SwingWorker<MapImage, Void> worker = activeWorker;
+        activeWorker = null;
+        if (worker != null) { worker.cancel(true); }
     }
 
     private void openBrowser(URI uri) {
@@ -489,45 +553,51 @@ public final class StationMapPanel extends JPanel implements AutoCloseable {
 
     /** Fits the complete image so the map credit stays visible at every window size. */
     private static final class MapCanvas extends JPanel {
-        private BufferedImage image;
+        private MapImage map;
         private String message = "Map has not been loaded";
 
         MapCanvas() {
-            setPreferredSize(new Dimension(640, 400));
-            setMaximumSize(new Dimension(Integer.MAX_VALUE, 400));
+            setPreferredSize(new Dimension(MapViewport.WIDTH, MapViewport.HEIGHT));
+            setMaximumSize(new Dimension(Integer.MAX_VALUE, MapViewport.HEIGHT));
             setBackground(Ui.BACKGROUND);
             getAccessibleContext().setAccessibleName("OpenStreetMap station map");
         }
 
         void clear(String text) {
-            image = null;
+            map = null;
             message = text;
             getAccessibleContext().setAccessibleDescription(text + ". Station information is also in the directory.");
             repaint();
         }
 
-        void showImage(BufferedImage value) {
-            image = value;
+        void showImage(MapImage value) {
+            map = value;
             getAccessibleContext().setAccessibleDescription("Station pins on a map credited to OpenStreetMap contributors. "
                     + "Use the station directory for a text alternative and station details.");
             repaint();
+        }
+
+        Rectangle imageBounds() {
+            BufferedImage image = map.getImage();
+            double scale = Math.min(1, Math.min((double) getWidth() / image.getWidth(),
+                    (double) getHeight() / image.getHeight()));
+            int width = Math.max(1, (int) (image.getWidth() * scale));
+            int height = Math.max(1, (int) (image.getHeight() * scale));
+            return new Rectangle((getWidth() - width) / 2, (getHeight() - height) / 2, width, height);
         }
 
         @Override
         protected void paintComponent(Graphics graphics) {
             super.paintComponent(graphics);
             Graphics2D copy = (Graphics2D) graphics.create();
-            if (image == null) {
+            if (map == null) {
                 copy.setColor(Ui.MUTED);
                 copy.setFont(Ui.BODY.deriveFont(13f));
                 copy.drawString(message, 15, getHeight() / 2);
             } else {
-                double scale = Math.min(1, Math.min((double) getWidth() / image.getWidth(),
-                        (double) getHeight() / image.getHeight()));
-                int width = Math.max(1, (int) (image.getWidth() * scale));
-                int height = Math.max(1, (int) (image.getHeight() * scale));
+                Rectangle bounds = imageBounds();
                 copy.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
-                copy.drawImage(image, (getWidth() - width) / 2, (getHeight() - height) / 2, width, height, null);
+                copy.drawImage(map.getImage(), bounds.x, bounds.y, bounds.width, bounds.height, null);
             }
             copy.dispose();
         }

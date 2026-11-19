@@ -4,7 +4,9 @@ import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
 import org.accessgraph.entity.GeoPosition;
 import org.accessgraph.entity.Station;
+import org.accessgraph.use_case.station_map.MapImage;
 import org.accessgraph.use_case.station_map.MapRequest;
+import org.accessgraph.use_case.station_map.MapViewport;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -75,7 +77,7 @@ class OpenStreetMapGatewayTest {
         List<Station> rows = new BundledStationRepository().load();
         GeoPosition fix = new GeoPosition(43.64, -79.39, 15, Instant.now());
         MapRequest request = new MapRequest(rows, null, fix, ADDRESS);
-        BufferedImage image = maps.fetch(request);
+        BufferedImage image = maps.fetch(request).getImage();
         assertEquals(640, image.getWidth());
         assertEquals(400, image.getHeight());
         assertEquals(Color.MAGENTA.getRGB(), image.getRGB(0, 0));
@@ -101,7 +103,7 @@ class OpenStreetMapGatewayTest {
         expireTiles = true;
         Station station = new BundledStationRepository().load().get(0);
         MapRequest request = new MapRequest(List.of(station), station, null, "");
-        BufferedImage focused = gateway().fetch(request);
+        BufferedImage focused = gateway().fetch(request).getImage();
         assertTrue(tileRequests.stream().allMatch(uri -> uri.getPath().startsWith("/tiles/15/")));
         assertEquals(0xAC2737, focused.getRGB(314, 200) & 0xFFFFFF);
         int count = tileRequests.size();
@@ -110,6 +112,33 @@ class OpenStreetMapGatewayTest {
         assertTrue(conditionalRequests.stream().allMatch(value -> value.equals("\"test-tile\"|" + MODIFIED)));
         gateway().fetch(request);
         assertEquals(2 * count, tileRequests.size());
+    }
+
+    @Test
+    void zoomFetchesTilesAtTheNewScaleAndProjectsTheFocusedPinInTheSameViewport() throws Exception {
+        OpenStreetMapGateway maps = gateway();
+        Station station = new BundledStationRepository().load().get(0);
+        List<Station> rows = List.of(station);
+        GeoPosition fix = new GeoPosition(station.getLatitude(), station.getLongitude() - 0.001, 10, Instant.now());
+        searchResult = "{\"features\":[{\"geometry\":{\"type\":\"Point\",\"coordinates\":["
+                + station.getLongitude() + "," + (station.getLatitude() + 0.001) + "]}}]}";
+        MapImage focused = maps.fetch(new MapRequest(rows, station, fix, ADDRESS));
+        MapViewport zoomedIn = focused.getViewport().zoomAt(1, 300, 200);
+        tileRequests.clear();
+        BufferedImage image = maps.fetch(new MapRequest(rows, station, fix, ADDRESS, zoomedIn)).getImage();
+        assertFalse(tileRequests.isEmpty());
+        assertTrue(tileRequests.stream().allMatch(uri -> uri.getPath().startsWith("/tiles/16/")));
+        assertEquals(0xAC2737, image.getRGB(334, 200) & 0xFFFFFF);
+        assertEquals(0xAC2737, image.getRGB(334, 136) & 0xFFFFFF, "Destination pin");
+        assertEquals(0x1455A3, image.getRGB(287, 200) & 0xFFFFFF, "Device pin");
+        assertEquals(Color.MAGENTA.getRGB(), image.getRGB(314, 200));
+
+        MapViewport zoomedOut = zoomedIn.zoomAt(-1, 300, 200);
+        tileRequests.clear();
+        BufferedImage restored = maps.fetch(new MapRequest(rows, station, fix, ADDRESS, zoomedOut)).getImage();
+        assertTrue(tileRequests.isEmpty(), "Returning to the original zoom should reuse cached tiles.");
+        assertEquals(0xAC2737, restored.getRGB(314, 200) & 0xFFFFFF);
+        assertEquals(1, searchQueries.size());
     }
 
     @Test

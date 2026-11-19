@@ -3,30 +3,37 @@ package org.accessgraph.view;
 import org.accessgraph.data_access.BundledStationRepository;
 import org.accessgraph.data_access.BrowserLocationGateway;
 import org.accessgraph.entity.Station;
+import org.accessgraph.use_case.station_map.MapImage;
 import org.accessgraph.use_case.station_map.MapImageGateway;
 import org.accessgraph.use_case.station_map.MapRequest;
+import org.accessgraph.use_case.station_map.MapViewport;
 import org.junit.jupiter.api.Test;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JList;
+import javax.swing.JPanel;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 import java.awt.Component;
 import java.awt.Container;
+import java.awt.event.MouseWheelEvent;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class StationMapPanelTest {
@@ -127,6 +134,66 @@ class StationMapPanelTest {
         }
     }
 
+    @Test
+    void wheelZoomUsesThePointerOnTheScaledMapAndShowListedStationsResetsIt() throws Exception {
+        List<Station> stations = new BundledStationRepository().load();
+        MapViewport overview = new MapViewport(11, 1000, 2000);
+        LinkedBlockingQueue<MapRequest> requests = new LinkedBlockingQueue<>();
+        AtomicReference<StationMapPanel> view = new AtomicReference<>();
+        SwingUtilities.invokeAndWait(() -> {
+            StationMapPanel panel = new StationMapPanel(stations, request -> {
+                requests.add(request);
+                MapViewport viewport = request.getViewport() == null ? overview : request.getViewport();
+                return new MapImage(new BufferedImage(640, 400, BufferedImage.TYPE_INT_RGB), viewport);
+            }, ignored -> { }, new BrowserLocationGateway());
+            view.set(panel);
+            button(panel, "Show listed stations").doClick();
+        });
+        try {
+            assertNotNull(requests.poll(3, TimeUnit.SECONDS));
+            awaitNotice(view.get(), "Showing all 103 listed station pins.");
+            SwingUtilities.invokeAndWait(() -> {
+                JPanel map = find(view.get(), JPanel.class).stream()
+                        .filter(panel -> "OpenStreetMap station map".equals(panel.getAccessibleContext().getAccessibleName()))
+                        .findFirst().orElseThrow();
+                map.setSize(320, 220);
+                wheel(map, -0.5);
+                wheel(map, -0.5);
+                wheel(map, -1.0);
+            });
+            MapRequest zoomedIn = requests.poll(3, TimeUnit.SECONDS);
+            assertNotNull(zoomedIn);
+            assertEquals(13, zoomedIn.getViewport().getZoom());
+            assertEquals(4600, zoomedIn.getViewport().getLeft());
+            assertEquals(8450, zoomedIn.getViewport().getTop());
+            assertEquals(103, zoomedIn.getStations().size());
+            awaitNotice(view.get(), "Zoom level 13. Showing pins in this area.");
+
+            SwingUtilities.invokeAndWait(() -> wheel(find(view.get(), JPanel.class).stream()
+                    .filter(panel -> "OpenStreetMap station map".equals(panel.getAccessibleContext().getAccessibleName()))
+                    .findFirst().orElseThrow(), 1.0));
+            MapRequest zoomedOut = requests.poll(3, TimeUnit.SECONDS);
+            assertNotNull(zoomedOut);
+            assertEquals(12, zoomedOut.getViewport().getZoom());
+            awaitNotice(view.get(), "Zoom level 12. Showing pins in this area.");
+
+            SwingUtilities.invokeAndWait(() -> button(view.get(), "Show listed stations").doClick());
+            MapRequest reset = requests.poll(3, TimeUnit.SECONDS);
+            assertNotNull(reset);
+            assertNull(reset.getViewport());
+        } finally {
+            SwingUtilities.invokeAndWait(() -> view.get().close());
+        }
+    }
+
+    private static void wheel(JPanel map, double rotation) {
+        MouseWheelEvent event = new MouseWheelEvent(map, MouseWheelEvent.MOUSE_WHEEL, System.currentTimeMillis(),
+                0, 100, 85, 100, 85, 0, false, MouseWheelEvent.WHEEL_UNIT_SCROLL, 3,
+                rotation < 0 ? -1 : 1, rotation);
+        map.dispatchEvent(event);
+        assertTrue(event.isConsumed());
+    }
+
     private void awaitNotice(StationMapPanel panel, String expected) throws Exception {
         long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(3);
         AtomicBoolean found = new AtomicBoolean();
@@ -145,13 +212,13 @@ class StationMapPanelTest {
         private final AtomicBoolean calledOnEdt = new AtomicBoolean();
         private boolean fail;
 
-        @Override public BufferedImage fetch(MapRequest request) throws IOException, InterruptedException {
+        @Override public MapImage fetch(MapRequest request) throws IOException, InterruptedException {
             calledOnEdt.set(SwingUtilities.isEventDispatchThread());
             started.countDown();
             try {
                 if (!release.await(3, TimeUnit.SECONDS)) { throw new IOException("Test request timed out"); }
                 if (fail) { throw new IOException("Test map unavailable"); }
-                return new BufferedImage(8, 8, BufferedImage.TYPE_INT_RGB);
+                return new MapImage(new BufferedImage(8, 8, BufferedImage.TYPE_INT_RGB), new MapViewport(11, 0, 0));
             } finally {
                 finished.countDown();
             }

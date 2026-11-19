@@ -11,8 +11,14 @@ public final class MapRequest {
     private final Station focus;
     private final GeoPosition position;
     private final String destination;
+    private final MapViewport viewport;
 
     public MapRequest(List<Station> stations, Station focus, GeoPosition position, String destination) {
+        this(stations, focus, position, destination, null);
+    }
+
+    public MapRequest(List<Station> stations, Station focus, GeoPosition position, String destination,
+                      MapViewport viewport) {
         this.stations = List.copyOf(stations);
         if (focus != null && !stations.contains(focus)) {
             throw new IllegalArgumentException("Select a station from the displayed list.");
@@ -20,6 +26,7 @@ public final class MapRequest {
         this.focus = focus;
         this.position = position;
         this.destination = validateDestination(destination);
+        this.viewport = viewport;
         if (stations.isEmpty() && position == null && this.destination.isEmpty()) {
             throw new IllegalArgumentException("Choose a station, location, or destination to display.");
         }
@@ -37,4 +44,5 @@ public final class MapRequest {
     public Station getFocus() { return focus; }
     public GeoPosition getPosition() { return position; }
     public String getDestination() { return destination; }
+    public MapViewport getViewport() { return viewport; }
 }

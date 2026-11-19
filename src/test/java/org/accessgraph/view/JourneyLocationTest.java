@@ -4,8 +4,10 @@ import org.accessgraph.data_access.BundledStationRepository;
 import org.accessgraph.entity.GeoPosition;
 import org.accessgraph.entity.Station;
 import org.accessgraph.use_case.station_map.LocationGateway;
+import org.accessgraph.use_case.station_map.MapImage;
 import org.accessgraph.use_case.station_map.MapImageGateway;
 import org.accessgraph.use_case.station_map.MapRequest;
+import org.accessgraph.use_case.station_map.MapViewport;
 import org.junit.jupiter.api.Test;
 
 import javax.swing.*;
@@ -118,10 +120,10 @@ class JourneyLocationTest {
 
     private static final class FakeMaps implements MapImageGateway {
         private final AtomicReference<MapRequest> last = new AtomicReference<>();
-        @Override public BufferedImage fetch(MapRequest request) {
+        @Override public MapImage fetch(MapRequest request) {
             assertFalse(SwingUtilities.isEventDispatchThread());
             last.set(request);
-            return new BufferedImage(8, 8, BufferedImage.TYPE_INT_RGB);
+            return new MapImage(new BufferedImage(8, 8, BufferedImage.TYPE_INT_RGB), new MapViewport(11, 0, 0));
         }
     }
 

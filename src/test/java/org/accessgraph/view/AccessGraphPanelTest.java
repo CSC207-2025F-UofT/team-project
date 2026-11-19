@@ -5,6 +5,8 @@ import org.accessgraph.interface_adapter.PrototypeState;
 import org.accessgraph.interface_adapter.PrototypeState.Screen;
 import org.accessgraph.data_access.BundledStationRepository;
 import org.accessgraph.data_access.BrowserLocationGateway;
+import org.accessgraph.use_case.station_map.MapImage;
+import org.accessgraph.use_case.station_map.MapViewport;
 import org.junit.jupiter.api.Test;
 
 import javax.swing.JButton;
@@ -141,7 +143,8 @@ class AccessGraphPanelTest {
     private static AccessGraphPanel panel(PrototypeState state, PrototypeController controller) {
         try {
             return new AccessGraphPanel(state, controller, new StationMapPanel(new BundledStationRepository().load(),
-                    request -> new BufferedImage(8, 8, BufferedImage.TYPE_INT_RGB), ignored -> { },
+                    request -> new MapImage(new BufferedImage(8, 8, BufferedImage.TYPE_INT_RGB),
+                            new MapViewport(11, 0, 0)), ignored -> { },
                     new BrowserLocationGateway()));
         } catch (IOException exception) {
             throw new AssertionError("Could not load the test station catalogue.", exception);
