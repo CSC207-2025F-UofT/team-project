@@ -8,6 +8,7 @@ public class BookFactory {
     /**
      * Creates a new Book object.
      *
+     * @param openLibraryId is the open library ID of the book
      * @param title title of book, may be null
      * @param author author of book, may be null
      * @param publicationYear the first publication year of book, may be null
@@ -16,11 +17,12 @@ public class BookFactory {
      * @return a new Book
      */
 
-    public Book create( String title, String author,
+    public Book create(String openLibraryId, String title, String author,
     Integer publicationYear, String isbn, Integer coverID){
-    if (isbn == null | isbn.isBlank())throw new IllegalArgumentException("Book must have isbn");
+    if (openLibraryId == null | openLibraryId.isBlank())throw new IllegalArgumentException("Book must have open library ID");
 
     return new Book(
+            openLibraryId,
             title,
             author,
             publicationYear,
