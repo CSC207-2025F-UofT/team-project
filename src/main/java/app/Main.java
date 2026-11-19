@@ -22,6 +22,7 @@ public class Main {
                 .addInteractWithPetView()
                 .addInteractWithPetUseCase()
                 .addGetPetPictureUseCase()
+                .addAdoptPetUseCase()
                 .build();
 
         application.pack();

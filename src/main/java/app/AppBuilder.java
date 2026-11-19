@@ -24,6 +24,8 @@ import interface_adapter.interact_with_pet.InteractWithPetPresenter;
 import interface_adapter.interact_with_pet.InteractWithPetViewModel;
 import interface_adapter.get_pet_picture.GetPetPictureController;
 import interface_adapter.get_pet_picture.GetPetPicturePresenter;
+import interface_adapter.adopt_pet.AdoptPetController;
+import interface_adapter.adopt_pet.AdoptPetPresenter;
 import use_case.change_password.ChangePasswordInputBoundary;
 import use_case.change_password.ChangePasswordInteractor;
 import use_case.change_password.ChangePasswordOutputBoundary;
@@ -41,6 +43,7 @@ import use_case.signup.SignupOutputBoundary;
 import use_case.interact_with_pet.InteractWithPetInteractor;
 import use_case.get_pet_picture.GetPetPictureInteractor;
 import use_case.get_pet_picture.GetPetPictureOutputBoundary;
+import use_case.adopt_pet.AdoptPetInteractor;
 import view.LoggedInView;
 import view.LoginView;
 import view.SignupView;
@@ -280,6 +283,24 @@ public class AppBuilder {
                 new GetPetPictureController(interactor);
 
         adoptPetView.setGetPetPictureController(controller);
+
+        return this;
+    }
+
+    public AppBuilder addAdoptPetUseCase() {
+        AdoptPetPresenter presenter = new AdoptPetPresenter(
+                adoptPetViewModel,
+                interactWithPetViewModel,
+                viewManagerModel
+        );
+
+        AdoptPetInteractor interactor = new AdoptPetInteractor(
+                petDataAccessObject,
+                presenter
+        );
+
+        AdoptPetController controller = new AdoptPetController(interactor);
+        adoptPetView.setAdoptPetController(controller);
 
         return this;
     }

@@ -4,12 +4,19 @@ import interface_adapter.adopt_pet.AdoptPetState;
 import interface_adapter.adopt_pet.AdoptPetViewModel;
 import interface_adapter.adopt_pet.AdoptPetViewModelListener;
 import interface_adapter.get_pet_picture.GetPetPictureController;
+import interface_adapter.adopt_pet.AdoptPetController;
 
 import java.util.concurrent.ExecutionException;
 import javax.swing.*;
 import java.awt.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.net.URLConnection;
 
 public class AdoptPetView extends JPanel
         implements AdoptPetViewModelListener {
@@ -24,14 +31,20 @@ public class AdoptPetView extends JPanel
     private final JLabel errorLabel = new JLabel();
 
     private final JButton anotherPictureButton =
-            new JButton("Another Picture");
+            new JButton("Generate Picture");
     private final JButton adoptButton = new JButton("Adopt");
     private boolean updatingFields = false;
     private GetPetPictureController getPetPictureController;
+    private AdoptPetController adoptPetController;
+    private String displayedImageUrl = "";
 
     public void setGetPetPictureController(
             GetPetPictureController getPetPictureController) {
         this.getPetPictureController = getPetPictureController;
+    }
+
+    public void setAdoptPetController(AdoptPetController adoptPetController) {
+        this.adoptPetController = adoptPetController;
     }
 
     private void requestAnotherPicture() {
@@ -152,9 +165,93 @@ public class AdoptPetView extends JPanel
         anotherPictureButton.addActionListener(
                 evt -> requestAnotherPicture()
         );
-        
+
+        adoptButton.addActionListener(evt -> {
+            AdoptPetState state = viewModel.getState();
+
+            adoptPetController.execute(
+                    state.getUsername(),
+                    state.getSpecies(),
+                    state.getPetName(),
+                    state.getImageUrl()
+            );
+        });
+
         stateChanged();
     }
+
+    private void loadPicture(String imageUrl) {
+        imageLabel.setIcon(null);
+        imageLabel.setText("Downloading picture...");
+        adoptButton.setEnabled(false);
+
+        new SwingWorker<ImageIcon, Void>() {
+            @Override
+            protected ImageIcon doInBackground() throws IOException {
+                URLConnection connection = new URL(imageUrl).openConnection();
+                connection.setConnectTimeout(10000);
+                connection.setReadTimeout(15000);
+
+                final BufferedImage image;
+
+                try (InputStream input = connection.getInputStream()) {
+                    image = ImageIO.read(input);
+                }
+
+                if (image == null) {
+                    throw new IOException("Unsupported image format.");
+                }
+
+                double scale = Math.min(
+                        320.0 / image.getWidth(),
+                        220.0 / image.getHeight()
+                );
+
+                int width = Math.max(1, (int) (image.getWidth() * scale));
+                int height = Math.max(1, (int) (image.getHeight() * scale));
+
+                BufferedImage resized = new BufferedImage(
+                        width, height, BufferedImage.TYPE_INT_ARGB
+                );
+
+                Graphics2D graphics = resized.createGraphics();
+                try {
+                    graphics.setRenderingHint(
+                            RenderingHints.KEY_INTERPOLATION,
+                            RenderingHints.VALUE_INTERPOLATION_BILINEAR
+                    );
+                    graphics.drawImage(image, 0, 0, width, height, null);
+                } finally {
+                    graphics.dispose();
+                }
+
+                return new ImageIcon(resized);
+            }
+
+            @Override
+            protected void done() {
+                // Ignore an old download if the user has changed the picture.
+                if (!imageUrl.equals(displayedImageUrl)) {
+                    return;
+                }
+
+                try {
+                    ImageIcon icon = get();
+                    imageLabel.setIcon(icon);
+                    imageLabel.setText("");
+                    adoptButton.setEnabled(true);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    showRequestError("Picture download was interrupted.");
+                } catch (ExecutionException e) {
+                    showRequestError(
+                            "Could not display this picture. Try another one."
+                    );
+                }
+            }
+        }.execute();
+    }
+
 
 
     @Override
@@ -180,10 +277,19 @@ public class AdoptPetView extends JPanel
                 !state.isLoading() && !state.getImageUrl().isEmpty()
         );
 
-        imageLabel.setText(
-                state.isLoading()
-                        ? "Loading picture..."
-                        : "Choose a species, then request a picture."
-        );
+        String imageUrl = state.getImageUrl();
+
+        if (state.isLoading()) {
+            displayedImageUrl = "";
+            imageLabel.setIcon(null);
+            imageLabel.setText("Loading picture...");
+        } else if (imageUrl.isEmpty()) {
+            displayedImageUrl = "";
+            imageLabel.setIcon(null);
+            imageLabel.setText("Choose a species, then request a picture.");
+        } else if (!imageUrl.equals(displayedImageUrl)) {
+            displayedImageUrl = imageUrl;
+            loadPicture(imageUrl);
+        }
     }
 }

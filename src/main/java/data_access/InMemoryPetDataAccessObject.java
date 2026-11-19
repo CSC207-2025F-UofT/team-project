@@ -2,12 +2,13 @@ package data_access;
 
 import entity.Pet;
 import use_case.interact_with_pet.PetDataAccessInterface;
+import use_case.adopt_pet.AdoptPetDataAccessInterface;
 
 import java.util.HashMap;
 import java.util.Map;
 
 public class InMemoryPetDataAccessObject
-        implements PetDataAccessInterface {
+        implements PetDataAccessInterface, AdoptPetDataAccessInterface {
 
     private final Map<String, Pet> petsByOwner = new HashMap<>();
 
