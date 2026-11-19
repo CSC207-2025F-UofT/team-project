@@ -1,6 +1,7 @@
 package pdf_editor.view;
 
 import view.DrawingCanvas;
+import pdf_editor.adapter.SelectedInkArtwork;
 import interface_adapter.history.CanvasHistorySelection;
 import javax.swing.JComponent;
 import javax.swing.TransferHandler;
@@ -42,7 +43,7 @@ public final class CanvasPdfDragController {
                         setDragImageOffset(new Point(-12, -12));
                         return new HistoryTransferable(payload);
                     }
-                    BufferedImage image = canvas.selectedInkTransparentImage();
+                    BufferedImage image = SelectedInkArtwork.render(canvas, false);
                     setDragImage(translucentPreview(image));
                     setDragImageOffset(new Point(-12, -12));
                     return new InkTransferable(image);

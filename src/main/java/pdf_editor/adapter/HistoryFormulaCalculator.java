@@ -19,13 +19,21 @@ public final class HistoryFormulaCalculator {
     public synchronized String calculate(String latex) {
         if (latex == null || latex.isBlank()) throw new IllegalArgumentException("Formula required");
         controller.execute(latex);
-        return formattedResult(viewModel.getState());
+        MathLabState state = viewModel.getState();
+        if (state.getErrorTitle() != null && !state.getErrorTitle().isBlank()) {
+            throw new IllegalArgumentException(state.getErrorTitle()
+                    + (state.getErrorText() == null || state.getErrorText().isBlank()
+                       ? "" : ": " + state.getErrorText()));
+        }
+        return formattedResult(state);
     }
 
     public static String formattedResult(MathLabState state) {
         Objects.requireNonNull(state);
         if ((state.getErrorTitle() != null && !state.getErrorTitle().isBlank()) || state.isDefinition())
             return "";
+        String latex = state.getAnswerLatex();
+        if (latex != null && !latex.isBlank()) return latex.trim().replaceFirst("^=\\s*", "");
         String result = state.getResultText();
         return result == null ? "" : result.trim().replaceFirst("^=\\s*", "");
     }

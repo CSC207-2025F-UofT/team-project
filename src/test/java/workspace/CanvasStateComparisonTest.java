@@ -21,6 +21,23 @@ class CanvasStateComparisonTest {
         assertFalse(CanvasStateComparison.same(original, state(new byte[]{1,2,4},10)));
         assertFalse(CanvasStateComparison.same(original, state(new byte[]{1,2,3},11)));
     }
+    @Test void onlyContentEditsSetTheEditedBadge() {
+        var before = new CanvasState(List.of(), List.of(), List.of(), 1, 0, 0);
+        var navigated = new CanvasState(List.of(), List.of(), List.of(), 2.5, 120, -70);
+        assertTrue(CanvasStateComparison.sameContent(before, navigated),
+                "Panning and zooming should not make a saved canvas appear edited");
+        assertFalse(CanvasStateComparison.same(before, navigated),
+                "Full snapshot equality must still include the saved viewport");
+        assertFalse(CanvasStateComparison.sameContent(state(new byte[] {1,2,3}, 10),
+                state(new byte[] {1,2,4}, 10)));
+        assertFalse(CanvasStateComparison.sameContent(state(new byte[] {1,2,3}, 10),
+                state(new byte[] {1,2,3}, 11)));
+        var ink = new CanvasState(List.of(new CanvasState.Ink(
+                List.of(new CanvasState.Point(1, 2, 3)), 0xff000000)),
+                List.of(), List.of(), 1, 0, 0);
+        assertFalse(CanvasStateComparison.sameContent(before, ink));
+    }
+
     @Test void changedInkAndViewportAlsoCountAsChanges() {
         var empty = new CanvasState(List.of(), List.of(), List.of(), 1, 0, 0);
         var moved = new CanvasState(List.of(), List.of(), List.of(), 1, 42, 0);

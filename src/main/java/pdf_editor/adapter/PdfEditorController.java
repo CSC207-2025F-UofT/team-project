@@ -102,6 +102,17 @@ public final class PdfEditorController {
         editor.editFormula(page, selectedId, formula, result);
         return true;
     }
+    /** Preserve Library source identity; all PDF copies revise together as one Undo operation. */
+    public int reviseSelectedFormula(String formula, String result) {
+        PdfDocument.Placement current = selected();
+        if (current == null || current.isNote() || current.material().isGraph()) return 0;
+        return editor.reviseFormulaMaterials(current.material().id(), formula, result);
+    }
+    /** Updating a Library entry refreshes all placements that originated from it. */
+    public int refreshMaterial(String materialId, String formula, String result) {
+        return editor.reviseFormulaMaterials(materialId, formula, result);
+    }
+
     /** Apply one precise-eraser gesture to PDF ink, without affecting other PDF objects. */
     public void replaceInkImages(java.util.Map<String, java.awt.image.BufferedImage> images) {
         if (images.isEmpty()) return;

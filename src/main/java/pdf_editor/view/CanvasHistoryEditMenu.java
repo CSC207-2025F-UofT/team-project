@@ -16,6 +16,7 @@ import java.util.function.Function;
 /** View-only history formula editor: LaTeX remains structured; the evaluator supplies the result. */
 public final class CanvasHistoryEditMenu {
     private CanvasHistoryEditMenu() { }
+    public record FormulaRevision(String oldFormula, String oldResult, String formula, String result) { }
 
     /** Compatibility overload for older callers; preserve the saved result if no evaluator is wired. */
     public static void install(DrawingCanvas canvas, BiFunction<String, String, BufferedImage> render) {
@@ -33,6 +34,16 @@ public final class CanvasHistoryEditMenu {
                                BiFunction<String, String, BufferedImage> render,
                                Function<String, String> calculate,
                                BiConsumer<String, String> addToLibrary) {
+        install(canvas, render, calculate, addToLibrary, change -> { });
+    }
+
+    /** Called only for a completed calculation, after the Canvas asset has been revised. */
+    public static void install(DrawingCanvas canvas,
+                               BiFunction<String, String, BufferedImage> render,
+                               Function<String, String> calculate,
+                               BiConsumer<String, String> addToLibrary,
+                               java.util.function.Consumer<FormulaRevision> onRevised) {
+        Objects.requireNonNull(onRevised);
         Objects.requireNonNull(canvas);
         Objects.requireNonNull(render);
         Objects.requireNonNull(calculate);
@@ -45,6 +56,7 @@ public final class CanvasHistoryEditMenu {
                 GlassContextMenu menu = new GlassContextMenu();
                 menu.addAction("Edit formula (recalculate)", () -> {
                     String before = canvas.selectedHistoryFormula();
+                    String beforeResult = canvas.selectedHistoryResult();
                     String formula = GlassDialogs.input(canvas, "Edit formula", "LaTeX formula",
                             before, "Recalculate");
                     if (formula == null || formula.isBlank()) return;
@@ -59,6 +71,8 @@ public final class CanvasHistoryEditMenu {
                                 // Ignore a stale async completion after changing selection.
                                 if (before.equals(canvas.selectedHistoryFormula())) {
                                     canvas.editHistoryAsset(formula, result, render.apply(formula, result));
+                                    onRevised.accept(new FormulaRevision(before, beforeResult,
+                                            formula, result));
                                 }
                             } catch (Exception failure) {
                                 GlassDialogs.error(canvas, "Could not recalculate: " +

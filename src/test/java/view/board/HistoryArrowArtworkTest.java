@@ -55,6 +55,21 @@ class HistoryArrowArtworkTest {
         assertTrue(painted > 30);
     }
 
+    @Test void latexFractionsUseMathTypesettingInsteadOfRawFontCharacters() {
+        var fraction = item("\\frac{d}{dx}(x^3/2-x^2)", "\\frac{3x^{2}}{2}-2x");
+        var math = HistoryAnswerArtwork.typesetAnswer(fraction, 18f);
+        assertNotNull(math, "A fraction result needs a real JLaTeXMath icon");
+        assertTrue(math.getIconHeight() > 0);
+        BufferedImage picture = HistoryPanel.picture(fraction);
+        assertTrue(picture.getWidth() > 150);
+        assertTrue(picture.getHeight() >= math.getIconHeight() * 2,
+                "High-resolution History artwork must have space for the stacked fraction");
+    }
+
+    @Test void plainLanguageResultKeepsReadableTextFallback() {
+        assertNull(HistoryAnswerArtwork.typesetAnswer(item("x=1", "no solution"), 18f));
+    }
+
     @Test void historyPreviewImageDoesNotTruncateSolution() {
         BufferedImage image = HistoryPanel.picture(item("3x=6", "x=2"));
         assertTrue(image.getWidth() > 70);

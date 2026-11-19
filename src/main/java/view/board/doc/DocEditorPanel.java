@@ -7,6 +7,7 @@ import pdf_editor.adapter.HistoryLibraryImporter;
 import interface_adapter.history.HistoryItem;
 import pdf_editor.MathLibrary;
 import pdf_editor.adapter.PdfEditorController;
+import pdf_editor.adapter.FormulaRevisionCoordinator;
 import pdf_editor.data_access.MaterialRenderer;
 import pdf_editor.domain.PdfDocument;
 import pdf_editor.domain.PdfMaterial;
@@ -47,6 +48,10 @@ public final class DocEditorPanel extends JPanel implements PdfWorkspacePort {
     private static final int MIN_ZOOM = 35;
 
     private final PdfEditorController controller;
+    private FormulaRevisionCoordinator formulaRevision;
+    public void setFormulaEditing(FormulaRevisionCoordinator actions) {
+        formulaRevision = Objects.requireNonNull(actions);
+    }
     private final MathLibrary library;
     private final PdfPageCanvas paper;
     private final JScrollPane pageScroll;
@@ -379,11 +384,14 @@ public final class DocEditorPanel extends JPanel implements PdfWorkspacePort {
             private void popup(MouseEvent e) {
                 if (!e.isPopupTrigger()) return;
                 libraryList.setSelectedIndex(libraryList.locationToIndex(e.getPoint()));
-                JPopupMenu menu = new GlassContextMenu();
+                GlassContextMenu menu = new GlassContextMenu();
                 item(menu, "Add to PDF", () -> {
                     MathLibrary.Material selected = libraryList.getSelectedValue();
                     if (selected != null) addMaterial(selected, 85, 110);
                 });
+                MathLibrary.Material selected = libraryList.getSelectedValue();
+                if (selected != null && !selected.isGraph())
+                    item(menu, "Edit formula (calculate or manual)", DocEditorPanel.this::editLibraryFormula);
                 item(menu, "Delete from Library", DocEditorPanel.this::deleteLibraryItem);
                 item(menu, "Undo Library delete", library::undoDelete);
                 menu.show(libraryList, e.getX(), e.getY());
@@ -521,8 +529,25 @@ public final class DocEditorPanel extends JPanel implements PdfWorkspacePort {
         });
     }
 
-    private void undo() {paper.finishInlineEdit();controller.undo();updateStatus();}
-    private void redo() {paper.finishInlineEdit();controller.redo();updateStatus();}
+    private void undo() {
+        paper.finishInlineEdit();
+        PdfDocument before = controller.documentSnapshot();
+        if (controller.undo()) reconcileFormulaUndo(before);
+        updateStatus();
+    }
+    private void redo() {
+        paper.finishInlineEdit();
+        PdfDocument before = controller.documentSnapshot();
+        if (controller.redo()) reconcileFormulaUndo(before);
+        updateStatus();
+    }
+    private void reconcileFormulaUndo(PdfDocument before) {
+        if (formulaRevision == null) return;
+        try { formulaRevision.reconcileDocumentUndo(before, controller.documentSnapshot()); }
+        catch (java.io.IOException failure) {
+            GlassDialogs.error(this, "Could not synchronize formula revision: " + failure.getMessage());
+        }
+    }
     private void autoLayout() {controller.autoLayout();updateStatus();}
     /** Normal document body starts at 1-inch margins. Text boxes stay a separate Insert tool. */
     public void typeOnPage() {
@@ -553,10 +578,38 @@ public final class DocEditorPanel extends JPanel implements PdfWorkspacePort {
     private void editFormula() {
         PdfDocument.Placement selected = controller.selected();
         if (selected == null || selected.isNote() || selected.material().isGraph()) {
-            GlassDialogs.warning(this, "Select a formula on the page first.");return;
+            GlassDialogs.warning(this, "Select a formula on the page first."); return;
         }
-        FormulaEditDialog.Result change = FormulaEditDialog.show(SwingUtilities.getWindowAncestor(this), selected.material());
-        if (change != null) {controller.editSelectedFormula(change.formula(), change.result()); updateStatus();}
+        if (formulaRevision == null) {
+            GlassDialogs.warning(this, "Formula recalculation is not configured."); return;
+        }
+        PdfMaterial original = selected.material();
+        FormulaEditDialog.Result change = FormulaEditDialog.show(
+                SwingUtilities.getWindowAncestor(this), original, formulaRevision::recalculate);
+        if (change == null) return;
+        try {
+            formulaRevision.editPdf(controller, original, change.formula(), change.result());
+            updateStatus();
+        } catch (java.io.IOException | RuntimeException problem) {
+            GlassDialogs.error(this, "Could not save formula revision: " + problem.getMessage());
+        }
+    }
+
+    private void editLibraryFormula() {
+        MathLibrary.Material selected = libraryList.getSelectedValue();
+        if (selected == null || selected.isGraph()) return;
+        if (formulaRevision == null) {
+            GlassDialogs.warning(this, "Formula recalculation is not configured."); return;
+        }
+        FormulaEditDialog.Result change = FormulaEditDialog.show(
+                SwingUtilities.getWindowAncestor(this), selected, formulaRevision::recalculate);
+        if (change == null) return;
+        try {
+            formulaRevision.editLibrary(controller, selected, change.formula(), change.result());
+            updateStatus();
+        } catch (java.io.IOException | RuntimeException problem) {
+            GlassDialogs.error(this, "Could not save Library revision: " + problem.getMessage());
+        }
     }
     private void editNote() {
         if (!paper.editNoteInline()) {
@@ -592,7 +645,7 @@ public final class DocEditorPanel extends JPanel implements PdfWorkspacePort {
     }
     private void arrangeMenu() {
         if (controller.selected() == null) {GlassDialogs.warning(this, "Select a page object first.");return;}
-        JPopupMenu menu = new JPopupMenu();
+        GlassContextMenu menu = new GlassContextMenu();
         item(menu, "Bring forward", () -> arrange(1));
         item(menu, "Send backward", () -> arrange(-1));
         item(menu, "Bring to front", () -> arrange(2));
@@ -607,32 +660,33 @@ public final class DocEditorPanel extends JPanel implements PdfWorkspacePort {
             final int destination = i;
             if (i != controller.currentPage()) {
                 JMenuItem target = new JMenuItem("Page " + (i + 1));
-                target.addActionListener(e -> {
-                    paper.finishInlineEdit(); controller.moveSelectedToPage(destination); updateStatus();
-                });
+                target.addActionListener(e -> moveSelectedToPage(destination));
                 destinations.add(target);
             }
         }
         JMenuItem newPage = new JMenuItem("New page");
-        newPage.addActionListener(e -> {
-            paper.finishInlineEdit(); controller.moveSelectedToPage(-1); updateStatus();
-        });
+        newPage.addActionListener(e -> moveSelectedToPage(-1));
         destinations.add(newPage);
         return destinations;
     }
+    private void moveSelectedToPage(int destination) {
+        paper.finishInlineEdit();
+        controller.moveSelectedToPage(destination);
+        updateStatus();
+    }
     private void moveToPageMenu() {
         if (controller.selected() == null) {GlassDialogs.warning(this, "Select a page object first.");return;}
-        JPopupMenu menu = new JPopupMenu();
-        JMenu choices = pageDestinations();
-        while (choices.getItemCount() > 0) {
-            JMenuItem destination = choices.getItem(0);
-            choices.remove(0);
-            menu.add(destination);
+        GlassContextMenu menu = new GlassContextMenu();
+        for (int i = 0; i < controller.pageCount(); i++) {
+            if (i == controller.currentPage()) continue;
+            final int destination = i;
+            menu.addAction("Page " + (i + 1), () -> moveSelectedToPage(destination));
         }
+        menu.addAction("New page", () -> moveSelectedToPage(-1));
         menu.show(this, Math.max(12, getWidth() / 3), 106);
     }
     private void contextMenu(MouseEvent event) {
-        JPopupMenu menu = new GlassContextMenu();
+        GlassContextMenu menu = new GlassContextMenu();
         PdfDocument.Placement selected = controller.selected();
         if (selected == null) {
             item(menu, "Type here", () -> {
@@ -644,26 +698,20 @@ public final class DocEditorPanel extends JPanel implements PdfWorkspacePort {
         } else {
             if (selected.isNote()) item(menu, "Type / edit text in place", this::editNote);
             else if (!selected.material().isGraph()) {
-                item(menu, "Edit formula / LaTeX / keyboard math...", this::editFormula);
+                item(menu, "Edit formula / recalculate or manual...", this::editFormula);
                 if (selected.material().hasResult()) item(menu, "Split formula and answer", () -> {controller.splitSelected();updateStatus();});
             }
             item(menu, "Bring forward one layer", () -> arrange(1));
             item(menu, "Send backward one layer", () -> arrange(-1));
             item(menu, "Bring to front", () -> arrange(2));
             item(menu, "Send to back", () -> arrange(-2));
-            ((GlassContextMenu) menu).addSubmenu(pageDestinations());
+            menu.addSubmenu(pageDestinations());
             item(menu, "Delete selected item", this::deleteSelectedItem);
         }
         menu.show(paper, event.getX(), event.getY());
     }
-    private static void item(JPopupMenu menu, String title, Runnable action) {
-        if (menu instanceof GlassContextMenu glass) {
-            glass.addAction(title, action);
-        } else {
-            JMenuItem entry = new JMenuItem(title);
-            entry.addActionListener(e -> action.run());
-            menu.add(entry);
-        }
+    private static void item(GlassContextMenu menu, String title, Runnable action) {
+        menu.addAction(title, action);
     }
     private void preview() {
         try {

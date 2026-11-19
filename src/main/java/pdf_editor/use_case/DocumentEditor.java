@@ -95,6 +95,32 @@ public final class DocumentEditor {
         document.replace(page, updated);
         return updated;
     }
+    /** Revise all placements sharing one material ID in one Undo step. Other objects are untouched. */
+    public int reviseFormulaMaterials(String materialId, String formula, String result) {
+        Objects.requireNonNull(materialId, "materialId");
+        Objects.requireNonNull(formula, "formula");
+        Objects.requireNonNull(result, "result");
+        if (formula.isBlank()) throw new IllegalArgumentException("Formula required");
+        int count = 0;
+        for (int page = 0; page < pageCount(); page++) {
+            for (PdfDocument.Placement item : placements(page)) {
+                if (!item.isNote() && !item.material().isGraph() &&
+                        item.material().id().equals(materialId)) count++;
+            }
+        }
+        if (count == 0) return 0;
+        checkpoint();
+        for (int page = 0; page < pageCount(); page++) {
+            for (PdfDocument.Placement item : placements(page)) {
+                if (!item.isNote() && !item.material().isGraph() &&
+                        item.material().id().equals(materialId)) {
+                    document.replace(page, item.withMaterial(item.material().revised(formula.trim(), result.trim())));
+                }
+            }
+        }
+        return count;
+    }
+
     /** Replace raster ink in place, preserving placement identity and stacking order. One Undo step. */
     public void replaceInkMaterials(int page, java.util.Map<String, PdfMaterial> replacements) {
         validatePage(page);

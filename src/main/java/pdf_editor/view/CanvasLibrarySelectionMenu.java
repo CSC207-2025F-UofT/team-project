@@ -2,6 +2,7 @@ package pdf_editor.view;
 
 import entity.Stroke;
 import pdf_editor.adapter.SelectedInkRegistry;
+import pdf_editor.adapter.SelectedInkArtwork;
 import pdf_editor.use_case.SelectionToLibrary;
 import view.DrawingCanvas;
 import view.glass.GlassDialogs;
@@ -60,7 +61,7 @@ public final class CanvasLibrarySelectionMenu {
                 ink.addActionListener(e -> {
                     List<Stroke> strokes = canvas.selectedInkSnapshot();
                     if (!strokes.isEmpty()) {
-                        registry.track(action.addInk(canvas.selectedInkColorImage()).id(), strokes);
+                        registry.track(action.addInk(SelectedInkArtwork.render(canvas, true)).id(), strokes);
                     }
                 });
                 menu.show(canvas, event.getX(), event.getY());
