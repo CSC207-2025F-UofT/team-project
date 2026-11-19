@@ -2,27 +2,19 @@ package interface_adapters.flashcard_studying;
 
 public class FlashcardStudyingState {
     private String deckTitle = "";
-    private String question = "";
-    private String answer = "";
+    private String front = "";
 
-    public String getQuestion() {
-        return question;
+    public String getFront() {
+        return front;
     }
 
-    public String getAnswer() {
-        return answer;
-    }
 
     public String getDeckTitle() {
         return deckTitle;
     }
 
-    public void setQuestion(String question) {
-        this.question = question;
-    }
-
-    public void setAnswer(String answer) {
-        this.answer = answer;
+    public void setFront(String front) {
+        this.front = front;
     }
 
     public void setDeckTitle(String title) {
