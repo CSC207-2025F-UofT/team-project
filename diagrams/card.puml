@@ -1,0 +1,42 @@
+@startuml
+
+abstract class Card {
+    - id : String
+}
+
+class NumberCard {
+    - color : CardColor
+    - number : int
+}
+
+abstract class ActionCard {
+    - color : CardColor
+
+}
+
+class SkipCard
+class ReverseCard
+class DrawTwoCard
+
+abstract class WildCard
+class Wild
+class WildDrawFour
+
+class Hand {
+    - hand: List<Card>
+    + getHand: List<Card>
+}
+
+
+Card <|-- NumberCard
+Card <|-- ActionCard
+Card <|-- WildCard
+
+ActionCard <|-- SkipCard
+ActionCard <|-- ReverseCard
+ActionCard <|-- DrawTwoCard
+
+WildCard <|-- Wild
+WildCard <|-- WildDrawFour
+
+@enduml
