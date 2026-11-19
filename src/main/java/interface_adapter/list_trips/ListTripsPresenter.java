@@ -46,7 +46,7 @@ public class ListTripsPresenter implements ListTripsOutputBoundary {
         return new TripListItem(trip.getId(), trip.getName(),
                 formatDateRange(trip.getStartTime(), trip.getEndTime()),
                 formatDetails(trip.getLocationLabel(), trip.getPhotoCount()),
-                trip.getCoverPhotoPath());
+                trip.getCoverPhotoId());
     }
 
     /** "13 Nov 2026", "13-14 Nov 2026", "13 Nov - 2 Dec 2026" */
