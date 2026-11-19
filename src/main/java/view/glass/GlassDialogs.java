@@ -28,6 +28,7 @@ import java.awt.RenderingHints;
 import java.awt.Window;
 import java.awt.event.KeyEvent;
 import java.awt.geom.RoundRectangle2D;
+import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -144,6 +145,7 @@ public final class GlassDialogs {
         }
         dialog.pack();
         dialog.setLocationRelativeTo(parent);
+        useOpaqueBackdrop(dialog, owner, pane);
         if (content instanceof JTextField field) {
             SwingUtilities.invokeLater(() -> { field.requestFocusInWindow(); field.selectAll(); });
         }
@@ -151,10 +153,44 @@ public final class GlassDialogs {
         return selected.get();
     }
 
+    /**
+     * A see-through window flashes on macOS: whenever anything inside it repaints (a button hover,
+     * the blinking caret) that patch is cleared to transparent for a frame and the canvas behind
+     * shows through. So when the dialog sits over our own window, it is made opaque instead, and
+     * the bit of that window behind the rounded corners and shadow is painted in as a snapshot.
+     * It looks the same, but nothing is ever cleared to transparent on screen.
+     */
+    private static void useOpaqueBackdrop(JDialog dialog, Window owner, DialogPane pane) {
+        if (owner == null || !owner.isShowing() || dialog.getBackground().getAlpha() == 255) return;
+        int w = dialog.getWidth(), h = dialog.getHeight();
+        if (w <= 0 || h <= 0) return;
+        double scale = dialog.getGraphicsConfiguration().getDefaultTransform().getScaleX();
+        BufferedImage snapshot = new BufferedImage((int) Math.ceil(w * scale), (int) Math.ceil(h * scale),
+                BufferedImage.TYPE_INT_RGB);
+        Graphics2D g = snapshot.createGraphics();
+        try {
+            g.setColor(owner.getBackground() == null ? new Color(242, 242, 247) : owner.getBackground());
+            g.fillRect(0, 0, snapshot.getWidth(), snapshot.getHeight());
+            g.scale(scale, scale);
+            g.translate(owner.getX() - dialog.getX(), owner.getY() - dialog.getY());
+            owner.paint(g);
+        } catch (RuntimeException paintFailed) {
+            return;  // keep the transparent window rather than show a broken backdrop
+        } finally {
+            g.dispose();
+        }
+        pane.backdrop = snapshot;
+        dialog.setBackground(new Color(242, 242, 247));
+        pane.setOpaque(false);  // an opaque window background marks its content pane opaque again
+        dialog.getRootPane().putClientProperty("Window.shadow", Boolean.FALSE);  // we draw our own
+    }
+
     /** Package-visible, window-free presentation: easily tested in headless mode. */
     static final class DialogPane extends JPanel {
         private static final int SHADOW = 9;
         final List<GlassButton> buttons = new ArrayList<>();
+        /** What is behind the dialog, drawn under it so the window itself can stay opaque. */
+        BufferedImage backdrop;
 
         DialogPane(String title, String message, Tone tone, JComponent extra,
                    String[] labels, IntConsumer select) {
@@ -238,6 +274,7 @@ public final class GlassDialogs {
 
         @Override protected void paintComponent(Graphics g) {
             Graphics2D g2 = (Graphics2D) g.create();
+            if (backdrop != null) g2.drawImage(backdrop, 0, 0, getWidth(), getHeight(), null);
             Glass.setUp(g2);
             RoundRectangle2D shell = new RoundRectangle2D.Double(SHADOW, SHADOW / 2.0,
                     getWidth() - SHADOW * 2.0, getHeight() - SHADOW * 1.5, 27, 27);
