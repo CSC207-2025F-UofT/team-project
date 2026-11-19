@@ -1,0 +1,9 @@
+@startuml
+class Player {
+    - id: String
+    - password: String
+
+    + getid(): String
+    + getPassword(): String
+}
+@enduml
