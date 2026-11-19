@@ -45,7 +45,7 @@ class TaskSortingStrategyNameMappings {
 abstract class Task {
   - {final} uniqueTaskId : int
   - {final} uniqueUserId : int
-  + getUniqueId() : int
+  + getUniqueTaskId() : int
   + getUniqueUserId() : int
 }
 
