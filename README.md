@@ -164,28 +164,30 @@ Extensions:
 The system displays a default placeholder image instead.
 
 ### Use Case 6
-Use Case: View past comments and movie ratings
+Use Case: View past comments and individual reviewer ratings
 
-Primary actor: User clicking the movie posters and the past comments and ratings will pop up
+Primary actor: User who wants to read movie reviews and individual reviewer ratings
 
 Precondition: 
-The user is logged in.
-The user has searched for a movie and can view its poster.
+The user is logged in
+The user has searched for a movie and can view its poster
 
-Trigger: User clicks on the movie poster.
+Trigger: User clicks on the movie poster
 
-Success Outcome: The user can view the available comments and overall rating of the selected movie.
+Success Outcome: The user can view the available comments and individual rating of the selected movie.
 
 Main success scenario:
 User clicks on the movie poster
 The system retrieves the comments and ratings associated with the selected movie
-The system displays the available comments and overall movie rating
+The system displays the available comments and individual movie rating
 
 Extensions:
 2a. No comments or ratings are available for the selected movie
 the system displays a message indicating that no comments or ratings are available
 the system does not display any comments or ratings
 
+3a. A reviewer has not provided an individual rating
+The system displays the review without a rating or shows "Not rated"
 
 (Add additional use cases as needed.)
 ---
