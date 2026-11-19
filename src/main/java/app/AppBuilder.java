@@ -27,6 +27,7 @@ import use_case.update_timer_settings.UpdateTimerSettingsInteractor;
 import use_case.update_timer_settings.UpdateTimerSettingsOutputBoundary;
 import view.FontManager;
 import view.HomeView;
+import view.TimerDisplayPanel;
 import view.TimerSettingsView;
 
 import javax.swing.*;
@@ -138,10 +139,17 @@ public class AppBuilder {
         viewManagerModel.setState("home view");
         viewManagerModel.notifyViewChanged();
 
+        // TODO: REMOVE LATER
+        JFrame testFrame = new JFrame("Timer Sync Test");
+        testFrame.setSize(400, 200);
+        testFrame.add(new TimerDisplayPanel(homeViewModel));
+        testFrame.setLocation(100, 100);
+        testFrame.setVisible(true);
+
         return application;
     }
 
-    // MOVE TO MAIN LATER
+    // TODO: MOVE TO MAIN LATER
     public static void main(String[] args) {
         FontManager.loadFonts();
 
