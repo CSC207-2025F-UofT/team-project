@@ -23,7 +23,7 @@ public class Drawing extends Layer {
 
     public void addStroke(Stroke stroke) {
         if (stroke == null) {
-            throw new IllegalArgumentException("stroke cannot be null");
+            throw new IllegalArgumentException("Stroke cannot be null");
         }
         strokes.add(stroke);
     }
