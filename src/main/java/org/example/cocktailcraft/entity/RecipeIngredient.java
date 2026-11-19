@@ -15,6 +15,8 @@ public class RecipeIngredient {
         return ingredient;
     }
 
+    public String getName() {return ingredient;}
+
     public String getAmount() {
         return amount;
     }
