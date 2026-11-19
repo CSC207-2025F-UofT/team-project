@@ -47,6 +47,17 @@ final class GraphTitle {
         }
     }
 
+    // natural width before any shrink-to-fit
+    static double width(String latex, float size) {
+        TeXIcon icon = icon(latex, size);
+        if (icon != null) {
+            return icon.getIconWidth();
+        }
+        synchronized (HOST) {
+            return HOST.getFontMetrics(GraphTheme.font(size)).stringWidth(latex);
+        }
+    }
+
     private static TeXIcon icon(String latex, float size) {
         String key = Math.round(size * 4) + "|" + latex;
         synchronized (ICONS) {

@@ -25,12 +25,8 @@ public class app {
             frame = new StackedAppBuilder()
                     .setFormulaRecognizer(new VitalMiniFormulaRecognizer(model))
                     .build();
+            // Not windowClosing: the user may cancel the close from the unsaved-changes prompt.
             frame.addWindowListener(new WindowAdapter() {
-                @Override
-                public void windowClosing(WindowEvent event) {
-                    model.close();
-                }
-
                 @Override
                 public void windowClosed(WindowEvent event) {
                     model.close();

@@ -73,16 +73,21 @@ public final class CanvasWorkspaceDialogs {
                 !CanvasStateComparison.sameContent(lastSavedState, current);
     }
 
-    private boolean confirmDiscardOrSave() {
+    /** Ask before the window closes; false means the user cancelled and the app must stay open. */
+    public boolean confirmClose() {
+        return confirmDiscardOrSave("closing Math Lab");
+    }
+
+    private boolean confirmDiscardOrSave(String beforeWhat) {
         if (!hasUnsavedChanges()) return true;
-        GlassDialogs.UnsavedDecision decision = GlassDialogs.unsavedChanges(parent, currentName);
+        GlassDialogs.UnsavedDecision decision = GlassDialogs.unsavedChanges(parent, currentName, beforeWhat);
         return decision == GlassDialogs.UnsavedDecision.DONT_SAVE
                 || (decision == GlassDialogs.UnsavedDecision.SAVE && saveCurrent(false));
     }
 
     /** New is intentionally unsaved until the first Save prompts for a name. */
     public void newCanvas() {
-        if (!confirmDiscardOrSave()) return;
+        if (!confirmDiscardOrSave("starting a new canvas")) return;
         try {
             canvas.restoreCanvasState(new CanvasState(List.of(), List.of(), List.of(), 1, 0, 0));
             workspace.newCanvas();
@@ -97,7 +102,7 @@ public final class CanvasWorkspaceDialogs {
         try {
             SavedCanvasChooser picker = new SavedCanvasChooser(workspace.all());
             picker.onDelete(saved -> {
-                boolean confirmed = GlassDialogs.confirm(parent, "Delete Canvas",
+                boolean confirmed = GlassDialogs.confirm(picker, "Delete Canvas",
                         "Permanently delete “" + saved.name() + "”? This cannot be undone.", "Delete");
                 if (!confirmed) return;
                 try {
@@ -121,7 +126,7 @@ public final class CanvasWorkspaceDialogs {
                 rename(chosen);
                 return;
             }
-            if (!confirmDiscardOrSave()) return;
+            if (!confirmDiscardOrSave("opening another canvas")) return;
             SavedCanvas opened = workspace.open(chosen.id());
             canvas.restoreCanvasState(opened.state());
             currentName = opened.name();

@@ -162,12 +162,17 @@ public class DrawingCanvas extends JPanel {
     private Point2D moveStart;        // where a drag of the selection started
     private int moveDx;
     private int moveDy;
-    // graph card: a picture shown next to the formula, in world coordinates so it pans and zooms with the ink
-    private BufferedImage graphImage;
-    private Rectangle2D graphCard;
-    private double graphPadding;
-    private boolean overGraphClose;
-    private Object graphTag;          // who owns the card (the live graph view), null for a restored picture
+    // graph cards: pictures shown next to formulas, in world coordinates so they pan and zoom with the ink.
+    // Several can be on the canvas at once; oldest first, so the newest is painted on top.
+    private final List<GraphSlot> graphs = new ArrayList<>();
+    private GraphSlot overGraphClose;  // card whose × is under the mouse, or null
+
+    /** One graph card. {@code tag} is its owner (a live graph view), null for a restored picture. */
+    private record GraphSlot(BufferedImage image, Rectangle2D card, double padding, Object tag) {
+        GraphSlot withCard(Rectangle2D next) {
+            return new GraphSlot(image, next, padding, tag);
+        }
+    }
 
     private int resizeHandle = -1;    // corner being dragged to resize (0 top-left, clockwise), or -1
     private Point2D resizeAnchor;     // the opposite corner, which stays put
@@ -201,8 +206,9 @@ public class DrawingCanvas extends JPanel {
             @Override
             public void mousePressed(MouseEvent e) {
                 requestFocusInWindow();  // so Delete, Ctrl+Z and Space reach the canvas
-                if (e.getButton() == MouseEvent.BUTTON1 && graphCloseContains(e.getPoint())) {
-                    removeGraph();
+                GraphSlot closing = e.getButton() == MouseEvent.BUTTON1 ? graphCloseAt(e.getPoint()) : null;
+                if (closing != null) {
+                    removeSlot(closing);
                     return;
                 }
                 if (spaceDown || e.getButton() != MouseEvent.BUTTON1) {
@@ -273,9 +279,10 @@ public class DrawingCanvas extends JPanel {
 
             @Override
             public void mouseMoved(MouseEvent e) {
-                boolean onClose = graphCloseContains(e.getPoint());
-                if (onClose != overGraphClose) {
-                    overGraphClose = onClose;
+                GraphSlot closeHit = graphCloseAt(e.getPoint());
+                boolean onClose = closeHit != null;
+                if (closeHit != overGraphClose) {
+                    overGraphClose = closeHit;
                     setCursor(Cursor.getPredefinedCursor(onClose ? Cursor.HAND_CURSOR : Cursor.CROSSHAIR_CURSOR));
                     repaint();
                 }
@@ -402,8 +409,9 @@ public class DrawingCanvas extends JPanel {
     /**
      * Shows a picture (the graph of a written function) as a card beside the given formula: to its
      * right, centred on it vertically, 40% of the visible width, so it never fills the canvas.
-     * The view moves if needed so the card can be seen. The card replaces any earlier one, moves
-     * and zooms with the ink, closes with its × button, and is never part of the formula image.
+     * The view moves if needed so the card can be seen. Each graph gets its own card, so several can
+     * be on the canvas at once; a card moves and zooms with the ink, closes with its × button, and is
+     * never part of the formula image.
      *
      * @param formula where the formula is, in world coordinates ({@link #getFormulaBounds()} when it
      *                was captured); null puts the card in the middle of the view
@@ -412,16 +420,18 @@ public class DrawingCanvas extends JPanel {
         showGraph(image, formula, null);
     }
 
-    // same, tagged so the live graph view knows the card is still its own
+    /**
+     * Same, tagged so a live graph view can find its own card again. Showing with a tag that already
+     * has a card replaces that card (a new graph from the same view); other cards are left alone.
+     */
     public void showGraph(BufferedImage image, Rectangle formula, Object tag) {
-        graphTag = tag;
         double viewWidth = (getWidth() > 0 ? getWidth() : getPreferredSize().width) / scale;
         double imageWidth = viewWidth * GRAPH_CARD_WIDTH;
         double imageHeight = imageWidth * image.getHeight() / image.getWidth();
-        graphImage = downscaled(image, (int) Math.ceil(imageWidth * 2));  // sharp up to 200% (and on HiDPI)
-        graphPadding = GRAPH_CARD_PADDING / scale;
-        double w = imageWidth + 2 * graphPadding;
-        double h = imageHeight + 2 * graphPadding;
+        BufferedImage sharp = downscaled(image, (int) Math.ceil(imageWidth * 2));  // sharp up to 200% (and on HiDPI)
+        double padding = GRAPH_CARD_PADDING / scale;
+        double w = imageWidth + 2 * padding;
+        double h = imageHeight + 2 * padding;
 
         double x;
         double y;
@@ -432,78 +442,186 @@ public class DrawingCanvas extends JPanel {
             x = (getWidth() / 2.0 - originX) / scale - w / 2;
             y = (getHeight() / 2.0 - originY) / scale - h / 2;
         }
-        graphCard = new Rectangle2D.Double(x, y, w, h);
-        bringIntoView(formula == null ? graphCard : graphCard.createUnion(formula), graphCard);
+        GraphSlot previous = slotOf(tag);
+        if (previous != null) {
+            graphs.remove(previous);
+        }
+        Rectangle2D card = clearOfOtherCards(new Rectangle2D.Double(x, y, w, h));
+        graphs.add(new GraphSlot(sharp, card, padding, tag));
+        bringIntoView(formula == null ? card : card.createUnion(formula), card);
         repaint();
     }
 
-    public void removeGraph() {
-        if (graphCard == null) {
+    // a second graph of the same formula would land exactly on the first: stack it underneath instead
+    private Rectangle2D clearOfOtherCards(Rectangle2D card) {
+        double gap = GRAPH_CARD_GAP / scale / 2;
+        for (int tries = 0; tries < graphs.size() + 1; tries++) {
+            GraphSlot hit = null;
+            for (GraphSlot other : graphs) {
+                if (other.card().intersects(card)) {
+                    hit = other;
+                    break;
+                }
+            }
+            if (hit == null) {
+                return card;
+            }
+            card = new Rectangle2D.Double(card.getX(), hit.card().getMaxY() + gap, card.getWidth(), card.getHeight());
+        }
+        return card;
+    }
+
+    private GraphSlot slotOf(Object tag) {
+        if (tag == null) {
+            return null;
+        }
+        for (GraphSlot slot : graphs) {
+            if (slot.tag() == tag) {
+                return slot;
+            }
+        }
+        return null;
+    }
+
+    private GraphSlot newest() {
+        return graphs.isEmpty() ? null : graphs.get(graphs.size() - 1);
+    }
+
+    private void replaceSlot(GraphSlot old, GraphSlot next) {
+        int at = graphs.indexOf(old);
+        if (at >= 0) {
+            graphs.set(at, next);
+            repaint();
+        }
+    }
+
+    private void removeSlot(GraphSlot slot) {
+        if (slot == null || !graphs.remove(slot)) {
             return;
         }
-        graphImage = null;
-        graphCard = null;
-        graphTag = null;
-        overGraphClose = false;
-        setCursor(Cursor.getPredefinedCursor(Cursor.CROSSHAIR_CURSOR));
+        if (overGraphClose == slot) {
+            overGraphClose = null;
+            setCursor(Cursor.getPredefinedCursor(Cursor.CROSSHAIR_CURSOR));
+        }
         repaint();
+    }
+
+    /** Removes the newest graph card. */
+    public void removeGraph() {
+        removeSlot(newest());
+    }
+
+    /** Removes the card shown with this tag, leaving the other graphs. */
+    public void removeGraph(Object tag) {
+        removeSlot(slotOf(tag));
     }
 
     public boolean hasGraph() {
-        return graphCard != null;
+        return !graphs.isEmpty();
     }
 
-    // whoever showed the card last (null after a restore / clear)
+    public boolean hasGraph(Object tag) {
+        return slotOf(tag) != null;
+    }
+
+    /** How many graph cards are on the canvas. */
+    public int graphCount() {
+        return graphs.size();
+    }
+
+    // who showed the newest card (null after a restore / clear, or for a plain picture)
     public Object getGraphTag() {
-        return graphCard == null ? null : graphTag;
+        GraphSlot slot = newest();
+        return slot == null ? null : slot.tag();
     }
 
-    // drag the card around, screen px, issue #45
+    // drag the newest card around, screen px, issue #45
     public void moveGraphBy(double dxScreen, double dyScreen) {
-        if (graphCard == null) {
+        moveSlotBy(newest(), dxScreen, dyScreen);
+    }
+
+    public void moveGraphBy(Object tag, double dxScreen, double dyScreen) {
+        moveSlotBy(slotOf(tag), dxScreen, dyScreen);
+    }
+
+    private void moveSlotBy(GraphSlot slot, double dxScreen, double dyScreen) {
+        if (slot == null) {
             return;
         }
-        graphCard = new Rectangle2D.Double(graphCard.getX() + dxScreen / scale, graphCard.getY() + dyScreen / scale,
-                graphCard.getWidth(), graphCard.getHeight());
-        repaint();
+        Rectangle2D c = slot.card();
+        replaceSlot(slot, slot.withCard(new Rectangle2D.Double(c.getX() + dxScreen / scale, c.getY() + dyScreen / scale,
+                c.getWidth(), c.getHeight())));
     }
 
     // new size in screen px, top-left stays
     public void resizeGraphTo(double widthScreen, double heightScreen) {
-        if (graphCard == null || !(widthScreen > 0) || !(heightScreen > 0)) {
+        resizeSlotTo(newest(), widthScreen, heightScreen);
+    }
+
+    public void resizeGraphTo(Object tag, double widthScreen, double heightScreen) {
+        resizeSlotTo(slotOf(tag), widthScreen, heightScreen);
+    }
+
+    private void resizeSlotTo(GraphSlot slot, double widthScreen, double heightScreen) {
+        if (slot == null || !(widthScreen > 0) || !(heightScreen > 0)) {
             return;
         }
-        graphCard = new Rectangle2D.Double(graphCard.getX(), graphCard.getY(), widthScreen / scale, heightScreen / scale);
-        repaint();
+        Rectangle2D c = slot.card();
+        replaceSlot(slot, slot.withCard(new Rectangle2D.Double(c.getX(), c.getY(), widthScreen / scale,
+                heightScreen / scale)));
     }
 
     // fresh picture for the same card (after pan / zoom), so save + pdf get what's on screen
     public void replaceGraphImage(BufferedImage image) {
-        if (graphCard == null || image == null) {
+        replaceSlotImage(newest(), image);
+    }
+
+    public void replaceGraphImage(Object tag, BufferedImage image) {
+        replaceSlotImage(slotOf(tag), image);
+    }
+
+    private void replaceSlotImage(GraphSlot slot, BufferedImage image) {
+        if (slot == null || image == null) {
             return;
         }
-        graphImage = image;
-        graphPadding = 0;   // live snapshots already draw their own card
-        repaint();
+        // live snapshots already draw their own card, so no white border
+        replaceSlot(slot, new GraphSlot(image, slot.card(), 0, slot.tag()));
     }
 
-    /** Where the graph card is on screen right now, or null if there is none. */
+    /** Where the newest graph card is on screen right now, or null if there is none. */
     public Rectangle2D getGraphCardOnScreen() {
-        return graphCard == null ? null : toScreen(graphCard);
+        GraphSlot slot = newest();
+        return slot == null ? null : toScreen(slot.card());
     }
 
-    /** The point to click to close the graph card, on screen, or null if there is none. */
+    /** Where the card shown with this tag is on screen right now, or null if it is gone. */
+    public Rectangle2D getGraphCardOnScreen(Object tag) {
+        GraphSlot slot = slotOf(tag);
+        return slot == null ? null : toScreen(slot.card());
+    }
+
+    /** The point to click to close the newest graph card, on screen, or null if there is none. */
     public Point2D getGraphCloseOnScreen() {
-        if (graphCard == null) {
+        return closeOf(newest());
+    }
+
+    private Point2D closeOf(GraphSlot slot) {
+        if (slot == null) {
             return null;
         }
-        Rectangle2D card = toScreen(graphCard);
+        Rectangle2D card = toScreen(slot.card());
         return new Point2D.Double(card.getMaxX() - GRAPH_CLOSE_RADIUS - 5, card.getMinY() + GRAPH_CLOSE_RADIUS + 5);
     }
 
-    private boolean graphCloseContains(Point p) {
-        Point2D close = getGraphCloseOnScreen();
-        return close != null && close.distance(p) <= GRAPH_CLOSE_RADIUS + 2;
+    // topmost card whose × is at p
+    private GraphSlot graphCloseAt(Point p) {
+        for (int i = graphs.size() - 1; i >= 0; i--) {
+            Point2D close = closeOf(graphs.get(i));
+            if (close.distance(p) <= GRAPH_CLOSE_RADIUS + 2) {
+                return graphs.get(i);
+            }
+        }
+        return null;
     }
 
     /** Pans (without zooming) so the world rectangle, or at least {@code fallback}, is in view. */
@@ -1031,7 +1149,7 @@ public class DrawingCanvas extends JPanel {
     }
 
     public boolean isBlank() {
-        return strokes.isEmpty() && pictures.isEmpty() && graphCard == null;
+        return strokes.isEmpty() && pictures.isEmpty() && graphs.isEmpty();
     }
 
     /** Steps back one change without destroying the redo chain. */
@@ -1060,8 +1178,8 @@ public class DrawingCanvas extends JPanel {
         strokeWidths.putAll(back.widths);
         book = back.book.copy();
         pictures.clear(); pictures.addAll(back.pictures);
-        graphImage = back.graphImage; graphCard = back.graphCard;
-        graphTag = back.graphTag; graphPadding = back.graphPadding;
+        graphs.clear(); graphs.addAll(back.graphs);
+        overGraphClose = null;
         selectedPicture = null;
         selectedPictures.clear();
         currentStroke = null;
@@ -1075,11 +1193,11 @@ public class DrawingCanvas extends JPanel {
     }
 
     public void clear() {
-        if (strokes.isEmpty() && pictures.isEmpty() && graphCard == null) return;
+        if (strokes.isEmpty() && pictures.isEmpty() && graphs.isEmpty()) return;
         fire(actionListeners);
         saveForUndo();
         pictures.clear();selectedPicture = null;selectedPictures.clear();
-        graphCard = null;graphImage = null;graphTag = null;
+        graphs.clear();overGraphClose = null;
         strokes.clear();
         for (Formula f : book.all()) {
             book.remove(f.getId());
@@ -1093,7 +1211,7 @@ public class DrawingCanvas extends JPanel {
 
     private Snapshot snapshot() {
         return new Snapshot(new ArrayList<>(strokes), colorsNow(), new HashMap<>(strokeWidths),
-                book.copy(), new ArrayList<>(pictures), graphImage, graphCard, graphTag, graphPadding);
+                book.copy(), new ArrayList<>(pictures), new ArrayList<>(graphs));
     }
 
     private void saveForUndo() {
@@ -1175,23 +1293,16 @@ public class DrawingCanvas extends JPanel {
         final Map<Stroke, Float> widths;
         final FormulaBook book;
         final List<Picture> pictures;
-        final BufferedImage graphImage;
-        final Rectangle2D graphCard;
-        final Object graphTag;
-        final double graphPadding;
+        final List<GraphSlot> graphs;
 
         Snapshot(List<Stroke> strokes, Map<Stroke, Color> colors, Map<Stroke, Float> widths,
-                 FormulaBook book, List<Picture> pictures, BufferedImage graphImage, Rectangle2D graphCard,
-                 Object graphTag, double graphPadding) {
+                 FormulaBook book, List<Picture> pictures, List<GraphSlot> graphs) {
             this.strokes = strokes;
             this.colors = colors;
             this.widths = widths;
             this.book = book;
             this.pictures = pictures;
-            this.graphImage = graphImage;
-            this.graphCard = graphCard;
-            this.graphTag = graphTag;
-            this.graphPadding = graphPadding;
+            this.graphs = graphs;
         }
     }
 
@@ -1753,7 +1864,9 @@ public class DrawingCanvas extends JPanel {
         h = h * 31 + moveDx * 131L + moveDy;
         h = h * 31 + Double.doubleToLongBits(resizeFactor);
         h = h * 31 + (lassoPath == null ? -1 : lassoPath.size());
-        h = h * 31 + (graphCard == null ? 0 : graphCard.hashCode() + System.identityHashCode(graphImage));
+        for (GraphSlot slot : graphs) {
+            h = h * 31 + slot.card().hashCode() + System.identityHashCode(slot.image());
+        }
         h = h * 31 + pictures.size();
         return h * 31 + getWidth() * 7919L + getHeight();
     }
@@ -1846,9 +1959,10 @@ public class DrawingCanvas extends JPanel {
         List<CanvasState.Asset> assets = new ArrayList<>();
         for (Picture p : pictures) assets.add(new CanvasState.Asset(p.latex, p.result, png(p.image),
                 p.box.getX(), p.box.getY(), p.box.getWidth(), p.box.getHeight()));
-        if (graphImage != null && graphCard != null) {
-            assets.add(new CanvasState.Asset("", "", png(graphImage), graphCard.getX(), graphCard.getY(),
-                    graphCard.getWidth(), graphCard.getHeight(), true));
+        for (GraphSlot slot : graphs) {
+            Rectangle2D c = slot.card();
+            assets.add(new CanvasState.Asset("", "", png(slot.image()), c.getX(), c.getY(),
+                    c.getWidth(), c.getHeight(), true));
         }
         return new CanvasState(ink, formulas, assets, scale, originX, originY);
     }
@@ -1899,13 +2013,12 @@ public class DrawingCanvas extends JPanel {
             }
         }
         List<Picture> restoredAssets = new ArrayList<>();
-        BufferedImage restoredGraph = null;
-        Rectangle2D restoredGraphBounds = null;
+        List<GraphSlot> restoredGraphs = new ArrayList<>();
         for (CanvasState.Asset asset : state.assets()) {
             BufferedImage image = ImageIO.read(new ByteArrayInputStream(asset.png()));
             if (image == null) throw new IOException("Unrecognizable saved image");
             Rectangle2D rectangle = new Rectangle2D.Double(asset.x(),asset.y(),asset.width(),asset.height());
-            if (asset.graph()) { restoredGraph=image;restoredGraphBounds=rectangle; }
+            if (asset.graph()) restoredGraphs.add(new GraphSlot(image, rectangle, 0, null));
             else restoredAssets.add(new Picture(image,rectangle,asset.latex(),asset.result()));
         }
         fire(actionListeners);
@@ -1916,7 +2029,7 @@ public class DrawingCanvas extends JPanel {
         history.clear();redoHistory.clear();strokeWidths.clear();
         strokeWidths.putAll(restoredWidths);
         selectedPicture = null;selectedPictures.clear();selection.clear();selectedAnswers.clear();
-        currentStroke = null;graphCard = restoredGraphBounds;graphImage = restoredGraph;graphTag = null;graphPadding = 0;
+        currentStroke = null;graphs.clear();graphs.addAll(restoredGraphs);overGraphClose = null;
         scale = state.zoom();originX = state.offsetX();originY = state.offsetY();
         repaint();fire(inkListeners);fire(viewListeners);
     }
@@ -2072,9 +2185,15 @@ public class DrawingCanvas extends JPanel {
 
     /** The graph card in world coordinates: a soft shadow, a white rounded card, the picture inside. */
     private void paintGraphCard(Graphics2D world) {
-        if (graphCard == null) {
-            return;
+        for (GraphSlot slot : graphs) {
+            paintGraphCard(world, slot);
         }
+    }
+
+    private void paintGraphCard(Graphics2D world, GraphSlot slot) {
+        Rectangle2D graphCard = slot.card();
+        BufferedImage graphImage = slot.image();
+        double graphPadding = slot.padding();
         Graphics2D g = (Graphics2D) world.create();
         g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         double unit = 1 / scale;  // one screen pixel in world units
@@ -2104,23 +2223,25 @@ public class DrawingCanvas extends JPanel {
         g.dispose();
     }
 
-    /** The card's × button, on screen so it stays the same size at every zoom. */
+    /** Each card's × button, on screen so it stays the same size at every zoom. */
     private void paintGraphClose(Graphics2D g2) {
-        Point2D c = getGraphCloseOnScreen();
-        if (c == null) {
-            return;
+        for (GraphSlot slot : graphs) {
+            paintGraphClose(g2, closeOf(slot), slot == overGraphClose);
         }
+    }
+
+    private void paintGraphClose(Graphics2D g2, Point2D c, boolean hot) {
         Graphics2D g = (Graphics2D) g2.create();
         g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         int r = GRAPH_CLOSE_RADIUS;
         Ellipse2D circle = new Ellipse2D.Double(c.getX() - r, c.getY() - r, 2 * r, 2 * r);
-        g.setColor(overGraphClose ? new Color(254, 226, 226) : new Color(255, 255, 255, 235));
+        g.setColor(hot ? new Color(254, 226, 226) : new Color(255, 255, 255, 235));
         g.fill(circle);
         g.setStroke(new BasicStroke(1f));
         g.setColor(GRAPH_CARD_BORDER);
         g.draw(circle);
         g.setStroke(new BasicStroke(1.6f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
-        g.setColor(overGraphClose ? new Color(185, 28, 28) : new Color(71, 85, 105));
+        g.setColor(hot ? new Color(185, 28, 28) : new Color(71, 85, 105));
         double s = 3.8;
         g.draw(new java.awt.geom.Line2D.Double(c.getX() - s, c.getY() - s, c.getX() + s, c.getY() + s));
         g.draw(new java.awt.geom.Line2D.Double(c.getX() - s, c.getY() + s, c.getX() + s, c.getY() - s));

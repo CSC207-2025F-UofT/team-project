@@ -143,4 +143,89 @@ class DrawingCanvasGraphCardTest {
         canvas.showGraph(CHART);
         assertNull(canvas.getGraphTag(), "plain picture has no owner");
     }
+
+    // ---- several graphs at once
+
+    @Test
+    void severalGraphsStayOnTheCanvasTogether() {
+        canvas.showGraph(CHART, new java.awt.Rectangle(60, 60, 50, 30), "first");
+        canvas.showGraph(CHART, new java.awt.Rectangle(60, 300, 50, 30), "second");
+        assertEquals(2, canvas.graphCount());
+        assertTrue(canvas.hasGraph("first") && canvas.hasGraph("second"));
+        assertEquals("second", canvas.getGraphTag(), "newest on top");
+        assertFalse(canvas.getGraphCardOnScreen("first").intersects(canvas.getGraphCardOnScreen("second")));
+    }
+
+    @Test
+    void showingAgainWithTheSameTagReplacesOnlyThatCard() {
+        canvas.showGraph(CHART, new java.awt.Rectangle(60, 60, 50, 30), "first");
+        canvas.showGraph(CHART, new java.awt.Rectangle(60, 300, 50, 30), "second");
+        canvas.showGraph(CHART, new java.awt.Rectangle(60, 60, 50, 30), "first");
+        assertEquals(2, canvas.graphCount());
+    }
+
+    @Test
+    void secondGraphOfTheSameFormulaDoesNotCoverTheFirst() {
+        java.awt.Rectangle formula = new java.awt.Rectangle(60, 100, 50, 30);
+        canvas.showGraph(CHART, formula, "first");
+        canvas.showGraph(CHART, formula, "second");
+        Rectangle2D first = canvas.getGraphCardOnScreen("first");
+        Rectangle2D second = canvas.getGraphCardOnScreen("second");
+        assertFalse(first.intersects(second), first + " vs " + second);
+        assertEquals(first.getX(), second.getX(), 1e-6, "stacked under it, same column");
+    }
+
+    @Test
+    void eachCardMovesResizesAndClosesOnItsOwn() {
+        canvas.showGraph(CHART, new java.awt.Rectangle(60, 60, 50, 30), "first");
+        canvas.showGraph(CHART, new java.awt.Rectangle(60, 300, 50, 30), "second");
+        Rectangle2D secondBefore = canvas.getGraphCardOnScreen("second");
+        Rectangle2D firstBefore = canvas.getGraphCardOnScreen("first");
+        canvas.moveGraphBy("first", 25, 10);
+        canvas.resizeGraphTo("first", 300, 200);
+        assertEquals(firstBefore.getX() + 25, canvas.getGraphCardOnScreen("first").getX(), 1e-6);
+        assertEquals(300, canvas.getGraphCardOnScreen("first").getWidth(), 1e-6);
+        assertEquals(secondBefore, canvas.getGraphCardOnScreen("second"), "the other card did not move");
+
+        canvas.removeGraph("first");
+        assertFalse(canvas.hasGraph("first"));
+        assertTrue(canvas.hasGraph("second"));
+    }
+
+    @Test
+    void closeButtonClosesOnlyTheCardItBelongsTo() {
+        canvas.showGraph(CHART, new java.awt.Rectangle(60, 60, 50, 30), "first");
+        canvas.showGraph(CHART, new java.awt.Rectangle(60, 300, 50, 30), "second");
+        Rectangle2D first = canvas.getGraphCardOnScreen("first");
+        int x = (int) (first.getMaxX() - 16);
+        int y = (int) (first.getMinY() + 16);
+        drag(x, y, x + 2, y + 2);
+        assertFalse(canvas.hasGraph("first"));
+        assertTrue(canvas.hasGraph("second"));
+    }
+
+    @Test
+    void undoAndClearCoverEveryGraph() {
+        canvas.showGraph(CHART, new java.awt.Rectangle(60, 60, 50, 30), "first");
+        canvas.showGraph(CHART, new java.awt.Rectangle(60, 300, 50, 30), "second");
+        canvas.clear();
+        assertEquals(0, canvas.graphCount());
+        canvas.undo();
+        assertEquals(2, canvas.graphCount(), "undo brings both back");
+        assertTrue(canvas.hasGraph("first") && canvas.hasGraph("second"));
+    }
+
+    @Test
+    void saveAndOpenKeepEveryGraph() throws Exception {
+        canvas.showGraph(CHART, new java.awt.Rectangle(60, 60, 50, 30), "first");
+        canvas.showGraph(CHART, new java.awt.Rectangle(60, 300, 50, 30), "second");
+        var state = canvas.exportCanvasState();
+        assertEquals(2, state.assets().stream().filter(a -> a.graph()).count());
+
+        DrawingCanvas reopened = new DrawingCanvas();
+        reopened.setSize(900, 500);
+        reopened.restoreCanvasState(state);
+        assertEquals(2, reopened.graphCount());
+        assertNull(reopened.getGraphTag(), "reopened graphs are plain pictures");
+    }
 }

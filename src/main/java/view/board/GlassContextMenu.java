@@ -4,6 +4,7 @@ import javax.swing.BorderFactory;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 import javax.swing.plaf.basic.BasicPopupMenuUI;
+import view.glass.GlassPopups;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -19,7 +20,7 @@ public final class GlassContextMenu extends JPopupMenu {
     public GlassContextMenu() {
         setUI(new BasicPopupMenuUI());
         setOpaque(false);
-        setLightWeightPopupEnabled(true);
+        GlassPopups.useTransparentPopup(this);
         setBackground(new Color(0, 0, 0, 0));
         setBorder(BorderFactory.createEmptyBorder(6, 6, 6, 6));
     }

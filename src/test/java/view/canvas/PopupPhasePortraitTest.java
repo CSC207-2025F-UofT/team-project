@@ -31,7 +31,7 @@ import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-/** Phase Portrait's own path: real use case -> card on the canvas, and it takes turns w/ Graph for the slot. */
+/** Phase Portrait's own path: real use case -> card on the canvas, next to Graph's cards. */
 class PopupPhasePortraitTest {
     private final List<String> said = new ArrayList<>();
     private final Notices notices = new Notices() {
@@ -92,7 +92,7 @@ class PopupPhasePortraitTest {
     }
 
     @Test
-    void graphAndPhaseTakeTurnsWithTheOneCardSlot() throws Exception {
+    void graphAndPhaseCardsStayOnTheCanvasTogether() throws Exception {
         shared.getDrawingCanvas().setSize(900, 500);
         CountDownLatch phaseDone = new CountDownLatch(1);
         PopupPhasePortrait phase = phase(new ArrayList<>(), phaseDone);
@@ -115,6 +115,7 @@ class PopupPhasePortraitTest {
         assertTrue(phaseDone.await(4, TimeUnit.SECONDS));
         SwingUtilities.invokeAndWait(() -> { });
         assertTrue(phase.card().isVisible());
-        assertFalse(graph.graphCard().isVisible(), "graph card stepped aside");
+        assertTrue(graph.graphCard().isVisible(), "the graph stays next to the portrait");
+        assertEquals(2, shared.getDrawingCanvas().graphCount());
     }
 }

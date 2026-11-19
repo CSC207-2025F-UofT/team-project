@@ -94,7 +94,7 @@ public final class CanvasLibrarySelectionMenu {
             setUI(new BasicPopupMenuUI());
             setOpaque(false);
             setBackground(new Color(0, 0, 0, 0));
-            setLightWeightPopupEnabled(true);
+            view.glass.GlassPopups.useTransparentPopup(this);
             setBorder(BorderFactory.createEmptyBorder(5, 5, 8, 5));
             surface.setOpaque(false);
             surface.setPreferredSize(new Dimension(WIDTH, INSET * 2 + ROW_HEIGHT * 2));

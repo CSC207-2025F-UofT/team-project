@@ -104,7 +104,8 @@ public final class SavedCanvasChooser extends JPanel {
         });
         JScrollPane scroll = new JScrollPane(list);
         scroll.setBorder(BorderFactory.createLineBorder(new Color(223, 228, 238)));
-        scroll.getViewport().setBackground(new Color(255, 255, 255, 120));
+        // Opaque: a translucent fill on an opaque viewport leaves stale grey paint below the rows.
+        scroll.getViewport().setBackground(Color.WHITE);
         scroll.getVerticalScrollBar().setUnitIncrement(28);
         JPanel center = new JPanel(new BorderLayout());
         center.setOpaque(false);

@@ -72,10 +72,20 @@ public final class GraphCard extends PlotCard {
     }
 
     @Override
+    String headerLatex() {
+        return viewModel.getState().getLatex();
+    }
+
+    @Override
+    String headerBadge() {
+        return GraphCardRenderer.badge(viewModel.getState());
+    }
+
+    @Override
     void paintCard(Graphics2D g, int hotButton) {
         GraphState s = viewModel.getState();
         GraphCardRenderer.paint(g, s, getWidth(), getHeight(), camera, sceneFor(s), s.getTrace(), pinned, true,
-                hotButton);
+                hotButton, headerControls());
     }
 
     private SurfaceScene sceneFor(GraphState s) {

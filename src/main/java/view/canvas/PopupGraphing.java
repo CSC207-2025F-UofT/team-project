@@ -12,26 +12,28 @@ import javax.swing.JComponent;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.util.function.BiConsumer;
+import java.util.function.Supplier;
 
-// Graph from the popup: uses the latex already read, live graph card goes beside that formula
-final class PopupGraphing extends PopupCardTool {
-    private final GraphController controller;
-    private final GraphViewModel viewModel;
+// Graph from the popup: uses the latex already read, each graph gets its own live card beside its formula
+final class PopupGraphing extends PopupCardTool<GraphSession> {
 
+
+    // one shared session: a single live card, a new graph replaces it
     PopupGraphing(SharedCanvas canvas, GraphController controller, GraphExploreController explore,
                   GraphViewModel viewModel, Notices notices, JComponent area,
                   BiConsumer<FormulaCapture, String> graphSaved) {
-        super(canvas, new GraphCard(viewModel, explore), notices, area, graphSaved, "popup-graph",
+        this(canvas, shared(new GraphSession(controller, explore, viewModel)), notices, area, graphSaved);
+    }
+
+    // a fresh session per graph: several live graphs on the canvas at once
+    PopupGraphing(SharedCanvas canvas, Supplier<GraphSession> kits, Notices notices, JComponent area,
+                  BiConsumer<FormulaCapture, String> graphSaved) {
+        super(canvas, kits, notices, area, graphSaved, "popup-graph",
                 "Can't graph", "Drawing the graph of", "Graph of");
-        this.controller = controller;
-        this.viewModel = viewModel;
-        viewModel.addPropertyChangeListener(e -> {
-            if (GraphViewModel.STATE_PROPERTY.equals(e.getPropertyName())) {
-                stateChanged();
-            } else if (GraphViewModel.VIEW_PROPERTY.equals(e.getPropertyName())) {
-                viewChanged();
-            }
-        });
+    }
+
+    private static Supplier<GraphSession> shared(GraphSession kit) {
+        return () -> kit;
     }
 
     JComponent graphCard() {
@@ -43,38 +45,59 @@ final class PopupGraphing extends PopupCardTool {
     }
 
     @Override
-    void execute(String latex, double[] xRange, double[] yRange) {
-        controller.execute(latex, xRange, yRange);
+    Live newLive(GraphSession kit) {
+        return new GraphLive(kit);
     }
 
-    @Override
-    String error() {
-        return viewModel.getState().getError();
-    }
+    private final class GraphLive extends Live {
+        private final GraphViewModel viewModel;
 
-    @Override
-    boolean hasContent() {
-        return viewModel.getState().hasGraph();
-    }
+        GraphLive(GraphSession kit) {
+            super(kit, new GraphCard(kit.viewModel(), kit.explore()));
+            this.viewModel = kit.viewModel();
+            viewModel.addPropertyChangeListener(e -> {
+                if (GraphViewModel.STATE_PROPERTY.equals(e.getPropertyName())) {
+                    stateChanged();
+                } else if (GraphViewModel.VIEW_PROPERTY.equals(e.getPropertyName())) {
+                    viewChanged();
+                }
+            });
+        }
 
-    @Override
-    String latex() {
-        return viewModel.getState().getLatex();
-    }
+        @Override
+        void execute(String latex, double[] xRange, double[] yRange) {
+            kit.controller().execute(latex, xRange, yRange);
+        }
 
-    @Override
-    double[] window() {
-        GraphState s = viewModel.getState();
-        return new double[]{s.getXMin(), s.getXMax(), s.getYMin(), s.getYMax()};
-    }
+        @Override
+        String error() {
+            return viewModel.getState().getError();
+        }
 
-    @Override
-    boolean followsY() {
-        return viewModel.getState().getKind() == GraphState.Kind.CURVE;
-    }
+        @Override
+        boolean hasContent() {
+            return viewModel.getState().hasGraph();
+        }
 
-    @Override
-    BufferedImage firstPicture() {
-        return GraphSnapshot.render(viewModel.getState(), SNAPSHOT_WIDTH, SNAPSHOT_HEIGHT);
+        @Override
+        String latex() {
+            return viewModel.getState().getLatex();
+        }
+
+        @Override
+        double[] window() {
+            GraphState s = viewModel.getState();
+            return new double[]{s.getXMin(), s.getXMax(), s.getYMin(), s.getYMax()};
+        }
+
+        @Override
+        boolean followsY() {
+            return viewModel.getState().getKind() == GraphState.Kind.CURVE;
+        }
+
+        @Override
+        BufferedImage firstPicture() {
+            return GraphSnapshot.render(viewModel.getState(), SNAPSHOT_WIDTH, SNAPSHOT_HEIGHT);
+        }
     }
 }

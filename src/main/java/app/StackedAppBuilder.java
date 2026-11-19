@@ -25,6 +25,8 @@ import interface_adapter.graph.GraphState;
 import interface_adapter.graph.GraphViewModel;
 import use_case.explore_graph.ExploreGraphInteractor;
 import view.graph.GraphSnapshot;
+import view.canvas.GraphSession;
+import view.canvas.PhaseSession;
 import interface_adapter.graph_check.GraphCheckController;
 import interface_adapter.history.HistoryViewModel;
 import interface_adapter.recognize.FormulaRecognizer;
@@ -106,42 +108,48 @@ public class StackedAppBuilder {
         DefinitionCheckController definitionCheck = new DefinitionCheckController(new DefinitionCheckInteractor());
         QuestionCheckController questionCheck = new QuestionCheckController(new QuestionCheckInteractor());
 
-        // graph, graphs also go to PDF Studio like before
-        GraphViewModel graphViewModel = new GraphViewModel();
-        graphViewModel.addPropertyChangeListener(event -> {
-            // only brand new graphs, pans / zooms come as VIEW and would spam the library
-            if (GraphViewModel.STATE_PROPERTY.equals(event.getPropertyName())) {
-                GraphState state = graphViewModel.getState();
-                if (state.getError() == null && state.hasGraph()) {
-                    pdfStudio.addGraph(state.getLatex(), GraphSnapshot.render(state, 880, 600));
+        // every graph on the canvas gets its own session (graphing + exploring share it), so several
+        // stay live at once; each new graph also goes to PDF Studio like before
+        java.util.function.Supplier<GraphSession> graphSessions = () -> {
+            GraphViewModel graphViewModel = new GraphViewModel();
+            graphViewModel.addPropertyChangeListener(event -> {
+                // only brand new graphs, pans / zooms come as VIEW and would spam the library
+                if (GraphViewModel.STATE_PROPERTY.equals(event.getPropertyName())) {
+                    GraphState state = graphViewModel.getState();
+                    if (state.getError() == null && state.hasGraph()) {
+                        pdfStudio.addGraph(state.getLatex(), GraphSnapshot.render(state, 880, 600));
+                    }
                 }
-            }
-        });
-        // graphs drawn in plain java now, one session shared by graphing + exploring
-        InMemoryGraphSessionDataAccessObject graphSession = new InMemoryGraphSessionDataAccessObject();
-        GraphPresenter graphPresenter = new GraphPresenter(graphViewModel);
-        GraphController graph = new GraphController(new GraphFunctionInteractor(
-                new LatexFunctionParser(), graphSession, graphPresenter));
-        GraphExploreController graphExplore = new GraphExploreController(
-                new ExploreGraphInteractor(graphSession, graphPresenter));
+            });
+            InMemoryGraphSessionDataAccessObject graphSession = new InMemoryGraphSessionDataAccessObject();
+            GraphPresenter graphPresenter = new GraphPresenter(graphViewModel);
+            return new GraphSession(
+                    new GraphController(new GraphFunctionInteractor(new LatexFunctionParser(), graphSession,
+                            graphPresenter)),
+                    new GraphExploreController(new ExploreGraphInteractor(graphSession, graphPresenter)),
+                    graphViewModel);
+        };
         GraphCheckController graphCheck = new GraphCheckController(new GraphCheckInteractor(new LatexFunctionParser()));
 
-        // phase portraits of odes: own use case + session, next to graphing, same popup; also go to PDF Studio
-        PhaseViewModel phaseViewModel = new PhaseViewModel();
-        phaseViewModel.addPropertyChangeListener(event -> {
-            if (PhaseViewModel.STATE_PROPERTY.equals(event.getPropertyName())) {
-                PhaseState state = phaseViewModel.getState();
-                if (state.getError() == null && state.hasPortrait()) {
-                    pdfStudio.addGraph(state.getLatex(), PhaseSnapshot.render(state, 880, 600));
+        // phase portraits of odes: own use case, a session per portrait, same popup; also go to PDF Studio
+        java.util.function.Supplier<PhaseSession> phaseSessions = () -> {
+            PhaseViewModel phaseViewModel = new PhaseViewModel();
+            phaseViewModel.addPropertyChangeListener(event -> {
+                if (PhaseViewModel.STATE_PROPERTY.equals(event.getPropertyName())) {
+                    PhaseState state = phaseViewModel.getState();
+                    if (state.getError() == null && state.hasPortrait()) {
+                        pdfStudio.addGraph(state.getLatex(), PhaseSnapshot.render(state, 880, 600));
+                    }
                 }
-            }
-        });
-        InMemoryPhaseSessionDataAccessObject phaseSession = new InMemoryPhaseSessionDataAccessObject();
-        PhasePresenter phasePresenter = new PhasePresenter(phaseViewModel);
-        PhaseController phase = new PhaseController(new PhasePortraitInteractor(
-                new DifferentialEquationParser(), phaseSession, phasePresenter));
-        PhaseExploreController phaseExplore = new PhaseExploreController(
-                new ExplorePhaseInteractor(phaseSession, phasePresenter));
+            });
+            InMemoryPhaseSessionDataAccessObject phaseSession = new InMemoryPhaseSessionDataAccessObject();
+            PhasePresenter phasePresenter = new PhasePresenter(phaseViewModel);
+            return new PhaseSession(
+                    new PhaseController(new PhasePortraitInteractor(new DifferentialEquationParser(), phaseSession,
+                            phasePresenter)),
+                    new PhaseExploreController(new ExplorePhaseInteractor(phaseSession, phasePresenter)),
+                    phaseViewModel);
+        };
         PhaseCheckController phaseCheck = new PhaseCheckController(
                 new PhaseCheckInteractor(new DifferentialEquationParser()));
 
@@ -189,12 +197,12 @@ public class StackedAppBuilder {
                 new SelectionToLibrary(sharedCanvas::recognizeFormula, pdfStudio.getLibrary()),
                 new SelectedInkRegistry(drawing, pdfStudio.getLibrary()));
         AnswerCanvasPage page = new AnswerCanvasPage(sharedCanvas, evaluate, mathViewModel, results,
-                graph, graphExplore, graphViewModel, graphCheck::canGraph, BoardTheme.CANVAS);
+                graphSessions, graphCheck::canGraph, BoardTheme.CANVAS);
         page.setDefinitionCheck(definitionCheck::isDefinition);
         page.setCalculateCheck(calculateCheck::canCalculate);
         page.setQuestionCheck(questionCheck::isQuestion);
         page.setFaintEqualsCheck(calculateCheck::canCalculate);
-        page.enablePhasePortrait(phase, phaseExplore, phaseViewModel, phaseCheck::isDifferentialEquation);
+        page.enablePhasePortrait(phaseSessions, phaseCheck::isDifferentialEquation);
         sharedCanvas.attachTo(page);
         PdfPanel pdfPanel = pdfStudio.createPanel();
         // Use the live selection (lasso or whole ink), not an outdated startup screenshot.
@@ -245,15 +253,22 @@ public class StackedAppBuilder {
             root.putClientProperty("apple.awt.windowTitleVisible", false);
         }
         int shortcut = Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx();
-        root.registerKeyboardAction(e -> drawing.undo(), KeyStroke.getKeyStroke(KeyEvent.VK_Z, shortcut),
-                JComponent.WHEN_IN_FOCUSED_WINDOW);
-        // Canvas redo only. PDF keeps its own ribbon buttons for Undo/Redo.
-        root.registerKeyboardAction(e -> {
+        // Canvas undo/redo only. The PDF workspace keeps its own Undo/Redo, and a text field
+        // being typed in must never silently undo canvas ink instead.
+        java.util.function.BooleanSupplier focusOutsideCanvas = () -> {
             java.awt.Component focused = java.awt.KeyboardFocusManager.getCurrentKeyboardFocusManager().getFocusOwner();
-            // Do not steal Ctrl+Y from the PDF workspace or its text editor.
-            if (focused != null && SwingUtilities.isDescendingFrom(focused, pdfPanel)) return;
-            drawing.redo();
-        }, KeyStroke.getKeyStroke(KeyEvent.VK_Y, java.awt.event.InputEvent.CTRL_DOWN_MASK),
+            return focused instanceof javax.swing.text.JTextComponent
+                    || (focused != null && SwingUtilities.isDescendingFrom(focused, pdfPanel));
+        };
+        java.awt.event.ActionListener canvasUndo = e -> { if (!focusOutsideCanvas.getAsBoolean()) drawing.undo(); };
+        java.awt.event.ActionListener canvasRedo = e -> { if (!focusOutsideCanvas.getAsBoolean()) drawing.redo(); };
+        root.registerKeyboardAction(canvasUndo, KeyStroke.getKeyStroke(KeyEvent.VK_Z, shortcut),
+                JComponent.WHEN_IN_FOCUSED_WINDOW);
+        root.registerKeyboardAction(canvasRedo, KeyStroke.getKeyStroke(KeyEvent.VK_Y, java.awt.event.InputEvent.CTRL_DOWN_MASK),
+                JComponent.WHEN_IN_FOCUSED_WINDOW);
+        // The platform redo shortcut (Cmd+Shift+Z on macOS, Ctrl+Shift+Z elsewhere).
+        root.registerKeyboardAction(canvasRedo,
+                KeyStroke.getKeyStroke(KeyEvent.VK_Z, shortcut | java.awt.event.InputEvent.SHIFT_DOWN_MASK),
                 JComponent.WHEN_IN_FOCUSED_WINDOW);
         root.registerKeyboardAction(e -> {
             dialogs.get().save();
@@ -268,7 +283,26 @@ public class StackedAppBuilder {
         root.registerKeyboardAction(e -> board.setPdfFullscreen(false),
                 KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_IN_FOCUSED_WINDOW);
         frame.setContentPane(board);
-        frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+        // Closing asks about unsaved ink first. EXIT_ON_CLOSE quit before windowClosed ran, so
+        // unsaved work was lost and the PDF editor and model were never closed.
+        frame.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
+        frame.addWindowListener(new java.awt.event.WindowAdapter() {
+            @Override public void windowClosing(java.awt.event.WindowEvent e) {
+                if (!dialogs.get().confirmClose()) return;
+                frame.dispose();
+                // Queued after windowClosed, so every close listener runs before the JVM exits.
+                SwingUtilities.invokeLater(() -> System.exit(0));
+            }
+        });
+        if (!java.awt.GraphicsEnvironment.isHeadless() && java.awt.Desktop.isDesktopSupported()
+                && java.awt.Desktop.getDesktop().isSupported(java.awt.Desktop.Action.APP_QUIT_HANDLER)) {
+            // Cmd+Q would otherwise exit immediately; route it through the same unsaved-changes check.
+            java.awt.Desktop.getDesktop().setQuitHandler((event, response) -> {
+                response.cancelQuit();
+                SwingUtilities.invokeLater(() -> frame.dispatchEvent(
+                        new java.awt.event.WindowEvent(frame, java.awt.event.WindowEvent.WINDOW_CLOSING)));
+            });
+        }
         frame.setSize(1280, 790);
         frame.addWindowListener(new java.awt.event.WindowAdapter() {
             @Override public void windowOpened(java.awt.event.WindowEvent e) { toolbar.relayout(); }

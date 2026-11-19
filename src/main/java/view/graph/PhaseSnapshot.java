@@ -23,8 +23,17 @@ public final class PhaseSnapshot {
     }
 
     static void paint(Graphics2D g, PhaseState s, double w, double h, PhaseReadout hover, boolean live, int hot) {
-        String badge = s.getKind() == PhaseState.Kind.SLOPE_FIELD ? "Slope field" : "Phase plane";
-        GraphCardRenderer.paintCard(g, w, h, s.getLatex(), badge, GraphTheme.PHASE, null, live, hot,
+        paint(g, s, w, h, hover, live, hot, null);
+    }
+
+    static String badge(PhaseState s) {
+        return s.getKind() == PhaseState.Kind.SLOPE_FIELD ? "Slope field" : "Phase plane";
+    }
+
+    // controls = size of the live x / y boxes sitting in the header, null for none
+    static void paint(Graphics2D g, PhaseState s, double w, double h, PhaseReadout hover, boolean live, int hot,
+                      java.awt.Dimension controls) {
+        GraphCardRenderer.paintCard(g, w, h, s.getLatex(), badge(s), GraphTheme.PHASE, null, live, hot, controls,
                 (gg, plot, ui) -> PhasePainter.paint(gg, s, plot, ui, hover));
     }
 }

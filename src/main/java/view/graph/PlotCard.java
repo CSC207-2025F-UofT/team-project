@@ -3,9 +3,11 @@ package view.graph;
 import javax.swing.JComponent;
 import javax.swing.SwingUtilities;
 import java.awt.Cursor;
+import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Point;
+import java.awt.Rectangle;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
@@ -61,6 +63,7 @@ public abstract class PlotCard extends JComponent {
     private Point lastScreen;
     private boolean moved;
     private int hotButton = GraphCardRenderer.NO_BUTTON;
+    private Dimension headerControls;   // live x / y boxes in the header, null = none / didn't fit
 
     protected PlotCard() {
         setOpaque(false);
@@ -81,6 +84,37 @@ public abstract class PlotCard extends JComponent {
 
     // what the card looks like right now as a picture, for saving
     public abstract BufferedImage snapshot(int width, int height);
+
+    /** Header scale for the card's current size, so floating controls can match the title. */
+    public float headerScale() {
+        return ui();
+    }
+
+    /**
+     * Makes room in the header, right after the function, for controls of this size (card pixels).
+     * Returns where they go in card coordinates, or null when the card is too narrow; the title then
+     * keeps the whole header. Pass null to give the room back.
+     */
+    public Rectangle reserveHeader(Dimension controls) {
+        Rectangle2D slot = controls == null || !hasContent() ? null
+                : GraphCardRenderer.headerLayout(headerLatex(), headerBadge(), getWidth(), true, controls).controls();
+        Dimension next = slot == null ? null : new Dimension(controls);
+        if (!java.util.Objects.equals(next, headerControls)) {
+            headerControls = next;
+            repaint();
+        }
+        return slot == null ? null : new Rectangle((int) Math.round(slot.getX()), (int) Math.round(slot.getY()),
+                controls.width, controls.height);
+    }
+
+    Dimension headerControls() {
+        return headerControls;
+    }
+
+    // the function shown in the header and its badge, for laying out the header
+    abstract String headerLatex();
+
+    abstract String headerBadge();
 
     // ---- what the plot does, subclass fills these in
 

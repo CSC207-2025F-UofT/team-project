@@ -101,7 +101,12 @@ public final class GlassDialogs {
 
     /** Order is stable: red destructive choice, neutral Cancel, blue Save. */
     public static UnsavedDecision unsavedChanges(Component parent, String canvasName) {
-        int choice = present(parent, "Save changes to “" + canvasName + "” before opening another canvas?",
+        return unsavedChanges(parent, canvasName, "opening another canvas");
+    }
+
+    /** {@code beforeWhat} completes "Save changes to … before ___?", e.g. "closing Math Lab". */
+    public static UnsavedDecision unsavedChanges(Component parent, String canvasName, String beforeWhat) {
+        int choice = present(parent, "Save changes to “" + canvasName + "” before " + beforeWhat + "?",
                 "If you don’t save, your latest drawing will be lost.", Tone.WARNING, null,
                 new String[]{"Don’t Save", "Cancel", "Save"});
         return choice == 0 ? UnsavedDecision.DONT_SAVE :
@@ -172,8 +177,21 @@ public final class GlassDialogs {
             g.setColor(owner.getBackground() == null ? new Color(242, 242, 247) : owner.getBackground());
             g.fillRect(0, 0, snapshot.getWidth(), snapshot.getHeight());
             g.scale(scale, scale);
-            g.translate(owner.getX() - dialog.getX(), owner.getY() - dialog.getY());
-            owner.paint(g);
+            // A dialog opened from another dialog (Delete over Open Canvas) sits above every window in
+            // its owner chain, so paint that whole stack bottom-up, not just the nearest owner.
+            List<Window> stack = new ArrayList<>();
+            for (Window w2 = owner; w2 != null; w2 = w2.getOwner()) {
+                if (w2.isShowing()) stack.add(0, w2);
+            }
+            for (Window layer : stack) {
+                Graphics2D lg = (Graphics2D) g.create();
+                try {
+                    lg.translate(layer.getX() - dialog.getX(), layer.getY() - dialog.getY());
+                    layer.paint(lg);
+                } finally {
+                    lg.dispose();
+                }
+            }
         } catch (RuntimeException paintFailed) {
             return;  // keep the transparent window rather than show a broken backdrop
         } finally {

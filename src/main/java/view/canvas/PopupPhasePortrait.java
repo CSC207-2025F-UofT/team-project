@@ -12,27 +12,28 @@ import javax.swing.JComponent;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.util.function.BiConsumer;
+import java.util.function.Supplier;
 
-// Phase Portrait from the popup: its own use case + card, runs next to Graph, shares the canvas card slot
-final class PopupPhasePortrait extends PopupCardTool {
-    private final PhaseController controller;
-    private final PhaseViewModel viewModel;
-    private volatile String asked;   // latex sent, the state shows a retitled one for systems
+// Phase Portrait from the popup: its own use case + cards, side by side with Graph's on the canvas
+final class PopupPhasePortrait extends PopupCardTool<PhaseSession> {
 
+
+    // one shared session: a single live card, a new portrait replaces it
     PopupPhasePortrait(SharedCanvas canvas, PhaseController controller, PhaseExploreController explore,
                        PhaseViewModel viewModel, Notices notices, JComponent area,
                        BiConsumer<FormulaCapture, String> saved) {
-        super(canvas, new PhaseCard(viewModel, explore), notices, area, saved, "popup-phase",
+        this(canvas, shared(new PhaseSession(controller, explore, viewModel)), notices, area, saved);
+    }
+
+    // a fresh session per portrait: several on the canvas at once
+    PopupPhasePortrait(SharedCanvas canvas, Supplier<PhaseSession> kits, Notices notices, JComponent area,
+                       BiConsumer<FormulaCapture, String> saved) {
+        super(canvas, kits, notices, area, saved, "popup-phase",
                 "Can't draw the phase portrait", "Drawing the phase portrait of", "Phase portrait of");
-        this.controller = controller;
-        this.viewModel = viewModel;
-        viewModel.addPropertyChangeListener(e -> {
-            if (PhaseViewModel.STATE_PROPERTY.equals(e.getPropertyName())) {
-                stateChanged();
-            } else if (PhaseViewModel.VIEW_PROPERTY.equals(e.getPropertyName())) {
-                viewChanged();
-            }
-        });
+    }
+
+    private static Supplier<PhaseSession> shared(PhaseSession kit) {
+        return () -> kit;
     }
 
     void draw(String latex, Rectangle formulaWorld, FormulaCapture capture) {
@@ -40,44 +41,66 @@ final class PopupPhasePortrait extends PopupCardTool {
     }
 
     @Override
-    void execute(String latex, double[] xRange, double[] yRange) {
-        asked = latex;
-        controller.execute(latex, xRange, yRange);
+    Live newLive(PhaseSession kit) {
+        return new PhaseLive(kit);
     }
 
-    @Override
-    String sourceLatex() {
-        return asked;
-    }
+    private final class PhaseLive extends Live {
+        private final PhaseViewModel viewModel;
+        private volatile String asked;   // latex sent, the state shows a retitled one for systems
 
-    @Override
-    String error() {
-        return viewModel.getState().getError();
-    }
+        PhaseLive(PhaseSession kit) {
+            super(kit, new PhaseCard(kit.viewModel(), kit.explore()));
+            this.viewModel = kit.viewModel();
+            viewModel.addPropertyChangeListener(e -> {
+                if (PhaseViewModel.STATE_PROPERTY.equals(e.getPropertyName())) {
+                    stateChanged();
+                } else if (PhaseViewModel.VIEW_PROPERTY.equals(e.getPropertyName())) {
+                    viewChanged();
+                }
+            });
+        }
 
-    @Override
-    boolean hasContent() {
-        return viewModel.getState().hasPortrait();
-    }
+        @Override
+        void execute(String latex, double[] xRange, double[] yRange) {
+            asked = latex;
+            kit.controller().execute(latex, xRange, yRange);
+        }
 
-    @Override
-    String latex() {
-        return viewModel.getState().getLatex();
-    }
+        @Override
+        String sourceLatex() {
+            return asked;
+        }
 
-    @Override
-    double[] window() {
-        PhaseState s = viewModel.getState();
-        return new double[]{s.getXMin(), s.getXMax(), s.getYMin(), s.getYMax()};
-    }
+        @Override
+        String error() {
+            return viewModel.getState().getError();
+        }
 
-    @Override
-    boolean followsY() {
-        return true;
-    }
+        @Override
+        boolean hasContent() {
+            return viewModel.getState().hasPortrait();
+        }
 
-    @Override
-    BufferedImage firstPicture() {
-        return PhaseSnapshot.render(viewModel.getState(), SNAPSHOT_WIDTH, SNAPSHOT_HEIGHT);
+        @Override
+        String latex() {
+            return viewModel.getState().getLatex();
+        }
+
+        @Override
+        double[] window() {
+            PhaseState s = viewModel.getState();
+            return new double[]{s.getXMin(), s.getXMax(), s.getYMin(), s.getYMax()};
+        }
+
+        @Override
+        boolean followsY() {
+            return true;
+        }
+
+        @Override
+        BufferedImage firstPicture() {
+            return PhaseSnapshot.render(viewModel.getState(), SNAPSHOT_WIDTH, SNAPSHOT_HEIGHT);
+        }
     }
 }

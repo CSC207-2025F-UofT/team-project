@@ -5,6 +5,7 @@ import interface_adapter.graph.GraphTrace;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.FontMetrics;
 import java.awt.GradientPaint;
 import java.awt.Graphics2D;
@@ -16,6 +17,7 @@ import java.awt.geom.Line2D;
 import java.awt.geom.Path2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.geom.RoundRectangle2D;
+import java.awt.image.BufferedImage;
 
 // paints the whole card (header w/ function name + plot), live cards + saved snapshots all use this
 final class GraphCardRenderer {
@@ -24,7 +26,52 @@ final class GraphCardRenderer {
     static final int RESET_BUTTON = 1;
     static final int CLOSE_BUTTON = 2;
 
+    // measures header text off-screen so layout and painting agree without a live Graphics
+    private static final Graphics2D MEASURE = measure();
+
     private GraphCardRenderer() {
+    }
+
+    private static Graphics2D measure() {
+        Graphics2D g = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics();
+        g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+        return g;
+    }
+
+    /**
+     * Where things go in the header, left to right: dot, title, the live x / y boxes (if any), badge,
+     * ↺ ×. {@code controls} is null when the boxes did not fit (or there are none); then the title
+     * gets the whole width, as it does on a saved picture.
+     */
+    record HeaderLayout(double titleX, double titleWidth, Rectangle2D controls, double badgeX, double badgeWidth) {
+    }
+
+    static HeaderLayout headerLayout(String latex, String badge, double w, boolean live, Dimension controls) {
+        float ui = ui(w);
+        double hh = headerHeight(w);
+        double titleX = 12 * ui + 10 * ui + 8 * ui;   // dot inset + dot + gap
+        FontMetrics m;
+        synchronized (MEASURE) {
+            m = MEASURE.getFontMetrics(GraphTheme.bold(10 * ui));
+        }
+        double right = live ? resetButton(w).getX() - 6 * ui : w - 10 * ui;
+        double badgeWidth = m.stringWidth(badge) + 10 * ui;
+        double badgeX = right - badgeWidth;
+        double room = badgeX - titleX - 8 * ui;
+        if (controls == null || controls.width <= 0 || controls.height > hh) {
+            return new HeaderLayout(titleX, room, null, badgeX, badgeWidth);
+        }
+        double gap = 10 * ui;
+        double minTitle = Math.min(GraphTitle.width(latex, 14 * ui), 90 * ui);   // keep the function readable
+        double titleRoom = room - gap - controls.width;
+        if (titleRoom < minTitle) {
+            return new HeaderLayout(titleX, room, null, badgeX, badgeWidth);
+        }
+        double titleWidth = Math.min(titleRoom, GraphTitle.width(latex, 14 * ui));
+        Rectangle2D slot = new Rectangle2D.Double(titleX + titleWidth + gap, (hh - controls.height) / 2,
+                controls.width, controls.height);
+        return new HeaderLayout(titleX, titleWidth, slot, badgeX, badgeWidth);
     }
 
     // everything scales with the card so zooming the canvas keeps it looking the same
@@ -66,11 +113,21 @@ final class GraphCardRenderer {
     // live = draw buttons + grip; scene may be null, then it's built here
     static void paint(Graphics2D g0, GraphState s, double w, double h, OrbitCamera camera, SurfaceScene scene,
                       GraphTrace hover, GraphTrace pinned, boolean live, int hotButton) {
+        paint(g0, s, w, h, camera, scene, hover, pinned, live, hotButton, null);
+    }
+
+    static String badge(GraphState s) {
+        return s.getKind() == GraphState.Kind.SURFACE ? "3D" : "2D";
+    }
+
+    // controls = size of the live x / y boxes sitting in the header, null for none
+    static void paint(Graphics2D g0, GraphState s, double w, double h, OrbitCamera camera, SurfaceScene scene,
+                      GraphTrace hover, GraphTrace pinned, boolean live, int hotButton, Dimension controls) {
         boolean surface = s.getKind() == GraphState.Kind.SURFACE;
         // colour dot like the notes app: orange line, ramp for a surface
         Color dotLow = surface ? GraphTheme.surface(0, 1, 255) : GraphTheme.CURVE;
         Color dotHigh = surface ? GraphTheme.surface(1, 1, 255) : null;
-        paintCard(g0, w, h, s.getLatex(), surface ? "3D" : "2D", dotLow, dotHigh, live, hotButton, (g, plot, ui) -> {
+        paintCard(g0, w, h, s.getLatex(), badge(s), dotLow, dotHigh, live, hotButton, controls, (g, plot, ui) -> {
             if (s.getKind() == GraphState.Kind.CURVE) {
                 CurvePainter.paint(g, s, plot, ui, hover, pinned);
             } else if (surface) {
@@ -83,6 +140,11 @@ final class GraphCardRenderer {
     // the card itself: rounded white body, plot, header w/ dot + typeset title + badge + buttons, grip
     static void paintCard(Graphics2D g0, double w, double h, String latex, String badge, Color dotLow, Color dotHigh,
                           boolean live, int hotButton, PlotLayer layer) {
+        paintCard(g0, w, h, latex, badge, dotLow, dotHigh, live, hotButton, null, layer);
+    }
+
+    static void paintCard(Graphics2D g0, double w, double h, String latex, String badge, Color dotLow, Color dotHigh,
+                          boolean live, int hotButton, Dimension controls, PlotLayer layer) {
         Graphics2D g = (Graphics2D) g0.create();
         try {
             g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -95,7 +157,7 @@ final class GraphCardRenderer {
             g.fill(card);
             g.clip(card);
             layer.paint(g, plotArea(w, h), ui);
-            header(g, latex, badge, dotLow, dotHigh, w, ui, live, hotButton);
+            header(g, latex, badge, dotLow, dotHigh, w, ui, live, hotButton, controls);
             if (live) {
                 grip(g, w, h, ui);
             }
@@ -109,7 +171,8 @@ final class GraphCardRenderer {
     }
 
     private static void header(Graphics2D g, String latex, String badge, Color dotLow, Color dotHigh, double w,
-                               float ui, boolean live, int hot) {
+                               float ui, boolean live, int hot, Dimension controls) {
+        HeaderLayout layout = headerLayout(latex, badge, w, live, controls);
         double hh = headerHeight(w);
         g.setColor(GraphTheme.HEADER);
         g.fill(new Rectangle2D.Double(0, 0, w, hh));
@@ -131,17 +194,16 @@ final class GraphCardRenderer {
         // badge, then the buttons on the right
         g.setFont(GraphTheme.bold(10 * ui));
         FontMetrics m = g.getFontMetrics();
-        double right = live ? resetButton(w).getX() - 6 * ui : w - 10 * ui;
-        double bw = m.stringWidth(badge) + 10 * ui;
+        double bw = layout.badgeWidth();
         double bh = m.getHeight() + 2 * ui;
-        double bx = right - bw;
+        double bx = layout.badgeX();
         g.setColor(GraphTheme.BADGE);
         g.fill(new RoundRectangle2D.Double(bx, hh / 2 - bh / 2, bw, bh, bh, bh));
         g.setColor(GraphTheme.LABEL);
         g.drawString(badge, (float) (bx + 5 * ui), (float) (hh / 2 - bh / 2 + (bh - m.getHeight()) / 2 + m.getAscent()));
 
-        double titleX = dotX + 2 * r + 8 * ui;
-        GraphTitle.paint(g, latex, titleX, hh / 2, bx - titleX - 8 * ui, 14 * ui);
+        // the live x / y boxes float over layout.controls(); the title stops short of them
+        GraphTitle.paint(g, latex, layout.titleX(), hh / 2, layout.titleWidth(), 14 * ui);
 
         if (live) {
             button(g, resetButton(w), hot == RESET_BUTTON, ui, true);
