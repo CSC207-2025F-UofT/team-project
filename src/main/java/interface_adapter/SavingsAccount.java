@@ -1,3 +1,10 @@
+package interface_adapter;
+
+import entity.Account;
+import entity.AccountType;
+import entity.Category;
+import entity.Income;
+
 import java.io.IOException;
 import java.time.LocalDate;
 

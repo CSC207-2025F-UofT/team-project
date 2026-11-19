@@ -1,9 +1,11 @@
+package entity;
+
+import interface_adapter.*;
 import org.json.JSONArray;
 
 import javax.swing.*;
 import java.io.IOException;
 import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
@@ -45,14 +47,14 @@ public class UserProfile {
         PasswordControl allPasswords = new PasswordControl(userDatabase);
         this.password = password;
         allPasswords.addPassword(password);
-        this.profileImage = "src/main/profile_images/default_profile.png";
+        this.profileImage = "src/main/java/data/profile_images/default_profile.png";
     }
 
     public void addAccount (Account newAccount) throws IOException {
       String userDatabase = "UserData.json";
       UserCreationControl allUsers = new UserCreationControl(userDatabase);
       if (accounts.contains(newAccount.getAccountID())) {
-        throw new IllegalArgumentException("Account has already been added!");
+        throw new IllegalArgumentException("entity.Account has already been added!");
       } else {
       accounts.add(newAccount.getAccountID());
       newAccount.setMainProfile(this.userID);
@@ -86,7 +88,7 @@ public class UserProfile {
     public ImageIcon uploadProfileImage(String imageSource) throws IOException {
       ImageIcon profileImage = new ImageIcon(imageSource);
       Path source = Path.of(imageSource);
-      Path destination = Path.of("src/main/profile_images", this.userID + ".png");
+      Path destination = Path.of("src/main/java/data/profile_images", this.userID + ".png");
       Files.createDirectories(destination.getParent());
       Files.copy(source, destination, StandardCopyOption.REPLACE_EXISTING);
       this.profileImage = String.valueOf(destination);

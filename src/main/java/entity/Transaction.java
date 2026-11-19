@@ -1,5 +1,7 @@
+package entity;
 
-import org.json.JSONArray;
+import interface_adapter.CurrencyControl;
+import interface_adapter.TransactionControl;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -16,8 +18,8 @@ public abstract class Transaction {
     protected String note;
 
     protected Transaction(double amount,
-                       LocalDate date, String description,
-                       Account account, String transactionCurrency, Category category, String note, String source) throws IOException {
+                          LocalDate date, String description,
+                          Account account, String transactionCurrency, Category category, String note, String source) throws IOException {
       String currencyDatabase = "Currencies.json";
       CurrencyControl allCurrencies = new CurrencyControl(currencyDatabase);
         if (amount <= 0) {

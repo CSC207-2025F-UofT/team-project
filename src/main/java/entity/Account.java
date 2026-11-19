@@ -1,3 +1,7 @@
+package entity;
+
+import interface_adapter.*;
+
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.net.InetAddress;
@@ -30,19 +34,19 @@ public class Account {
 
       if (accountName == null || accountName.isBlank() || password == null || password.isBlank()) {
         throw new IllegalArgumentException(
-            "Account name or password cannot be empty!"
+            "entity.Account name or password cannot be empty!"
         );
       } else if (allUsers.usernameTaken(accountName)) {
         throw new IllegalArgumentException(
-            "Account name has already been taken!"
+            "entity.Account name has already been taken!"
         );
       } else if (!accountName.matches("[\\\\x21-\\\\x7E]+") || !password.matches("[\\\\x21-\\\\x7E]+")) {
         throw new IllegalArgumentException(
-            "Account name or password contains illegal characters, please restrict usage to only English letters, numbers, and symbols."
+            "entity.Account name or password contains illegal characters, please restrict usage to only English letters, numbers, and symbols."
         );
       } else if (accountName.equals(password)) {
         throw new IllegalArgumentException(
-            "Account name can not be identical to the password!"
+            "entity.Account name can not be identical to the password!"
         );
       } else if (balance < 0) {
         throw new IllegalArgumentException(
@@ -134,13 +138,13 @@ public class Account {
       if (this.accountName.equals(accountName)) {
         throw new IllegalArgumentException("The new account name must be different from the old.");
       } else if (accountName.equals(password)) {
-        throw new IllegalArgumentException("Account name can not be identical to the password!");
+        throw new IllegalArgumentException("entity.Account name can not be identical to the password!");
       } else if (accountName.isBlank()) {
-        throw new IllegalArgumentException("Account name cannot be empty!");
+        throw new IllegalArgumentException("entity.Account name cannot be empty!");
       } else if (allUsers.usernameTaken(accountName)) {
-        throw new IllegalArgumentException("Account name has already been taken!");
+        throw new IllegalArgumentException("entity.Account name has already been taken!");
       } else if (!accountName.matches("[\\\\x21-\\\\x7E]+")) {
-        throw new IllegalArgumentException("\"Account name contains illegal characters, please restrict usage to only English letters, numbers, and symbols.");
+        throw new IllegalArgumentException("\"entity.Account name contains illegal characters, please restrict usage to only English letters, numbers, and symbols.");
       } else {
         this.accountName = accountName;
         allUsers.changeUsername(accountID, accountName);

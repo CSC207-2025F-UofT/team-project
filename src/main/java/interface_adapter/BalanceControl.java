@@ -1,7 +1,8 @@
+package interface_adapter;
+
 import org.json.JSONArray;
 
 import java.io.IOException;
-import java.util.List;
 
 public class BalanceControl extends JSONControl {
   public BalanceControl(String file) throws IOException {

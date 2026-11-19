@@ -1,3 +1,7 @@
+package interface_adapter;
+
+import entity.Account;
+import entity.Category;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
