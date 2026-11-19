@@ -8,6 +8,9 @@ import interface_adapter.evaluate.EvaluateController;
 import interface_adapter.graph.GraphController;
 import interface_adapter.graph.GraphExploreController;
 import interface_adapter.graph.GraphViewModel;
+import interface_adapter.phase.PhaseController;
+import interface_adapter.phase.PhaseExploreController;
+import interface_adapter.phase.PhaseViewModel;
 import view.FormulaCapture;
 import view.answer.AnswerLayout;
 import view.answer.Formula;
@@ -61,6 +64,8 @@ public class AnswerCanvasPage extends CanvasPage {
     private int running;              // Calculate jobs still going
     private Runnable calculating = () -> { };  // takes the Calculating… card down
     private PopupGraphing graphing;   // one board only: Graph in the popup
+    private PopupPhasePortrait phase; // one board only: Phase Portrait for an ode, null if not wired
+    private Predicate<String> differential = latex -> false;
     private PopupHover hover;         // mouse on an unanswered "=" brings the popup back
     private final Map<Long, Read> reads = new HashMap<>();  // last read per formula
     private final Map<Long, Long> defined = new HashMap<>();  // id -> revision saved as a f(x)=...
@@ -136,6 +141,22 @@ public class AnswerCanvasPage extends CanvasPage {
         addCanvasUnderlay(graphing.graphCard());
         addCanvasOverlay(graphing.rangeBar());
         useBoardLook(background);
+    }
+
+    // ode -> Phase Portrait in the popup, its own use case + card next to Graph's
+    public void enablePhasePortrait(PhaseController controller, PhaseExploreController explore,
+                                    PhaseViewModel viewModel, Predicate<String> isDifferentialEquation) {
+        if (graphing == null || phase != null) {
+            return;   // board only, once
+        }
+        phase = new PopupPhasePortrait(getSharedCanvas(), controller, explore, viewModel, notices,
+                getCanvasArea(), this::publishFormulaOnly);
+        differential = isDifferentialEquation;
+        // one card slot on the canvas: whoever shows last keeps it, the other steps aside
+        graphing.setOnShown(phase::placeRanges);
+        phase.setOnShown(graphing::placeRanges);
+        addCanvasUnderlay(phase.card());
+        addCanvasOverlay(phase.rangeBar());
     }
 
     // the area the board floats things over (same coords as the canvas)
@@ -421,6 +442,8 @@ public class AnswerCanvasPage extends CanvasPage {
             hidePopup();
             showError(capture, "Can't read formula", problem);
             return;
+        } else if (phase != null && differential.test(latex)) {
+            popup.showFormula(latex, null, null, () -> phasePortrait(capture, latex));
         } else if (graphing != null) {
             boolean canGraph = graphable.test(latex);
             boolean canCalc = !canGraph || calculable.test(latex);  // neither -> Calculate says why
@@ -473,6 +496,13 @@ public class AnswerCanvasPage extends CanvasPage {
         hidePopup();
         Rectangle world = getSharedCanvas().formulaBounds(capture.getId());
         graphing.graph(latex, world, capture);
+    }
+
+    // Phase Portrait in the popup: same latex, no second read
+    private void phasePortrait(FormulaCapture capture, String latex) {
+        hidePopup();
+        Rectangle world = getSharedCanvas().formulaBounds(capture.getId());
+        phase.draw(latex, world, capture);
     }
 
     /** Publish only after an explicit Calculate action, never while merely recognizing ink. */

@@ -5,6 +5,7 @@ functions
 2. It can calculate formulas that is written and taken by the photograph.
 3. It can create a pdf file from the formulas and handwriting record.
 4. It graphs functions in plain java, no outside api: y = f(x) in 2D and z = f(x, y) in 3D. Hover reads the real value off the graph (snaps to roots / highs / lows), click pins it, drag pans (2D) or spins (3D), scroll zooms, drag the title bar to move the card, corner to resize.
+4. Lasso a differential equation and the popup offers Phase Portrait (separate from Graph): y' = f(x, y) / dy/dx = ... draws a slope field, y'' = f(y, y') or a system x' = ..., y' = ... (two lines) draws a phase plane w/ arrows. Hover follows the solution through the cursor and reads the point + the arrow / slope there, snaps onto equilibria (saddle, node, spiral, center, stable / unstable lines), click pins a solution curve, click it again to drop it; same move / resize / pan / zoom as the graph card.
 4. Supported formulas are polynomials, functions, sin, cos, tan, derivative, integration, e, log,ln, vector, logic operator.
 5. might supporthandwriting detection for any text in near future, and this will intergrade into the function of pdf editing.
 

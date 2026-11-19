@@ -932,11 +932,43 @@ class AnswerCanvasPageTest {
                     java.awt.Color.WHITE);
             page.setCalculateCheck(calcCheck::canCalculate);
             page.setQuestionCheck(new QuestionCheckInteractor()::isQuestion);
+            page.enablePhasePortrait(new interface_adapter.phase.PhaseController(input -> phaseAsked.add(input.getLatex())),
+                    new interface_adapter.phase.PhaseExploreController(new NoPhaseExplore()),
+                    new interface_adapter.phase.PhaseViewModel(),
+                    new use_case.phase_check.PhaseCheckInteractor(
+                            new entity.phase.DifferentialEquationParser())::isDifferentialEquation);
             page.setPopupDelay(100);
             shared.attachTo(page);
             page.setSize(900, 560);
             layout(page);
         });
+    }
+
+    private final java.util.List<String> phaseAsked = new java.util.concurrent.CopyOnWriteArrayList<>();
+
+    @Test
+    void odeGetsOnlyPhasePortrait() throws Exception {
+        boardPopupFor("y'=x-y");
+        assertTrue(popup().hasPhasePortrait());
+        assertFalse(popup().hasCalculate());
+        assertFalse(popup().hasGraph());
+        AnswerPopup shown = popup();
+        SwingUtilities.invokeAndWait(shown::clickPhasePortrait);
+        waitFor(() -> phaseAsked.size() == 1, "phase portrait use case");
+        assertEquals("y'=x-y", phaseAsked.get(0));
+    }
+
+    @Test
+    void systemOfOdesGetsPhasePortraitToo() throws Exception {
+        boardPopupFor("\\begin{matrix}x'=y\\\\y'=-x\\end{matrix}");
+        assertTrue(popup().hasPhasePortrait());
+    }
+
+    @Test
+    void functionStillGetsGraphNotPhasePortrait() throws Exception {
+        boardPopupFor("y=3x");
+        assertFalse(popup().hasPhasePortrait());
+        assertTrue(popup().hasGraph());
     }
 
     private void boardPopupFor(String latex) throws Exception {
@@ -987,6 +1019,15 @@ class AnswerCanvasPageTest {
         waitFor(() -> calls.get() == 1, "the read");
         Thread.sleep(300);
         assertNull(popup());
+    }
+
+    private static final class NoPhaseExplore implements use_case.explore_phase.ExplorePhaseInputBoundary {
+        @Override public void pan(double dx, double dy) { }
+        @Override public void zoom(double cx, double cy, double fx, double fy) { }
+        @Override public void reset() { }
+        @Override public void trace(double h, double v, double snapH, double snapV) { }
+        @Override public void endTrace() { }
+        @Override public void toggleSolution(double h, double v, double snapH, double snapV) { }
     }
 
     // graph never runs here, nothing to explore

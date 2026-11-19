@@ -34,6 +34,30 @@ public final class Icons {
         g.draw(p);
     }
 
+    // inward spiral w/ an arrow on the way in, phase portrait
+    public static void phase(Graphics2D g) {
+        prep(g);
+        Path2D p = new Path2D.Double();
+        int n = 64;
+        for (int i = 0; i <= n; i++) {
+            double t = i * 3.3 * Math.PI / n;
+            double r = 8.5 - t * 0.62;
+            double x = r * Math.cos(t);
+            double y = -r * Math.sin(t);
+            if (i == 0) {
+                p.moveTo(x, y);
+            } else {
+                p.lineTo(x, y);
+            }
+        }
+        g.draw(p);
+        Path2D head = new Path2D.Double();
+        head.moveTo(5.6, -3.4);
+        head.lineTo(8.3, -3.6);
+        head.lineTo(9.6, -1.2);
+        g.draw(head);
+    }
+
     public static void save(Graphics2D g) {
         prep(g);
         g.draw(new RoundRectangle2D.Double(-8,-8,16,16,2,2));
