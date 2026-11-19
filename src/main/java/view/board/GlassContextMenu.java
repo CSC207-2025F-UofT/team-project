@@ -1,7 +1,6 @@
 package view.board;
 
 import javax.swing.BorderFactory;
-import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 import javax.swing.plaf.basic.BasicPopupMenuUI;
@@ -30,19 +29,6 @@ public final class GlassContextMenu extends JPopupMenu {
         item.addActionListener(e -> action.run());
         add(item);
         return item;
-    }
-
-    /** Style a nested page-destination submenu without changing its commands. */
-    public void addSubmenu(JMenu menu) {
-        menu.setOpaque(false);
-        menu.setFont(BoardTheme.font(12.5f));
-        menu.setBorder(BorderFactory.createEmptyBorder(8, 12, 8, 12));
-        JPopupMenu child = menu.getPopupMenu();
-        child.setUI(new BasicPopupMenuUI());
-        child.setOpaque(false);
-        child.setBackground(new Color(0, 0, 0, 0));
-        child.setBorder(BorderFactory.createEmptyBorder(6, 6, 6, 6));
-        add(menu);
     }
 
     @Override protected void paintComponent(Graphics graphics) {

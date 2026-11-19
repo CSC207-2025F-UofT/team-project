@@ -86,6 +86,20 @@ public final class DocEditorPanel extends JPanel implements PdfWorkspacePort {
             @Override public void editNote() { DocEditorPanel.this.editNote(); }
             @Override public void editFormula() { DocEditorPanel.this.editFormula(); }
             @Override public void typeInDocument() { DocEditorPanel.this.typeOnPage(); }
+            @Override public void typeInDocumentAt(float x,float y) {
+                controller.clearSelection();
+                paper.editBodyInlineAt(x,y);
+            }
+            @Override public void bodyChanged() { updateStatus(); }
+            @Override public void bodyOverflow() {
+                // Already on the EDT. Do not queue a second page jump that could
+                // run after the user has manually navigated back to an earlier page.
+                int next = controller.currentPage() + 1;
+                if (next < controller.pageCount()) {
+                    changePage(next);
+                    paper.editBodyInline();
+                }
+            }
         });
         paper.setBackground(DESK);
         pageScroll = new JScrollPane(new CenteredDesk(paper));
@@ -206,7 +220,7 @@ public final class DocEditorPanel extends JPanel implements PdfWorkspacePort {
     }
     private JPanel homeRibbon() {
         JPanel row = ribbon();
-        command(row, RibbonButton.labeled(DocIcons::comment, "Type"), this::typeOnPage);
+        command(row, RibbonButton.labeled(DocIcons::comment, "Write"), this::typeOnPage);
         command(row, RibbonButton.icon(Icons::undo, "Undo"), this::undo);
         command(row, RibbonButton.icon(DocIcons::redo, "Redo"), this::redo);
         command(row, RibbonButton.labeled(DocIcons::deletePage, "Delete item"), this::deleteSelectedItem);
@@ -263,6 +277,8 @@ public final class DocEditorPanel extends JPanel implements PdfWorkspacePort {
         command(row, RibbonButton.labeled(Icons::preview, "Preview"), this::preview);
         command(row, RibbonButton.labeled(Icons::fullScreen, "Full screen"), () -> toggleFullscreen.run());
         command(row, RibbonButton.labeled(DocIcons::fitPage, "Fit page"), this::fitWhenOpened);
+        command(row, RibbonButton.labeled(DocIcons::layers, "Image Layout…"), this::showImageLayoutMenu);
+        command(row, RibbonButton.labeled(Icons::pointer, "Select all"), this::selectAllPdfObjects);
         command(row, RibbonButton.letter("−", Font.PLAIN, false, false, "Zoom out"), () -> zoom(paper.zoom() / 1.15));
         command(row, RibbonButton.letter("+", Font.PLAIN, false, false, "Zoom in"), () -> zoom(paper.zoom() * 1.15));
         return row;
@@ -324,7 +340,9 @@ public final class DocEditorPanel extends JPanel implements PdfWorkspacePort {
         }
     }
     private void setupLibrary() {
-        libraryPanel.setBackground(Color.WHITE);
+        // The Library is an overlay on the desk, not a white sheet.
+        // Only the actual material glyphs/graph pixels should be painted.
+        libraryPanel.setOpaque(false);
         libraryPanel.setBorder(BorderFactory.createMatteBorder(0, 0, 0, 1, DIVIDER));
         libraryPanel.setPreferredSize(new Dimension(188, 0));
         JPanel header = new JPanel(new BorderLayout());header.setOpaque(false);
@@ -347,13 +365,27 @@ public final class DocEditorPanel extends JPanel implements PdfWorkspacePort {
         libraryActions.add(close);
         header.add(libraryActions, BorderLayout.EAST);
         libraryPanel.add(header, BorderLayout.NORTH);
+        libraryList.setOpaque(false);
+        libraryList.setBackground(new Color(0, 0, 0, 0));
         libraryList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         libraryList.setFixedCellHeight(76);
         libraryList.setFont(BoardTheme.font(12f));
         libraryList.setCellRenderer((list, material, index, selected, focus) -> {
-            JPanel card = new JPanel(new BorderLayout(0, 3));
+            JPanel card = new JPanel(new BorderLayout(0, 3)) {
+                @Override protected void paintComponent(Graphics graphics) {
+                    super.paintComponent(graphics);
+                    if (selected) {
+                        Graphics2D g2 = (Graphics2D) graphics.create();
+                        g2.setColor(new Color(0, 122, 255, 28));
+                        g2.fillRoundRect(0, 0, getWidth(), getHeight(), 12, 12);
+                        g2.dispose();
+                    }
+                }
+            };
             card.setBorder(BorderFactory.createEmptyBorder(5, 8, 5, 6));
-            card.setBackground(selected ? new Color(0xDCEAFE) : Color.WHITE);
+            // Non-opaque even when selected: translucent selection paint must
+            // never advertise an opaque surface (which causes macOS artifacts).
+            card.setOpaque(false);
             if (material != null) {
                 JLabel label = new JLabel(material.isGraph() ? "Graph" : material.title());
                 label.setFont(BoardTheme.font(11f));
@@ -409,7 +441,10 @@ public final class DocEditorPanel extends JPanel implements PdfWorkspacePort {
                 }
             }
         });
-        JScrollPane scroll = new JScrollPane(libraryList);scroll.setBorder(null);
+        JScrollPane scroll = new JScrollPane(libraryList);
+        scroll.setBorder(null);
+        scroll.setOpaque(false);
+        scroll.getViewport().setOpaque(false);
         libraryPanel.add(scroll, BorderLayout.CENTER);
         JLabel help = new JLabel("Drag to page or double-click");
         help.setFont(BoardTheme.font(10f)); help.setForeground(MUTED);
@@ -443,7 +478,12 @@ public final class DocEditorPanel extends JPanel implements PdfWorkspacePort {
         pageCount.setText("Page " + (controller.currentPage() + 1) + " of " + controller.pageCount());
         paper.repaint();
     }
-    private void changePage(int target) {paper.finishInlineEdit();controller.switchPage(target);updateStatus();}
+    private void changePage(int target) {
+        paper.finishInlineEdit();
+        controller.switchPage(target);
+        paper.clearPageSelection();
+        updateStatus();
+    }
     private void zoom(double z) {
         double actual = paper.setZoom(z);
         updatingZoom = true;
@@ -522,6 +562,18 @@ public final class DocEditorPanel extends JPanel implements PdfWorkspacePort {
         String action = "deletePdfSelection";
         keys.put(KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0), action);
         keys.put(KeyStroke.getKeyStroke(KeyEvent.VK_BACK_SPACE, 0), action);
+        int shortcut = GraphicsEnvironment.isHeadless() ? KeyEvent.CTRL_DOWN_MASK
+                : java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx();
+        keys.put(KeyStroke.getKeyStroke(KeyEvent.VK_A, shortcut), "selectAllPdfObjects");
+        actions.put("selectAllPdfObjects", new AbstractAction() {
+            @Override public void actionPerformed(java.awt.event.ActionEvent event) {
+                if (!paper.isEditingNote()) selectAllPdfObjects();
+            }
+        });
+        keys.put(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), "clearPdfSelection");
+        actions.put("clearPdfSelection", new AbstractAction() {
+            @Override public void actionPerformed(java.awt.event.ActionEvent event) { paper.clearPageSelection(); }
+        });
         actions.put(action, new AbstractAction() {
             @Override public void actionPerformed(java.awt.event.ActionEvent event) {
                 deleteSelectedItem();
@@ -549,19 +601,47 @@ public final class DocEditorPanel extends JPanel implements PdfWorkspacePort {
         }
     }
     private void autoLayout() {controller.autoLayout();updateStatus();}
-    /** Normal document body starts at 1-inch margins. Text boxes stay a separate Insert tool. */
-    public void typeOnPage() {
+    private void selectAllPdfObjects() {
         paper.finishInlineEdit();
-        PdfDocument.Placement body = controller.placements().stream()
-                .filter(p -> p.isNote() && Math.abs(p.x()-72)<.5 && Math.abs(p.y()-72)<.5
-                        && p.width() >= 440).findFirst().orElse(null);
-        if (body == null) {
-            body = controller.addNoteAt(72, 72);
-            controller.beginTransform();
-            controller.transform(72, 72, 451, 690);
-        } else controller.select(body.id());
+        controller.selectAll();
         updateStatus();
-        paper.editNoteInline();
+    }
+    private void changeImageLayout(PdfDocument.ImageLayer layer) {
+        paper.finishInlineEdit();
+        if (controller.imageLayoutAndReflow(layer)) updateStatus();
+    }
+
+    /** The three options are real layout operations, not placeholder menu states. */
+    private void showImageLayoutMenu() {
+        if (controller.selectedIds().stream().noneMatch(id -> controller.placements().stream()
+                .anyMatch(p -> p.id().equals(id) && !p.isNote()))) {
+            GlassDialogs.warning(this, "Select an image, graph or formula first.");
+            return;
+        }
+        GlassContextMenu menu = new GlassContextMenu();
+        addImageLayoutActions(menu);
+        menu.show(this, Math.max(14, getWidth() / 3), 105);
+    }
+    private void addImageLayoutActions(GlassContextMenu menu) {
+        PdfDocument.Placement chosen = controller.selected();
+        PdfDocument.ImageLayer current = chosen == null || chosen.isNote()
+                ? PdfDocument.ImageLayer.IN_FRONT_OF_TEXT : chosen.imageLayer();
+        item(menu, current == PdfDocument.ImageLayer.IN_FRONT_OF_TEXT
+                ? "In Front of Text  (Current)" : "In Front of Text",
+                () -> changeImageLayout(PdfDocument.ImageLayer.IN_FRONT_OF_TEXT));
+        item(menu, current == PdfDocument.ImageLayer.BEHIND_TEXT
+                ? "Behind Text  (Current)" : "Behind Text",
+                () -> changeImageLayout(PdfDocument.ImageLayer.BEHIND_TEXT));
+        item(menu, current == PdfDocument.ImageLayer.WRAP_TEXT
+                ? "Wrap Text  (Current)" : "Wrap Text",
+                () -> changeImageLayout(PdfDocument.ImageLayer.WRAP_TEXT));
+    }
+
+    /** Word-like body is a separate flowing document layer, never a large text box. */
+    public void typeOnPage() {
+        controller.clearSelection();
+        paper.editBodyInline();
+        updateStatus();
     }
     private void addNote() {paper.finishInlineEdit();controller.addNote();updateStatus();editNote();}
     private void insertFormula() {
@@ -613,7 +693,7 @@ public final class DocEditorPanel extends JPanel implements PdfWorkspacePort {
     }
     private void editNote() {
         if (!paper.editNoteInline()) {
-            GlassDialogs.warning(this, "Select a text box first, or double-click an empty page to type.");
+            GlassDialogs.warning(this, "Select a text box to edit it, or click Write to type in the document.");
         }
     }
     private void setNoteStyle(String style) {
@@ -653,21 +733,14 @@ public final class DocEditorPanel extends JPanel implements PdfWorkspacePort {
         item(menu, "Move to page…", this::moveToPageMenu);
         menu.show(this, Math.max(12, getWidth() / 3), 100);
     }
-    /** Build destinations once for the ribbon and the document context menu. */
-    private JMenu pageDestinations() {
-        JMenu destinations = new JMenu("Move to page");
+    /** Append native-feeling page targets directly to the shared glass menu, not a legacy JMenu. */
+    private void addPageDestinations(GlassContextMenu menu) {
         for (int i = 0; i < controller.pageCount(); i++) {
+            if (i == controller.currentPage()) continue;
             final int destination = i;
-            if (i != controller.currentPage()) {
-                JMenuItem target = new JMenuItem("Page " + (i + 1));
-                target.addActionListener(e -> moveSelectedToPage(destination));
-                destinations.add(target);
-            }
+            item(menu, "Move to Page " + (i + 1), () -> moveSelectedToPage(destination));
         }
-        JMenuItem newPage = new JMenuItem("New page");
-        newPage.addActionListener(e -> moveSelectedToPage(-1));
-        destinations.add(newPage);
-        return destinations;
+        item(menu, "Move to New Page", () -> moveSelectedToPage(-1));
     }
     private void moveSelectedToPage(int destination) {
         paper.finishInlineEdit();
@@ -689,9 +762,9 @@ public final class DocEditorPanel extends JPanel implements PdfWorkspacePort {
         GlassContextMenu menu = new GlassContextMenu();
         PdfDocument.Placement selected = controller.selected();
         if (selected == null) {
-            item(menu, "Type here", () -> {
-                controller.addNoteAt(paper.pageX(event.getX()), paper.pageY(event.getY()));
-                updateStatus();editNote();
+            item(menu, "Write here", () -> {
+                controller.clearSelection();
+                paper.editBodyInlineAt(paper.pageX(event.getX()), paper.pageY(event.getY()));
             });
             item(menu, "Insert formula", this::insertFormula);
             item(menu, "Capture Canvas area", () -> regionCapture.run());
@@ -705,8 +778,11 @@ public final class DocEditorPanel extends JPanel implements PdfWorkspacePort {
             item(menu, "Send backward one layer", () -> arrange(-1));
             item(menu, "Bring to front", () -> arrange(2));
             item(menu, "Send to back", () -> arrange(-2));
-            menu.addSubmenu(pageDestinations());
-            item(menu, "Delete selected item", this::deleteSelectedItem);
+            if (controller.selectedIds().stream().anyMatch(id -> controller.placements().stream()
+                    .anyMatch(p -> p.id().equals(id) && !p.isNote()))) addImageLayoutActions(menu);
+            addPageDestinations(menu);
+            item(menu, controller.selectedIds().size() > 1 ? "Delete selected items" : "Delete selected item",
+                    this::deleteSelectedItem);
         }
         menu.show(paper, event.getX(), event.getY());
     }

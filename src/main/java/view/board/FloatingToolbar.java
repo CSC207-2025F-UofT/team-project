@@ -120,6 +120,7 @@ public final class FloatingToolbar {
     }
 
     private boolean choosePointer() {
+        pdfPanel.editor().pageView().clearPageSelection();
         // The ordinary pointer belongs to the PDF interaction mode; Canvas keeps
         // its existing safe selection behavior without modifying teammates' code.
         canvas.setTool(DrawingCanvas.Tool.LASSO);
@@ -134,6 +135,9 @@ public final class FloatingToolbar {
     }
 
     private boolean chooseTool(DrawingCanvas.Tool tool) {
+        boolean wasPointer = pdfPointerMode;
+        if (wasPointer || canvas.getTool() != tool)
+            pdfPanel.editor().pageView().clearPageSelection();
         pdfPointerMode = false;
         boolean sameSelection = tool == DrawingCanvas.Tool.LASSO
                 && canvas.getTool() == DrawingCanvas.Tool.RECTANGLE;

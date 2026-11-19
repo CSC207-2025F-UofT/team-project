@@ -4,7 +4,7 @@ import java.util.Objects;
 
 /** View-facing snapshot of the current canvas save state (no persistence logic here). */
 public record SaveMenuState(String name, Phase phase) {
-    public enum Phase { NEW, MODIFIED, SAVED }
+    public enum Phase { NEW, MODIFIED, SAVING, SAVED }
 
     public SaveMenuState {
         name = Objects.requireNonNull(name).trim();

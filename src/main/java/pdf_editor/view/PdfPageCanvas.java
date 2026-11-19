@@ -1,6 +1,8 @@
 package pdf_editor.view;
 
 import pdf_editor.adapter.PdfEditorController;
+import pdf_editor.adapter.PdfBodyFlowLayout;
+import pdf_editor.adapter.PdfWrapTextLayout;
 import pdf_editor.adapter.CanvasHistoryImporter;
 import interface_adapter.history.CanvasHistorySelection;
 import pdf_editor.adapter.PageZoomModel;
@@ -26,6 +28,9 @@ public final class PdfPageCanvas extends JPanel {
         void editNote();
         void editFormula();
         default void typeInDocument() { }
+        default void typeInDocumentAt(float x, float y) { typeInDocument(); }
+        default void bodyOverflow() { }
+        default void bodyChanged() { }
     }
     private static final int MARGIN = 28;
     private final PdfEditorController controller;
@@ -62,9 +67,118 @@ public final class PdfPageCanvas extends JPanel {
     private boolean resizing;
     private boolean dragStarted;
     private boolean editingBeforePress;
+    private boolean clearedSelectionOnPress;
     private InlineNoteEditor inlineNote;
+    /** Independent flowing body; never appears in the selectable placement collection. */
+    private InlineNoteEditor inlineBody;
+    private boolean forwardingBodyOverflow;
+    private int lastBodyLength;
+    private int bodyEditorPage = -1;
     private String editingId;
     private int liveEditorHeight;
+    /** Start borderless page body editing. Floating notes remain separately selectable. */
+    public void editBodyInline() { editBodyInlineAt(Float.NaN, Float.NaN); }
+    public void editBodyInlineAt(float pageX, float pageY) {
+        if (inlineBody != null) {
+            positionBodyCaret(pageX, pageY);
+            inlineBody.requestFocusInWindow(); return;
+        }
+        finishInlineEdit();
+        final int editedPage = controller.currentPage();
+        PdfDocument.Placement bodyNote = PdfBodyFlowLayout.displayNote(controller.body());
+        inlineBody = new InlineNoteEditor(bodyNote, zoom(), spans -> {
+            // Concatenate all downstream flowing pages before repagination; do not
+            // discard text that was already on following pages.
+            java.util.List<java.util.List<PdfDocument.NoteSpan>> rest = new java.util.ArrayList<>();
+            rest.add(spans);
+            for (int page = editedPage + 1; page < controller.pageCount(); page++)
+                rest.add(controller.body(page));
+            java.util.List<java.util.List<PdfDocument.NoteSpan>> pages =
+                    PdfWrapTextLayout.paginate(PdfBodyFlowLayout.concat(rest),
+                            controller.documentSnapshot(), editedPage);
+            boolean differs = false;
+            for (int i = editedPage; i < Math.max(controller.pageCount(), editedPage+pages.size()); i++) {
+                var expected = i - editedPage < pages.size() ? pages.get(i-editedPage) : java.util.List.<PdfDocument.NoteSpan>of();
+                var existing = i < controller.pageCount() ? controller.body(i) : java.util.List.<PdfDocument.NoteSpan>of();
+                if (!expected.equals(existing)) { differs = true; break; }
+            }
+            if (differs) {
+                controller.updateFlowingBody(editedPage, pages);
+                listener.bodyChanged();
+            }
+            InlineNoteEditor old = inlineBody;
+            inlineBody = null;
+            if (old != null) remove(old);
+            revalidate(); repaint();
+        }, () -> checkBodyOverflow());
+        bodyEditorPage = editedPage;
+        lastBodyLength = inlineBody.getDocument().getLength();
+        inlineBody.setBorder(null);
+        inlineBody.setOpaque(false);
+        inlineBody.setBackground(new Color(0,0,0,0));
+        inlineBody.setMargin(new Insets(6, 7, 6, 7));
+        inlineBody.setPassThroughHit(local -> {
+            if (inlineBody == null) return false;
+            float x = toPageX(inlineBody.getX() + local.x);
+            float y = toPageY(inlineBody.getY() + local.y);
+            for (PdfDocument.Placement material : controller.placements()) {
+                if (material.isNote() || material.imageLayer() == PdfDocument.ImageLayer.BEHIND_TEXT) continue;
+                if (x >= material.x() && x <= material.x()+material.width()
+                        && y >= material.y() && y <= material.y()+material.height()) return true;
+            }
+            return false;
+        });
+        setLayout(null);
+        positionBodyEditor();
+        add(inlineBody, 0);
+        revalidate(); repaint();
+        positionBodyCaret(pageX, pageY);
+        SwingUtilities.invokeLater(() -> { if (inlineBody != null) inlineBody.requestFocusInWindow(); });
+    }
+    private void positionBodyCaret(float pageX, float pageY) {
+        if (inlineBody == null) return;
+        int position;
+        if (Float.isFinite(pageX) && Float.isFinite(pageY)) {
+            position = inlineBody.viewToModel2D(new Point(
+                    Math.max(0, Math.round((pageX - PdfDocument.BODY_LEFT) * (float)zoom())),
+                    Math.max(0, Math.round((pageY - PdfDocument.BODY_TOP) * (float)zoom()))));
+        } else position = inlineBody.getDocument().getLength();
+        inlineBody.setCaretPosition(Math.max(0, Math.min(inlineBody.getDocument().getLength(), position)));
+    }
+
+    private void checkBodyOverflow() {
+        if (inlineBody == null || forwardingBodyOverflow || controller.currentPage() != bodyEditorPage) return;
+        int length = inlineBody.getDocument().getLength();
+        // Visiting an already-filled earlier page or changing formatting must NOT
+        // force a jump to the last page. Only actual new typing at the end may advance.
+        boolean added = length > lastBodyLength;
+        lastBodyLength = length;
+        if (!added || inlineBody.getCaretPosition() < length - 2) return;
+        java.util.List<PdfDocument.NoteSpan> content =
+                pdf_editor.adapter.NoteTextDocumentFactory.toSpans(inlineBody, zoom());
+        boolean overflowing = PdfWrapTextLayout.page(content, 0, controller.placements()).until()
+                < PdfBodyFlowLayout.plainText(content).length();
+        if (!overflowing) return;
+        final int pageAtOverflow = bodyEditorPage;
+        forwardingBodyOverflow = true;
+        SwingUtilities.invokeLater(() -> {
+            try {
+                if (inlineBody != null && controller.currentPage() == pageAtOverflow) {
+                    finishInlineEdit();
+                    listener.bodyOverflow();
+                }
+            } finally { forwardingBodyOverflow = false; }
+        });
+    }
+
+    private void positionBodyEditor() {
+        if (inlineBody == null) return;
+        int x = Math.round(PdfBodyFlowLayout.LEFT * (float) zoom()) + MARGIN;
+        int y = Math.round(PdfBodyFlowLayout.TOP * (float) zoom()) + MARGIN;
+        int width = Math.max(120, Math.round(PdfBodyFlowLayout.WIDTH * (float)zoom()));
+        int height = Math.max(120, Math.round(PdfBodyFlowLayout.HEIGHT * (float)zoom()));
+        inlineBody.setBounds(x, y, width, height);
+    }
     /** Begin Word-like in-place editing of the selected text object, without opening another window. */
     public boolean editNoteInline() {
         PdfDocument.Placement note = controller.selected();
@@ -121,11 +235,21 @@ public final class PdfPageCanvas extends JPanel {
         }
         return false;
     }
-    public boolean isEditingNote() { return inlineNote != null; }
-    public void toggleInlineStyle(Object style) { if (inlineNote != null) inlineNote.toggleStyle(style); }
-    public void setInlineFontFamily(String family) { if (inlineNote != null) inlineNote.fontFamily(family); }
-    public void setInlineFontSize(int size) { if (inlineNote != null) inlineNote.fontSize(size); }
+    public boolean isEditingNote() { return inlineNote != null || inlineBody != null; }
+    public void toggleInlineStyle(Object style) {
+        InlineNoteEditor editing = inlineBody != null ? inlineBody : inlineNote;
+        if (editing != null) editing.toggleStyle(style);
+    }
+    public void setInlineFontFamily(String family) {
+        InlineNoteEditor editing = inlineBody != null ? inlineBody : inlineNote;
+        if (editing != null) editing.fontFamily(family);
+    }
+    public void setInlineFontSize(int size) {
+        InlineNoteEditor editing = inlineBody != null ? inlineBody : inlineNote;
+        if (editing != null) editing.fontSize(size);
+    }
     public void finishInlineEdit() {
+        if (inlineBody != null) inlineBody.finish();
         // Re-measure synchronously before commit, even when a pending document event
         // has not yet reached the EDT (e.g., typing and immediately clicking away).
         if (inlineNote != null) growInlineNote();
@@ -155,6 +279,7 @@ public final class PdfPageCanvas extends JPanel {
     }
     @Override public void doLayout() {
         super.doLayout();
+        positionBodyEditor();
         if (inlineNote != null) {
             PdfDocument.Placement note = controller.selected();
             if (note != null && note.isNote()) positionInlineEditor(note);
@@ -185,7 +310,6 @@ public final class PdfPageCanvas extends JPanel {
     }
 
     private final java.util.List<Point> lassoScreenPath = new java.util.ArrayList<>();
-    private final java.util.Set<String> selectedGroup = new java.util.LinkedHashSet<>();
     private final java.util.Set<String> selectionCandidates = new java.util.LinkedHashSet<>();
     private final java.util.Map<String, PdfDocument.Placement> groupDragOriginal = new java.util.LinkedHashMap<>();
     /** Input routing is View-only; stored ink is an immutable PDF material placement. */
@@ -264,9 +388,26 @@ public final class PdfPageCanvas extends JPanel {
     private void updateToolCursor() {
         view.DrawingCanvas.Tool current = drawingOnPdf ? drawingTool.get() : null;
         if (cursorTool == current && pdfToolCursor != null) return;
+        // A tool switch must not strand a previous lasso's blue selection overlay.
+        if (cursorTool != current) {
+            controller.clearSelection();
+            selectionCandidates.clear();
+            repaint();
+        }
         cursorTool = current;
         pdfToolCursor = PdfToolCursors.forTool(current);
         setCursor(pdfToolCursor);
+    }
+    /** Escape deselects even when the view isn't redrawn by a document operation. */
+    public void clearPageSelection() {
+        controller.clearSelection();
+        selectionCandidates.clear();
+        groupDragOriginal.clear();
+        selectingBox = false;
+        selectionBoxStart = null; selectionBoxEnd = null;
+        lassoScreenPath.clear();
+        anchor = null;
+        repaint();
     }
     private void refreshErasePreview() {
         liveErasedInk.clear();
@@ -419,34 +560,41 @@ public final class PdfPageCanvas extends JPanel {
                 updateToolCursor();
                 requestFocusInWindow();
                 if (inkToolActive()) {beginPdfStroke(e);return;}
-                // Keep PPT text-box exit behaviour; don't immediately create a body on that click.
-                editingBeforePress = inlineNote != null;
+                // Commit an active body/note before choosing a PDF object.
+                editingBeforePress = inlineNote != null || inlineBody != null;
                 finishInlineEdit();
-                controller.selectAt(toPageX(e.getX()), toPageY(e.getY()));
-                PdfDocument.Placement p = controller.selected();
+                clearedSelectionOnPress = !controller.selectedIds().isEmpty();
+                PdfDocument.Placement hit = controller.hitAt(toPageX(e.getX()), toPageY(e.getY()));
+                boolean additive = e.isShiftDown() || e.isControlDown() || e.isMetaDown();
                 anchor = null; dragStarted = false;
-                selectingBox = selectionToolActive() && p == null && SwingUtilities.isLeftMouseButton(e);
+                selectingBox = selectionToolActive() && hit == null && SwingUtilities.isLeftMouseButton(e);
                 selectionBoxStart = selectingBox ? e.getPoint() : null;
                 selectionBoxEnd = selectionBoxStart;
                 lassoScreenPath.clear();
+                groupDragOriginal.clear();
                 if (selectingBox) {
                     selectionCandidates.clear();
-                    selectedGroup.clear();
                     lassoScreenPath.add(e.getPoint());
+                    if (!additive) controller.clearSelection();
+                } else if (hit == null) {
+                    controller.clearSelection();
+                } else if (additive && SwingUtilities.isLeftMouseButton(e)) {
+                    controller.toggleSelection(hit.id());
+                } else if (!controller.isSelected(hit.id())) {
+                    controller.select(hit.id());
                 }
-                groupDragOriginal.clear();
-                if (p != null && selectionToolActive()) {
-                    if (!selectedGroup.contains(p.id())) selectedGroup.clear();
-                    selectedGroup.add(p.id());
-                    if (selectedGroup.size() > 1) {
-                        for (var element : controller.placements()) {
-                            if (selectedGroup.contains(element.id())) groupDragOriginal.put(element.id(), element);
-                        }
+                PdfDocument.Placement p = controller.selected();
+                // Preserve the entire selected group when starting a drag on any member.
+                if (hit != null && controller.isSelected(hit.id()) && !additive) {
+                    for (var element : controller.placements()) {
+                        if (controller.isSelected(element.id())) groupDragOriginal.put(element.id(), element);
                     }
+                    p = hit;
                 }
-                if (p != null) {
+                if (p != null && !additive) {
                     oldX = p.x(); oldY = p.y(); oldW = p.width(); oldH = p.height();
-                    resizing = toPageX(e.getX()) > p.x() + p.width() - 18 / zoom()
+                    resizing = controller.selectedIds().size() == 1 &&
+                            toPageX(e.getX()) > p.x() + p.width() - 18 / zoom()
                             && toPageY(e.getY()) > p.y() + p.height() - 18 / zoom();
                     if (SwingUtilities.isLeftMouseButton(e)) anchor = e.getPoint();
                 }
@@ -501,7 +649,7 @@ public final class PdfPageCanvas extends JPanel {
                                     Math.abs(selectionBoxStart.x - selectionBoxEnd.x),
                                     Math.abs(selectionBoxStart.y - selectionBoxEnd.y));
                         }
-                        selectedGroup.clear();
+                        java.util.Set<String> chosen = new java.util.LinkedHashSet<>();
                         for (var item : controller.placements()) {
                             int cx = Math.round((item.x() + item.width()/2) * (float)zoom()) + MARGIN;
                             int cy = Math.round((item.y() + item.height()/2) * (float)zoom()) + MARGIN;
@@ -510,38 +658,45 @@ public final class PdfPageCanvas extends JPanel {
                             int width = Math.max(1, Math.round(item.width() * (float) zoom()));
                             int height = Math.max(1, Math.round(item.height() * (float) zoom()));
                             if (region.contains(cx, cy) || region.intersects(left, top, width, height))
-                                selectedGroup.add(item.id());
+                                chosen.add(item.id());
                         }
-                        if (!selectedGroup.isEmpty()) controller.select(selectedGroup.iterator().next());
+                        controller.setSelection(chosen, e.isShiftDown() || e.isControlDown() || e.isMetaDown());
                     }
-                    // Keep the selected items highlighted after the lasso gesture ends.
+                    // Keep multi-selection visible until Escape, blank click or tool/page switch.
                     selectionCandidates.clear();
                     selectionBoxStart = null; selectionBoxEnd = null; lassoScreenPath.clear();
                     repaint();
                 }
+                boolean movedPicture = dragStarted;
                 anchor = null; dragStarted = false; groupDragOriginal.clear();
+                if (movedPicture && controller.reflowAfterImageMove()) listener.bodyChanged();
                 if (e.isPopupTrigger()) listener.contextMenu(e);
             }
             @Override public void mouseClicked(MouseEvent e) {
                 if (inkToolActive() || selectionToolActive()) return;
-                if (SwingUtilities.isLeftMouseButton(e) && e.getClickCount() == 1 && !editingBeforePress) {
+                if (SwingUtilities.isLeftMouseButton(e) && e.getClickCount() == 1 && !editingBeforePress
+                        && !clearedSelectionOnPress && !e.isShiftDown() && !e.isControlDown() && !e.isMetaDown()) {
                     var chosen = controller.selected();
                     float x=toPageX(e.getX()), y=toPageY(e.getY());
                     if (x>=0 && y>=0 && x<PdfDocument.PAGE_WIDTH && y<PdfDocument.PAGE_HEIGHT) {
-                        if (chosen == null) listener.typeInDocument();
-                        else if (chosen.isNote() && chosen.width() >= 440 && Math.abs(chosen.x()-72)<.5f)
-                            listener.editNote();
+                        if (chosen == null) listener.typeInDocumentAt(x,y);
+                        else if (chosen.isNote()) listener.editNote();
                     }
                 }
                 if (e.getClickCount() == 2 && SwingUtilities.isLeftMouseButton(e)) {
                     if (controller.selected() == null) {
-                        listener.typeInDocument();
+                        listener.typeInDocumentAt(toPageX(e.getX()), toPageY(e.getY()));
                     } else if (controller.selected().isNote()) listener.editNote();
                     else if (!controller.selected().material().isGraph()) listener.editFormula();
                 }
+                clearedSelectionOnPress = false;
             }
         };
         addMouseListener(mouse); addMouseMotionListener(mouse);
+        getInputMap(JComponent.WHEN_FOCUSED).put(KeyStroke.getKeyStroke("ESCAPE"), "pdfClearSelection");
+        getActionMap().put("pdfClearSelection", new AbstractAction() {
+            @Override public void actionPerformed(java.awt.event.ActionEvent e) { clearPageSelection(); }
+        });
     }
     private static java.awt.image.BufferedImage imageAsBuffered(java.awt.Image image) {
         if (image instanceof java.awt.image.BufferedImage buffered) return buffered;
@@ -552,6 +707,42 @@ public final class PdfPageCanvas extends JPanel {
         java.awt.Graphics2D graphics = copy.createGraphics();
         graphics.drawImage(image, 0, 0, null); graphics.dispose();
         return copy;
+    }
+
+    @Override protected void paintChildren(Graphics graphics) {
+        super.paintChildren(graphics);
+        if (inlineBody == null) return;
+        // Swing children normally paint above the parent; redraw just the
+        // foreground media so text typed behind a picture cannot cover it.
+        Graphics2D g = (Graphics2D) graphics.create();
+        try {
+            g.translate(MARGIN, MARGIN);
+            g.scale(zoom(), zoom());
+            g.translate(-MARGIN, -MARGIN);
+            for (PdfDocument.Placement p : controller.placements())
+                if (!p.isNote() && p.imageLayer() != PdfDocument.ImageLayer.BEHIND_TEXT)
+                    paintPlacement(g, p);
+        } finally { g.dispose(); }
+    }
+
+    private void paintPlacement(Graphics2D g, PdfDocument.Placement p) {
+        int x = Math.round(p.x()) + MARGIN, y = Math.round(p.y()) + MARGIN;
+        int width = Math.round(p.width()), height = Math.round(p.height());
+        double deviceScale = Math.max(1.0, zoom() * Math.max(1.0,
+                g.getDeviceConfiguration().getDefaultTransform().getScaleX()));
+        int w = Math.min(3200, Math.max(8, (int)Math.ceil(width * deviceScale)));
+        int h = Math.min(3200, Math.max(8, (int)Math.ceil(height * deviceScale)));
+        g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
+        BufferedImage preview = liveErasedInk.get(p.id());
+        if (preview == null) g.drawImage(MaterialRenderer.render(p.material(), w, h), x, y, width, height, null);
+        else g.drawImage(preview, x, y, width, height, null);
+        // Keep selection visible on behind-text objects too.
+        if (controller.isSelected(p.id()) || selectionCandidates.contains(p.id())) {
+            g.setColor(SELECTION_HALO); g.fillRoundRect(x,y,width,height,8,8);
+            g.setColor(SELECTION_BLUE); g.setStroke(selectionOutlineStroke());
+            g.drawRoundRect(x,y,width,height,8,8);
+            g.setStroke(new BasicStroke(1.5f));
+        }
     }
 
     @Override protected void paintComponent(Graphics g) {
@@ -573,7 +764,24 @@ public final class PdfPageCanvas extends JPanel {
             g2.drawRect(MARGIN, MARGIN, (int)PdfDocument.PAGE_WIDTH, (int)PdfDocument.PAGE_HEIGHT);
             PdfDocument.Placement selected = controller.selected();
             List<PdfDocument.Placement> placements = controller.placements();
+            // First render images below text, then the independent body, then objects above.
             for (PdfDocument.Placement p : placements) {
+                if (!p.isNote() && p.imageLayer() == PdfDocument.ImageLayer.BEHIND_TEXT)
+                    paintPlacement(g2, p);
+            }
+            if (inlineBody == null && !controller.body().isEmpty()) {
+                var body = PdfBodyFlowLayout.displayNote(controller.body());
+                double deviceScale = Math.max(1.0, zoom() * Math.max(1.0,
+                        g2.getDeviceConfiguration().getDefaultTransform().getScaleX()));
+                int w = Math.min(3200, (int)Math.ceil(body.width()*deviceScale));
+                int h = Math.min(3200, (int)Math.ceil(body.height()*deviceScale));
+                g2.drawImage(PdfWrapTextLayout.render(controller.body(), placements, w, h),
+                        Math.round(body.x())+MARGIN, Math.round(body.y())+MARGIN,
+                        Math.round(body.width()), Math.round(body.height()), null);
+            }
+            for (PdfDocument.Placement p : placements) {
+                if (!p.isNote() && p.imageLayer() == PdfDocument.ImageLayer.BEHIND_TEXT) continue;
+                if (inlineBody != null && !p.isNote()) continue;
                 if (inlineNote != null && p.id().equals(editingId)) continue;
                 int x = Math.round(p.x()) + MARGIN, y = Math.round(p.y()) + MARGIN;
                 int width = Math.round(p.width()), height = Math.round(p.height());
@@ -592,8 +800,7 @@ public final class PdfPageCanvas extends JPanel {
                 } else if (preview.getWidth() > 1 || preview.getHeight() > 1) {
                     g2.drawImage(preview, x, y, width, height, null);
                 }
-                if ((selected != null && selected.id().equals(p.id())) || selectedGroup.contains(p.id())
-                        || selectionCandidates.contains(p.id())) {
+                if (controller.isSelected(p.id()) || selectionCandidates.contains(p.id())) {
                     g2.setColor(SELECTION_HALO);
                     g2.fillRoundRect(x, y, width, height, 8, 8);
                     g2.setColor(SELECTION_BLUE);

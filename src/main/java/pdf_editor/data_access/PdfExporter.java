@@ -2,6 +2,7 @@ package pdf_editor.data_access;
 
 import pdf_editor.domain.PdfDocument;
 import pdf_editor.domain.PdfMaterial;
+import pdf_editor.adapter.PdfWrapTextLayout;
 
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
@@ -24,25 +25,47 @@ public final class PdfExporter {
     public PDDocument build(PdfDocument document) throws IOException {
         PDDocument pdf = new PDDocument();
         try {
-            for (java.util.List<PdfDocument.Placement> pageItems : document.pages()) {
+            for (int pageIndex = 0; pageIndex < document.pageCount(); pageIndex++) {
+                java.util.List<PdfDocument.Placement> pageItems = document.placements(pageIndex);
                 PDPage page = new PDPage(PDRectangle.A4); pdf.addPage(page);
                 try (PDPageContentStream stream = new PDPageContentStream(pdf, page)) {
-                    for (PdfDocument.Placement p : pageItems) {
-                        if (p.width() < 1 || p.height() < 1) continue;
-                        // 4 raster pixels per PDF point (~288 DPI). For PNG graphs,
-                        // never discard source detail by first rasterizing at 1x.
-                        int w = Math.min(3200, Math.max(8, Math.round(p.width() * 4)));
-                        int h = Math.min(3200, Math.max(8, Math.round(p.height() * 4)));
-                        BufferedImage image = p.isNote() ? NoteRenderer.render(p, w, h) : MaterialRenderer.render(p.material(), w, h);
-                        PDImageXObject xobj = LosslessFactory.createFromImage(pdf, image);
-                        stream.drawImage(xobj, p.x(), PdfDocument.PAGE_HEIGHT - p.y() - p.height(), p.width(), p.height());
-                    }
+                    // Background pictures, flowing body, then foreground pictures/notes.
+                    for (PdfDocument.Placement p : pageItems)
+                        if (!p.isNote() && p.imageLayer() == PdfDocument.ImageLayer.BEHIND_TEXT)
+                            drawPlacement(pdf, stream, p);
+                    if (!document.body(pageIndex).isEmpty())
+                        drawBody(pdf, stream, document.body(pageIndex), pageItems);
+                    for (PdfDocument.Placement p : pageItems)
+                        if (p.isNote() || p.imageLayer() != PdfDocument.ImageLayer.BEHIND_TEXT)
+                            drawPlacement(pdf, stream, p);
                 }
             }
             addAppendix(pdf, document);
             return pdf;
         } catch (IOException | RuntimeException ex) { pdf.close(); throw ex; }
     }
+    private static void drawBody(PDDocument pdf, PDPageContentStream stream,
+            java.util.List<PdfDocument.NoteSpan> body,
+            java.util.List<PdfDocument.Placement> placements) throws IOException {
+        int w = Math.round(PdfDocument.BODY_WIDTH * 4);
+        int h = Math.round(PdfDocument.BODY_HEIGHT * 4);
+        BufferedImage image = PdfWrapTextLayout.render(body, placements, w, h);
+        PDImageXObject xobj = LosslessFactory.createFromImage(pdf, image);
+        stream.drawImage(xobj, PdfDocument.BODY_LEFT,
+                PdfDocument.PAGE_HEIGHT - PdfDocument.BODY_TOP - PdfDocument.BODY_HEIGHT,
+                PdfDocument.BODY_WIDTH, PdfDocument.BODY_HEIGHT);
+    }
+    private static void drawPlacement(PDDocument pdf, PDPageContentStream stream,
+                                      PdfDocument.Placement p) throws IOException {
+        if (p.width() < 1 || p.height() < 1) return;
+        int w = Math.min(3200, Math.max(8, Math.round(p.width() * 4)));
+        int h = Math.min(3200, Math.max(8, Math.round(p.height() * 4)));
+        BufferedImage image = p.isNote() ? NoteRenderer.render(p, w, h)
+                : MaterialRenderer.render(p.material(), w, h);
+        PDImageXObject xobj = LosslessFactory.createFromImage(pdf, image);
+        stream.drawImage(xobj, p.x(), PdfDocument.PAGE_HEIGHT - p.y() - p.height(), p.width(), p.height());
+    }
+
     private void addAppendix(PDDocument pdf, PdfDocument document) throws IOException {
         Map<String, PdfMaterial> used = new LinkedHashMap<>();
         for (java.util.List<PdfDocument.Placement> page : document.pages())

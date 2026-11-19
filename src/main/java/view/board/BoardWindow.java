@@ -88,6 +88,10 @@ public class BoardWindow extends JPanel implements HistoryPanel.DragHost {
                        Runnable saveCanvas, Runnable saveAsCanvas, Runnable openCanvas) {
         super(null);
         saveStateDebounce.setRepeats(false);
+        saveStatusChip.setRenameAction(() -> {
+            openCanvas.run(); // Open's existing glass chooser exposes Rename; no shared wiring changes.
+            refreshSaveState();
+        });
         this.saveCanvas = java.util.Objects.requireNonNull(saveCanvas);
         this.saveAsCanvas = java.util.Objects.requireNonNull(saveAsCanvas);
         this.page = page;
@@ -119,8 +123,7 @@ public class BoardWindow extends JPanel implements HistoryPanel.DragHost {
         });
         saveItem = historyBar.action("Save…", Icons::save, () -> {
             if (lastSaveState.phase() != SaveMenuState.Phase.SAVED) {
-                this.saveCanvas.run();
-                refreshSaveState();
+                runSaveWithStatus(this.saveCanvas);
             }
         }, () -> true);
         saveItem.setEnabled(() -> lastSaveState.phase() != SaveMenuState.Phase.SAVED);
@@ -175,27 +178,37 @@ public class BoardWindow extends JPanel implements HistoryPanel.DragHost {
     /** Called immediately after Open, Save and keyboard actions. */
     public void refreshSaveState() {
         SaveMenuState next = java.util.Objects.requireNonNull(saveState.get());
-        if (next.equals(lastSaveState)) return;
+        if (next.equals(lastSaveState)) {
+            // A cancelled synchronous save restores the previous visual status as well.
+            saveStatusChip.setState(next);
+            return;
+        }
         lastSaveState = next;
         saveStatusChip.setState(next);
         switch (next.phase()) {
             case NEW -> saveItem.setDisplay("Save…", Icons::save);
             case MODIFIED -> saveItem.setDisplay("Save", Icons::save);
+            case SAVING -> saveItem.setDisplay("Saving…", Icons::save);
             case SAVED -> saveItem.setDisplay("Saved", Icons::check);
         }
         historyBar.finish();
         relayout();
     }
 
+    /** Show saving feedback immediately, then restore the workspace's authoritative state. */
+    private void runSaveWithStatus(Runnable action) {
+        saveStatusChip.setState(new SaveMenuState(lastSaveState.name(), SaveMenuState.Phase.SAVING));
+        if (saveStatusChip.isShowing())
+            saveStatusChip.paintImmediately(0, 0, saveStatusChip.getWidth(), saveStatusChip.getHeight());
+        try { action.run(); }
+        finally { refreshSaveState(); }
+    }
+
     /** The menu always opens from the chevron, with options appropriate to the current state. */
     JPopupMenu createSaveMenu() {
-        return new GlassSaveMenu(lastSaveState, () -> {
-            saveCanvas.run();
-            refreshSaveState();
-        }, () -> {
-            saveAsCanvas.run();
-            refreshSaveState();
-        });
+        return new GlassSaveMenu(lastSaveState,
+                () -> runSaveWithStatus(saveCanvas),
+                () -> runSaveWithStatus(saveAsCanvas));
     }
 
     private void showSaveChoices() {
