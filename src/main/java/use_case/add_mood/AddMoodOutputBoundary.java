@@ -1,4 +1,4 @@
-package use_case;
+package use_case.add_mood;
 
 public interface AddMoodOutputBoundary {
 }
