@@ -1,4 +1,4 @@
-package exception;
+package use_case;
 
 import java.lang.RuntimeException;
 import java.nio.file.Path;

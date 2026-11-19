@@ -1,4 +1,4 @@
-package exception;
+package use_case;
 
 public class PhotoUnavailableException extends RuntimeException {
     private final String photoId;
