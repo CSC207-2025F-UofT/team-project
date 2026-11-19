@@ -1,22 +1,22 @@
-"""训练"公式图片最佳缩放系数"模型（LightGBM），导出给训练和 Java 运行时使用。
+"""用 LightGBM 预测公式图片的最佳缩放系数。
 
-缩放系数 m 的含义、特征和运行时推理见 crop_scale.py；本文件负责打标签、评估、训练和导出。
+formula_layout.py 按"最高行带"定缩放：scale = 112 / 最高行带高度。行带切得不对时（手写斜行、
+大括号或根号把几行连成一个带、分式被切开等），缩放就不合适。本模块预测一个乘在规则最高行带上的
+系数 m（即 load_formula_image / render 的 band_scale）：实际缩放 = 112 / (最高行带 × m)。
+m < 1 字放大，m > 1 字缩小，m = 1 就是原规则。
 
 "最佳"由识别模型自己决定：对每张没参与训练的验证图，依次试 CANDIDATES 里的每个 m，用 teacher
 forcing 算标签序列的平均 token 负对数似然（NLL），NLL 越低说明模型在这个缩放下越容易读对。
+特征只来自裁剪后的二值笔迹图，和运行时能拿到的信息一样，不看来源也不看标签。
 
 用法（在 src/neutral network/ 下，用装了 torch、lightgbm、scipy 的 .venv）：
   python crop.py label              # 跑识别模型，生成每张图在各候选 m 下的 NLL 表
-  python crop.py fit                # 交叉验证评估各方法，训练最终模型并导出 crop_scale.json
-  python crop.py cache              # 给训练数据预先算好 m，train.py 直接读缓存
+  python crop.py fit                # 交叉验证评估各方法，并在全部数据上训练最终模型
   python crop.py predict a.png ...  # 预测图片的 m
-
-导出的 crop_scale.json 默认在 checkpoints/crop/，train.py 默认读取它；Java 运行时读取
-src/main/java/model/checkpoints/crop_scale.json，换模型时要把同一份文件复制过去。
-注意：缩放偏好是从当前识别模型学来的，识别模型重新训练后应重新 label + fit。
 """
 import argparse
 import json
+import math
 import random
 import time
 from collections import Counter
@@ -25,24 +25,133 @@ from pathlib import Path
 import numpy as np
 import torch
 import torch.nn.functional as F
+from scipy import ndimage, signal
 
-from crop_scale import (CANDIDATES, DEFAULT_PATH, LOG2_CANDIDATES, RULE_INDEX, CropScale, ink_features,
-                        save_model, trees_from_lightgbm)
-from formula_layout import FLAT_FRACTION, GAP_MIN_PX, formula_layout, row_spans, tallest_band
+from formula_layout import FLAT_FRACTION, GAP_MIN_PX, band_heights, formula_layout, row_spans, tallest_band
 from model import load_training_weights, load_vocab, max_len, pad_id, vital_mini
 from preprocess import formula_ink_mask, load_formula_image
-from train import (IMAGE_INVERT, MathWriting, collate, convert, formula_mask, read_strokes, render,
-                   save_scale_cache, scale_cache_path, load_scale_cache)
+from train import IMAGE_INVERT, MathWriting, collate, convert, read_strokes, render
 
 HERE = Path(__file__).resolve().parent
 CHECKPOINTS = HERE.parents[1] / "checkpoints"
 OUT_DIR = CHECKPOINTS / "crop"
 TABLE_PATH = OUT_DIR / "labels.npz"
+MODEL_PATH = OUT_DIR / "crop_lgbm.txt"
+
+CANDIDATES = tuple(2.0 ** (k / 4) for k in range(-6, 9))   # m: 0.35 ... 4，按 2^(1/4) 递增
+LOG2_CANDIDATES = np.log2(CANDIDATES)
+RULE_INDEX = CANDIDATES.index(1.0)
+GAP_FRACTIONS = (0.005, 0.01, 0.02, 0.03, 0.05, 0.08)       # 多阈值行带
+SHEARS = tuple(k * 0.05 for k in range(-4, 5))               # 倾斜校正试的剪切系数，含精确的 0
+MAX_SHEAR_PIXELS = 200_000                                   # 剪切投影最多用这么多笔迹像素
 SOFT_TAU = 0.02                                              # direct 方法的软 argmin 温度（NLL 单位）
 LGB_PARAMS = dict(objective="regression", learning_rate=0.05, num_leaves=31, min_data_in_leaf=40,
                   feature_fraction=0.8, bagging_fraction=0.8, bagging_freq=1, lambda_l2=1.0,
                   verbose=-1, seed=0, num_threads=0)
 LGB_ROUNDS = 300
+
+
+# ---------- 特征 ----------
+def ink_features(mask: np.ndarray) -> dict[str, float]:
+    """裁剪后的二值笔迹图 [H,W] -> 特征。长度都除以笔迹高或宽，和分辨率无关。"""
+    mask = np.asarray(mask, dtype=bool)
+    h, w = mask.shape
+    ink = max(int(mask.sum()), 1)
+    spans = row_spans(mask.any(axis=1))
+    rule = max(tallest_band(spans, h, GAP_MIN_PX), FLAT_FRACTION * w)
+    f = {"log_aspect": math.log(w / h), "density": ink / (h * w), "rule_band": rule / h}
+
+    for g in GAP_FRACTIONS:
+        bands = sorted(band_heights(spans, h, GAP_MIN_PX, g), reverse=True) or [0.0]
+        f[f"bands@{g}"] = len(bands)
+        f[f"band1@{g}"] = bands[0] / h
+        f[f"band2@{g}"] = (bands[1] if len(bands) > 1 else 0.0) / h
+        f[f"band_med@{g}"] = float(np.median(bands)) / h
+
+    # 行投影：峰的个数、空白行比例、自相关主峰（行距）
+    profile = mask.sum(axis=1).astype(np.float64)
+    k = max(1, h // 50)
+    smooth = np.convolve(profile, np.ones(k) / k, mode="same")
+    top = smooth.max()
+    peaks, _ = signal.find_peaks(np.r_[0.0, smooth, 0.0], prominence=0.2 * top)
+    f["profile_peaks"] = len(peaks)
+    f["empty_rows"] = float(np.mean(smooth < 0.05 * top))
+    centered = profile - profile.mean()
+    ac = np.correlate(centered, centered, "full")[h - 1:]
+    lo, hi = max(1, int(0.1 * h)), int(0.9 * h)
+    if ac[0] > 0 and hi > lo:
+        lag = lo + int(np.argmax(ac[lo:hi]))
+        f["ac_lag"], f["ac_peak"] = lag / h, float(ac[lag] / ac[0])
+    else:
+        f["ac_lag"] = f["ac_peak"] = 0.0
+
+    # 连通域（8 邻域），过滤掉噪点
+    labels, _ = ndimage.label(mask, structure=np.ones((3, 3), dtype=bool))
+    areas = np.bincount(labels.ravel())[1:]
+    boxes = [b for b, a in zip(ndimage.find_objects(labels), areas) if a >= max(2, 0.002 * ink)]
+    hs = np.array([b[0].stop - b[0].start for b in boxes], dtype=np.float64)
+    ws = np.array([b[1].stop - b[1].start for b in boxes], dtype=np.float64)
+    f["cc_count"] = math.log1p(len(boxes))
+    for q in (10, 25, 50, 75, 90, 100):
+        f[f"cc_h_q{q}"] = float(np.percentile(hs, q)) / h if len(hs) else 0.0
+    f["cc_h_med_vs_rule"] = float(np.median(hs)) / rule if len(hs) else 0.0
+    f["cc_w_med"] = float(np.median(ws)) / w if len(ws) else 0.0
+    f["cc_w_max"] = float(ws.max()) / w if len(ws) else 0.0
+    lines = [b for b, bh, bw in zip(boxes, hs, ws) if bw > 3 * bh and bw > 0.15 * w]
+    f["thin_lines"] = len(lines)
+    bars = 0                                                 # 上下都有连通域的横线，多半是分数线
+    for line in lines:
+        x0, x1, y = line[1].start, line[1].stop, (line[0].start + line[0].stop) / 2
+        above = below = False
+        for b in boxes:
+            if b is line or b[1].stop <= x0 or b[1].start >= x1:
+                continue
+            centre = (b[0].start + b[0].stop) / 2
+            above |= centre < y
+            below |= centre > y
+        bars += above and below
+    f["fraction_bars"] = bars
+
+    # 笔画粗细：横向游程长度中位数
+    edges = np.diff(np.pad(mask, ((0, 0), (1, 1))).astype(np.int8), axis=1)
+    runs = np.nonzero(edges == -1)[1] - np.nonzero(edges == 1)[1]
+    f["stroke"] = float(np.median(runs)) / h
+
+    # 倾斜：哪个剪切角让行投影最"尖"，以及剪切后的行带
+    ys, xs = np.nonzero(mask)
+    if len(ys) > MAX_SHEAR_PIXELS:
+        pick = np.random.default_rng(0).choice(len(ys), MAX_SHEAR_PIXELS, replace=False)
+        ys, xs = ys[pick], xs[pick]
+    best = (-1.0, 0.0, None)
+    sharp0 = 1.0
+    for s in SHEARS:
+        yy = np.round(ys + s * (xs - w / 2)).astype(np.int64)
+        prof = np.bincount(yy - yy.min())
+        sharp = float((prof.astype(np.float64) ** 2).sum()) / len(ys) ** 2
+        if s == 0:
+            sharp0 = sharp
+        if sharp > best[0]:
+            best = (sharp, float(s), prof)
+    f["shear_best"] = best[1]
+    f["shear_gain"] = best[0] / sharp0
+    sheared = band_heights(row_spans(best[2] > 0), len(best[2]), GAP_MIN_PX)
+    f["shear_bands"] = len(sheared)
+    f["shear_band1"] = max(sheared) / h
+    return f
+
+
+def crop_to_ink(mask: np.ndarray) -> np.ndarray:
+    rows, cols = np.nonzero(mask.any(axis=1))[0], np.nonzero(mask.any(axis=0))[0]
+    if not len(rows):
+        raise ValueError("没有笔迹")
+    return mask[rows[0]:rows[-1] + 1, cols[0]:cols[-1] + 1]
+
+
+def sample_mask(kind: str, path: str) -> np.ndarray:
+    """运行时能拿到的二值笔迹图。InkML 先按原规则渲染成图片再取笔迹。"""
+    if kind == "image":
+        return formula_ink_mask(Path(path))
+    return crop_to_ink(render(read_strokes(Path(path)))[0].numpy() > 0.5)
 
 
 def sample_input(kind: str, path: str, band_scale: float) -> torch.Tensor:
@@ -86,7 +195,7 @@ class CandidateSet(torch.utils.data.Dataset):
     def __getitem__(self, i: int):
         kind, path, _ = self.items[i]
         try:
-            features = ink_features(formula_mask(kind, path))
+            features = ink_features(sample_mask(kind, path))
             return i, features, [sample_input(kind, path, m) for m in CANDIDATES], None
         except Exception as error:                            # 坏样本跳过，不中断整轮
             return i, None, None, f"{type(error).__name__}: {error}"
@@ -96,13 +205,10 @@ def keep_as_is(sample):
     return sample
 
 
-def vocab_ids() -> dict[str, int]:
-    return {t: i for i, t in enumerate(load_vocab())}
-
-
 def pick_samples(per_source: int, seed: int) -> tuple[list, list[str]]:
     """混合数据的 valid（识别模型没训练过）每个来源抽 per_source 条，加上全部个人 val/ 截图。"""
-    dataset = MathWriting(str(HERE / "data" / "mixed"), ["valid"], vocab_ids(), train=False, image_roots=[str(HERE)])
+    vocab = {t: i for i, t in enumerate(load_vocab())}
+    dataset = MathWriting(str(HERE / "data" / "mixed"), ["valid"], vocab, train=False, image_roots=[str(HERE)])
     personal = str((HERE / "val").resolve())
     groups: dict[str, list] = {}
     for item, source in zip(dataset.items, dataset.sources):
@@ -136,7 +242,7 @@ def label(args):
         start = 0
         while start < len(pending):
             end = start
-            # 按补边后的像素数控制每批大小，多行大图自动少放几张
+            # 按补边后的特征格数控制每批大小，多行大图自动少放几张
             while end < len(pending) and (end - start + 1) * pending[end][2].size(-2) * pending[end][2].size(-1) \
                     <= args.batch_pixels and end - start < 128:
                 end += 1
@@ -163,13 +269,12 @@ def label(args):
 
     done = sorted(features)
     names = list(features[done[0]])
-    args.out.parent.mkdir(parents=True, exist_ok=True)
+    OUT_DIR.mkdir(parents=True, exist_ok=True)
     np.savez_compressed(
         args.out, features=np.array([[features[i][k] for k in names] for i in done], dtype=np.float64),
         feature_names=np.array(names), nll=nll[done], correct=correct[done], tokens=tokens[done],
         sources=np.array([sources[i] for i in done]), kinds=np.array([items[i][0] for i in done]),
-        paths=np.array([items[i][1] for i in done]), candidates=np.array(CANDIDATES),
-        weights=np.array(str(Path(args.weights).resolve())))
+        paths=np.array([items[i][1] for i in done]), candidates=np.array(CANDIDATES))
     print(f"完成 {len(done)} 条，失败 {len(failures)} 条，用时 {time.monotonic() - started:.0f}s -> {args.out}")
     for path, error in failures[:5]:
         print(f"  失败: {path}: {error}")
@@ -197,7 +302,7 @@ def fit_booster(method: str, X: np.ndarray, nll: np.ndarray):
 
 
 def choose(method: str, booster, X: np.ndarray) -> np.ndarray:
-    """预测 -> 每个样本选中的候选下标。与 CropScale.choose_index 的规则相同。"""
+    """预测 -> 每个样本选中的候选下标。"""
     if method == "surface":
         delta = booster.predict(surface_rows(X)).reshape(len(X), len(CANDIDATES))
         delta[:, RULE_INDEX] = 0.0                     # 预测不会更好时保持原规则
@@ -252,7 +357,7 @@ def greedy_check(table: dict, pick: np.ndarray, n: int, weights: Path, seed: int
         return {"n": 0}
     device = "cuda" if torch.cuda.is_available() else "cpu"
     model = load_recognizer(weights, device)
-    vocab = vocab_ids()
+    vocab = {t: i for i, t in enumerate(load_vocab())}
     from labels import tokenize_label
     labels_by_path = {}
     for manifest in (HERE / "data" / "mixed" / "valid.jsonl", HERE / "val" / "labels.jsonl"):
@@ -276,8 +381,6 @@ def load_table(path: Path) -> dict:
         table = {key: data[key] for key in data.files}
     if not np.allclose(table["candidates"], CANDIDATES):
         raise ValueError("标签表的候选 m 和当前 CANDIDATES 不一致，请重新运行 label")
-    if table["feature_names"].tolist() != list(ink_features(np.ones((4, 4), dtype=bool))):
-        raise ValueError("标签表的特征和当前 crop_scale.ink_features 不一致，请重新运行 label")
     return table
 
 
@@ -294,28 +397,20 @@ def fit(args):
                                      for g in groups}
     print_report(report, groups)
 
-    method = args.method or min(("direct", "surface"), key=lambda m: report["methods"][m]["全部"]["nll"])
-    print(f"\n导出方法: {method}", flush=True)
+    method = min(("direct", "surface"), key=lambda m: report["methods"][m]["全部"]["nll"])
+    print(f"\n交叉验证更好的方法: {method}", flush=True)
     if args.exp_n:
         report["greedy_check"] = greedy_check(table, picks[method], args.exp_n, args.weights, args.seed)
         print(f"贪心解码整式正确率（只在预测改变缩放的样本里抽查）: {report['greedy_check']}")
 
     booster = fit_booster(method, X, nll)
-    names = table["feature_names"].tolist()
-    save_model(args.model, method, names, trees_from_lightgbm(booster),
-               {"recognizer": str(table.get("weights", "")), "samples": int(len(X))})
-    exported = CropScale(args.model)
-    lgb_pick = choose(method, booster, X)
-    json_pick = np.array([exported.choose_index(dict(zip(names, row))) for row in X.tolist()])
-    if not (lgb_pick == json_pick).all():                     # 导出的树必须和 LightGBM 逐条一致
-        raise RuntimeError(f"导出的树与 LightGBM 预测不一致: {(lgb_pick != json_pick).sum()} 条")
-    importance = sorted(zip(names + (["log2_m"] if method == "surface" else []),
+    booster.save_model(str(args.model), importance_type="gain")
+    importance = sorted(zip(table["feature_names"].tolist() + (["log2_m"] if method == "surface" else []),
                             booster.feature_importance("gain").tolist()), key=lambda p: -p[1])
-    report.update(method=method, model_sha256=exported.sha256,
+    report.update(method=method, feature_names=table["feature_names"].tolist(),
                   importance=[[name, float(gain)] for name, gain in importance[:15]])
-    report_path = args.model.with_name(args.model.stem + "_report.json")
-    report_path.write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
-    print(f"模型 -> {args.model}（sha {exported.sha256[:12]}，与 LightGBM 逐条一致）\n报告 -> {report_path}")
+    args.model.with_suffix(".json").write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
+    print(f"模型 -> {args.model}\n报告 -> {args.model.with_suffix('.json')}")
     print("特征重要性前 10:", ", ".join(name for name, _ in importance[:10]))
 
 
@@ -328,59 +423,29 @@ def print_report(report: dict, groups: list[str]):
             print(f"  {method:<9}" + "".join(f"{by_group[g][c]:>15.4f}" for c in columns))
 
 
-# ---------- 给训练数据预先算 m ----------
-class ScaleSet(torch.utils.data.Dataset):
-    def __init__(self, items: list[tuple[str, str]], model_path: Path):
-        self.items, self.model_path, self.model = items, model_path, None
+# ---------- 推理 ----------
+class CropModel:
+    """训练好的缩放模型：二值笔迹图 -> 系数 m（传给 load_formula_image 的 band_scale）。"""
 
-    def __len__(self) -> int:
-        return len(self.items)
+    def __init__(self, path: Path = MODEL_PATH):
+        import lightgbm as lgb
+        meta = json.loads(path.with_suffix(".json").read_text(encoding="utf-8"))
+        if not np.allclose(meta["candidates"], CANDIDATES):
+            raise ValueError("模型的候选 m 和当前 CANDIDATES 不一致")
+        self.method, self.feature_names = meta["method"], meta["feature_names"]
+        self.booster = lgb.Booster(model_file=str(path))
 
-    def __getitem__(self, i: int):
-        if self.model is None:                                # 每个子进程各读一次模型
-            self.model = CropScale(self.model_path)
-        kind, path = self.items[i]
-        try:
-            return path, self.model.band_scale(formula_mask(kind, path))
-        except Exception:
-            return path, None
-
-
-def cache(args):
-    """train.py 用到的全部样本（混合数据 + 个人数据）-> data/mixed/crop_scale_cache_<sha>.npz。"""
-    model = CropScale(args.model)
-    data_root = HERE / "data" / "mixed"
-    path = scale_cache_path(data_root, model)
-    scales = load_scale_cache(path)
-    vocab = vocab_ids()
-    items = {}
-    for splits, extra in ((args.splits.split(","), {"personal_train": HERE / "train"}), (["valid"], {})):
-        dataset = MathWriting(str(data_root), splits, vocab, train=bool(extra), **extra)
-        items.update((p, (kind, p)) for kind, p, _ in dataset.items if p not in scales)
-    todo = list(items.values())
-    print(f"缩放模型 sha {model.sha256[:12]} | 已缓存 {len(scales)} 条，待计算 {len(todo)} 条 -> {path}", flush=True)
-    loader = torch.utils.data.DataLoader(ScaleSet(todo, args.model), batch_size=None,
-                                         num_workers=args.workers, collate_fn=keep_as_is)
-    started, failed = time.monotonic(), 0
-    for n, (p, m) in enumerate(loader, 1):
-        if m is None:
-            failed += 1
-        else:
-            scales[p] = m
-        if n % args.save_every == 0 or n == len(todo):
-            save_scale_cache(path, scales)
-            print(f"  {n}/{len(todo)} | {time.monotonic() - started:.0f}s | 已保存", flush=True)
-    if not todo:
-        save_scale_cache(path, scales)
-    counts = Counter(scales.values())
-    print(f"完成，失败 {failed} 条。m 分布: {{{', '.join(f'{m:.2f}: {counts[m]}' for m in CANDIDATES)}}}")
+    def band_scale(self, mask: np.ndarray) -> float:
+        features = ink_features(mask)
+        X = np.array([[features[name] for name in self.feature_names]], dtype=np.float64)
+        return CANDIDATES[int(choose(self.method, self.booster, X)[0])]
 
 
 def predict(args):
-    model = CropScale(args.model)
+    crop = CropModel(args.model)
     for path in args.images:
         mask = formula_ink_mask(Path(path))
-        m = model.band_scale(mask)
+        m = crop.band_scale(mask)
         h, w = mask.shape
         rule = max(tallest_band(row_spans(mask.any(axis=1)), h, GAP_MIN_PX), FLAT_FRACTION * w)
         layout = formula_layout(w, h, rule * m)
@@ -389,35 +454,28 @@ def predict(args):
 
 
 def main(argv=None):
-    ap = argparse.ArgumentParser(description="训练公式图片的缩放系数模型")
+    ap = argparse.ArgumentParser(description="LightGBM 预测公式图片的最佳缩放系数")
     sub = ap.add_subparsers(dest="command", required=True)
     p = sub.add_parser("label", help="用识别模型给验证样本打标签")
     p.add_argument("--weights", type=Path, default=CHECKPOINTS / "model.pt")
-    p.add_argument("--per-source", type=int, default=2000, help="每个来源抽多少条 valid 样本")
+    p.add_argument("--per-source", type=int, default=1500, help="每个来源抽多少条 valid 样本")
     p.add_argument("--workers", type=int, default=6)
     p.add_argument("--flush", type=int, default=64, help="攒够多少个样本送一次 GPU")
     p.add_argument("--batch-pixels", type=int, default=64 * 128 * 512, help="每批补边后的像素上限")
     p.add_argument("--seed", type=int, default=0)
     p.add_argument("--out", type=Path, default=TABLE_PATH)
     p.set_defaults(run=label)
-    p = sub.add_parser("fit", help="交叉验证评估，训练最终模型并导出 crop_scale.json")
+    p = sub.add_parser("fit", help="交叉验证评估并训练最终模型")
     p.add_argument("--table", type=Path, default=TABLE_PATH)
-    p.add_argument("--model", type=Path, default=DEFAULT_PATH)
-    p.add_argument("--method", choices=["direct", "surface"], help="默认取交叉验证损失更低的")
+    p.add_argument("--model", type=Path, default=MODEL_PATH)
     p.add_argument("--weights", type=Path, default=CHECKPOINTS / "model.pt", help="贪心解码抽查用的识别模型")
     p.add_argument("--folds", type=int, default=5)
     p.add_argument("--exp-n", type=int, default=300, help="贪心解码抽查条数，0=不抽查")
     p.add_argument("--seed", type=int, default=0)
     p.set_defaults(run=fit)
-    p = sub.add_parser("cache", help="给训练数据预先算好缩放系数")
-    p.add_argument("--model", type=Path, default=DEFAULT_PATH)
-    p.add_argument("--splits", default="train", help="训练用的子集，与 train.py --splits 相同")
-    p.add_argument("--workers", type=int, default=6)
-    p.add_argument("--save-every", type=int, default=50000)
-    p.set_defaults(run=cache)
     p = sub.add_parser("predict", help="预测图片的缩放系数")
     p.add_argument("images", nargs="+")
-    p.add_argument("--model", type=Path, default=DEFAULT_PATH)
+    p.add_argument("--model", type=Path, default=MODEL_PATH)
     p.set_defaults(run=predict)
     args = ap.parse_args(argv)
     args.run(args)

@@ -87,35 +87,6 @@ final class FormulaLayout {
         return open ? Math.max(best, end - start) : best;
     }
 
-    /**
-     * Height of every band from top to bottom, joining spans like {@link #tallestBand} but with the
-     * white needed between bands set by {@code gapFraction} (formula_layout.band_heights).
-     */
-    static List<Double> bandHeights(List<int[]> spans, double inkHeight, double minGap, double gapFraction) {
-        double gap = Math.max(gapFraction * inkHeight, minGap);
-        List<Double> heights = new ArrayList<>();
-        double start = 0;
-        double end = 0;
-        boolean open = false;
-        for (int[] span : spans) {
-            if (!open) {
-                start = span[0];
-                end = span[1];
-                open = true;
-            } else if (span[0] - end < gap) {
-                end = Math.max(end, span[1]);
-            } else {
-                heights.add(end - start);
-                start = span[0];
-                end = span[1];
-            }
-        }
-        if (open) {
-            heights.add(end - start);
-        }
-        return heights;
-    }
-
     /** Ink size (stroke width included) and its tallest band -> scale and canvas size. */
     static Size size(double inkWidth, double inkHeight, double tallest) {
         double base = Math.max(tallest, FLAT_FRACTION * inkWidth);

@@ -1,9 +1,4 @@
-"""导出 vital_mini 推理要用的 TorchScript 方法；不导出 generate（beam search 在 Java 里）。
-
-- final_norm、head、判断分支的基础层：每层一个方法；
-- CNN（含残差块、池化和二维位置编码）、两个视觉 encoder、六个 decoder：直接 script model.py 里的原模块，
-  不在这里重写；
-- decoder_start / decoder_step：model.incremental_decoder 的逐 token 解码（KV 缓存）。
+"""导出基础层、完整视觉 encoder 和 decoder；不导出 generate。
 
 运行：.venv/bin/python 'src/neutral network/export_torchscript_ops.py'
 生成 checkpoints/model_ops.pt 和 model_ops.json（方法清单）。
@@ -13,38 +8,112 @@ import argparse
 import hashlib
 import importlib.util
 import json
+import math
 from pathlib import Path
 import sys
 import tempfile
-from typing import Optional, Tuple
+from typing import Optional
 
 import torch
 from torch import nn
 import torch.nn.functional as F
 
-from model import incremental_decoder, vital_mini
+from model import attention_heads, d_model, vital_mini
 
 
 ROOT = Path(__file__).resolve().parents[2]
 LAYER_TYPES = (nn.Conv2d, nn.BatchNorm2d, nn.Linear, nn.LayerNorm)
 DECODER_PREFIXES = ('decoder1', 'decoder2', 'decoder3', 'decoder4', 'decoder5', 'judge_decoder')
 ENCODER_PREFIXES = ('encoder1', 'encoder2')
-CNN_PREFIX = 'cnn'
-BLOCK_PREFIXES = (CNN_PREFIX,) + ENCODER_PREFIXES + DECODER_PREFIXES
 
 
 def layer_methods(model):
-    """块外的基础层（final_norm、head、判断分支）；CNN、encoder、decoder 内部的层随整块导出。"""
+    """仅导出实际基础层，避免递归编译原模型的搜索和 Python 工具方法。"""
     return {name.replace('.', '_'): (name, layer)
             for name, layer in model.named_modules()
-            if isinstance(layer, LAYER_TYPES) and name.split('.')[0] not in BLOCK_PREFIXES}
+            if isinstance(layer, LAYER_TYPES)}
 
 
-def optional_mask(mask: Optional[torch.Tensor]) -> Optional[torch.Tensor]:
-    """Java 的 NDList 不能传 None；零元素 BOOL 张量表示不使用该 mask。"""
-    if mask is None or mask.numel() == 0:
-        return None
-    return mask
+class ExportAttention(nn.Module):
+    """完整的原 attention_module：含 pre-norm、投影、mask、Dropout 和残差。"""
+    def __init__(self, source):
+        super().__init__()
+        self.heads = attention_heads
+        self.width = d_model
+        self.head_dim = source.head_dim
+        self.q_proj = source.q_proj
+        self.k_proj = source.k_proj
+        self.v_proj = source.v_proj
+        self.out_proj = source.out_proj
+        self.norm = source.norm
+        self.dropout = source.dropout
+
+    def forward(self, x: torch.Tensor, memory: Optional[torch.Tensor] = None,
+                attn_mask: Optional[torch.Tensor] = None,
+                key_padding_mask: Optional[torch.Tensor] = None) -> torch.Tensor:
+        residual = x
+        x = self.norm(x)
+        kv = x if memory is None else memory
+        batch, tq, tk = x.size(0), x.size(1), kv.size(1)
+        q = self.q_proj(x).reshape(batch, tq, self.heads, self.head_dim).transpose(1, 2)
+        k = self.k_proj(kv).reshape(batch, tk, self.heads, self.head_dim).transpose(1, 2)
+        v = self.v_proj(kv).reshape(batch, tk, self.heads, self.head_dim).transpose(1, 2)
+        scores = torch.matmul(q, k.transpose(-2, -1)) / math.sqrt(float(self.head_dim))
+        # Java 的 NDList 不能传 None；零元素 BOOL 张量也表示不应用 mask。
+        if attn_mask is not None and attn_mask.numel() > 0:
+            scores = scores.masked_fill(attn_mask, float('-inf'))
+        if key_padding_mask is not None and key_padding_mask.numel() > 0:
+            scores = scores.masked_fill(key_padding_mask[:, None, None, :], float('-inf'))
+        weights = self.dropout(F.softmax(scores, dim=-1))
+        out = torch.matmul(weights, v).transpose(1, 2).reshape(batch, tq, self.width)
+        return residual + self.dropout(self.out_proj(out))
+
+
+class ExportFFN(nn.Module):
+    """完整 FFN，SwiGLU 在内部执行，不生成独立导出入口。"""
+    def __init__(self, source):
+        super().__init__()
+        self.norm = source.norm
+        self.gate = source.gate
+        self.up = source.up
+        self.down = source.down
+        self.dropout = source.dropout
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        normalized = self.norm(x)
+        hidden = F.silu(self.gate(normalized)) * self.up(normalized)
+        return self.dropout(self.down(hidden)) + x
+
+
+class ExportEncoder(nn.Module):
+    """与 model.py 的 encoder 对齐：无因果遮罩的视觉自注意力 -> FFN。"""
+    def __init__(self, source):
+        super().__init__()
+        self.self_attention = ExportAttention(source.self_attention)
+        self.ffn = ExportFFN(source.ffn)
+
+    def forward(self, x: torch.Tensor,
+                memory_key_padding_mask: Optional[torch.Tensor] = None) -> torch.Tensor:
+        x = self.self_attention(x, None, None, memory_key_padding_mask)
+        return self.ffn(x)
+
+
+class ExportDecoder(nn.Module):
+    """与 model.py 的 decoder 对齐：因果自注意力 -> 交叉注意力 -> FFN。"""
+    def __init__(self, source):
+        super().__init__()
+        self.self_attention = ExportAttention(source.self_attention)
+        self.cross_attention = ExportAttention(source.cross_attention)
+        self.ffn = ExportFFN(source.ffn)
+
+    def forward(self, x: torch.Tensor, memory: torch.Tensor,
+                tgt_key_padding_mask: Optional[torch.Tensor] = None,
+                memory_key_padding_mask: Optional[torch.Tensor] = None) -> torch.Tensor:
+        length = x.size(1)
+        causal = torch.triu(torch.ones((length, length), dtype=torch.bool, device=x.device), diagonal=1)
+        x = self.self_attention(x, None, causal, tgt_key_padding_mask)
+        x = self.cross_attention(x, memory, None, memory_key_padding_mask)
+        return self.ffn(x)
 
 
 class TensorOps(nn.Module):
@@ -52,9 +121,10 @@ class TensorOps(nn.Module):
         super().__init__()
         for name, (_, layer) in layer_methods(model).items():
             self.add_module('layer_' + name, layer)
-        for name in BLOCK_PREFIXES:
-            self.add_module('block_' + name, getattr(model, name))
-        self.incremental = incremental_decoder(model)
+        for name in DECODER_PREFIXES:
+            self.add_module('block_' + name, ExportDecoder(getattr(model, name)))
+        for name in ENCODER_PREFIXES:
+            self.add_module('block_' + name, ExportEncoder(getattr(model, name)))
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         raise RuntimeError('Use a named exported method, not forward.')
@@ -62,20 +132,6 @@ class TensorOps(nn.Module):
     @torch.jit.export
     def silu(self, x: torch.Tensor) -> torch.Tensor:
         return F.silu(x)
-
-    @torch.jit.export
-    def decoder_start(self, memory: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor]:
-        """memory [B,S,256] -> (图像 K/V 缓存 [5,2,B,4,S,64], 空的自注意力缓存 [5,2,B,4,0,64])"""
-        return self.incremental.start(memory)
-
-    @torch.jit.export
-    def decoder_step(self, tokens: torch.Tensor, parents: torch.Tensor, self_cache: torch.Tensor,
-                     cross_cache: torch.Tensor, memory_key_padding_mask: Optional[torch.Tensor] = None
-                     ) -> Tuple[torch.Tensor, torch.Tensor]:
-        """先按 parents [K] 重排上一步的自注意力缓存，再解码新 token [K,N]
-        -> (最后一个新位置的 logits [K,vocab], 新缓存 [5,2,K,4,T+N,64])"""
-        return self.incremental(tokens, self_cache.index_select(2, parents), cross_cache,
-                                optional_mask(memory_key_padding_mask))
 
 
 def load_model(checkpoint_path):
@@ -94,27 +150,22 @@ def build_scripted(model):
     导出后的 .pt 自带程序和权重，不依赖该临时文件或 Python 环境。
     """
     module_name = '_generated_model_ops'
-    source = ('import torch\nfrom typing import Optional\n'
-              'from export_torchscript_ops import TensorOps, optional_mask\n\nclass ModelOps(TensorOps):\n')
+    source = 'import torch\nfrom typing import Optional\nfrom export_torchscript_ops import TensorOps\n\nclass ModelOps(TensorOps):\n'
     for name in layer_methods(model):
         source += (f'    @torch.jit.export\n'
                    f'    def {name}(self, x: torch.Tensor) -> torch.Tensor:\n'
                    f'        return self.layer_{name}(x)\n\n')
-    source += (f'    @torch.jit.export\n'
-               f'    def {CNN_PREFIX}(self, x: torch.Tensor) -> torch.Tensor:\n'
-               f'        return self.block_{CNN_PREFIX}(x)\n\n')
     for name in ENCODER_PREFIXES:
         source += (f'    @torch.jit.export\n'
                    f'    def {name}(self, x: torch.Tensor, '
                    f'memory_key_padding_mask: Optional[torch.Tensor] = None) -> torch.Tensor:\n'
-                   f'        return self.block_{name}(x, optional_mask(memory_key_padding_mask))\n\n')
+                   f'        return self.block_{name}(x, memory_key_padding_mask)\n\n')
     for name in DECODER_PREFIXES:
         source += (f'    @torch.jit.export\n'
                    f'    def {name}(self, x: torch.Tensor, memory: torch.Tensor, '
                    f'tgt_key_padding_mask: Optional[torch.Tensor] = None, '
                    f'memory_key_padding_mask: Optional[torch.Tensor] = None) -> torch.Tensor:\n'
-                   f'        return self.block_{name}(x, memory, optional_mask(tgt_key_padding_mask), '
-                   f'optional_mask(memory_key_padding_mask))\n\n')
+                   f'        return self.block_{name}(x, memory, tgt_key_padding_mask, memory_key_padding_mask)\n\n')
     with tempfile.TemporaryDirectory(prefix='model-ops-') as directory:
         path = Path(directory) / (module_name + '.py')
         path.write_text(source, encoding='utf-8')
@@ -145,26 +196,12 @@ def export(checkpoint_path, output_path):
         'vocab_size': model.token_embedding.num_embeddings,
         'layers': {name: {'python_path': path, 'type': type(layer).__name__}
                    for name, (path, layer) in layer_methods(model).items()},
-        'cnn_block': {'python_path': CNN_PREFIX,
-                      'includes': 'model.vital_pixel scripted as is: convolutions, BatchNorm, SiLU, max pooling, '
-                                  'the residual block after con4 and the 2D sinusoidal position embedding; '
-                                  'image FLOAT32 [B,3,H,W] (H, W multiples of 16) -> FLOAT32 [B,256,H/16,W/16]'},
-        'decoder_blocks': {name: {'python_path': name, 'includes': 'model.decoder scripted as is: causal self-attention, cross-attention, FFN (including SwiGLU), all normalization and residual connections'}
+        'decoder_blocks': {name: {'python_path': name, 'includes': 'causal self-attention, cross-attention, FFN (including SwiGLU), all normalization and residual connections'}
                            for name in DECODER_PREFIXES},
-        'encoder_blocks': {name: {'python_path': name, 'includes': 'model.encoder scripted as is: non-causal visual self-attention, FFN (including SwiGLU), all normalization and residual connections'}
+        'encoder_blocks': {name: {'python_path': name, 'includes': 'non-causal visual self-attention, FFN (including SwiGLU), all normalization and residual connections'}
                            for name in ENCODER_PREFIXES},
-        'incremental_decoding': {
-            'python_path': 'model.incremental_decoder over decoder1..decoder5, token_embedding, final_norm, head',
-            'decoder_start': 'memory FLOAT32 [B,S,256] -> (cross_cache [5,2,B,4,S,64], empty self_cache [5,2,B,4,0,64])',
-            'decoder_step': 'tokens INT64 [K,N], parents INT64 [K] (rows of the previous self_cache), self_cache, '
-                            'cross_cache (batch 1 is shared by all K), memory mask BOOL [1 or K,S] or empty '
-                            '-> (logits FLOAT32 [K,vocab] of the last new position, self_cache [5,2,K,4,T+N,64]); '
-                            'positions continue from T, at most max_len in total',
-        },
         'mask_convention': 'True = blocked; omitted/None or an empty BOOL tensor = no padding mask. Encoders are non-causal; each decoder creates its own causal mask.',
-        'scope': 'LayerNorm and Linear layers outside the CNN/encoder/decoder blocks, one shared silu, '
-                 'the complete CNN, two complete visual encoders, six complete decoders and the cached decoding steps. '
-                 'Layers inside the blocks are not exported separately.',
+        'scope': 'All Conv2d, BatchNorm2d, LayerNorm and Linear layers (including block internals), one shared silu, two complete visual encoders and six complete decoders. No separate SwiGLU, attention or FFN block methods.',
         'methods': methods,
     }
     output_path.with_suffix('.json').write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')

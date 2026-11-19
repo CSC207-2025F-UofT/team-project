@@ -6,7 +6,6 @@ import hashlib
 import heapq
 import json
 import math
-import os
 import random
 import re
 import sys
@@ -23,9 +22,8 @@ from PIL import Image, ImageDraw
 from torch.utils.data import DataLoader, Dataset, Sampler, Subset
 
 from model import vital_mini, load_vocab, load_training_weights, vocab_size, pad_id, bos_id, eos_id, max_len
-from preprocess import EmptyFormulaImageError, check_formula_image, formula_ink_mask, load_formula_image
-from formula_layout import MAX_TOKENS, STRIDE, formula_layout, tallest_band
-from crop_scale import CANDIDATES, DEFAULT_PATH as CROP_SCALE_PATH, CropScale, crop_to_ink
+from preprocess import EmptyFormulaImageError, check_formula_image, load_formula_image
+from formula_layout import STRIDE, formula_layout, tallest_band
 from augmentation import augment_formula_image, DEFAULT_AUGMENT_PROBABILITY, AUGMENTATION_VERSION
 
 Learning_rate = 8e-5
@@ -48,7 +46,6 @@ def source_name(value: str | None, kind: str) -> str:
     return aliases.get(value.strip().lower(), value.strip())
 
 # ---------- 标签 -> token ----------
-import labels
 from labels import tokenize_label, LABEL_RE
 
 def build_index(root: Path, split: str) -> list[tuple[str, str]]:
@@ -119,57 +116,6 @@ def render(strokes: list[np.ndarray], stroke_px: float = 3.0, ss: int = 2, band_
     canvas = canvas.resize((width, height), Image.BOX)
     return torch.from_numpy(np.asarray(canvas, dtype=np.float32) / 255.0).unsqueeze(0)
 
-
-# ---------- 缩放系数（crop_scale.py 的树模型） ----------
-def formula_mask(kind: str, path: str) -> np.ndarray:
-    """缩放模型看到的二值笔迹图：图片用与预处理相同的笔迹检测；InkML 先按原规则渲染成图片再取笔迹，
-    对应运行时 Java 拿到的画布截图。"""
-    if kind == "image":
-        return formula_ink_mask(Path(path))
-    return crop_to_ink(render(read_strokes(Path(path)))[0].numpy() > 0.5)
-
-
-def scale_cache_path(data_root: Path, crop_scale: CropScale) -> Path:
-    """缓存文件名带模型哈希，换了缩放模型自动失效。"""
-    return Path(data_root) / f"crop_scale_cache_{crop_scale.sha256[:12]}.npz"
-
-
-def load_scale_cache(path: Path) -> dict[str, float]:
-    if not path.is_file():
-        return {}
-    with np.load(path) as data:
-        return {p: CANDIDATES[k] for p, k in zip(data["paths"].tolist(), data["index"].tolist())}
-
-
-def save_scale_cache(path: Path, scales: dict[str, float]) -> None:
-    index = {m: k for k, m in enumerate(CANDIDATES)}
-    paths = sorted(scales)
-    tmp = path.with_name(path.stem + ".tmp.npz")
-    np.savez_compressed(tmp, paths=np.array(paths), index=np.array([index[scales[p]] for p in paths], dtype=np.uint8))
-    tmp.replace(path)
-
-# ---------- 标签分词缓存 ----------
-# 百万级标签每次启动都重新分词要数分钟；分词只由标签文本和 labels.py 决定，按标签文本缓存。
-# 文件名带 labels.py 内容哈希，改了规范化/分词规则自动失效。
-def token_cache_path(data_root: Path) -> Path:
-    labels_sha = hashlib.sha256(Path(labels.__file__).read_bytes()).hexdigest()[:12]
-    return Path(data_root) / f"token_cache_{labels_sha}.json"
-
-def load_token_cache(path: Path) -> dict[str, list[str]]:
-    try:
-        data = json.loads(path.read_text(encoding="utf-8"))
-        return data if isinstance(data, dict) else {}
-    except (OSError, ValueError):
-        return {}
-
-def save_token_cache(path: Path, cache: dict[str, list[str]]) -> None:
-    temp = path.with_name(path.name + ".tmp")
-    try:
-        temp.write_text(json.dumps(cache, ensure_ascii=False), encoding="utf-8")
-        temp.replace(path)
-    except OSError as error:
-        print(f"无法写入分词缓存 {path}: {error}", flush=True)
-
 # ---------- 图片有效性缓存 ----------
 IMAGE_CHECK_VERSION = 2              # 修改 check_formula_image 的判定规则时递增，使旧缓存失效
 
@@ -200,14 +146,8 @@ class MathWriting(Dataset):
     def __init__(self, root: str, splits: list[str], vocab: dict[str, int], train: bool,
                  oov: str = "skip", max_samples: int | None = None,
                  image_roots: list[str] | None = None, personal_train: Path | None = None,
-                 augment: bool = True, augment_probability: float = DEFAULT_AUGMENT_PROBABILITY,
-                 crop_scale: CropScale | None = None, scale_cache: dict[str, float] | None = None,
-                 token_cache: dict[str, list[str]] | None = None):
+                 augment: bool = True, augment_probability: float = DEFAULT_AUGMENT_PROBABILITY):
         self.root, self.train = Path(root).resolve(), train
-        self.token_cache = token_cache        # 标签 -> token；None 时每次现算，新分词的结果会写回此字典
-        # 缩放模型为 None 时用原规则（m=1）；scale_cache 是 路径 -> m，缺的样本现算并记在本进程内
-        self.crop_scale = crop_scale
-        self.scale_cache = {} if scale_cache is None else scale_cache
         if not 0 <= augment_probability <= 1:
             raise ValueError('augment_probability 必须在 [0,1] 内')
         self.augment = train and augment
@@ -262,12 +202,8 @@ class MathWriting(Dataset):
                     seen_paths[path] = label
                     source_by_path[path] = source
                     total += 1
-                    toks = None if self.token_cache is None else self.token_cache.get(label)
-                    if toks is None:
-                        toks = tokenize_label(label)
-                        if self.token_cache is not None:
-                            self.token_cache[label] = toks
-                    if len(toks) + 2 > max_len:                   # 加上 <bos>/<eos>
+                    toks = tokenize_label(label)
+                    if len(toks) + 2 > max_len:                    # 加上 <bos>/<eos>
                         too_long += 1
                         continue
                     if oov == "skip" and any(t not in vocab for t in toks):
@@ -323,26 +259,15 @@ class MathWriting(Dataset):
     def __getitem__(self, i: int) -> tuple[torch.Tensor, list[int]]:
         kind, path, ids = self.items[i]
         do_augment = self.augment and self.augment_probability > 0 and random.random() < self.augment_probability
-        band_scale = self.band_scale(i)
         if kind == "image":
-            image = load_formula_image(Path(path), invert=IMAGE_INVERT, band_scale=band_scale)
+            image = load_formula_image(Path(path), invert=IMAGE_INVERT)
             return augment_formula_image(image) if do_augment else image, ids
         strokes = read_strokes(Path(path))
         stroke_px = 3.0
         if do_augment:                                        # 复用坐标增强；不叠加图片几何变换
             strokes = augment_strokes(strokes, random)
             stroke_px = random.uniform(2.0, 4.0)
-        return render(strokes, stroke_px, band_scale=band_scale), ids
-
-    def band_scale(self, i: int) -> float:
-        """样本 i 的缩放系数 m：先查缓存，没有就用缩放模型现算。按未增强的原样本计算。"""
-        if self.crop_scale is None:
-            return 1.0
-        kind, path, _ = self.items[i]
-        m = self.scale_cache.get(path)
-        if m is None:
-            m = self.scale_cache[path] = self.crop_scale.band_scale(formula_mask(kind, path))
-        return m
+        return render(strokes, stroke_px), ids
 
 
 def read_manifest(path: Path):
@@ -360,11 +285,10 @@ def read_manifest(path: Path):
                 kind = row.get("format", "image")
                 if kind not in {"image", "inkml"} or not isinstance(label, str) or not label.strip():
                     raise ValueError("format 必须为 image/inkml，latex 必须为非空字符串")
-                # 清单目录已是绝对路径；只消除 ..，不逐级解析符号链接，也不逐条 stat：
-                # 百万行时 resolve()+is_file() 要数分钟。文件存在性由 data.py 构建清单时检查，
-                # 图片在下方有效性检查中会 stat，缺失文件仍会明确报错。
-                sample_path = os.path.abspath(path.parent / filename)
-                yield kind, sample_path, label, source_name(row.get("source"), kind)
+                sample_path = (path.parent / filename).resolve()
+                if not sample_path.is_file():
+                    raise FileNotFoundError(sample_path)
+                yield kind, str(sample_path), label, source_name(row.get("source"), kind)
             except (KeyError, TypeError, ValueError, OSError) as error:
                 raise ValueError(f"无效数据清单 {path}:{line_number}: {error}") from error
 
@@ -400,39 +324,6 @@ def collate(batch):
         seq[i, :len(x) + 2] = torch.tensor([bos_id] + list(x) + [eos_id])
     tokens_in, target = seq[:, :-1], seq[:, 1:]
     return image, memory_mask, tokens_in, tokens_in == pad_id, target
-
-
-# ---------- 按补边后的画布分子批 ----------
-# convert 把整批的高、宽分别补到最大值：一张多行高图和一张单行宽图同批时，补出的画布远超单张的
-# MAX_TOKENS，而视觉 encoder 的自注意力显存随 子批大小 × 格数² 增长（实测 32 张 512x2560 要 80 GiB 以上）。
-# 上限取"32 张、每张恰好 MAX_TOKENS 格"，即单张合法的最坏情况（实测峰值约 10 GiB）；与 --batch-size 无关。
-CHUNK_CELL_BUDGET = 32 * MAX_TOKENS                  # 子批大小 × 补边后格数（CNN、FFN 等线性部分）
-CHUNK_ATTENTION_BUDGET = 32 * MAX_TOKENS ** 2        # 子批大小 × 补边后格数²（视觉自注意力）
-
-
-def canvas_chunks(sizes: list[tuple[int, int]]) -> list[list[int]]:
-    """各样本 (高, 宽) -> 子批的样本下标。按 (高, 宽) 排序后贪心装填，补边后的画布不超过上面两个上限；
-    单张样本总是自成一批。"""
-    order = sorted(range(len(sizes)), key=lambda i: sizes[i])
-    chunks, current, height, width = [], [], 0, 0
-    for i in order:
-        h, w = max(height, sizes[i][0]), max(width, sizes[i][1])
-        cells, n = (h // STRIDE) * (w // STRIDE), len(current) + 1
-        if current and (n * cells > CHUNK_CELL_BUDGET or n * cells * cells > CHUNK_ATTENTION_BUDGET):
-            chunks.append(current)
-            current, (h, w) = [], sizes[i]
-        current.append(i)
-        height, width = h, w
-    if current:
-        chunks.append(current)
-    return chunks
-
-
-def collate_chunks(batch) -> list[tuple]:
-    """训练/验证 DataLoader 的 collate：一个 batch -> 若干个 collate 子批（见 canvas_chunks）。
-    样本和 token 总数不变；训练时各子批的损失按 token 数加权累积梯度，等价于整批的平均损失。"""
-    sizes = [(image.size(-2), image.size(-1)) for image, _ in batch]
-    return [collate([batch[i] for i in chunk]) for chunk in canvas_chunks(sizes)]
 
 class SourceMixedBatchSampler(Sampler):
     """各来源按原始占比贯穿整轮；每条样本恰好一次，来源内保留局部长度分桶。"""
@@ -562,35 +453,6 @@ def run_batch(model: nn.Module, batch, device: str, amp: bool) -> tuple[torch.Te
                            ignore_index=pad_id, label_smoothing=0.1)
     return loss, logits, target
 
-CUDA_MEMORY_FRACTION = 0.85     # 16 GB 卡约 13.6 GB；桌面等程序空闲时另占约 1.4 GB，子批峰值约 10 GiB
-
-
-def limit_cuda_memory(fraction: float, device: int = 0) -> None:
-    """给 PyTorch 的显存缓存设上限。图片尺寸每批不同，缓存块常常复用不上；Windows 驱动默认在显存满时
-    借用系统内存而不报错，PyTorch 就从不释放缓存，占用一路涨过显卡容量，借来的部分走 PCIe 很慢。
-    有了上限，缓存到顶时 PyTorch 会先释放缓存再重试；实际需求超过上限才会 OOM。"""
-    torch.cuda.set_per_process_memory_fraction(fraction, device)
-    total = torch.cuda.get_device_properties(device).total_memory
-    print(f"显存上限: {fraction:.0%} × {total / 2**30:.1f} GiB = {fraction * total / 2**30:.1f} GiB", flush=True)
-
-
-def train_step(model: nn.Module, chunks: list[tuple], optimizer, device: str, amp: bool) -> float:
-    """一个 batch（collate_chunks 的若干子批）的一次参数更新，返回整批的平均 token 损失。
-    子批损失按 token 数加权后分别 backward，梯度累加起来等于整批一起算的平均损失。
-    注意 CNN 的 BatchNorm 按子批统计均值方差，子批比整批小时统计会更嘈杂。"""
-    optimizer.zero_grad(set_to_none=True)
-    total = sum((chunk[-1] != pad_id).sum().item() for chunk in chunks)
-    batch_loss = 0.0
-    for chunk in chunks:
-        loss, _, target = run_batch(model, chunk, device, amp)
-        share = (target != pad_id).sum().item() / total
-        (loss * share).backward()
-        batch_loss += loss.item() * share
-    nn.utils.clip_grad_norm_(model.parameters(), 1.0)
-    optimizer.step()
-    return batch_loss
-
-
 def validation_metrics(loss_sum: float, correct: int, tokens: int, samples: int) -> dict:
     if tokens == 0:
         raise ValueError("验证数据没有有效 token")
@@ -604,14 +466,13 @@ def evaluate(model: nn.Module, loader: DataLoader, device: str, amp: bool) -> di
     model.eval()
     total_loss = 0.0
     correct = count = samples = 0
-    for chunks in loader:                                     # collate_chunks: 每个 batch 是若干子批
-        for batch in chunks:
-            loss, logits, target = run_batch(model, batch, device, amp)
-            keep = target != pad_id
-            total_loss += loss.item() * keep.sum().item()
-            correct += ((logits.argmax(-1) == target) & keep).sum().item()
-            count += keep.sum().item()
-            samples += target.size(0)
+    for batch in loader:
+        loss, logits, target = run_batch(model, batch, device, amp)
+        keep = target != pad_id
+        total_loss += loss.item() * keep.sum().item()
+        correct += ((logits.argmax(-1) == target) & keep).sum().item()
+        count += keep.sum().item()
+        samples += target.size(0)
     return validation_metrics(total_loss, correct, count, samples)
 
 
@@ -745,19 +606,9 @@ def main(argv=None, *, freeze_cnn: bool = False):
                     help="训练时随机增强图片/InkML；--no-augment 关闭，验证和推理始终不增强")
     ap.add_argument("--augment-prob", type=float, default=DEFAULT_AUGMENT_PROBABILITY,
                     help="每个训练样本应用增强的概率，范围 [0,1]，默认 0.7")
-    ap.add_argument("--crop-scale", type=Path, default=CROP_SCALE_PATH,
-                    help="缩放系数树模型（crop.py fit 导出的 crop_scale.json），训练和验证都按它缩放；"
-                         "Java 端须加载同一份文件")
-    ap.add_argument("--no-crop-scale", dest="crop_scale", action="store_const", const=None,
-                    help="不用缩放模型，按原规则（m=1）缩放")
-    ap.add_argument("--cuda-memory-fraction", type=float, default=CUDA_MEMORY_FRACTION,
-                    help="PyTorch 最多使用显卡显存的比例，范围 (0,1]，默认 0.85；"
-                         "到上限时先释放缓存再重试，避免 Windows 驱动借用系统内存")
     args = ap.parse_args(argv)
     if not 0 <= args.augment_prob <= 1:
         ap.error("augment-prob 必须在 [0,1] 内")
-    if not 0 < args.cuda_memory_fraction <= 1:
-        ap.error("cuda-memory-fraction 必须在 (0,1] 内")
     if args.max_samples < 0 or args.workers < 0 or args.epochs < 1 or args.batch_size < 1 or args.eval_n < 1:
         ap.error("max-samples、workers 必须 >= 0；epochs、batch-size、eval-n 必须 >= 1")
     args.data = str(resolve_data_root(args.data))
@@ -790,8 +641,6 @@ def train(args):
     torch.manual_seed(args.seed)
     device = "cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu"
     amp = device == "cuda"                                    # CUDA 上用 bf16 混合精度
-    if device == "cuda":
-        limit_cuda_memory(getattr(args, "cuda_memory_fraction", CUDA_MEMORY_FRACTION))
     pin_memory = args.pin_memory and device == "cuda"
     print(f"固定主机内存 pin_memory={pin_memory}", flush=True)
     if sys.platform == "win32" and args.workers > 0:
@@ -803,41 +652,19 @@ def train(args):
                     "probability": getattr(args, "augment_prob", DEFAULT_AUGMENT_PROBABILITY),
                     "version": AUGMENTATION_VERSION}
     print(f"训练数据增强: {augmentation} | 验证集不增强", flush=True)
-    crop_scale, scale_cache, crop_info = None, {}, None
-    if getattr(args, "crop_scale", None) is not None:
-        if not Path(args.crop_scale).is_file():
-            raise FileNotFoundError(f"缩放模型不存在: {args.crop_scale}（先运行 crop.py fit，或加 --no-crop-scale）")
-        crop_scale = CropScale(args.crop_scale)
-        scale_cache = load_scale_cache(scale_cache_path(Path(args.data), crop_scale))
-        crop_info = {"path": str(crop_scale.path.resolve()), "sha256": crop_scale.sha256, "method": crop_scale.method}
-    token_path = token_cache_path(Path(args.data))
-    token_cache = load_token_cache(token_path)
-    cached_labels = len(token_cache)
     train_ds = MathWriting(args.data, args.splits.split(","), vocab, train=True, oov=args.oov,
                            max_samples=args.max_samples, image_roots=args.image_data,
                            personal_train=None if args.no_personal_train else args.personal_train.resolve(),
-                           augment=augmentation["enabled"], augment_probability=augmentation["probability"],
-                           crop_scale=crop_scale, scale_cache=scale_cache, token_cache=token_cache)
+                           augment=augmentation["enabled"], augment_probability=augmentation["probability"])
     val_ds = MathWriting(args.data, ["valid"], vocab, train=False, oov=args.oov,
-                         max_samples=args.max_samples, image_roots=args.image_data,
-                         crop_scale=crop_scale, scale_cache=scale_cache, token_cache=token_cache)
-    if len(token_cache) != cached_labels:
-        save_token_cache(token_path, token_cache)
+                         max_samples=args.max_samples, image_roots=args.image_data)
     if not len(train_ds) or not len(val_ds):
         raise ValueError("过滤后的训练集或验证集为空，请检查清单、词表和数据路径")
-    if crop_scale is None:
-        print("缩放模型: 不使用（原规则 m=1）", flush=True)
-    else:
-        missing = sum(item[1] not in scale_cache for ds in (train_ds, val_ds) for item in ds.items)
-        print(f"缩放模型: {crop_scale.path} (sha {crop_scale.sha256[:12]}, {crop_scale.method}) | "
-              f"缓存缺 {missing} 条，训练时现算；可先运行 crop.py cache 预先算好", flush=True)
     overlap = {item[1] for item in train_ds.items} & {item[1] for item in val_ds.items}
     if overlap:
         raise ValueError(f"训练和验证清单引用了相同文件，例如: {next(iter(overlap))}")
     validation_hash = hashlib.sha256()
     validation_hash.update(json.dumps({"image_invert": IMAGE_INVERT, "image_color_mode": "RGB"}).encode("utf-8"))
-    if crop_info is not None:                                 # 缩放模型改变验证输入；不用时签名与旧版相同
-        validation_hash.update(crop_info["sha256"].encode("utf-8"))
     validation_hash.update(json.dumps(load_vocab(), ensure_ascii=False).encode("utf-8"))
     for source, item in zip(val_ds.sources, val_ds.items):
         validation_hash.update(json.dumps([source, item], ensure_ascii=False).encode("utf-8") + b"\n")
@@ -850,7 +677,7 @@ def train(args):
     out = Path(args.out)
     exp_protocol = save_exp_sample(val_ds, exp_indices, out, args.eval_seed, args.eval_n)
     # 不让训练、验证的两组 worker 常驻；显式启用多进程时也限制预取数量。
-    loader_args = dict(collate_fn=collate_chunks, num_workers=args.workers, pin_memory=pin_memory)
+    loader_args = dict(collate_fn=collate, num_workers=args.workers, pin_memory=pin_memory)
     if args.workers > 0:
         loader_args["prefetch_factor"] = 1
     train_sampler = SourceMixedBatchSampler(
@@ -921,11 +748,16 @@ def train(args):
         set_training_mode(model, freeze_cnn)
         start, running = time.time(), 0.0
         train_loss_sum = train_token_count = 0
-        for step, chunks in enumerate(train_loader, 1):
-            batch_loss = train_step(model, chunks, optimizer, device, amp)
+        for step, batch in enumerate(train_loader, 1):
+            loss, _, _ = run_batch(model, batch, device, amp)
+            optimizer.zero_grad(set_to_none=True)
+            loss.backward()
+            nn.utils.clip_grad_norm_(model.parameters(), 1.0)
+            optimizer.step()
             scheduler.step()
+            batch_loss = loss.item()
             running += batch_loss
-            token_count = sum((chunk[-1] != pad_id).sum().item() for chunk in chunks)
+            token_count = (batch[-1] != pad_id).sum().item()
             train_loss_sum += batch_loss * token_count
             train_token_count += token_count
             if step % 50 == 0:
@@ -955,7 +787,7 @@ def train(args):
                 "model": model.state_dict(), "epoch": epoch, "val_loss": val_loss, "exp_rate": rate,
                 "validation_signature": validation_signature, "image_invert": IMAGE_INVERT,
                 "image_color_mode": "RGB",
-                "augmentation": augmentation, "crop_scale": crop_info,
+                "augmentation": augmentation,
                 "validation": validation, "validation_by_source": validation_by_source,
                 "exp_rate_count": expression["sample_count"], "exp_rate_by_source": expression_by_source,
                 "exp_rate_protocol": exp_protocol}

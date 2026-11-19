@@ -6,12 +6,13 @@ import ai.djl.ndarray.NDArray;
 import ai.djl.ndarray.NDManager;
 import ai.djl.ndarray.types.DataType;
 import ai.djl.ndarray.types.Shape;
+import ai.djl.nn.pooling.Pool;
 import ai.djl.translate.TranslateException;
 
 import java.io.IOException;
 import java.nio.file.Path;
 
-/** model.py 的 vital_pixel；整块调用导出的 cnn 方法（含残差块和二维位置编码）。单线程使用。 */
+/** model.py 的 vital_pixel；只调用 CNN 的卷积、归一化和 SiLU，执行池化及二维位置编码。单线程使用。 */
 public final class vital_pixel implements AutoCloseable {
     private final ModelRuntime runtime;
     private final boolean ownsRuntime;
@@ -56,8 +57,50 @@ public final class vital_pixel implements AutoCloseable {
                 || shape.get(3) < 16 || shape.get(3) % 16 != 0) {
             throw new IllegalArgumentException("image 必须为 FLOAT32 [B,3,H,W]，H 和 W 都是 16 的正整数倍");
         }
-        // 整个 Python cnn.forward（卷积、残差块、池化、二维位置编码）作为一个导出方法调用。
-        return runtime.callPixel(scope, "cnn", runtime.copyInput(scope, image));
+        NDArray x = runtime.copyInput(scope, image);
+        // 对应 Python cnn.forward，逐步展示各层，不在 Java 中重新定义权重。
+        x = runtime.callPixel(scope, "cnn_conv", x);
+        x = runtime.callPixel(scope, "cnn_norm", x);
+        x = runtime.callPixel(scope, "silu", x);
+        x = pool(x);
+        x = runtime.callPixel(scope, "cnn_conv2", x);
+        x = runtime.callPixel(scope, "cnn_norm2", x);
+        x = runtime.callPixel(scope, "silu", x);
+        x = pool(x);
+        x = runtime.callPixel(scope, "cnn_conv3", x);
+        x = runtime.callPixel(scope, "cnn_norm3", x);
+        x = runtime.callPixel(scope, "silu", x);
+        x = pool(x);
+        x = runtime.callPixel(scope, "cnn_con4", x);
+        x = runtime.callPixel(scope, "cnn_norm4", x);
+        x = runtime.callPixel(scope, "silu", x);
+        x = runtime.callPixel(scope, "cnn_con5", x);
+        x = runtime.callPixel(scope, "cnn_norm5", x);
+        return positionEmbedding(scope, x);
+    }
+
+    private static NDArray pool(NDArray x) {
+        return Pool.maxPool2d(x, new Shape(2, 2), new Shape(2, 2), new Shape(0, 0), false);
+    }
+
+    private static NDArray positionEmbedding(NDManager scope, NDArray x) {
+        int h = Math.toIntExact(x.getShape().get(2)), w = Math.toIntExact(x.getShape().get(3));
+        float[] positions = new float[256 * h * w];
+        for (int c = 0; c < 256; c++) {
+            float frequency = frequency(c % 128 / 2, 128);
+            for (int y = 0; y < h; y++) {
+                for (int col = 0; col < w; col++) {
+                    float angle = (c < 128 ? y : col) * frequency;
+                    positions[(c * h + y) * w + col] = (float) (c % 2 == 0 ? Math.sin(angle) : Math.cos(angle));
+                }
+            }
+        }
+        return x.add(scope.create(positions, new Shape(1, 256, h, w)));
+    }
+
+    private static float frequency(int pair, int dimension) {
+        // 保持 PyTorch float32 的指数和角度运算顺序。
+        return (float) Math.exp((float) (2 * pair * (float) (-Math.log(10000.0) / dimension)));
     }
 
     @Override

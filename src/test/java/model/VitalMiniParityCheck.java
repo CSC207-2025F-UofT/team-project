@@ -59,8 +59,8 @@ public final class VitalMiniParityCheck {
                 throw new AssertionError("CNN accepted head");
             } catch (IllegalArgumentException expected) { }
             try {
-                runtime.callMini(scope, "cnn", input);
-                throw new AssertionError("vital_mini accepted CNN block");
+                runtime.callMini(scope, "cnn_conv", input);
+                throw new AssertionError("vital_mini accepted CNN layer");
             } catch (IllegalArgumentException expected) { }
             vital_pixel shared = new vital_pixel(runtime);
             shared.close();
