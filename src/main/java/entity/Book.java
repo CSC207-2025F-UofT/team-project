@@ -9,7 +9,6 @@ public class Book {
     private final String title;
     private final String author;
     private final String isbn;
-    private final String genre;
     private final Integer publicationYear;
     private final Integer coverID;
     private LocalDateTime dateAdded;
@@ -24,7 +23,6 @@ public class Book {
         this.title =title;
         this.author =author;
         this.isbn =isbn;
-        this.genre =genre;
         this.publicationYear =publicationYear;
         this.coverID = coverID;
         this.dateAdded = null;
@@ -72,13 +70,6 @@ public class Book {
         return publicationYear;
     }
 
-    /**
-     * Returns the genre of the Book.
-     * @return the genre of the Book.
-     */
-    public String getGenre(){
-        return genre;
-    }
 
     /**
      * Returns the coverID of the Book.
