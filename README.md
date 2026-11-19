@@ -117,7 +117,9 @@ study decks I have on my computer/so I can study decks that other people have cr
 [Any additional project information.]
 
 Use Figma first to discuss and design GUI before finalization and implementation
+
 Link to Figma Folder : https://www.figma.com/community/file/1705311968683862257
+
 Link to Prototype: https://www.figma.com/proto/Z0UAvyBWPMTXB1CJ5FSPoo/Graphical-Interface?node-id=0-1&t=TJIhFRMs4qNJvbvR-1
 
 Create a chatbot with API that can generate answers about the current flashcard if
