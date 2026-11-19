@@ -328,12 +328,49 @@ Plain Java; no Swing, JSON, SQL or API dependencies. Entities appear in the phas
 - **Location:** `id, name, description, openDays, closedInBadWeather, requiresUnlock, npcIds, challengeIds, pickupItemIds, shopPrices`.
 - **Item / Buff / Inventory:** item has `id, name, description, instantEffects, buff`; buff has `ChallengeKind appliesTo` (REACTION, MEMORY, FIGHT) and `difficultyDelta`; inventory holds up to 5 items.
 - **NPC / DialogueNode / DialogueOption:** NPC has `id, name, locationId, persona, startNodeId`; node has `text, options`; option has `text` and either `nextNodeId`, a final `Outcome`, or `fightOpponentId`.
-- **Outcome:** `effects, itemsGained, itemsLost, unlockedLocationIds, timeBlocksUsed, message`.
+- **Outcome:** `effects, itemsGained, itemsLost, unlockedLocationIds, timeBlocksUsed, newLocationId, message`. Immutable; built with `Outcome.Builder` (unset parts default to no effect, empty lists, 0 blocks, `null` location = stay put, empty message).
 - **GameState:** `day, timeBlocksLeft, player, forecast, inventory, activeBuffs, currentLocationId, unlockedLocationIds, pickedUpToday, eventLog, daySummaries`. Methods: `apply(Outcome) → GameStatus` (IN_PROGRESS, DAY_ENDED, WON, LOST), `effectiveDifficulty(kind)`, `consumeBuffs(kind)`, `startNextDay()`.
 - **EventRecord / DaySummary / RunSummary:** a logged event (`day, source, message, effects`); an end-of-day snapshot (`day, weather, stats`); a finished run (`result, daysSurvived, finalStats, gradeLetter`).
 - **User:** `username, passwordHash`.
 
 ---
+
+### Skeleton contract (Story 2)
+
+Merged in the Story 2 skeleton PR. Build your story against these; if you need to change one, say so in your PR and update this section.
+
+**Entities (implemented now)**
+
+| Class | What you can rely on |
+|---|---|
+| `StatEffects` | Immutable deltas `(energy, sanity, academic, money)`; `StatEffects.NONE`. |
+| `Player` | `createNew()` = 100 / 100 / 50 / $50. `applyEffects(StatEffects)` clamps Energy, Sanity, Academic Survival to 0–100 and Money to ≥ 0. `isOutOfStat()` is true when Energy, Sanity or Academic Survival is 0 (Money 0 is not a loss). |
+| `Outcome` | See above. Every use case that changes the game builds one. |
+| `GameState` | `startNew()` = Day 1 of `TOTAL_DAYS` (7) at `START_LOCATION_ID` (`"residence"`). `apply(Outcome) → GameStatus`: applies effects, moves the player if `newLocationId != null`, sets `LOST` when a stat hits 0; once `WON`/`LOST` it ignores further outcomes. Time blocks, items, weather, logging and end-of-day are added to `apply` by later stories without changing its signature. |
+| `GameStatus` | `IN_PROGRESS, DAY_ENDED, WON, LOST`. |
+
+**Shared use case interface**
+
+```java
+package use_case;
+public interface GameStateDataAccessInterface {
+    void saveGameState(GameState gameState);  // replaces the current game
+    GameState getGameState();                 // null before New Game
+}
+```
+
+Implemented by `data_access.InMemoryGameStateDataAccessObject`. Interactors get the current game from it, call `apply(outcome)`, and never call each other. In tests, use your own small fake (see `NewGameInteractorTest`).
+
+**Shared interface adapters and views**
+
+- `interface_adapter.ViewModel<T>`: base class with `getViewName()`, `getState()/setState(T)`, `firePropertyChanged()` / `firePropertyChanged(String)` and `addPropertyChangeListener(...)`. The default property name is `"state"`.
+- `ViewManagerModel`: its state is the card name on screen. To switch screens, call `setState(viewName); firePropertyChanged();`.
+- `interface_adapter.hud.HudViewModel` / `HudState`: `day, totalDays, energy, sanity, academicSurvival, money`. **Every presenter whose use case changes stats updates this view model**, and `view.StatsPanel` redraws itself. Later stories add fields here (time blocks in Story 8, location in Story 5).
+- `view.GameView` (card `"game"`) holds the `StatsPanel` at the top; later stories fill its centre.
+- `view.StartView` (card `"start"`) is a **temporary** New Game button. Story 1's `TitleView` replaces it and calls the same `NewGameController.execute()`.
+- `app.AppBuilder`: each story adds its own `addXView()` and `addXUseCase()` methods and chains them in `Main`. Add views before the use cases that need them.
+
+**Use case: `use_case/new_game/`**: `NewGameInputBoundary.execute(NewGameInputData)` → `NewGameInteractor` (creates the game with `GameState.startNew()`, saves it, presents it) → `NewGameOutputBoundary.prepareSuccessView(NewGameOutputData)` → `NewGamePresenter` (fills `HudViewModel`, switches to `"game"`). `NewGameInputData` is empty for now; Story 1 adds the username.
 
 ## API Usage
 
@@ -419,7 +456,7 @@ entity/            Player, StatEffects, Weather, WeatherCondition, Location, Ite
                    NPC, DialogueNode, DialogueOption, Outcome, GameState, GameStatus,
                    EventRecord, DaySummary, RunSummary, User
 use_case/
-  start_game/ navigate/ collect_item/ use_item/ talk_to_npc/ end_day/ study_spot/
+  new_game/ navigate/ collect_item/ use_item/ talk_to_npc/ end_day/ study_spot/
   save_game/ load_game/ view_transcript/ login/ signup/ logout/
   (each with Input/OutputBoundary, InputData, OutputData, Interactor)
   DAO interfaces: WeatherDataAccessInterface, LocationDataAccessInterface, ItemDataAccessInterface,
@@ -518,13 +555,11 @@ This README is the single source of truth for scope, stories and ownership. When
 
 ## How to Run
 
-1. Requires a JDK and Maven. `pom.xml` currently targets Java 11; the version is still to be confirmed with the TA.
+1. Requires JDK 17 or newer and Maven. `pom.xml` compiles with `release 17` and uses JUnit 5 (Surefire 3.2.5). Java 17 is still to be confirmed with the TA.
 2. Clone the repository and open it in IntelliJ (or run `mvn compile`).
 3. Weather needs no key. For LLM-written NPC replies (Story 11 onwards), set `LLM_API_KEY` (environment variable or a git-ignored `.env`); without it the game uses scripted dialogue.
-4. Run `app.Main`. The database file `data/uofteart.db` is created automatically on first run.
+4. Run `app.Main`. It currently opens a New Game button that leads to the Day 1 stats screen. From Story 3 onwards, the database file `data/uofteart.db` is created automatically on first run.
 5. Run tests with `mvn test` (no network or key needed).
-
-*(Update once the build is set up in Story 2.)*
 
 ---
 
