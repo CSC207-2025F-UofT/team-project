@@ -9,7 +9,6 @@ public class Deck {
     private ArrayList<Card> studyingDeck;
     private Card currentCard;
     String title;
-
     public Deck(String title, ArrayList<Card> flashcardDeck) {
         this.title = title;
         this.flashcardDeck = flashcardDeck;
@@ -44,4 +43,7 @@ public class Deck {
         this.flashcardDeck.add(card);
 
     }
+    public String getTitle(){return this.title;}
+    public ArrayList<Card> getFlashcardDeck(){ return this.flashcardDeck;}
+    public void setTitle(String title){ this.title = title;}
 }
