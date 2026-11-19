@@ -3,6 +3,7 @@ package model;
 import ai.djl.Device;
 import ai.djl.MalformedModelException;
 import ai.djl.ndarray.NDArray;
+import ai.djl.ndarray.NDList;
 import ai.djl.ndarray.NDManager;
 import ai.djl.ndarray.types.DataType;
 import ai.djl.ndarray.types.Shape;
@@ -21,7 +22,7 @@ import ai.djl.modality.cv.ImageFactory;
  */
 public final class vital_mini implements AutoCloseable {
     public static final int VOCAB_LENGTH = 234;
-    public static final int PAD_ID = 67, BOS_ID = 68, EOS_ID = 69, MAX_LEN = 1000;
+    public static final int PAD_ID = 67, BOS_ID = 68, EOS_ID = 69, MAX_LEN = 300;
     private final Path modelPath;
     private ModelRuntime runtime;
     private vital_pixel cnn;
@@ -55,13 +56,17 @@ public final class vital_mini implements AutoCloseable {
             NDArray noMask = scope.create(new boolean[0]);
             loaded.callMini(scope, "encoder1", probe, noMask);
             loaded.callMini(scope, "encoder2", probe, noMask);
+            // generate 依赖带 KV 缓存的逐 token 解码，旧导出文件没有这两个方法。
+            NDList start = loaded.callMiniList(scope, "decoder_start", probe);
+            loaded.callMiniList(scope, "decoder_step", scope.create(new long[]{BOS_ID}).reshape(1, 1),
+                    scope.create(new long[]{0}), start.get(1), start.get(0), noMask);
             cnn = new vital_pixel(loaded);
             encoder1 = new encoder(loaded, "encoder1");
             encoder2 = new encoder(loaded, "encoder2");
             runtime = loaded;
         } catch (TranslateException e) {
             loaded.close();
-            throw new IOException("无法读取共享词嵌入或视觉编码器，请重新导出 model_ops.pt", e);
+            throw new IOException("无法读取共享词嵌入、视觉编码器或逐 token 解码方法，请重新导出 model_ops.pt", e);
         } catch (IOException | RuntimeException | Error e) {
             loaded.close();
             throw e;
@@ -250,19 +255,25 @@ public final class vital_mini implements AutoCloseable {
                     .div(255f)           // 像素归一化到 [0, 1]
                     .transpose(2, 0, 1)  // [H, W, 3] → [3, H, W]
                     .expandDims(0);      // → [1, 3, H, W]
-            // 图像编码只计算一次；所有 token 步骤复用 memory。
+            // 图像编码和各层交叉注意力的 K/V 只计算一次；之后每步只把各假设新选的 token 送进
+            // decoder_step，自注意力的 K/V 缓存记住前面的位置（model.incremental_decoder）。
             try (NDArray encoded = cnn.forward(image_tensor);
                  NDArray memory = encodeFeatures(encoded)) {
+                NDList start = runtime.callMiniList(scope, "decoder_start", memory);
+                NDArray crossCache = start.get(0);
+                NDArray selfCache = start.get(1);
+                NDArray noMask = scope.create(new boolean[0]);
                 while (!search.isDone()) {
                     try (NDManager step = scope.newSubManager()) {
-                        NDArray tokensTensor = step.create(search.tokenIds()).reshape(search.size(), search.length());
-                        NDArray batchMemory = memory.broadcast(
-                                new Shape(search.size(), memory.getShape().get(1), memory.getShape().get(2)));
-                        batchMemory.attach(step);
-                        try (NDArray decoded = decode(batchMemory, tokensTensor);
-                             NDArray last = decoded.get(":,-1,:")) {
-                            search.advance(last.toFloatArray());
-                        }
+                        NDArray tokens = step.create(search.lastTokenIds()).reshape(search.size(), 1);
+                        NDArray parents = step.create(search.parentIds());
+                        NDList outputs = runtime.callMiniList(step, "decoder_step",
+                                tokens, parents, selfCache, crossCache, noMask);
+                        search.advance(outputs.get(0).toFloatArray());
+                        NDArray next = outputs.get(1);
+                        next.attach(scope);                     // 留给下一步；旧缓存不再需要
+                        selfCache.close();
+                        selfCache = next;
                     }
                 }
             }

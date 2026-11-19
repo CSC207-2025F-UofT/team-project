@@ -50,8 +50,29 @@ UniMER 的图片名整数对应标签文件的零基行号；保留空行的索�
 多行公式每行保持单行的大小，高度向上取整到 16 的倍数，最高 512。只有高度超过 512，或特征格数
 （高/16 × 宽/16）超过 1280 时，才把整张图等比缩小。宽度不再单独限制。组批时高度和宽度都补到批内最大值，
 `memory_mask` 同时屏蔽补出的行和列。这改变了缩放规则，原有权重需要继续训练后再使用。
+
+高图和宽图同批时补出的画布可达单张上限的数倍，视觉自注意力的显存随 子批大小 × 格数² 增长。
+因此 `train.py` 用 `collate_chunks` 把每个 batch 按补边后的画布拆成子批（`canvas_chunks`：
+子批大小 × 格数 ≤ 32 × 1280，子批大小 × 格数² ≤ 32 × 1280²，即 32 张恰好 1280 格的图，峰值约 10 GiB），
+各子批损失按 token 数加权累积梯度，等价于整批一起算的平均损失；验证也逐子批计算。
+CNN 的 BatchNorm 按子批统计，子批变小时统计更嘈杂。
 改动 `formula_layout.py` 的常量或算法时，必须同步修改 `FormulaLayout.java`，
 并让 `tests/test_formula_layout.py` 与 `FormulaLayoutTest.java` 的期望值保持一致。
+
+### 缩放系数模型（crop_scale）
+
+在上面的规则之上，每张图再乘一个系数 m：实际缩放 = 112 / (最高行带 × m)，m 从 0.35 到 4
+共 15 档。m 由 LightGBM 树模型按二值笔迹图的特征预测（`crop_scale.py`），模型由 `crop.py` 训练：
+对验证图逐档试 m，以识别模型的 teacher forcing 损失最低者为标签。训练（`train.py`）、
+Python 推理（`start.py`）和 Java 运行时（`CropScale.java` / `FormulaImagePreprocessor`）用同一份模型：
+
+- 训练默认读取 `checkpoints/crop/crop_scale.json`，`--no-crop-scale` 关闭；所用模型的哈希写入权重元数据。
+- Java 读取 `src/main/java/model/checkpoints/crop_scale.json`，换模型时把同一份文件复制过去。
+- 长时间训练前先运行 `python crop.py cache`，给全部训练样本预先算好 m（约 20–30 分钟），
+  缓存按模型哈希命名放在 `data/mixed/`；缺的样本训练时现算。
+- 识别模型重新训练后缩放偏好会变，应重新 `crop.py label` + `crop.py fit`，再复制到 Java 端。
+- 改动 `crop_scale.py` 的特征时必须同步修改 `CropScale.java`，并运行
+  `tests/generate_crop_scale_fixtures.py` 重新生成对照数据；`test_crop.py` 和 `CropScaleTest.java` 会核对两边逐项一致。
 
 ## 训练数据增强
 

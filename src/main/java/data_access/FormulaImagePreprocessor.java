@@ -29,26 +29,69 @@ final class FormulaImagePreprocessor {
     private FormulaImagePreprocessor() {
     }
 
-    /**
-     * @return a gray-on-white RGB image (r=g=b) at least 128 px high, sides multiples of 16
-     * @throws IllegalArgumentException if there is no ink in the image
-     */
+    /** {@link #prepare(BufferedImage, CropScale)} with the scale model training used. */
     static BufferedImage prepare(BufferedImage source) {
-        return prepare(source, BandRule.TALLEST_BAND);
+        return prepare(source, CropScale.defaultModel());
     }
 
-    // same, but rule picks what height counts as one line
-    static BufferedImage prepare(BufferedImage source, BandRule rule) {
-        GrayInk gray = GrayInk.of(source);
-        Rectangle box = gray.bounds();
-        if (box == null) {
+    /**
+     * @param cropScale picks the factor m on the tallest band, like {@code band_scale} in training;
+     *                  {@link CropScale#RULE} keeps the plain rule
+     * @return an RGB image at least 128 px high, height and width multiples of 16,
+     *         preserving the source RGB colours like the training images
+     * @throws IllegalArgumentException if there is no ink in the image
+     */
+    static BufferedImage prepare(BufferedImage source, CropScale cropScale) {
+        int width = source.getWidth();
+        int height = source.getHeight();
+        int[] rgb = toRgb(source);
+
+        // A light border means a light background (as on the canvas); the ink is then the dark part.
+        boolean lightBackground = median(border(rgb, width, height)) >= 128;
+        int left = width;
+        int top = height;
+        int right = -1;
+        int bottom = -1;
+        boolean[] rowHasInk = new boolean[height];
+        boolean[] isInk = new boolean[width * height];
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                int pixel = rgb[y * width + x];
+                int foreground = 0;
+                for (int shift = 16; shift >= 0; shift -= 8) {
+                    int value = (pixel >>> shift) & 0xFF;
+                    foreground = Math.max(foreground, lightBackground ? 255 - value : value);
+                }
+                if (foreground > INK_THRESHOLD) {
+                    left = Math.min(left, x);
+                    top = Math.min(top, y);
+                    right = Math.max(right, x);
+                    bottom = Math.max(bottom, y);
+                    rowHasInk[y] = true;
+                    isInk[y * width + x] = true;
+                }
+            }
+        }
+        if (right < 0) {
             throw new IllegalArgumentException("The image has no handwriting in it.");
         }
-        double tallest = lineHeight(gray, box, rule);
-        FormulaLayout.Size layout = FormulaLayout.size(box.width, box.height, tallest);
-        int resizedWidth = Math.max(1, FormulaLayout.roundHalfUp(box.width * layout.scale()));
-        int resizedHeight = Math.max(1, FormulaLayout.roundHalfUp(box.height * layout.scale()));
-        BufferedImage resized = resize(gray.crop(box), resizedWidth, resizedHeight);
+        int inkWidth = right - left + 1;
+        int inkHeight = bottom - top + 1;
+        BufferedImage ink = new BufferedImage(inkWidth, inkHeight, BufferedImage.TYPE_INT_RGB);
+        ink.setRGB(0, 0, inkWidth, inkHeight, rgb, top * width + left, width);
+
+        // Same scale and canvas as training (formula_layout.py, band_scale from crop_scale.py).
+        boolean[] mask = new boolean[inkWidth * inkHeight];
+        for (int y = 0; y < inkHeight; y++) {
+            System.arraycopy(isInk, (top + y) * width + left, mask, y * inkWidth, inkWidth);
+        }
+        double tallest = FormulaLayout.tallestBand(
+                FormulaLayout.rowSpans(Arrays.copyOfRange(rowHasInk, top, bottom + 1)),
+                inkHeight, FormulaLayout.GAP_MIN_PX) * cropScale.bandScale(mask, inkWidth, inkHeight);
+        FormulaLayout.Size layout = FormulaLayout.size(inkWidth, inkHeight, tallest);
+        int resizedWidth = Math.max(1, FormulaLayout.roundHalfUp(inkWidth * layout.scale()));
+        int resizedHeight = Math.max(1, FormulaLayout.roundHalfUp(inkHeight * layout.scale()));
+        BufferedImage resized = resize(ink, resizedWidth, resizedHeight);
 
         BufferedImage canvas = new BufferedImage(layout.width(), layout.height(), BufferedImage.TYPE_INT_RGB);
         Graphics2D g = canvas.createGraphics();
