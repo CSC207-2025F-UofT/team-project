@@ -1,50 +1,10 @@
 {
   "checkpoint": "model.pt",
-  "checkpoint_sha256": "28888928aadfcb0a4f7de6c5b75754a44702f9c8914f580d0eb92237efa384cd",
+  "checkpoint_sha256": "978c6c9c56a5f03c1106a9f350fcda512703d83ea240dc10d9466b1d1f640f80",
   "torch_version": "2.11.0+cu128",
   "mode": "eval (inference only; dropout is identity, BN uses saved statistics)",
   "vocab_size": 234,
   "layers": {
-    "cnn_conv": {
-      "python_path": "cnn.conv",
-      "type": "Conv2d"
-    },
-    "cnn_norm": {
-      "python_path": "cnn.norm",
-      "type": "BatchNorm2d"
-    },
-    "cnn_conv2": {
-      "python_path": "cnn.conv2",
-      "type": "Conv2d"
-    },
-    "cnn_norm2": {
-      "python_path": "cnn.norm2",
-      "type": "BatchNorm2d"
-    },
-    "cnn_conv3": {
-      "python_path": "cnn.conv3",
-      "type": "Conv2d"
-    },
-    "cnn_norm3": {
-      "python_path": "cnn.norm3",
-      "type": "BatchNorm2d"
-    },
-    "cnn_con4": {
-      "python_path": "cnn.con4",
-      "type": "Conv2d"
-    },
-    "cnn_con5": {
-      "python_path": "cnn.con5",
-      "type": "Conv2d"
-    },
-    "cnn_norm4": {
-      "python_path": "cnn.norm4",
-      "type": "BatchNorm2d"
-    },
-    "cnn_norm5": {
-      "python_path": "cnn.norm5",
-      "type": "BatchNorm2d"
-    },
     "final_norm": {
       "python_path": "final_norm",
       "type": "LayerNorm"
@@ -65,6 +25,10 @@
       "python_path": "test",
       "type": "Linear"
     }
+  },
+  "cnn_block": {
+    "python_path": "cnn",
+    "includes": "model.vital_pixel scripted as is: convolutions, BatchNorm, SiLU, max pooling, the residual block after con4 and the 2D sinusoidal position embedding; image FLOAT32 [B,3,H,W] (H, W multiples of 16) -> FLOAT32 [B,256,H/16,W/16]"
   },
   "decoder_blocks": {
     "decoder1": {
@@ -108,18 +72,9 @@
     "decoder_step": "tokens INT64 [K,N], parents INT64 [K] (rows of the previous self_cache), self_cache, cross_cache (batch 1 is shared by all K), memory mask BOOL [1 or K,S] or empty -> (logits FLOAT32 [K,vocab] of the last new position, self_cache [5,2,K,4,T+N,64]); positions continue from T, at most max_len in total"
   },
   "mask_convention": "True = blocked; omitted/None or an empty BOOL tensor = no padding mask. Encoders are non-causal; each decoder creates its own causal mask.",
-  "scope": "Conv2d, BatchNorm2d, LayerNorm and Linear layers outside the encoder/decoder blocks, one shared silu, two complete visual encoders, six complete decoders and the cached decoding steps. Layers inside the blocks are not exported separately.",
+  "scope": "LayerNorm and Linear layers outside the CNN/encoder/decoder blocks, one shared silu, the complete CNN, two complete visual encoders, six complete decoders and the cached decoding steps. Layers inside the blocks are not exported separately.",
   "methods": {
-    "cnn_con4": "cnn_con4(__torch__._generated_model_ops.ModelOps self, Tensor x) -> Tensor",
-    "cnn_con5": "cnn_con5(__torch__._generated_model_ops.ModelOps self, Tensor x) -> Tensor",
-    "cnn_conv": "cnn_conv(__torch__._generated_model_ops.ModelOps self, Tensor x) -> Tensor",
-    "cnn_conv2": "cnn_conv2(__torch__._generated_model_ops.ModelOps self, Tensor x) -> Tensor",
-    "cnn_conv3": "cnn_conv3(__torch__._generated_model_ops.ModelOps self, Tensor x) -> Tensor",
-    "cnn_norm": "cnn_norm(__torch__._generated_model_ops.ModelOps self, Tensor x) -> Tensor",
-    "cnn_norm2": "cnn_norm2(__torch__._generated_model_ops.ModelOps self, Tensor x) -> Tensor",
-    "cnn_norm3": "cnn_norm3(__torch__._generated_model_ops.ModelOps self, Tensor x) -> Tensor",
-    "cnn_norm4": "cnn_norm4(__torch__._generated_model_ops.ModelOps self, Tensor x) -> Tensor",
-    "cnn_norm5": "cnn_norm5(__torch__._generated_model_ops.ModelOps self, Tensor x) -> Tensor",
+    "cnn": "cnn(__torch__._generated_model_ops.ModelOps self, Tensor x) -> Tensor",
     "decoder1": "decoder1(__torch__._generated_model_ops.ModelOps self, Tensor x, Tensor memory, Tensor? tgt_key_padding_mask=None, Tensor? memory_key_padding_mask=None) -> Tensor",
     "decoder2": "decoder2(__torch__._generated_model_ops.ModelOps self, Tensor x, Tensor memory, Tensor? tgt_key_padding_mask=None, Tensor? memory_key_padding_mask=None) -> Tensor",
     "decoder3": "decoder3(__torch__._generated_model_ops.ModelOps self, Tensor x, Tensor memory, Tensor? tgt_key_padding_mask=None, Tensor? memory_key_padding_mask=None) -> Tensor",

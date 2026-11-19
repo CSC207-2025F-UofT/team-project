@@ -6,6 +6,7 @@ import hashlib
 import heapq
 import json
 import math
+import os
 import random
 import re
 import sys
@@ -47,6 +48,7 @@ def source_name(value: str | None, kind: str) -> str:
     return aliases.get(value.strip().lower(), value.strip())
 
 # ---------- 标签 -> token ----------
+import labels
 from labels import tokenize_label, LABEL_RE
 
 def build_index(root: Path, split: str) -> list[tuple[str, str]]:
@@ -146,6 +148,28 @@ def save_scale_cache(path: Path, scales: dict[str, float]) -> None:
     np.savez_compressed(tmp, paths=np.array(paths), index=np.array([index[scales[p]] for p in paths], dtype=np.uint8))
     tmp.replace(path)
 
+# ---------- 标签分词缓存 ----------
+# 百万级标签每次启动都重新分词要数分钟；分词只由标签文本和 labels.py 决定，按标签文本缓存。
+# 文件名带 labels.py 内容哈希，改了规范化/分词规则自动失效。
+def token_cache_path(data_root: Path) -> Path:
+    labels_sha = hashlib.sha256(Path(labels.__file__).read_bytes()).hexdigest()[:12]
+    return Path(data_root) / f"token_cache_{labels_sha}.json"
+
+def load_token_cache(path: Path) -> dict[str, list[str]]:
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+        return data if isinstance(data, dict) else {}
+    except (OSError, ValueError):
+        return {}
+
+def save_token_cache(path: Path, cache: dict[str, list[str]]) -> None:
+    temp = path.with_name(path.name + ".tmp")
+    try:
+        temp.write_text(json.dumps(cache, ensure_ascii=False), encoding="utf-8")
+        temp.replace(path)
+    except OSError as error:
+        print(f"无法写入分词缓存 {path}: {error}", flush=True)
+
 # ---------- 图片有效性缓存 ----------
 IMAGE_CHECK_VERSION = 2              # 修改 check_formula_image 的判定规则时递增，使旧缓存失效
 
@@ -177,8 +201,10 @@ class MathWriting(Dataset):
                  oov: str = "skip", max_samples: int | None = None,
                  image_roots: list[str] | None = None, personal_train: Path | None = None,
                  augment: bool = True, augment_probability: float = DEFAULT_AUGMENT_PROBABILITY,
-                 crop_scale: CropScale | None = None, scale_cache: dict[str, float] | None = None):
+                 crop_scale: CropScale | None = None, scale_cache: dict[str, float] | None = None,
+                 token_cache: dict[str, list[str]] | None = None):
         self.root, self.train = Path(root).resolve(), train
+        self.token_cache = token_cache        # 标签 -> token；None 时每次现算，新分词的结果会写回此字典
         # 缩放模型为 None 时用原规则（m=1）；scale_cache 是 路径 -> m，缺的样本现算并记在本进程内
         self.crop_scale = crop_scale
         self.scale_cache = {} if scale_cache is None else scale_cache
@@ -236,8 +262,12 @@ class MathWriting(Dataset):
                     seen_paths[path] = label
                     source_by_path[path] = source
                     total += 1
-                    toks = tokenize_label(label)
-                    if len(toks) + 2 > max_len:                    # 加上 <bos>/<eos>
+                    toks = None if self.token_cache is None else self.token_cache.get(label)
+                    if toks is None:
+                        toks = tokenize_label(label)
+                        if self.token_cache is not None:
+                            self.token_cache[label] = toks
+                    if len(toks) + 2 > max_len:                   # 加上 <bos>/<eos>
                         too_long += 1
                         continue
                     if oov == "skip" and any(t not in vocab for t in toks):
@@ -330,10 +360,11 @@ def read_manifest(path: Path):
                 kind = row.get("format", "image")
                 if kind not in {"image", "inkml"} or not isinstance(label, str) or not label.strip():
                     raise ValueError("format 必须为 image/inkml，latex 必须为非空字符串")
-                sample_path = (path.parent / filename).resolve()
-                if not sample_path.is_file():
-                    raise FileNotFoundError(sample_path)
-                yield kind, str(sample_path), label, source_name(row.get("source"), kind)
+                # 清单目录已是绝对路径；只消除 ..，不逐级解析符号链接，也不逐条 stat：
+                # 百万行时 resolve()+is_file() 要数分钟。文件存在性由 data.py 构建清单时检查，
+                # 图片在下方有效性检查中会 stat，缺失文件仍会明确报错。
+                sample_path = os.path.abspath(path.parent / filename)
+                yield kind, sample_path, label, source_name(row.get("source"), kind)
             except (KeyError, TypeError, ValueError, OSError) as error:
                 raise ValueError(f"无效数据清单 {path}:{line_number}: {error}") from error
 
@@ -779,14 +810,19 @@ def train(args):
         crop_scale = CropScale(args.crop_scale)
         scale_cache = load_scale_cache(scale_cache_path(Path(args.data), crop_scale))
         crop_info = {"path": str(crop_scale.path.resolve()), "sha256": crop_scale.sha256, "method": crop_scale.method}
+    token_path = token_cache_path(Path(args.data))
+    token_cache = load_token_cache(token_path)
+    cached_labels = len(token_cache)
     train_ds = MathWriting(args.data, args.splits.split(","), vocab, train=True, oov=args.oov,
                            max_samples=args.max_samples, image_roots=args.image_data,
                            personal_train=None if args.no_personal_train else args.personal_train.resolve(),
                            augment=augmentation["enabled"], augment_probability=augmentation["probability"],
-                           crop_scale=crop_scale, scale_cache=scale_cache)
+                           crop_scale=crop_scale, scale_cache=scale_cache, token_cache=token_cache)
     val_ds = MathWriting(args.data, ["valid"], vocab, train=False, oov=args.oov,
                          max_samples=args.max_samples, image_roots=args.image_data,
-                         crop_scale=crop_scale, scale_cache=scale_cache)
+                         crop_scale=crop_scale, scale_cache=scale_cache, token_cache=token_cache)
+    if len(token_cache) != cached_labels:
+        save_token_cache(token_path, token_cache)
     if not len(train_ds) or not len(val_ds):
         raise ValueError("过滤后的训练集或验证集为空，请检查清单、词表和数据路径")
     if crop_scale is None:

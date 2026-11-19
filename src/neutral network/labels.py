@@ -1,11 +1,13 @@
 """训练与去重共用的保守标签规范化；原始标签不覆盖。"""
 import re
 
-NORMALIZATION_VERSION = 3
+NORMALIZATION_VERSION = 4
 TOKEN_RE = re.compile(r"\\[a-zA-Z]+|\\.|\S", re.S)
 ALIASES = {r"\le": r"\leq", r"\ge": r"\geq", r"\ne": r"\neq", r"\to": r"\rightarrow",
            r"\Box": r"\square", "□": r"\square", "⟨": r"\langle", "⟩": r"\rangle",
-           "⊥": r"\perp", "‖": r"\|", r"\Vert": r"\|", r"\lVert": r"\|", r"\rVert": r"\|"}
+           "⊥": r"\perp", "‖": r"\|", r"\Vert": r"\|", r"\lVert": r"\|", r"\rVert": r"\|",
+           # 撇号统一为词表里的 '（f^{\prime} 由 normalize_structure 再化成 f'）
+           r"\prime": "'", "′": "'", "’": "'", "´": "'"}
 LABEL_RE = re.compile(r'<annotation type="normalizedLabel">(.*?)</annotation>', re.S)
 GREEK_ALIASES = dict(zip("αβγδεζηθικλμνξοπρστυφχψω", ("\\" + name for name in
     "alpha beta gamma delta varepsilon zeta eta theta iota kappa lambda mu nu xi omicron pi rho sigma tau upsilon varphi chi psi omega".split())))
@@ -114,9 +116,12 @@ def tokenize_label(label: str) -> list[str]:
 
 # ---------- 结构规范化：同一渲染结果只保留一种写法 ----------
 # 上下标及 \frac/\sqrt 等参数一律加花括号；同时有上下标时先 _ 后 ^；
-# 去掉不影响渲染的分组括号（{dx}^2 -> dx^{2}）；三个连续的 . 统一为 \ldots。
+# 去掉不影响渲染的分组括号（{dx}^2 -> dx^{2}）；三个连续的 . 统一为 \ldots；
+# 撇号写在下标之后、上标之前（f^{\prime}_{1} -> f_{1}'，f^{\prime 2} -> f'^{2}）。
 # \text、\begin/\end、\mathrm 等受保护区域原样保留；花括号不配对的标签整体不改。
 SCRIPT_OPS = ("_", "^")
+PRIME = "'"
+SCRIPT_MARKS = SCRIPT_OPS + (PRIME,)
 ARGUMENT_COUNTS = {**dict.fromkeys(r"\frac \dfrac \tfrac \binom \overset \underset \stackrel".split(), 2),
                    **dict.fromkeys(r"\sqrt \vec \hat \overline \bar \dot \ddot \mathbb \mathcal \mathfrak "
                                    r"\mathscr \boldsymbol \bm \pmb \textrm \textbf \textit \tilde \widehat "
@@ -182,11 +187,11 @@ def _keep_group(nodes: list, i: int, after_command: bool) -> bool:
     children = nodes[i]
     while len(children) == 1 and isinstance(children[0], _Group):      # {{{C^{\prime}}}}_4 看最内层
         children = children[0]
-    if (not children or _top_level(children, ROW_TOKENS) or after_command or children[0] in SCRIPT_OPS
+    if (not children or _top_level(children, ROW_TOKENS) or after_command or children[0] in SCRIPT_MARKS
             or (isinstance(children[-1], str) and children[-1] in ARGUMENT_COUNTS)):
         return True                     # {}^{a} 占位、矩阵行、未知命令的参数、{_2F_1} 前置角标、缺参数的 {\sqrt}
     following = nodes[i + 1] if i + 1 < len(nodes) else None
-    return following in SCRIPT_OPS and _top_level(children, SCRIPT_OPS)   # {10^{2}}^{3}
+    return following in SCRIPT_MARKS and _top_level(children, SCRIPT_MARKS)  # {10^{2}}^{3}、{f^{2}}'、{C'}_4
 
 
 def _argument(nodes: list, j: int) -> tuple[list[str], int]:
@@ -216,6 +221,34 @@ def _command(nodes: list, i: int) -> tuple[list[str], int]:
     return tokens, j
 
 
+def _scripts(nodes: list, i: int) -> tuple[list[str], int]:
+    """一串连续的 _ ^ ' -> 下标、撇号、上标余下部分；^{'} 里开头的撇号移出上标。"""
+    items = []                                              # (标记, 参数 token；撇号为 None)
+    while i < len(nodes) and nodes[i] in SCRIPT_MARKS:
+        if nodes[i] == PRIME:
+            items.append((PRIME, None))
+            i += 1
+            continue
+        argument, next_i = _argument(nodes, i + 1)
+        items.append((nodes[i], argument))
+        i = next_i if next_i > i + 1 else i + 1
+    marks = [mark for mark, _ in items]
+    sup_at = marks.index("^") if "^" in marks else len(marks)
+    if (marks.count("^") > 1 or marks.count("_") > 1 or PRIME in marks[sup_at:]
+            or any(argument == [] for _, argument in items)):
+        # 重复上下标、上标后的撇号、缺参数: 不是合法写法，保持原顺序
+        return [token for mark, argument in items for token in (mark, *(argument or []))], i
+    scripts = dict(items)
+    primes = marks.count(PRIME)
+    sup = scripts.get("^", [])[1:-1]
+    leading = next((k for k, token in enumerate(sup) if token != PRIME), len(sup))
+    tokens = ["_", *scripts["_"]] if "_" in scripts else []
+    tokens += [PRIME] * (primes + leading)
+    if "^" in scripts and (sup[leading:] or not leading):
+        tokens += ["^", "{", *sup[leading:], "}"]
+    return tokens, i
+
+
 def _emit(nodes: list) -> list[str]:
     out, i = [], 0
     while i < len(nodes):
@@ -228,16 +261,9 @@ def _emit(nodes: list) -> list[str]:
         elif isinstance(node, _Group):
             out += ["{", *_emit(node), "}"] if _keep_group(nodes, i, after_command) else _emit(node)
             i += 1
-        elif node in SCRIPT_OPS:
-            scripts = []
-            while i < len(nodes) and nodes[i] in SCRIPT_OPS:
-                argument, next_i = _argument(nodes, i + 1)
-                scripts.append((nodes[i], argument))
-                i = next_i if next_i > i + 1 else i + 1
-            if [op for op, _ in scripts] == ["^", "_"]:
-                scripts.reverse()
-            for op, argument in scripts:
-                out += [op, *argument]
+        elif node in SCRIPT_MARKS:
+            tokens, i = _scripts(nodes, i)
+            out += tokens
         elif node in ARGUMENT_COUNTS:
             tokens, i = _command(nodes, i)
             out += tokens

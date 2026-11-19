@@ -83,7 +83,7 @@ class FunctionLabelsTests(unittest.TestCase):
             r'a....b': ['a', '.', '.', '.', '.', 'b'],
             r'x^{a': ['x', '^', '{', 'a'],
             r'{_2F_1}': ['{', '_', '{', '2', '}', 'F', '_', '{', '1', '}', '}'],
-            r'{{{C^\prime}}}_4': ['{', 'C', '^', '{', r'\prime', '}', '}', '_', '{', '4', '}'],
+            r'{{{C^\prime}}}_4': ['{', 'C', "'", '}', '_', '{', '4', '}'],
             r'{\sqrt}B': ['{', r'\sqrt', '}', 'B'],
             r'\frac C \rho {X}': [r'\frac', '{', 'C', '}', '{', r'\rho', '}', 'X'],
             r'\rho {X}': [r'\rho', '{', 'X', '}'],
@@ -92,6 +92,23 @@ class FunctionLabelsTests(unittest.TestCase):
             with self.subTest(raw=raw):
                 self.assertEqual(tokenize_label(raw), expected)
         self.assertEqual(label_key('x^2_1'), label_key('x_{1}^{2}'))
+
+    def test_primes_use_the_existing_apostrophe_token(self):
+        same = {
+            r"f'(x)": (r'f^{\prime}(x)', r"f^{'}(x)", r'f^\prime(x)', 'f′(x)', r'y\prime(x)'.replace('y', 'f')),
+            r"f''": (r'f^{\prime\prime}', r"f^{''}"),
+            r"f_{1}'": (r"f'_1", r'f^{\prime}_{1}', r'f_1^{\prime}'),
+            r"f'^{2}": (r'f^{\prime 2}', r"f'^2"),
+        }
+        for expected, spellings in same.items():
+            for raw in spellings:
+                with self.subTest(raw=raw):
+                    self.assertEqual(tokenize_label(raw), tokenize_label(expected))
+        self.assertEqual(tokenize_label(r"f'(x)"), ['f', "'", '(', 'x', ')'])
+        self.assertEqual(tokenize_label(r'L^{\sigma\prime}'), ['L', '^', '{', r'\sigma', "'", '}'])
+        # 上标之后的撇号不是合法写法，保持原样；\text 里的撇号不动
+        self.assertEqual(tokenize_label(r"f^{2}'"), ['f', '^', '{', '2', '}', "'"])
+        self.assertEqual(tokenize_label(r"\text{it's}"), [r'\text', '{', 'i', 't', "'", 's', '}'])
 
     def test_python_java_vocab_and_new_ids(self):
         root = Path(__file__).resolve().parents[2]
