@@ -24,6 +24,14 @@ public class TerrainMap {
     public Tile getTile(int x, int y) {
         return tiles[x][y];
     }
+
+    public int getWidth() {
+        return width;
+    }
+
+    public int getHeight() {
+        return height;
+    }
 }
 
 // TODO: There will be different types of tiles, such as water, land, mountain, etc.
