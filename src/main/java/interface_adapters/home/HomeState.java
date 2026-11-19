@@ -4,8 +4,8 @@ package interface_adapters.home;
  * The State information representing the Home Page.
  */
 public class HomeState {
-    private String timerDisplay = "25:00";
-    private int totalSeconds = 25 * 60;
+    private String timerDisplay = "00:00";
+    private int totalSeconds = 0;
     private boolean timerRunning = false;
 
     /**
