@@ -1,46 +1,64 @@
 package entity;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+/**
+ * One round of the game: a target city, the guesses made so far, and whether
+ * the round is still going, won or lost.
+ * Elliot's Submit Guess interactor decides when to set WON or LOST.
+ */
 public class Round {
-    public static final int MAX_ATTEMPTS = 5;
-    public static final int START_ZOOM = 17;
-    public static final int ZOOM_STEP = 1;
+    public static final int MAX_ATTEMPTS = GameRules.MAX_ATTEMPTS;
 
-    private final AnswerCity answerCity;
-    private int wrongGuesses = 0;
-    private boolean roundOver = false;
+    private final AnswerCity target;
+    private final List<City> guesses = new ArrayList<>();
+    private RoundStatus status = RoundStatus.IN_PROGRESS;
 
-    public Round(AnswerCity answerCity) {
-        this.answerCity = answerCity;
+    public Round(AnswerCity target) {
+        this.target = target;
     }
 
-    public AnswerCity getAnswer() {
-        return answerCity;
+    public AnswerCity getTarget() {
+        return target;
     }
 
-    public int getWrongGuesses() {
-        return wrongGuesses;
+    /** The guesses made so far, oldest first. Read-only; use addGuess to add one. */
+    public List<City> getGuesses() {
+        return Collections.unmodifiableList(guesses);
     }
 
-    public boolean isRoundOver() {
-        return roundOver;
+    public RoundStatus getStatus() {
+        return status;
     }
 
-    public int getZoom() {
-        return START_ZOOM - wrongGuesses * ZOOM_STEP;
+    public void setStatus(RoundStatus status) {
+        this.status = status;
     }
 
-    public int getAttemptsLeft() {
-        return MAX_ATTEMPTS - wrongGuesses;
+    /** Records a guess and uses up one attempt. Does not decide won/lost. */
+    public void addGuess(City guess) {
+        guesses.add(guess);
     }
 
-    public void addWrongGuess() {
-        wrongGuesses++;
-        if (wrongGuesses >= MAX_ATTEMPTS) {
-            roundOver = true;
-        }
+    public int attemptsUsed() {
+        return guesses.size();
     }
 
-    public void endRound() {
-        roundOver = true;
+    public int attemptsRemaining() {
+        return MAX_ATTEMPTS - guesses.size();
+    }
+
+    public boolean isOver() {
+        return status != RoundStatus.IN_PROGRESS;
+    }
+
+    /**
+     * Which image to show, as a plain step from 1 (most zoomed in) to 5 (most zoomed out).
+     * The real Mapbox zoom level for each step lives in MapboxImageDataAccessObject.
+     */
+    public int getZoomStep() {
+        return Math.min(guesses.size() + 1, MAX_ATTEMPTS);
     }
 }
