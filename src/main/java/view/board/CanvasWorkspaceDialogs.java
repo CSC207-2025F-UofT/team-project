@@ -70,7 +70,7 @@ public final class CanvasWorkspaceDialogs {
     public boolean hasUnsavedChanges() {
         CanvasState current = canvas.exportCanvasState();
         return lastSavedState == null ? !canvas.isBlank() :
-                !CanvasStateComparison.same(lastSavedState, current);
+                !CanvasStateComparison.sameContent(lastSavedState, current);
     }
 
     private boolean confirmDiscardOrSave() {
@@ -96,6 +96,20 @@ public final class CanvasWorkspaceDialogs {
     public void open() {
         try {
             SavedCanvasChooser picker = new SavedCanvasChooser(workspace.all());
+            picker.onDelete(saved -> {
+                boolean confirmed = GlassDialogs.confirm(parent, "Delete Canvas",
+                        "Permanently delete “" + saved.name() + "”? This cannot be undone.", "Delete");
+                if (!confirmed) return;
+                try {
+                    boolean deletingCurrent = workspace.currentId().filter(saved.id()::equals).isPresent();
+                    workspace.delete(saved.id());
+                    picker.removeSaved(saved.id());
+                    if (deletingCurrent) { lastSavedState = null; currentName = "Untitled canvas"; }
+                    GlassNotices.showSuccess(parent, "Deleted “" + saved.name() + "”");
+                } catch (IOException | IllegalArgumentException failure) {
+                    GlassNotices.showError(parent, "Can't delete canvas", failure.getMessage());
+                }
+            });
             if (!GlassDialogs.choose(parent, "", picker, "Open", picker::onDoubleClick)) return;
             if (picker.choice() == SavedCanvasChooser.Choice.NEW) {
                 newCanvas();

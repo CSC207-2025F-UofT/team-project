@@ -11,9 +11,9 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-// popup only once there's an "=", lasso picks always
+// popup only once there's an "=" or a done comparison, lasso picks always
 class PopupGateTest {
-    private final PopupGate gate = new PopupGate();
+    private final PopupGate gate = new PopupGate(latex -> false);
 
     private static Stroke stroke(int... xy) {
         Stroke s = new Stroke();
@@ -57,6 +57,15 @@ class PopupGateTest {
         gate.picked(f.getId());
         assertTrue(gate.allows(f, "1+1"));
         assertTrue(gate.allows(f, null));
+    }
+
+    @Test
+    void finishedComparisonPasses() {
+        PopupGate withCheck = new PopupGate("2x>5"::equals);
+        assertTrue(withCheck.allows(one(), "2x>5"));
+        assertFalse(withCheck.allows(one(), "2x>"), "check said no");
+        assertFalse(withCheck.allows(one(), null), "not read yet, only ink counts");
+        assertTrue(withCheck.allows(one(), "1+1="), "= still works on its own");
     }
 
     @Test

@@ -10,17 +10,21 @@ import pdf_editor.view.CanvasRegionCaptureController;
 import pdf_editor.view.CanvasLibrarySelectionMenu;
 import pdf_editor.adapter.SelectedInkRegistry;
 import pdf_editor.use_case.SelectionToLibrary;
-import data_access.QuickChartGraphRenderer;
+import data_access.InMemoryGraphSessionDataAccessObject;
 import entity.LatexFunctionParser;
 import interface_adapter.MathLabViewModel;
 import interface_adapter.evaluate.CalculateCheckController;
 import interface_adapter.evaluate.DefinitionCheckController;
 import interface_adapter.evaluate.EvaluateController;
 import interface_adapter.evaluate.EvaluatePresenter;
+import interface_adapter.evaluate.QuestionCheckController;
 import interface_adapter.graph.GraphController;
+import interface_adapter.graph.GraphExploreController;
 import interface_adapter.graph.GraphPresenter;
 import interface_adapter.graph.GraphState;
 import interface_adapter.graph.GraphViewModel;
+import use_case.explore_graph.ExploreGraphInteractor;
+import view.graph.GraphSnapshot;
 import interface_adapter.graph_check.GraphCheckController;
 import interface_adapter.history.HistoryViewModel;
 import interface_adapter.recognize.FormulaRecognizer;
@@ -28,7 +32,20 @@ import pdf_editor.PdfStudioLauncher;
 import use_case.evaluate.CalculateCheckInteractor;
 import use_case.evaluate.DefinitionCheckInteractor;
 import use_case.evaluate.EvaluateInteractor;
+import use_case.evaluate.QuestionCheckInteractor;
 import use_case.graph_check.GraphCheckInteractor;
+import use_case.phase_check.PhaseCheckInteractor;
+import use_case.phase_portrait.PhasePortraitInteractor;
+import use_case.explore_phase.ExplorePhaseInteractor;
+import entity.phase.DifferentialEquationParser;
+import data_access.InMemoryPhaseSessionDataAccessObject;
+import interface_adapter.phase.PhaseCheckController;
+import interface_adapter.phase.PhaseController;
+import interface_adapter.phase.PhaseExploreController;
+import interface_adapter.phase.PhasePresenter;
+import interface_adapter.phase.PhaseState;
+import interface_adapter.phase.PhaseViewModel;
+import view.graph.PhaseSnapshot;
 import use_case.graph_function.GraphFunctionInteractor;
 import view.DrawingCanvas;
 import view.board.BoardTheme;
@@ -87,20 +104,46 @@ public class StackedAppBuilder {
                 functions, new EvaluatePresenter(mathViewModel)));
         CalculateCheckController calculateCheck = new CalculateCheckController(new CalculateCheckInteractor(functions));
         DefinitionCheckController definitionCheck = new DefinitionCheckController(new DefinitionCheckInteractor());
+        QuestionCheckController questionCheck = new QuestionCheckController(new QuestionCheckInteractor());
 
         // graph, graphs also go to PDF Studio like before
         GraphViewModel graphViewModel = new GraphViewModel();
         graphViewModel.addPropertyChangeListener(event -> {
+            // only brand new graphs, pans / zooms come as VIEW and would spam the library
             if (GraphViewModel.STATE_PROPERTY.equals(event.getPropertyName())) {
                 GraphState state = graphViewModel.getState();
-                if (state.getError() == null && state.getGraphImage() != null) {
-                    pdfStudio.addGraph(state.getLatex(), state.getGraphImage());
+                if (state.getError() == null && state.hasGraph()) {
+                    pdfStudio.addGraph(state.getLatex(), GraphSnapshot.render(state, 880, 600));
                 }
             }
         });
+        // graphs drawn in plain java now, one session shared by graphing + exploring
+        InMemoryGraphSessionDataAccessObject graphSession = new InMemoryGraphSessionDataAccessObject();
+        GraphPresenter graphPresenter = new GraphPresenter(graphViewModel);
         GraphController graph = new GraphController(new GraphFunctionInteractor(
-                new LatexFunctionParser(), new QuickChartGraphRenderer(), new GraphPresenter(graphViewModel)));
+                new LatexFunctionParser(), graphSession, graphPresenter));
+        GraphExploreController graphExplore = new GraphExploreController(
+                new ExploreGraphInteractor(graphSession, graphPresenter));
         GraphCheckController graphCheck = new GraphCheckController(new GraphCheckInteractor(new LatexFunctionParser()));
+
+        // phase portraits of odes: own use case + session, next to graphing, same popup; also go to PDF Studio
+        PhaseViewModel phaseViewModel = new PhaseViewModel();
+        phaseViewModel.addPropertyChangeListener(event -> {
+            if (PhaseViewModel.STATE_PROPERTY.equals(event.getPropertyName())) {
+                PhaseState state = phaseViewModel.getState();
+                if (state.getError() == null && state.hasPortrait()) {
+                    pdfStudio.addGraph(state.getLatex(), PhaseSnapshot.render(state, 880, 600));
+                }
+            }
+        });
+        InMemoryPhaseSessionDataAccessObject phaseSession = new InMemoryPhaseSessionDataAccessObject();
+        PhasePresenter phasePresenter = new PhasePresenter(phaseViewModel);
+        PhaseController phase = new PhaseController(new PhasePortraitInteractor(
+                new DifferentialEquationParser(), phaseSession, phasePresenter));
+        PhaseExploreController phaseExplore = new PhaseExploreController(
+                new ExplorePhaseInteractor(phaseSession, phasePresenter));
+        PhaseCheckController phaseCheck = new PhaseCheckController(
+                new PhaseCheckInteractor(new DifferentialEquationParser()));
 
         // history
         HistoryViewModel historyViewModel = new HistoryViewModel();
@@ -118,17 +161,40 @@ public class StackedAppBuilder {
                         new pdf_editor.domain.PdfMaterial("Canvas History", latex, result, null, 0, 0) { },
                         width, height));
         CanvasPdfDragController.install(drawing);
+        // Reuse the existing US2 evaluation use case with a dedicated view model, so
+        // editing History does not race with the Canvas answer worker's view-model updates.
+        MathLabViewModel historyEditModel = new MathLabViewModel();
+        pdf_editor.adapter.HistoryFormulaCalculator historyEditCalculator =
+                new pdf_editor.adapter.HistoryFormulaCalculator(
+                        new EvaluateController(new EvaluateInteractor(
+                                functions, new EvaluatePresenter(historyEditModel))), historyEditModel);
+        pdfStudio.setFormulaRecalculator(historyEditCalculator::calculate);
         CanvasHistoryEditMenu.install(drawing, (latex, result) ->
                 pdf_editor.data_access.MaterialRenderer.render(
                         new pdf_editor.domain.PdfMaterial("Edited Math", latex, result, null, 0, 0) { },
-                        800, 190));
+                        800, 190), historyEditCalculator::calculate,
+                (latex, result) -> {
+                    if (latex.isBlank()) return;
+                    if (result.isBlank()) pdfStudio.getLibrary().addFormula(latex);
+                    else pdfStudio.getLibrary().addCalculation(latex, result);
+                }, change -> {
+                    try {
+                        pdfStudio.reviseCanvasHistory(change.oldFormula(), change.oldResult(),
+                                change.formula(), change.result());
+                    } catch (java.io.IOException failure) {
+                        System.err.println("Formula revision sync failed: " + failure.getMessage());
+                    }
+                });
         CanvasLibrarySelectionMenu.install(drawing,
                 new SelectionToLibrary(sharedCanvas::recognizeFormula, pdfStudio.getLibrary()),
                 new SelectedInkRegistry(drawing, pdfStudio.getLibrary()));
         AnswerCanvasPage page = new AnswerCanvasPage(sharedCanvas, evaluate, mathViewModel, results,
-                graph, graphViewModel, graphCheck::canGraph, BoardTheme.CANVAS);
+                graph, graphExplore, graphViewModel, graphCheck::canGraph, BoardTheme.CANVAS);
         page.setDefinitionCheck(definitionCheck::isDefinition);
         page.setCalculateCheck(calculateCheck::canCalculate);
+        page.setQuestionCheck(questionCheck::isQuestion);
+        page.setFaintEqualsCheck(calculateCheck::canCalculate);
+        page.enablePhasePortrait(phase, phaseExplore, phaseViewModel, phaseCheck::isDifferentialEquation);
         sharedCanvas.attachTo(page);
         PdfPanel pdfPanel = pdfStudio.createPanel();
         // Use the live selection (lasso or whole ink), not an outdated startup screenshot.
@@ -136,11 +202,23 @@ public class StackedAppBuilder {
             try { return drawing.toFormulaImage(); }
             catch (RuntimeException empty) { return null; }
         });
-        pdfPanel.setRegionCapture(() -> CanvasRegionCaptureController.begin(
-                page.boardArea(), drawing, image -> {
-                    pdfStudio.getLibrary().addInk("Canvas screenshot", image);
-                    pdfPanel.editor().showLibrary();
-                }));
+        java.util.concurrent.atomic.AtomicReference<Runnable> cancelCapture = new java.util.concurrent.atomic.AtomicReference<>();
+        pdfPanel.setRegionCapture(() -> {
+            if (cancelCapture.get() != null) {
+                cancelCapture.getAndSet(null).run();
+                return;
+            }
+            pdfPanel.setCaptureAreaActive(true);
+            Runnable close = CanvasRegionCaptureController.begin(
+                    page.boardArea(), drawing, image -> {
+                        pdfStudio.getLibrary().addInk("Canvas screenshot", image);
+                        pdfPanel.editor().showLibrary();
+                    }, () -> {
+                        cancelCapture.set(null);
+                        pdfPanel.setCaptureAreaActive(false);
+                    });
+            cancelCapture.set(close);
+        });
         // Save/Open are separate use-case commands; the board knows only the callbacks.
         java.util.concurrent.atomic.AtomicReference<CanvasWorkspaceDialogs> dialogs = new java.util.concurrent.atomic.AtomicReference<>();
         BoardWindow board = new BoardWindow(page, drawing,
@@ -149,7 +227,7 @@ public class StackedAppBuilder {
                 () -> dialogs.get().save(), () -> dialogs.get().saveAs(),
                 () -> dialogs.get().open());
         dialogs.set(new CanvasWorkspaceDialogs(canvases, drawing, board));
-        FloatingToolbar toolbar = new FloatingToolbar(drawing, board);
+        FloatingToolbar toolbar = new FloatingToolbar(drawing, board, pdfPanel);
         board.addFloatingToolbar(toolbar.component());
         pdfPanel.setFullscreenAction(() -> board.setPdfFullscreen(!board.isPdfFullscreen()));
         pdfStudio.onOpen(() -> board.setPdfOpen(true));
@@ -168,6 +246,14 @@ public class StackedAppBuilder {
         }
         int shortcut = Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx();
         root.registerKeyboardAction(e -> drawing.undo(), KeyStroke.getKeyStroke(KeyEvent.VK_Z, shortcut),
+                JComponent.WHEN_IN_FOCUSED_WINDOW);
+        // Canvas redo only. PDF keeps its own ribbon buttons for Undo/Redo.
+        root.registerKeyboardAction(e -> {
+            java.awt.Component focused = java.awt.KeyboardFocusManager.getCurrentKeyboardFocusManager().getFocusOwner();
+            // Do not steal Ctrl+Y from the PDF workspace or its text editor.
+            if (focused != null && SwingUtilities.isDescendingFrom(focused, pdfPanel)) return;
+            drawing.redo();
+        }, KeyStroke.getKeyStroke(KeyEvent.VK_Y, java.awt.event.InputEvent.CTRL_DOWN_MASK),
                 JComponent.WHEN_IN_FOCUSED_WINDOW);
         root.registerKeyboardAction(e -> {
             dialogs.get().save();

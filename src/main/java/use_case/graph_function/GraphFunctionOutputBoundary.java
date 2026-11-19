@@ -1,10 +1,13 @@
 package use_case.graph_function;
 
-/**
- * How the graph use case reports its result.
- */
+// how graphing reports back, fresh = a brand new graph, not just a pan / zoom of the old one
 public interface GraphFunctionOutputBoundary {
-    void prepareSuccessView(GraphFunctionOutputData outputData);
+    void prepareCurveView(CurveOutputData data, boolean fresh);
+
+    void prepareSurfaceView(SurfaceOutputData data, boolean fresh);
+
+    // null = cursor left, hide the readout
+    void prepareTraceView(TraceOutputData data);
 
     void prepareFailView(String errorMessage);
 }

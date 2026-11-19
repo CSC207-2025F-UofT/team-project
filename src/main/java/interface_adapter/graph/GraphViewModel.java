@@ -3,11 +3,10 @@ package interface_adapter.graph;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 
-/**
- * Holds the {@link GraphState} and notifies the view when it changes.
- */
+// holds the GraphState; STATE = new graph or error, VIEW = same graph panned / zoomed / traced
 public class GraphViewModel {
     public static final String STATE_PROPERTY = "graphState";
+    public static final String VIEW_PROPERTY = "graphView";
 
     private final PropertyChangeSupport support = new PropertyChangeSupport(this);
     private GraphState state = new GraphState();
@@ -22,6 +21,10 @@ public class GraphViewModel {
 
     public void firePropertyChanged() {
         support.firePropertyChange(STATE_PROPERTY, null, state);
+    }
+
+    public void fireViewChanged() {
+        support.firePropertyChange(VIEW_PROPERTY, null, state);
     }
 
     public void addPropertyChangeListener(PropertyChangeListener listener) {

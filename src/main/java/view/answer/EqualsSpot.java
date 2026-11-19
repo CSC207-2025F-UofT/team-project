@@ -49,6 +49,76 @@ public final class EqualsSpot {
         return latex != null ? lastEquals(latex) >= 0 : !pairs(strokes, charHeight).isEmpty();
     }
 
+    // read has an "=" outside any {...}
+    public static boolean topLevelEquals(String latex) {
+        return latex != null && lastEquals(latex) >= 0;
+    }
+
+    // the 2 bars of an "=" that ends the ink, top first; empty if it doesn't end in one
+    public static List<Stroke> trailingPair(Collection<Stroke> strokes, double charHeight) {
+        List<Stroke> all = new ArrayList<>(strokes);
+        List<Stroke> best = List.of();
+        double bestX = Double.NEGATIVE_INFINITY;
+        for (int i = 0; i < all.size(); i++) {
+            for (int j = i + 1; j < all.size(); j++) {
+                Rectangle a = AnswerLayout.bounds(List.of(all.get(i)));
+                Rectangle b = AnswerLayout.bounds(List.of(all.get(j)));
+                if (a == null || b == null || !isPair(a, b, charHeight)) {
+                    continue;
+                }
+                Rectangle pair = a.union(b);
+                if (pair.getCenterX() > bestX && endsWith(all, i, j, pair)) {
+                    best = a.y <= b.y ? List.of(all.get(i), all.get(j)) : List.of(all.get(j), all.get(i));
+                    bestX = pair.getCenterX();
+                }
+            }
+        }
+        return best;
+    }
+
+    // just 2 strokes making an "=", sized by themselves
+    public static boolean isEqualsPair(Collection<Stroke> group) {
+        if (group.size() != 2) {
+            return false;
+        }
+        List<Stroke> two = new ArrayList<>(group);
+        Rectangle a = AnswerLayout.bounds(List.of(two.get(0)));
+        Rectangle b = AnswerLayout.bounds(List.of(two.get(1)));
+        return a != null && b != null && isPair(a, b, 0);
+    }
+
+    // something else is there and all of it stops left of the pair's middle
+    private static boolean endsWith(List<Stroke> all, int i, int j, Rectangle pair) {
+        boolean others = false;
+        for (int k = 0; k < all.size(); k++) {
+            if (k == i || k == j) {
+                continue;
+            }
+            Rectangle o = AnswerLayout.bounds(List.of(all.get(k)));
+            if (o != null && o.getMaxX() >= pair.getCenterX()) {
+                return false;
+            }
+            others |= o != null;
+        }
+        return others;
+    }
+
+    // 2 flat bars stacked like an "=", scale = the bigger of char height / their width so a big = on small ink counts
+    private static boolean isPair(Rectangle a, Rectangle b, double h) {
+        double s = Math.max(h, (a.width + b.width) / 2.0);
+        if (!isBar(a, s) || !isBar(b, s)) {
+            return false;
+        }
+        double overlap = Math.min(a.getMaxX(), b.getMaxX()) - Math.max(a.x, b.x);
+        double dy = Math.abs(a.getCenterY() - b.getCenterY());
+        double ratio = (double) Math.max(a.width, b.width) / Math.max(1, Math.min(a.width, b.width));
+        return overlap >= 0.5 * Math.min(a.width, b.width) && dy >= MIN_GAP * s && dy <= MAX_GAP * s && ratio <= 3;
+    }
+
+    private static boolean isBar(Rectangle b, double s) {
+        return b.height <= FLAT * s && b.width >= MIN_BAR * s && b.width >= 1.5 * b.height;
+    }
+
     // last "=" outside any {...}, -1 if none
     static int lastEquals(String latex) {
         int depth = 0;

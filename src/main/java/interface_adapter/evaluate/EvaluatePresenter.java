@@ -57,7 +57,7 @@ public class EvaluatePresenter implements EvaluateOutputBoundary {
 
     @Override
     public void prepareFunctionDefinedView(String definition) {
-        publish(AnswerFormatter.defined(), null, "", "", definition);
+        publish(AnswerFormatter.defined(), AnswerFormatter.defined(), "", "", "", definition);
     }
 
     @Override
@@ -67,7 +67,9 @@ public class EvaluatePresenter implements EvaluateOutputBoundary {
             fail(UncalculableText.TITLE, UncalculableText.answerTooLong());
             return;
         }
-        publish("= " + ExprWriter.latex(expression), AnswerFormatter.canvasRuns(kind, runs), "", "", null);
+        String result = "= " + ExprWriter.latex(expression);
+        publish(result, TextRun.plain(AnswerFormatter.canvasRuns(kind, runs)), CanvasLatex.ofLatex(kind, result), "",
+                "", null);
     }
 
     @Override
@@ -82,22 +84,21 @@ public class EvaluatePresenter implements EvaluateOutputBoundary {
 
     // title on top, reason under it
     private void fail(String title, String reason) {
-        publish("", null, title, reason, null);
+        publish("", "", "", title, reason, null);
     }
 
     private void showResult(String text) {
-        // 5×10^20 gets its 20 raised
-        publish(text, PowerOfTen.runs(AnswerFormatter.canvasText(kind, text)), "", "", null);
+        publish(text, AnswerFormatter.canvasText(kind, text), CanvasLatex.ofText(kind, text), "", "", null);
     }
 
-    // canvasRuns null = plain text answer, definedLatex null = not a definition
-    private void publish(String resultText, List<TextRun> canvasRuns, String errorTitle, String errorText,
-                         String definedLatex) {
+    // answerLatex "" = nothing to typeset, definedLatex null = not a definition
+    private void publish(String resultText, String answerText, String answerLatex, String errorTitle,
+                         String errorText, String definedLatex) {
         MathLabState state = viewModel.getState();
         state.setResultText(resultText);
         state.setAnswerKind(kind);
-        state.setAnswerText(AnswerFormatter.canvasText(kind, resultText));
-        state.setAnswerRuns(canvasRuns);
+        state.setAnswerText(answerText);
+        state.setAnswerLatex(answerLatex);
         state.setErrorTitle(errorTitle);
         state.setErrorText(errorText);
         state.setDefinition(definedLatex != null);

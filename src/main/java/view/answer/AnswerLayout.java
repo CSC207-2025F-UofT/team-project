@@ -65,10 +65,15 @@ public final class AnswerLayout {
 
     // top-left of an answer right of the formula, centred on its last glyph
     public static Point2D.Double rightOf(Collection<Stroke> formula, double charHeight, double answerHeight) {
+        return rightOfAt(formula, charHeight, answerHeight / 2);
+    }
+
+    // same, but this far down the answer lands on the last glyph's middle (a fraction bar, not the box centre)
+    public static Point2D.Double rightOfAt(Collection<Stroke> formula, double charHeight, double answerMiddle) {
         Rectangle all = bounds(formula);
         List<Rectangle> glyphs = glyphs(formula);
         Rectangle last = glyphs.get(glyphs.size() - 1);
-        return new Point2D.Double(all.getMaxX() + GAP_RIGHT * charHeight, last.getCenterY() - answerHeight / 2);
+        return new Point2D.Double(all.getMaxX() + GAP_RIGHT * charHeight, last.getCenterY() - answerMiddle);
     }
 
     // top-left of an answer under the formula
@@ -91,8 +96,26 @@ public final class AnswerLayout {
         return Math.hypot(dx, dy);
     }
 
-    // median height of tall single strokes; lines stacked above each other don't add up
+    // 3/4 up the tall single strokes, lowercase + "+" don't shrink it; lines stacked above each other don't add up
     public static double strokeHeight(Collection<Stroke> strokes) {
+        List<Integer> heights = tallHeights(strokeBoxes(strokes));
+        if (heights.isEmpty()) {
+            return charHeight(strokes);
+        }
+        heights.sort(null);
+        return clamped(heights.get((int) (0.75 * (heights.size() - 1))));
+    }
+
+    // tallest single stroke = a full char, a fraction doesn't stack up, lowercase doesn't drag it down
+    public static double tallestStroke(Collection<Stroke> strokes) {
+        List<Integer> heights = tallHeights(strokeBoxes(strokes));
+        if (heights.isEmpty()) {
+            return charHeight(strokes);
+        }
+        return clamped(java.util.Collections.max(heights));
+    }
+
+    private static List<Rectangle> strokeBoxes(Collection<Stroke> strokes) {
         List<Rectangle> boxes = new ArrayList<>();
         for (Stroke s : strokes) {
             Rectangle b = bounds(List.of(s));
@@ -100,11 +123,7 @@ public final class AnswerLayout {
                 boxes.add(b);
             }
         }
-        List<Integer> heights = tallHeights(boxes);
-        if (heights.isEmpty()) {
-            return charHeight(strokes);
-        }
-        return clamped(median(heights));
+        return boxes;
     }
 
     // fresh loose ink: same formula if on the same line, gaps up to 1.5 chars

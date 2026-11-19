@@ -1,38 +1,90 @@
 package pdf_editor.view;
 
 import view.DrawingCanvas;
+import view.board.GlassContextMenu;
 import view.glass.GlassDialogs;
-import javax.swing.*;
+
+import javax.swing.SwingWorker;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
+import java.util.Objects;
+import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 
-/** UI-only action: changes source LaTeX of selected imported history items, not individual strokes. */
+/** View-only history formula editor: LaTeX remains structured; the evaluator supplies the result. */
 public final class CanvasHistoryEditMenu {
     private CanvasHistoryEditMenu() { }
+    public record FormulaRevision(String oldFormula, String oldResult, String formula, String result) { }
+
+    /** Compatibility overload for older callers; preserve the saved result if no evaluator is wired. */
+    public static void install(DrawingCanvas canvas, BiFunction<String, String, BufferedImage> render) {
+        install(canvas, render, latex -> canvas.selectedHistoryResult(), (latex, result) -> { });
+    }
+
     public static void install(DrawingCanvas canvas,
-                               java.util.function.BiFunction<String, String, BufferedImage> render) {
+                               BiFunction<String, String, BufferedImage> render,
+                               Function<String, String> calculate) {
+        install(canvas, render, calculate, (latex, result) -> { });
+    }
+
+    /** The optional Library command is injected; this view never manipulates repository state. */
+    public static void install(DrawingCanvas canvas,
+                               BiFunction<String, String, BufferedImage> render,
+                               Function<String, String> calculate,
+                               BiConsumer<String, String> addToLibrary) {
+        install(canvas, render, calculate, addToLibrary, change -> { });
+    }
+
+    /** Called only for a completed calculation, after the Canvas asset has been revised. */
+    public static void install(DrawingCanvas canvas,
+                               BiFunction<String, String, BufferedImage> render,
+                               Function<String, String> calculate,
+                               BiConsumer<String, String> addToLibrary,
+                               java.util.function.Consumer<FormulaRevision> onRevised) {
+        Objects.requireNonNull(onRevised);
+        Objects.requireNonNull(canvas);
+        Objects.requireNonNull(render);
+        Objects.requireNonNull(calculate);
+        Objects.requireNonNull(addToLibrary);
         canvas.addMouseListener(new MouseAdapter() {
             @Override public void mousePressed(MouseEvent e) { show(e); }
             @Override public void mouseReleased(MouseEvent e) { show(e); }
             private void show(MouseEvent e) {
                 if (!e.isPopupTrigger() || !canvas.hasSelectedHistoryAsset()) return;
-                JPopupMenu popup = new JPopupMenu();
-                JMenuItem edit = new JMenuItem("Edit imported formula (LaTeX)…");
-                edit.addActionListener(a -> {
+                GlassContextMenu menu = new GlassContextMenu();
+                menu.addAction("Edit formula (recalculate)", () -> {
+                    String before = canvas.selectedHistoryFormula();
+                    String beforeResult = canvas.selectedHistoryResult();
                     String formula = GlassDialogs.input(canvas, "Edit formula", "LaTeX formula",
-                            canvas.selectedHistoryFormula(), "Apply");
+                            before, "Recalculate");
                     if (formula == null || formula.isBlank()) return;
-                    String answer = GlassDialogs.input(canvas, "Edit result", "Result (optional)",
-                            canvas.selectedHistoryResult(), "Apply");
-                    if (answer == null) return;
-                    BufferedImage image = render.apply(formula, answer);
-                    canvas.editHistoryAsset(formula, answer, image);
+                    if (formula.trim().equals(before)) return;
+                    // Keep mathematical work off the Swing event-dispatch thread.
+                    new SwingWorker<String, Void>() {
+                        @Override protected String doInBackground() { return calculate.apply(formula.trim()); }
+                        @Override protected void done() {
+                            try {
+                                String result = get();
+                                if (result == null) result = "";
+                                // Ignore a stale async completion after changing selection.
+                                if (before.equals(canvas.selectedHistoryFormula())) {
+                                    canvas.editHistoryAsset(formula, result, render.apply(formula, result));
+                                    onRevised.accept(new FormulaRevision(before, beforeResult,
+                                            formula, result));
+                                }
+                            } catch (Exception failure) {
+                                GlassDialogs.error(canvas, "Could not recalculate: " +
+                                        (failure.getCause() != null ? failure.getCause().getMessage() : failure.getMessage()));
+                            }
+                        }
+                    }.execute();
                 });
-                JMenuItem remove = new JMenuItem("Delete selected item");
-                remove.addActionListener(a -> canvas.deleteSelection());
-                popup.add(edit);popup.add(remove);
-                popup.show(canvas, e.getX(), e.getY());
+                menu.addAction("Add to Library", () -> addToLibrary.accept(
+                        canvas.selectedHistoryFormula(), canvas.selectedHistoryResult()));
+                menu.addAction("Delete selected item", canvas::deleteSelection);
+                menu.show(canvas, e.getX(), e.getY());
             }
         });
     }

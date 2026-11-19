@@ -7,6 +7,7 @@ import java.awt.Color;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.atomic.AtomicInteger;
 import static org.junit.jupiter.api.Assertions.*;
 
 class CanvasRegionCaptureControllerTest {
@@ -25,7 +26,8 @@ class CanvasRegionCaptureControllerTest {
         int before = canvas.getStrokes().size();
         assertTrue(before > 0);
         AtomicReference<BufferedImage> captured = new AtomicReference<>();
-        CanvasRegionCaptureController.begin(area, canvas, captured::set);
+        AtomicInteger closed = new AtomicInteger();
+        Runnable cancel = CanvasRegionCaptureController.begin(area, canvas, captured::set, closed::incrementAndGet);
         java.awt.Component overlay = area.getComponent(0);
         mouse(overlay, MouseEvent.MOUSE_PRESSED, 55, 55);
         mouse(overlay, MouseEvent.MOUSE_DRAGGED, 120, 110);
@@ -34,18 +36,33 @@ class CanvasRegionCaptureControllerTest {
         assertEquals(65, captured.get().getWidth());
         assertEquals(55, captured.get().getHeight());
         assertEquals(before, canvas.getStrokes().size());
+        assertEquals(2, area.getComponentCount(), "Capture mode remains active after capturing");
+        assertEquals(0, closed.get());
+        captured.set(null);
+        mouse(overlay, MouseEvent.MOUSE_PRESSED, 55, 55);
+        mouse(overlay, MouseEvent.MOUSE_DRAGGED, 120, 110);
+        mouse(overlay, MouseEvent.MOUSE_RELEASED, 120, 110);
+        assertNotNull(captured.get(), "Capture mode supports multiple captures");
+        cancel.run();
         assertEquals(1, area.getComponentCount());
+        assertEquals(1, closed.get());
+        cancel.run();
+        assertEquals(1, closed.get(), "Closing is idempotent");
     }
     @Test void emptyScreenshotDoesNotCreateLibraryMaterial() {
         JPanel area = new JPanel(null);area.setSize(150,130);
         DrawingCanvas canvas=new DrawingCanvas();canvas.setBounds(0,0,150,130);area.add(canvas);
         AtomicReference<BufferedImage> captured = new AtomicReference<>();
-        CanvasRegionCaptureController.begin(area,canvas,captured::set);
+        AtomicInteger closed = new AtomicInteger();
+        Runnable cancel = CanvasRegionCaptureController.begin(area, canvas, captured::set, closed::incrementAndGet);
         java.awt.Component overlay=area.getComponent(0);
         mouse(overlay,MouseEvent.MOUSE_PRESSED,10,10);
         mouse(overlay,MouseEvent.MOUSE_DRAGGED,100,100);
         mouse(overlay,MouseEvent.MOUSE_RELEASED,100,100);
         assertNull(captured.get());
-        assertEquals(1,area.getComponentCount());
+        assertEquals(2, area.getComponentCount(), "Empty capture leaves capture mode active");
+        cancel.run();
+        assertEquals(1, area.getComponentCount());
+        assertEquals(1, closed.get());
     }
 }

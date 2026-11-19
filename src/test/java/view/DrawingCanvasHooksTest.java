@@ -1,6 +1,7 @@
 package view;
 
 import entity.Stroke;
+import interface_adapter.AnswerKind;
 import org.junit.jupiter.api.Test;
 
 import java.awt.Rectangle;
@@ -221,5 +222,247 @@ class DrawingCanvasHooksTest {
         canvas.clear();
         assertNull(canvas.registerNewInk(a, List.of(a)));
         assertNull(canvas.formulaBounds(12345));
+    }
+
+    // one stroke bound + answered, 40 tall at x
+    private Stroke answeredAt(int x) {
+        write(x, 100, x, 140);
+        Stroke s = last();
+        FormulaCapture c = canvas.registerNewInk(s, List.of(s));
+        assertTrue(canvas.showAnswer(c.getId(), c.getRevision(), AnswerKind.AFTER_EQUALS, "1", false));
+        return s;
+    }
+
+    private void lasso(int left, int top, int right, int bottom) {
+        canvas.setTool(DrawingCanvas.Tool.LASSO);
+        write(left, top, right, top, right, bottom, left, bottom);
+    }
+
+    @Test
+    void lassoAddingMissedInkToAnAnsweredFormulaRebuildsIt() {
+        Stroke a = answeredAt(100);
+        write(100, 200, 130, 230);                 // missed bit, stays loose
+        Stroke missed = last();
+        lasso(80, 80, 160, 250);
+        FormulaCapture capture = canvas.registerSelection();
+        assertNotNull(capture, "user fixed the grouping, read it again");
+        assertEquals(2, strokesIn(capture));
+        assertTrue(canvas.isBound(a) && canvas.isBound(missed));
+        assertTrue(canvas.getAnswers().isEmpty(), "old answer was for the wrong ink");
+    }
+
+    @Test
+    void lassoOverTwoAnsweredFormulasLeavesThem() {
+        answeredAt(100);
+        answeredAt(400);
+        lasso(80, 80, 600, 200);
+        assertNull(canvas.registerSelection());
+        assertEquals(2, canvas.getAnswers().size());
+        assertEquals(2, canvas.getFormulas().size());
+    }
+
+    @Test
+    void limitsWrittenAfterThePauseJoinTheirFormula() {
+        List<Stroke> body = new ArrayList<>();
+        int[][] lim = {{100, 100, 100, 140}, {115, 110, 115, 140}, {130, 110, 130, 140, 145, 112, 160, 140}};
+        for (int[] s : lim) {
+            write(s);
+            body.add(last());
+        }
+        assertNotNull(canvas.registerNewInk(last(), body));
+        List<Stroke> later = new ArrayList<>();
+        int[][] limit = {
+            {98, 150, 110, 162}, {110, 150, 98, 162},            // x right under the l
+            {114, 156, 134, 156}, {128, 152, 134, 156, 128, 160}, // arrow, flat bits
+            {140, 150, 140, 162, 148, 162, 148, 150, 140, 150},   // 0
+        };
+        for (int[] s : limit) {
+            write(s);
+            later.add(last());
+            assertTrue(!canvas.isBound(last()), "waits for the pause");
+        }
+        FormulaCapture capture = canvas.registerNewInk(last(), later);
+        assertEquals(8, strokesIn(capture));
+        assertEquals(1, canvas.getFormulas().size());
+    }
+
+    @Test
+    void lineWrittenUnderAFormulaLaterDoesntSwallowIt() {
+        List<Stroke> sum = new ArrayList<>();
+        int[][] ink = {
+            {251, 200, 200, 200, 229, 232, 200, 264, 251, 264},     // Σ 64
+            {261, 222, 261, 246}, {261, 230, 271, 222, 281, 246},    // n
+            {317, 214, 323, 212, 331, 220, 317, 254, 339, 254},      // 2, 40
+        };
+        for (int[] s : ink) {
+            write(s);
+            sum.add(last());
+        }
+        assertNotNull(canvas.registerNewInk(last(), sum));
+        List<Stroke> line = new ArrayList<>();
+        int[][] next = {{205, 290, 210, 285, 210, 325}, {222, 305, 242, 305}, {232, 295, 232, 315}, {250, 290, 255, 285, 255, 325}};
+        for (int[] s : next) {
+            write(s);                              // full size 1+1, 26 under the Σ
+            line.add(last());
+        }
+        assertEquals(4, strokesIn(canvas.registerNewInk(last(), line)));
+        assertEquals(2, canvas.getFormulas().size());
+    }
+
+    @Test
+    void bothLimitsAfterThePauseComeBackAsOneCurrentFormula() {
+        List<Stroke> sum = new ArrayList<>();
+        int[][] ink = {
+            {251, 200, 200, 200, 229, 232, 200, 264, 251, 264},     // Σ 64
+            {261, 222, 261, 246}, {261, 230, 271, 222, 281, 246},    // n
+            {317, 214, 323, 212, 331, 220, 317, 254, 339, 254},      // 2, 40
+        };
+        for (int[] s : ink) {
+            write(s);
+            sum.add(last());
+        }
+        assertNotNull(canvas.registerNewInk(last(), sum));
+        List<Stroke> later = new ArrayList<>();
+        int[][] limits = {
+            {237, 160, 223, 160, 222, 173, 236, 178, 230, 190, 221, 188},  // 5 over Σ, loose
+            {205, 274, 205, 286, 210, 274, 215, 286},                     // n=0 under it, loose
+            {219, 278, 229, 278}, {219, 283, 229, 283},
+            {233, 274, 233, 294, 241, 294, 241, 274, 233, 274},
+        };
+        for (int[] s : limits) {
+            write(s);
+            later.add(last());
+            assertTrue(!canvas.isBound(last()), "both limits wait for the pause");
+        }
+        FormulaCapture capture = canvas.registerNewInk(last(), later);
+        assertTrue(canvas.isCurrent(capture.getId(), capture.getRevision()), "not a formula that got merged again");
+        assertEquals(9, strokesIn(capture));
+    }
+
+    @Test
+    void equalsAfterAFractionStaysInOnePiece() {
+        List<Stroke> session = new ArrayList<>();
+        int[][] ink = {
+            {200, 176, 220, 200}, {220, 176, 200, 200},              // x, x-height
+            {225, 184, 245, 184}, {235, 174, 235, 194},              // +
+            {257, 168, 265, 160, 265, 200},                          // 1
+            {195, 205, 285, 205},                                    // bar
+            {230, 220, 236, 212, 250, 218, 230, 252, 252, 252},      // 2
+            {300, 207, 322, 207}, {300, 216, 322, 216},              // = at the bar, lower bar last
+        };
+        for (int[] s : ink) {
+            write(s);
+            session.add(last());
+        }
+        assertEquals(9, strokesIn(canvas.registerNewInk(last(), session)));
+        assertEquals(1, canvas.getFormulas().size());
+    }
+
+    // Σ 120 tall + "n+1" 60 tall
+    private static final int[][] SUM = {
+        {220, 100, 100, 100, 160, 160, 100, 220, 220, 220},
+        {240, 130, 240, 190, 280, 130, 280, 190},
+        {300, 160, 340, 160}, {320, 140, 320, 180},
+        {360, 130, 360, 190},
+    };
+
+    private List<Stroke> writeAll(int[][] ink) {
+        List<Stroke> out = new ArrayList<>();
+        for (int[] s : ink) {
+            write(s);
+            out.add(last());
+        }
+        return out;
+    }
+
+    // body + more ink in one go, no pause; more ink should stay its own formula
+    private void assertStaysApartFromSum(int[][] more) {
+        List<Stroke> session = writeAll(SUM);
+        session.addAll(writeAll(more));
+        canvas.registerNewInk(last(), session);
+        assertEquals(2, canvas.getFormulas().size());
+        Stroke sigma = session.get(0);
+        assertEquals(SUM.length, canvas.getFormulas().stream()
+                .filter(f -> f.getStrokes().contains(sigma)).findFirst().orElseThrow().getStrokes().size());
+    }
+
+    @Test
+    void lowerLimitHalfACharUnderASumAfterThePauseJoinsIt() {
+        List<Stroke> sum = writeAll(SUM);
+        assertNotNull(canvas.registerNewInk(last(), sum));
+        List<Stroke> later = writeAll(new int[][]{
+            {120, 250, 120, 280, 140, 250},                    // n, 30 under the Σ
+            {150, 260, 170, 260}, {150, 270, 170, 270},        // =
+            {180, 250, 200, 280, 180, 280},                    // 0
+        });
+        assertEquals(9, strokesIn(canvas.registerNewInk(last(), later)));
+        assertEquals(1, canvas.getFormulas().size());
+    }
+
+    @Test
+    void fullSizeLineUnderASumStaysApart() {
+        assertStaysApartFromSum(new int[][]{{120, 260, 120, 320}, {160, 260, 160, 320}});
+    }
+
+    @Test
+    void lonelyDashUnderASumStaysApart() {
+        assertStaysApartFromSum(new int[][]{{120, 250, 200, 250}});  // next line's "-"
+    }
+
+    @Test
+    void smallInkOffToTheSideOfASumStaysApart() {
+        assertStaysApartFromSum(new int[][]{{500, 240, 500, 270}});
+    }
+
+    // d over a bar over dx, both d's full size, nothing beside it to tie the rows
+    private static final int[][] DDX = {
+        {85, 40, 86, 100, 87, 140, 91, 152},                    // d stem
+        {75, 105, 60, 125, 52, 145, 60, 150, 75, 135, 80, 110},  // d bowl
+        {27, 170, 131, 170},                                    // bar
+        {70, 180, 70, 230, 69, 290},                            // d stem
+        {60, 235, 37, 240, 34, 260, 35, 280, 50, 272, 62, 250},  // d bowl
+        {77, 275, 95, 252, 117, 246},                           // x
+        {90, 247, 100, 257, 107, 274},
+    };
+
+    // (x^3/2 - x^2) = after the d/dx
+    private static final int[][] REST = {
+        {177, 97, 170, 150, 171, 210, 180, 250, 189, 260},      // (
+        {225, 117, 240, 112, 262, 147}, {272, 112, 255, 130, 239, 147},  // x
+        {280, 77, 297, 80, 290, 90, 300, 97, 292, 105, 280, 104},  // 3
+        {216, 168, 305, 169},                                   // bar
+        {242, 202, 275, 200, 260, 225, 242, 237, 287, 240},      // 2
+        {336, 165, 360, 165},                                   // -
+        {392, 155, 405, 150, 427, 194}, {430, 156, 415, 170, 400, 189},  // x
+        {435, 134, 450, 135, 442, 142, 452, 144},               // 2
+        {464, 89, 472, 140, 472, 180, 460, 225, 433, 257},      // )
+        {493, 164, 513, 164}, {493, 185, 513, 185},             // =
+    };
+
+    @Test
+    void fractionWrittenAloneStaysOneFormula() {
+        List<Stroke> ddx = writeAll(DDX);
+        assertEquals(DDX.length, strokesIn(canvas.registerNewInk(last(), ddx)));
+        assertEquals(1, canvas.getFormulas().size());
+    }
+
+    @Test
+    void pauseAfterTheFractionKeepsItInTheFormula() {
+        List<Stroke> ddx = writeAll(DDX);
+        canvas.registerNewInk(last(), ddx);
+        List<Stroke> rest = writeAll(REST);
+        canvas.registerNewInk(last(), rest);
+        assertEquals(DDX.length + REST.length, canvas.getFormulas().stream()
+                .filter(f -> f.getStrokes().contains(last())).findFirst().orElseThrow().getStrokes().size());
+        assertEquals(1, canvas.getFormulas().size());
+    }
+
+    @Test
+    void dashUnderAFormulaWithNothingUnderItIsNoFraction() {
+        List<Stroke> one = writeAll(new int[][]{{100, 100, 100, 140}});  // 1
+        canvas.registerNewInk(last(), one);
+        writeAll(new int[][]{{80, 160, 120, 160}});                    // next line's "-", nothing under it
+        canvas.registerNewInk(last(), List.of(last()));
+        assertEquals(2, canvas.getFormulas().size());
     }
 }

@@ -34,6 +34,30 @@ public final class Icons {
         g.draw(p);
     }
 
+    // inward spiral w/ an arrow on the way in, phase portrait
+    public static void phase(Graphics2D g) {
+        prep(g);
+        Path2D p = new Path2D.Double();
+        int n = 64;
+        for (int i = 0; i <= n; i++) {
+            double t = i * 3.3 * Math.PI / n;
+            double r = 8.5 - t * 0.62;
+            double x = r * Math.cos(t);
+            double y = -r * Math.sin(t);
+            if (i == 0) {
+                p.moveTo(x, y);
+            } else {
+                p.lineTo(x, y);
+            }
+        }
+        g.draw(p);
+        Path2D head = new Path2D.Double();
+        head.moveTo(5.6, -3.4);
+        head.lineTo(8.3, -3.6);
+        head.lineTo(9.6, -1.2);
+        g.draw(head);
+    }
+
     public static void save(Graphics2D g) {
         prep(g);
         g.draw(new RoundRectangle2D.Double(-8,-8,16,16,2,2));
@@ -102,6 +126,21 @@ public final class Icons {
         g.draw(new Line2D.Double(-4, 2.2, 4, 2.2));
     }
 
+    /** Ordinary pointer/selection cursor, separate from freehand Lasso and Rectangle. */
+    public static void pointer(Graphics2D g) {
+        prep(g);
+        Path2D arrow = new Path2D.Double();
+        arrow.moveTo(-7.5, -9);
+        arrow.lineTo(-7.5, 8);
+        arrow.lineTo(-2.7, 4.2);
+        arrow.lineTo(0.6, 10);
+        arrow.lineTo(3.7, 8.4);
+        arrow.lineTo(0.4, 2.7);
+        arrow.lineTo(6.8, 2.1);
+        arrow.closePath();
+        g.draw(arrow);
+    }
+
     public static void pencil(Graphics2D g) {
         prep(g);
         AffineTransform t = g.getTransform();
@@ -167,6 +206,13 @@ public final class Icons {
         head.lineTo(-7, -3);
         head.lineTo(-3.5, 0.5);
         g.draw(head);
+    }
+
+    public static void redo(Graphics2D g) {
+        AffineTransform previous = g.getTransform();
+        g.scale(-1, 1);
+        undo(g);
+        g.setTransform(previous);
     }
 
     public static void trash(Graphics2D g) {

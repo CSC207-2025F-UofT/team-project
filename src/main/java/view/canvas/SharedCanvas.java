@@ -4,7 +4,6 @@ import interface_adapter.AnswerKind;
 import view.answer.CanvasAnswer;
 import view.answer.Formula;
 import entity.Stroke;
-import interface_adapter.TextRun;
 import interface_adapter.recognize.FormulaRecognizer;
 import view.DrawingCanvas;
 import view.FormulaCapture;
@@ -177,16 +176,17 @@ public class SharedCanvas {
         return canvas.isCurrent(id, revision);
     }
 
-    public boolean showAnswer(long id, long revision, AnswerKind kind, String text, boolean error) {
-        return canvas.showAnswer(id, revision, kind, text, error);
-    }
-
-    public boolean showAnswer(long id, long revision, AnswerKind kind, List<TextRun> runs, boolean error) {
-        return canvas.showAnswer(id, revision, kind, runs, error);
+    public boolean showTypesetAnswer(long id, long revision, AnswerKind kind, String text, String latex) {
+        return canvas.showTypesetAnswer(id, revision, kind, text, latex);
     }
 
     public void addFormulaChangeListener(LongConsumer listener) {
         canvas.addFormulaChangeListener(listener);
+    }
+
+    // whole formula moved / resized, ink same
+    public void addFormulaMoveListener(LongConsumer listener) {
+        canvas.addFormulaMoveListener(listener);
     }
 
     public List<CanvasAnswer> getAnswers() {
@@ -257,8 +257,8 @@ public class SharedCanvas {
     }
 
     /**
-     * Screenshot of the formula on the canvas (cropped, dark ink on white): the lasso selection if
-     * there is one, otherwise all the ink. Safe to call from any thread.
+     * Picture of the formula drawn from its strokes (cropped, gray dark ink on white, zoom ignored):
+     * the lasso selection if there is one, otherwise all the ink. Safe to call from any thread.
      *
      * @throws IllegalStateException if the canvas is empty
      */

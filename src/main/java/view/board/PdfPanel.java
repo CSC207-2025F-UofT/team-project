@@ -19,11 +19,13 @@ public final class PdfPanel extends JPanel implements PdfWorkspacePort {
     }
     public void setCanvasCapture(Supplier<BufferedImage> capture) { editor.setCanvasCapture(capture); }
     public void setRegionCapture(Runnable command) { editor.setRegionCapture(command); }
+    public void setCaptureAreaActive(boolean active) { editor.setCaptureAreaActive(active); }
     public DocEditorPanel editor() { return editor; }
     public void setFullscreenAction(Runnable action) { editor.setFullscreenAction(action); }
     public void close() { editor.close(); }
     @Override public void fitWhenOpened() { editor.fitWhenOpened(); }
     @Override public void addHistoryItem(HistoryItem item) { editor.addHistoryItem(item); }
+    @Override public void addHistoryToLibrary(HistoryItem item) { editor.addHistoryToLibrary(item); }
     @Override public boolean dropHistoryItem(HistoryItem item, Point screenTopLeft) {
         return editor.dropHistoryItem(item, screenTopLeft);
     }

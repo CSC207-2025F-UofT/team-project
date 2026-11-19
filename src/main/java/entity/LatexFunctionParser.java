@@ -7,7 +7,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.DoubleUnaryOperator;
+import java.util.function.DoubleBinaryOperator;
 
 /**
  * Turns a LaTeX string such as {@code y=\sin(x-\frac{\pi}{2})+1} into a {@link MathFunction} of x.
@@ -17,6 +17,7 @@ import java.util.function.DoubleUnaryOperator;
  * \sin \cos \tan \cot \sec \csc, their arc and hyperbolic versions, \ln, \log (with optional _base),
  * \exp, and powers on functions such as \sin^2 x or \sin^{-1} x.
  * An equation is accepted when one side is just {@code y} or {@code f(x)}.
+ * {@link #parseSurface} reads a function of x and y the same way, named {@code z} or {@code f(x,y)}.
  */
 public class LatexFunctionParser {
 
@@ -70,6 +71,10 @@ public class LatexFunctionParser {
     private List<Token> tokens;
     private int pos;
     private int absDepth;
+    private boolean surface;  // y is a variable, not the function name
+    private String xName = "x";
+    private String yName;     // null = only x is a variable
+    private boolean field;    // parseField: caller words the unknown-letter error
 
     /**
      * Parses the LaTeX string into a function of x.
@@ -77,21 +82,72 @@ public class LatexFunctionParser {
      * @throws LatexParseException if the string is empty, malformed, or not an explicit function of x
      */
     public MathFunction parse(String latex) throws LatexParseException {
+        DoubleBinaryOperator rule = parseRule(latex, false);
+        return new MathFunction(latex, x -> rule.applyAsDouble(x, 0));
+    }
+
+    /**
+     * Parses a function of x and y, e.g. {@code z = x^2 + y^2} or {@code f(x,y) = \sin x \cos y}.
+     *
+     * @throws LatexParseException if the string is not an explicit function of x and y
+     */
+    public SurfaceFunction parseSurface(String latex) throws LatexParseException {
+        return new SurfaceFunction(latex, parseRule(latex, true));
+    }
+
+    /**
+     * Parses a bare expression (no '=') in two single-letter variables, e.g. the right side of
+     * {@code y' = x - y}. The first letter becomes the operator's first argument.
+     *
+     * @throws LatexParseException if it's malformed or uses any other variable
+     */
+    public SurfaceFunction parseField(String expression, String first, String second) throws LatexParseException {
+        if (expression == null || expression.trim().isEmpty()) {
+            throw new LatexParseException("The expression is empty.");
+        }
+        surface = true;
+        field = true;
+        xName = first;
+        yName = second;
+        try {
+            tokens = tokenize(expression);
+            for (Token t : tokens) {
+                if (t.isSymbol("=")) {
+                    throw new LatexParseException("Only one '=' is allowed in each equation.");
+                }
+            }
+            return new SurfaceFunction(expression, parseTokens());
+        } finally {
+            xName = "x";
+            yName = null;
+            field = false;
+        }
+    }
+
+    // same grammar both ways, surface just lets y in as a variable
+    private DoubleBinaryOperator parseRule(String latex, boolean twoVariables) throws LatexParseException {
         if (latex == null || latex.trim().isEmpty()) {
             throw new LatexParseException("The expression is empty.");
         }
+        surface = twoVariables;
+        xName = "x";
+        yName = twoVariables ? "y" : null;
         List<Token> all = tokenize(latex);
         tokens = selectFunctionSide(all);
+        return parseTokens();
+    }
+
+    private DoubleBinaryOperator parseTokens() throws LatexParseException {
         pos = 0;
         absDepth = 0;
         if (tokens.isEmpty()) {
             throw new LatexParseException("The expression is empty.");
         }
-        DoubleUnaryOperator rule = parseExpression();
+        DoubleBinaryOperator rule = parseExpression();
         if (pos < tokens.size()) {
             throw new LatexParseException("Unexpected '" + tokens.get(pos) + "'.");
         }
-        return new MathFunction(latex, rule);
+        return rule;
     }
 
     // ---------------------------------------------------------------- tokenizer
@@ -133,7 +189,7 @@ public class LatexFunctionParser {
             } else if (c == 'π') {
                 out.add(new Token(Kind.COMMAND, "pi"));
                 i++;
-            } else if ("+-*/^_()[]{}|=".indexOf(c) >= 0) {
+            } else if ("+-*/^_()[]{}|=,".indexOf(c) >= 0) {
                 out.add(new Token(Kind.SYMBOL, String.valueOf(c)));
                 i++;
             } else {
@@ -236,18 +292,27 @@ public class LatexFunctionParser {
         if (isFunctionName(rhs)) {
             return new ArrayList<>(lhs);
         }
-        throw new LatexParseException("Write the function explicitly, e.g. y = x^2 or f(x) = x^2.");
+        throw new LatexParseException(surface
+                ? "Write the surface explicitly, e.g. z = x^2 + y^2 or f(x,y) = x y."
+                : "Write the function explicitly, e.g. y = x^2 or f(x) = x^2.");
     }
 
-    private static boolean isFunctionName(List<Token> side) {
+    // y / f(x) for curves, z / f(x,y) for surfaces
+    private boolean isFunctionName(List<Token> side) {
         if (side.size() == 1) {
-            return side.get(0).is(Kind.LETTER, "y");
+            return side.get(0).is(Kind.LETTER, surface ? "z" : "y");
         }
-        return side.size() == 4
+        boolean named = side.size() >= 4
                 && side.get(0).kind == Kind.LETTER
                 && side.get(1).isSymbol("(")
                 && side.get(2).is(Kind.LETTER, "x")
-                && side.get(3).isSymbol(")");
+                && side.get(side.size() - 1).isSymbol(")");
+        if (!named) {
+            return false;
+        }
+        return surface
+                ? side.size() == 6 && side.get(3).isSymbol(",") && side.get(4).is(Kind.LETTER, "y")
+                : side.size() == 4;
     }
 
     // ---------------------------------------------------------------- parser
@@ -270,45 +335,45 @@ public class LatexFunctionParser {
         pos++;
     }
 
-    private DoubleUnaryOperator parseExpression() throws LatexParseException {
-        DoubleUnaryOperator left = parseTerm();
+    private DoubleBinaryOperator parseExpression() throws LatexParseException {
+        DoubleBinaryOperator left = parseTerm();
         while (peekSymbol("+") || peekSymbol("-")) {
             boolean plus = peek().isSymbol("+");
             pos++;
-            DoubleUnaryOperator a = left;
-            DoubleUnaryOperator b = parseTerm();
-            left = plus ? x -> a.applyAsDouble(x) + b.applyAsDouble(x)
-                    : x -> a.applyAsDouble(x) - b.applyAsDouble(x);
+            DoubleBinaryOperator a = left;
+            DoubleBinaryOperator b = parseTerm();
+            left = plus ? (x, y) -> a.applyAsDouble(x, y) + b.applyAsDouble(x, y)
+                    : (x, y) -> a.applyAsDouble(x, y) - b.applyAsDouble(x, y);
         }
         return left;
     }
 
-    private DoubleUnaryOperator parseTerm() throws LatexParseException {
-        DoubleUnaryOperator left = parseUnary();
+    private DoubleBinaryOperator parseTerm() throws LatexParseException {
+        DoubleBinaryOperator left = parseUnary();
         while (true) {
-            DoubleUnaryOperator a = left;
+            DoubleBinaryOperator a = left;
             if (peekSymbol("*")) {
                 pos++;
-                DoubleUnaryOperator b = parseUnary();
-                left = x -> a.applyAsDouble(x) * b.applyAsDouble(x);
+                DoubleBinaryOperator b = parseUnary();
+                left = (x, y) -> a.applyAsDouble(x, y) * b.applyAsDouble(x, y);
             } else if (peekSymbol("/")) {
                 pos++;
-                DoubleUnaryOperator b = parseUnary();
-                left = x -> a.applyAsDouble(x) / b.applyAsDouble(x);
+                DoubleBinaryOperator b = parseUnary();
+                left = (x, y) -> a.applyAsDouble(x, y) / b.applyAsDouble(x, y);
             } else if (startsImplicitFactor(true)) {
-                DoubleUnaryOperator b = parsePower();
-                left = x -> a.applyAsDouble(x) * b.applyAsDouble(x);
+                DoubleBinaryOperator b = parsePower();
+                left = (x, y) -> a.applyAsDouble(x, y) * b.applyAsDouble(x, y);
             } else {
                 return left;
             }
         }
     }
 
-    private DoubleUnaryOperator parseUnary() throws LatexParseException {
+    private DoubleBinaryOperator parseUnary() throws LatexParseException {
         if (peekSymbol("-")) {
             pos++;
-            DoubleUnaryOperator a = parseUnary();
-            return x -> -a.applyAsDouble(x);
+            DoubleBinaryOperator a = parseUnary();
+            return (x, y) -> -a.applyAsDouble(x, y);
         }
         if (peekSymbol("+")) {
             pos++;
@@ -317,12 +382,12 @@ public class LatexFunctionParser {
         return parsePower();
     }
 
-    private DoubleUnaryOperator parsePower() throws LatexParseException {
-        DoubleUnaryOperator base = parsePrimary();
+    private DoubleBinaryOperator parsePower() throws LatexParseException {
+        DoubleBinaryOperator base = parsePrimary();
         if (peekSymbol("^")) {
             pos++;
-            DoubleUnaryOperator exponent = parseScriptArgument();
-            return x -> Math.pow(base.applyAsDouble(x), exponent.applyAsDouble(x));
+            DoubleBinaryOperator exponent = parseScriptArgument();
+            return (x, y) -> Math.pow(base.applyAsDouble(x, y), exponent.applyAsDouble(x, y));
         }
         return base;
     }
@@ -345,7 +410,7 @@ public class LatexFunctionParser {
         }
     }
 
-    private DoubleUnaryOperator parsePrimary() throws LatexParseException {
+    private DoubleBinaryOperator parsePrimary() throws LatexParseException {
         Token t = peek();
         if (t == null) {
             throw new LatexParseException("The expression ends unexpectedly.");
@@ -354,15 +419,22 @@ public class LatexFunctionParser {
         switch (t.kind) {
             case NUMBER:
                 double value = parseNumber(t.text);
-                return x -> value;
+                return (x, y) -> value;
             case LETTER:
-                if (t.text.equals("x")) {
-                    return x -> x;
+                if (t.text.equals(xName)) {
+                    return (x, y) -> x;
+                }
+                if (t.text.equals(yName)) {
+                    return (x, y) -> y;
                 }
                 if (t.text.equals("e")) {
-                    return x -> Math.E;
+                    return (x, y) -> Math.E;
                 }
-                throw new LatexParseException("Unknown variable '" + t.text + "'. Only x can be graphed.");
+                if (field) {
+                    throw new LatexParseException("Unknown variable '" + t.text + "'.");  // field, caller explains
+                }
+                throw new LatexParseException("Unknown variable '" + t.text + "'. "
+                        + (surface ? "Only x and y can be graphed." : "Only x can be graphed."));
             case COMMAND:
                 return parseCommand(t.text);
             default:
@@ -370,7 +442,7 @@ public class LatexFunctionParser {
         }
     }
 
-    private DoubleUnaryOperator parseBracketed(Token open) throws LatexParseException {
+    private DoubleBinaryOperator parseBracketed(Token open) throws LatexParseException {
         String close;
         switch (open.text) {
             case "(":
@@ -384,45 +456,45 @@ public class LatexFunctionParser {
                 break;
             case "|":
                 absDepth++;
-                DoubleUnaryOperator inner = parseExpression();
+                DoubleBinaryOperator inner = parseExpression();
                 expectSymbol("|");
                 absDepth--;
-                return x -> Math.abs(inner.applyAsDouble(x));
+                return (x, y) -> Math.abs(inner.applyAsDouble(x, y));
             default:
                 throw new LatexParseException("Unexpected '" + open + "'.");
         }
         int savedAbs = absDepth;
         absDepth = 0;
-        DoubleUnaryOperator inner = parseExpression();
+        DoubleBinaryOperator inner = parseExpression();
         expectSymbol(close);
         absDepth = savedAbs;
         return inner;
     }
 
-    private DoubleUnaryOperator parseCommand(String name) throws LatexParseException {
+    private DoubleBinaryOperator parseCommand(String name) throws LatexParseException {
         switch (name) {
             case "pi":
-                return x -> Math.PI;
+                return (x, y) -> Math.PI;
             case "frac":
             case "dfrac":
             case "tfrac": {
-                DoubleUnaryOperator num = parseScriptArgument();
-                DoubleUnaryOperator den = parseScriptArgument();
-                return x -> num.applyAsDouble(x) / den.applyAsDouble(x);
+                DoubleBinaryOperator num = parseScriptArgument();
+                DoubleBinaryOperator den = parseScriptArgument();
+                return (x, y) -> num.applyAsDouble(x, y) / den.applyAsDouble(x, y);
             }
             case "sqrt": {
-                DoubleUnaryOperator degree = null;
+                DoubleBinaryOperator degree = null;
                 if (peekSymbol("[")) {
                     pos++;
                     degree = parseExpression();
                     expectSymbol("]");
                 }
-                DoubleUnaryOperator radicand = parseScriptArgument();
+                DoubleBinaryOperator radicand = parseScriptArgument();
                 if (degree == null) {
-                    return x -> Math.sqrt(radicand.applyAsDouble(x));
+                    return (x, y) -> Math.sqrt(radicand.applyAsDouble(x, y));
                 }
-                DoubleUnaryOperator n = degree;
-                return x -> nthRoot(radicand.applyAsDouble(x), n.applyAsDouble(x));
+                DoubleBinaryOperator n = degree;
+                return (x, y) -> nthRoot(radicand.applyAsDouble(x, y), n.applyAsDouble(x, y));
             }
             default:
                 if (FUNCTIONS.contains(name)) {
@@ -436,7 +508,7 @@ public class LatexFunctionParser {
      * Argument of ^, _, \frac or \sqrt: a {braced group}, or a single token as in LaTeX
      * (so x^23 means x^2 * 3 and \frac12 means 1/2). A leading minus is allowed: x^-1.
      */
-    private DoubleUnaryOperator parseScriptArgument() throws LatexParseException {
+    private DoubleBinaryOperator parseScriptArgument() throws LatexParseException {
         Token t = peek();
         if (t == null) {
             throw new LatexParseException("The expression ends unexpectedly.");
@@ -445,32 +517,32 @@ public class LatexFunctionParser {
             pos++;
             int savedAbs = absDepth;
             absDepth = 0;
-            DoubleUnaryOperator inner = parseExpression();
+            DoubleBinaryOperator inner = parseExpression();
             expectSymbol("}");
             absDepth = savedAbs;
             return inner;
         }
         if (t.isSymbol("-")) {
             pos++;
-            DoubleUnaryOperator a = parseScriptArgument();
-            return x -> -a.applyAsDouble(x);
+            DoubleBinaryOperator a = parseScriptArgument();
+            return (x, y) -> -a.applyAsDouble(x, y);
         }
         if (t.kind == Kind.NUMBER && t.text.length() > 1 && t.text.charAt(0) != '.') {
             // Only the first digit belongs to the script; the rest stays in the stream.
             tokens.set(pos, new Token(Kind.NUMBER, t.text.substring(1)));
             double digit = t.text.charAt(0) - '0';
-            return x -> digit;
+            return (x, y) -> digit;
         }
         return parsePrimary();
     }
 
-    private DoubleUnaryOperator parseFunction(String name) throws LatexParseException {
-        DoubleUnaryOperator logBase = null;
+    private DoubleBinaryOperator parseFunction(String name) throws LatexParseException {
+        DoubleBinaryOperator logBase = null;
         if ((name.equals("log")) && peekSymbol("_")) {
             pos++;
             logBase = parseScriptArgument();
         }
-        DoubleUnaryOperator power = null;
+        DoubleBinaryOperator power = null;
         if (peekSymbol("^")) {
             pos++;
             power = parseScriptArgument();
@@ -481,80 +553,80 @@ public class LatexFunctionParser {
             power = null;
         }
 
-        DoubleUnaryOperator arg = parseFunctionArgument();
-        DoubleUnaryOperator applied = applyFunction(effective, arg, logBase);
+        DoubleBinaryOperator arg = parseFunctionArgument();
+        DoubleBinaryOperator applied = applyFunction(effective, arg, logBase);
         if (power == null) {
             return applied;
         }
-        DoubleUnaryOperator p = power;
-        return x -> Math.pow(applied.applyAsDouble(x), p.applyAsDouble(x));
+        DoubleBinaryOperator p = power;
+        return (x, y) -> Math.pow(applied.applyAsDouble(x, y), p.applyAsDouble(x, y));
     }
 
     /** \sin(x+1) takes the bracket; \sin 2x takes the product 2x but stops before another function. */
-    private DoubleUnaryOperator parseFunctionArgument() throws LatexParseException {
+    private DoubleBinaryOperator parseFunctionArgument() throws LatexParseException {
         if (peekSymbol("(") || peekSymbol("[") || peekSymbol("{")) {
             return parsePrimary();
         }
         if (peek() == null) {
             throw new LatexParseException("A function is missing its argument.");
         }
-        DoubleUnaryOperator arg;
+        DoubleBinaryOperator arg;
         if (peekSymbol("-")) {
             pos++;
-            DoubleUnaryOperator a = parsePower();
-            arg = x -> -a.applyAsDouble(x);
+            DoubleBinaryOperator a = parsePower();
+            arg = (x, y) -> -a.applyAsDouble(x, y);
         } else {
             arg = parsePower();
         }
         while (startsImplicitFactor(false)) {
-            DoubleUnaryOperator a = arg;
-            DoubleUnaryOperator b = parsePower();
-            arg = x -> a.applyAsDouble(x) * b.applyAsDouble(x);
+            DoubleBinaryOperator a = arg;
+            DoubleBinaryOperator b = parsePower();
+            arg = (x, y) -> a.applyAsDouble(x, y) * b.applyAsDouble(x, y);
         }
         return arg;
     }
 
-    private static DoubleUnaryOperator applyFunction(String name, DoubleUnaryOperator arg,
-                                                     DoubleUnaryOperator logBase) {
+    private static DoubleBinaryOperator applyFunction(String name, DoubleBinaryOperator arg,
+                                                     DoubleBinaryOperator logBase) {
         switch (name) {
             case "sin":
-                return x -> Math.sin(arg.applyAsDouble(x));
+                return (x, y) -> Math.sin(arg.applyAsDouble(x, y));
             case "cos":
-                return x -> Math.cos(arg.applyAsDouble(x));
+                return (x, y) -> Math.cos(arg.applyAsDouble(x, y));
             case "tan":
-                return x -> Math.tan(arg.applyAsDouble(x));
+                return (x, y) -> Math.tan(arg.applyAsDouble(x, y));
             case "cot":
-                return x -> 1.0 / Math.tan(arg.applyAsDouble(x));
+                return (x, y) -> 1.0 / Math.tan(arg.applyAsDouble(x, y));
             case "sec":
-                return x -> 1.0 / Math.cos(arg.applyAsDouble(x));
+                return (x, y) -> 1.0 / Math.cos(arg.applyAsDouble(x, y));
             case "csc":
-                return x -> 1.0 / Math.sin(arg.applyAsDouble(x));
+                return (x, y) -> 1.0 / Math.sin(arg.applyAsDouble(x, y));
             case "arcsin":
-                return x -> Math.asin(arg.applyAsDouble(x));
+                return (x, y) -> Math.asin(arg.applyAsDouble(x, y));
             case "arccos":
-                return x -> Math.acos(arg.applyAsDouble(x));
+                return (x, y) -> Math.acos(arg.applyAsDouble(x, y));
             case "arctan":
-                return x -> Math.atan(arg.applyAsDouble(x));
+                return (x, y) -> Math.atan(arg.applyAsDouble(x, y));
             case "sinh":
-                return x -> Math.sinh(arg.applyAsDouble(x));
+                return (x, y) -> Math.sinh(arg.applyAsDouble(x, y));
             case "cosh":
-                return x -> Math.cosh(arg.applyAsDouble(x));
+                return (x, y) -> Math.cosh(arg.applyAsDouble(x, y));
             case "tanh":
-                return x -> Math.tanh(arg.applyAsDouble(x));
+                return (x, y) -> Math.tanh(arg.applyAsDouble(x, y));
             case "ln":
-                return x -> Math.log(arg.applyAsDouble(x));
+                return (x, y) -> Math.log(arg.applyAsDouble(x, y));
             case "exp":
-                return x -> Math.exp(arg.applyAsDouble(x));
+                return (x, y) -> Math.exp(arg.applyAsDouble(x, y));
             default:  // log, lg
                 if (logBase == null) {
-                    return x -> Math.log10(arg.applyAsDouble(x));
+                    return (x, y) -> Math.log10(arg.applyAsDouble(x, y));
                 }
-                return x -> Math.log(arg.applyAsDouble(x)) / Math.log(logBase.applyAsDouble(x));
+                return (x, y) -> Math.log(arg.applyAsDouble(x, y)) / Math.log(logBase.applyAsDouble(x, y));
         }
     }
 
-    private static boolean isConstant(DoubleUnaryOperator f, double value) {
-        return f.applyAsDouble(0) == value && f.applyAsDouble(1) == value;
+    private static boolean isConstant(DoubleBinaryOperator f, double value) {
+        return f.applyAsDouble(0, 0) == value && f.applyAsDouble(1, 1) == value;
     }
 
     private static double nthRoot(double v, double n) {

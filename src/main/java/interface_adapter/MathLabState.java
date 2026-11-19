@@ -1,7 +1,5 @@
 package interface_adapter;
 
-import java.util.List;
-
 public class MathLabState {
     private String expression = "";
 
@@ -15,7 +13,7 @@ public class MathLabState {
 
     private String answerText = "";  // what gets drawn
 
-    private List<TextRun> answerRuns;  // same w/ raised exponents, null for plain answers
+    private String answerLatex = "";  // same answer as tex, typeset on the canvas
 
     private boolean definition;  // f(x)= got saved, nothing to draw
 
@@ -35,7 +33,7 @@ public class MathLabState {
 
     public void setResultText(String resultText) {
         this.resultText = resultText;
-        this.answerRuns = null;
+        this.answerLatex = "";
     }
 
     public AnswerKind getAnswerKind() {
@@ -54,12 +52,12 @@ public class MathLabState {
         this.answerText = answerText;
     }
 
-    public List<TextRun> getAnswerRuns() {
-        return answerRuns;
+    public String getAnswerLatex() {
+        return answerLatex;
     }
 
-    public void setAnswerRuns(List<TextRun> answerRuns) {
-        this.answerRuns = answerRuns;
+    public void setAnswerLatex(String answerLatex) {
+        this.answerLatex = answerLatex;
     }
 
     public boolean isDefinition() {

@@ -3,15 +3,18 @@ package view.board.doc;
 import view.glass.GlassDialogs;
 
 import history.adapter.HistoryMaterialMapper;
+import pdf_editor.adapter.HistoryLibraryImporter;
 import interface_adapter.history.HistoryItem;
 import pdf_editor.MathLibrary;
 import pdf_editor.adapter.PdfEditorController;
+import pdf_editor.adapter.FormulaRevisionCoordinator;
 import pdf_editor.data_access.MaterialRenderer;
 import pdf_editor.domain.PdfDocument;
 import pdf_editor.domain.PdfMaterial;
 import pdf_editor.view.FormulaEditDialog;
 import pdf_editor.view.PdfPageCanvas;
 import view.board.BoardTheme;
+import view.board.GlassContextMenu;
 import view.board.Icons;
 import view.board.PdfWorkspacePort;
 
@@ -22,6 +25,7 @@ import java.awt.datatransfer.StringSelection;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.MouseEvent;
+import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -44,11 +48,16 @@ public final class DocEditorPanel extends JPanel implements PdfWorkspacePort {
     private static final int MIN_ZOOM = 35;
 
     private final PdfEditorController controller;
+    private FormulaRevisionCoordinator formulaRevision;
+    public void setFormulaEditing(FormulaRevisionCoordinator actions) {
+        formulaRevision = Objects.requireNonNull(actions);
+    }
     private final MathLibrary library;
     private final PdfPageCanvas paper;
     private final JScrollPane pageScroll;
     private final JPanel ribbonHolder = new JPanel(new BorderLayout());
     private final JPanel libraryPanel = new JPanel(new BorderLayout());
+    private JButton libraryToggleButton;
     private final DefaultListModel<MathLibrary.Material> libraryModel = new DefaultListModel<>();
     private final JList<MathLibrary.Material> libraryList = new JList<>(libraryModel);
     private final JLabel pageCount = new JLabel();
@@ -60,6 +69,8 @@ public final class DocEditorPanel extends JPanel implements PdfWorkspacePort {
     private final Runnable detachLibraryListener;
     private Supplier<BufferedImage> canvasCapture = () -> null;
     private Runnable regionCapture = this::insertCanvasInk;
+    private RibbonButton captureButton;
+    private boolean capturing;
     private boolean updatingZoom;
     private Runnable toggleFullscreen = () -> { };
     public void setFullscreenAction(Runnable callback) { toggleFullscreen = Objects.requireNonNull(callback); }
@@ -87,6 +98,7 @@ public final class DocEditorPanel extends JPanel implements PdfWorkspacePort {
         });
         workspace.setBackground(DESK);
         workspace.add(pageScroll, BorderLayout.CENTER);
+        installDeleteShortcut();
         // A decorative ruler misrepresented measurements and did not scroll with the page.
         // Keep the desk clean until a real, scroll-synchronised editing ruler is added.
         setupLibrary();
@@ -112,7 +124,12 @@ public final class DocEditorPanel extends JPanel implements PdfWorkspacePort {
     }
     /** Request a temporary screenshot selection on the visible Canvas. */
     public void setRegionCapture(Runnable command) { regionCapture = Objects.requireNonNull(command); }
-    public void showLibrary() { libraryPanel.setVisible(true); workspace.revalidate(); workspace.repaint(); }
+    public void setCaptureAreaActive(boolean active) {
+        capturing = active;
+        if (captureButton != null) captureButton.setActive(active);
+    }
+    public boolean isCaptureAreaActive() { return capturing; }
+    public void showLibrary() { setLibraryVisible(true); }
     public void close() { detachLibraryListener.run(); }
     public PdfPageCanvas pageView() { return paper; }
     public PdfEditorController documentController() { return controller; }
@@ -160,6 +177,12 @@ public final class DocEditorPanel extends JPanel implements PdfWorkspacePort {
         tabs.add(new Tab("Layout", layoutRibbon()));
         tabs.add(new Tab("View", viewRibbon()));
         for (Tab tab : tabs) names.add(tab.button);
+        // Library is a frequent workspace action, not a secondary Insert command.
+        // Keep the existing ribbon tabs and document workspace unchanged.
+        libraryToggleButton = new RoundedActionButton("Library", this::toggleLibrary, false);
+        libraryToggleButton.setName("libraryTopButton");
+        libraryToggleButton.setToolTipText("Show or hide Material Library");
+        tabsRow.add(libraryToggleButton);
         tabsRow.add(names);
         JButton export = new RoundedActionButton("Export PDF", this::export, true);
         export.setToolTipText("Save your document as a PDF file");
@@ -186,6 +209,7 @@ public final class DocEditorPanel extends JPanel implements PdfWorkspacePort {
         command(row, RibbonButton.labeled(DocIcons::comment, "Type"), this::typeOnPage);
         command(row, RibbonButton.icon(Icons::undo, "Undo"), this::undo);
         command(row, RibbonButton.icon(DocIcons::redo, "Redo"), this::redo);
+        command(row, RibbonButton.labeled(DocIcons::deletePage, "Delete item"), this::deleteSelectedItem);
         command(row, RibbonButton.letter("B", Font.BOLD, false, false, "Bold selected note"), () -> setNoteStyle("bold"));
         command(row, RibbonButton.letter("I", Font.ITALIC, false, false, "Italic selected note"), () -> setNoteStyle("italic"));
         command(row, RibbonButton.letter("U", Font.PLAIN, true, false, "Underline selected note"), () -> setNoteStyle("underline"));
@@ -218,9 +242,9 @@ public final class DocEditorPanel extends JPanel implements PdfWorkspacePort {
         JPanel row = ribbon();
         command(row, RibbonButton.labeled(DocIcons::formula, "Formula"), this::insertFormula);
         command(row, RibbonButton.labeled(DocIcons::comment, "Text box"), this::addNote);
-        command(row, RibbonButton.labeled(DocIcons::image, "Capture area"), () -> regionCapture.run());
+        captureButton = command(row, RibbonButton.labeled(DocIcons::image, "Capture area"), () -> regionCapture.run());
+        captureButton.setActive(capturing);
         command(row, RibbonButton.labeled(DocIcons::pageBreak, "New page"), this::addPage);
-        command(row, RibbonButton.labeled(Icons::library, "Library"), this::toggleLibrary);
         return row;
     }
     private JPanel layoutRibbon() {
@@ -289,7 +313,8 @@ public final class DocEditorPanel extends JPanel implements PdfWorkspacePort {
             g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
             int w = getWidth(), h = getHeight();
             Color top = primary ? (over ? new Color(41, 143, 255) : new Color(0, 122, 255))
-                    : (over ? new Color(228, 237, 249, 252) : new Color(247, 249, 253, 242));
+                    : (getModel().isSelected() ? new Color(222, 235, 254)
+                    : over ? new Color(228, 237, 249, 252) : new Color(247, 249, 253, 242));
             Color end = primary ? new Color(0, 93, 216) : new Color(239, 243, 249);
             g2.setPaint(new GradientPaint(0, 0, top, 0, h, end));
             g2.fillRoundRect(0, 0, w - 1, h - 1, 17, 17);
@@ -359,11 +384,14 @@ public final class DocEditorPanel extends JPanel implements PdfWorkspacePort {
             private void popup(MouseEvent e) {
                 if (!e.isPopupTrigger()) return;
                 libraryList.setSelectedIndex(libraryList.locationToIndex(e.getPoint()));
-                JPopupMenu menu = new JPopupMenu();
+                GlassContextMenu menu = new GlassContextMenu();
                 item(menu, "Add to PDF", () -> {
                     MathLibrary.Material selected = libraryList.getSelectedValue();
                     if (selected != null) addMaterial(selected, 85, 110);
                 });
+                MathLibrary.Material selected = libraryList.getSelectedValue();
+                if (selected != null && !selected.isGraph())
+                    item(menu, "Edit formula (calculate or manual)", DocEditorPanel.this::editLibraryFormula);
                 item(menu, "Delete from Library", DocEditorPanel.this::deleteLibraryItem);
                 item(menu, "Undo Library delete", library::undoDelete);
                 menu.show(libraryList, e.getX(), e.getY());
@@ -401,7 +429,16 @@ public final class DocEditorPanel extends JPanel implements PdfWorkspacePort {
         MathLibrary.Material selected = libraryList.getSelectedValue();
         if (selected != null) library.delete(selected.id());
     }
-    private void toggleLibrary() { libraryPanel.setVisible(!libraryPanel.isVisible()); workspace.revalidate();workspace.repaint(); }
+    private void toggleLibrary() { setLibraryVisible(!libraryPanel.isVisible()); }
+    private void setLibraryVisible(boolean visible) {
+        libraryPanel.setVisible(visible);
+        if (libraryToggleButton != null) {
+            libraryToggleButton.getModel().setSelected(visible);
+            libraryToggleButton.repaint();
+        }
+        workspace.revalidate();
+        workspace.repaint();
+    }
     private void updateStatus() {
         pageCount.setText("Page " + (controller.currentPage() + 1) + " of " + controller.pageCount());
         paper.repaint();
@@ -431,22 +468,39 @@ public final class DocEditorPanel extends JPanel implements PdfWorkspacePort {
         if (w > 0 && h > 0) zoom(paper.fitZoom(w, h));
     }
     private void addMaterial(PdfMaterial material, float x, float y) {
+        // Imported History must be clickable immediately: an active JTextPane
+        // otherwise remains above the page and intercepts mouse input.
+        paper.finishInlineEdit();
         float w = material.isGraph() ? 280 : 320;
         float h = material.isGraph() ? Math.max(65, w * material.imageHeight() / Math.max(1f, material.imageWidth())) : 90;
         if (h > 600) {w *= 600f / h;h = 600;}
         controller.place(material, x, y, w, h);
         updateStatus();
     }
+    @Override public void addHistoryToLibrary(HistoryItem item) {
+        HistoryLibraryImporter.importRecord(item, library);
+        showLibrary();
+    }
     @Override public void addHistoryItem(HistoryItem item) {
         Objects.requireNonNull(item);
         addMaterial(HistoryMaterialMapper.toPdfMaterial(item.entry()), 75, 108);
     }
-    @Override public boolean dropHistoryItem(HistoryItem item, Point screenTopLeft) {
-        if (!paper.isShowing()) {addHistoryItem(item);return true;}
-        Point spot = new Point(screenTopLeft);
-        SwingUtilities.convertPointFromScreen(spot, paper);
-        addMaterial(HistoryMaterialMapper.toPdfMaterial(item.entry()),
-                Math.max(0, paper.pageX(spot.x)), Math.max(0, paper.pageY(spot.y)));
+    /**
+     * A History drop is a single import: the same structured material appears in
+     * both the PDF document and its Library. Graphs retain the original PNG.
+     * Regular Add to PDF (via the History context menu) remains unchanged.
+     */
+    @Override public boolean dropHistoryItem(HistoryItem item, Point cursorScreen) {
+        Objects.requireNonNull(item, "item");
+        Objects.requireNonNull(cursorScreen, "cursorScreen");
+        Point spot = new Point(cursorScreen);
+        if (paper.isShowing()) SwingUtilities.convertPointFromScreen(spot, paper);
+        float x = paper.isShowing() ? Math.max(0, paper.pageX(spot.x)) : 75;
+        float y = paper.isShowing() ? Math.max(0, paper.pageY(spot.y)) : 108;
+        // Store the structured formula/result (or original graph pixels), not the
+        // dragged thumbnail. Use the imported Library object for PDF placement.
+        MathLibrary.Material material = HistoryLibraryImporter.importRecord(item, library);
+        addMaterial(material, x, y);
         return true;
     }
     private void addPage() {paper.finishInlineEdit();controller.addPage();updateStatus();}
@@ -455,8 +509,45 @@ public final class DocEditorPanel extends JPanel implements PdfWorkspacePort {
         if (!controller.deletePage()) GlassDialogs.warning(this, "The document must contain one page.");
         updateStatus();
     }
-    private void undo() {paper.finishInlineEdit();controller.undo();updateStatus();}
-    private void redo() {paper.finishInlineEdit();controller.redo();updateStatus();}
+    /** Delete the selected PDF placement, never the source Canvas or Library item. */
+    private void deleteSelectedItem() {
+        if (paper.isEditingNote()) return; // Editing text must retain normal Delete/Backspace.
+        if (controller.deleteSelected()) updateStatus();
+    }
+
+    /** Shortcuts are scoped to the PDF workspace, not the whole Math Lab window. */
+    private void installDeleteShortcut() {
+        InputMap keys = workspace.getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+        ActionMap actions = workspace.getActionMap();
+        String action = "deletePdfSelection";
+        keys.put(KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0), action);
+        keys.put(KeyStroke.getKeyStroke(KeyEvent.VK_BACK_SPACE, 0), action);
+        actions.put(action, new AbstractAction() {
+            @Override public void actionPerformed(java.awt.event.ActionEvent event) {
+                deleteSelectedItem();
+            }
+        });
+    }
+
+    private void undo() {
+        paper.finishInlineEdit();
+        PdfDocument before = controller.documentSnapshot();
+        if (controller.undo()) reconcileFormulaUndo(before);
+        updateStatus();
+    }
+    private void redo() {
+        paper.finishInlineEdit();
+        PdfDocument before = controller.documentSnapshot();
+        if (controller.redo()) reconcileFormulaUndo(before);
+        updateStatus();
+    }
+    private void reconcileFormulaUndo(PdfDocument before) {
+        if (formulaRevision == null) return;
+        try { formulaRevision.reconcileDocumentUndo(before, controller.documentSnapshot()); }
+        catch (java.io.IOException failure) {
+            GlassDialogs.error(this, "Could not synchronize formula revision: " + failure.getMessage());
+        }
+    }
     private void autoLayout() {controller.autoLayout();updateStatus();}
     /** Normal document body starts at 1-inch margins. Text boxes stay a separate Insert tool. */
     public void typeOnPage() {
@@ -487,10 +578,38 @@ public final class DocEditorPanel extends JPanel implements PdfWorkspacePort {
     private void editFormula() {
         PdfDocument.Placement selected = controller.selected();
         if (selected == null || selected.isNote() || selected.material().isGraph()) {
-            GlassDialogs.warning(this, "Select a formula on the page first.");return;
+            GlassDialogs.warning(this, "Select a formula on the page first."); return;
         }
-        FormulaEditDialog.Result change = FormulaEditDialog.show(SwingUtilities.getWindowAncestor(this), selected.material());
-        if (change != null) {controller.editSelectedFormula(change.formula(), change.result()); updateStatus();}
+        if (formulaRevision == null) {
+            GlassDialogs.warning(this, "Formula recalculation is not configured."); return;
+        }
+        PdfMaterial original = selected.material();
+        FormulaEditDialog.Result change = FormulaEditDialog.show(
+                SwingUtilities.getWindowAncestor(this), original, formulaRevision::recalculate);
+        if (change == null) return;
+        try {
+            formulaRevision.editPdf(controller, original, change.formula(), change.result());
+            updateStatus();
+        } catch (java.io.IOException | RuntimeException problem) {
+            GlassDialogs.error(this, "Could not save formula revision: " + problem.getMessage());
+        }
+    }
+
+    private void editLibraryFormula() {
+        MathLibrary.Material selected = libraryList.getSelectedValue();
+        if (selected == null || selected.isGraph()) return;
+        if (formulaRevision == null) {
+            GlassDialogs.warning(this, "Formula recalculation is not configured."); return;
+        }
+        FormulaEditDialog.Result change = FormulaEditDialog.show(
+                SwingUtilities.getWindowAncestor(this), selected, formulaRevision::recalculate);
+        if (change == null) return;
+        try {
+            formulaRevision.editLibrary(controller, selected, change.formula(), change.result());
+            updateStatus();
+        } catch (java.io.IOException | RuntimeException problem) {
+            GlassDialogs.error(this, "Could not save Library revision: " + problem.getMessage());
+        }
     }
     private void editNote() {
         if (!paper.editNoteInline()) {
@@ -526,7 +645,7 @@ public final class DocEditorPanel extends JPanel implements PdfWorkspacePort {
     }
     private void arrangeMenu() {
         if (controller.selected() == null) {GlassDialogs.warning(this, "Select a page object first.");return;}
-        JPopupMenu menu = new JPopupMenu();
+        GlassContextMenu menu = new GlassContextMenu();
         item(menu, "Bring forward", () -> arrange(1));
         item(menu, "Send backward", () -> arrange(-1));
         item(menu, "Bring to front", () -> arrange(2));
@@ -541,32 +660,33 @@ public final class DocEditorPanel extends JPanel implements PdfWorkspacePort {
             final int destination = i;
             if (i != controller.currentPage()) {
                 JMenuItem target = new JMenuItem("Page " + (i + 1));
-                target.addActionListener(e -> {
-                    paper.finishInlineEdit(); controller.moveSelectedToPage(destination); updateStatus();
-                });
+                target.addActionListener(e -> moveSelectedToPage(destination));
                 destinations.add(target);
             }
         }
         JMenuItem newPage = new JMenuItem("New page");
-        newPage.addActionListener(e -> {
-            paper.finishInlineEdit(); controller.moveSelectedToPage(-1); updateStatus();
-        });
+        newPage.addActionListener(e -> moveSelectedToPage(-1));
         destinations.add(newPage);
         return destinations;
     }
+    private void moveSelectedToPage(int destination) {
+        paper.finishInlineEdit();
+        controller.moveSelectedToPage(destination);
+        updateStatus();
+    }
     private void moveToPageMenu() {
         if (controller.selected() == null) {GlassDialogs.warning(this, "Select a page object first.");return;}
-        JPopupMenu menu = new JPopupMenu();
-        JMenu choices = pageDestinations();
-        while (choices.getItemCount() > 0) {
-            JMenuItem destination = choices.getItem(0);
-            choices.remove(0);
-            menu.add(destination);
+        GlassContextMenu menu = new GlassContextMenu();
+        for (int i = 0; i < controller.pageCount(); i++) {
+            if (i == controller.currentPage()) continue;
+            final int destination = i;
+            menu.addAction("Page " + (i + 1), () -> moveSelectedToPage(destination));
         }
+        menu.addAction("New page", () -> moveSelectedToPage(-1));
         menu.show(this, Math.max(12, getWidth() / 3), 106);
     }
     private void contextMenu(MouseEvent event) {
-        JPopupMenu menu = new JPopupMenu();
+        GlassContextMenu menu = new GlassContextMenu();
         PdfDocument.Placement selected = controller.selected();
         if (selected == null) {
             item(menu, "Type here", () -> {
@@ -578,20 +698,20 @@ public final class DocEditorPanel extends JPanel implements PdfWorkspacePort {
         } else {
             if (selected.isNote()) item(menu, "Type / edit text in place", this::editNote);
             else if (!selected.material().isGraph()) {
-                item(menu, "Edit formula / LaTeX / keyboard math...", this::editFormula);
+                item(menu, "Edit formula / recalculate or manual...", this::editFormula);
                 if (selected.material().hasResult()) item(menu, "Split formula and answer", () -> {controller.splitSelected();updateStatus();});
             }
             item(menu, "Bring forward one layer", () -> arrange(1));
             item(menu, "Send backward one layer", () -> arrange(-1));
             item(menu, "Bring to front", () -> arrange(2));
             item(menu, "Send to back", () -> arrange(-2));
-            menu.add(pageDestinations());
-            item(menu, "Delete selected item", () -> {controller.deleteSelected();updateStatus();});
+            menu.addSubmenu(pageDestinations());
+            item(menu, "Delete selected item", this::deleteSelectedItem);
         }
         menu.show(paper, event.getX(), event.getY());
     }
-    private static void item(JPopupMenu menu, String title, Runnable action) {
-        JMenuItem entry = new JMenuItem(title);entry.addActionListener(e -> action.run());menu.add(entry);
+    private static void item(GlassContextMenu menu, String title, Runnable action) {
+        menu.addAction(title, action);
     }
     private void preview() {
         try {

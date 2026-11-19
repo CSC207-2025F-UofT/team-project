@@ -37,6 +37,16 @@ class FormulaImagePreprocessorTest {
         return image.getRGB(x, y) & 0xFF;
     }
 
+    private static void assertGray(BufferedImage image) {
+        for (int y = 0; y < image.getHeight(); y++) {
+            for (int x = 0; x < image.getWidth(); x++) {
+                int rgb = image.getRGB(x, y);
+                assertEquals(rgb & 0xFF, (rgb >> 8) & 0xFF);
+                assertEquals(rgb & 0xFF, (rgb >> 16) & 0xFF);
+            }
+        }
+    }
+
     private static void assertModelShape(BufferedImage image) {
         assertEquals(0, image.getHeight() % 16, "height a multiple of 16");
         assertTrue(image.getHeight() >= 128 && image.getHeight() <= 512, "height " + image.getHeight());
@@ -45,7 +55,7 @@ class FormulaImagePreprocessorTest {
         assertTrue((image.getHeight() / 16) * (image.getWidth() / 16) <= 1280, "feature cells within the limit");
     }
 
-    /** White picture with solid black blocks, each {x, y, width, height}. */
+    /** White picture with hollow black boxes drawn with a 4 px pen, each {x, y, width, height}. */
     private static BufferedImage blocks(int width, int height, int[]... blocks) {
         BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
         Graphics2D g = image.createGraphics();
@@ -53,10 +63,72 @@ class FormulaImagePreprocessorTest {
         g.fillRect(0, 0, width, height);
         g.setColor(Color.BLACK);
         for (int[] b : blocks) {
+            g.fillRect(b[0], b[1], b[2], 4);
+            g.fillRect(b[0], b[1] + b[3] - 4, b[2], 4);
+            g.fillRect(b[0], b[1], 4, b[3]);
+            g.fillRect(b[0] + b[2] - 4, b[1], 4, b[3]);
+        }
+        g.dispose();
+        return image;
+    }
+
+    /** Height of the ink in the output: rows holding anything darker than mid gray. */
+    private static int inkRows(BufferedImage image) {
+        int rows = 0;
+        for (int y = 0; y < image.getHeight(); y++) {
+            for (int x = 0; x < image.getWidth(); x++) {
+                if (gray(image, x, y) < 128) {
+                    rows++;
+                    break;
+                }
+            }
+        }
+        return rows;
+    }
+
+    /** White picture with solid black bars, each {x, y, width, height}. */
+    private static BufferedImage bars(int width, int height, int[]... bars) {
+        BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+        Graphics2D g = image.createGraphics();
+        g.setColor(Color.WHITE);
+        g.fillRect(0, 0, width, height);
+        g.setColor(Color.BLACK);
+        for (int[] b : bars) {
             g.fillRect(b[0], b[1], b[2], b[3]);
         }
         g.dispose();
         return image;
+    }
+
+    @Test
+    void loneDotIsNotBlownUpToFillTheLine() {
+        BufferedImage out = FormulaImagePreprocessor.prepare(bars(100, 100, new int[]{40, 40, 16, 16}));
+        assertModelShape(out);
+        assertEquals(128, out.getHeight());
+        assertTrue(inkRows(out) <= 40, "dot is " + inkRows(out) + " px tall");
+    }
+
+    @Test
+    void loneMinusStaysAThinBar() {
+        BufferedImage out = FormulaImagePreprocessor.prepare(bars(240, 100, new int[]{40, 42, 160, 16}));
+        assertModelShape(out);
+        assertEquals(128, out.getHeight());
+        assertTrue(inkRows(out) <= 40, "minus is " + inkRows(out) + " px thick");
+    }
+
+    @Test
+    void equalsSignIsNotStretchedBarByBar() {
+        BufferedImage out = FormulaImagePreprocessor.prepare(
+                bars(240, 140, new int[]{40, 40, 160, 16}, new int[]{40, 84, 160, 16}));
+        assertModelShape(out);
+        assertEquals(128, out.getHeight(), "one line, not each bar as its own 112 px line");
+    }
+
+    @Test
+    void handwrittenSizedCharIsLeftAtFullLineHeight() {
+        // 16 px pen, char 10 pens tall like the canvas renders a normal glyph
+        BufferedImage out = FormulaImagePreprocessor.prepare(blocks(300, 260, new int[]{40, 40, 120, 160}));
+        assertTrue(inkRows(out) >= 108, "char is " + inkRows(out) + " px tall");
     }
 
     @Test
@@ -126,23 +198,25 @@ class FormulaImagePreprocessorTest {
     void darkBackgroundKeepsItsColourToo() {
         BufferedImage out = prepare(
                 drawing(300, 120, Color.BLACK, Color.WHITE, 20, 60, 280, 60));
-        assertEquals(0, gray(out, 0, 0));
+        assertEquals(255, gray(out, 0, 0));
+        assertTrue(gray(out, out.getWidth() / 2, 64) < 80, "ink flipped dark");
     }
 
     @Test
-    void colouredInkKeepsDistinctRgbChannelsIncludingYellow() {
+    void colouredInkTurnsDarkGrayEvenYellow() {
         for (Color colour : new Color[]{Color.RED, Color.BLUE, Color.YELLOW}) {
             BufferedImage out = prepare(
                     drawing(300, 120, Color.WHITE, colour, 20, 60, 280, 60));
             assertModelShape(out);
-            int pixel = out.getRGB(out.getWidth() / 2, 64) & 0xFFFFFF;
-            assertEquals(colour.getRGB() & 0xFFFFFF, pixel, "ink colour must be preserved");
+            int pixel = out.getRGB(out.getWidth() / 2, 64);
+            assertEquals(0, pixel & 0xFF, "darkest channel kept as the ink");
+            assertGray(out);
             assertEquals(0xFFFFFF, out.getRGB(0, 0) & 0xFFFFFF);
         }
     }
 
     @Test
-    void transparentPixelsAreCompositedOntoWhiteWithoutLosingColour() {
+    void transparentPixelsAreCompositedOntoWhite() {
         BufferedImage image = new BufferedImage(100, 60, BufferedImage.TYPE_INT_ARGB);
         Graphics2D g = image.createGraphics();
         g.setColor(new Color(255, 0, 0, 128));

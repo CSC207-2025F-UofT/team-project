@@ -102,6 +102,25 @@ public final class PdfEditorController {
         editor.editFormula(page, selectedId, formula, result);
         return true;
     }
+    /** Preserve Library source identity; all PDF copies revise together as one Undo operation. */
+    public int reviseSelectedFormula(String formula, String result) {
+        PdfDocument.Placement current = selected();
+        if (current == null || current.isNote() || current.material().isGraph()) return 0;
+        return editor.reviseFormulaMaterials(current.material().id(), formula, result);
+    }
+    /** Updating a Library entry refreshes all placements that originated from it. */
+    public int refreshMaterial(String materialId, String formula, String result) {
+        return editor.reviseFormulaMaterials(materialId, formula, result);
+    }
+
+    /** Apply one precise-eraser gesture to PDF ink, without affecting other PDF objects. */
+    public void replaceInkImages(java.util.Map<String, java.awt.image.BufferedImage> images) {
+        if (images.isEmpty()) return;
+        java.util.Map<String, pdf_editor.domain.PdfMaterial> materials = new java.util.LinkedHashMap<>();
+        images.forEach((id, image) -> materials.put(id, MathLibrary.region("PDF ink stroke", image)));
+        editor.replaceInkMaterials(page, materials);
+    }
+
     public void arrange(int direction) { if (selected() != null) editor.arrange(page, selectedId, direction); }
     public boolean splitSelected() {
         if (selected() == null) return false;
@@ -109,6 +128,13 @@ public final class PdfEditorController {
         if (split == null) return false;
         selectedId = split[0].id(); return true;
     }
+    public void beginGroupTransform(java.util.Set<String> ids) {
+        editor.beginGroupTransform(page, ids);
+    }
+    public void transformGroup(java.util.Map<String, PdfDocument.Placement> originals, float dx, float dy) {
+        editor.transformGroup(page, originals, dx, dy);
+    }
+
     public void beginTransform() {
         if (selected() != null) editor.beginTransform(page, selectedId);
     }

@@ -5,6 +5,7 @@ import pdf_editor.data_access.PdfBoxOutputAdapter;
 import pdf_editor.use_case.AutoLayoutInteractor;
 import pdf_editor.adapter.CanvasSnapshotGateway;
 import pdf_editor.adapter.MathLabCollector;
+import pdf_editor.adapter.CanvasAnswerRecovery;
 import pdf_editor.data_access.DrawingCanvasSnapshotAdapter;
 import pdf_editor.use_case.DocumentEditor;
 import pdf_editor.use_case.PdfExportInteractor;
@@ -27,9 +28,24 @@ public final class PdfStudioLauncher implements Us4InputBoundary {
     private final history.use_case.CanvasHistoryLifecycle canvasHistory;
     private final PdfEditorController controller;
     private Runnable showPdf = () -> { };
+    private CanvasAnswerRecovery answerRecovery;
+    private final history.use_case.HistoryInteractor history;
+    private pdf_editor.adapter.FormulaRevisionCoordinator formulaRevision;
+
+    /** Inject US2 through its existing public controller adapter, not its implementation. */
+    public void setFormulaRecalculator(java.util.function.Function<String, String> evaluator) {
+        formulaRevision = new pdf_editor.adapter.FormulaRevisionCoordinator(library, history,
+                java.util.Objects.requireNonNull(evaluator));
+    }
+    public void reviseCanvasHistory(String oldFormula, String oldResult, String newFormula, String newResult)
+            throws IOException {
+        if (formulaRevision != null)
+            formulaRevision.editCanvasHistory(controller, oldFormula, oldResult, newFormula, newResult);
+    }
 
     public PdfStudioLauncher() { this(null); }
     public PdfStudioLauncher(history.use_case.HistoryInteractor history) {
+        this.history = history;
         canvasHistory = history == null ? null : new history.use_case.CanvasHistoryLifecycle(history);
         collector = new MathLabCollector(library, history, canvasHistory);
         DocumentEditor editing = new DocumentEditor();
@@ -42,6 +58,7 @@ public final class PdfStudioLauncher implements Us4InputBoundary {
     /** The document model is shared across overlay/split mode changes and stays editable. */
     public PdfPanel createPanel() {
         PdfPanel panel = new PdfPanel(controller);
+        if (formulaRevision != null) panel.editor().setFormulaEditing(formulaRevision);
         panel.setCanvasCapture(() -> snapshotGateway.capture());
         return panel;
     }
@@ -49,6 +66,9 @@ public final class PdfStudioLauncher implements Us4InputBoundary {
 
     /** Team Canvas is only read through its adapter; it is never modified by PDF Studio. */
     public void setSourceCanvas(SharedCanvas canvas) {
+        if (answerRecovery != null) answerRecovery.dispose();
+        answerRecovery = canvas == null ? null
+                : new CanvasAnswerRecovery(canvas::getFormulas, collector::acceptCalculation);
         snapshotGateway = canvas == null ? () -> null
                 : new DrawingCanvasSnapshotAdapter(canvas);
     }
@@ -56,7 +76,14 @@ public final class PdfStudioLauncher implements Us4InputBoundary {
     public MathLabCollector getCollector() { return collector; }
     @Override public void addCalculation(String latex, String result) { collector.acceptCalculation(latex, result); }
     public void addCalculationWithSource(long sourceId, String latex, String result) {
-        collector.acceptCalculation(sourceId, latex, result);
+        Runnable publish = () -> {
+            String displayResult = answerRecovery == null ? result
+                    : answerRecovery.displayResult(sourceId, result);
+            collector.acceptCalculation(sourceId, latex, displayResult);
+            if (answerRecovery != null) answerRecovery.published(sourceId, latex, displayResult);
+        };
+        if (SwingUtilities.isEventDispatchThread()) publish.run();
+        else SwingUtilities.invokeLater(publish);
     }
     public void synchronizeCanvas(SharedCanvas canvas) {
         if (canvas == null) return;
@@ -64,6 +91,7 @@ public final class PdfStudioLauncher implements Us4InputBoundary {
             // Formula definitions do not have an answer; they are still valid source ink.
             Set<Long> active = canvas.getDrawingCanvas().getFormulas().stream()
                     .map(formula -> formula.getId()).collect(Collectors.toSet());
+            if (answerRecovery != null) answerRecovery.synchronize(active);
             library.retainActiveSources(active);
             if (canvasHistory != null) {
                 try { canvasHistory.synchronize(active); }

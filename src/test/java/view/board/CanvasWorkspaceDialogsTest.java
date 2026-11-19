@@ -33,6 +33,18 @@ class CanvasWorkspaceDialogsTest {
                 "Clicking Saved must not rewrite an unchanged canvas");
     }
 
+    @Test void panningOrZoomingAStoredCanvasDoesNotSetEdited() throws Exception {
+        var repository = new FileCanvasRepository(temp);
+        var canvas = new DrawingCanvas();
+        new CanvasWorkspace(repository).save(canvas.exportCanvasState(), "View-only change", false);
+        var dialogs = new CanvasWorkspaceDialogs(new CanvasWorkspace(repository), canvas, new JPanel());
+        dialogs.restoreLatestAtStartup();
+        canvas.panBy(120, 35);
+        canvas.zoomAt(80, 90, 1.4);
+        assertFalse(dialogs.hasUnsavedChanges());
+        assertEquals(SaveMenuState.Phase.SAVED, dialogs.saveMenuState().phase());
+    }
+
     @Test void startupOpenIsCleanAndEditingOrUndoUpdatesDirtyStatus() throws Exception {
         var repo = new FileCanvasRepository(temp);
         var initial = new DrawingCanvas();

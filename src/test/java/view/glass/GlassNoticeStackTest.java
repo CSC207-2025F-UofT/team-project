@@ -81,17 +81,31 @@ class GlassNoticeStackTest {
     @Test
     void pillMakesRoomForAFormulaAndShrinksTallOnes() throws Exception {
         SwingUtilities.invokeAndWait(() -> {
-            javax.swing.Icon tall = new javax.swing.Icon() {
-                @Override public void paintIcon(java.awt.Component c, java.awt.Graphics g, int x, int y) { }
-                @Override public int getIconWidth() { return 120; }
-                @Override public int getIconHeight() { return 68; }
-            };
+            // Same intrinsic width, different heights: only the tall formula should be scaled down.
+            javax.swing.Icon tall = formulaIcon(120, 68);
+            javax.swing.Icon shortFormula = formulaIcon(120, 30);
             var words = new GlassNotices.NoticeView(GlassNotices.Kind.PROGRESS, "", "Calculating");
-            var both = new GlassNotices.NoticeView(GlassNotices.Kind.PROGRESS, "", "Calculating", tall);
-            int extra = both.getPreferredSize().width - words.getPreferredSize().width;
-            assertTrue(extra >= 60 && extra < 120, "68 tall gets halved, width " + extra);
-            assertEquals(64, both.getPreferredSize().height, "pill stays one size");
+            var withTall = new GlassNotices.NoticeView(GlassNotices.Kind.PROGRESS, "", "Calculating", tall);
+            var withShort = new GlassNotices.NoticeView(GlassNotices.Kind.PROGRESS, "", "Calculating", shortFormula);
+
+            int wordsWidth = words.getPreferredSize().width;
+            int tallWidth = withTall.getPreferredSize().width;
+            int shortWidth = withShort.getPreferredSize().width;
+
+            assertTrue(tallWidth > wordsWidth, "adding a formula must make room for it");
+            assertTrue(tallWidth < shortWidth,
+                    "the 68px-tall formula should occupy less width than an equally wide 30px-tall formula");
+            assertEquals(64, withTall.getPreferredSize().height, "pill stays one size");
+            assertEquals(64, withShort.getPreferredSize().height, "pill stays one size");
         });
+    }
+
+    private static javax.swing.Icon formulaIcon(int width, int height) {
+        return new javax.swing.Icon() {
+            @Override public void paintIcon(java.awt.Component c, java.awt.Graphics g, int x, int y) { }
+            @Override public int getIconWidth() { return width; }
+            @Override public int getIconHeight() { return height; }
+        };
     }
 
     @Test

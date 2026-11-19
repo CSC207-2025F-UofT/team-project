@@ -10,24 +10,26 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import pdf_editor.MathLibrary;
 import pdf_editor.adapter.MathLabCollector;
+import data_access.InMemoryGraphSessionDataAccessObject;
+import entity.LatexFunctionParser;
+import interface_adapter.graph.GraphExploreController;
+import use_case.explore_graph.ExploreGraphInteractor;
 import use_case.graph_function.GraphFunctionInputBoundary;
-import use_case.graph_function.GraphFunctionOutputData;
+import use_case.graph_function.GraphFunctionInteractor;
 import view.DrawingCanvas;
 import view.FormulaCapture;
 
-import javax.imageio.ImageIO;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayOutputStream;
 import java.nio.file.Path;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import static org.junit.jupiter.api.Assertions.*;
 
-/** Tests Graph's real presenter/callback path, without an external chart service or ML model. */
+/** Tests Graph's real interactor/presenter/callback path, all local java, no ML model. */
 class PopupGraphPublicationTest {
     // no cards in these tests
     private static final Notices QUIET = new Notices() {
@@ -38,11 +40,6 @@ class PopupGraphPublicationTest {
     };
 
     @TempDir Path storage;
-    private static byte[] png() throws Exception {
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-        ImageIO.write(new BufferedImage(60, 40, BufferedImage.TYPE_INT_RGB), "png", out);
-        return out.toByteArray();
-    }
 
     @Test void successfulGraphPublishesItsSourceFormulaAsEditableLibraryAndHistoryMaterial() throws Exception {
         var library = new MathLibrary();
@@ -50,12 +47,13 @@ class PopupGraphPublicationTest {
         var collector = new MathLabCollector(library, history);
         var viewModel = new GraphViewModel();
         var presenter = new GraphPresenter(viewModel);
-        byte[] png = png();
-        GraphFunctionInputBoundary graph = input ->
-                presenter.prepareSuccessView(new GraphFunctionOutputData(input.getLatex(), png));
+        var session = new InMemoryGraphSessionDataAccessObject();
+        GraphFunctionInputBoundary graph = new GraphFunctionInteractor(new LatexFunctionParser(), session, presenter);
         var shared = new SharedCanvas(new DrawingCanvas());
+        shared.getDrawingCanvas().setSize(900, 500);
         CountDownLatch saved = new CountDownLatch(1);
-        var popup = new PopupGraphing(shared, new GraphController(graph), viewModel,
+        var popup = new PopupGraphing(shared, new GraphController(graph),
+                new GraphExploreController(new ExploreGraphInteractor(session, presenter)), viewModel,
                 QUIET, new JPanel(), (capture, latex) -> {
                     collector.acceptCalculation(capture.getId(), latex, "");
                     saved.countDown();
@@ -69,6 +67,8 @@ class PopupGraphPublicationTest {
         assertFalse(library.items().get(0).isGraph());
         assertEquals(1, history.list().size());
         assertEquals(HistoryEntry.Kind.FORMULA, history.list().get(0).kind());
+        assertTrue(shared.getDrawingCanvas().hasGraph(), "card is on the canvas");
+        assertNotNull(shared.getDrawingCanvas().getGraphTag(), "and it's the live one");
     }
 
     @Test void graphFailureMustNotPersistTheFormula() throws Exception {
@@ -80,7 +80,8 @@ class PopupGraphPublicationTest {
         GraphFunctionInputBoundary graph = input -> presenter.prepareFailView("Invalid graph");
         AtomicInteger callbacks = new AtomicInteger();
         var popup = new PopupGraphing(new SharedCanvas(new DrawingCanvas()), new GraphController(graph),
-                viewModel, QUIET, new JPanel(), (capture, latex) -> {
+                new GraphExploreController(new ExploreGraphInteractor(new InMemoryGraphSessionDataAccessObject(),
+                        presenter)), viewModel, QUIET, new JPanel(), (capture, latex) -> {
                     callbacks.incrementAndGet();
                     collector.acceptCalculation(capture.getId(), latex, "");
                 });

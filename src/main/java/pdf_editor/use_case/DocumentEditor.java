@@ -60,7 +60,13 @@ public final class DocumentEditor {
         PdfDocument.Placement p = PdfDocument.Placement.note(text,
                 clamp(x, 0, PdfDocument.PAGE_WIDTH - 260), clamp(y, 0, PdfDocument.PAGE_HEIGHT - 95), 260, 95);
         checkpoint();
-        document.add(page, p);
+        // Text is the default background layer: newly inserted notes must not
+        // cover existing History materials, including a full-page body text box.
+        // Explicit Arrange commands remain free to change this ordering later.
+        List<PdfDocument.Placement> existing = document.placements(page);
+        int insertAt = 0;
+        while (insertAt < existing.size() && existing.get(insertAt).isNote()) insertAt++;
+        document.insert(page, insertAt, p);
         return p;
     }
     public PdfDocument.Placement updateNote(int page, String id, String text, int style, int size) {
@@ -89,6 +95,49 @@ public final class DocumentEditor {
         document.replace(page, updated);
         return updated;
     }
+    /** Revise all placements sharing one material ID in one Undo step. Other objects are untouched. */
+    public int reviseFormulaMaterials(String materialId, String formula, String result) {
+        Objects.requireNonNull(materialId, "materialId");
+        Objects.requireNonNull(formula, "formula");
+        Objects.requireNonNull(result, "result");
+        if (formula.isBlank()) throw new IllegalArgumentException("Formula required");
+        int count = 0;
+        for (int page = 0; page < pageCount(); page++) {
+            for (PdfDocument.Placement item : placements(page)) {
+                if (!item.isNote() && !item.material().isGraph() &&
+                        item.material().id().equals(materialId)) count++;
+            }
+        }
+        if (count == 0) return 0;
+        checkpoint();
+        for (int page = 0; page < pageCount(); page++) {
+            for (PdfDocument.Placement item : placements(page)) {
+                if (!item.isNote() && !item.material().isGraph() &&
+                        item.material().id().equals(materialId)) {
+                    document.replace(page, item.withMaterial(item.material().revised(formula.trim(), result.trim())));
+                }
+            }
+        }
+        return count;
+    }
+
+    /** Replace raster ink in place, preserving placement identity and stacking order. One Undo step. */
+    public void replaceInkMaterials(int page, java.util.Map<String, PdfMaterial> replacements) {
+        validatePage(page);
+        if (replacements.isEmpty()) return;
+        for (var entry : replacements.entrySet()) {
+            PdfDocument.Placement current = findRequired(page, entry.getKey());
+            if (current.isNote() || !current.material().isGraph()
+                    || !"PDF ink stroke".equals(current.material().title()))
+                throw new IllegalArgumentException("Only PDF ink strokes can be erased");
+            Objects.requireNonNull(entry.getValue());
+        }
+        checkpoint();
+        for (var entry : replacements.entrySet()) {
+            document.replace(page, findRequired(page, entry.getKey()).withMaterial(entry.getValue()));
+        }
+    }
+
     public void arrange(int page, String id, int direction) {
         validatePage(page);
         int index = document.indexOf(page, id);
@@ -135,6 +184,25 @@ public final class DocumentEditor {
         checkpoint(); return document.remove(page, id);
     }
     /** One checkpoint per drag gesture, not per mouse movement. */
+    /** Start a grouped selection move as one Undo operation. */
+    public void beginGroupTransform(int page, java.util.Set<String> ids) {
+        if (ids.isEmpty()) return;
+        for (String id : ids) findRequired(page, id);
+        checkpoint();
+    }
+    /** Live group move uses the checkpoint created at gesture start. */
+    public void transformGroup(int page, java.util.Map<String, PdfDocument.Placement> originals,
+                               float dx, float dy) {
+        validatePage(page);
+        for (var entry : originals.entrySet()) {
+            PdfDocument.Placement original = entry.getValue();
+            PdfDocument.Placement current = findRequired(page, entry.getKey());
+            float x = clamp(original.x() + dx, 0, PdfDocument.PAGE_WIDTH - current.width());
+            float y = clamp(original.y() + dy, 0, PdfDocument.PAGE_HEIGHT - current.height());
+            document.replace(page, current.withBounds(x, y, current.width(), current.height()));
+        }
+    }
+
     public void beginTransform(int page, String id) { findRequired(page, id); checkpoint(); }
     public PdfDocument.Placement transform(int page, String id, float x, float y, float width, float height) {
         PdfDocument.Placement p = findRequired(page, id);

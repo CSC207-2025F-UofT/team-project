@@ -30,16 +30,20 @@ public final class MathLabCollector {
     public void acceptCalculation(String latex, String result) {
         if (latex != null && !latex.trim().isEmpty())
             onEdt(() -> {
-                library.addCalculation(latex, result == null ? "" : result);
+                // Persist first: Library listeners must not observe a result that History
+                // has not finished recording yet (the former caused intermittent mismatch).
                 persist(() -> history.recordCalculation(latex, result));
+                library.addCalculation(latex, result == null ? "" : result);
             });
     }
     public void acceptCalculation(long sourceId, String latex, String result) {
         if (latex != null && !latex.isBlank())
             onEdt(() -> {
-                library.addSourceCalculation(sourceId, latex, result == null ? "" : result);
+                // History and Library represent the same completed event. Finish durable
+                // storage before publishing the in-memory change to UI subscribers.
                 if (linkedHistory != null) persist(() -> linkedHistory.recordCalculation(sourceId, latex, result));
                 else persist(() -> history.recordCalculation(latex, result));
+                library.addSourceCalculation(sourceId, latex, result == null ? "" : result);
             });
     }
     public void acceptGraph(String title, BufferedImage image) {
