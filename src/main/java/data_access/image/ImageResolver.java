@@ -1,4 +1,4 @@
-package data_access.photo;
+package data_access.image;
 
 import java.nio.file.Path;
 import java.util.Map;
@@ -8,7 +8,7 @@ import entity.ImageType;
 import entity.Photo;
 import data_access.StorageResolver;
 
-public class PhotoResolver {
+public class ImageResolver {
     private static final String PHOTOS_FOLDER_NAME = "photos";
 
     private static final Map<String, ImageType> EXTENSION_TO_TYPE_MAP = Map.of(
@@ -26,7 +26,7 @@ public class PhotoResolver {
 
     private final StorageResolver storageResolver;
 
-    public PhotoResolver(StorageResolver storageResolver) {
+    public ImageResolver(StorageResolver storageResolver) {
         this.storageResolver = storageResolver;
     }
 
@@ -62,7 +62,7 @@ public class PhotoResolver {
         return extension;
     }
 
-    public Path getPhotoPath(Photo photo) {
+    public Path getImagePath(Photo photo) {
         String fileName = photo.getId() + '.' + getImageTypeExtension(photo.getType());
 
         return storageResolver.getDirectory()
