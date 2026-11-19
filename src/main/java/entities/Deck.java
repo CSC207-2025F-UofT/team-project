@@ -40,4 +40,8 @@ public class Deck {
         int num = r.nextInt(studyingDeck.size());
         return studyingDeck.get(num);
     }
+    public void addCard(Card card){
+        this.flashcardDeck.add(card);
+
+    }
 }
