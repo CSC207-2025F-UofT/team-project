@@ -65,7 +65,7 @@ Alternative Flows:
 - 1a. User chooses a different shape without stamping.
 - 1b. User inputs an invalid width. System displays an error message.
 
-Outcome:
+Outcome: The chosen shape appears on the canvas in the selected colour and width, at the position the user placed or moved it to. The shape is saved as part of the canvas, so it can be selected and moved again later.
 
 ### Use Case 3: Generate Colour Palette
 Primary Actor: User
