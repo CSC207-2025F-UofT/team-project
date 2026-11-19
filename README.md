@@ -48,9 +48,11 @@ Record Transaction
 	Earn Reward Coins
 ### Use Case 5
 	Purchase Pet Items
-
 ### Use Case 6
-	Interact with Pet
+	Interact With Pet
+### Use case 7
+	Get Pet Pictures
+
 (Add additional use cases as needed.)
 ---
 ## Minimal Viable Product (MVP)
