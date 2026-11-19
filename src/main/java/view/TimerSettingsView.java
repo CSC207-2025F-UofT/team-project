@@ -134,15 +134,16 @@ public class TimerSettingsView extends JPanel implements TimerSettingsViewModelL
      */
     @Override
     public void stateChanged() {
-        if (viewModel.getState().getSettingsOpen()) {
-            this.showWindow();
-        } else if (viewModel.getState().getErrorMessage() != null) {
+        if (viewModel.getState().getErrorMessage() != null) {
             JOptionPane.showMessageDialog(
                     settingsFrame,
                     viewModel.getState().getErrorMessage(),
                     "Invalid Input",
                     JOptionPane.ERROR_MESSAGE
             );
+            viewModel.getState().setErrorMessage(null);
+        } else if (viewModel.getState().getSettingsOpen()){
+            this.showWindow();
         } else {
             settingsFrame.setVisible(false);
         }
