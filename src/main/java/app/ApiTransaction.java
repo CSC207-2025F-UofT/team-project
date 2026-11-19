@@ -1,3 +1,5 @@
+package app;
+
 public class ApiTransaction {
 
   private int id;

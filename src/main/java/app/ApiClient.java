@@ -1,3 +1,5 @@
+package app;
+
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -95,7 +97,7 @@ public class ApiClient {
       String description = transaction.getString("description");
       String date = transaction.getString("date");
 
-      // Create an ApiTransaction object
+      // Create an app.ApiTransaction object
       ApiTransaction apiTransaction = new ApiTransaction(
           id, amount, description, date
       );

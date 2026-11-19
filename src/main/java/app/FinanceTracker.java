@@ -1,5 +1,5 @@
+package app;
 
-import interface_adapter.TransactionControl;
 import interface_adapter.TransactionControl_App;
 
 import javax.swing.*;

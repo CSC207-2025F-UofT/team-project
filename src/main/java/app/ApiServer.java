@@ -1,3 +1,5 @@
+package app;
+
 import com.sun.net.httpserver.HttpServer;
 
 import java.io.IOException;
@@ -5,7 +7,6 @@ import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
 
-import interface_adapter.TransactionControl;
 import interface_adapter.TransactionControl_App;
 import org.json.JSONArray;
 import org.json.JSONObject;
