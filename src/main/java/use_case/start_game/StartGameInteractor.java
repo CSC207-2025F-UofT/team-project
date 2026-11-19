@@ -20,9 +20,13 @@ public class StartGameInteractor implements StartGameInputBoundary {
         final String team2Name = startGameInputData.getTeam2Name();
 
         // Check Valid Team Names
-        if (!checkValidTeamNames(team1Name, team2Name)) {
+        if (!checkNotEmptyTeamNames(team1Name, team2Name)) {
             // prepare fail view
             startGamePresenter.prepareFailView("Team names must not be empty.");
+        }
+        // Check same name
+        if (team1Name.equalsIgnoreCase(team2Name)) {
+            startGamePresenter.prepareFailView("Team names must not be equal.");
         }
 
         // Check Team Already Exist in Database and Create new Team Objects
@@ -48,7 +52,7 @@ public class StartGameInteractor implements StartGameInputBoundary {
         return;
     }
 
-    Boolean checkValidTeamNames(String team1Name, String team2Name) {
+    Boolean checkNotEmptyTeamNames(String team1Name, String team2Name) {
         // Check Empty
         if (!checkEmptyName(team1Name)) { return false; }
         if (!checkEmptyName(team2Name)) { return false; }
