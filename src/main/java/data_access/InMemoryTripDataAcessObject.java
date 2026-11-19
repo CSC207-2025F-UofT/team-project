@@ -11,47 +11,65 @@ import java.util.stream.Collectors;
 
 import entity.Photo;
 import entity.Trip;
-import use_case.list_trips.ListTripsDataAccessInterface;
+import use_case.PhotoAccessException;
+import use_case.PhotoAccessInterface;
+import use_case.TripAccessException;
+import use_case.TripAccessInterface;
 
 /**
  * In-memory storage for trips and photos. Implements each use case's
  * data-access interface as those use cases are added.
  */
-public class InMemoryTripDataAcessObject implements ListTripsDataAccessInterface {
+public class InMemoryTripDataAcessObject implements TripAccessInterface, PhotoAccessInterface {
     private final Map<String, Trip> trips = new LinkedHashMap<>();
     private final Map<String, Photo> photos = new HashMap<>();
-    private final Map<String, String> photoPaths = new HashMap<>();
-
-    public Optional<Trip> getTrip(String tripId) {
-        return Optional.ofNullable(trips.get(tripId));
+    
+    @Override 
+    public Trip getTripById(String id) {
+        Trip trip = trips.get(id);
+        if (trip == null) throw new TripAccessException("No trip with id " + id);
+        return trip;
     }
 
-    public List<Trip> getAllTrips() {
+    @Override
+    public List<Trip> getTrips() {
         return new ArrayList<>(trips.values());
     }
 
-    public void saveTrip(Trip trip) {
+    @Override 
+    public void writeTrip(Trip trip) {
         trips.put(trip.getId(), trip);
     }
 
-    public void deleteTrip(String tripId) {
-        trips.remove(tripId);
+    @Override 
+    public void writeTrips(List<Trip> toWrite) {
+        toWrite.forEach(this::writeTrip);
     }
 
-    public Optional<Photo> getPhoto(String photoId) {
-        return Optional.ofNullable(photos.get(photoId));
+    @Override
+    public Photo getPhotoById(String id) {
+        Photo photo = photos.get(id);
+        if (photo == null) throw new PhotoAccessException("No photo with id " + id);
+        return photo;
     }
 
-    public void savePhoto(Photo photo, String filePath) {
+    @Override
+    public List<Photo> getPhotos() {
+        return new ArrayList<>(photos.values());
+    }
+
+    @Override
+    public void writePhoto(Photo photo) {
         photos.put(photo.getId(), photo);
-        photoPaths.put(photo.getId(), filePath);
     }
 
-    public String getPhotoPath(String photoId) {
-        return photoPaths.get(photoId);
+    @Override
+    public void writePhotos(List<Photo> toWrite) {
+        toWrite.forEach(this::writePhoto);
     }
 
-    public List<Photo> getTripPhotos(String tripId) {
+    @Override
+    public List<Photo> getPhotosByTripId(String tripId) {
         Trip trip = trips.get(tripId);
         if (trip == null) {
             return new ArrayList<>();
@@ -62,4 +80,8 @@ public class InMemoryTripDataAcessObject implements ListTripsDataAccessInterface
                 .collect(Collectors.toList());
     }
 
+    // TODO: add this to an interface (tripAccessInterface?)
+    public void deleteTrip(String tripId) {
+        trips.remove(tripId);
+    }
 }
