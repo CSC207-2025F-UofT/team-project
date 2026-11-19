@@ -35,4 +35,5 @@ build/
 .vscode/
 
 ### Mac OS ###
-.DS_Storeusers.json
+.DS_Store
+users.json
