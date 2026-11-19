@@ -2,6 +2,7 @@ package pdf_editor.adapter;
 
 import pdf_editor.MathLibrary;
 import pdf_editor.domain.PdfDocument;
+import pdf_editor.adapter.PdfWrapTextLayout;
 import pdf_editor.domain.PdfMaterial;
 import pdf_editor.use_case.AutoLayoutInteractor;
 import pdf_editor.use_case.DocumentEditor;
@@ -59,6 +60,49 @@ public final class PdfEditorController {
     public int currentPage() { return page; }
     public int pageCount() { return editor.pageCount(); }
     public List<PdfDocument.Placement> placements() { return editor.placements(page); }
+    public List<PdfDocument.NoteSpan> body() { return editor.body(page); }
+    public List<PdfDocument.NoteSpan> body(int targetPage) { return editor.body(targetPage); }
+    public void updateFlowingBody(int firstPage, List<List<PdfDocument.NoteSpan>> pages) {
+        editor.updateFlowingBody(firstPage, pages);
+    }
+    public void updateFlowingBody(int firstPage, List<List<PdfDocument.NoteSpan>> pages,
+              java.util.Map<String, pdf_editor.use_case.DocumentEditor.BodyAnchorMove> anchors) {
+        editor.updateFlowingBody(firstPage, pages, anchors);
+    }
+    public boolean imageLayout(PdfDocument.ImageLayer layer, PdfDocument.AnchorMode mode,
+                               java.util.Map<String,Integer> anchorOffsets) {
+        return editor.layoutSelectedImages(page, selection.ids(), layer, mode, anchorOffsets);
+    }
+    /** Set an actual image layout and repaginate the body in the same Undo step. */
+    public boolean imageLayoutAndReflow(PdfDocument.ImageLayer layer) {
+        PdfDocument draft = editor.snapshot();
+        boolean changed = false;
+        for (PdfDocument.Placement placement : draft.placements(page)) {
+            if (!placement.isNote() && selection.ids().contains(placement.id()) &&
+                    (placement.imageLayer() != layer ||
+                     placement.anchorMode() != PdfDocument.AnchorMode.FIXED_ON_PAGE)) {
+                draft.replace(page, placement.withLayout(layer, PdfDocument.AnchorMode.FIXED_ON_PAGE, -1));
+                changed = true;
+            }
+        }
+        if (!changed) return false;
+        var body = new java.util.ArrayList<java.util.List<PdfDocument.NoteSpan>>();
+        for (int i = 0; i < draft.pageCount(); i++) body.add(draft.body(i));
+        var flow = PdfWrapTextLayout.paginate(PdfBodyFlowLayout.concat(body), draft, 0);
+        return editor.imageLayoutAndReflow(page, selection.ids(), layer, flow);
+    }
+
+    /** Reflow after an existing move/resize snapshot; do not create an extra Undo step. */
+    public boolean reflowAfterImageMove() {
+        PdfDocument draft = editor.snapshot();
+        boolean wrapping = draft.pages().stream().flatMap(java.util.List::stream)
+                .anyMatch(item -> !item.isNote() && item.imageLayer() == PdfDocument.ImageLayer.WRAP_TEXT);
+        if (!wrapping) return false;
+        var parts = new java.util.ArrayList<java.util.List<PdfDocument.NoteSpan>>();
+        for (int i = 0; i < draft.pageCount(); i++) parts.add(draft.body(i));
+        var flow = PdfWrapTextLayout.paginate(PdfBodyFlowLayout.concat(parts), draft, 0);
+        return editor.repaginateAfterImageMove(flow);
+    }
     public PdfDocument.Placement selected() { return editor.find(page, selectedId()); }
     public void select(String id) { selection.select(editor.find(page, id) == null ? null : id); }
     public void clearSelection() { selection.clear(); }

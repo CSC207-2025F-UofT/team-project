@@ -9,6 +9,14 @@ import java.util.UUID;
 public final class PdfDocument {
     public static final float PAGE_WIDTH = 595f;
     public static final float PAGE_HEIGHT = 842f;
+    public static final float BODY_LEFT = 72f;
+    public static final float BODY_TOP = 72f;
+    public static final float BODY_WIDTH = PAGE_WIDTH - 144f;
+    public static final float BODY_HEIGHT = PAGE_HEIGHT - 144f;
+    /** One immutable view of body runs for both Preview and PDF output. */
+    public static Placement bodyPlacement(List<NoteSpan> spans) {
+        return Placement.note("", BODY_LEFT, BODY_TOP, BODY_WIDTH, BODY_HEIGHT).withSpans(spans);
+    }
 
     public record NoteSpan(String text, boolean bold, boolean italic, boolean underline, int size, String fontFamily) {
         public NoteSpan(String text, boolean bold, boolean italic, boolean underline, int size) {
@@ -22,6 +30,10 @@ public final class PdfDocument {
         }
     }
 
+    /** PDF media positioning relative to the independent flowing body text. */
+    public enum ImageLayer { IN_FRONT_OF_TEXT, BEHIND_TEXT, WRAP_TEXT }
+    public enum AnchorMode { FIXED_ON_PAGE, MOVE_WITH_TEXT }
+
     public static final class Placement {
         private final String id;
         private final PdfMaterial material;
@@ -29,9 +41,19 @@ public final class PdfDocument {
         private final String noteText;
         private final List<NoteSpan> noteSpans;
         private final int noteStyle, noteSize;
+        private final ImageLayer imageLayer;
+        private final AnchorMode anchorMode;
+        private final int bodyAnchorOffset;
 
         private Placement(String id, PdfMaterial material, float x, float y, float width, float height,
                           String noteText, List<NoteSpan> spans, int noteStyle, int noteSize) {
+            this(id, material, x, y, width, height, noteText, spans, noteStyle, noteSize,
+                    material == null ? ImageLayer.BEHIND_TEXT : ImageLayer.IN_FRONT_OF_TEXT,
+                    AnchorMode.FIXED_ON_PAGE, -1);
+        }
+        private Placement(String id, PdfMaterial material, float x, float y, float width, float height,
+                          String noteText, List<NoteSpan> spans, int noteStyle, int noteSize,
+                          ImageLayer layer, AnchorMode anchor, int anchorOffset) {
             this.id = Objects.requireNonNull(id, "id");
             if (material == null && noteText == null) throw new IllegalArgumentException("Empty placement");
             if (material != null && noteText != null) throw new IllegalArgumentException("Placement must have one content type");
@@ -41,6 +63,9 @@ public final class PdfDocument {
             this.x = x; this.y = y; this.width = width; this.height = height;
             this.noteText = noteText; this.noteSpans = List.copyOf(spans);
             this.noteStyle = noteStyle; this.noteSize = noteSize;
+            this.imageLayer = Objects.requireNonNull(layer);
+            this.anchorMode = Objects.requireNonNull(anchor);
+            this.bodyAnchorOffset = anchorOffset;
         }
         public static Placement material(PdfMaterial material, float x, float y, float width, float height) {
             return new Placement(UUID.randomUUID().toString(), Objects.requireNonNull(material), x, y, width, height,
@@ -61,30 +86,43 @@ public final class PdfDocument {
         public List<NoteSpan> noteSpans() { return noteSpans; }
         public int noteStyle() { return noteStyle; }
         public int noteSize() { return noteSize; }
+        public ImageLayer imageLayer() { return imageLayer; }
+        public AnchorMode anchorMode() { return anchorMode; }
+        public int bodyAnchorOffset() { return bodyAnchorOffset; }
+        public Placement withLayout(ImageLayer layer, AnchorMode mode, int anchorOffset) {
+            return new Placement(id, material, x, y, width, height, noteText, noteSpans, noteStyle, noteSize,
+                    layer, mode, anchorOffset);
+        }
         public Placement withMaterial(PdfMaterial newMaterial) {
             if (isNote()) throw new IllegalStateException("Notes are not formula materials");
             return new Placement(id, Objects.requireNonNull(newMaterial), x, y, width, height,
-                    null, List.of(), noteStyle, noteSize);
+                    null, List.of(), noteStyle, noteSize, imageLayer, anchorMode, bodyAnchorOffset);
         }
         public Placement withBounds(float newX, float newY, float newWidth, float newHeight) {
-            return new Placement(id, material, newX, newY, newWidth, newHeight, noteText, noteSpans, noteStyle, noteSize);
+            return new Placement(id, material, newX, newY, newWidth, newHeight, noteText, noteSpans, noteStyle, noteSize,
+                    imageLayer, anchorMode, bodyAnchorOffset);
         }
         public Placement withNote(String text, int style, int size) {
             if (!isNote()) throw new IllegalStateException("Not a note");
-            return new Placement(id, null, x, y, width, height, text, List.of(), style, size);
+            return new Placement(id, null, x, y, width, height, text, List.of(), style, size, imageLayer, anchorMode, bodyAnchorOffset);
         }
         public Placement withSpans(List<NoteSpan> spans) {
             if (!isNote()) throw new IllegalStateException("Not a note");
             List<NoteSpan> copy = List.copyOf(spans);
             StringBuilder text = new StringBuilder();
             for (NoteSpan span : copy) text.append(span.text());
-            return new Placement(id, null, x, y, width, height, text.toString(), copy, noteStyle, noteSize);
+            return new Placement(id, null, x, y, width, height, text.toString(), copy, noteStyle, noteSize, imageLayer, anchorMode, bodyAnchorOffset);
         }
     }
 
     private final List<List<Placement>> pages = new ArrayList<>();
-    public PdfDocument() { pages.add(new ArrayList<>()); }
-    private PdfDocument(boolean empty) { if (!empty) pages.add(new ArrayList<>()); }
+    /** Word-like body runs are not selectable floating placements. */
+    private final List<List<NoteSpan>> bodies = new ArrayList<>();
+    public PdfDocument() { addEmptyPage(); }
+    private PdfDocument(boolean empty) { if (!empty) addEmptyPage(); }
+    private void addEmptyPage() { pages.add(new ArrayList<>()); bodies.add(List.of()); }
+    public List<NoteSpan> body(int page) { return bodies.get(page); }
+    public void setBody(int page, List<NoteSpan> spans) { bodies.set(page, List.copyOf(spans)); }
     public int pageCount() { return pages.size(); }
     public List<Placement> placements(int page) { return List.copyOf(pages.get(page)); }
     public List<List<Placement>> pages() {
@@ -96,12 +134,13 @@ public final class PdfDocument {
     public PdfDocument copy() {
         PdfDocument result = new PdfDocument(true);
         for (List<Placement> page : pages) result.pages.add(new ArrayList<>(page));
+        for (List<NoteSpan> body : bodies) result.bodies.add(body);
         return result;
     }
-    public int addPage() { pages.add(new ArrayList<>()); return pages.size() - 1; }
+    public int addPage() { addEmptyPage(); return pages.size() - 1; }
     public void removePage(int page) {
         if (pages.size() <= 1) throw new IllegalStateException("At least one page is required");
-        pages.remove(page);
+        pages.remove(page); bodies.remove(page);
     }
     public void add(int page, Placement item) { pages.get(page).add(Objects.requireNonNull(item)); }
     public void insert(int page, int index, Placement item) { pages.get(page).add(index, Objects.requireNonNull(item)); }

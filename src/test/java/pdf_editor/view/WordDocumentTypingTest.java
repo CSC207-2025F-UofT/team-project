@@ -16,15 +16,23 @@ class WordDocumentTypingTest {
         return new PdfEditorController(new MathLibrary(),editor,new AutoLayoutInteractor(editor),
                 new PdfExportInteractor((d,f)->{},(d,dpi)->List.of()));
     }
-    @Test void defaultDocumentBodyUsesOneInchMarginsAndDoesNotDuplicateOnRepeatedType() {
+    @Test void defaultDocumentBodyIsBorderlessAndNotASelectableFloatingTextBox() {
         var controller=controller();var view=new DocEditorPanel(controller);
-        view.typeOnPage();
-        assertEquals(1,controller.placements().size());
-        var body=controller.placements().get(0);
-        assertEquals(72f,body.x());assertEquals(72f,body.y());
-        assertEquals(451f,body.width());
-        view.typeOnPage();assertEquals(1,controller.placements().size());
-        view.close();
+        try {
+            view.typeOnPage();
+            assertTrue(controller.placements().isEmpty(), "Body is not a floating note placement");
+            assertEquals(72f, PdfDocument.BODY_LEFT);
+            assertEquals(451f, PdfDocument.BODY_WIDTH);
+            var editors=java.util.Arrays.stream(view.pageView().getComponents())
+                    .filter(c -> c instanceof InlineNoteEditor).toList();
+            assertEquals(1, editors.size(), "One borderless body editor");
+            assertNull(((InlineNoteEditor)editors.get(0)).getBorder());
+            view.typeOnPage();
+            assertEquals(1,java.util.Arrays.stream(view.pageView().getComponents())
+                    .filter(c -> c instanceof InlineNoteEditor).count());
+            view.pageView().finishInlineEdit();
+            assertEquals(0, controller.placements().size());
+        } finally { view.close(); }
     }
     @Test void fontFamilyIsPreservedThroughNoteSpans() {
         var original=new PdfDocument.NoteSpan("hello",true,false,false,16,"Georgia");

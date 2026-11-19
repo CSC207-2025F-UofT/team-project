@@ -17,6 +17,102 @@ public final class DocumentEditor {
     public PdfDocument snapshot() { return document.copy(); }
     public int pageCount() { return document.pageCount(); }
     public List<PdfDocument.Placement> placements(int page) { return document.placements(page); }
+    public List<PdfDocument.NoteSpan> body(int page) { return document.body(page); }
+    /** A stable PDF object anchored to a location in the document body. */
+    public record BodyAnchorMove(int page, int offset, float y) {
+        public BodyAnchorMove {
+            if (page < 0 || offset < 0 || !Float.isFinite(y))
+                throw new IllegalArgumentException("Invalid body anchor");
+        }
+    }
+    /** Reflow text and its anchored pictures in a single undoable transaction. */
+    public void updateFlowingBody(int startPage, List<List<PdfDocument.NoteSpan>> pageRuns) {
+        updateFlowingBody(startPage, pageRuns, java.util.Map.of());
+    }
+    public void updateFlowingBody(int startPage, List<List<PdfDocument.NoteSpan>> pageRuns,
+                                   java.util.Map<String,BodyAnchorMove> anchored) {
+        validatePage(startPage);
+        Objects.requireNonNull(pageRuns); Objects.requireNonNull(anchored);
+        if (pageRuns.isEmpty()) throw new IllegalArgumentException("At least one body page is required");
+        transaction(() -> {
+            while (document.pageCount() < startPage + pageRuns.size()) document.addPage();
+            for (int p = startPage; p < document.pageCount(); p++) {
+                int n = p - startPage;
+                document.setBody(p, n < pageRuns.size() ? pageRuns.get(n) : List.of());
+            }
+            // Snapshot references before moving anything between pages.
+            var picturePages = new java.util.LinkedHashMap<String,Integer>();
+            for (int page = startPage; page < document.pageCount(); page++)
+                for (var placement : document.placements(page))
+                    if (anchored.containsKey(placement.id())) picturePages.put(placement.id(), page);
+            for (var entry : picturePages.entrySet()) {
+                String id = entry.getKey();
+                BodyAnchorMove destination = anchored.get(id);
+                PdfDocument.Placement original = document.find(entry.getValue(), id);
+                if (original == null || original.isNote() ||
+                        original.anchorMode() != PdfDocument.AnchorMode.MOVE_WITH_TEXT) continue;
+                while (document.pageCount() <= destination.page()) document.addPage();
+                float y = Math.max(0f, Math.min(PdfDocument.PAGE_HEIGHT-original.height(), destination.y()));
+                PdfDocument.Placement relocated = original.withBounds(original.x(), y,
+                                original.width(), original.height()).withLayout(original.imageLayer(),
+                                original.anchorMode(), destination.offset());
+                document.remove(entry.getValue(), id);
+                document.add(destination.page(), relocated);
+            }
+        });
+    }
+    public boolean layoutSelectedImages(int page, java.util.Collection<String> ids,
+            PdfDocument.ImageLayer layer, PdfDocument.AnchorMode anchor, java.util.Map<String,Integer> offsets) {
+        validatePage(page); Objects.requireNonNull(ids); Objects.requireNonNull(offsets);
+        List<PdfDocument.Placement> selected = document.placements(page).stream()
+                .filter(p -> !p.isNote() && ids.contains(p.id())).toList();
+        if (selected.isEmpty()) return false;
+        boolean differs = selected.stream().anyMatch(p -> p.imageLayer() != layer || p.anchorMode() != anchor ||
+                (anchor == PdfDocument.AnchorMode.MOVE_WITH_TEXT &&
+                  p.bodyAnchorOffset() != offsets.getOrDefault(p.id(), -1)));
+        if (!differs) return false;
+        checkpoint();
+        for (PdfDocument.Placement item : selected)
+            document.replace(page, item.withLayout(layer, anchor,
+                    anchor == PdfDocument.AnchorMode.MOVE_WITH_TEXT ? offsets.getOrDefault(item.id(), -1) : -1));
+        return true;
+    }
+    /** Image layout and its consequent body pagination form one atomic edit. */
+    public boolean imageLayoutAndReflow(int page, java.util.Collection<String> ids,
+            PdfDocument.ImageLayer layer, List<List<PdfDocument.NoteSpan>> flowed) {
+        validatePage(page); Objects.requireNonNull(ids); Objects.requireNonNull(layer);
+        List<PdfDocument.Placement> changed = document.placements(page).stream()
+                .filter(p -> !p.isNote() && ids.contains(p.id()))
+                .filter(p -> p.imageLayer() != layer || p.anchorMode() != PdfDocument.AnchorMode.FIXED_ON_PAGE)
+                .toList();
+        if (changed.isEmpty()) return false;
+        transaction(() -> {
+            for (PdfDocument.Placement item : changed)
+                document.replace(page, item.withLayout(layer, PdfDocument.AnchorMode.FIXED_ON_PAGE, -1));
+            replaceBodyPages(flowed);
+        });
+        return true;
+    }
+
+    /** Derived pagination following a transform is covered by the transform's Undo snapshot. */
+    public boolean repaginateAfterImageMove(List<List<PdfDocument.NoteSpan>> flowed) {
+        Objects.requireNonNull(flowed);
+        boolean differs = false;
+        for (int i = 0; i < Math.max(document.pageCount(),flowed.size()); i++) {
+            List<PdfDocument.NoteSpan> existing = i < document.pageCount() ? document.body(i) : List.of();
+            List<PdfDocument.NoteSpan> incoming = i < flowed.size() ? flowed.get(i) : List.of();
+            if (!existing.equals(incoming)) {differs = true;break;}
+        }
+        if (differs) replaceBodyPages(flowed);
+        return differs;
+    }
+
+    private void replaceBodyPages(List<List<PdfDocument.NoteSpan>> flowed) {
+        if (flowed.isEmpty()) throw new IllegalArgumentException("Missing body pages");
+        while (document.pageCount() < flowed.size()) document.addPage();
+        for (int i = 0; i < document.pageCount(); i++)
+            document.setBody(i, i < flowed.size() ? flowed.get(i) : List.of());
+    }
     public PdfDocument.Placement find(int page, String id) { return document.find(page, id); }
     private void checkpoint() {
         if (inBatch) return;

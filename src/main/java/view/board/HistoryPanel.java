@@ -7,6 +7,7 @@ import org.scilab.forge.jlatexmath.TeXConstants;
 import org.scilab.forge.jlatexmath.TeXFormula;
 import org.scilab.forge.jlatexmath.TeXIcon;
 import view.answer.AnswerFont;
+import rendering.TransparentArtwork;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -139,7 +140,7 @@ public class HistoryPanel extends JPanel {
                 // tiny thumbnail and later enlarge that thumbnail into pixels.
                 BufferedImage original = javax.imageio.ImageIO.read(
                         new java.io.ByteArrayInputStream(item.imagePng()));
-                if (original != null) return original;
+                if (original != null) return TransparentArtwork.removeWhiteMatte(original);
             } catch (java.io.IOException badImage) { /* fall through to formula */ }
         }
         TeXIcon icon = typeset(HistoryAnswerArtwork.formulaLatex(item));
@@ -215,7 +216,7 @@ public class HistoryPanel extends JPanel {
         return menu;
     }
 
-    // one white capsule, drag it out by anywhere on it
+    // Transparent material row; drag the artwork from anywhere in the row
     private final class Row extends JComponent {
         private final HistoryItem item;
         private final TeXIcon icon;

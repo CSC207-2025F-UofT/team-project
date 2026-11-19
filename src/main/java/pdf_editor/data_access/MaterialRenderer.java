@@ -9,6 +9,7 @@ import org.scilab.forge.jlatexmath.TeXIcon;
 
 import javax.swing.JLabel;
 import java.awt.Color;
+import rendering.TransparentArtwork;
 import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
@@ -27,7 +28,6 @@ public final class MaterialRenderer {
         BufferedImage out = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
         Graphics2D g = out.createGraphics();
         try {
-            if (!material.isGraph()) { g.setColor(Color.WHITE); g.fillRect(0, 0, width, height); }
             g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
             g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
             g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
@@ -73,7 +73,10 @@ public final class MaterialRenderer {
                     BufferedImage image = javax.imageio.ImageIO.read(
                             new java.io.ByteArrayInputStream(source.imagePng()));
                     if (image == null) throw new java.io.IOException("Unsupported image");
-                    return image;
+                    // Preserve original PNG bytes but remove an opaque white matte
+                    // from display/preview/export pixels. An existing alpha channel
+                    // is never flattened or modified.
+                    return TransparentArtwork.removeWhiteMatte(image);
                 } catch (java.io.IOException ex) {
                     throw new IllegalStateException("Could not decode graph image", ex);
                 }
