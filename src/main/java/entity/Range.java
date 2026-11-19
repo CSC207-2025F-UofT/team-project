@@ -15,15 +15,18 @@ public final class Range {
    * @param hi the upper bound
    */
   public Range(double lo, double hi) {
+    if (lo > hi) {
+      throw new IllegalArgumentException("lo must not be greater than hi");
+    }
     this.lo = lo;
     this.hi = hi;
   }
 
-  public double lo() {
+  public double getLo() {
     return lo;
   }
 
-  public double hi() {
+  public double getHi() {
     return hi;
   }
 

@@ -64,18 +64,20 @@ public final class Substance {
   }
 
   /**
-   * Whether this substance dissolves in a phase at a given pH. An acid also dissolves in water
-   * when the pH is above its pKa, because it becomes its salt.
+   * Whether this substance dissolves in a phase at a given pH. An acid moves into water once a
+   * base has made the water basic (pH above 7 and above its pKa), because it becomes its salt;
+   * the salt then no longer dissolves in ether.
    *
    * @param p the phase to check
    * @param ph the pH of the mixture
    * @return true if it dissolves there
    */
   public boolean isSolubleIn(Phase p, double ph) {
-    if (isAcid() && p == Phase.AQUEOUS && ph > 7 && ph > pka) {
-      return true;
+    boolean isSalt = isAcid() && ph > 7 && ph > pka;  
+    if (isSalt) {
+      return p == Phase.AQUEOUS;                      
     }
-    return p == getPhase();
+    return p == phase;                                
   }
 
   /**

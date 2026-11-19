@@ -76,4 +76,9 @@ class SubstanceTest {
     assertFalse(Substances.HCL.isAcid());
     assertFalse(Substances.VANILLIN.isAcid());
   }
+
+  @Test
+  void aspirinNotInEtherAfterNaoh() {
+    assertFalse(Substances.ASPIRIN.isSolubleIn(Phase.ORGANIC, AFTER_NAOH));
+  }
 }

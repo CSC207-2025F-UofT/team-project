@@ -35,12 +35,7 @@ public class Mixture {
     return ph;
   }
 
-  /**
-   * Sets the mixture's pH. Only reaction rules should call this.
-   *
-   * @param ph the new pH
-   */
-  public void setPh(double ph) {
+  void setPh(double ph) {
     this.ph = ph;
   }
 

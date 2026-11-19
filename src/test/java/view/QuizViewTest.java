@@ -127,6 +127,71 @@ class QuizViewTest {
     assertTrue(buttons(quiz).get(4).isEnabled(), "tile D is free");
   }
 
+  @Test
+  void shuffledChoicesReportTheirOriginalIndexes() {
+    LabModule module = new LabModule("Pre-lab", LocalDate.of(2026, 11, 30), "", List.of(),
+        List.of(), null, QUESTIONS);
+    QuizView quiz = quizFor(module);
+    // q1's choices are shown as "wrong", "right": original indexes 1, 0.
+    quiz.open(shuffledTwoQuestions(List.of()), () -> { }, () -> { });
+    button(quiz, "right").setSelected(true);
+    button(quiz, "Check Answer").doClick();
+    assertTrue(texts(quiz).stream().anyMatch(text -> text.contains("Correct.")),
+        "the right answer is right wherever it is shown");
+    button(quiz, "Exit Module").doClick();
+    assertEquals(Set.of(0), module.getSavedAnswers().get(0), "saved by original index");
+  }
+
+  @Test
+  void reopeningRestoresSavedAnswersWhenTheOrderIsDifferentThisTime() {
+    QuizView quiz = quizFor(new LabModule("Pre-lab", LocalDate.of(2026, 11, 30), "",
+        List.of(), List.of(), null, QUESTIONS));
+    // Saved: q1 original 0 ("right"), q2 originals 0 and 2 ("yes", "also yes").
+    quiz.open(shuffledTwoQuestions(List.of(Set.of(0), Set.of(0, 2))), () -> { }, () -> { });
+    assertTrue(button(quiz, "right").isSelected(), "the saved answer follows its choice");
+    assertFalse(button(quiz, "wrong").isSelected());
+    button(quiz, "Next →").doClick();
+    assertTrue(button(quiz, "yes").isSelected());
+    assertTrue(button(quiz, "also yes").isSelected());
+    assertFalse(button(quiz, "no").isSelected());
+  }
+
+  @Test
+  void shuffledEquationTilesRestoreAndReportOriginalIndexes() {
+    LabModule module = new LabModule("Pre-lab", LocalDate.of(2026, 11, 30), "", List.of(),
+        List.of(), null, List.of(new QuizQuestion("q", "A + B", List.of("C", "D", "E"),
+            Set.of(0, 1), "")));
+    QuizView quiz = quizFor(module);
+    // Tiles are shown as E, C, D: original indexes 2, 0, 1. Saved: C (0) and E (2).
+    ModuleState shuffled = new ModuleState("Pre-lab", "", "", false, "", List.of(), List.of(),
+        List.of(Set.of(2, 0)), List.of(new QuestionState("q", false, false, true, "A + B", 2,
+            List.of("E", "C", "D"), List.of(2, 0, 1), false)));
+    quiz.open(shuffled, () -> { }, () -> { });
+    List<String> texts = buttons(quiz).stream().map(AbstractButton::getText)
+        .collect(Collectors.toList());
+    assertEquals(List.of("Question 1", "C", "E", "E", "C", "D"), texts.subList(0, 6),
+        "saved tiles fill the blanks, in original order");
+    assertFalse(buttons(quiz).get(3).isEnabled(), "tile E is in a blank");
+    assertFalse(buttons(quiz).get(4).isEnabled(), "tile C is in a blank");
+    assertTrue(buttons(quiz).get(5).isEnabled(), "tile D is free");
+
+    // Clear the blank holding E and fill it with D: C and D is the right answer.
+    buttons(quiz).get(2).doClick();
+    buttons(quiz).get(5).doClick();
+    button(quiz, "Check Answer").doClick();
+    assertTrue(texts(quiz).stream().anyMatch(text -> text.contains("Correct.")),
+        "C and D is correct however the tiles are laid out");
+  }
+
+  /** q1 and q2 of {@link #QUESTIONS} with their choices shown in a different order. */
+  private static ModuleState shuffledTwoQuestions(List<Set<Integer>> saved) {
+    return new ModuleState("Pre-lab", "", "", false, "", List.of(), List.of(), saved, List.of(
+        new QuestionState("q1", false, false, false, "", 0, List.of("wrong", "right"),
+            List.of(1, 0), false),
+        new QuestionState("q2", true, false, false, "", 0, List.of("also yes", "no", "yes"),
+            List.of(2, 1, 0), false)));
+  }
+
   /** The two {@link #QUESTIONS}; {@code firstCorrect} marks q1's saved answer as right. */
   private static ModuleState twoQuestions(List<Set<Integer>> saved, boolean firstCorrect) {
     return new ModuleState("Pre-lab", "", "", false, "", List.of(), List.of(), saved, List.of(
