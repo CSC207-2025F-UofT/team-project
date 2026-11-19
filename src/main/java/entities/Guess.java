@@ -14,7 +14,7 @@ public class Guess {
 
     public Guess(String guessedCode, List<CandleType> feedback) {
         this.guessedCode = guessedCode;
-        this.feedback = List<CandleType> feedback;
+        this.feedback = feedback;
     }
 
     /**
