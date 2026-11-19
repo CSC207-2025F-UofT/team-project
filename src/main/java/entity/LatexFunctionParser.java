@@ -72,6 +72,9 @@ public class LatexFunctionParser {
     private int pos;
     private int absDepth;
     private boolean surface;  // y is a variable, not the function name
+    private String xName = "x";
+    private String yName;     // null = only x is a variable
+    private boolean field;    // parseField: caller words the unknown-letter error
 
     /**
      * Parses the LaTeX string into a function of x.
@@ -92,14 +95,49 @@ public class LatexFunctionParser {
         return new SurfaceFunction(latex, parseRule(latex, true));
     }
 
+    /**
+     * Parses a bare expression (no '=') in two single-letter variables, e.g. the right side of
+     * {@code y' = x - y}. The first letter becomes the operator's first argument.
+     *
+     * @throws LatexParseException if it's malformed or uses any other variable
+     */
+    public SurfaceFunction parseField(String expression, String first, String second) throws LatexParseException {
+        if (expression == null || expression.trim().isEmpty()) {
+            throw new LatexParseException("The expression is empty.");
+        }
+        surface = true;
+        field = true;
+        xName = first;
+        yName = second;
+        try {
+            tokens = tokenize(expression);
+            for (Token t : tokens) {
+                if (t.isSymbol("=")) {
+                    throw new LatexParseException("Only one '=' is allowed in each equation.");
+                }
+            }
+            return new SurfaceFunction(expression, parseTokens());
+        } finally {
+            xName = "x";
+            yName = null;
+            field = false;
+        }
+    }
+
     // same grammar both ways, surface just lets y in as a variable
     private DoubleBinaryOperator parseRule(String latex, boolean twoVariables) throws LatexParseException {
         if (latex == null || latex.trim().isEmpty()) {
             throw new LatexParseException("The expression is empty.");
         }
         surface = twoVariables;
+        xName = "x";
+        yName = twoVariables ? "y" : null;
         List<Token> all = tokenize(latex);
         tokens = selectFunctionSide(all);
+        return parseTokens();
+    }
+
+    private DoubleBinaryOperator parseTokens() throws LatexParseException {
         pos = 0;
         absDepth = 0;
         if (tokens.isEmpty()) {
@@ -383,14 +421,17 @@ public class LatexFunctionParser {
                 double value = parseNumber(t.text);
                 return (x, y) -> value;
             case LETTER:
-                if (t.text.equals("x")) {
+                if (t.text.equals(xName)) {
                     return (x, y) -> x;
                 }
-                if (surface && t.text.equals("y")) {
+                if (t.text.equals(yName)) {
                     return (x, y) -> y;
                 }
                 if (t.text.equals("e")) {
                     return (x, y) -> Math.E;
+                }
+                if (field) {
+                    throw new LatexParseException("Unknown variable '" + t.text + "'.");  // field, caller explains
                 }
                 throw new LatexParseException("Unknown variable '" + t.text + "'. "
                         + (surface ? "Only x and y can be graphed." : "Only x can be graphed."));
