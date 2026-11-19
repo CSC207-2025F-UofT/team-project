@@ -1,15 +1,15 @@
-package exception;
+package use_case;
 
-public class PhotoUnavailableException extends RuntimeException {
+public class ImageReadException extends RuntimeException {
     private final String photoId;
 
-    public PhotoUnavailableException(String photoId, String reason, Throwable cause) {
+    public ImageReadException(String photoId, String reason, Throwable cause) {
         super("Photo with id " + photoId + " unavailable: " + reason, cause);
 
         this.photoId = photoId;
     }
 
-    public PhotoUnavailableException(String photoId, String reason) {
+    public ImageReadException(String photoId, String reason) {
         this(photoId, reason, null);
     }
 

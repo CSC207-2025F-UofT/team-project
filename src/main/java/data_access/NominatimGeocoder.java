@@ -2,24 +2,31 @@ package data_access.location;
 
 import java.io.IOException;
 import java.net.URI;
+import java.net.URLEncoder;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import entity.Location;
 import entity.LocationInfo;
-import exception.ReverseGeocodeException;
-import use_case.ReverseGeocoderInterface;
+import use_case.import_photos.GeocodeException;
+import use_case.import_photos.GeocoderInterface;
+import use_case.import_photos.ReverseGeocodeException;
+import use_case.import_photos.ReverseGeocoderInterface;
 
-public class ReverseGeocoder implements ReverseGeocoderInterface {
-    private static final String NOMINATIM_BASE_URL = "https://nominatim.openstreetmap.org/reverse";
+public class NominatimGeocoder implements GeocoderInterface, ReverseGeocoderInterface {
+    private static final String SEARCH_BASE_URL = "https://nominatim.openstreetmap.org/search";
+    private static final String REVERSE_BASE_URL = "https://nominatim.openstreetmap.org/reverse";
 
     private final HttpClient httpClient;
 
-    public ReverseGeocoder() {
+    public NominatimGeocoder() {
         httpClient = HttpClient.newBuilder()
             .connectTimeout(Duration.ofSeconds(10))
             .build();
@@ -67,9 +74,55 @@ public class ReverseGeocoder implements ReverseGeocoderInterface {
         };
     }
 
+    @Override
+    public Location getLocation(String description) {
+        if (description == null || description.isBlank()) {
+            return null;
+        }
+
+        String encodedQuery = URLEncoder.encode(description.trim(), StandardCharsets.UTF_8);
+        String url = String.format("%s?format=json&q=%s&limit=1", SEARCH_BASE_URL, encodedQuery);
+
+        HttpRequest request = HttpRequest.newBuilder()
+            .uri(URI.create(url))
+            .header("User-Agent", "JourneyeApp/1.0 (Local Desktop App)")
+            .header("Accept", "application/json")
+            .GET()
+            .build();
+
+        try {
+            HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+
+            if (response.statusCode() != 200) {
+                throw new GeocodeException("OSM Nominatim search API failed [Status " + response.statusCode() + "]: " + response.body());
+            }
+
+            JSONArray results = new JSONArray(response.body());
+
+            if (results.isEmpty()) {
+                return null;
+            }
+
+            JSONObject firstMatch = results.getJSONObject(0);
+            double latitude = Double.parseDouble(firstMatch.getString("lat"));
+            double longitude = Double.parseDouble(firstMatch.getString("lon"));
+
+            return new Location(latitude, longitude, null);
+
+        } catch (IOException | JSONException | NumberFormatException e) {
+            throw new ReverseGeocodeException(e.getMessage(), e);
+
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+
+            throw new ReverseGeocodeException(e.getMessage(), e);
+        }
+    }
+
+    @Override
     public LocationInfo getLocationInfo(double latitude, double longitude) {
         String url = String.format("%s?format=json&lat=%f&lon=%f&zoom=10",
-            NOMINATIM_BASE_URL, latitude, longitude);
+            REVERSE_BASE_URL, latitude, longitude);
 
         HttpRequest request = HttpRequest.newBuilder()
             .uri(URI.create(url))
@@ -96,15 +149,12 @@ public class ReverseGeocoder implements ReverseGeocoderInterface {
                 getContinent(address.optString("country_code"), latitude, longitude)
             );
 
-        } catch (IOException e) {
+        } catch (IOException | JSONException e) {
             throw new ReverseGeocodeException(e.getMessage(), e);
 
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
 
-            throw new ReverseGeocodeException(e.getMessage(), e);
-
-        } catch (JSONException e) {
             throw new ReverseGeocodeException(e.getMessage(), e);
         }
     }

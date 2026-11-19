@@ -1,4 +1,4 @@
-package exception;
+package use_case.import_photos;
 
 import java.lang.RuntimeException;
 

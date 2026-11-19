@@ -1,12 +1,14 @@
-package data_access.photo;
+package data_access.image;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.nio.file.Files;
+import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.time.LocalDateTime;
@@ -24,10 +26,11 @@ import com.drew.metadata.exif.GpsDirectory;
 import entity.Photo;
 import entity.ImageType;
 import entity.Location;
-import exception.PhotoImportException;
-import use_case.PhotoImporterInterface;
+import use_case.import_photos.ImageImportException;
+import use_case.import_photos.ImageImportProgressData;
+import use_case.import_photos.ImageImporterInterface;
 
-public class PhotoImporter implements PhotoImporterInterface {
+public class ImageImporter implements ImageImporterInterface {
     private static final List<DateTimeFormatter> FORMATTERS = List.of(
         DateTimeFormatter.ofPattern("yyyy:MM:dd HH:mm:ss"),
         DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"),
@@ -35,14 +38,14 @@ public class PhotoImporter implements PhotoImporterInterface {
         DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")
     );
 
-    private final PhotoResolver resolver;
+    private final ImageResolver resolver;
 
-    public PhotoImporter(PhotoResolver resolver) {
+    public ImageImporter(ImageResolver resolver) {
         this.resolver = resolver;
     }
 
     private static Optional<Photo> getPhotoFromPath(Path imagePath) {
-        Optional<ImageType> type = PhotoResolver.getImageType(imagePath);
+        Optional<ImageType> type = ImageResolver.getImageType(imagePath);
         if (type.isEmpty()) return Optional.empty();
 
         try {
@@ -87,7 +90,7 @@ public class PhotoImporter implements PhotoImporterInterface {
 
     private boolean saveImage(Photo photo, Path imagePath) {
         try {
-            Path copyPath = resolver.getPhotoPath(photo);
+            Path copyPath = resolver.getImagePath(photo);
 
             Files.createDirectories(copyPath.getParent());
             Files.copy(imagePath, copyPath, StandardCopyOption.REPLACE_EXISTING);
@@ -99,26 +102,31 @@ public class PhotoImporter implements PhotoImporterInterface {
         }
     }
 
-    public void importImages(List<Path> locations, Consumer<Photo> onPhotoProcessed) {
+    @Override
+    public List<Photo> importImages(List<String> paths, Consumer<ImageImportProgressData> onImageProcessed) {
         List<Path> imagePaths = new ArrayList<>();
 
-        for (Path location : locations) {
+        for (String pathString : paths) {
             try {
-                if (Files.isDirectory(location)) {
-                    try (Stream<Path> pathStream = Files.walk(location)) {
+                Path path = Path.of(pathString);
+
+                if (Files.isDirectory(path)) {
+                    try (Stream<Path> pathStream = Files.walk(path)) {
                         pathStream
-                            .filter(path -> Files.isRegularFile(path) && PhotoResolver.isSupportedType(path))
-                            .forEach(path -> imagePaths.add(path));
+                            .filter(p -> Files.isRegularFile(p) && ImageResolver.isSupportedType(p))
+                            .forEach(p -> imagePaths.add(p));
                     }
 
-                } else if (Files.isRegularFile(location) && PhotoResolver.isSupportedType(location)) {
-                    imagePaths.add(location);
+                } else if (Files.isRegularFile(path) && ImageResolver.isSupportedType(path)) {
+                    imagePaths.add(path);
                 }
 
-            } catch (IOException e) {
-                throw new PhotoImportException(location, e.getMessage(), e);
+            } catch (InvalidPathException | IOException | UncheckedIOException e) {
+                throw new ImageImportException(pathString, e.getMessage(), e);
             }
         }
+
+        List<Photo> photos = new ArrayList<>();
 
         for (Path imagePath : imagePaths) {
             Optional<Photo> photo = getPhotoFromPath(imagePath);
@@ -126,9 +134,23 @@ public class PhotoImporter implements PhotoImporterInterface {
 
             boolean successful = saveImage(photo.get(), imagePath);
 
-            if (successful) {
-                onPhotoProcessed.accept(photo.get());
-            }
+            onImageProcessed.accept(
+                new ImageImportProgressData(imagePath.toString(), successful, imagePaths.size())
+            );
+
+            photos.add(photo.get());
         }
+
+        return photos;
+    }
+
+    @Override
+    public void cleanupImage(Photo photo) {
+        try {
+            Path imagePath = resolver.getImagePath(photo);
+
+            Files.deleteIfExists(imagePath);
+
+        } catch (IOException e) {}
     }
 }
