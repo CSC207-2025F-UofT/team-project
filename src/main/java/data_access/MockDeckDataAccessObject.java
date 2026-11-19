@@ -88,7 +88,7 @@ public class MockDeckDataAccessObject implements GetAllDecksDataAccessInterface,
         return decks;
     }
 
-    public boolean isEmpty() {
+    public boolean noAvailableDecks() {
         return false;
     }
 

@@ -21,7 +21,7 @@ public class GetAllDecksInteractor implements GetAllDecksInputBoundary {
 
     @Override
     public void execute() {
-        if (deckDataAccessObject.isEmpty()) {
+        if (deckDataAccessObject.noAvailableDecks()) {
             getAllDecksPresenter.prepareEmptyView("No Flashcard Decks have been added");
         }
         else {

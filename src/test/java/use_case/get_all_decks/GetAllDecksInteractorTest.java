@@ -26,7 +26,7 @@ public class GetAllDecksInteractorTest {
         }
 
         @Override
-        public boolean isEmpty() { return decks.isEmpty(); }
+        public boolean noAvailableDecks() { return decks.isEmpty(); }
     }
 
     @Test
