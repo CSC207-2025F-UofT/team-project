@@ -168,6 +168,7 @@ public class StackedAppBuilder {
                 new pdf_editor.adapter.HistoryFormulaCalculator(
                         new EvaluateController(new EvaluateInteractor(
                                 functions, new EvaluatePresenter(historyEditModel))), historyEditModel);
+        pdfStudio.setFormulaRecalculator(historyEditCalculator::calculate);
         CanvasHistoryEditMenu.install(drawing, (latex, result) ->
                 pdf_editor.data_access.MaterialRenderer.render(
                         new pdf_editor.domain.PdfMaterial("Edited Math", latex, result, null, 0, 0) { },
@@ -176,6 +177,13 @@ public class StackedAppBuilder {
                     if (latex.isBlank()) return;
                     if (result.isBlank()) pdfStudio.getLibrary().addFormula(latex);
                     else pdfStudio.getLibrary().addCalculation(latex, result);
+                }, change -> {
+                    try {
+                        pdfStudio.reviseCanvasHistory(change.oldFormula(), change.oldResult(),
+                                change.formula(), change.result());
+                    } catch (java.io.IOException failure) {
+                        System.err.println("Formula revision sync failed: " + failure.getMessage());
+                    }
                 });
         CanvasLibrarySelectionMenu.install(drawing,
                 new SelectionToLibrary(sharedCanvas::recognizeFormula, pdfStudio.getLibrary()),

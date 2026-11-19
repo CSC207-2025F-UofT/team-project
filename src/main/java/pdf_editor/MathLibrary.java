@@ -19,6 +19,9 @@ public final class MathLibrary {
                          byte[] image, int width, int height) {
             super(title, formula, result, image, width, height);
         }
+        private Material(String id, String title, String formula, String result) {
+            super(id, title, formula, result, null, 0, 0);
+        }
     }
 
     private final List<Material> items = new ArrayList<>();
@@ -60,6 +63,28 @@ public final class MathLibrary {
         notifyListeners();
         return true;
     }
+    /** Revise the original Library material, keeping its ID, source links and listeners intact.
+     * A detached PDF copy may still match the saved material by its old content.
+     * Only exact matches are revised; never replace unrelated graph or ink items. */
+    public int reviseFormula(String materialId, String previousFormula, String previousResult,
+                             String formula, String result) {
+        Objects.requireNonNull(formula, "formula");
+        Objects.requireNonNull(result, "result");
+        if (formula.isBlank()) throw new IllegalArgumentException("Formula required");
+        int changed = 0;
+        for (int i = 0; i < items.size(); i++) {
+            Material previous = items.get(i);
+            if (previous.isGraph()) continue;
+            if (previous.id().equals(materialId) ||
+                    (previous.formula().equals(previousFormula) && previous.result().equals(previousResult))) {
+                items.set(i, new Material(previous.id(), previous.title(), formula.trim(), result.trim()));
+                changed++;
+            }
+        }
+        if (changed > 0) notifyListeners();
+        return changed;
+    }
+
     public Material addCalculation(String formula, String result) {
         Material item = new Material("Calculation " + (items.size() + 1),
                 formula, result, null, 0, 0);

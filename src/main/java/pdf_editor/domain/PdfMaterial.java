@@ -53,6 +53,13 @@ public class PdfMaterial {
                 Objects.requireNonNull(newResult, "result"), null, 0, 0);
     }
 
+    /** An edit of a shared material preserves its identity across PDF placements and Library. */
+    public final PdfMaterial revised(String newFormula, String newResult) {
+        if (isGraph()) throw new IllegalStateException("An image cannot be edited as a formula");
+        return new PdfMaterial(id, title, Objects.requireNonNull(newFormula, "formula"),
+                Objects.requireNonNull(newResult, "result"), null, 0, 0);
+    }
+
     public final String id() { return id; }
     public final String title() { return title; }
     public final String formula() { return formula; }

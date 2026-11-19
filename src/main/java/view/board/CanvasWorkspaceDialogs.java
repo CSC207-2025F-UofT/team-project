@@ -70,7 +70,7 @@ public final class CanvasWorkspaceDialogs {
     public boolean hasUnsavedChanges() {
         CanvasState current = canvas.exportCanvasState();
         return lastSavedState == null ? !canvas.isBlank() :
-                !CanvasStateComparison.same(lastSavedState, current);
+                !CanvasStateComparison.sameContent(lastSavedState, current);
     }
 
     private boolean confirmDiscardOrSave() {
