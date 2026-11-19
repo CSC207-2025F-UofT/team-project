@@ -25,12 +25,19 @@ final class FormulaImagePreprocessor {
     private FormulaImagePreprocessor() {
     }
 
+    /** {@link #prepare(BufferedImage, CropScale)} with the scale model training used. */
+    static BufferedImage prepare(BufferedImage source) {
+        return prepare(source, CropScale.defaultModel());
+    }
+
     /**
+     * @param cropScale picks the factor m on the tallest band, like {@code band_scale} in training;
+     *                  {@link CropScale#RULE} keeps the plain rule
      * @return an RGB image at least 128 px high, height and width multiples of 16,
      *         preserving the source RGB colours like the training images
      * @throws IllegalArgumentException if there is no ink in the image
      */
-    static BufferedImage prepare(BufferedImage source) {
+    static BufferedImage prepare(BufferedImage source, CropScale cropScale) {
         int width = source.getWidth();
         int height = source.getHeight();
         int[] rgb = toRgb(source);
@@ -42,6 +49,7 @@ final class FormulaImagePreprocessor {
         int right = -1;
         int bottom = -1;
         boolean[] rowHasInk = new boolean[height];
+        boolean[] isInk = new boolean[width * height];
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
                 int pixel = rgb[y * width + x];
@@ -56,6 +64,7 @@ final class FormulaImagePreprocessor {
                     right = Math.max(right, x);
                     bottom = Math.max(bottom, y);
                     rowHasInk[y] = true;
+                    isInk[y * width + x] = true;
                 }
             }
         }
@@ -67,10 +76,14 @@ final class FormulaImagePreprocessor {
         BufferedImage ink = new BufferedImage(inkWidth, inkHeight, BufferedImage.TYPE_INT_RGB);
         ink.setRGB(0, 0, inkWidth, inkHeight, rgb, top * width + left, width);
 
-        // Same scale and canvas as training (formula_layout.py).
+        // Same scale and canvas as training (formula_layout.py, band_scale from crop_scale.py).
+        boolean[] mask = new boolean[inkWidth * inkHeight];
+        for (int y = 0; y < inkHeight; y++) {
+            System.arraycopy(isInk, (top + y) * width + left, mask, y * inkWidth, inkWidth);
+        }
         double tallest = FormulaLayout.tallestBand(
                 FormulaLayout.rowSpans(Arrays.copyOfRange(rowHasInk, top, bottom + 1)),
-                inkHeight, FormulaLayout.GAP_MIN_PX);
+                inkHeight, FormulaLayout.GAP_MIN_PX) * cropScale.bandScale(mask, inkWidth, inkHeight);
         FormulaLayout.Size layout = FormulaLayout.size(inkWidth, inkHeight, tallest);
         int resizedWidth = Math.max(1, FormulaLayout.roundHalfUp(inkWidth * layout.scale()));
         int resizedHeight = Math.max(1, FormulaLayout.roundHalfUp(inkHeight * layout.scale()));

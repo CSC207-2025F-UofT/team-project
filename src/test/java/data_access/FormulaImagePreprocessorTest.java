@@ -14,6 +14,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 /** The model accepts images whose height (at least 128) and width are multiples of 16. */
 class FormulaImagePreprocessorTest {
 
+    /** These cases check the plain layout rule; the scale model has its own tests in CropScaleTest. */
+    private static BufferedImage prepare(BufferedImage image) {
+        return FormulaImagePreprocessor.prepare(image, CropScale.RULE);
+    }
+
     /** An image of the given size and background with one thick line drawn in the given colour. */
     private static BufferedImage drawing(int width, int height, Color background, Color ink,
                                          int x1, int y1, int x2, int y2) {
@@ -60,13 +65,13 @@ class FormulaImagePreprocessorTest {
         for (int[] size : sizes) {
             BufferedImage image = drawing(size[0], size[1], Color.WHITE, Color.BLACK,
                     18, 18, size[0] - 18, size[1] - 18);
-            assertModelShape(FormulaImagePreprocessor.prepare(image));
+            assertModelShape(prepare(image));
         }
     }
 
     @Test
     void whiteBackgroundAndDarkInkAreKeptNotInverted() {
-        BufferedImage out = FormulaImagePreprocessor.prepare(
+        BufferedImage out = prepare(
                 drawing(300, 120, Color.WHITE, Color.BLACK, 20, 60, 280, 60));
         assertEquals(255, gray(out, 0, 0), "background stays white");
         assertEquals(255, gray(out, out.getWidth() - 1, 127));
@@ -79,7 +84,7 @@ class FormulaImagePreprocessorTest {
 
     @Test
     void inkFitsInsideTheEightPixelMarginAndIsCentred() {
-        BufferedImage out = FormulaImagePreprocessor.prepare(
+        BufferedImage out = prepare(
                 drawing(200, 400, Color.WHITE, Color.BLACK, 100, 20, 100, 380));  // tall, thin
         int top = 128;
         int bottom = -1;
@@ -98,7 +103,7 @@ class FormulaImagePreprocessorTest {
 
     @Test
     void veryWideSingleLineIsNotShrunkJustForBeingWide() {
-        BufferedImage out = FormulaImagePreprocessor.prepare(
+        BufferedImage out = prepare(
                 drawing(4000, 60, Color.WHITE, Color.BLACK, 10, 30, 3990, 30));
         assertModelShape(out);
         assertEquals(128, out.getHeight());
@@ -107,8 +112,8 @@ class FormulaImagePreprocessorTest {
 
     @Test
     void twoLinesKeepTheSingleLineScaleAndMakeTheCanvasTaller() {
-        BufferedImage single = FormulaImagePreprocessor.prepare(blocks(160, 80, new int[]{30, 20, 91, 41}));
-        BufferedImage two = FormulaImagePreprocessor.prepare(
+        BufferedImage single = prepare(blocks(160, 80, new int[]{30, 20, 91, 41}));
+        BufferedImage two = prepare(
                 blocks(160, 160, new int[]{30, 20, 91, 41}, new int[]{30, 90, 91, 41}));
         assertEquals(128, single.getHeight());
         assertEquals(272, single.getWidth());
@@ -119,7 +124,7 @@ class FormulaImagePreprocessorTest {
 
     @Test
     void darkBackgroundKeepsItsColourToo() {
-        BufferedImage out = FormulaImagePreprocessor.prepare(
+        BufferedImage out = prepare(
                 drawing(300, 120, Color.BLACK, Color.WHITE, 20, 60, 280, 60));
         assertEquals(0, gray(out, 0, 0));
     }
@@ -127,7 +132,7 @@ class FormulaImagePreprocessorTest {
     @Test
     void colouredInkKeepsDistinctRgbChannelsIncludingYellow() {
         for (Color colour : new Color[]{Color.RED, Color.BLUE, Color.YELLOW}) {
-            BufferedImage out = FormulaImagePreprocessor.prepare(
+            BufferedImage out = prepare(
                     drawing(300, 120, Color.WHITE, colour, 20, 60, 280, 60));
             assertModelShape(out);
             int pixel = out.getRGB(out.getWidth() / 2, 64) & 0xFFFFFF;
@@ -143,7 +148,7 @@ class FormulaImagePreprocessorTest {
         g.setColor(new Color(255, 0, 0, 128));
         g.fillRect(20, 20, 60, 20);
         g.dispose();
-        BufferedImage out = FormulaImagePreprocessor.prepare(image);
+        BufferedImage out = prepare(image);
         int pixel = out.getRGB(out.getWidth() / 2, 64);
         assertEquals(255, (pixel >>> 16) & 0xFF);
         assertTrue(Math.abs(((pixel >>> 8) & 0xFF) - 127) <= 1);
@@ -154,7 +159,7 @@ class FormulaImagePreprocessorTest {
     void blankImageIsRejectedWithAMessage() {
         BufferedImage blank = drawing(100, 50, Color.WHITE, Color.WHITE, 0, 0, 0, 0);
         IllegalArgumentException e = assertThrows(IllegalArgumentException.class,
-                () -> FormulaImagePreprocessor.prepare(blank));
+                () -> prepare(blank));
         assertTrue(e.getMessage().contains("no handwriting"));
     }
 }

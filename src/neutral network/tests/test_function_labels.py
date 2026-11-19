@@ -4,7 +4,7 @@ import unittest
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from labels import FUNCTIONS, TOKEN_RE, tokenize_label
+from labels import FUNCTIONS, TOKEN_RE, normalize_structure, tokenize_label
 from model import ids_to_latex, load_vocab
 from data import label_key
 
@@ -57,6 +57,41 @@ class FunctionLabelsTests(unittest.TestCase):
         self.assertEqual(label_key('c o s ( x )'), label_key(r'\cos(x)'))
         self.assertNotEqual(label_key(r'\sin x'), label_key(r'\sinx'))
         self.assertNotEqual(label_key(r'\text{a b}'), label_key(r'\text{ab}'))
+
+    def test_structure_normalization_unifies_equivalent_spellings(self):
+        cases = {
+            r'a_n^2': r'a_{n}^{2}',
+            r'ds^2_{d+1}=-{dx}^2': r'ds_{d+1}^{2}=-dx^{2}',
+            r'\sum_{i=0}^{n-1}{t^i}': r'\sum_{i=0}^{n-1}t^{i}',
+            r'\sqrt2m+\frac12': r'\sqrt{2}m+\frac{1}{2}',
+            r'\sqrt[3]x': r'\sqrt[3]{x}',
+            r'x^\frac12': r'x^{\frac{1}{2}}',
+            r'{{x}}^{{2}}': r'x^{2}',
+            r'\bar x_1+\mathbb R': r'\bar{x}_{1}+\mathbb{R}',
+            r'1,2,...,n': r'1,2,\ldots,n',
+        }
+        for raw, expected in cases.items():
+            with self.subTest(raw=raw):
+                self.assertEqual(tokenize_label(raw), tokenize_label(expected))
+                self.assertEqual(tokenize_label(expected), normalize_structure(tokenize_label(expected)))
+
+    def test_structure_normalization_keeps_meaningful_braces(self):
+        kept = {
+            r'{10^{218}}^{10}': ['{', '1', '0', '^', '{', '2', '1', '8', '}', '}', '^', '{', '1', '0', '}'],
+            r'x^{a}{}^{b}': ['x', '^', '{', 'a', '}', '{', '}', '^', '{', 'b', '}'],
+            r'\text{a ... b}': [r'\text', '{', 'a', ' ', '.', '.', '.', ' ', 'b', '}'],
+            r'a....b': ['a', '.', '.', '.', '.', 'b'],
+            r'x^{a': ['x', '^', '{', 'a'],
+            r'{_2F_1}': ['{', '_', '{', '2', '}', 'F', '_', '{', '1', '}', '}'],
+            r'{{{C^\prime}}}_4': ['{', 'C', '^', '{', r'\prime', '}', '}', '_', '{', '4', '}'],
+            r'{\sqrt}B': ['{', r'\sqrt', '}', 'B'],
+            r'\frac C \rho {X}': [r'\frac', '{', 'C', '}', '{', r'\rho', '}', 'X'],
+            r'\rho {X}': [r'\rho', '{', 'X', '}'],
+        }
+        for raw, expected in kept.items():
+            with self.subTest(raw=raw):
+                self.assertEqual(tokenize_label(raw), expected)
+        self.assertEqual(label_key('x^2_1'), label_key('x_{1}^{2}'))
 
     def test_python_java_vocab_and_new_ids(self):
         root = Path(__file__).resolve().parents[2]

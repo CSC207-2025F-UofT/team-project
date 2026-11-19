@@ -1,7 +1,7 @@
 """训练与去重共用的保守标签规范化；原始标签不覆盖。"""
 import re
 
-NORMALIZATION_VERSION = 2
+NORMALIZATION_VERSION = 3
 TOKEN_RE = re.compile(r"\\[a-zA-Z]+|\\.|\S", re.S)
 ALIASES = {r"\le": r"\leq", r"\ge": r"\geq", r"\ne": r"\neq", r"\to": r"\rightarrow",
            r"\Box": r"\square", "□": r"\square", "⟨": r"\langle", "⟩": r"\rangle",
@@ -109,4 +109,150 @@ def tokenize_label(label: str) -> list[str]:
         else:
             raise ValueError(f"标签的 \\text 区域缺少右花括号: {label}")
     result.extend(math_tokens(label[position:]))
-    return result
+    return normalize_structure(result)
+
+
+# ---------- 结构规范化：同一渲染结果只保留一种写法 ----------
+# 上下标及 \frac/\sqrt 等参数一律加花括号；同时有上下标时先 _ 后 ^；
+# 去掉不影响渲染的分组括号（{dx}^2 -> dx^{2}）；三个连续的 . 统一为 \ldots。
+# \text、\begin/\end、\mathrm 等受保护区域原样保留；花括号不配对的标签整体不改。
+SCRIPT_OPS = ("_", "^")
+ARGUMENT_COUNTS = {**dict.fromkeys(r"\frac \dfrac \tfrac \binom \overset \underset \stackrel".split(), 2),
+                   **dict.fromkeys(r"\sqrt \vec \hat \overline \bar \dot \ddot \mathbb \mathcal \mathfrak "
+                                   r"\mathscr \boldsymbol \bm \pmb \textrm \textbf \textit \tilde \widehat "
+                                   r"\widetilde \overrightarrow \underline \overbrace \underbrace \boxed "
+                                   r"\mathring \check \breve \acute \grave".split(), 1)}
+# 与 PROTECTED_GROUP_RE 保护的命令一致，另加 \text
+OPAQUE_COMMANDS = frozenset(r"\text \operatorname \mathrm \mathit \mathbf \mathsf \mathtt \begin \end".split())
+ROW_TOKENS = frozenset(("&", r"\\"))
+
+
+class _Group(list):
+    """{...} 内的节点"""
+
+
+class _Raw(list):
+    """原样输出的受保护 token 片段"""
+
+
+def _braces_balanced(tokens: list[str]) -> bool:
+    depth = 0
+    for token in tokens:
+        depth += (token == "{") - (token == "}")
+        if depth < 0:
+            return False
+    return depth == 0
+
+
+def _parse(tokens: list[str], i: int = 0, nested: bool = False) -> tuple[list, int]:
+    nodes = []
+    while i < len(tokens):
+        token = tokens[i]
+        if token == "}" and nested:
+            return nodes, i + 1
+        if token == "{":
+            children, i = _parse(tokens, i + 1, True)
+            nodes.append(_Group(children))
+        elif token in OPAQUE_COMMANDS:
+            end = i + 1 + (i + 1 < len(tokens) and tokens[i + 1] == "*")
+            if end < len(tokens) and tokens[end] == "{":
+                depth = 0
+                for end in range(end, len(tokens)):
+                    depth += (tokens[end] == "{") - (tokens[end] == "}")
+                    if depth == 0:
+                        break
+                end += 1
+            nodes.append(_Raw(tokens[i:end]))
+            i = end
+        else:
+            nodes.append(token)
+            i += 1
+    return nodes, i
+
+
+def _top_level(nodes: list, wanted) -> bool:
+    return any(isinstance(node, str) and node in wanted for node in nodes)
+
+
+def _is_command(token) -> bool:
+    return isinstance(token, str) and token[:1] == "\\" and token[1:].isalpha()
+
+
+def _keep_group(nodes: list, i: int, after_command: bool) -> bool:
+    children = nodes[i]
+    while len(children) == 1 and isinstance(children[0], _Group):      # {{{C^{\prime}}}}_4 看最内层
+        children = children[0]
+    if (not children or _top_level(children, ROW_TOKENS) or after_command or children[0] in SCRIPT_OPS
+            or (isinstance(children[-1], str) and children[-1] in ARGUMENT_COUNTS)):
+        return True                     # {}^{a} 占位、矩阵行、未知命令的参数、{_2F_1} 前置角标、缺参数的 {\sqrt}
+    following = nodes[i + 1] if i + 1 < len(nodes) else None
+    return following in SCRIPT_OPS and _top_level(children, SCRIPT_OPS)   # {10^{2}}^{3}
+
+
+def _argument(nodes: list, j: int) -> tuple[list[str], int]:
+    """命令或上下标的一个参数，统一加花括号"""
+    if j >= len(nodes) or nodes[j] in SCRIPT_OPS:
+        return [], j
+    node = nodes[j]
+    if isinstance(node, _Group):
+        while len(node) == 1 and isinstance(node[0], _Group):   # {{x}} -> {x}
+            node = node[0]
+        return ["{", *_emit(node), "}"], j + 1
+    if isinstance(node, str) and node in ARGUMENT_COUNTS:
+        tokens, j = _command(nodes, j)
+        return ["{", *tokens, "}"], j
+    return ["{", *(node if isinstance(node, _Raw) else [node]), "}"], j + 1
+
+
+def _command(nodes: list, i: int) -> tuple[list[str], int]:
+    tokens, j = [nodes[i]], i + 1
+    if nodes[i] == r"\sqrt" and j < len(nodes) and nodes[j] == "[" and "]" in nodes[j:]:
+        close = nodes.index("]", j)
+        tokens += ["[", *_emit(nodes[j + 1:close]), "]"]
+        j = close + 1
+    for _ in range(ARGUMENT_COUNTS[nodes[i]]):
+        argument, j = _argument(nodes, j)
+        tokens += argument
+    return tokens, j
+
+
+def _emit(nodes: list) -> list[str]:
+    out, i = [], 0
+    while i < len(nodes):
+        node = nodes[i]
+        # 紧跟在原样输出的命令 token 之后的分组可能是它的参数（只看实际输出，参数已被消费的不算）
+        after_command = i > 0 and _is_command(nodes[i - 1]) and out[-1:] == [nodes[i - 1]]
+        if isinstance(node, _Raw):
+            out += node
+            i += 1
+        elif isinstance(node, _Group):
+            out += ["{", *_emit(node), "}"] if _keep_group(nodes, i, after_command) else _emit(node)
+            i += 1
+        elif node in SCRIPT_OPS:
+            scripts = []
+            while i < len(nodes) and nodes[i] in SCRIPT_OPS:
+                argument, next_i = _argument(nodes, i + 1)
+                scripts.append((nodes[i], argument))
+                i = next_i if next_i > i + 1 else i + 1
+            if [op for op, _ in scripts] == ["^", "_"]:
+                scripts.reverse()
+            for op, argument in scripts:
+                out += [op, *argument]
+        elif node in ARGUMENT_COUNTS:
+            tokens, i = _command(nodes, i)
+            out += tokens
+        elif node == "." and nodes[i:i + 3] == [".", ".", "."] and nodes[i + 3:i + 4] != ["."] \
+                and nodes[i - 1:i] != ["."]:
+            out.append(r"\ldots")
+            i += 3
+        else:
+            out.append(node)
+            i += 1
+    return out
+
+
+def normalize_structure(tokens: list[str]) -> list[str]:
+    """tokenize_label 的最后一步；结果再规范化一次不变。"""
+    if not _braces_balanced(tokens):
+        return tokens
+    return _emit(_parse(tokens)[0])
