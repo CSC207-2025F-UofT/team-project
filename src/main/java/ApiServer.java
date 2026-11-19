@@ -6,6 +6,7 @@ import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
 
 import interface_adapter.TransactionControl;
+import interface_adapter.TransactionControl_App;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -52,8 +53,8 @@ public class ApiServer {
 
       try {
 
-        TransactionControl control =
-            new TransactionControl("UserTransactions.json");
+        TransactionControl_App control =
+            new TransactionControl_App("UserTransactions.json");
 
         // Check whether the user exists
         JSONObject users =

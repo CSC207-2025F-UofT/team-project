@@ -1,5 +1,6 @@
 
 import interface_adapter.TransactionControl;
+import interface_adapter.TransactionControl_App;
 
 import javax.swing.*;
 import javax.swing.border.*;
@@ -93,8 +94,8 @@ public class FinanceTracker extends JFrame {
 
     //Grabs the Usernames
     try {
-      TransactionControl control =
-          new TransactionControl("UserTransactions.json");
+      TransactionControl_App control =
+          new TransactionControl_App("UserTransactions.json");
 
       List<String> users = control.getUsers();
 
