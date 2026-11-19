@@ -450,7 +450,7 @@ mvn compile exec:java
 mvn test
 ```
 
-All 1405 tests passed on 2026-11-18.
+All 1437 tests passed on 2026-11-18.
 
 **Using it:**
 - Write a formula ending in "=" and pause. Click **Calculate** or **Graph** in the popup.
