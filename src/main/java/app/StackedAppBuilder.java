@@ -10,7 +10,7 @@ import pdf_editor.view.CanvasRegionCaptureController;
 import pdf_editor.view.CanvasLibrarySelectionMenu;
 import pdf_editor.adapter.SelectedInkRegistry;
 import pdf_editor.use_case.SelectionToLibrary;
-import data_access.QuickChartGraphRenderer;
+import data_access.InMemoryGraphSessionDataAccessObject;
 import entity.LatexFunctionParser;
 import interface_adapter.MathLabViewModel;
 import interface_adapter.evaluate.CalculateCheckController;
@@ -19,9 +19,12 @@ import interface_adapter.evaluate.EvaluateController;
 import interface_adapter.evaluate.EvaluatePresenter;
 import interface_adapter.evaluate.QuestionCheckController;
 import interface_adapter.graph.GraphController;
+import interface_adapter.graph.GraphExploreController;
 import interface_adapter.graph.GraphPresenter;
 import interface_adapter.graph.GraphState;
 import interface_adapter.graph.GraphViewModel;
+import use_case.explore_graph.ExploreGraphInteractor;
+import view.graph.GraphSnapshot;
 import interface_adapter.graph_check.GraphCheckController;
 import interface_adapter.history.HistoryViewModel;
 import interface_adapter.recognize.FormulaRecognizer;
@@ -31,6 +34,18 @@ import use_case.evaluate.DefinitionCheckInteractor;
 import use_case.evaluate.EvaluateInteractor;
 import use_case.evaluate.QuestionCheckInteractor;
 import use_case.graph_check.GraphCheckInteractor;
+import use_case.phase_check.PhaseCheckInteractor;
+import use_case.phase_portrait.PhasePortraitInteractor;
+import use_case.explore_phase.ExplorePhaseInteractor;
+import entity.phase.DifferentialEquationParser;
+import data_access.InMemoryPhaseSessionDataAccessObject;
+import interface_adapter.phase.PhaseCheckController;
+import interface_adapter.phase.PhaseController;
+import interface_adapter.phase.PhaseExploreController;
+import interface_adapter.phase.PhasePresenter;
+import interface_adapter.phase.PhaseState;
+import interface_adapter.phase.PhaseViewModel;
+import view.graph.PhaseSnapshot;
 import use_case.graph_function.GraphFunctionInteractor;
 import view.DrawingCanvas;
 import view.board.BoardTheme;
@@ -94,16 +109,41 @@ public class StackedAppBuilder {
         // graph, graphs also go to PDF Studio like before
         GraphViewModel graphViewModel = new GraphViewModel();
         graphViewModel.addPropertyChangeListener(event -> {
+            // only brand new graphs, pans / zooms come as VIEW and would spam the library
             if (GraphViewModel.STATE_PROPERTY.equals(event.getPropertyName())) {
                 GraphState state = graphViewModel.getState();
-                if (state.getError() == null && state.getGraphImage() != null) {
-                    pdfStudio.addGraph(state.getLatex(), state.getGraphImage());
+                if (state.getError() == null && state.hasGraph()) {
+                    pdfStudio.addGraph(state.getLatex(), GraphSnapshot.render(state, 880, 600));
                 }
             }
         });
+        // graphs drawn in plain java now, one session shared by graphing + exploring
+        InMemoryGraphSessionDataAccessObject graphSession = new InMemoryGraphSessionDataAccessObject();
+        GraphPresenter graphPresenter = new GraphPresenter(graphViewModel);
         GraphController graph = new GraphController(new GraphFunctionInteractor(
-                new LatexFunctionParser(), new QuickChartGraphRenderer(), new GraphPresenter(graphViewModel)));
+                new LatexFunctionParser(), graphSession, graphPresenter));
+        GraphExploreController graphExplore = new GraphExploreController(
+                new ExploreGraphInteractor(graphSession, graphPresenter));
         GraphCheckController graphCheck = new GraphCheckController(new GraphCheckInteractor(new LatexFunctionParser()));
+
+        // phase portraits of odes: own use case + session, next to graphing, same popup; also go to PDF Studio
+        PhaseViewModel phaseViewModel = new PhaseViewModel();
+        phaseViewModel.addPropertyChangeListener(event -> {
+            if (PhaseViewModel.STATE_PROPERTY.equals(event.getPropertyName())) {
+                PhaseState state = phaseViewModel.getState();
+                if (state.getError() == null && state.hasPortrait()) {
+                    pdfStudio.addGraph(state.getLatex(), PhaseSnapshot.render(state, 880, 600));
+                }
+            }
+        });
+        InMemoryPhaseSessionDataAccessObject phaseSession = new InMemoryPhaseSessionDataAccessObject();
+        PhasePresenter phasePresenter = new PhasePresenter(phaseViewModel);
+        PhaseController phase = new PhaseController(new PhasePortraitInteractor(
+                new DifferentialEquationParser(), phaseSession, phasePresenter));
+        PhaseExploreController phaseExplore = new PhaseExploreController(
+                new ExplorePhaseInteractor(phaseSession, phasePresenter));
+        PhaseCheckController phaseCheck = new PhaseCheckController(
+                new PhaseCheckInteractor(new DifferentialEquationParser()));
 
         // history
         HistoryViewModel historyViewModel = new HistoryViewModel();
@@ -149,11 +189,12 @@ public class StackedAppBuilder {
                 new SelectionToLibrary(sharedCanvas::recognizeFormula, pdfStudio.getLibrary()),
                 new SelectedInkRegistry(drawing, pdfStudio.getLibrary()));
         AnswerCanvasPage page = new AnswerCanvasPage(sharedCanvas, evaluate, mathViewModel, results,
-                graph, graphViewModel, graphCheck::canGraph, BoardTheme.CANVAS);
+                graph, graphExplore, graphViewModel, graphCheck::canGraph, BoardTheme.CANVAS);
         page.setDefinitionCheck(definitionCheck::isDefinition);
         page.setCalculateCheck(calculateCheck::canCalculate);
         page.setQuestionCheck(questionCheck::isQuestion);
         page.setFaintEqualsCheck(calculateCheck::canCalculate);
+        page.enablePhasePortrait(phase, phaseExplore, phaseViewModel, phaseCheck::isDifferentialEquation);
         sharedCanvas.attachTo(page);
         PdfPanel pdfPanel = pdfStudio.createPanel();
         // Use the live selection (lasso or whole ink), not an outdated startup screenshot.

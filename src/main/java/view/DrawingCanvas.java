@@ -96,11 +96,10 @@ public class DrawingCanvas extends JPanel {
 
     private static final float INK_WIDTH = 4f;
     private static final Color INK_COLOR = Color.BLACK;
-    private static final int FORMULA_MARGIN = 16;  // white space kept around the ink in toFormulaImage()
+    // draws the recognition picture straight from the strokes, same pen as the screen
+    private static final FormulaImageRenderer FORMULA_RENDERER = new FormulaImageRenderer(INK_WIDTH);
     static final double READABLE_MIN_HEIGHT = 30;   // char heights the model reads fine w/ pen 4, outside gets scaled
     static final double READABLE_MAX_HEIGHT = 240;
-    /** toFormulaImage() is always at least this many times as wide as it is tall. */
-    public static final double FORMULA_MIN_ASPECT = 2.0;
     private static final int PRECISE_ERASER_RADIUS = 12;  // on screen, whatever the zoom
     private static final int STROKE_ERASER_RADIUS = 6;  // only has to touch a stroke
     private static final Color STROKE_ERASER_OUTLINE = new Color(220, 38, 38);
@@ -168,6 +167,7 @@ public class DrawingCanvas extends JPanel {
     private Rectangle2D graphCard;
     private double graphPadding;
     private boolean overGraphClose;
+    private Object graphTag;          // who owns the card (the live graph view), null for a restored picture
 
     private int resizeHandle = -1;    // corner being dragged to resize (0 top-left, clockwise), or -1
     private Point2D resizeAnchor;     // the opposite corner, which stays put
@@ -409,6 +409,12 @@ public class DrawingCanvas extends JPanel {
      *                was captured); null puts the card in the middle of the view
      */
     public void showGraph(BufferedImage image, Rectangle formula) {
+        showGraph(image, formula, null);
+    }
+
+    // same, tagged so the live graph view knows the card is still its own
+    public void showGraph(BufferedImage image, Rectangle formula, Object tag) {
+        graphTag = tag;
         double viewWidth = (getWidth() > 0 ? getWidth() : getPreferredSize().width) / scale;
         double imageWidth = viewWidth * GRAPH_CARD_WIDTH;
         double imageHeight = imageWidth * image.getHeight() / image.getWidth();
@@ -437,6 +443,7 @@ public class DrawingCanvas extends JPanel {
         }
         graphImage = null;
         graphCard = null;
+        graphTag = null;
         overGraphClose = false;
         setCursor(Cursor.getPredefinedCursor(Cursor.CROSSHAIR_CURSOR));
         repaint();
@@ -444,6 +451,40 @@ public class DrawingCanvas extends JPanel {
 
     public boolean hasGraph() {
         return graphCard != null;
+    }
+
+    // whoever showed the card last (null after a restore / clear)
+    public Object getGraphTag() {
+        return graphCard == null ? null : graphTag;
+    }
+
+    // drag the card around, screen px, issue #45
+    public void moveGraphBy(double dxScreen, double dyScreen) {
+        if (graphCard == null) {
+            return;
+        }
+        graphCard = new Rectangle2D.Double(graphCard.getX() + dxScreen / scale, graphCard.getY() + dyScreen / scale,
+                graphCard.getWidth(), graphCard.getHeight());
+        repaint();
+    }
+
+    // new size in screen px, top-left stays
+    public void resizeGraphTo(double widthScreen, double heightScreen) {
+        if (graphCard == null || !(widthScreen > 0) || !(heightScreen > 0)) {
+            return;
+        }
+        graphCard = new Rectangle2D.Double(graphCard.getX(), graphCard.getY(), widthScreen / scale, heightScreen / scale);
+        repaint();
+    }
+
+    // fresh picture for the same card (after pan / zoom), so save + pdf get what's on screen
+    public void replaceGraphImage(BufferedImage image) {
+        if (graphCard == null || image == null) {
+            return;
+        }
+        graphImage = image;
+        graphPadding = 0;   // live snapshots already draw their own card
+        repaint();
     }
 
     /** Where the graph card is on screen right now, or null if there is none. */
@@ -503,7 +544,7 @@ public class DrawingCanvas extends JPanel {
                 world.getWidth() * scale, world.getHeight() * scale);
     }
 
-    /** A smooth, smaller copy of a big image (QuickChart sends 1600 px), so it draws cleanly. */
+    /** A smooth, smaller copy of a big image, so it draws cleanly. */
     private static BufferedImage downscaled(BufferedImage image, int maxWidth) {
         if (image.getWidth() <= maxWidth || maxWidth <= 0) {
             return image;
@@ -1020,6 +1061,7 @@ public class DrawingCanvas extends JPanel {
         book = back.book.copy();
         pictures.clear(); pictures.addAll(back.pictures);
         graphImage = back.graphImage; graphCard = back.graphCard;
+        graphTag = back.graphTag; graphPadding = back.graphPadding;
         selectedPicture = null;
         selectedPictures.clear();
         currentStroke = null;
@@ -1037,7 +1079,7 @@ public class DrawingCanvas extends JPanel {
         fire(actionListeners);
         saveForUndo();
         pictures.clear();selectedPicture = null;selectedPictures.clear();
-        graphCard = null;graphImage = null;
+        graphCard = null;graphImage = null;graphTag = null;
         strokes.clear();
         for (Formula f : book.all()) {
             book.remove(f.getId());
@@ -1051,7 +1093,7 @@ public class DrawingCanvas extends JPanel {
 
     private Snapshot snapshot() {
         return new Snapshot(new ArrayList<>(strokes), colorsNow(), new HashMap<>(strokeWidths),
-                book.copy(), new ArrayList<>(pictures), graphImage, graphCard);
+                book.copy(), new ArrayList<>(pictures), graphImage, graphCard, graphTag, graphPadding);
     }
 
     private void saveForUndo() {
@@ -1135,9 +1177,12 @@ public class DrawingCanvas extends JPanel {
         final List<Picture> pictures;
         final BufferedImage graphImage;
         final Rectangle2D graphCard;
+        final Object graphTag;
+        final double graphPadding;
 
         Snapshot(List<Stroke> strokes, Map<Stroke, Color> colors, Map<Stroke, Float> widths,
-                 FormulaBook book, List<Picture> pictures, BufferedImage graphImage, Rectangle2D graphCard) {
+                 FormulaBook book, List<Picture> pictures, BufferedImage graphImage, Rectangle2D graphCard,
+                 Object graphTag, double graphPadding) {
             this.strokes = strokes;
             this.colors = colors;
             this.widths = widths;
@@ -1145,6 +1190,8 @@ public class DrawingCanvas extends JPanel {
             this.pictures = pictures;
             this.graphImage = graphImage;
             this.graphCard = graphCard;
+            this.graphTag = graphTag;
+            this.graphPadding = graphPadding;
         }
     }
 
@@ -1619,13 +1666,10 @@ public class DrawingCanvas extends JPanel {
     }
 
     /**
-     * Screenshot of just the formula: the lasso selection if there is one, otherwise all the ink,
-     * cropped to its bounding box with a white margin, dark strokes on white, at 100% whatever the
-     * current zoom. This is the image handed to handwriting recognition.
-     *
-     * <p>The image is always a landscape rectangle, at least {@value #FORMULA_MIN_ASPECT} times as
-     * wide as it is tall, like a line of formula; narrow ink (a single tall symbol, a fraction) is
-     * centred with extra white space on its left and right.
+     * Picture of just the formula: the lasso selection if there is one, otherwise all the ink.
+     * Rendered from the strokes at a fixed scale whatever the zoom, cropped to the ink plus the pen
+     * width, black on white in gray, at least 8 px of margin, padded (never stretched) to multiples
+     * of 16. This is the image handed to handwriting recognition.
      *
      * @throws IllegalStateException if nothing has been written
      */
@@ -1638,22 +1682,7 @@ public class DrawingCanvas extends JPanel {
 
     // cropped picture of some strokes, answers never included
     private BufferedImage imageOf(List<Stroke> formula) {
-        Rectangle ink = boundsOf(formula);
-        int margin = FORMULA_MARGIN + (int) Math.ceil(INK_WIDTH / 2);
-        int inkWidth = ink.width + 1 + 2 * margin;
-        int height = ink.height + 1 + 2 * margin;
-        int width = Math.max(inkWidth, (int) Math.ceil(FORMULA_MIN_ASPECT * height));
-        BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
-        Graphics2D g2 = image.createGraphics();
-        g2.setColor(Color.WHITE);
-        g2.fillRect(0, 0, width, height);
-        g2.translate(margin - ink.x + (width - inkWidth) / 2, margin - ink.y);
-        setUpInk(g2);
-        for (Stroke stroke : formula) {
-            drawStroke(g2, stroke);
-        }
-        g2.dispose();
-        return image;
+        return FORMULA_RENDERER.render(formula);
     }
 
     /** Draws the ink (no background) as it appears on screen, e.g. onto a copy of the canvas elsewhere. */
@@ -1887,7 +1916,7 @@ public class DrawingCanvas extends JPanel {
         history.clear();redoHistory.clear();strokeWidths.clear();
         strokeWidths.putAll(restoredWidths);
         selectedPicture = null;selectedPictures.clear();selection.clear();selectedAnswers.clear();
-        currentStroke = null;graphCard = restoredGraphBounds;graphImage = restoredGraph;
+        currentStroke = null;graphCard = restoredGraphBounds;graphImage = restoredGraph;graphTag = null;graphPadding = 0;
         scale = state.zoom();originX = state.offsetX();originY = state.offsetY();
         repaint();fire(inkListeners);fire(viewListeners);
     }
@@ -2219,15 +2248,6 @@ public class DrawingCanvas extends JPanel {
     }
 
     private static void drawStroke(Graphics2D g2, Stroke stroke) {
-        List<InkPoint> points = stroke.getPoints();
-        if (points.isEmpty()) {
-            return;
-        }
-        // A single point (a tap, e.g. a decimal point) is drawn as a dot by the round cap.
-        InkPoint previous = points.get(0);
-        for (InkPoint point : points) {
-            g2.drawLine(previous.getX(), previous.getY(), point.getX(), point.getY());
-            previous = point;
-        }
+        FormulaImageRenderer.trace(g2, stroke);
     }
 }

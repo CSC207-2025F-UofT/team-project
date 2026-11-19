@@ -81,4 +81,20 @@ class LatexFunctionParserTest {
         assertThrows(LatexParseException.class, () -> parser.parse("\\frac{1}{"));
         assertThrows(LatexParseException.class, () -> parser.parse("(x+1"));
     }
+
+    @Test
+    void surfacesTakeZOrFOfXY() throws LatexParseException {
+        assertEquals(13, parser.parseSurface("z=x^2+y^2").evaluate(2, 3), 1e-12);
+        assertEquals(6, parser.parseSurface("f(x,y)=xy").evaluate(2, 3), 1e-12);
+        assertEquals(-1, parser.parseSurface("x-y=z").evaluate(2, 3), 1e-12);
+        assertEquals(Math.sin(1) * Math.cos(2), parser.parseSurface("z=\\sin x\\cos y").evaluate(1, 2), 1e-12);
+    }
+
+    @Test
+    void yIsStillTheNameOnCurvesNotAVariable() {
+        assertThrows(LatexParseException.class, () -> parser.parse("y=x+y"));
+        assertThrows(LatexParseException.class, () -> parser.parse("z=x+y"));
+        assertThrows(LatexParseException.class, () -> parser.parseSurface("y=x^2"));
+        assertThrows(LatexParseException.class, () -> parser.parseSurface("z=x+w"));
+    }
 }

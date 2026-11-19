@@ -20,7 +20,7 @@ Write math by hand. penTex reads it, calculates it, graphs it and exports it as 
 
 **Education (mathematics)**
 
-penTex is a Java Swing desktop app for students who would rather write math than type it. The window is a single infinite canvas. A student writes a formula with the pen. When they pause after an "=", a neural network we trained reads the ink as LaTeX, and a small popup shows the typeset formula with **Calculate** and **Graph** buttons. **Calculate** writes the answer on the canvas right after the "=", in a handwriting-style font. **Graph** draws the function in a card beside the formula. Every calculation and graph is saved to a local **History** panel. Anything on the canvas or in History can be dragged into the built-in **PDF** editor and exported.
+penTex is a Java Swing desktop app for students who would rather write math than type it. The window is a single infinite canvas. A student writes a formula with the pen. When they pause after an "=", a neural network we trained reads the ink as LaTeX, and a small popup shows the typeset formula with **Calculate** and **Graph** buttons. **Calculate** writes the answer on the canvas right after the "=", in a handwriting-style font. **Graph** draws the function in a live card beside the formula. A differential equation gets a **Phase Portrait** button instead, which draws its slope field or phase plane in the same kind of card. Every calculation and graph is saved to a local **History** panel. Anything on the canvas or in History can be dragged into the built-in **PDF** editor and exported.
 
 **Specification (for noun/verb analysis).** A *student* draws *strokes* on a *canvas*. Strokes are grouped into *formulas*, and each formula is *recognized* as a LaTeX string. A formula can be *calculated*: evaluated to a *value*, solved as an equation or inequality in one unknown, differentiated, or saved as a *user-defined function* such as f(x) = x². The *answer* is shown next to the formula. A formula of the form y = … or f(x) = … can be *graphed* over an x range. Every calculation, defined function and graph becomes a *history entry* that is kept between sessions. History entries and canvas selections become *materials*, which the student places on the *pages* of a *PDF document* and exports. The whole canvas can be *saved* under a name and *reopened* later.
 
@@ -73,7 +73,7 @@ The actor in every use case is the **student**.
 1. The student writes a formula on the canvas with the pen, ending with "=", e.g. `3x+5=`.
 2. The student stops writing for about 1.5 seconds.
 3. The system groups the new strokes into one formula, crops them to a dark-on-white image and runs the recognition model on it.
-4. The system shows a popup next to the "=" with the typeset LaTeX and the actions that fit it: **Calculate**, **Graph**, or both.
+4. The system shows a popup next to the "=" with the typeset LaTeX and the actions that fit it: **Calculate**, **Graph**, or both; a differential equation gets **Phase Portrait** alone.
 
 **Alternative flows:**
 - **Lasso selection:** the student circles some ink with the lasso (or drags a box). The selection is read as one formula, with or without an "=".
@@ -126,19 +126,37 @@ The actor in every use case is the **student**.
 **User story:** US4 · **Lead:** Haoyu Wang · **MVP:** yes
 
 **Main flow:**
-1. The student writes `y = …` or `f(x) = …`, and the popup offers **Graph**.
+1. The student writes `y = …` or `f(x) = …` (a curve) or `z = …` / `f(x,y) = …` (a surface), and the popup offers **Graph**.
 2. The student clicks **Graph**.
-3. The system parses the LaTeX into a function of x and samples 401 points over x ∈ [−10, 10]. It breaks the line at gaps and asymptotes and picks a y window that ignores blow-ups.
-4. The system sends the points to the QuickChart API, which returns a PNG.
-5. The system shows the graph in a card beside the formula and adds it to History and the PDF library.
+3. The system parses the LaTeX and builds a plot in plain Java, no web API. A curve is sampled over x ∈ [−10, 10], broken at gaps and asymptotes, with a y window that ignores blow-ups; its roots, minima, maxima and y-intercept are found. A surface is sampled on a grid.
+4. The system shows a live graph card beside the formula, with the typeset function in its title bar, and adds a picture of it to History and the PDF library.
 
 **Alternative flows:**
-- **Change range:** the student types new x and y ranges in the bar under the graph card, and the graph is redrawn (steps 3–5).
-- **Not a function of x:** the popup does not offer **Graph**.
+- **Read a value:** hovering over a curve shows the real point on it, with dashed guides and the values on both axes; near a root, minimum, maximum or y-intercept it snaps onto that point and names it. On a surface it shows (x, y, z) under the cursor. A click pins the readout.
+- **Explore:** dragging the plot pans (2D) or rotates (3D), scrolling zooms, double click or ↺ goes back to the start. The range boxes under the card follow the window.
+- **Move or resize the card:** dragging the title bar moves the card, the corner grip resizes it, × closes it.
+- **Change range:** the student types new x and y ranges in the bar under the card, and the graph is redrawn (steps 3–4).
+- **Not a function of x (or of x and y):** the popup does not offer **Graph**.
 - **Bad range or nothing to draw:** if min ≥ max, the function is undefined on the whole range, or the graph lies entirely outside the y range, the system shows an error notice.
-- **Service unavailable:** if QuickChart cannot be reached or returns an error, the system shows *Could not draw the graph* with the reason.
 
-**Main classes:** `GraphController`, `GraphFunctionInteractor` (with its input/output boundaries and data), `GraphRendererGateway` / `QuickChartGraphRenderer`, `LatexFunctionParser`, `GraphPresenter`, `GraphViewModel`, `PopupGraphing`, `GraphRangeBar`. `GraphCheckInteractor` decides whether **Graph** is offered.
+**Main classes:** `GraphController`, `GraphFunctionInteractor`, `GraphExploreController` / `ExploreGraphInteractor`, `GraphSessionDataAccessInterface` / `InMemoryGraphSessionDataAccessObject`, `LatexFunctionParser`, `entity.graph` (`CurvePlot`, `SurfacePlot`, `CurveSampler`, `KeyPointFinder`, `Viewport`), `GraphPresenter`, `GraphViewModel`, `view.graph` (`GraphCard`, `PlotCard`, `CurvePainter`, `SurfacePainter`), `PopupGraphing`, `GraphRangeBar`. `GraphCheckInteractor` decides whether **Graph** is offered.
+
+### Use Case 4b: Draw the phase portrait of a differential equation
+**User story:** US4 · **Lead:** Haoyu Wang
+
+**Main flow:**
+1. The student lassoes a differential equation. The system checks that one side of every line is a derivative (`y'`, `\frac{dy}{dx}`, `\dot{x}`, `y''` …), and the popup offers **Phase Portrait** (and nothing else).
+2. The student clicks **Phase Portrait**.
+3. The system reads the equation as a plane vector field: `y' = f(x, y)` becomes a slope field, `y'' = f(y, y')` a phase plane in (y, y'), and a system `x' = f(x, y)`, `y' = g(x, y)` (two lines) a phase plane in (x, y). It finds the equilibria and classifies them (saddle, stable / unstable node, stable / unstable spiral, center; stable / unstable lines on a slope field).
+4. The system shows a live card beside the formula with arrows (or slope dashes) and the equilibria, and adds a picture to History and the PDF library.
+
+**Alternative flows:**
+- **Follow a solution:** hovering draws the solution through the cursor (RK4) and shows the point and the field there (`x′`, `y′`, or the slope); near an equilibrium it snaps onto it and names it.
+- **Pin solutions:** a click pins the solution through that point (up to 8); clicking a pinned curve removes it.
+- **Explore, move, resize, change range:** same as the graph card in Use Case 4. Graph and Phase Portrait share the canvas card slot; whichever was drawn last is shown.
+- **Can't be drawn:** a third-order equation, an `x` on the right of `y'' = …`, or an unknown letter shows a notice saying why.
+
+**Main classes:** `DifferentialEquationParser`, `entity.phase` (`DifferentialEquation`, `PhasePlot`, `EquilibriumFinder`, `SolutionTracer`, `ArrowField`), `PhasePortraitInteractor`, `ExplorePhaseInteractor`, `PhaseCheckInteractor`, `PhasePresenter`, `PhaseViewModel`, `PhaseCard`, `PhasePainter`, `PopupPhasePortrait`.
 
 ### Use Case 5: Build and export a PDF
 **User story:** US5 · **Lead:** Bojun (Eric) Yang · **MVP:** yes
@@ -196,7 +214,7 @@ The actor in every use case is the **student**.
 |-------------|--------------|
 | Yuanmo (Frank) Zha | Use Case 1: Recognize a handwritten formula |
 | Haoxiang Zhao | Use Case 2: Calculate a formula; Use Case 3: Show the result on the canvas |
-| Haoyu Wang | Use Case 4: Graph a function |
+| Haoyu Wang | Use Case 4: Graph a function, Use Case 4b: Phase portrait |
 | Bojun (Eric) Yang | Use Case 5: Build and export a PDF |
 
 Added after the MVP (both implemented, led by Bojun (Eric) Yang): Use Case 6, Browse and reuse history, and Use Case 7, Save and reopen a canvas.
@@ -232,9 +250,14 @@ A function the student defined, e.g. `f(x)=x^2`.
 - Instance variables: `name: String`, `parameters: List<String>`, `body: Node`, `bodyText: String`
 - Methods: getters
 
-### MathFunction / GraphData (`entity`)
-- `MathFunction`: `latex: String`, `rule: DoubleUnaryOperator`. Methods: `getLatex()`, `evaluate(x)`
-- `GraphData`: sampled points ready to draw. `title: String`, `xs: double[]`, `ys: double[]` (NaN marks a gap), `xMin`, `xMax`, `yMin`, `yMax`. Methods: getters
+### MathFunction / SurfaceFunction / plots (`entity`, `entity.graph`)
+- `MathFunction`: `latex: String`, `rule: DoubleUnaryOperator`. Methods: `getLatex()`, `evaluate(x)`. `SurfaceFunction` is the same for f(x, y).
+- `Viewport`: the immutable x / y window. Methods: `panned(dx, dy)`, `zoomed(cx, cy, fx, fy)`
+- `Plot` (`CurvePlot`, `SurfacePlot`): a function seen through a viewport. Methods: `lookingAt(viewport)`, `trace(x, y, snapX)` (the real point under the cursor), `getCurve()` / `getKeyPoints()` or `getGrid()`
+
+### DifferentialEquation / PhasePlot (`entity.phase`)
+- `DifferentialEquation`: `kind` (`SLOPE_FIELD`, `PHASE_PLANE`), axis names, and the field `dh(h, v)`, `dv(h, v)`
+- `PhasePlot`: an equation, a viewport and the pinned solutions. Methods: `getArrows()`, `getEquilibria()` (each an `Equilibrium` with its `Type`), `getSolutions()`, `trace(h, v, snapH, snapV)`, `withSolutionToggled(...)`, `lookingAt(viewport)`
 
 ### HistoryEntry (`history.domain`)
 One saved formula, calculation or graph. It is an immutable record.
@@ -253,15 +276,9 @@ One saved formula, calculation or graph. It is an immutable record.
 
 ## API Usage
 
-### QuickChart (web API)
+### Graphing (no web API)
 
-**Documentation:** https://quickchart.io/documentation/
-
-**How it is used in the program:** `QuickChartGraphRenderer` sends a `POST` to `https://quickchart.io/chart`. The body is a Chart.js v4 line chart holding the sampled points, the x and y axes and the window. QuickChart returns an 800×500 PNG, which becomes the graph card on the canvas and the graph image in History and the PDF. The renderer sits behind the `GraphRendererGateway` interface, so `GraphFunctionInteractor` never deals with HTTP and the tests can swap in a fake renderer. QuickChart is free and needs no API key.
-
-**Status:** called successfully. The app uses it for every graph, and a test request on 2026-11-17 returned HTTP 200 with `image/png`.
-
-Earlier drafts of this README planned to use the Desmos API. We use QuickChart instead because it returns a plain image over HTTP, which a Swing app can show directly.
+Graphs and phase portraits are computed and drawn in plain Java (Java2D), so they work offline. Earlier versions sent the sampled points to the QuickChart web API and showed the PNG it returned; that was replaced so the graph could be a live card (hover values, pan, zoom, move) instead of a still picture.
 
 ### Libraries
 
@@ -326,11 +343,17 @@ classDiagram
         -DoubleUnaryOperator rule
         +evaluate(double) double
     }
-    class GraphData {
-        -String title
-        -double[] xs
-        -double[] ys
-        -double xMin, xMax, yMin, yMax
+    class CurvePlot {
+        -MathFunction function
+        -Viewport viewport
+        +trace(double, double, double) TracePoint
+        +lookingAt(Viewport) Plot
+    }
+    class PhasePlot {
+        -DifferentialEquation equation
+        -Viewport viewport
+        +getEquilibria() List~Equilibrium~
+        +trace(double, double, double, double) PhaseTracePoint
     }
     class HistoryEntry {
         <<record>>
@@ -372,7 +395,8 @@ classDiagram
     Node ..> Value : produces
     Context o-- UserFunction
     UserFunction --> Node : body
-    MathFunction ..> GraphData : sampled into
+    CurvePlot --> MathFunction : samples
+    PhasePlot --> DifferentialEquation : follows
     SavedCanvas --> CanvasState
     PdfDocument o-- PdfMaterial : placed on pages
 ```
@@ -412,7 +436,7 @@ sequenceDiagram
 **Requirements:**
 - JDK 17 or newer (`mvn -v` must show Java 17+; if not, set `JAVA_HOME` to a newer JDK)
 - Maven 3.9+
-- An internet connection on the first run, when DJL downloads the PyTorch native library to `~/.djl.ai`, and whenever you draw a graph (QuickChart)
+- An internet connection on the first run, when DJL downloads the PyTorch native library to `~/.djl.ai`
 
 **Run the app** from the repository root (the model path is relative to it):
 
@@ -426,10 +450,12 @@ mvn compile exec:java
 mvn test
 ```
 
-All 1118 tests passed on 2026-11-17.
+All 1437 tests passed on 2026-11-18.
 
 **Using it:**
 - Write a formula ending in "=" and pause. Click **Calculate** or **Graph** in the popup.
+- Lasso a differential equation such as `y'=y` or `y''=-y` and click **Phase Portrait**.
+- On a graph card: hover to read values, click to pin, drag to pan (or spin a 3D one), scroll to zoom, drag the title bar to move it.
 - Use the toolbar at the bottom for Pen, Eraser, Lasso, colours, Undo and Clear. Drag its handle to move it to a corner.
 - **History** (top left) and **PDF** (top right) open side panels.
 - Shortcuts: ⌘Z / Ctrl+Z undo, ⌘S / Ctrl+S save, ⌘⇧S / Ctrl+Shift+S save as, Esc leaves full-screen PDF.
@@ -444,8 +470,8 @@ All 1118 tests passed on 2026-11-17.
 
 | Layer | Packages |
 |---|---|
-| Entities | `entity`, `entity.node`, `entity.value`, `entity.symbolic`, `entity.calculus`, `history.domain`, `workspace.domain`, `pdf_editor.domain` |
-| Use cases | `use_case.evaluate`, `use_case.graph_function`, `use_case.graph_check`, `history.use_case`, `workspace.use_case`, `pdf_editor.use_case` |
+| Entities | `entity`, `entity.graph`, `entity.phase`, `entity.node`, `entity.value`, `entity.symbolic`, `entity.calculus`, `history.domain`, `workspace.domain`, `pdf_editor.domain` |
+| Use cases | `use_case.evaluate`, `use_case.graph_function`, `use_case.explore_graph`, `use_case.graph_check`, `use_case.phase_portrait`, `use_case.explore_phase`, `use_case.phase_check`, `history.use_case`, `workspace.use_case`, `pdf_editor.use_case` |
 | Interface adapters | `interface_adapter.*`, `history.adapter`, `pdf_editor.adapter` |
 | Frameworks & drivers | `data_access`, `history.data_access`, `workspace.data_access`, `pdf_editor.data_access`, `view.*`, `pdf_editor.view`, `model` (DJL runtime) |
 | Wiring | `app.java`, `app.StackedAppBuilder` |
@@ -456,4 +482,3 @@ The recognizer (`model.vital_mini`) is a CNN followed by transformer encoder and
 ### Known limitations
 - Integrals are recognized but not calculated.
 - Uploading a photo (from US1) is not implemented yet. Recognition works on canvas ink only.
-- Graphing needs an internet connection.

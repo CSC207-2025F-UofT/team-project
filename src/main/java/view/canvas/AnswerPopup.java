@@ -26,7 +26,7 @@ import java.awt.geom.RoundRectangle2D;
 import java.util.function.Consumer;
 import java.util.function.LongSupplier;
 
-// glass capsule (Calculate, Graph or both) + white card with the recognised formula
+// glass capsule (Calculate, Graph, both, or Phase Portrait for an ode) + white card with the recognised formula
 public class AnswerPopup extends JPanel {
     private static final float TEX_SIZE = 22f;
     private static final int CARD_SHIFT = 24;   // card sits a bit right of the button
@@ -44,14 +44,17 @@ public class AnswerPopup extends JPanel {
     private final GlassBar calcBar;   // Calculate only
     private final GlassBar graphBar;  // Graph only
     private final GlassBar bothBar;   // Calculate + Graph
+    private final GlassBar phaseBar;  // Phase Portrait, for an ode
     private final GlassBar.Item calcOnly;
     private final GlassBar.Item graphOnly;
     private final GlassBar.Item calcItem;
     private final GlassBar.Item graphItem;
+    private final GlassBar.Item phaseOnly;
     private GlassBar bar;             // the one on show, null for a problem
     private final Card card = new Card();
     private Runnable onCalculate = () -> { };
     private Runnable onGraph = () -> { };
+    private Runnable onPhase = () -> { };
     private String latex;
     private TeXIcon icon;
 
@@ -73,13 +76,18 @@ public class AnswerPopup extends JPanel {
         calcItem = bothBar.action("Calculate", Icons::equalCircle, () -> onCalculate.run(), () -> true);
         graphItem = bothBar.action("Graph", Icons::scribble, () -> onGraph.run(), () -> true);
         bothBar.finish();
+        phaseBar = newBar(backdrop, version);
+        phaseOnly = phaseBar.action("Phase Portrait", Icons::phase, () -> onPhase.run(), () -> true);
+        phaseBar.finish();
         add(calcBar);
         add(graphBar);
         add(bothBar);
+        add(phaseBar);
         add(card);
         calcBar.setVisible(false);
         graphBar.setVisible(false);
         bothBar.setVisible(false);
+        phaseBar.setVisible(false);
         setVisible(false);
     }
 
@@ -96,11 +104,21 @@ public class AnswerPopup extends JPanel {
 
     // board popup: null = that button's left out, at least one of them is set
     public void showFormula(String latex, Runnable onCalculate, Runnable onGraph) {
+        showFormula(latex, onCalculate, onGraph, null);
+    }
+
+    // an ode gets its own Phase Portrait button, nothing else
+    public void showFormula(String latex, Runnable onCalculate, Runnable onGraph, Runnable onPhase) {
         this.latex = latex;
         this.onCalculate = onCalculate == null ? () -> { } : onCalculate;
         this.onGraph = onGraph == null ? () -> { } : onGraph;
+        this.onPhase = onPhase == null ? () -> { } : onPhase;
         icon = typeset(latex);
-        bar = onGraph == null ? calcBar : onCalculate == null ? graphBar : bothBar;
+        if (onPhase != null) {
+            bar = phaseBar;
+        } else {
+            bar = onGraph == null ? calcBar : onCalculate == null ? graphBar : bothBar;
+        }
         relayout();
     }
 
@@ -157,6 +175,16 @@ public class AnswerPopup extends JPanel {
         return bar == graphBar || bar == bothBar;
     }
 
+    boolean hasPhasePortrait() {
+        return bar == phaseBar;
+    }
+
+    void clickPhasePortrait() {
+        if (hasPhasePortrait()) {
+            bar.activate(phaseOnly);
+        }
+    }
+
     void clickGraph() {
         if (hasGraph()) {
             bar.activate(bar == bothBar ? graphItem : graphOnly);
@@ -186,6 +214,7 @@ public class AnswerPopup extends JPanel {
         calcBar.setVisible(bar == calcBar);
         graphBar.setVisible(bar == graphBar);
         bothBar.setVisible(bar == bothBar);
+        phaseBar.setVisible(bar == phaseBar);
         Dimension c = card.getPreferredSize();
         if (bar != null) {
             Dimension d = bar.getPreferredSize();

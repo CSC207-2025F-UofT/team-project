@@ -47,6 +47,30 @@ final class GraphRangeBar extends JPanel {
         yRange.setText(y);
     }
 
+    // after a pan / zoom, show the window you're looking at (y stays as typed for 3d)
+    void showRange(double xMin, double xMax, double yMin, double yMax, boolean showY) {
+        if (xRange.hasFocus() || yRange.hasFocus()) {
+            return;   // don't stomp on typing
+        }
+        put(xRange, pair(xMin, xMax));
+        if (showY) {
+            put(yRange, pair(yMin, yMax));
+        }
+    }
+
+    // only touch the box if it changed, start of the text in view so the minus isn't scrolled off
+    private static void put(GlassTextField box, String text) {
+        if (!text.equals(box.getText())) {
+            box.setText(text);
+            box.setCaretPosition(0);
+        }
+    }
+
+    private static String pair(double lo, double hi) {
+        return interface_adapter.graph.GraphNumbers.format(lo) + ", "
+                + interface_adapter.graph.GraphNumbers.format(hi);
+    }
+
     private static JLabel axis(String name) {
         JLabel label = new JLabel(name);
         label.setFont(Fonts.ui(Font.ITALIC, 15f));

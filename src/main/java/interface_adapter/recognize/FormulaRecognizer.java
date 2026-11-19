@@ -5,9 +5,9 @@ import java.awt.image.BufferedImage;
 /**
  * Handwriting recognition (US1): turns a picture of a handwritten formula into LaTeX.
  *
- * <p>Not implemented yet. The machine-learning part implements this, e.g. by saving the image
- * to a temporary PNG, running the Python model on it and returning the LaTeX it prints.
- * The image comes from {@code DrawingCanvas.toFormulaImage()}: dark ink on white, cropped to the formula.
+ * <p>The image comes from {@code DrawingCanvas.toFormulaImage()}: drawn from the strokes at a fixed
+ * scale (not the screen zoom), gray dark ink on white, cropped to the ink plus pen width, at least
+ * 8 px of margin, sides padded to multiples of 16. The implementation fits it to the model.
  */
 public interface FormulaRecognizer {
     /**
