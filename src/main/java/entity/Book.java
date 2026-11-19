@@ -16,8 +16,8 @@ public class Book {
 
 
     public Book(String title, String author,
-                 Integer publicationYear, String isbn, String genre,
-                 Integer coverID){
+                 Integer publicationYear, String isbn,
+                Integer coverID){
         this.title =title;
         this.author =author;
         this.isbn =isbn;
