@@ -3,6 +3,7 @@ package app;
 import data_access.InMemoryUpdateTimerSettingsDataAccess;
 import entities.TimerSessionFactory;
 import interface_adapters.ViewManagerModel;
+import interface_adapters.flashcard_generator.FlashcardGeneratorViewModel;
 import interface_adapters.home.HomeViewModel;
 import interface_adapters.open_settings.OpenSettingsController;
 import interface_adapters.open_settings.OpenSettingsPresenter;
@@ -16,6 +17,7 @@ import use_case.update_timer_settings.UpdateTimerSettingsDataAccessInterface;
 import use_case.update_timer_settings.UpdateTimerSettingsInputBoundary;
 import use_case.update_timer_settings.UpdateTimerSettingsInteractor;
 import use_case.update_timer_settings.UpdateTimerSettingsOutputBoundary;
+import view.FlashcardGeneratorView;
 import view.HomeView;
 import view.TimerSettingsView;
 
@@ -107,6 +109,12 @@ public class AppBuilder {
         viewManagerModel.notifyViewChanged();
 
         return application;
+    }
+
+    public AppBuilder addFlashcardGeneratorView(){
+
+
+        return this;
     }
 
     // MOVE TO MAIN LATER
