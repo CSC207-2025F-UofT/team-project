@@ -26,6 +26,9 @@ public class Project {
     }
 
     public void changeName(String name) {
+        if (name == null) {
+            throw new IllegalArgumentException("Project name cannot be empty.");
+        }
         this.name = name;
     }
 
