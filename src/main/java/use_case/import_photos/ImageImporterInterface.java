@@ -7,5 +7,5 @@ import entity.Photo;
 
 public interface ImageImporterInterface {
     List<Photo> importImages(List<String> paths, Consumer<ImageImportProgressData> onImageProcessed);
-    void cleanupImage(Photo photo);
+    void cleanupImages(List<Photo> photos);
 }
