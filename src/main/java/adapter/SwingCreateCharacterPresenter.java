@@ -26,18 +26,7 @@ public final class SwingCreateCharacterPresenter implements CreateCharacterOutpu
             + " "
             + response.getClassName()
             + "</b><br>"
-            + "STR "
-            + response.getStrength()
-            + " &nbsp; DEX "
-            + response.getDexterity()
-            + " &nbsp; CON "
-            + response.getConstitution()
-            + " &nbsp; INT "
-            + response.getIntelligence()
-            + " &nbsp; WIS "
-            + response.getWisdom()
-            + " &nbsp; CHA "
-            + response.getCharisma()
+            + response.getStats()  // note Stats.toString() is implicitly called here
             + "</html>";
     SwingUtilities.invokeLater(() -> display.showCharacterCreated(characterResult));
   }

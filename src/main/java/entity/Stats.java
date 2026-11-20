@@ -3,6 +3,9 @@ package entity;
 /**
  * This entity stores the six ability scores (strength, dexterity, constitution, intelligence,
  * wisdom, and charisma) together.
+ *
+ * It's a final class because mutating the attributes might interfere with the cache of the API.
+ * If stats get modified then it's better to use {@code plus} to create a new Stats object
  */
 public final class Stats {
   private final int strength;
@@ -12,7 +15,7 @@ public final class Stats {
   private final int wisdom;
   private final int charisma;
 
-  /** Creates an immutable set of six ability scores. */
+  /** Creates a set of six ability scores. */
   public Stats(
       int strength, int dexterity, int constitution, int intelligence, int wisdom, int charisma) {
     this.strength = strength;

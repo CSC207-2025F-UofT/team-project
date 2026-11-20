@@ -3,7 +3,6 @@ package usecase;
 import entity.CharacterClass;
 import entity.PlayerCharacter;
 import entity.Race;
-import entity.Stats;
 import java.util.List;
 
 /** Coordinates character creation between the catalog and presentation boundaries. */
@@ -40,17 +39,8 @@ public class CreateCharacterInteractor {
     }
 
     PlayerCharacter character = new PlayerCharacter(race, cls);
-    Stats s = character.totalStats();
     output.presentCreated(
-        new CreateCharacterResponse(
-            race.getName(),
-            cls.getName(),
-            s.getStrength(),
-            s.getDexterity(),
-            s.getIntelligence(),
-            s.getConstitution(),
-            s.getWisdom(),
-            s.getCharisma()));
+        new CreateCharacterResponse(race.getName(), cls.getName(), character.getStats()));
   }
 
   /**

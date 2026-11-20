@@ -7,6 +7,7 @@ package entity;
 public class PlayerCharacter {
   private final Race race;
   private final CharacterClass characterClass;
+  private final Stats stats;
 
   /**
    * Creates a player character.
@@ -17,15 +18,15 @@ public class PlayerCharacter {
   public PlayerCharacter(Race race, CharacterClass characterClass) {
     this.race = race;
     this.characterClass = characterClass;
+    this.stats = characterClass.getBaseStats().plus(race.getBonuses());
   }
 
   /**
-   * Returns the player character's stats. Stats are calculated as the sum of base stats (determined
-   * by character class) and stat bonuses (determined by race).
+   * Returns the player character's saved stats.
    *
    * @return the stats of the player character
    */
-  public Stats totalStats() {
-    return characterClass.getBaseStats().plus(race.getBonuses());
+  public Stats getStats() {
+    return stats;
   }
 }
