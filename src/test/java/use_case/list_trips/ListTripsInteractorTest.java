@@ -13,36 +13,42 @@ import entity.Location;
 import entity.LocationInfo;
 import entity.Photo;
 import entity.Trip;
+import use_case.PhotoAccessException;
+import use_case.PhotoAccessInterface;
+import use_case.TripAccessException;
+import use_case.TripAccessInterface;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class ListTripsInteractorTest {
 
-    static class FakeDataAccess implements ListTripsDataAccessInterface {
+    static class FakeDataAccess implements TripAccessInterface, PhotoAccessInterface {
         final List<Trip> trips = new ArrayList<>();
         final Map<String, Photo> photos = new HashMap<>();
-        final Map<String, String> paths = new HashMap<>();
-        boolean fail = false;
+        RuntimeException tripError;
+        RuntimeException photoError;
 
         void addTrip(Trip trip, Photo... tripPhotos) {
             for (Photo p : tripPhotos) {
                 photos.put(p.getId(), p);
-                paths.put(p.getId(), "/photos/" + p.getId() + ".jpg");
                 trip.addPhoto(p);
             }
             trips.add(trip);
         }
 
         @Override
-        public List<Trip> getAllTrips() {
-            if (fail) {
-                throw new IllegalStateException("disk on fire");
+        public List<Trip> getTrips() {
+            if (tripError != null) {
+                throw tripError;
             }
             return new ArrayList<>(trips);
         }
 
         @Override
-        public List<Photo> getTripPhotos(String tripId) {
+        public List<Photo> getPhotosByTripId(String tripId) {
+            if (photoError != null) {
+                throw photoError;
+            }
             List<Photo> result = new ArrayList<>();
             for (Trip t : trips) {
                 if (t.getId().equals(tripId)) {
@@ -52,10 +58,15 @@ class ListTripsInteractorTest {
             return result;
         }
 
-        @Override
-        public String getPhotoPath(String photoId) {
-            return paths.get(photoId);
-        }
+        // Not used by List Trips.
+        @Override public Trip getTripById(String id) { throw new UnsupportedOperationException(); }
+        @Override public void writeTrip(Trip trip) { throw new UnsupportedOperationException(); }
+        @Override public void writeTrips(List<Trip> toWrite) { throw new UnsupportedOperationException(); }
+        @Override public void deleteTripById(String id) { throw new UnsupportedOperationException(); }
+        @Override public Photo getPhotoById(String id) { throw new UnsupportedOperationException(); }
+        @Override public List<Photo> getPhotos() { throw new UnsupportedOperationException(); }
+        @Override public void writePhoto(Photo photo) { throw new UnsupportedOperationException(); }
+        @Override public void writePhotos(List<Photo> toWrite) { throw new UnsupportedOperationException(); }
     }
 
     /** Records what the interactor sent, instead of updating a real ViewModel. */
@@ -81,7 +92,7 @@ class ListTripsInteractorTest {
     void setUp() {
         dao = new FakeDataAccess();
         presenter = new CapturingPresenter();
-        interactor = new ListTripsInteractor(dao, presenter);
+        interactor = new ListTripsInteractor(dao, dao, presenter);
     }
 
     private static Photo photo(String id, LocalDateTime time, LocationInfo info) {
@@ -127,7 +138,7 @@ class ListTripsInteractorTest {
         TripSummary summary = presenter.success.getTrips().get(0);
         assertEquals(3, summary.getPhotoCount());
         assertEquals("Montreal, Canada", summary.getLocationLabel());
-        assertEquals("/photos/early.jpg", summary.getCoverPhotoPath());   // earliest photo, not first added
+        assertEquals("early", summary.getCoverPhotoId());   // earliest photo, not first added
         assertEquals(day(1), summary.getStartTime());
         assertEquals(day(3), summary.getEndTime());
     }
@@ -160,7 +171,7 @@ class ListTripsInteractorTest {
 
         TripSummary summary = presenter.success.getTrips().get(0);
         assertEquals(0, summary.getPhotoCount());
-        assertNull(summary.getCoverPhotoPath());
+        assertNull(summary.getCoverPhotoId());
     }
 
     @Test
@@ -172,12 +183,31 @@ class ListTripsInteractorTest {
     }
 
     @Test
-    void dataAccessErrorGoesToFailView() {
-        dao.fail = true;
+    void tripAccessErrorGoesToFailView() {
+        dao.tripError = new TripAccessException("disk on fire");
 
         interactor.execute();
 
         assertNull(presenter.success);
         assertTrue(presenter.failure.contains("disk on fire"));
+    }
+
+    @Test
+    void photoAccessErrorGoesToFailView() {
+        dao.addTrip(new Trip("t", "Trip", null, null), photo("a", day(1), MONTREAL));
+        dao.photoError = new PhotoAccessException("photos gone");
+
+        interactor.execute();
+
+        assertNull(presenter.success);
+        assertTrue(presenter.failure.contains("photos gone"));
+    }
+
+    @Test
+    void programmingErrorsAreNotHiddenAsFailView() {
+        dao.tripError = new IllegalStateException("bug");
+
+        assertThrows(IllegalStateException.class, () -> interactor.execute());
+        assertNull(presenter.failure);
     }
 }

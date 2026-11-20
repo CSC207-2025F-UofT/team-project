@@ -40,7 +40,7 @@ class ListTripsPresenterTest {
         viewModel.addPropertyChangeListener(evt -> fires[0]++);
 
         TripSummary summary = new TripSummary("t1", "Montreal Weekend", at(2025, 5, 16), at(2025, 5, 17),
-                5, "Montreal, Canada", "/c.jpg");
+                5, "Montreal, Canada", "p1");
         new ListTripsPresenter(viewModel).prepareSuccessView(new ListTripsOutputData(List.of(summary)));
 
         TripListItem item = viewModel.getState().getItems().get(0);
@@ -48,9 +48,19 @@ class ListTripsPresenterTest {
         assertEquals("Montreal Weekend", item.getName());
         assertEquals("16–17 May 2025", item.getDateRange());
         assertEquals("Montreal, Canada · 5 photos", item.getDetails());
-        assertEquals("/c.jpg", item.getCoverPhotoPath());
+        assertEquals("p1", item.getCoverPhotoId());
         assertNull(viewModel.getState().getErrorMessage());
         assertEquals(1, fires[0]);
+    }
+
+    @Test
+    void tripWithoutCoverPassesNullThrough() {
+        TripListViewModel viewModel = new TripListViewModel();
+        TripSummary summary = new TripSummary("t1", "Empty", null, null, 0, null, null);
+
+        new ListTripsPresenter(viewModel).prepareSuccessView(new ListTripsOutputData(List.of(summary)));
+
+        assertNull(viewModel.getState().getItems().get(0).getCoverPhotoId());
     }
 
     @Test

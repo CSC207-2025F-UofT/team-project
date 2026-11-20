@@ -10,17 +10,17 @@ public class TripSummary {
     private final LocalDateTime endTime;
     private final int photoCount;
     private final String locationLabel;
-    private final String coverPhotoPath;
+    private final String coverPhotoId;
 
     public TripSummary(String id, String name, LocalDateTime startTime, LocalDateTime endTime,
-                       int photoCount, String locationLabel, String coverPhotoPath) {
+                       int photoCount, String locationLabel, String coverPhotoId) {
         this.id = id;
         this.name = name;
         this.startTime = startTime;
         this.endTime = endTime;
         this.photoCount = photoCount;
         this.locationLabel = locationLabel;
-        this.coverPhotoPath = coverPhotoPath;
+        this.coverPhotoId = coverPhotoId;
     }
 
     public String getId() { return id; }
@@ -30,6 +30,6 @@ public class TripSummary {
     public int getPhotoCount() { return photoCount; }
     /** "City, Country", or null if no photo in the trip has a known location. */
     public String getLocationLabel() { return locationLabel; }
-    /** File path of the cover photo, or null if the trip has no photos. */
-    public String getCoverPhotoPath() { return coverPhotoPath; }
+    /** ID of the cover photo, or null if the trip has no photos. */
+    public String getCoverPhotoId() { return coverPhotoId; }
 }

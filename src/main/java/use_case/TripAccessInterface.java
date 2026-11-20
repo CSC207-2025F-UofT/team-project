@@ -10,4 +10,5 @@ public interface TripAccessInterface {
 
     void writeTrip(Trip trip);
     void writeTrips(List<Trip> trips);
+    void deleteTripById(String id);
 }

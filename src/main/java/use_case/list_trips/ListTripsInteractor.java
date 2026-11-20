@@ -14,16 +14,22 @@ import java.util.stream.Stream;
 import entity.LocationInfo;
 import entity.Photo;
 import entity.Trip;
+import use_case.TripAccessInterface;
+import use_case.TripAccessException;
+import use_case.PhotoAccessInterface;
+import use_case.PhotoAccessException;
 
 public class ListTripsInteractor implements ListTripsInputBoundary {
     private static final Comparator<TripSummary> NEWEST_FIRST = Comparator.comparing(
             TripSummary::getStartTime, Comparator.nullsLast(Comparator.<LocalDateTime>reverseOrder()));
     
-    private final ListTripsDataAccessInterface dataAcess;
+    private final TripAccessInterface tripAccess;
+    private final PhotoAccessInterface photoAccess;
     private final ListTripsOutputBoundary presenter;
 
-    public ListTripsInteractor(ListTripsDataAccessInterface dataAccess, ListTripsOutputBoundary presenter) {
-        this.dataAcess = dataAccess;
+    public ListTripsInteractor(TripAccessInterface tripAccess, PhotoAccessInterface photoAccess, ListTripsOutputBoundary presenter) {
+        this.tripAccess = tripAccess;
+        this.photoAccess = photoAccess;
         this.presenter = presenter;
     }
 
@@ -31,10 +37,10 @@ public class ListTripsInteractor implements ListTripsInputBoundary {
     public void execute() {
         List<TripSummary> summaries = new ArrayList<>();
         try {
-            for (Trip trip : dataAcess.getAllTrips()) {
+            for (Trip trip : tripAccess.getTrips()) {
                 summaries.add(summarize(trip));
             }
-        } catch (RuntimeException e) {
+        } catch (TripAccessException | PhotoAccessException e ) {
             presenter.prepareFailView("Couldn't load trips: " + e.getMessage());
             return;
         }
@@ -43,12 +49,12 @@ public class ListTripsInteractor implements ListTripsInputBoundary {
     }
 
     private TripSummary summarize(Trip trip) {
-        List<Photo> photos = new ArrayList<>(dataAcess.getTripPhotos(trip.getId()));
+        List<Photo> photos = new ArrayList<>(photoAccess.getPhotosByTripId(trip.getId()));
         Collections.sort(photos); //chronological. photos without a time last.
 
-        String coverPath = photos.isEmpty() ? null : dataAcess.getPhotoPath(photos.get(0).getId());
+        String coverPhotoId = photos.isEmpty() ? null : photos.get(0).getId();
 
-        return new TripSummary(trip.getId(), trip.getName(), trip.getStartTime(), trip.getEndTime(), photos.size(), mostCommonLocation(photos), coverPath);
+        return new TripSummary(trip.getId(), trip.getName(), trip.getStartTime(), trip.getEndTime(), photos.size(), mostCommonLocation(photos), coverPhotoId);
     }
 
     /** The most frequent "City, Country" among the photos. Earliest photo wins for ties. */

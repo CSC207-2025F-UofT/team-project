@@ -1,9 +1,7 @@
 package data_access.image;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.file.Files;
-import java.nio.file.Path;
 
 import entity.Photo;
 import use_case.ImageReadException;
@@ -17,12 +15,9 @@ public class ImageReader implements ImageReaderInterface {
     }
 
     @Override
-    public InputStream readFullImage(Photo photo) {
+    public byte[] readFullImage(Photo photo) {
         try {
-            Path imagePath = resolver.getImagePath(photo);
-
-            return Files.newInputStream(imagePath);
-
+            return Files.readAllBytes(resolver.getImagePath(photo));
         } catch (IOException e) {
             throw new ImageReadException(photo.getId(), e.getMessage(), e);
         }

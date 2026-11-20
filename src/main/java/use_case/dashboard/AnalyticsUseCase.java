@@ -3,7 +3,8 @@ package use_case.dashboard;
 import entity.LocationInfo;
 import entity.Trip;
 import entity.dashboard.DashboardDataCatalog;
-import use_case.list_trips.ListTripsDataAccessInterface;
+import use_case.PhotoAccessInterface;
+import use_case.TripAccessInterface;
 
 import java.time.LocalDate;
 import java.util.*;
@@ -15,12 +16,15 @@ import java.util.stream.Collectors;
  */
 public class AnalyticsUseCase implements DashboardInputBoundary {
     private static final int RANKING_LIMIT = 30;
-    private final ListTripsDataAccessInterface tripAccess;
+    private final TripAccessInterface tripAccess;
+    private final PhotoAccessInterface photoAccess;
     private final DashboardOutputBoundary presenter;
 
-    public AnalyticsUseCase(ListTripsDataAccessInterface tripAccess,
-                         DashboardOutputBoundary dashboardOutputBoundary) {
+    public AnalyticsUseCase(TripAccessInterface tripAccess,
+                            PhotoAccessInterface photoAccess,
+                            DashboardOutputBoundary dashboardOutputBoundary) {
         this.presenter = dashboardOutputBoundary;
+        this.photoAccess = photoAccess;
         this.tripAccess = tripAccess;
     }
     @Override
@@ -38,9 +42,9 @@ public class AnalyticsUseCase implements DashboardInputBoundary {
     }
 
     private DashboardDataCatalog.MostVisitedCountries computeMostVisitedCountries() {
-        List<Trip> trips = tripAccess.getAllTrips();
+        List<Trip> trips = tripAccess.getTrips();
         Map<String, Long> numVisitsByCountry = trips.stream()
-                .flatMap(trip -> tripAccess.getTripPhotos(trip.getId()).stream()
+                .flatMap(trip -> photoAccess.getPhotosByTripId(trip.getId()).stream()
                         .map(photo -> photo.getLocation().getInfo().getCountry())
                         .collect(Collectors.toSet())
                         .stream()
@@ -48,7 +52,7 @@ public class AnalyticsUseCase implements DashboardInputBoundary {
                 .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
 
         Map<String, List<LocationInfo>> locationsByCountry = trips.stream()
-                .flatMap(trip -> tripAccess.getTripPhotos(trip.getId()).stream())
+                .flatMap(trip -> photoAccess.getPhotosByTripId(trip.getId()).stream())
                 .map(photo -> photo.getLocation().getInfo())
                 .collect(Collectors.groupingBy(LocationInfo::getCountry));
 
@@ -76,7 +80,7 @@ public class AnalyticsUseCase implements DashboardInputBoundary {
     }
 
     private List<String> getCountriesByTrip(Trip trip) {
-        return tripAccess.getTripPhotos(trip.getId()).stream()
+        return photoAccess.getPhotosByTripId(trip.getId()).stream()
                 .map(photo -> photo.getLocation().getInfo().getCountry())
                 .toList();
     }

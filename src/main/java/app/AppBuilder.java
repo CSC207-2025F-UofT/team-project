@@ -1,26 +1,35 @@
 package app;
 
 import java.awt.BorderLayout;
-import java.awt.Frame;
 
 import javax.swing.JComponent;
 import javax.swing.JFrame;
-import javax.swing.border.Border;
 
-import data_access.InMemoryTripDataAcessObject;
+
+import data_access.InMemoryDataAccessObject;
 import data_access.SampleData;
+import data_access.StorageResolver;
+import data_access.image.ImageReader;
+import data_access.image.ImageResolver;
 import interface_adapter.ViewManagerModel;
 import interface_adapter.ViewNames;
 import interface_adapter.dashboard.DashboardController;
 import interface_adapter.dashboard.DashboardPresenter;
 import interface_adapter.dashboard.DashboardViewModel;
-import use_case.dashboard.AnalyticsUseCase;
 import interface_adapter.list_trips.ListTripsController;
 import interface_adapter.list_trips.ListTripsPresenter;
 import interface_adapter.list_trips.TripListViewModel;
+import interface_adapter.load_photos.LoadPhotoController;
+import interface_adapter.load_photos.LoadPhotoPresenter;
+import interface_adapter.load_photos.PhotoImageViewModel;
+import use_case.ImageReaderInterface;
+import use_case.dashboard.AnalyticsUseCase;
 import use_case.list_trips.ListTripsInputBoundary;
 import use_case.list_trips.ListTripsInteractor;
 import use_case.list_trips.ListTripsOutputBoundary;
+import use_case.load_photos.LoadPhotoInputBoundary;
+import use_case.load_photos.LoadPhotoInteractor;
+import use_case.load_photos.LoadPhotoOutputBoundary;
 import view.NavigationBar;
 import view.PlaceholderView;
 import view.TripListView;
@@ -38,16 +47,27 @@ public class AppBuilder {
     private final NavigationBar navigationBar = new NavigationBar(viewManagerModel);
 
 
-    // Single swap point for storage. (Replace this with file stuff later)
-    private final InMemoryTripDataAcessObject tripDao = new InMemoryTripDataAcessObject();
-    private final ThumbnailCache thumbnailCache = new ThumbnailCache(96, 300);
+    // Storage. Replace with SQLite implementation later.
+    private final InMemoryDataAccessObject dataAccess = new InMemoryDataAccessObject();
+    private final ImageResolver imageResolver = new ImageResolver(new StorageResolver());
+    private final ImageReaderInterface imageReader = new ImageReader(imageResolver);
+
+    // Photo loading, shared by every view that shows photos.
+    private final PhotoImageViewModel photoImageViewModel = new PhotoImageViewModel();
+    private final ThumbnailCache thumbnailCache = buildThumbnailCache();
 
     private TripListViewModel tripListViewModel;
     private TripListView tripListView;
 
 
     public AppBuilder() {
-        SampleData.populate(tripDao);
+        SampleData.populate(dataAccess, dataAccess, imageResolver);
+    }
+
+    private ThumbnailCache buildThumbnailCache() {
+        LoadPhotoOutputBoundary presenter = new LoadPhotoPresenter(photoImageViewModel);
+        LoadPhotoInputBoundary interactor = new LoadPhotoInteractor(dataAccess, imageReader, presenter);
+        return new ThumbnailCache(96, 300, photoImageViewModel, new LoadPhotoController(interactor));
     }
 
     public AppBuilder addTripListView() {
@@ -58,7 +78,7 @@ public class AppBuilder {
 
     public AppBuilder addListTripsUseCase() {
         ListTripsOutputBoundary presenter = new ListTripsPresenter(tripListViewModel);
-        ListTripsInputBoundary interactor = new ListTripsInteractor(tripDao, presenter);
+        ListTripsInputBoundary interactor = new ListTripsInteractor(dataAccess, dataAccess, presenter);
         tripListView.setListTripsController(new ListTripsController(interactor));
         return this;
     }
@@ -70,7 +90,7 @@ public class AppBuilder {
     public AppBuilder addDashBoardView() {
         DashboardViewModel dashboardViewModel = new DashboardViewModel();
         DashboardPresenter dashboardPresenter = new DashboardPresenter(dashboardViewModel);
-        AnalyticsUseCase analyticsUseCase = new AnalyticsUseCase(tripDao, dashboardPresenter);
+        AnalyticsUseCase analyticsUseCase = new AnalyticsUseCase(dataAccess, dataAccess, dashboardPresenter);
         DashboardController dashboardController = new DashboardController(analyticsUseCase);
         return addScreen("Dashboard", ViewNames.DASHBOARD, new DashboardView(dashboardViewModel, dashboardController));
     }

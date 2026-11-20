@@ -10,6 +10,8 @@ import org.junit.jupiter.api.Test;
 import interface_adapter.list_trips.ListTripsController;
 import interface_adapter.list_trips.TripListItem;
 import interface_adapter.list_trips.TripListViewModel;
+import interface_adapter.load_photos.LoadPhotoController;
+import interface_adapter.load_photos.PhotoImageViewModel;
 import view.components.ThumbnailCache;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -21,7 +23,8 @@ class TripListViewTest {
     @BeforeEach
     void setUp() {
         viewModel = new TripListViewModel();
-        view = new TripListView(viewModel, new ThumbnailCache(64, 10));
+        view = new TripListView(viewModel, new ThumbnailCache(64, 10,
+                new PhotoImageViewModel(), new LoadPhotoController(input -> { })));
     }
 
     private void publish(List<TripListItem> items, String error) throws Exception {
