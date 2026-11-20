@@ -1,55 +1,87 @@
-//import java.io.IOException;
-//
-//import okhttp3.OkHttpClient;
-//import okhttp3.Request;
-//import okhttp3.Response;
-//import org.json.JSONObject;
-//
-///**
-// * A minimal example of making an API call that requires no additional parameters.
-// */
-//public class GetMovieData {
-//    private final OkHttpClient client = new OkHttpClient();
-//
-//    /**
-//     * Make an API call to the specified URL with the given extra parameter key-value pair
-//     * and return the result.
-//     * @param baseURL the URL to query
-//     * @param paramKey the name for the extra parameter
-//     * @param paramValue the value for the extra parameter
-//     * @return the response as a String
-//     * @throws IOException if there is a problem connecting to the API
-//     */
-//    public String run(String baseURL, String paramKey, String paramValue) throws IOException {
-////        HttpUrl url = HttpUrl.parse(baseURL).newBuilder()
-////                .addQueryParameter(paramKey, paramValue)
-////                .build();
-//
-//        Request request = new Request.Builder()
-//                .url("https://api.example.com/data")
-//                .addHeader("Authorization", "Bearer " + apiToken)
-//                .build();
-//
-////        Request request = new Request.Builder()
-////                .url(url)
-////                .build();
-//
-//        try (Response response = client.newCall(request).execute()) {
-//            return response.body().string();
-//        }
-//    }
-//
-//    /**
-//     * Sample main method demonstrating calling the meowfacts API.
-//     * @param args not used
-//     * @throws IOException if the run method fails
-//     */
-//    public static void main(String[] args) throws IOException {
-//        GetExample example = new GetExample();
-//        String response = example.run("https://meowfacts.herokuapp.com");
-//        System.out.println(response);
-//
-//        response = example.run("https://meowfacts.herokuapp.com", "count", "2");
-//        System.out.println(response);
-//    }
-//}
+
+package data_access;
+
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
+import okhttp3.RequestBody;
+import okhttp3.MediaType;
+
+import java.io.IOException;
+
+public class GetMovieData {
+
+    private static final String BASE_URL =
+            "https://api.themoviedb.org/3/";
+
+    private final OkHttpClient client;
+    private final String token;
+
+    // Constructor
+    public GetMovieData(String token) {
+        if (token == null || token.isBlank()) {
+            throw new IllegalArgumentException(
+                    "TMDB token is missing");
+        }
+
+        this.client = new OkHttpClient();
+        this.token = token;
+    }
+
+    // GET: Retrieve information from TMDB
+    public String get(String endpoint) throws IOException {
+
+        String url = BASE_URL + endpoint;
+
+        Request request = new Request.Builder()
+                .url(url)
+                .get()
+                .addHeader("accept", "application/json")
+                .addHeader("Authorization", "Bearer " + token)
+                .build();
+
+        return executeRequest(request);
+    }
+
+    // POST: Send information to TMDB
+    public String post(String endpoint, String jsonBody)
+            throws IOException {
+
+        String url = BASE_URL + endpoint;
+
+        MediaType mediaType =
+                MediaType.get("application/json; charset=utf-8");
+
+        RequestBody body =
+                RequestBody.create(jsonBody, mediaType);
+
+        Request request = new Request.Builder()
+                .url(url)
+                .post(body)
+                .addHeader("accept", "application/json")
+                .addHeader("Authorization", "Bearer " + token)
+                .build();
+
+        return executeRequest(request);
+    }
+
+    // Execute the HTTP request
+    private String executeRequest(Request request)
+            throws IOException {
+
+        try (Response response =
+                     client.newCall(request).execute()) {
+
+            if (!response.isSuccessful()) {
+                throw new IOException(
+                        "API request failed: " + response.code());
+            }
+
+            if (response.body() == null) {
+                throw new IOException("Empty response body");
+            }
+
+            return response.body().string();
+        }
+    }
+}
