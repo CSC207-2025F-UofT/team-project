@@ -7,9 +7,7 @@ import entity.Transaction;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -18,40 +16,18 @@ import java.util.Objects;
 public final class PortfolioInteractor implements PortfolioInputBoundary {
     private final PortfolioOutputBoundary outputBoundary;
     private final StockPriceDataAccessInterface stockPriceDataAccess;
-    private final Map<String, Portfolio> portfolios;
-    private final Portfolio defaultPortfolio;
+    private final PortfolioDataAccessInterface portfolioDataAccess;
 
-    public PortfolioInteractor(Portfolio portfolio,
-                               StockPriceDataAccessInterface stockPriceDataAccess,
-                               PortfolioOutputBoundary outputBoundary) {
-        this.defaultPortfolio = Objects.requireNonNull(portfolio, "portfolio must not be null");
+    public PortfolioInteractor(
+            PortfolioDataAccessInterface portfolioDataAccess,
+            StockPriceDataAccessInterface stockPriceDataAccess,
+            PortfolioOutputBoundary outputBoundary) {
+        this.portfolioDataAccess = Objects.requireNonNull(
+                portfolioDataAccess, "portfolioDataAccess must not be null");
         this.stockPriceDataAccess = Objects.requireNonNull(
                 stockPriceDataAccess, "stockPriceDataAccess must not be null");
         this.outputBoundary = Objects.requireNonNull(
                 outputBoundary, "outputBoundary must not be null");
-        this.portfolios = null;
-    }
-
-    public PortfolioInteractor(StockPriceDataAccessInterface stockPriceDataAccess,
-                               PortfolioOutputBoundary outputBoundary) {
-        this.stockPriceDataAccess = Objects.requireNonNull(
-                stockPriceDataAccess, "stockPriceDataAccess must not be null");
-        this.outputBoundary = Objects.requireNonNull(
-                outputBoundary, "outputBoundary must not be null");
-        this.portfolios = new LinkedHashMap<>();
-        this.defaultPortfolio = null;
-    }
-
-    public PortfolioInteractor(Map<String, Portfolio> portfolios,
-                               StockPriceDataAccessInterface stockPriceDataAccess,
-                               PortfolioOutputBoundary outputBoundary) {
-        Objects.requireNonNull(portfolios, "portfolios must not be null");
-        this.portfolios = new LinkedHashMap<>(portfolios);
-        this.stockPriceDataAccess = Objects.requireNonNull(
-                stockPriceDataAccess, "stockPriceDataAccess must not be null");
-        this.outputBoundary = Objects.requireNonNull(
-                outputBoundary, "outputBoundary must not be null");
-        this.defaultPortfolio = null;
     }
 
     @Override
@@ -80,6 +56,7 @@ public final class PortfolioInteractor implements PortfolioInputBoundary {
         try {
             BigDecimal price = stockPriceDataAccess.getCurrentPrice(inputData.getTicker());
             portfolio.buy(inputData.getTicker(), inputData.getQuantity(), price);
+            portfolioDataAccess.savePortfolio(inputData.getUsername(), portfolio);
             outputBoundary.prepareBuyView(new TradeOutputData(
                     true,
                     "Successfully bought " + inputData.getQuantity()
@@ -96,6 +73,7 @@ public final class PortfolioInteractor implements PortfolioInputBoundary {
         try {
             BigDecimal price = stockPriceDataAccess.getCurrentPrice(inputData.getTicker());
             portfolio.sell(inputData.getTicker(), inputData.getQuantity(), price);
+            portfolioDataAccess.savePortfolio(inputData.getUsername(), portfolio);
             outputBoundary.prepareSellView(new TradeOutputData(
                     true,
                     "Successfully sold " + inputData.getQuantity()
@@ -117,6 +95,7 @@ public final class PortfolioInteractor implements PortfolioInputBoundary {
                 // Keep the last known price if a stock quote cannot be refreshed.
             }
         }
+        portfolioDataAccess.savePortfolio(inputData.getUsername(), portfolio);
 
         List<HoldingOutputData> holdings = new ArrayList<>();
         for (Holding holding : portfolio.getHoldings().values()) {
@@ -151,9 +130,7 @@ public final class PortfolioInteractor implements PortfolioInputBoundary {
     }
 
     private Portfolio getPortfolio(String username) {
-        if (portfolios == null) {
-            return defaultPortfolio;
-        }
-        return portfolios.computeIfAbsent(username, key -> new Portfolio());
+        Portfolio portfolio = portfolioDataAccess.loadPortfolio(username);
+        return portfolio == null ? new Portfolio() : portfolio;
     }
 }

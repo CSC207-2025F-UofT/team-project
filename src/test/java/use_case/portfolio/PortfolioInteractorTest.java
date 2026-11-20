@@ -3,8 +3,9 @@ package use_case.portfolio;
 import entity.Portfolio;
 import org.junit.jupiter.api.Test;
 
-import java.io.IOException;
 import java.math.BigDecimal;
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -12,6 +13,21 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class PortfolioInteractorTest {
+    private static final class InMemoryPortfolioDataAccess
+            implements PortfolioDataAccessInterface {
+        private final Map<String, Portfolio> portfolios = new HashMap<>();
+
+        @Override
+        public Portfolio loadPortfolio(String username) {
+            return portfolios.get(username);
+        }
+
+        @Override
+        public void savePortfolio(String username, Portfolio portfolio) {
+            portfolios.put(username, portfolio);
+        }
+    }
+
     private static final class RecordingOutputBoundary implements PortfolioOutputBoundary {
         private TradeOutputData tradeOutput;
         private PortfolioViewOutputData portfolioOutput;
@@ -40,11 +56,11 @@ public class PortfolioInteractorTest {
     }
 
     @Test
-    public void buysAndSellsAtCurrentPrice() throws IOException {
-        Portfolio portfolio = new Portfolio();
+    public void buysAndSellsAtCurrentPrice() {
         RecordingOutputBoundary presenter = new RecordingOutputBoundary();
+        InMemoryPortfolioDataAccess dataAccess = new InMemoryPortfolioDataAccess();
         PortfolioInteractor interactor = new PortfolioInteractor(
-                portfolio,
+                dataAccess,
                 ticker -> new BigDecimal("100"),
                 presenter);
 
@@ -59,15 +75,15 @@ public class PortfolioInteractorTest {
 
         assertTrue(presenter.tradeOutput.isSuccess());
         assertEquals(new BigDecimal("9500.00"), presenter.tradeOutput.getAvailableCash());
-        assertEquals(2, portfolio.getTransactions().size());
+
+        assertEquals(2, dataAccess.loadPortfolio("user").getTransactions().size());
     }
 
     @Test
     public void presentsInsufficientCashAsFailedTrade() {
-        Portfolio portfolio = new Portfolio();
         RecordingOutputBoundary presenter = new RecordingOutputBoundary();
         PortfolioInteractor interactor = new PortfolioInteractor(
-                portfolio,
+                new InMemoryPortfolioDataAccess(),
                 ticker -> new BigDecimal("200"),
                 presenter);
 
@@ -82,21 +98,21 @@ public class PortfolioInteractorTest {
 
     @Test
     public void presentsCurrentPortfolioAndTransactionHistory() {
-        Portfolio portfolio = new Portfolio();
-        portfolio.buy("AAPL", 10, new BigDecimal("100"));
         RecordingOutputBoundary presenter = new RecordingOutputBoundary();
         PortfolioInteractor interactor = new PortfolioInteractor(
-                portfolio,
+                new InMemoryPortfolioDataAccess(),
                 ticker -> new BigDecimal("120"),
                 presenter);
 
+        interactor.execute(new PortfolioInputData(
+                "user", "AAPL", 10, PortfolioInputData.Operation.BUY));
         interactor.execute(new PortfolioInputData(
                 "user", PortfolioInputData.Operation.VIEW));
         interactor.execute(new PortfolioInputData(
                 "user", PortfolioInputData.Operation.TRANSACTION_HISTORY));
 
-        assertEquals(new BigDecimal("10200.00"), presenter.portfolioOutput.getPortfolioValue());
-        assertEquals(new BigDecimal("200.00"), presenter.portfolioOutput.getProfitLoss());
+        assertEquals(new BigDecimal("10000.00"), presenter.portfolioOutput.getPortfolioValue());
+        assertEquals(new BigDecimal("0.00"), presenter.portfolioOutput.getProfitLoss());
         assertEquals(1, presenter.portfolioOutput.getHoldings().size());
         assertEquals(new BigDecimal("120"),
                 presenter.portfolioOutput.getHoldings().get(0).getCurrentPrice());
@@ -108,6 +124,7 @@ public class PortfolioInteractorTest {
     public void usesSeparatePortfolioForEachUsername() {
         RecordingOutputBoundary presenter = new RecordingOutputBoundary();
         PortfolioInteractor interactor = new PortfolioInteractor(
+                new InMemoryPortfolioDataAccess(),
                 ticker -> new BigDecimal("10"),
                 presenter);
 
