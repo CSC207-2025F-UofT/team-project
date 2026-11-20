@@ -6,15 +6,13 @@ import java.util.Objects;
 import java.util.UUID;
 
 /*
- * TimeEntry
+ * Summary
  * ---------
- * Represents ONE punch in / punch out interval for an activity
- * (e.g. "worked on CSC207 from 2:00 PM to 3:30 PM").
+ * Represents one punch in / punch out interval for an activity (ex: "work", 2:00 PM ~ 3:00 PM)
  *
- * An entry with no end time is "running": the user has punched in
- * but has not punched out yet.
+ * An entry with no end time is "running" -> the user has punched in but has not punched out yet.
  *
- * Main functions:
+ * Main methods:
  *  - TimeEntry(start)             : create a new running entry (punch in)
  *  - TimeEntry(id, start, end)    : rebuild an existing entry (e.g. loaded from storage)
  *  - stop(when)                   : punch out a running entry
@@ -22,10 +20,7 @@ import java.util.UUID;
  *  - getDuration()                : length of the entry (elapsed time if still running)
  *  - isRunning()                  : true if the entry has no end time yet
  *  - getId() / getStart() / getEnd() : read-only access to the fields
- *
- * This class only depends on java.time and java.util, so it has no
- * knowledge of the GUI, database, or any outer layer.
- */
+  */
 public class TimeEntry {
     // Unique id so a single entry can be found, edited, or deleted later.
     private final String id;
@@ -48,7 +43,7 @@ public class TimeEntry {
      * Used when loading saved entries from storage.
      */
     public TimeEntry(String id, LocalDateTime start, LocalDateTime end) {
-        // Id and start are always required.
+        // id and start are always required.
         this.id = Objects.requireNonNull(id, "id cannot be null");
         this.start = Objects.requireNonNull(start, "start cannot be null");
         // End is optional, but if present it must not come before start.
