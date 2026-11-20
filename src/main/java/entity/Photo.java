@@ -1,6 +1,7 @@
 package entity;
 
 import java.util.Comparator;
+import java.time.Duration;
 import java.time.LocalDateTime;
 
 public class Photo implements Comparable<Photo> {
@@ -33,6 +34,14 @@ public class Photo implements Comparable<Photo> {
 
     public LocalDateTime getTime() {
         return time;
+    }
+
+    public Duration getTimeTo(Photo other) {
+        if (time == null || other.time == null) {
+            return null;
+        }
+
+        return Duration.between(time, other.time);
     }
 
     @Override
