@@ -189,24 +189,26 @@ Primary Actor: User
 
 Preconditions: User has logged into the app.
 
-Trigger: User clicks the button to create a new project.
+Trigger: User clicks create new project button.
 
 Main Success Scenario:
 1. System prompts the user to input canvas dimensions and a project name.
-2. System creates a new, blank canvas of the specified size.
-3. System opens the project in the editing view.
+2. User enters the requested information and confirms.
+3. System validates the input and creates a new, blank canvas of the specified size.
+4. System opens the project in the editing view.
 
 Alternative Flows:
-- 1a. User inputs unsupported dimensions. System reports an error.
+- 3a. User inputs unsupported dimensions. System reports an error.
+- 2a. User cancels. System does not create a project.
 
 Outcome: A new project is created and ready for editing.
 
 ### Use Case 10: Open Project
 Primary Actor: User
 
-Preconditions: User is logged in and has at least one existing saved project.
+Preconditions: User is logged into the app.
 
-Trigger: User selects an existing project to open.
+Trigger: User chooses to open a saved project.
 
 Main Success Scenario:
 1. System displays the user's available projects.
@@ -216,26 +218,28 @@ Main Success Scenario:
 5. User resumes editing.
 
 Alternative Flows:
-- 2a. User has no saved projects. System displays an empty project list.
+- 1a. User has no saved projects. System displays an empty project list.
+- 2a. User cancels. System leaves the current view unchanged.
 
 Outcome: The selected project is open and ready for editing.
 
 ### Use Case 11: Save Project
 Primary Actor: User
 
-Preconditions: User has an open project with unsaved changes.
+Preconditions: User is logged in and has an open project.
 
 Trigger: User clicks the Save Project button.
 
 Main Success Scenario:
-1. User makes a change to their project.
-2. System detects that the project has been modified.
-3. User clicks save.
-4. System saves the project's data and confirms the project has been saved.
+1. System checks whether the project is new or has unsaved changes.
+2. System saves the project's current data to the user's project bank.
+3. System marks the project as having no unsaved changes.
+4. System confirms that the project has been saved.
 
 Alternative Flows:
-- 3a. User attempts to exit the app without saving. System shows a warning message reminding the user to save their work.
-- 4a. The project has no new changes to save. System does nothing.
+- 1a. The project has already been saved and has no new changes. System does not update the saved data.
+- 1b. User tries to exit the app without saving. System shows a warning message reminding the user to save their work.
+- 2a. System cannot save the project. System displays an error and keeps the project marked as having unsaved changes. 
 
 Outcome: The project's current state is saved to the user's project bank.
 
