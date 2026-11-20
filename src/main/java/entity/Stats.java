@@ -3,7 +3,6 @@ package entity;
 /**
  * This entity stores the six ability scores (strength, dexterity, constitution, intelligence,
  * wisdom, and charisma) together.
- *
  * It's a final class because mutating the attributes might interfere with the cache of the API.
  * If stats get modified then it's better to use {@code plus} to create a new Stats object
  */
