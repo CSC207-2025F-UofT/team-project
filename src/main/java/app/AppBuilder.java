@@ -5,7 +5,10 @@ import entities.TimerSessionFactory;
 import interface_adapters.ViewManagerModel;
 import interface_adapters.cancel_timer.CancelTimerController;
 import interface_adapters.cancel_timer.CancelTimerPresenter;
+import interface_adapters.flashcard_studying.FlashcardStudyingViewModel;
 import interface_adapters.home.HomeViewModel;
+import interface_adapters.menu_bar.SwitchViewController;
+import interface_adapters.menu_bar.SwitchViewPresenter;
 import interface_adapters.open_settings.OpenSettingsController;
 import interface_adapters.open_settings.OpenSettingsPresenter;
 import interface_adapters.start_timer.StartTimerController;
@@ -16,6 +19,9 @@ import interface_adapters.update_timer_settings.TimerSettingsViewModel;
 import use_case.cancel_timer.CancelTimerInputBoundary;
 import use_case.cancel_timer.CancelTimerInteractor;
 import use_case.cancel_timer.CancelTimerOutputBoundary;
+import use_case.menu_bar.SwitchViewInputBoundary;
+import use_case.menu_bar.SwitchViewInteractor;
+import use_case.menu_bar.SwitchViewOutputBoundary;
 import use_case.open_settings.OpenSettingsInputBoundary;
 import use_case.open_settings.OpenSettingsInteractor;
 import use_case.open_settings.OpenSettingsOutputBoundary;
@@ -25,10 +31,7 @@ import use_case.start_timer.StartTimerOutputBoundary;
 import use_case.update_timer_settings.UpdateTimerSettingsInputBoundary;
 import use_case.update_timer_settings.UpdateTimerSettingsInteractor;
 import use_case.update_timer_settings.UpdateTimerSettingsOutputBoundary;
-import view.FontManager;
-import view.HomeView;
-import view.TimerDisplayPanel;
-import view.TimerSettingsView;
+import view.*;
 
 import javax.swing.*;
 import java.awt.*;
@@ -39,8 +42,10 @@ import java.awt.*;
 public class AppBuilder {
     private final JPanel cardPanel = new JPanel();
     private final CardLayout cardLayout = new CardLayout();
-    TimerSessionFactory sessionFactory = new TimerSessionFactory();
+    final TimerSessionFactory sessionFactory = new TimerSessionFactory();
     final ViewManagerModel viewManagerModel = new ViewManagerModel();
+    ViewManager viewManager = new ViewManager(cardPanel, cardLayout, viewManagerModel);
+
 
     InMemoryTimerDataAccess timerDataAccess = new InMemoryTimerDataAccess(sessionFactory);
 
@@ -48,6 +53,9 @@ public class AppBuilder {
     private TimerSettingsViewModel timerSettingsViewModel;
     private HomeView homeView;
     private HomeViewModel homeViewModel;
+
+    private FlashcardStudyingView flashcardStudyingView;
+    private FlashcardStudyingViewModel flashcardStudyingViewModel;
 
     public AppBuilder() {
         cardPanel.setLayout(cardLayout);
@@ -72,7 +80,14 @@ public class AppBuilder {
     public AppBuilder addHomeView() {
         homeViewModel = new HomeViewModel();
         homeView = new HomeView(homeViewModel);
-        cardPanel.add(homeView, homeViewModel.VIEW_NAME);
+        cardPanel.add(homeView, ViewNames.HOME);
+        return this;
+    }
+
+    public AppBuilder addFSView() {
+        flashcardStudyingViewModel = new FlashcardStudyingViewModel();
+        flashcardStudyingView = new FlashcardStudyingView(flashcardStudyingViewModel);
+        cardPanel.add(flashcardStudyingView, ViewNames.STUDY_FLASHCARDS);
         return this;
     }
 
@@ -125,6 +140,15 @@ public class AppBuilder {
         return this;
     }
 
+    public AppBuilder addSwitchViewUseCase() {
+        final SwitchViewOutputBoundary switchViewPresenter = new SwitchViewPresenter(viewManagerModel);
+        final SwitchViewInputBoundary switchViewInteractor = new SwitchViewInteractor(switchViewPresenter);
+
+        SwitchViewController switchViewController = new SwitchViewController(switchViewInteractor);
+        homeView.setSwitchViewController(switchViewController);
+        return this;
+    }
+
     /**
      * Builds the main application window
      * @return the JFrame application
@@ -136,7 +160,7 @@ public class AppBuilder {
 
         application.add(cardPanel);
 
-        viewManagerModel.setState("home view");
+        viewManagerModel.setState(ViewNames.HOME);
         viewManagerModel.notifyViewChanged();
 
         // TODO: REMOVE LATER
@@ -147,23 +171,5 @@ public class AppBuilder {
         testFrame.setVisible(true);
 
         return application;
-    }
-
-    // TODO: MOVE TO MAIN LATER
-    public static void main(String[] args) {
-        FontManager.loadFonts();
-
-        AppBuilder appBuilder = new AppBuilder();
-        JFrame application = appBuilder
-                .addTimerSettingsView()
-                .addHomeView()
-                .addUpdateTimerSettingsUseCase()
-                .addOpenSettingsUseCase()
-                .addStartTimerUseCase()
-                .addCancelTimerUseCase()
-                .build();
-
-        application.setLocationRelativeTo(null);
-        application.setVisible(true);
     }
 }

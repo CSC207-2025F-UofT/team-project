@@ -3,6 +3,7 @@ package view;
 import interface_adapters.cancel_timer.CancelTimerController;
 import interface_adapters.home.HomeViewModel;
 import interface_adapters.home.HomeViewModelListener;
+import interface_adapters.menu_bar.SwitchViewController;
 import interface_adapters.open_settings.OpenSettingsController;
 import interface_adapters.start_timer.StartTimerController;
 
@@ -21,6 +22,7 @@ public class HomeView extends JPanel implements HomeViewModelListener {
     private OpenSettingsController settingsController = null;
     private StartTimerController startTimerController = null;
     private CancelTimerController cancelTimerController = null;
+    private SwitchViewController switchViewController = null;
 
     private JLabel timerLabel = new JLabel();
 
@@ -191,6 +193,10 @@ public class HomeView extends JPanel implements HomeViewModelListener {
         this.cancelTimerController = cancelTimerController;
     }
 
+    public void setSwitchViewController(SwitchViewController switchViewController) {
+        this.switchViewController = switchViewController;
+    }
+
     /**
      * Builds the navigation popup menu that appears when the user clicks the menu bar.
      * @return a JPopupMenu that contains the pages of the app.
@@ -203,12 +209,10 @@ public class HomeView extends JPanel implements HomeViewModelListener {
                 BorderFactory.createEmptyBorder(10, 15, 10, 15)
         ));
 
-        String[] pages = {"Make Flashcards", "Study Flashcards"};
-        for (String page : pages) {
-            popup.add(this.buildMenuItem(page));
-        }
+        popup.add(buildMenuItem("Make Flashcards", ViewNames.MAKE_FLASHCARDS));
+        popup.add(buildMenuItem("Study Flashcards", ViewNames.STUDY_FLASHCARDS));
 
-        gameMenuItem = buildMenuItem("Game");
+        gameMenuItem = buildMenuItem("Game", ViewNames.GAME);
         popup.add(gameMenuItem);
 
         return popup;
@@ -219,7 +223,7 @@ public class HomeView extends JPanel implements HomeViewModelListener {
      * @param title the text displayed for the menu item
      * @return a JMenuItem representing a page of the app
      */
-    private JMenuItem buildMenuItem(String title) {
+    private JMenuItem buildMenuItem(String title, String viewName) {
         JMenuItem item = new JMenuItem(title);
         item.setFont(FontManager.getGinny(30f));
         item.setBackground(Color.WHITE);
@@ -227,7 +231,9 @@ public class HomeView extends JPanel implements HomeViewModelListener {
         item.setBorder(BorderFactory.createEmptyBorder(0, 10, 8, 40));
 
         item.addActionListener(e -> {
-            // TODO: Add call to controller
+            if (switchViewController != null) {
+                switchViewController.execute(viewName);
+            }
             System.out.println("clicked: " + title);
         });
         return item;
