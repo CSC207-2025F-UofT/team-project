@@ -29,6 +29,34 @@ public class Portfolio {
         this.availableCash = this.initialBalance;
     }
 
+    public static Portfolio restore(
+            BigDecimal initialBalance,
+            BigDecimal availableCash,
+            Map<String, Holding> holdings,
+            List<Transaction> transactions) {
+        Portfolio portfolio = new Portfolio(initialBalance);
+        portfolio.availableCash = requireNonNegativeAmount(availableCash);
+        Objects.requireNonNull(holdings, "holdings must not be null");
+        Objects.requireNonNull(transactions, "transactions must not be null");
+
+        for (Map.Entry<String, Holding> entry : holdings.entrySet()) {
+            Objects.requireNonNull(entry.getKey(), "holding ticker must not be null");
+            Holding holding = Objects.requireNonNull(
+                    entry.getValue(), "holdings must not contain null");
+            portfolio.holdings.put(entry.getKey(), new Holding(
+                    holding.getTicker(),
+                    holding.getQuantity(),
+                    holding.getAveragePurchasePrice(),
+                    holding.getCurrentPrice()));
+        }
+
+        for (Transaction transaction : transactions) {
+                    portfolio.transactions.add(Objects.requireNonNull(
+                            transaction, "transactions must not contain null"));
+        }
+        return portfolio;
+    }
+
     public BigDecimal getInitialBalance() {
         return initialBalance;
     }
