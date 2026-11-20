@@ -17,13 +17,13 @@ import use_case.TripAccessException;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class InMemoryTripDataAcessObjectTest {
+class InMemoryDataAcessObjectTest {
     private static final LocalDateTime T0 = LocalDateTime.of(2025, 1, 1, 12, 0);
-    private InMemoryTripDataAcessObject dao;
+    private InMemoryDataAccessObject dao;
 
     @BeforeEach
     void setUp() {
-        dao = new InMemoryTripDataAcessObject();
+        dao = new InMemoryDataAccessObject();
     }
 
     @Test
@@ -78,10 +78,15 @@ class InMemoryTripDataAcessObjectTest {
         trip.addPhoto(p);
         dao.writeTrip(trip);
 
-        dao.deleteTrip("t1");
+        dao.deleteTripById("t1");
 
         assertThrows(TripAccessException.class, () -> dao.getTripById("t1"));
         assertSame(p, dao.getPhotoById("p1"));
+    }
+
+    @Test 
+    void deletingMissingTripThrows() {
+        assertThrows(TripAccessException.class, () -> dao.deleteTripById("nope"));
     }
 
     @Test

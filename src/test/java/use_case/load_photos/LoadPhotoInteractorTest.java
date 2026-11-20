@@ -6,7 +6,7 @@ import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import data_access.InMemoryTripDataAcessObject;
+import data_access.InMemoryDataAccessObject;
 import entity.ImageType;
 import entity.Photo;
 import use_case.ImageReadException;
@@ -26,13 +26,13 @@ class LoadPhotoInteractorTest {
         }
     }
 
-    private InMemoryTripDataAcessObject photos;
+    private InMemoryDataAccessObject photos;
     private CapturingPresenter presenter;
     private Photo stored;
 
     @BeforeEach
     void setUp() {
-        photos = new InMemoryTripDataAcessObject();
+        photos = new InMemoryDataAccessObject();
         presenter = new CapturingPresenter();
         stored = new Photo("p1", ImageType.JPEG, null, null);
         photos.writePhoto(stored);

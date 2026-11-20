@@ -19,7 +19,7 @@ import use_case.TripAccessInterface;
  * In-memory storage for trips and photos. Implements each use case's
  * data-access interface as those use cases are added.
  */
-public class InMemoryTripDataAcessObject implements TripAccessInterface, PhotoAccessInterface {
+public class InMemoryDataAccessObject implements TripAccessInterface, PhotoAccessInterface {
     private final Map<String, Trip> trips = new LinkedHashMap<>();
     private final Map<String, Photo> photos = new HashMap<>();
     
@@ -79,8 +79,10 @@ public class InMemoryTripDataAcessObject implements TripAccessInterface, PhotoAc
                 .collect(Collectors.toList());
     }
 
-    
+    @Override
     public void deleteTripById(String tripId) {
-        trips.remove(tripId);
+        if (trips.remove(tripId) == null) {
+            throw new TripAccessException("No trip with id " + tripId);
+        }
     }
 }

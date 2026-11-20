@@ -62,6 +62,7 @@ class ListTripsInteractorTest {
         @Override public Trip getTripById(String id) { throw new UnsupportedOperationException(); }
         @Override public void writeTrip(Trip trip) { throw new UnsupportedOperationException(); }
         @Override public void writeTrips(List<Trip> toWrite) { throw new UnsupportedOperationException(); }
+        @Override public void deleteTripById(String id) { throw new UnsupportedOperationException(); }
         @Override public Photo getPhotoById(String id) { throw new UnsupportedOperationException(); }
         @Override public List<Photo> getPhotos() { throw new UnsupportedOperationException(); }
         @Override public void writePhoto(Photo photo) { throw new UnsupportedOperationException(); }

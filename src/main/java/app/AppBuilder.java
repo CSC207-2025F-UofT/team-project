@@ -6,7 +6,7 @@ import javax.swing.JComponent;
 import javax.swing.JFrame;
 
 
-import data_access.InMemoryTripDataAcessObject;
+import data_access.InMemoryDataAccessObject;
 import data_access.SampleData;
 import data_access.StorageResolver;
 import data_access.image.ImageReader;
@@ -48,7 +48,7 @@ public class AppBuilder {
 
 
     // Storage. Replace with SQLite implementation later.
-    private final InMemoryTripDataAcessObject dataAccess = new InMemoryTripDataAcessObject();
+    private final InMemoryDataAccessObject dataAccess = new InMemoryDataAccessObject();
     private final ImageResolver imageResolver = new ImageResolver(new StorageResolver());
     private final ImageReaderInterface imageReader = new ImageReader(imageResolver);
 
