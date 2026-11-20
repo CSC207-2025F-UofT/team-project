@@ -115,7 +115,7 @@ Acceptance criteria:
 
 > As a TTC passenger, I want my route to be recalculated when a required connection becomes inaccessible so that I can find a feasible alternative.
 
-**Owner:** Dean Wu.
+**Owner:** Dean Wu. MVP implemented: after finding a route, open the **Disruptions** tab beside the map, choose a line, a connection and a type, and select **Simulate disruption**. **Restore selected** makes the connection available again. Disruptions are simulated and last until the application closes.
 
 Acceptance criteria:
 

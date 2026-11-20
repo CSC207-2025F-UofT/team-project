@@ -66,6 +66,7 @@ The `InputBoundary` method returns `void`. Results flow out through the presente
 - **Already used:**
   - **Strategy:** `RouteFinder` / `DijkstraRouteFinder`.
   - **Observer:** `PlanRouteViewModel` with property change listeners.
+  - **Decorator (not taught in class):** `DisruptionAwareNetworkDataAccess` wraps a network gateway and applies the active disruptions. `JourneyRecorder` wraps the plan-route input boundary and remembers the last search. Neither wrapped class was edited.
 - **Candidate pattern not taught in class (needed for 5/5): Specification/Composite.** A `ConnectionRule` interface with rules like step-free-only, max transfers and disrupted-connection, combined with an `AllRules` composite. Disruptions (Story 3) would become another rule, which is a clean extensibility example.
 
 ## 5. Code quality checklist
@@ -115,3 +116,20 @@ git push -u origin feat/<short-name>
 - Add more lines (5 and 6) and real times from GTFS.
 - Add Checkstyle and fix the warnings.
 - Draw a PlantUML class diagram and a sequence diagram for the slides.
+
+## 8. User Story 3 (disruption-aware rerouting): status
+
+**MVP done:**
+- A disruption (service outage or planned closure) makes one connection unavailable: one line between two neighbouring stations, in both directions. Stations are never disabled as a whole.
+- `TransitNetwork.without(disruptions)` gives the network that is left. The original network is not changed.
+- The **Disruptions** tab simulates a disruption and restores it. After each change it explains why the previous route is no longer valid and shows the replacement, or reports that no alternative exists.
+- The route planner reads the network through `DisruptionAwareNetworkDataAccess`, so every search avoids disrupted connections. The tab title counts the active disruptions.
+- Disruptions are simulated and kept in memory, and the tab says so.
+
+**Interfaces teammates build on:**
+- **Story 4 (saved trips):** run saved trips through the `JourneyRecorder` that wraps `PlanRouteInputBoundary`, and they are planned under the current disruptions and recalculated when a disruption changes. `RerouteOutputData` carries the outcome and the current route for a before/after comparison.
+- **Live alerts:** a live source can supply the same list as `DisruptionDataAccessInterface.getActiveDisruptions()`.
+
+**Later:**
+- Live TTC alerts from the GTFS-Realtime feed, once stop ids can be mapped to our connections.
+- Elevator outages, which need entrance and transfer connections in the graph.
