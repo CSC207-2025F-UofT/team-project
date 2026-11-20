@@ -6,8 +6,10 @@ import org.accessgraph.use_case.sign_in.SignIn;
 import org.accessgraph.use_case.station_map.LocationGateway;
 import org.accessgraph.use_case.station_map.MapSession;
 
+import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
+import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.time.Clock;
 
@@ -21,6 +23,13 @@ public final class AccessGraphPanel extends JPanel implements AutoCloseable {
 
     public AccessGraphPanel(SignIn signIn, String demoUsername, String demoPassword, MapSession session,
                             TileGateway tiles, LocationGateway locations, BrowserGateway browser, Clock clock) {
+        this(signIn, demoUsername, demoPassword, session, tiles, locations, browser, clock, null);
+    }
+
+    /** Same as above, with an optional route planner shown beside the map after sign-in. */
+    public AccessGraphPanel(SignIn signIn, String demoUsername, String demoPassword, MapSession session,
+                            TileGateway tiles, LocationGateway locations, BrowserGateway browser, Clock clock,
+                            JComponent routePlanner) {
         setLayout(cards);
         map = new MapPanel(session, tiles, locations, browser, clock, this::signOut);
         login = new LoginPanel(demoUsername, demoPassword, (name, password) -> {
@@ -30,7 +39,14 @@ public final class AccessGraphPanel extends JPanel implements AutoCloseable {
             return true;
         });
         add(login, LOGIN);
-        add(map, MAP);
+        if (routePlanner == null) {
+            add(map, MAP);
+        } else {
+            JPanel mapWithPlanner = new JPanel(new BorderLayout());
+            mapWithPlanner.add(map, BorderLayout.CENTER);
+            mapWithPlanner.add(routePlanner, BorderLayout.EAST);
+            add(mapWithPlanner, MAP);
+        }
     }
 
     private void signOut() {

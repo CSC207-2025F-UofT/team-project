@@ -89,7 +89,7 @@ Each teammate will lead at least one complete use case across its application la
 
 > As a TTC passenger, I want to find a route between two stations that meets my accessibility requirements so that I can avoid barriers I cannot navigate.
 
-**Owner:** Adrien Lau.
+**Owner:** Adrian Lau. MVP implemented: choose two stations in the panel beside the map and select **Find route** (step-free profile, at most 2 transfers, Lines 1, 2 and 4).
 
 Acceptance criteria:
 
@@ -115,7 +115,7 @@ Acceptance criteria:
 
 > As a TTC passenger, I want my route to be recalculated when a required connection becomes inaccessible so that I can find a feasible alternative.
 
-**Owner:** Dean Wu.
+**Owner:** Dean Wu. MVP implemented: after finding a route, open the **Disruptions** tab beside the map, choose a line, a connection and a type, and select **Simulate disruption**. **Restore selected** makes the connection available again. Disruptions are simulated and last until the application closes.
 
 Acceptance criteria:
 
