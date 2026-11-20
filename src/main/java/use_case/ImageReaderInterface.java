@@ -1,9 +1,8 @@
 package use_case;
 
-import java.io.InputStream;
-
 import entity.Photo;
 
 public interface ImageReaderInterface {
-    InputStream readFullImage(Photo photo);
+    /** The encoded image file (JPEG/PNG/WebP bytes). Throws ImageReadException if unavailable. */
+    byte[] readFullImage(Photo photo);
 }
