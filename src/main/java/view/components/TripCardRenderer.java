@@ -44,7 +44,7 @@ public class TripCardRenderer extends JPanel implements ListCellRenderer<TripLis
     @Override 
     public Component getListCellRendererComponent(JList<? extends TripListItem> list, TripListItem item,
                                                   int index, boolean isSelected, boolean cellHasFocus) {
-        cover.setIcon(thumbnails.get(item.getCoverPhotoPath(), repaintList));
+        cover.setIcon(thumbnails.get(item.getCoverPhotoId(), repaintList));
         name.setText(item.getName());
         dates.setText(item.getDateRange());
         details.setText(item.getDetails());
