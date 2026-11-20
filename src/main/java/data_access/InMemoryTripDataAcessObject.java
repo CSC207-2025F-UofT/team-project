@@ -79,8 +79,8 @@ public class InMemoryTripDataAcessObject implements TripAccessInterface, PhotoAc
                 .collect(Collectors.toList());
     }
 
-    // TODO: add this to an interface (tripAccessInterface?)
-    public void deleteTrip(String tripId) {
+    
+    public void deleteTripById(String tripId) {
         trips.remove(tripId);
     }
 }
