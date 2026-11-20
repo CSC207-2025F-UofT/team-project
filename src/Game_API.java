@@ -1,62 +1,92 @@
-import javax.imageio.*;
+import javax.imageio.ImageIO;
+import javax.imageio.ImageReader;
 import javax.imageio.stream.ImageInputStream;
+
 import org.w3c.dom.Node;
 
-import java.awt.*;
+import java.awt.AlphaComposite;
+import java.awt.Graphics2D;
+import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
-import java.io.*;
+
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+
 import java.net.URI;
-import java.net.http.*;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.*;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+
+import java.nio.file.Files;
+import java.nio.file.Path;
+
 import java.time.Duration;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
 
-public class FFBE_API {
-
-    // CHANGE HEROES HERE.
-    private static final String[] HERO_IDS = {
-            "100000102", // Rain
-            "100000202", // Lasswell
-            "100000302", // Fina
-            "100000403", // Nichol
-            "100000503"  // Lid
-    };
-
-    private static final String[] HERO_NAMES = {
-            "Rain", "Lasswell", "Fina", "Nichol", "Lid"
-    };
-
-    // HP, attack, defense, speed.
-    // Temporary values, not official FFBE stats.
-    private static final int[][] HERO_STATS = {
-            {160, 34, 24, 75},
-            {140, 38, 20, 85},
-            {125, 27, 18, 65},
-            {130, 30, 21, 70},
-            {150, 33, 25, 60}
-    };
-
-    // Verified simple monster animation sheets.
-    private static final String[] MONSTER_POOL = {
-            "10000000",
-            "10000001",
-            "10000002",
-            "10000003",
-            "10000004",
-            "10000005"
-    };
-
-    private static final int ENEMY_COUNT = 3;
+/**
+ *
+ * Artwork: Pixel-boy / Sparklin Labs, CC0.
+ * https://github.com/sparklinlabs/superpowers-asset-packs
+ */
+public class Game_API {
 
     private static final String ROOT =
             "https://raw.githubusercontent.com/"
-                    + "DaddyRaegen/ffbe_asset_dump/main/";
+                    + "sparklinlabs/superpowers-asset-packs/"
+                    + "master/rpg-battle-system/";
 
-    private final Path cache = Path.of("ffbe-cache");
+    private static final Path CACHE =
+            Path.of("superpowers-cache");
+
+    // Set to 1–24 for a specific background.
+    // Set to 0 to choose randomly at startup.
+    private static final int BACKGROUND = 0;
+
+    private static final String[] HERO_FOLDERS = {
+            "warrior",
+            "paladin",
+            "mage",
+            "bowman",
+            "Wizard"
+    };
+
+    private static final String[] HERO_NAMES = {
+            "Warrior",
+            "Paladin",
+            "Mage",
+            "Bowman",
+            "Wizard"
+    };
+
+    // HP, attack, defense, speed.
+    private static final int[][] HERO_STATS = {
+            {160, 34, 24, 75},
+            {180, 29, 32, 55},
+            {125, 40, 18, 70},
+            {135, 33, 20, 90},
+            {130, 38, 19, 65}
+    };
+
+    private static final String[] ENEMY_FOLDERS = {
+            "slime",
+            "bat",
+            "mushroom"
+    };
+
+    private static final String[] ENEMY_NAMES = {
+            "Slime",
+            "Bat",
+            "Mushroom"
+    };
+
+    private static final int[][] ENEMY_STATS = {
+            {145, 27, 21, 50},
+            {120, 30, 18, 82},
+            {160, 29, 24, 60}
+    };
 
     private final HttpClient client = HttpClient.newBuilder()
             .followRedirects(HttpClient.Redirect.NORMAL)
@@ -66,70 +96,49 @@ public class FFBE_API {
     public GameAssets load() throws Exception {
         GameAssets game = new GameAssets();
 
-        game.background = image("battle_bg/battle_bg_0002_02.jpg");
+        int background = BACKGROUND == 0
+                ? ThreadLocalRandom.current().nextInt(1, 25)
+                : BACKGROUND;
+
+        if (background < 1 || background > 24) {
+            throw new IllegalArgumentException(
+                    "BACKGROUND must be 0 or between 1 and 24."
+            );
+        }
+
+        game.background = image(
+                "backgrounds/" + background + ".png"
+        );
 
         List<Battle.Fighter> heroes = new ArrayList<>();
         List<Battle.Fighter> enemies = new ArrayList<>();
 
-        for (int i = 0; i < HERO_IDS.length; i++) {
-            int[] s = HERO_STATS[i];
-
-            Battle.Fighter fighter = new Battle.Fighter(
-                    HERO_NAMES[i],
-                    true,
-                    s[0], s[1], s[2], s[3]
+        for (int i = 0; i < HERO_FOLDERS.length; i++) {
+            Battle.Fighter fighter = fighter(
+                    HERO_NAMES[i], true, HERO_STATS[i]
             );
 
-            GameAssets.Art art = new GameAssets.Art();
-
-            String prefix =
-                    "animated_gifs/unit_" + HERO_IDS[i] + "_";
-
-            art.idle = gif(prefix + "1idle_opac.gif");
-            art.move = gif(prefix + "2move_opac.gif");
-            art.attack = gif(prefix + "3atk_opac.gif");
-            art.dead = gif(prefix + "dead_opac.gif");
-
-            art.portrait = image(
-                    "unit_icons/unit_icon_" + HERO_IDS[i] + ".png"
+            GameAssets.Art art = loadArt(
+                    "char/" + HERO_FOLDERS[i] + "/"
             );
+
+            // Heroes face toward the enemies on the left.
+            art.mirror = false;
 
             heroes.add(fighter);
             game.art.put(fighter, art);
         }
 
-        List<String> pool =
-                new ArrayList<>(List.of(MONSTER_POOL));
-
-        Collections.shuffle(pool);
-
-        for (int i = 0; i < ENEMY_COUNT; i++) {
-            String id = pool.get(i);
-
-            Battle.Fighter fighter = new Battle.Fighter(
-                    "Monster " + (i + 1),
-                    false,
-                    105 + i * 12,
-                    25 + i * 2,
-                    18 + i * 2,
-                    55 + i * 12
+        for (int i = 0; i < ENEMY_FOLDERS.length; i++) {
+            Battle.Fighter fighter = fighter(
+                    ENEMY_NAMES[i], false, ENEMY_STATS[i]
             );
 
-            BufferedImage sheet = image(
-                    "monster_animated/monster_anime_" + id + ".png"
+            GameAssets.Art art = loadArt(
+                    "monster/" + ENEMY_FOLDERS[i] + "/"
             );
 
-            List<int[]> parts = csv(
-                    "monster_animated_csv/monster_cgg_" + id + ".csv"
-            );
-
-            GameAssets.Art art = new GameAssets.Art();
-
-            art.idle = monster(sheet, parts, id, "idle");
-            art.attack = monster(sheet, parts, id, "atk");
-
-            // These monsters use their idle pose while approaching.
-            art.move = art.idle;
+            // These enemy sprites face toward the right.
             art.mirror = false;
 
             enemies.add(fighter);
@@ -141,16 +150,62 @@ public class FFBE_API {
         return game;
     }
 
-    private byte[] bytes(String path) throws Exception {
-        Path file = cache.resolve(path);
+    private Battle.Fighter fighter(
+            String name,
+            boolean player,
+            int[] stats) {
 
-        if (Files.exists(file)) {
+        return new Battle.Fighter(
+                name,
+                player,
+                stats[0],
+                stats[1],
+                stats[2],
+                stats[3]
+        );
+    }
+
+    private GameAssets.Art loadArt(String folder)
+            throws Exception {
+
+        GameAssets.Art art = new GameAssets.Art();
+
+        art.idle = gif(folder + "idle.gif");
+        art.attack = gif(folder + "attack.gif");
+
+        // The current view moves the sprite across the screen.
+        art.move = art.idle;
+
+        // Null tells the current view to fade defeated fighters.
+        art.dead = null;
+
+        // Use a cropped idle frame as the portrait.
+        BufferedImage first = art.idle.frames[0];
+        Rectangle bounds = GameAssets.bounds(first);
+
+        art.portrait = copy(first.getSubimage(
+                bounds.x,
+                bounds.y,
+                bounds.width,
+                bounds.height
+        ));
+
+        return art;
+    }
+
+    private byte[] bytes(String relativePath)
+            throws Exception {
+
+        Path file = CACHE.resolve(relativePath);
+
+        if (Files.isRegularFile(file)) {
             return Files.readAllBytes(file);
         }
 
         HttpRequest request = HttpRequest.newBuilder(
-                        URI.create(ROOT + path))
+                        URI.create(ROOT + relativePath))
                 .timeout(Duration.ofSeconds(45))
+                .header("User-Agent", "CSC207-RPG")
                 .GET()
                 .build();
 
@@ -161,54 +216,111 @@ public class FFBE_API {
 
         if (response.statusCode() != 200) {
             throw new IOException(
-                    "HTTP " + response.statusCode() + ": " + path
+                    "Could not download " + relativePath
+                            + " (HTTP "
+                            + response.statusCode() + ")"
             );
         }
 
-        Files.createDirectories(file.getParent());
-        Files.write(file, response.body());
+        byte[] data = response.body();
 
-        return response.body();
-    }
+        // Validate before caching an image response.
+        try (ByteArrayInputStream input =
+                     new ByteArrayInputStream(data)) {
 
-    private BufferedImage image(String path) throws Exception {
-        BufferedImage image = ImageIO.read(
-                new ByteArrayInputStream(bytes(path))
-        );
-
-        if (image == null) {
-            throw new IOException("Invalid image: " + path);
+            if (ImageIO.read(input) == null) {
+                throw new IOException(
+                        "Invalid image: " + relativePath
+                );
+            }
         }
 
-        return image;
+        Files.createDirectories(file.getParent());
+
+        // A cache write failure should not prevent playing.
+        try {
+            Files.write(file, data);
+        } catch (IOException exception) {
+            System.err.println(
+                    "Could not cache " + relativePath
+                            + ": " + exception.getMessage()
+            );
+        }
+
+        return data;
     }
 
-    // Reads individual GIF frames and their timings.
-    // This lets attacks play once instead of looping forever.
-    private GameAssets.Clip gif(String path) throws Exception {
+    private BufferedImage image(String relativePath)
+            throws Exception {
+
+        BufferedImage result = ImageIO.read(
+                new ByteArrayInputStream(bytes(relativePath))
+        );
+
+        if (result == null) {
+            throw new IOException(
+                    "Invalid image: " + relativePath
+            );
+        }
+
+        return result;
+    }
+
+    /**
+     * Composes GIF frames and preserves their frame timings.
+     */
+    private GameAssets.Clip gif(String relativePath)
+            throws Exception {
+
         try (ImageInputStream input =
                      ImageIO.createImageInputStream(
-                             new ByteArrayInputStream(bytes(path)))) {
+                             new ByteArrayInputStream(
+                                     bytes(relativePath)))) {
+
+            if (input == null) {
+                throw new IOException(
+                        "Cannot read GIF: " + relativePath
+                );
+            }
 
             ImageReader reader =
-                    ImageIO.getImageReadersByFormatName("gif").next();
+                    ImageIO.getImageReadersByFormatName("gif")
+                            .next();
 
             try {
                 reader.setInput(input);
 
-                Node screen = child(
+                Node streamMetadata =
                         reader.getStreamMetadata().getAsTree(
-                                "javax_imageio_gif_stream_1.0"),
+                                "javax_imageio_gif_stream_1.0"
+                        );
+
+                Node screen = child(
+                        streamMetadata,
                         "LogicalScreenDescriptor"
                 );
 
+                int width = value(
+                        screen, "logicalScreenWidth", 1
+                );
+
+                int height = value(
+                        screen, "logicalScreenHeight", 1
+                );
+
                 BufferedImage canvas = new BufferedImage(
-                        value(screen, "logicalScreenWidth"),
-                        value(screen, "logicalScreenHeight"),
+                        width,
+                        height,
                         BufferedImage.TYPE_INT_ARGB
                 );
 
                 int count = reader.getNumImages(true);
+
+                if (count == 0) {
+                    throw new IOException(
+                            "Empty GIF: " + relativePath
+                    );
+                }
 
                 BufferedImage[] frames =
                         new BufferedImage[count];
@@ -216,53 +328,83 @@ public class FFBE_API {
                 int[] delays = new int[count];
 
                 for (int i = 0; i < count; i++) {
-                    Node meta = reader.getImageMetadata(i)
-                            .getAsTree(
-                                    "javax_imageio_gif_image_1.0"
-                            );
+                    Node metadata =
+                            reader.getImageMetadata(i)
+                                    .getAsTree(
+                                            "javax_imageio_gif_image_1.0"
+                                    );
 
-                    Node desc = child(meta, "ImageDescriptor");
+                    Node descriptor = child(
+                            metadata, "ImageDescriptor"
+                    );
 
                     Node control = child(
-                            meta, "GraphicControlExtension"
+                            metadata, "GraphicControlExtension"
+                    );
+
+                    int x = value(
+                            descriptor, "imageLeftPosition", 0
+                    );
+
+                    int y = value(
+                            descriptor, "imageTopPosition", 0
+                    );
+
+                    int frameWidth = value(
+                            descriptor, "imageWidth", width
+                    );
+
+                    int frameHeight = value(
+                            descriptor, "imageHeight", height
                     );
 
                     BufferedImage previous = copy(canvas);
 
-                    int x = value(desc, "imageLeftPosition");
-                    int y = value(desc, "imageTopPosition");
+                    Graphics2D graphics =
+                            canvas.createGraphics();
 
-                    Graphics2D g = canvas.createGraphics();
-                    g.drawImage(reader.read(i), x, y, null);
-                    g.dispose();
+                    graphics.drawImage(
+                            reader.read(i), x, y, null
+                    );
 
-                    frames[i] = copy(canvas);
+                    graphics.dispose();
+
+                    BufferedImage frame = copy(canvas);
+
+                    // The preview GIFs have a flat background.
+                    // Remove only matching pixels connected
+                    // to the image edges.
+                    removeBackground(frame);
+
+                    frames[i] = frame;
 
                     delays[i] = Math.max(
                             20,
-                            value(control, "delayTime") * 10
+                            value(control, "delayTime", 10) * 10
                     );
 
-                    String disposal = control.getAttributes()
-                            .getNamedItem("disposalMethod")
-                            .getNodeValue();
+                    String disposal = attribute(
+                            control,
+                            "disposalMethod",
+                            "none"
+                    );
 
-                    if (disposal.equals(
-                            "restoreToBackgroundColor")) {
+                    if ("restoreToBackgroundColor"
+                            .equals(disposal)) {
 
-                        g = canvas.createGraphics();
-                        g.setComposite(AlphaComposite.Clear);
-
-                        g.fillRect(
-                                x, y,
-                                value(desc, "imageWidth"),
-                                value(desc, "imageHeight")
+                        graphics = canvas.createGraphics();
+                        graphics.setComposite(
+                                AlphaComposite.Clear
                         );
 
-                        g.dispose();
+                        graphics.fillRect(
+                                x, y, frameWidth, frameHeight
+                        );
 
-                    } else if (disposal.equals(
-                            "restoreToPrevious")) {
+                        graphics.dispose();
+
+                    } else if ("restoreToPrevious"
+                            .equals(disposal)) {
 
                         canvas = previous;
                     }
@@ -284,132 +426,174 @@ public class FFBE_API {
         }
     }
 
-    private static BufferedImage copy(BufferedImage source) {
+    /**
+     * Removes a flat GIF background without deleting enclosed
+     * areas of the same colour inside the character.
+     */
+    private static void removeBackground(
+            BufferedImage image) {
+
+        int width = image.getWidth();
+        int height = image.getHeight();
+
+        int colour = image.getRGB(0, 0);
+
+        if ((colour >>> 24) == 0) {
+            return;
+        }
+
+        // Only remove a uniform backdrop present at all corners.
+        if (image.getRGB(width - 1, 0) != colour
+                || image.getRGB(0, height - 1) != colour
+                || image.getRGB(
+                width - 1, height - 1
+        ) != colour) {
+            return;
+        }
+
+        int[] queue = new int[width * height];
+        int head = 0;
+        int tail = 0;
+
+        // Seed every matching border pixel.
+        for (int x = 0; x < width; x++) {
+            tail = enqueue(
+                    image, x, 0, colour, queue, tail
+            );
+
+            tail = enqueue(
+                    image, x, height - 1,
+                    colour, queue, tail
+            );
+        }
+
+        for (int y = 0; y < height; y++) {
+            tail = enqueue(
+                    image, 0, y, colour, queue, tail
+            );
+
+            tail = enqueue(
+                    image, width - 1, y,
+                    colour, queue, tail
+            );
+        }
+
+        while (head < tail) {
+            int index = queue[head++];
+
+            int x = index % width;
+            int y = index / width;
+
+            if (x > 0) {
+                tail = enqueue(
+                        image, x - 1, y,
+                        colour, queue, tail
+                );
+            }
+
+            if (x + 1 < width) {
+                tail = enqueue(
+                        image, x + 1, y,
+                        colour, queue, tail
+                );
+            }
+
+            if (y > 0) {
+                tail = enqueue(
+                        image, x, y - 1,
+                        colour, queue, tail
+                );
+            }
+
+            if (y + 1 < height) {
+                tail = enqueue(
+                        image, x, y + 1,
+                        colour, queue, tail
+                );
+            }
+        }
+    }
+
+    private static int enqueue(
+            BufferedImage image,
+            int x,
+            int y,
+            int colour,
+            int[] queue,
+            int tail) {
+
+        if (image.getRGB(x, y) == colour) {
+            image.setRGB(x, y, 0);
+            queue[tail++] = y * image.getWidth() + x;
+        }
+
+        return tail;
+    }
+
+    private static BufferedImage copy(
+            BufferedImage source) {
+
         BufferedImage result = new BufferedImage(
                 source.getWidth(),
                 source.getHeight(),
                 BufferedImage.TYPE_INT_ARGB
         );
 
-        Graphics2D g = result.createGraphics();
-        g.drawImage(source, 0, 0, null);
-        g.dispose();
+        Graphics2D graphics = result.createGraphics();
+        graphics.drawImage(source, 0, 0, null);
+        graphics.dispose();
 
         return result;
     }
 
-    private static Node child(Node parent, String name) {
-        for (Node n = parent.getFirstChild();
-             n != null;
-             n = n.getNextSibling()) {
+    private static Node child(
+            Node parent,
+            String name) {
 
-            if (n.getNodeName().equals(name)) {
-                return n;
+        if (parent == null) {
+            return null;
+        }
+
+        for (Node node = parent.getFirstChild();
+             node != null;
+             node = node.getNextSibling()) {
+
+            if (name.equals(node.getNodeName())) {
+                return node;
             }
         }
 
-        throw new IllegalArgumentException(
-                "Missing GIF field: " + name
-        );
+        return null;
     }
 
-    private static int value(Node node, String attribute) {
+    private static String attribute(
+            Node node,
+            String name,
+            String fallback) {
+
+        if (node == null || node.getAttributes() == null) {
+            return fallback;
+        }
+
+        Node result =
+                node.getAttributes().getNamedItem(name);
+
+        return result == null
+                ? fallback
+                : result.getNodeValue();
+    }
+
+    private static int value(
+            Node node,
+            String name,
+            int fallback) {
+
         return Integer.parseInt(
-                node.getAttributes()
-                        .getNamedItem(attribute)
-                        .getNodeValue()
-        );
-    }
-
-    private List<int[]> csv(String path) throws Exception {
-        List<int[]> rows = new ArrayList<>();
-
-        String text = new String(
-                bytes(path),
-                StandardCharsets.UTF_8
-        );
-
-        for (String line : text.split("\\R")) {
-            if (line.trim().isEmpty()) {
-                continue;
-            }
-
-            String[] fields = line.trim().split(",");
-            int[] values = new int[fields.length];
-
-            for (int i = 0; i < fields.length; i++) {
-                values[i] =
-                        Integer.parseInt(fields[i].trim());
-            }
-
-            rows.add(values);
-        }
-
-        return rows;
-    }
-
-    // Assembles the six selected monsters from their sheet parts.
-    private GameAssets.Clip monster(
-            BufferedImage sheet,
-            List<int[]> parts,
-            String id,
-            String action) throws Exception {
-
-        List<int[]> sequence = csv(
-                "monster_animated_csv/monster_"
-                        + action + "_cgs_" + id + ".csv"
-        );
-
-        BufferedImage[] frames =
-                new BufferedImage[sequence.size()];
-
-        int[] delays = new int[frames.length];
-
-        for (int i = 0; i < frames.length; i++) {
-            int[] step = sequence.get(i);
-            int[] row = parts.get(step[0]);
-
-            BufferedImage frame = new BufferedImage(
-                    512, 512,
-                    BufferedImage.TYPE_INT_ARGB
-            );
-
-            Graphics2D g = frame.createGraphics();
-
-            for (int p = row[1] - 1; p >= 0; p--) {
-                int k = 2 + p * 11;
-
-                int x = 256 + step[1] + row[k];
-                int y = 256 + step[2] + row[k + 1];
-
-                int sx = row[k + 6];
-                int sy = row[k + 7];
-
-                int w = row[k + 8];
-                int h = row[k + 9];
-
-                g.drawImage(
-                        sheet,
-                        x, y, x + w, y + h,
-                        sx, sy, sx + w, sy + h,
-                        null
-                );
-            }
-
-            g.dispose();
-
-            frames[i] = frame;
-
-            delays[i] = Math.max(
-                    20,
-                    (int) Math.round(
-                            step[3] * 1000.0 / 120 // enemy animation speed, increase divisor to +
-                    )
-            );
-        }
-
-        return new GameAssets.Clip(
-                frames, delays, 256, 256
+                attribute(
+                        node,
+                        name,
+                        Integer.toString(fallback)
+                )
         );
     }
 }
