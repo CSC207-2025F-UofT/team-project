@@ -1,6 +1,6 @@
-package Entity;
+package entity;
 
-import Entity.User.Role;
+import entity.User.Role;
 /**
  * Factory for creating CommonUser objects.
  */

@@ -1,6 +1,6 @@
 package use_case.admin_signup;
 
-import Entity.User;
+import entity.User;
 
 /**
  * DAO interface for the Admin Signup Use Case.

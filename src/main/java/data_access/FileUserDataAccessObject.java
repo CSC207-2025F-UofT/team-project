@@ -1,4 +1,4 @@
-package Data_access;
+package data_access;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -10,9 +10,9 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import Entity.User;
-import Entity.User.Role;
-import Entity.UserFactory;
+import entity.User;
+import entity.User.Role;
+import entity.UserFactory;
 import use_case.admin_signup.AdminSignupUserDataAccessInterface;
 import use_case.login.LoginUserDataAccessInterface;
 import use_case.signup.SignupUserDataAccessInterface;

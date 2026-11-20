@@ -1,4 +1,4 @@
-package Data_access;
+package data_access;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;

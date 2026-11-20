@@ -6,9 +6,9 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.regex.Pattern;
 
-import Entity.User;
-import Entity.User.Role;
-import Entity.UserFactory;
+import entity.User;
+import entity.User.Role;
+import entity.UserFactory;
 
 /**
  * The Signup Interactor for adopters (regular users).

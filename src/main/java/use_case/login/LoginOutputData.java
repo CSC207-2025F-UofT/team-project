@@ -1,6 +1,6 @@
 package use_case.login;
 
-import Entity.User.Role;
+import entity.User.Role;
 
 /**
  * Output Data for the Login Use Case.
