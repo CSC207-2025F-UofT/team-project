@@ -1,0 +1,74 @@
+# Estimated station-to-station connections for TTC Lines 1, 2 and 4 (MVP subset).
+# Each row is usable in both directions. Minutes are planning estimates, not schedule data.
+line	from	to	minutes
+Line 1	Finch	North York Centre	2
+Line 1	North York Centre	Sheppard-Yonge	2
+Line 1	Sheppard-Yonge	York Mills	2
+Line 1	York Mills	Lawrence	2
+Line 1	Lawrence	Eglinton	2
+Line 1	Eglinton	Davisville	2
+Line 1	Davisville	St Clair	2
+Line 1	St Clair	Summerhill	2
+Line 1	Summerhill	Rosedale	2
+Line 1	Rosedale	Bloor-Yonge	2
+Line 1	Bloor-Yonge	Wellesley	2
+Line 1	Wellesley	College	2
+Line 1	College	TMU	2
+Line 1	TMU	Queen	2
+Line 1	Queen	King	2
+Line 1	King	Union	2
+Line 1	Union	St Andrew	2
+Line 1	St Andrew	Osgoode	2
+Line 1	Osgoode	St Patrick	2
+Line 1	St Patrick	Queen's Park	2
+Line 1	Queen's Park	Museum	2
+Line 1	Museum	St George	2
+Line 1	St George	Spadina	2
+Line 1	Spadina	Dupont	2
+Line 1	Dupont	St Clair West	2
+Line 1	St Clair West	Cedarvale	2
+Line 1	Cedarvale	Glencairn	2
+Line 1	Glencairn	Lawrence West	2
+Line 1	Lawrence West	Yorkdale	2
+Line 1	Yorkdale	Wilson	2
+Line 1	Wilson	Sheppard West	2
+Line 1	Sheppard West	Downsview Park	2
+Line 1	Downsview Park	Finch West	2
+Line 1	Finch West	York University	2
+Line 1	York University	Pioneer Village	2
+Line 1	Pioneer Village	Highway 407	2
+Line 1	Highway 407	Vaughan Metropolitan Centre	2
+Line 2	Kipling	Islington	2
+Line 2	Islington	Royal York	2
+Line 2	Royal York	Old Mill	2
+Line 2	Old Mill	Jane	2
+Line 2	Jane	Runnymede	2
+Line 2	Runnymede	High Park	2
+Line 2	High Park	Keele	2
+Line 2	Keele	Dundas West	2
+Line 2	Dundas West	Lansdowne	2
+Line 2	Lansdowne	Dufferin	2
+Line 2	Dufferin	Ossington	2
+Line 2	Ossington	Christie	2
+Line 2	Christie	Bathurst	2
+Line 2	Bathurst	Spadina	2
+Line 2	Spadina	St George	2
+Line 2	St George	Bay	2
+Line 2	Bay	Bloor-Yonge	2
+Line 2	Bloor-Yonge	Sherbourne	2
+Line 2	Sherbourne	Castle Frank	2
+Line 2	Castle Frank	Broadview	2
+Line 2	Broadview	Chester	2
+Line 2	Chester	Pape	2
+Line 2	Pape	Donlands	2
+Line 2	Donlands	Greenwood	2
+Line 2	Greenwood	Coxwell	2
+Line 2	Coxwell	Woodbine	2
+Line 2	Woodbine	Main Street	2
+Line 2	Main Street	Victoria Park	2
+Line 2	Victoria Park	Warden	2
+Line 2	Warden	Kennedy	2
+Line 4	Sheppard-Yonge	Bayview	2
+Line 4	Bayview	Bessarion	2
+Line 4	Bessarion	Leslie	2
+Line 4	Leslie	Don Mills	2

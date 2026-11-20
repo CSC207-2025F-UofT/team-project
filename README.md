@@ -89,7 +89,7 @@ Each teammate will lead at least one complete use case across its application la
 
 > As a TTC passenger, I want to find a route between two stations that meets my accessibility requirements so that I can avoid barriers I cannot navigate.
 
-**Owner:** Adrien Lau.
+**Owner:** Adrian Lau. MVP implemented: choose two stations in the panel beside the map and select **Find route** (step-free profile, at most 2 transfers, Lines 1, 2 and 4).
 
 Acceptance criteria:
 
