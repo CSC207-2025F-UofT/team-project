@@ -104,8 +104,13 @@ public class AppBuilder {
         if (searchView == null || recipeDetailView == null || filterView == null || favoritesView == null){
             throw new IllegalStateException("All four use cases must be added before build()");
     }
-        //TODO
+        searchView.setOnRecipeSelected(this::openRecipeDetails);
+        filterView.setOnRecipeSelected(this::openRecipeDetails);
+        favoritesView.setOnRecipeSelected(this::openRecipeDetails);
+        recipeDetailView.setOnSaveFavorite(favoriteRecipeController::save);
 
+        mainFrame.showView("Search");
 
+        return mainFrame;
     }
 }
