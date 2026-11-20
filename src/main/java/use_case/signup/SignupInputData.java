@@ -2,6 +2,7 @@ package use_case.signup;
 
 /**
  * The Input Data for the Signup Use Case.
+ * Preferences are filled in later (Use Case 4), not at signup.
  */
 public class SignupInputData {
 
@@ -10,17 +11,14 @@ public class SignupInputData {
     private final String email;
     private final String password;
     private final String repeatPassword;
-    private final String preference;
-
 
     public SignupInputData(String username, String id, String email, String password,
-                           String repeatPassword, String preference) {
+                           String repeatPassword) {
         this.username = username;
         this.id = id;
         this.email = email;
         this.password = password;
         this.repeatPassword = repeatPassword;
-        this.preference = preference;
     }
 
     String getUsername() {
@@ -38,6 +36,4 @@ public class SignupInputData {
     public String getRepeatPassword() {
         return repeatPassword;
     }
-
-    String getPreference() {return preference;}
 }

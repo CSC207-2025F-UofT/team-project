@@ -1,5 +1,6 @@
 package use_case.signup;
 
+import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -12,6 +13,7 @@ import Entity.UserFactory;
 /**
  * The Signup Interactor for adopters (regular users).
  * Admin accounts are created through the admin_signup use case instead.
+ * New adopters start with no preference; they fill it in later.
  */
 public class SignupInteractor implements SignupInputBoundary {
     private static final int MIN_PASSWORD_LENGTH = 8;
@@ -42,7 +44,7 @@ public class SignupInteractor implements SignupInputBoundary {
                                              signupInputData.getEmail(),
                                              hashPassword(signupInputData.getPassword()),
                                              Role.ADOPTER,
-                                             signupInputData.getPreference());
+                                             null);
         userDataAccessObject.save(user);
 
         final SignupOutputData signupOutputData = new SignupOutputData(user.getName());
@@ -74,9 +76,6 @@ public class SignupInteractor implements SignupInputBoundary {
         if (!input.getPassword().equals(input.getRepeatPassword())) {
             return "Passwords don't match.";
         }
-        if (isEmpty(input.getPreference())) {
-            return "Preference cannot be empty";
-        }
         if (userDataAccessObject.existsById(input.getId())) {
             return "User with this id already exists.";
         }
@@ -92,13 +91,9 @@ public class SignupInteractor implements SignupInputBoundary {
      */
     private static String hashPassword(String rawPassword) {
         try {
-            final MessageDigest digest = MessageDigest.getInstance("SHA-256");
-            final byte[] hash = digest.digest(rawPassword.getBytes(StandardCharsets.UTF_8));
-            final StringBuilder hex = new StringBuilder(hash.length * 2);
-            for (byte b : hash) {
-                hex.append(String.format("%02x", b));
-            }
-            return hex.toString();
+            final byte[] hash = MessageDigest.getInstance("SHA-256")
+                    .digest(rawPassword.getBytes(StandardCharsets.UTF_8));
+            return String.format("%064x", new BigInteger(1, hash));
         }
         catch (NoSuchAlgorithmException ex) {
             // Every Java platform is required to support SHA-256.

@@ -8,16 +8,9 @@ import Entity.User;
 public interface LoginUserDataAccessInterface {
 
     /**
-     * Checks if a user with the given email exists.
-     * @param email the email to look for
-     * @return true if a user with the given email exists; false otherwise
-     */
-    boolean existsByEmail(String email);
-
-    /**
      * Returns the user with the given email.
      * @param email the email to look up
-     * @return the user with the given email
+     * @return the user with the given email, or null if there is none
      */
     User getByEmail(String email);
 

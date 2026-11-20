@@ -37,6 +37,7 @@ Scope: We focus on a small core: browse, match, apply, track, and review. Everyt
 
 ### Domain
 PawPortal is a pet adoption portal for a nonprofit animal shelter.
+
 ---
 ## User Stories
 ### User Story 1
@@ -55,8 +56,9 @@ so that animals are matched with suitable adopters efficiently.
 ---
 ## Use Cases
 ### Use Case 1
-Sign up / Log in
-The user enters their name, email, and password to sign up, or email and password to log in.
+Sign up / ADMIN Sign up / Log in
+The user enters their name, id, email, password and preference to sign up, or email and password to log in.
+The Shelter admin enters their name, id, email, password and invite code to sign up, or email and password to log in.
 The system validates the input and checks that the email is not already registered (sign up) or that the credentials match (log in).
 The system opens the home screen for the user's role.
 ### Use Case 2

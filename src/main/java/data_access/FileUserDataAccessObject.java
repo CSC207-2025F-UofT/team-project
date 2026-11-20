@@ -2,9 +2,7 @@ package Data_access;
 
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -60,7 +58,7 @@ public class FileUserDataAccessObject implements SignupUserDataAccessInterface,
     private void readFile() {
         final String content;
         try {
-            content = new String(Files.readAllBytes(csvFile.toPath()), StandardCharsets.UTF_8);
+            content = Files.readString(csvFile.toPath());
         }
         catch (IOException ex) {
             throw new RuntimeException(ex);
@@ -88,7 +86,7 @@ public class FileUserDataAccessObject implements SignupUserDataAccessInterface,
     }
 
     private void writeFile() {
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(csvFile, StandardCharsets.UTF_8))) {
+        try (BufferedWriter writer = Files.newBufferedWriter(csvFile.toPath())) {
             writer.write(HEADER);
             writer.newLine();
 
