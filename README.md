@@ -56,11 +56,13 @@ so that animals are matched with suitable adopters efficiently.
 ---
 ## Use Cases
 ### Use Case 1
-Sign up / ADMIN Sign up / Log in
-The user enters their name, id, email, password and preference to sign up, or email and password to log in.
-The Shelter admin enters their name, id, email, password and invite code to sign up, or email and password to log in.
-The system validates the input and checks that the email is not already registered (sign up) or that the credentials match (log in).
-The system opens the home screen for the user's role.
+Sign up / Admin Sign up / Log in
+The adopter enters their username, id, email, and password to sign up.
+The shelter admin enters their username, id, email, password, and invite code to sign up.
+Both log in with their email and password.
+The system validates the input and checks that the id and the email are not already registered (sign up) or that the 
+credentials match (log in).
+After signing up, the system opens the login screen. After logging in, the system opens the home screen for the user's role.
 ### Use Case 2
 Add / Edit / Remove a Pet
 The admin opens the pet management screen and chooses Add, Edit, or Remove.
