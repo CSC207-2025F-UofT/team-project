@@ -30,7 +30,7 @@ public class SideQuest {
         this.expectedTime = expectedTime;
         this.exp = exp;
         this.location = location;
-        this.interests = interests;
+        this.interests = List.copyOf(interests);;
     }
 
     public String getName() {
@@ -45,15 +45,15 @@ public class SideQuest {
         return photoUrl;
     }
 
+    public String isIndoor() {
+        return isIndoor;
+    }
+
     public double getBudget() {
         return budget;
     }
 
-    public boolean isIndoor() {
-        return isIndoor;
-    }
-
-    public float getExpectedTime() {
+    public double getExpectedTime() {
         return expectedTime;
     }
 
