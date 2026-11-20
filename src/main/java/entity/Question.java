@@ -49,4 +49,9 @@ public class Question {
      * @return this Question's associated text
      */
     public String getQuestionText() { return this.questionText; }
+
+    /**
+     * @return the number of correct answers for this Question
+     */
+    public int getAnswerCount() { return this.correctAnswers.size(); }
 }
