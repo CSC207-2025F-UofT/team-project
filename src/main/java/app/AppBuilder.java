@@ -65,7 +65,7 @@ public class AppBuilder {
         SearchRecipeInputBoundary interacter = new SearchRecipeInteractor(recipeDAO, presenter);
         SearchRecipeController controller = new SearchRecipeController(interacter);
         searchView = new SearchView(controller, searchViewModel);
-        mainFrame.addView("Search", searchView); //TODO
+        mainFrame.addView("Search", searchView);
         return this;
     }
 
@@ -75,7 +75,7 @@ public class AppBuilder {
         ViewRecipeInputBoundary interacter = new ViewRecipeInteractor(recipeDAO, presenter);
         ViewRecipeController controller = new ViewRecipeController(interacter);
         recipeDetailView = new RecipeDetailView(viewRecipeController, viewRecipeViewModel);
-        mainFrame.addView("Details", recipeDetailView); //TODO
+        mainFrame.addView("Details", recipeDetailView);
         return this;
     }
 
@@ -85,7 +85,7 @@ public class AppBuilder {
         FilterRecipeInputBoundary interacter = new FilterRecipeInteractor(recipeDAO, presenter);
         ViewRecipeController controller = new FilterRecipeController(interacter);
         filterView = new FilterView(controller, filterViewModel);
-        mainFrame.addView("Filter", filterView); //TODO
+        mainFrame.addView("Filter", filterView);
         return this;
     }
 
@@ -100,10 +100,10 @@ public class AppBuilder {
     }
 
     //JFrame
-    public JFrame build(){
-        if (searchView == null || recipeDetailView == null || filterView == null || favoritesView == null){
+    public JFrame build() {
+        if (searchView == null || recipeDetailView == null || filterView == null || favoritesView == null) {
             throw new IllegalStateException("All four use cases must be added before build()");
-    }
+        }
         searchView.setOnRecipeSelected(this::openRecipeDetails);
         filterView.setOnRecipeSelected(this::openRecipeDetails);
         favoritesView.setOnRecipeSelected(this::openRecipeDetails);
@@ -113,4 +113,10 @@ public class AppBuilder {
 
         return mainFrame;
     }
+
+    private void openRecipeDetails(String recipeID){
+        viewRecipeController.execute(recipeID);
+        mainFrame.showView("Details");
+    }
 }
+//TODO: All red-labeled methods are to be implemented, do constantly view the app builder for any methods to be built
