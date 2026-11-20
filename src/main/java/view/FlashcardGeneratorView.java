@@ -9,7 +9,7 @@ import javax.swing.text.StyleConstants;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import use_case_layer.flashcard_generator.FlashcardGeneratorInputData.TextPiece;
+import use_case.flashcard_generator.FlashcardGeneratorInputData.TextPiece;
 
 public class FlashcardGeneratorView extends JPanel implements ActionListener {
 

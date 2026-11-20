@@ -1,6 +1,4 @@
-package use_case_layer.flashcard_generator;
-
-import java.util.List;
+package use_case.flashcard_generator;
 
 public interface FlashcardGeneratorInputBoundary {
     void execute(FlashcardGeneratorInputData data);
