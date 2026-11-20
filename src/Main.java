@@ -1108,7 +1108,7 @@ public class Main extends JPanel {
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
-            Main view = new Main(new FFBE_API()::load);
+            Main view = new Main(new Game_API()::load);
 
             JFrame window =
                     new JFrame("Battle Preview");
