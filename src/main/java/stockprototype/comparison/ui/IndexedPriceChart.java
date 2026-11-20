@@ -4,13 +4,12 @@ import stockprototype.comparison.ComparisonResult;
 
 import javax.swing.JPanel;
 import java.awt.BasicStroke;
-import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
-import java.awt.geom.Path2D;
+import java.awt.geom.Line2D;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.math.RoundingMode;
@@ -24,12 +23,15 @@ final class IndexedPriceChart extends JPanel {
     private static final long serialVersionUID = 1L;
     private static final MathContext PRECISION = MathContext.DECIMAL128;
     private static final BigDecimal HUNDRED = BigDecimal.valueOf(100);
-    private static final BasicStroke SOLID = new BasicStroke(2.5f);
-    private static final BasicStroke DASHED = new BasicStroke(2.5f,
-            BasicStroke.CAP_BUTT, BasicStroke.JOIN_ROUND, 1, new float[]{7, 4}, 0);
+    private static final BasicStroke SOLID = new BasicStroke(2.2f);
+    private static final float[] DASH = {8, 5};
+    private static final float DASH_PERIOD = DASH[0] + DASH[1];
     private ComparisonResult result;
 
     IndexedPriceChart() {
+        setOpaque(true);
+        setBackground(ComparisonTheme.BACKGROUND);
+        setForeground(ComparisonTheme.TEXT);
         setPreferredSize(new Dimension(580, 270));
         getAccessibleContext().setAccessibleName("Indexed closing prices");
     }
@@ -65,17 +67,14 @@ final class IndexedPriceChart extends JPanel {
         int right = getWidth() - 14;
         int bottom = getHeight() - line - 12;
         int legendY = 8 + line;
-        boolean dark = getBackground().getRed() < 128;
-        Color firstColor = dark ? new Color(100, 190, 255) : new Color(17, 94, 154);
-        Color secondColor = dark ? new Color(255, 182, 100) : new Color(166, 73, 14);
-        drawLegend(g, result.firstSymbol, 12, legendY, firstColor, SOLID);
+        drawLegend(g, result.firstSymbol, 12, legendY, SOLID);
         int secondX = 12 + 50 + font.stringWidth(result.firstSymbol);
         if (secondX + 30 + font.stringWidth(result.secondSymbol) > right) {
             secondX = 12;
             legendY += line + 2;
         }
-        drawLegend(g, result.secondSymbol, secondX, legendY, secondColor, DASHED);
-        g.setColor(getForeground());
+        drawLegend(g, result.secondSymbol, secondX, legendY, dashed(0));
+        g.setColor(ComparisonTheme.MUTED);
         g.drawString("Index (first close = 100)", 12, legendY + line + 4);
 
         BigDecimal min = HUNDRED;
@@ -90,7 +89,7 @@ final class IndexedPriceChart extends JPanel {
         BigDecimal high = max.add(margin, PRECISION);
         BigDecimal range = high.subtract(low, PRECISION);
         int top = legendY + line * 2 + 4;
-        int left = 0;
+        int left = font.stringWidth("100");
         String[] ticks = new String[5];
         for (int i = 0; i < ticks.length; i++) {
             BigDecimal fraction = BigDecimal.valueOf(i * 25L, 2);
@@ -101,15 +100,23 @@ final class IndexedPriceChart extends JPanel {
         if (right - left < 50 || bottom - top < 36) {
             return;
         }
+        double baseline = screenY(HUNDRED, low, range, top, bottom);
+        int baselineTick = (int) Math.round(baseline);
         g.setStroke(new BasicStroke(1f));
         for (int i = 0; i < ticks.length; i++) {
             int y = bottom - Math.round((bottom - top) * i / 4f);
-            Color ink = getForeground();
-            g.setColor(new Color(ink.getRed(), ink.getGreen(), ink.getBlue(), 45));
-            g.drawLine(left, y, right, y);
-            g.setColor(ink);
-            g.drawString(ticks[i], left - font.stringWidth(ticks[i]) - 6, y + font.getAscent() / 2);
+            if (Math.abs(y - baselineTick) >= line) {
+                g.setColor(ComparisonTheme.GRID);
+                g.drawLine(left, y, right, y);
+                g.setColor(ComparisonTheme.MUTED);
+                g.drawString(ticks[i], left - font.stringWidth(ticks[i]) - 6, y + font.getAscent() / 2);
+            }
         }
+        g.setColor(ComparisonTheme.MUTED);
+        g.draw(new Line2D.Double(left, baseline, right, baseline));
+        g.setColor(ComparisonTheme.TEXT);
+        g.drawString("100", left - font.stringWidth("100") - 6, baselineTick + font.getAscent() / 2);
+        g.setColor(ComparisonTheme.MUTED);
         LocalDate start = result.days.get(0).date;
         LocalDate end = result.days.get(result.days.size() - 1).date;
         int dateY = bottom + line + 2;
@@ -119,30 +126,50 @@ final class IndexedPriceChart extends JPanel {
             g.drawString(end.toString(), endLabelX, dateY);
         }
 
-        Path2D first = new Path2D.Double();
-        Path2D second = new Path2D.Double();
-        for (int i = 0; i < result.days.size(); i++) {
-            ComparisonResult.Day day = result.days.get(i);
-            double elapsed = (double) (day.date.toEpochDay() - start.toEpochDay())
-                    / (end.toEpochDay() - start.toEpochDay());
-            double x = left + elapsed * (right - left);
-            append(first, i, x, screenY(day.firstIndex, low, range, top, bottom));
-            append(second, i, x, screenY(day.secondIndex, low, range, top, bottom));
+        for (int series = 0; series < 2; series++) {
+            double lastX = left;
+            double lastY = baseline;
+            double length = 0;
+            boolean useDashes = series == 1;
+            for (int i = 1; i < result.days.size(); i++) {
+                ComparisonResult.Day day = result.days.get(i);
+                double elapsed = (double) (day.date.toEpochDay() - start.toEpochDay())
+                        / (end.toEpochDay() - start.toEpochDay());
+                double x = left + elapsed * (right - left);
+                double y = screenY(useDashes ? day.secondIndex : day.firstIndex, low, range, top, bottom);
+                // A segment that crosses the starting price changes color at the crossing.
+                if ((lastY < baseline && y > baseline) || (lastY > baseline && y < baseline)) {
+                    double crossX = lastX + (x - lastX) * (baseline - lastY) / (y - lastY);
+                    drawSegment(g, lastX, lastY, crossX, baseline, baseline, useDashes, length);
+                    length += Math.hypot(crossX - lastX, baseline - lastY);
+                    lastX = crossX;
+                    lastY = baseline;
+                }
+                drawSegment(g, lastX, lastY, x, y, baseline, useDashes, length);
+                length += Math.hypot(x - lastX, y - lastY);
+                lastX = x;
+                lastY = y;
+            }
         }
-        g.setColor(firstColor);
-        g.setStroke(SOLID);
-        g.draw(first);
-        g.setColor(secondColor);
-        g.setStroke(DASHED);
-        g.draw(second);
     }
 
-    private static void append(Path2D path, int i, double x, double y) {
-        if (i == 0) {
-            path.moveTo(x, y);
+    private static void drawSegment(Graphics2D g, double x1, double y1, double x2, double y2,
+                                    double baseline, boolean useDashes, double length) {
+        double middle = (y1 + y2) / 2;
+        if (middle < baseline) {
+            g.setColor(ComparisonTheme.GAIN);
+        } else if (middle > baseline) {
+            g.setColor(ComparisonTheme.LOSS);
         } else {
-            path.lineTo(x, y);
+            g.setColor(ComparisonTheme.TEXT);
         }
+        g.setStroke(useDashes ? dashed(length) : SOLID);
+        g.draw(new Line2D.Double(x1, y1, x2, y2));
+    }
+
+    private static BasicStroke dashed(double length) {
+        return new BasicStroke(3.2f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_ROUND,
+                1, DASH, (float) (length % DASH_PERIOD));
     }
 
     private static double screenY(BigDecimal value, BigDecimal low, BigDecimal range, int top, int bottom) {
@@ -157,8 +184,8 @@ final class IndexedPriceChart extends JPanel {
         return value.setScale(2, RoundingMode.HALF_UP).stripTrailingZeros().toPlainString();
     }
 
-    private void drawLegend(Graphics2D g, String label, int x, int y, Color color, BasicStroke stroke) {
-        g.setColor(color);
+    private void drawLegend(Graphics2D g, String label, int x, int y, BasicStroke stroke) {
+        g.setColor(ComparisonTheme.TEXT);
         g.setStroke(stroke);
         g.drawLine(x, y - 4, x + 22, y - 4);
         g.setColor(getForeground());
