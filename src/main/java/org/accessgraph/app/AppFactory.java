@@ -1,46 +1,41 @@
 package org.accessgraph.app;
 
-import org.accessgraph.interface_adapter.PrototypeController;
-import org.accessgraph.interface_adapter.PrototypeState;
-import org.accessgraph.view.AccessGraphPanel;
-import org.accessgraph.view.StationMapPanel;
-import org.accessgraph.data_access.BundledStationRepository;
 import org.accessgraph.data_access.BrowserLocationGateway;
+import org.accessgraph.data_access.BundledStationRepository;
+import org.accessgraph.data_access.DemoAccount;
 import org.accessgraph.data_access.DesktopBrowser;
-import org.accessgraph.data_access.GoogleStaticMapsGateway;
-import org.accessgraph.data_access.MacKeychainApiKeyStore;
-import org.accessgraph.interface_adapter.ApiKeySettings;
+import org.accessgraph.data_access.OpenStreetMapGateway;
+import org.accessgraph.entity.Station;
+import org.accessgraph.use_case.sign_in.SignIn;
+import org.accessgraph.use_case.station_map.MapSession;
+import org.accessgraph.view.AccessGraphPanel;
 
-import javax.swing.JComponent;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.SwingUtilities;
-import java.awt.BorderLayout;
 import java.io.IOException;
 import java.net.http.HttpClient;
+import java.time.Clock;
 import java.time.Duration;
+import java.util.List;
+import java.util.stream.Collectors;
 
-/** Composition root. Future gateways and interactors will be wired here. */
+/** The composition root connects the use cases and their desktop adapters. */
 public final class AppFactory {
     private AppFactory() { }
 
     public static AccessGraphPanel createPanel() {
-        PrototypeState state = new PrototypeState();
-        PrototypeController controller = new PrototypeController(state);
-        ApiKeySettings settings = new ApiKeySettings(System.getenv("GOOGLE_MAPS_API_KEY"), new MacKeychainApiKeyStore());
-        JComponent stationMap;
+        HttpClient http = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(8)).build();
+        return new AccessGraphPanel(new SignIn(new DemoAccount()), DemoAccount.USERNAME, DemoAccount.PASSWORD,
+                new MapSession(loadStations()), new OpenStreetMapGateway(http), new BrowserLocationGateway(),
+                new DesktopBrowser(), Clock.systemUTC());
+    }
+
+    private static List<Station> loadStations() {
         try {
-            stationMap = new StationMapPanel(new BundledStationRepository().load(),
-                    new GoogleStaticMapsGateway(HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(15)).build(),
-                            settings::keyForRequest), new DesktopBrowser(), new BrowserLocationGateway());
+            return new BundledStationRepository().load().stream()
+                    .filter(station -> station.getAccessibility() == Station.Accessibility.CONFIRMED)
+                    .collect(Collectors.toList());
         } catch (IOException exception) {
-            JPanel error = new JPanel(new BorderLayout());
-            error.add(new JLabel("Station catalogue unavailable. Rebuild the application with its bundled resources."),
-                    BorderLayout.NORTH);
-            stationMap = error;
+            System.err.println("The bundled TTC catalogue could not be read: " + exception.getMessage());
+            return List.of();
         }
-        AccessGraphPanel panel = new AccessGraphPanel(state, controller, stationMap, settings);
-        SwingUtilities.invokeLater(panel::initialiseSettings);
-        return panel;
     }
 }

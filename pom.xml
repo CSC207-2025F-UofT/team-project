@@ -8,7 +8,7 @@
     <artifactId>TeamProject</artifactId>
     <version>1.0-SNAPSHOT</version>
     <name>AccessGraph</name>
-    <description>Accessibility-aware TTC journey planner — Swing interface prototype.</description>
+    <description>AccessGraph desktop map demo for accessible TTC stations.</description>
 
     <properties>
         <maven.compiler.source>11</maven.compiler.source>
