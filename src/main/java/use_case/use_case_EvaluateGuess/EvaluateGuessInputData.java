@@ -1,4 +1,4 @@
-package use_case_EvaluateGuess;
+package use_case.use_case_EvaluateGuess;
 
 public class EvaluateGuessInputData {
 }

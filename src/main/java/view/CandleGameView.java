@@ -1,5 +1,6 @@
 package view;
 
+import interface_adapters.candle_game.CandleGameViewModel;
 import interface_adapters.candle_game.CandleGameViewModelListener;
 import javax.swing.*;
 import interface_adapters.candle_game.CandleGameController;
@@ -14,12 +15,14 @@ import java.awt.event.ActionListener;
 
 public class CandleGameView extends JPanel implements ActionListener {
 
-    private final CandleGameController controller;
+//    private final CandleGameViewModel candleGameViewModel;
 
     private final JLabel attempts;
     private final JLabel attemptsRemaining;
     private final JLabel background;
     private final JTextField[] numberBoxes;
+    private final CandleGameController controller;
+
     private final JButton quitButton;
     private final JButton instructionsButton;
     private final JButton submitButton;
@@ -32,6 +35,9 @@ public class CandleGameView extends JPanel implements ActionListener {
      */
     public CandleGameView(CandleGameController controller) {
         this.controller = controller;
+//        this.candleGameViewModel = candleGameViewModel;
+//        this.candleGameViewModel.addListener(this);
+
         this.setLayout(null);
 
         // Font
@@ -147,6 +153,12 @@ public class CandleGameView extends JPanel implements ActionListener {
         instructionsFrame.setLocationRelativeTo(this);
         instructionsFrame.setVisible(true);
     }
+//    @Override
+//    public void candleGameStateChanged() {
+//        // Update the displayed information using the ViewModel
+//        attemptsRemaining.setText(
+//                String.valueOf(candleGameViewModel.getAttemptsRemaining()));
+//    }
 
 
     public static void main(String[] args) {
