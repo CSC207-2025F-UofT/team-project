@@ -53,36 +53,60 @@ public final class PortfolioInteractor implements PortfolioInputBoundary {
 
     private void executeBuy(PortfolioInputData inputData) {
         Portfolio portfolio = getPortfolio(inputData.getUsername());
+        BigDecimal originalCash = portfolio.getAvailableCash();
         try {
             BigDecimal price = stockPriceDataAccess.getCurrentPrice(inputData.getTicker());
             portfolio.buy(inputData.getTicker(), inputData.getQuantity(), price);
-            portfolioDataAccess.savePortfolio(inputData.getUsername(), portfolio);
-            outputBoundary.prepareBuyView(new TradeOutputData(
-                    true,
-                    "Successfully bought " + inputData.getQuantity()
-                            + " shares of " + inputData.getTicker() + ".",
-                    portfolio.getAvailableCash()));
         } catch (IOException | IllegalArgumentException exception) {
             outputBoundary.prepareBuyView(new TradeOutputData(
                     false, exception.getMessage(), portfolio.getAvailableCash()));
+            return;
         }
+
+        try {
+            portfolioDataAccess.savePortfolio(inputData.getUsername(), portfolio);
+        } catch (RuntimeException exception) {
+            outputBoundary.prepareBuyView(new TradeOutputData(
+                    false,
+                    "Could not save your portfolio. Please try again.",
+                    originalCash));
+            return;
+        }
+
+        outputBoundary.prepareBuyView(new TradeOutputData(
+                true,
+                "Successfully bought " + inputData.getQuantity()
+                        + " shares of " + inputData.getTicker() + ".",
+                portfolio.getAvailableCash()));
     }
 
     private void executeSell(PortfolioInputData inputData) {
         Portfolio portfolio = getPortfolio(inputData.getUsername());
+        BigDecimal originalCash = portfolio.getAvailableCash();
         try {
             BigDecimal price = stockPriceDataAccess.getCurrentPrice(inputData.getTicker());
             portfolio.sell(inputData.getTicker(), inputData.getQuantity(), price);
-            portfolioDataAccess.savePortfolio(inputData.getUsername(), portfolio);
-            outputBoundary.prepareSellView(new TradeOutputData(
-                    true,
-                    "Successfully sold " + inputData.getQuantity()
-                            + " shares of " + inputData.getTicker() + ".",
-                    portfolio.getAvailableCash()));
         } catch (IOException | IllegalArgumentException exception) {
             outputBoundary.prepareSellView(new TradeOutputData(
                     false, exception.getMessage(), portfolio.getAvailableCash()));
+            return;
         }
+
+        try {
+            portfolioDataAccess.savePortfolio(inputData.getUsername(), portfolio);
+        } catch (RuntimeException exception) {
+            outputBoundary.prepareSellView(new TradeOutputData(
+                    false,
+                    "Could not save your portfolio. Please try again.",
+                    originalCash));
+            return;
+        }
+
+        outputBoundary.prepareSellView(new TradeOutputData(
+                true,
+                "Successfully sold " + inputData.getQuantity()
+                        + " shares of " + inputData.getTicker() + ".",
+                portfolio.getAvailableCash()));
     }
 
     private void executeView(PortfolioInputData inputData) {
@@ -95,7 +119,13 @@ public final class PortfolioInteractor implements PortfolioInputBoundary {
                 // Keep the last known price if a stock quote cannot be refreshed.
             }
         }
-        portfolioDataAccess.savePortfolio(inputData.getUsername(), portfolio);
+        try {
+            portfolioDataAccess.savePortfolio(inputData.getUsername(), portfolio);
+        } catch (RuntimeException exception) {
+            System.err.println(
+                    "Failed to save refreshed portfolio prices: "
+                            + exception.getMessage());
+        }
 
         List<HoldingOutputData> holdings = new ArrayList<>();
         for (Holding holding : portfolio.getHoldings().values()) {
