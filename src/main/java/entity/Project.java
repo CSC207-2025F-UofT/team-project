@@ -1,14 +1,13 @@
 package entity;
 
 public class Project {
-    private final long id;
+    private final long id; // unique id
     private String name;
-    public Canvas canvas; // temp public see how we implement others
+    public Canvas canvas;
     public boolean isPublished;
     private ColourPalette palette;
 
     public Project(long id, String name) {
-        // generate a new unique project id
         this.id = id;
         canvas = new Canvas();
         isPublished = false;
