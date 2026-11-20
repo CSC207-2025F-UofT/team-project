@@ -1,0 +1,4 @@
+# The invalid ID is on the fourth physical line.
+1 0
+
+0 9

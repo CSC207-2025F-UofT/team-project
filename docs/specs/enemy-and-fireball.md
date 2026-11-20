@@ -144,51 +144,36 @@ An `image()` method on the tile class would mean the `entity` layer imports AWT 
 
 ```java
 // entity/TileType.java
-public enum TileType {
-    WATER(0, false),
-    DIRT(1, true);
-
-    private final int id;
-    private final boolean walkable;
-
-    TileType(int id, boolean walkable) {
-        this.id = id;
-        this.walkable = walkable;
-    }
-
-    public boolean isWalkable() {
-        return walkable;
-    }
-
-    public static TileType fromId(int id) {
-        for (TileType type : values()) {
-            if (type.id == id) {
-                return type;
-            }
-        }
-        throw new IllegalArgumentException("Unknown tile id: " + id);
-    }
+public interface TileType {
+    int getId();
+    boolean isWalkable();
 }
 ```
 
-An enum fits because every water tile is identical. That way 600 tiles share 2 constants instead of being 600 objects, and adding a tile type is one line. If a tile later needs its own state, such as a door that opens, a `Tile` class can wrap a `TileType` plus that state.
+`WaterTileType` implements ID 0 with walking blocked, and `DirtTileType` implements ID 1 with walking allowed. Implementations must be immutable so a grid can safely share terrain objects.
+
+`TileTypeRegistry` receives a list of terrain objects and builds an ID lookup. Its `fromId(id)` returns the registered object or throws an error for an unknown ID; construction rejects duplicate IDs and null entries. Adding another terrain implementation does not require changing the registry or `TileMap`.
+
+When map loading is wired into the application, `Main` will construct the registry with one water object and one dirt object and pass it to the file reader. The map can then share those two objects across all 600 cells. If a tile later needs its own state, such as a door that opens, a `Tile` class can wrap a `TileType` plus that state.
 
 **Where the code goes**
 
 | Layer | Change |
 | --- | --- |
-| `entity` | `TileType` enum (above). `TileMap` holds a `TileType[][]` grid (rows × columns) and the tile size, with `getTile(col, row)`, `tileAtPixel(x, y)`, `isWalkable(x, y)` and width and height in pixels |
-| `use_case/load_map` | `LoadMapInteractor` asks a `MapDataAccessInterface` for a map by name and passes the resulting `TileMap` to the game |
-| `data_access` (new package) | `FileMapDataAccessObject` implements `MapDataAccessInterface`. It reads the text file and parses it into a `TileMap` |
+| `entity` | `TileType` interface, `WaterTileType`, `DirtTileType`, and `TileTypeRegistry`. `TileMap` holds a `TileType[][]` grid (rows × columns) and the tile size, with `getTile(col, row)`, `tileAtPixel(x, y)`, `isWalkable(x, y)` and width and height in pixels |
+| `use_case/load_map` | `MapDataAccessInterface.load(mapName)` supplies a `TileMap` or throws `MapLoadingException`. The later `LoadMapInteractor` will handle this failure through its output boundary |
+| `data_access` | `FileMapDataAccessObject` implements `MapDataAccessInterface`. It reads a UTF-8 classpath resource under `maps/` and parses it into a `TileMap` using the supplied terrain registry and tile size |
 | `interface_adapter` | A presenter sends the tile grid to the view once, after loading |
-| `view` | `TileSprites` maps each `TileType` to its image, which is where `image()` lives. `GamePanel` draws the map before the player and enemy |
-| `app` | `Main` creates the file data-access object and runs the map load before starting the loop |
+| `view` | `TileSprites` maps terrain IDs supplied by the view model to images. `GamePanel` draws the map before the player and enemy |
+| `app` | `Main` creates the terrain registry and file data-access object and runs the map load before starting the loop |
 
 **Parsing rules**
 
 - Every row must have the same number of tiles.
 - An unknown number stops loading with an error that names the line and column.
 - A missing or empty file is an error too, so a mistake shows up at startup instead of as a blank screen.
+- Non-integer IDs and IDs outside the Java integer range are rejected. Error locations use the original file's one-based line number and one-based tile column, including when comments or blank lines precede the error.
+- Loading failures use `MapLoadingException`, owned by `use_case/load_map`; file APIs stay in `data_access`. Wiring this failure into a presenter is part of the next implementation step.
 
 **Drawing**
 

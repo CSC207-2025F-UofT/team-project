@@ -303,13 +303,35 @@ Requires JDK 11+ (17 recommended).
 
 Move the white box with WASD or the arrow keys.
 
+Run unit tests with `mvn test` (or the Maven `test` lifecycle in IntelliJ).
+
 ### Architecture (core loop)
 
 - `entity/Player`: position, size and speed (no Swing).
+- `entity/TileType`: interface for immutable terrain types. `WaterTileType` has ID 0 and blocks walking; `DirtTileType` has ID 1 and permits walking.
+- `entity/TileTypeRegistry`: resolves IDs through registered terrain objects and rejects duplicate or unknown IDs.
+- `entity/TileMap`: an immutable grid of terrain objects, pixel-coordinate lookup and walkability (no Swing or file access). Map loading and rendering are not connected yet.
+- `use_case/load_map`: `MapDataAccessInterface` defines map loading, with failures reported through `MapLoadingException`. The interactor and presentation flow are a later step.
+- `data_access/FileMapDataAccessObject`: loads UTF-8 resources from `maps/`, resolves IDs through the supplied terrain registry, and validates the tile grid.
 - `use_case/update_game`: one tick of game rules (`UpdateGameInteractor`) with input/output boundaries.
 - `interface_adapter/game`: `GameController` (key state -> request), `GamePresenter` + `GameViewModel` (result -> what to draw).
 - `view`: `GameWindow` (JFrame), `GamePanel` (draws), `KeyboardInput` (records held keys).
 - `app`: `GameLoop` (60 ticks/s thread: input -> update -> repaint) and `Main` (builds and wires everything).
+
+### Map resource format
+
+The file reader loads names such as `level1.txt` from `maps/` on the classpath, so it does not
+depend on the current working directory. Production maps will go in `src/main/resources/maps/`;
+small test maps currently live in `src/test/resources/maps/`.
+
+Each non-comment line is one row of integer tile IDs, separated by whitespace. With the MVP
+terrain registry, `0` is water and `1` is dirt. Blank lines and lines whose first non-whitespace
+character is `#` are skipped. Every tile row must have the same number of columns. The tile size
+is supplied when constructing the reader; the planned game map uses 32-pixel tiles.
+
+Missing, empty, unreadable, or malformed maps produce `MapLoadingException`. Format errors
+identify the map name, original file line, and tile column, counted from one. Columns count
+tile entries, not characters. The game startup and view are not connected to the reader yet.
 
 ---
 
