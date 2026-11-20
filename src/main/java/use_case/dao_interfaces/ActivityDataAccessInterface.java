@@ -1,4 +1,4 @@
-package use_case.gateway;
+package use_case.dao_interfaces;
 
 import entity.Activity;
 import java.util.List;
