@@ -53,12 +53,12 @@ The updater downloads the official GTFS archive (currently about 68 MB), the TTC
 | `entity` | TTC station records and timestamped device positions. |
 | `use_case.sign_in` | Sign-in rules and the authentication boundary. |
 | `use_case.station_map` | Map-session rules, viewport geometry, and the location boundary. |
-| `interface_adapter` | Location controller and browser and image-rendering ports. |
+| `interface_adapter` | Location controller and browser and map-tile ports. |
 | `data_access` | Demo account, OpenStreetMap tiles and cache, station reader, and browser permission bridge. |
 | `view` | Swing sign-in and map screens. The map view renders fetched imagery and handles gestures. |
 | `app` | Dependency injection and desktop startup. |
 
-The use cases know neither Swing nor the providers. `AppFactory` injects the concrete adapters, and the Swing map view fetches images off the event dispatch thread. The local demo authenticator can be replaced behind the same boundary when account management is in scope.
+The use cases know neither Swing nor the providers. `AppFactory` injects the concrete adapters, and the Swing map view keeps decoded tiles in memory and loads missing tiles off the event dispatch thread. The local demo authenticator can be replaced behind the same boundary when account management is in scope.
 
 ## Project specification
 

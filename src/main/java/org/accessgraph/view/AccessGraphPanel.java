@@ -1,7 +1,7 @@
 package org.accessgraph.view;
 
 import org.accessgraph.interface_adapter.BrowserGateway;
-import org.accessgraph.interface_adapter.MapImageGateway;
+import org.accessgraph.interface_adapter.TileGateway;
 import org.accessgraph.use_case.sign_in.SignIn;
 import org.accessgraph.use_case.station_map.LocationGateway;
 import org.accessgraph.use_case.station_map.MapSession;
@@ -20,9 +20,9 @@ public final class AccessGraphPanel extends JPanel implements AutoCloseable {
     private final MapPanel map;
 
     public AccessGraphPanel(SignIn signIn, String demoUsername, String demoPassword, MapSession session,
-                            MapImageGateway maps, LocationGateway locations, BrowserGateway browser, Clock clock) {
+                            TileGateway tiles, LocationGateway locations, BrowserGateway browser, Clock clock) {
         setLayout(cards);
-        map = new MapPanel(session, maps, locations, browser, clock, this::signOut);
+        map = new MapPanel(session, tiles, locations, browser, clock, this::signOut);
         login = new LoginPanel(demoUsername, demoPassword, (name, password) -> {
             if (!signIn.authenticate(name, password)) { return false; }
             cards.show(this, MAP);

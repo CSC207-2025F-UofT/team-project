@@ -2,9 +2,6 @@ package org.accessgraph.data_access;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
-import org.accessgraph.entity.Station;
-import org.accessgraph.use_case.station_map.MapRequest;
-import org.accessgraph.use_case.station_map.MapViewport;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -35,6 +32,7 @@ class OpenStreetMapGatewayTest {
     private final ConcurrentLinkedQueue<String> conditionalRequests = new ConcurrentLinkedQueue<>();
     private volatile boolean expireTiles;
     private volatile int tileStatus = 200;
+    private volatile boolean outage;
 
     @BeforeEach
     void setUp() throws IOException {
@@ -55,57 +53,42 @@ class OpenStreetMapGatewayTest {
     void tearDown() { server.stop(0); }
 
     @Test
-    void rendersTilesAtViewportSizeAndZoomsAndPansTheSameStationPin() throws Exception {
-        OpenStreetMapGateway maps = gateway();
-        Station station = new BundledStationRepository().load().get(0);
-        List<Station> stations = List.of(station);
-        MapViewport viewport = at(station, 15);
-        BufferedImage image = maps.fetch(new MapRequest(stations, viewport));
-        assertEquals(640, image.getWidth());
-        assertEquals(400, image.getHeight());
+    void downloadsIdentifiedTilesAndReusesThePersistedCopy() throws Exception {
+        BufferedImage image = gateway().tile(15, 9156, 11966);
+        assertEquals(256, image.getWidth());
+        assertEquals(256, image.getHeight());
         assertEquals(Color.MAGENTA.getRGB(), image.getRGB(0, 0));
-        assertEquals(0x06635B, image.getRGB(320, 200) & 0xFFFFFF);
+        assertEquals(List.of("/tiles/15/9156/11966.png"), List.copyOf(tileRequests));
         assertTrue(tileUserAgents.stream().allMatch(agent -> agent.startsWith("AccessGraph/")));
 
-        MapViewport detail = viewport.zoomAt(1, 300, 200);
         tileRequests.clear();
-        image = maps.fetch(new MapRequest(stations, detail));
-        assertFalse(tileRequests.isEmpty());
-        assertTrue(tileRequests.stream().allMatch(path -> path.startsWith("/tiles/16/")));
-        assertEquals(0x06635B, image.getRGB(340, 200) & 0xFFFFFF);
-        image = maps.fetch(new MapRequest(stations, detail.pan(25, -15)));
-        assertEquals(0x06635B, image.getRGB(365, 185) & 0xFFFFFF);
-
-        tileRequests.clear();
-        gateway().fetch(new MapRequest(stations, detail.zoomAt(-1, 300, 200)));
-        assertTrue(tileRequests.isEmpty(), "Returning to the original zoom should reuse persisted tiles.");
+        assertEquals(Color.MAGENTA.getRGB(), gateway().tile(15, 9156, 11966).getRGB(10, 10));
+        assertTrue(tileRequests.isEmpty(), "A fresh tile should come from the disk cache.");
+        assertThrows(IllegalArgumentException.class, () -> gateway().tile(2, 4, 0));
     }
 
     @Test
     void expiredTilesAreConditionallyRevalidated() throws Exception {
         expireTiles = true;
-        Station station = new BundledStationRepository().load().get(0);
-        MapRequest request = new MapRequest(List.of(station), at(station, 15));
-        gateway().fetch(request);
-        int count = tileRequests.size();
-        gateway().fetch(request);
-        assertEquals(count, conditionalRequests.size());
-        assertTrue(conditionalRequests.stream().allMatch(value -> value.equals("\"test-tile\"|" + MODIFIED)));
-        gateway().fetch(request);
-        assertEquals(2 * count, tileRequests.size());
+        gateway().tile(15, 9156, 11966);
+        gateway().tile(15, 9156, 11966);
+        assertEquals(2, tileRequests.size());
+        assertEquals(List.of("\"test-tile\"|" + MODIFIED), List.copyOf(conditionalRequests));
     }
 
     @Test
-    void reportsTileErrors() throws Exception {
+    void reportsTileErrors() {
         tileStatus = 503;
-        Station station = new BundledStationRepository().load().get(0);
-        MapRequest request = new MapRequest(List.of(station), at(station, 15));
-        assertTrue(assertThrows(IOException.class, () -> gateway().fetch(request))
+        assertTrue(assertThrows(IOException.class, () -> gateway().tile(15, 9156, 11966))
                 .getMessage().contains("OpenStreetMap returned HTTP 503"));
     }
 
-    private static MapViewport at(Station station, int zoom) {
-        return MapViewport.centered(station.getLatitude(), station.getLongitude(), zoom, 640, 400);
+    @Test
+    void showsTheExpiredCopyWhenTheServerIsUnavailable() throws Exception {
+        expireTiles = true;
+        gateway().tile(15, 9156, 11966);
+        outage = true;
+        assertEquals(Color.MAGENTA.getRGB(), gateway().tile(15, 9156, 11966).getRGB(0, 0));
     }
 
     private OpenStreetMapGateway gateway() {
@@ -118,7 +101,9 @@ class OpenStreetMapGatewayTest {
             tileRequests.add(response.getRequestURI().getPath());
             tileUserAgents.add(response.getRequestHeaders().getFirst("User-Agent"));
             String etag = response.getRequestHeaders().getFirst("If-None-Match");
-            if (etag != null) {
+            if (outage) {
+                response.sendResponseHeaders(503, -1);
+            } else if (etag != null) {
                 conditionalRequests.add(etag + "|" + response.getRequestHeaders().getFirst("If-Modified-Since"));
                 response.getResponseHeaders().add("Cache-Control", "public, max-age=3600");
                 response.sendResponseHeaders(304, -1);

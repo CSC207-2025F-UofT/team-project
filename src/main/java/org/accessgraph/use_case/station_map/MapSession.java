@@ -60,12 +60,13 @@ public final class MapSession {
 
     public void centerOnNextFix() { centerOnFirstFix = true; }
 
-    public boolean zoom(int steps, double x, double y) { return update(viewport.zoomAt(steps, x, y)); }
+    public boolean zoom(double steps, double x, double y) { return update(viewport.zoomAt(steps, x, y)); }
+    public boolean zoomTo(double level, double x, double y) { return update(viewport.zoomTo(level, x, y)); }
     public void pan(double dx, double dy) { viewport = viewport.pan(dx, dy); }
     public boolean resize(int width, int height) { return update(viewport.resize(width, height)); }
 
     public MapViewport getViewport() { return viewport; }
-    public MapRequest request() { return new MapRequest(stations, viewport); }
+    public List<Station> getStations() { return stations; }
     public GeoPosition getPosition(Instant now) {
         return position != null && position.isRecent(now) ? position : null;
     }
