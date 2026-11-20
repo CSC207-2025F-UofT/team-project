@@ -19,7 +19,7 @@ class LocationInfoTest {
 
     @Test
     void generalInfoIsCorrect() {
-        assertEquals("North America", markham.getInfo(LocationInfoType.CONTINENT));
+        assertEquals("North America", markham.getType(LocationInfoType.CONTINENT));
     }
 
     @Test
