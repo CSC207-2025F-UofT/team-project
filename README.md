@@ -268,7 +268,47 @@ User can retake the questionnaire later to update their preferences if their int
 The system recommends a list of sidequests based on the user’s preference from the questionnaire. <br>
 The system displays the sidequest that ‘fits’ the user’s preference the most by assessing how close the sidequest is to user’s preference. <br>
 User can view the activity type, budget, and location of the sidequest and decide to accept or decline. <br>
+
+
 ### Use Case 6: <Defaults/Adding Quests>
+**Lead:** Isaac Wan <br>
+**Primary actor:** App user <br>
+**Goal:** Allow the user to add Side Quests they have completed to the system, along with the Side Quests' corresponding information such as quest name, description, estimated completion time, xp earned etc. Moreover, users should be allowed to view a catalogue of default side quests to complete.
+
+<details>
+<summary>Full use case</summary>
+
+**Preconditions:**
+
+1. The user is logged in.
+2. The user fills in all the mandatory fields when adding their quest.
+3. The user is on the "Add Quest" page.
+
+**Trigger:** The user opens the Add Quest tab.
+
+**Main success scenario:**
+
+1. The user clicks on the Add Quest page in the app.
+2. The user fills in all mandatory text field forms, such as name, description and location details
+3. The user clicks the "Add Quest" button at the bottom.
+4. The quest is added to the App's system
+
+**Alternative flows and exceptions:**
+
+* 2a. The user can click on other pages, in which the data filled in will be held temporarily in the Add Quest Page, and will be there when they return
+* 3a. The user clicks on "Add Quest" without filling out all relevant fields, resulting in the application prompting the user to fill in all fields, returning the user to step 2.
+* 3b. The user enters an invalid input in any of the fields, leading to a prompt of which field was passed in incorrectly.
+
+**Success postcondition:** The notification "Saved quest successfully" shows up on the user's UI. The user's Side Quest entity is saved into the system, as that is the main goal of this use case. <br>
+**Failure postcondition:** The user stays on the Add Quest tab, and no data is changed.
+
+**Features that can be added later:**
+
+1. The ability for the quest to be dynamic instead of static: It can be cancelled halfway through.
+2. A progress bar for the dynamic quest.
+3. The option to invite other users to complete a quest together when adding a quest.
+
+</details>
 
 [Back to top](#linked-out)
 
@@ -527,7 +567,22 @@ User can view the activity type, budget, and location of the sidequest and decid
 
 ## Entities
 
-### Entity 1: Quest Entity
+### Entity 1: SideQuest Entity
+<details>
+<summary>Entity details</summary>
+
+**SideQuest** (Isaac): represents a side quest that can be created by a user or provided as a default quest.
+
+**Instance variables:** name: String, description: String, photoUrl: String, isIndoor: boolean, budget: double, expectedTime: double, exp: int, location: Location, interests: List<String>
+
+**Methods:** getters for all instance variables, including getName(), getDescription(), getPhotoUrl(), isIndoor(), getBudget(), getExpectedTime(), getExp(), getLocation(), and getInterests().
+
+**Location**: represents the location associated with a side quest. The location is selected through the map functionality and stored using the application's own `Location` entity rather than a map-API-specific object.
+
+The `SideQuest` entity is used by the Add Side Quest use case. User-provided values are passed through `AddSideQuestInputData`, validated and processed by the use case interactor, and then used to create a `SideQuest` object.
+
+</details>
+
 
 ### Entity 2: User (Profile/Person Entity)
 
