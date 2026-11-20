@@ -22,15 +22,15 @@ public class AddQuestionInteractor implements AddQuestionInputBoundary {
     @Override
     public void execute(AddQuestionInputData inputData) {
         final String questionText = inputData.getQuestionText();
+        final List<String> primaryAnswers = inputData.getPrimaryAnswers();
+        final List<Integer> scores = inputData.getScores();
+        final List<List<String>> variants = inputData.getAcceptedVariants();
+        final List<Answer> answersList = new ArrayList<>();
 
         if (questionText == null || questionText.trim().isEmpty()) {
             presenter.prepareFailView("Question text cannot be empty.");
             return;
         }
-
-        final List<String> primaryAnswers = inputData.getPrimaryAnswers();
-        final List<Integer> scores = inputData.getScores();
-        final List<List<String>> variants = inputData.getAcceptedVariants();
 
         if (primaryAnswers == null || primaryAnswers.isEmpty()) {
             presenter.prepareFailView("At least one answer must be provided.");
@@ -46,8 +46,6 @@ public class AddQuestionInteractor implements AddQuestionInputBoundary {
             presenter.prepareFailView("This question already exists in the question bank.");
             return;
         }
-
-        final List<Answer> answersList = new ArrayList<>();
 
         for (int i = 0; i < primaryAnswers.size(); i++) {
             String ansText = primaryAnswers.get(i);
