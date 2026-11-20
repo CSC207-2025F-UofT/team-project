@@ -1,4 +1,4 @@
-package interface_adaptor;
+package interface_adapter;
 
 import java.util.ArrayList;
 import java.util.List;

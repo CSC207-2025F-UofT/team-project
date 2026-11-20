@@ -1,4 +1,4 @@
-package interface_adaptor.search;
+package interface_adapter.search;
 
 /**
  * The state for the Search View Model.

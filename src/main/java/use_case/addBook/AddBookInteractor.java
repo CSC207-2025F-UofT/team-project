@@ -8,7 +8,7 @@ import entity.Book;
  * Retrieves the selected book using its Open Library ID, checks whether
  * it already exists in the bookshelf, and saves it if it is not a duplicate.
  */
-public class AddBookInteractor implements AddBookInputBoundary {
+public class   AddBookInteractor implements AddBookInputBoundary {
 
     private final BookSearchDataAccessInterface bookDataAccessObject;
     private final BookshelfDataAccessInterface bookshelfDataAccessObject;
@@ -63,8 +63,7 @@ public class AddBookInteractor implements AddBookInputBoundary {
         bookshelfDataAccessObject.saveBook(book);
 
         // Notify the presenter that the book was successfully added.
-        AddBookOutputData outputData =
-                new AddBookOutputData(book, false);
+        AddBookOutputData outputData = new AddBookOutputData(book);
 
         addBookPresenter.prepareSuccessView(outputData);
     }
