@@ -49,4 +49,20 @@ public final class TransitNetwork {
     public List<Connection> connectionsFrom(String stationId) {
         return Collections.unmodifiableList(outgoing.getOrDefault(stationId, List.of()));
     }
+
+    /**
+     * Returns a copy of this network in which the connections affected by the disruptions are unavailable.
+     * Every station is kept, and this network is not changed.
+     */
+    public TransitNetwork without(Collection<Disruption> disruptions) {
+        List<Connection> available = new ArrayList<>();
+        for (Station station : stations.values()) {
+            for (Connection connection : outgoing.get(station.getId())) {
+                if (disruptions.stream().noneMatch(disruption -> disruption.affects(connection))) {
+                    available.add(connection);
+                }
+            }
+        }
+        return new TransitNetwork(stations.values(), available);
+    }
 }
