@@ -133,11 +133,16 @@ The program uses the Api to retrieve stock data for the user stories
 
 ### Stock API data access
 
-This is Edwin's first milestone: retrieve daily stock prices and display them in
-a console demo so the team can inspect and reuse the data. The separate second
-milestone is the two-stock comparison feature: price histories, correlation,
-projected prices, and its Swing interface. Those comparison features are not
-implemented in this prototype.
+Edwin’s stock comparison screen shows two symbols over their shared trading dates.
+Run `stockprototype.StockComparisonApp --demo` and click **Compare** to try IBM
+and AAPL with synthetic prices. For live data, set `ALPHA_VANTAGE_API_KEY` in a
+local IntelliJ run configuration and run `StockComparisonApp --live`. An existing
+`StockApiDemo` configuration can open the same screen with `--compare`.
+
+Choose the last 20, last 60, or all shared dates. The chart starts both series
+at 100. The results include percentage price changes, correlation between paired
+returns, and a one-interval estimate that extends each stock's historical compound
+growth rate. The panel currently opens in its own window.
 
 The reusable classes are in `src/main/java/stockprototype`:
 
@@ -170,7 +175,7 @@ prices; full daily history requires premium access. See the
 This interface is provisional until reconciled with the team's agreed domain
 types. Inject the interface into use cases and construct the concrete client in
 application setup. Network calls must run off Swing's event dispatch thread.
-Caching, persistence, charts, and comparison calculations are not included.
+The Swing panel uses a background worker for price requests. Each live client waits at least 2.5 seconds between requests.
 
 #### Running the API demo
 
@@ -186,16 +191,15 @@ Caching, persistence, charts, and comparison calculations are not included.
 
 #### Validation status
 
-Run `mvn test` with JDK 11+ to execute nine offline tests using synthetic data and
-fake HTTP responses. They cover parsing, date ordering, invalid input, provider
-notices, malformed data, HTTP/network errors, credential-safe errors, and thread
-interruption. No API key is needed for these tests.
+Run `mvn -Dtest=AlphaVantageClientTest,ComparisonInteractorTest test` with
+JDK 11+ for the stock feature's 16 offline tests. They cover API parsing and
+errors, request spacing, shared dates, period selection, price changes,
+correlation, and estimates. The tests use sample data and a fake transport.
 
 On November 16, 2026, the existing IntelliJ console run of `StockApiDemo --live IBM`
 showed a successful live response with 100 daily prices, covering
 June 25 through November 13, 2026, and exit code 0. The API key is not included.
-The integrated copy also passes the nine offline tests and the synthetic demo;
-no additional live request was made during integration.
+On November 19, 2026, the comparison window displayed IBM and AAPL over 20 shared dates from live API responses.
 
  
 
