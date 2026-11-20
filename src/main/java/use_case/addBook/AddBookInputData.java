@@ -1,5 +1,7 @@
 package use_case.addBook;
 
+import entity.Book;
+
 /**
  * Stores the input data required to add a book
  * to the user's personal bookshelf.
