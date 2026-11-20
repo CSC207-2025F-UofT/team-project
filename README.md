@@ -89,7 +89,7 @@ Each teammate will lead at least one complete use case across its application la
 
 > As a TTC passenger, I want to find a route between two stations that meets my accessibility requirements so that I can avoid barriers I cannot navigate.
 
-**Owner:** To be assigned.
+**Owner:** Adrien Lau.
 
 Acceptance criteria:
 
@@ -102,7 +102,7 @@ Acceptance criteria:
 
 > As a passenger with mobility restrictions, I want to save my accessibility preferences so that future searches automatically consider my needs.
 
-**Owner:** To be assigned.
+**Owner:** Hayk Danghyan.
 
 Acceptance criteria:
 
@@ -115,7 +115,7 @@ Acceptance criteria:
 
 > As a TTC passenger, I want my route to be recalculated when a required connection becomes inaccessible so that I can find a feasible alternative.
 
-**Owner:** To be assigned.
+**Owner:** Dean Wu.
 
 Acceptance criteria:
 
@@ -128,7 +128,7 @@ Acceptance criteria:
 
 > As a frequent TTC passenger, I want to save common journeys and compare their routes under different conditions so that I can quickly choose a suitable journey.
 
-**Owner:** To be assigned.
+**Owner:** Hongbo Wang.
 
 Acceptance criteria:
 
