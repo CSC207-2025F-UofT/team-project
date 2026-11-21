@@ -188,7 +188,7 @@ state belong to the presenter. The controller only packages the request.
 The main scenario follows `MapController` -> `LoadMapInputBoundary` / `LoadMapInteractor` ->
 `MapDataAccessInterface` -> `TileMap` -> `LoadMapOutputBoundary` -> `MapPresenter` ->
 `MapViewModel`. Output data and state copy their arrays to keep published snapshots immutable.
-Views will read only the map view model, never the entity or use-case output data.
+Views read only the map view model, never the entity or use-case output data.
 
 README extension 2a (missing name) goes directly from the interactor to the failure output.
 Extensions 2b (unavailable/unreadable) and 2c (empty/malformed) arrive as `MapLoadingException`
@@ -196,13 +196,6 @@ and follow the same failure output. The presenter keeps any previous map and pub
 error message; a successful retry replaces the map and clears the error. Tests cover these
 paths with in-memory data access and a recording output boundary, plus presenter state and
 notifications. No Swing or real files are needed to test the interactor.
-
-Checkpoint 4 completes this use-case and adapter flow. The original resource and rendering
-steps (5 and 6) are now one completed checkpoint, step 5. Startup and panel integration
-(original step 7, renumbered step 6) are also implemented. Final verification and documentation
-remain original step 8, renumbered step 7. The existing game tick and movement code are unchanged.
-The panel's property-change listener only requests repainting. Swing performs the drawing on
-its event thread; the view model does not import Swing.
 
 **Drawing**
 
@@ -256,7 +249,7 @@ Startup tests cover missing/blank names, unavailable/empty/malformed maps, image
 failures and missing terrain-image mappings. Panel tests cover initial and later map states,
 draw order, error banners, cache reuse and listener cleanup. Movement integration tests drive
 the existing keyboard/controller/interactor/presenter flow and paint its result over the map.
-Running-game visual inspection and actual keyboard-focus checks remain part of final verification.
+Seran confirmed the running-game display and keyboard-focus checks during final verification.
 
 **Confirmed collision and artwork scope**
 
@@ -269,12 +262,49 @@ Running-game visual inspection and actual keyboard-focus checks remain part of f
 
 **Done when**
 
-- [ ] `level1.txt` (30 × 20) loads, and dirt and water sprites draw behind the player
-- [ ] Editing a number in the file changes the map on the next run, with no code change
-- [ ] A bad file (uneven rows or an unknown number) stops with a clear error that names the line
+- [x] `level1.txt` (30 × 20) loads, and dirt and water sprites draw behind the player
+- [x] Editing a number in the file changes the map on the next run, with no code change
+- [x] A bad file (uneven rows or an unknown number) stops with a clear error that names the line
 - [x] Unit tests parse a small map string into a `TileMap` and check `tileAtPixel` and `isWalkable`
 - [x] The production arena and both placeholder PNGs load and render correctly without a window
 - [x] Cached rendering reuses unchanged terrain and preserves the last complete image on failure
+
+### Final verification (original step 8)
+
+Completed November 20, 2026. This is the final checkpoint after combining the original
+resource and rendering steps; it is renumbered step 7. The map MVP meets its acceptance
+criteria. This checkpoint changes documentation and adds a panel preview; no production
+Java, movement rules, build configuration or terrain resources needed changes.
+
+| Check | Evidence |
+| --- | --- |
+| Automated regression suite | `mvn -q test`: 121 tests, zero failures, errors or skipped tests |
+| Clean Architecture and Java compatibility | All six `AGENTS.md` dependency checks produced no matches; all production sources compiled with `javac --release 11` |
+| Production arena | Startup preparation and panel tests verify the 30 × 20 grid, 32 × 32 tiles, 960 × 640 background and player drawn above it; Seran confirmed the live green arena, two blue water areas and white player |
+| Editing only terrain data | Fresh JVMs loaded temporary copies of `level1.txt` through the real `MapBuilder` and painted `GamePanel`; changing the first terrain ID from `1` to `0` changed the top-left tile from green to blue without changing Java code |
+| Invalid terrain data | Fresh-process checks rejected ID `9` at line 3, column 1 and a short row at line 4, column 30; startup returned no layer and reported one clear error. The committed map was not modified |
+| Resource lookup | The fresh-process checks ran outside the project directory, confirming that lookup uses classpath resources |
+| Other failure paths | Tests cover absent/blank map names, missing/unreadable/empty/malformed maps, missing/corrupt/incorrectly sized images, missing image mappings, and preserving the last complete image on a later failure |
+| Drawing and updates | Tests cover paint order, original map dimensions, cache reuse, error banners, recovery and repaint-listener cleanup. The production panel's offscreen preview was visually inspected |
+| Keyboard and movement | Seran confirmed movement without first clicking the game, both WASD and arrow keys, stopping on release, and crossing water. Automated movement tests also pass |
+
+The desktop automation tool could launch but could not access the Java window. Live display
+and keyboard observations above therefore come from Seran's manual check; the automated
+panel preview is not presented as a screenshot of the running window. No architecture rules
+were bent, and no new dependencies were added.
+
+**Repeat the acceptance check**
+
+1. Run `mvn -q test`, then `mvn compile exec:java -Dexec.mainClass=app.Main`.
+2. Confirm the green arena, two blue water areas and white player. Use WASD and all four arrow
+   keys before clicking the panel; release the keys to stop. Walk across water.
+3. Close the game. In `src/main/resources/maps/level1.txt`, change the first terrain ID on
+   line 3 from `1` to `0`, keeping 30 entries per row. Run the same compile/start command;
+   the top-left 32 × 32 tile should now be blue.
+4. Close the game, undo that edit, then temporarily use ID `9` or remove one entry from a
+   row. Recompile and start: an error dialog should name the problem's line and column,
+   and a playable game should not open.
+5. Restore the original resource, recompile and start again. The original arena should return.
 
 **Ideas for later**
 

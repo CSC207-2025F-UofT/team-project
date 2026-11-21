@@ -185,6 +185,7 @@ Implementation status: the loading flow, production map, placeholder tile images
 renderer are connected to startup and the game panel. Startup failures show an error dialog
 without opening a playable game; later map errors appear above the last complete background.
 Automated tests cover the startup builder, panel drawing and existing movement controls.
+Final verification is complete; the live display and keyboard checks were confirmed by Seran.
 Enemy spawning, player collision and camera behaviour are outside this map MVP.
 
 
@@ -343,7 +344,7 @@ For environments without a desktop display, use `mvn -Djava.awt.headless=true te
 ### Architecture (Load Map, Seran)
 
 Loads the terrain once at startup and prepares a cached map image, separately from the per-tick use cases.
-Startup and game-panel integration are implemented. Final running-game verification remains a separate checkpoint.
+The map MVP is implemented and verified, including startup and game-panel integration.
 
 - `entity/TileType`: interface for immutable terrain types. `WaterTileType` has ID 0 and blocks walking; `DirtTileType` has ID 1 and permits walking.
 - `entity/TileTypeRegistry`: resolves IDs through registered terrain objects and rejects duplicate or unknown IDs.
@@ -403,12 +404,15 @@ To edit the map, change the numbers in `level1.txt` and rebuild resources before
 The terrain data marks water as non-walkable for the enemy feature to use; integrating enemy
 movement is separate work. Fireballs should cross water.
 
-The combined resource/rendering checkpoint (original steps 5 and 6) and startup integration
-(original step 7, renumbered step 6) are implemented. The remaining checkpoint is final
-running-game verification and documentation (original step 8, renumbered step 7). Automated
-checks cover successful startup preparation, invalid maps, missing/corrupt/incorrectly sized
-images, missing image mappings, panel draw order, cache reuse, repaint subscriptions, WASD
-and arrow-key movement, and deferred player-water collision.
+#### Map verification
+
+See the [map acceptance checks](docs/specs/enemy-and-fireball.md#final-verification-original-step-8)
+for the evidence and steps to repeat the checks.
+
+The image below is an offscreen render of the production `GamePanel`, using the shipped map
+and tile images with the player at its starting position.
+
+![Map MVP: green dirt, two blue water areas and the white player](docs/images/map-mvp.png)
 
 ---
 
