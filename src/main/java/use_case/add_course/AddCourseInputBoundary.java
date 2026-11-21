@@ -11,4 +11,14 @@ public interface AddCourseInputBoundary {
      */
     void execute(AddCourseInputData addCourseInputData);
 
+    /**
+     * Executes the "switch to AddCourseView" Use Case.
+     */
+    void switchToAddCourseView();
+
+    /**
+     * Executes the "switch to LoggedInView" Use Case.
+     */
+    void switchToLoggedInView();
+
 }

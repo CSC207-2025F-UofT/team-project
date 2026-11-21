@@ -25,12 +25,6 @@ public class Student {
         if ("".equals(password)) {
             throw new IllegalArgumentException("Password cannot be empty");
         }
-        if (courses.isEmpty()) {
-            throw new IllegalArgumentException("Courses cannot be empty");
-        }
-        if (skills.isEmpty()) {
-            throw new IllegalArgumentException("Courses cannot be empty");
-        }
         this.name = name;
         this.password = password;
         this.courses = new ArrayList<>(courses);

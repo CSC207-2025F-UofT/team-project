@@ -1,6 +1,9 @@
 package interface_adapter.job_list;
 
+import java.util.ArrayList;
+
 import interface_adapter.ViewManagerModel;
+import interface_adapter.logged_in.LoggedInViewModel;
 import use_case.job_match.JobMatchOutputBoundary;
 import use_case.job_match.JobMatchOutputData;
 
@@ -32,7 +35,18 @@ public class JobListPresenter implements JobMatchOutputBoundary {
     @Override
     public void prepareFailView(String errorMessage) {
         final JobListState jobListState = jobListViewModel.getState();
+        jobListState.setJobs(new ArrayList<>());
         jobListState.setError(errorMessage);
         jobListViewModel.notifyStateChanged();
+
+        // Still switch to the job list so the student can see the error.
+        viewManagerModel.setState(JobListViewModel.VIEW_NAME);
+        viewManagerModel.notifyViewChanged();
+    }
+
+    @Override
+    public void switchToLoggedInView() {
+        viewManagerModel.setState(LoggedInViewModel.VIEW_NAME);
+        viewManagerModel.notifyViewChanged();
     }
 }

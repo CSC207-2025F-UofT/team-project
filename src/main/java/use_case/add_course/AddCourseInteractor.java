@@ -79,4 +79,14 @@ public class AddCourseInteractor implements AddCourseInputBoundary {
         addCoursePresenter.prepareSuccessView(
                 new AddCourseOutputData(addedCourses, rejectedCourses, allCourses));
     }
+
+    @Override
+    public void switchToAddCourseView() {
+        addCoursePresenter.switchToAddCourseView();
+    }
+
+    @Override
+    public void switchToLoggedInView() {
+        addCoursePresenter.switchToLoggedInView();
+    }
 }

@@ -9,20 +9,35 @@ import java.util.ArrayList;
  * The Job Match Interactor.
  */
 public class JobMatchInteractor implements JobMatchInputBoundary {
-    private final JobMatchUserDataAccessInterface userDataAccessObject;
+    private final JobMatchUserDataAccessInterface jobDataAccessObject;
+    private final JobMatchStudentDataAccessInterface studentDataAccessObject;
     private final JobMatchOutputBoundary userPresenter;
 
     public JobMatchInteractor(JobMatchUserDataAccessInterface jobMatchDataAccessInterface,
+                              JobMatchStudentDataAccessInterface studentDataAccessInterface,
                               JobMatchOutputBoundary jobMatchOutputBoundary) {
-        this.userDataAccessObject = jobMatchDataAccessInterface;
+        this.jobDataAccessObject = jobMatchDataAccessInterface;
+        this.studentDataAccessObject = studentDataAccessInterface;
         this.userPresenter = jobMatchOutputBoundary;
     }
 
     @Override
     public void execute(JobMatchInputData jobMatchInputData) {
-        final Student student = jobMatchInputData.getStudent();
-        final ArrayList<Job> jobs = userDataAccessObject.getJobs(student);
-        final JobMatchOutputData jobMatchOutputData = new JobMatchOutputData(jobs);
-        userPresenter.prepareSuccessView(jobMatchOutputData);
+        final Student student = studentDataAccessObject.get(jobMatchInputData.getUsername());
+        if (student == null) {
+            userPresenter.prepareFailView("Please log in first.");
+            return;
+        }
+        final ArrayList<Job> jobs = jobDataAccessObject.getJobs(student);
+        if (jobs.isEmpty()) {
+            userPresenter.prepareFailView("No matching jobs found.");
+            return;
+        }
+        userPresenter.prepareSuccessView(new JobMatchOutputData(jobs));
+    }
+
+    @Override
+    public void switchToLoggedInView() {
+        userPresenter.switchToLoggedInView();
     }
 }

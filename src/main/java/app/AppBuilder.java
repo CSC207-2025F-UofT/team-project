@@ -1,10 +1,19 @@
 package app;
 
-import data_access.FileUserDataAccessObject;
+import data_access.FileStudentDataAccessObject;
+import data_access.InMemoryUserDataAccessObject;
+import data_access.StubJobDataAccessObject;
 import entity.StudentFactory;
 import interface_adapter.ViewManagerModel;
-import interface_adapter.logged_in.ChangePasswordController;
-import interface_adapter.logged_in.ChangePasswordPresenter;
+import interface_adapter.add_course.AddCourseController;
+import interface_adapter.add_course.AddCoursePresenter;
+import interface_adapter.add_course.AddCourseViewModel;
+import interface_adapter.job_grouping.CreateJobGroupController;
+import interface_adapter.job_grouping.CreateJobGroupPresenter;
+import interface_adapter.job_grouping.CreateJobGroupViewModel;
+import interface_adapter.job_list.JobListController;
+import interface_adapter.job_list.JobListPresenter;
+import interface_adapter.job_list.JobListViewModel;
 import interface_adapter.logged_in.LoggedInViewModel;
 import interface_adapter.login.LoginController;
 import interface_adapter.login.LoginPresenter;
@@ -14,12 +23,21 @@ import interface_adapter.logout.LogoutPresenter;
 import interface_adapter.signup.SignupController;
 import interface_adapter.signup.SignupPresenter;
 import interface_adapter.signup.SignupViewModel;
-import interface_adapter.job_grouping.CreateJobGroupController;
-import interface_adapter.job_grouping.CreateJobGroupPresenter;
-import interface_adapter.job_grouping.CreateJobGroupViewModel;
-import use_case.change_password.ChangePasswordInputBoundary;
-import use_case.change_password.ChangePasswordInteractor;
-import use_case.change_password.ChangePasswordOutputBoundary;
+import interface_adapter.skills_list.SkillListController;
+import interface_adapter.skills_list.SkillListPresenter;
+import interface_adapter.skills_list.SkillListViewModel;
+import use_case.add_course.AddCourseInputBoundary;
+import use_case.add_course.AddCourseInteractor;
+import use_case.add_course.AddCourseOutputBoundary;
+import use_case.course_analysis.AnalysisInputBoundary;
+import use_case.course_analysis.AnalysisInteractor;
+import use_case.course_analysis.AnalysisOutputBoundary;
+import use_case.job_grouping.CreateJobGroupInputBoundary;
+import use_case.job_grouping.CreateJobGroupInteractor;
+import use_case.job_grouping.CreateJobGroupOutputBoundary;
+import use_case.job_match.JobMatchInputBoundary;
+import use_case.job_match.JobMatchInteractor;
+import use_case.job_match.JobMatchOutputBoundary;
 import use_case.login.LoginInputBoundary;
 import use_case.login.LoginInteractor;
 import use_case.login.LoginOutputBoundary;
@@ -29,14 +47,14 @@ import use_case.logout.LogoutOutputBoundary;
 import use_case.signup.SignupInputBoundary;
 import use_case.signup.SignupInteractor;
 import use_case.signup.SignupOutputBoundary;
-import use_case.job_grouping.CreateJobGroupInputBoundary;
-import use_case.job_grouping.CreateJobGroupInteractor;
-import use_case.job_grouping.CreateJobGroupOutputBoundary;
+import view.AddCourseView;
+import view.CreateJobGroupView;
+import view.JobListView;
 import view.LoggedInView;
 import view.LoginView;
 import view.SignupView;
+import view.SkillsListView;
 import view.ViewManager;
-import view.CreateJobGroupView;
 
 import java.util.ArrayList;
 
@@ -54,7 +72,13 @@ public class AppBuilder {
     // of the classes from the data_access package
 
     // DAO version using local file storage
-    final FileUserDataAccessObject userDataAccessObject = new FileUserDataAccessObject("users.csv", studentFactory);
+    final FileStudentDataAccessObject userDataAccessObject = new FileStudentDataAccessObject("users.csv", studentFactory);
+
+    // DAO that calls the UofT course API and Gemini for course analysis
+    final InMemoryUserDataAccessObject courseApiDataAccessObject = new InMemoryUserDataAccessObject();
+
+    // TODO: replace this stub with a real implementation
+    final StubJobDataAccessObject jobDataAccessObject = new StubJobDataAccessObject();
 
     private SignupView signupView;
     private SignupViewModel signupViewModel;
@@ -64,6 +88,12 @@ public class AppBuilder {
     private LoginView loginView;
     private CreateJobGroupViewModel createJobGroupViewModel;
     private CreateJobGroupView createJobGroupView;
+    private AddCourseViewModel addCourseViewModel;
+    private AddCourseView addCourseView;
+    private SkillListViewModel skillListViewModel;
+    private SkillsListView skillsListView;
+    private JobListViewModel jobListViewModel;
+    private JobListView jobListView;
 
     public AppBuilder() {
         cardPanel.setLayout(cardLayout);
@@ -90,6 +120,56 @@ public class AppBuilder {
         return this;
     }
 
+    /**
+     * Adds the Create Job Group View to the application.
+     * @return this builder
+     */
+    public AppBuilder addCreateJobGroupView() {
+        createJobGroupViewModel = new CreateJobGroupViewModel();
+
+        createJobGroupView = new CreateJobGroupView(
+                createJobGroupViewModel,
+                new ArrayList<>()
+        );
+
+        cardPanel.add(createJobGroupView, CreateJobGroupViewModel.VIEW_NAME);
+
+        return this;
+    }
+
+    /**
+     * Adds the Add Course View to the application.
+     * @return this builder
+     */
+    public AppBuilder addAddCourseView() {
+        addCourseViewModel = new AddCourseViewModel();
+        addCourseView = new AddCourseView(addCourseViewModel);
+        cardPanel.add(addCourseView, AddCourseViewModel.VIEW_NAME);
+        return this;
+    }
+
+    /**
+     * Adds the Skill List View to the application.
+     * @return this builder
+     */
+    public AppBuilder addSkillListView() {
+        skillListViewModel = new SkillListViewModel();
+        skillsListView = new SkillsListView(skillListViewModel);
+        cardPanel.add(skillsListView, SkillListViewModel.VIEW_NAME);
+        return this;
+    }
+
+    /**
+     * Adds the Job List View to the application.
+     * @return this builder
+     */
+    public AppBuilder addJobListView() {
+        jobListViewModel = new JobListViewModel();
+        jobListView = new JobListView(jobListViewModel);
+        cardPanel.add(jobListView, JobListViewModel.VIEW_NAME);
+        return this;
+    }
+
     public AppBuilder addSignupUseCase() {
         final SignupOutputBoundary signupOutputBoundary = new SignupPresenter(viewManagerModel,
                 signupViewModel, loginViewModel);
@@ -112,17 +192,6 @@ public class AppBuilder {
         return this;
     }
 
-    public AppBuilder addChangePasswordUseCase() {
-        final ChangePasswordOutputBoundary changePasswordOutputBoundary = new ChangePasswordPresenter(loggedInViewModel);
-
-        final ChangePasswordInputBoundary changePasswordInteractor =
-                new ChangePasswordInteractor(userDataAccessObject, changePasswordOutputBoundary, studentFactory);
-
-        ChangePasswordController changePasswordController = new ChangePasswordController(changePasswordInteractor);
-        loggedInView.setChangePasswordController(changePasswordController);
-        return this;
-    }
-
     /**
      * Adds the Logout Use Case to the application.
      * @return this builder
@@ -136,23 +205,6 @@ public class AppBuilder {
 
         final LogoutController logoutController = new LogoutController(logoutInteractor);
         loggedInView.setLogoutController(logoutController);
-        return this;
-    }
-
-    /**
-     * Adds the Create Job Group View to the application.
-     * @return this builder
-     */
-    public AppBuilder addCreateJobGroupView() {
-        createJobGroupViewModel = new CreateJobGroupViewModel();
-
-        createJobGroupView = new CreateJobGroupView(
-                createJobGroupViewModel,
-                new ArrayList<>()
-        );
-
-        cardPanel.add(createJobGroupView, CreateJobGroupViewModel.VIEW_NAME);
-
         return this;
     }
 
@@ -175,6 +227,56 @@ public class AppBuilder {
         return this;
     }
 
+    /**
+     * Adds the Add Course Use Case to the application.
+     * @return this builder
+     */
+    public AppBuilder addAddCourseUseCase() {
+        final AddCourseOutputBoundary addCourseOutputBoundary = new AddCoursePresenter(viewManagerModel, addCourseViewModel);
+
+        final AddCourseInputBoundary addCourseInteractor = new AddCourseInteractor(
+                userDataAccessObject, userDataAccessObject, addCourseOutputBoundary, studentFactory);
+
+        final AddCourseController addCourseController = new AddCourseController(addCourseInteractor);
+        addCourseView.setAddCourseController(addCourseController);
+        loggedInView.setAddCourseController(addCourseController);
+        return this;
+    }
+
+    /**
+     * Adds the Course Analysis Use Case to the application.
+     * @return this builder
+     */
+    public AppBuilder addCourseAnalysisUseCase() {
+        final AnalysisOutputBoundary analysisOutputBoundary =
+                new SkillListPresenter(viewManagerModel, skillListViewModel);
+
+        final AnalysisInputBoundary analysisInteractor = new AnalysisInteractor(
+                courseApiDataAccessObject, userDataAccessObject, analysisOutputBoundary, studentFactory);
+
+        final SkillListController skillListController = new SkillListController(analysisInteractor);
+        skillsListView.setSkillListController(skillListController);
+        loggedInView.setSkillListController(skillListController);
+        return this;
+    }
+
+    /**
+     * Adds the Job Match Use Case to the application.
+     * @return this builder
+     */
+    public AppBuilder addJobMatchUseCase() {
+        final JobMatchOutputBoundary jobMatchOutputBoundary =
+                new JobListPresenter(viewManagerModel, jobListViewModel);
+
+        final JobMatchInputBoundary jobMatchInteractor =
+                new JobMatchInteractor(jobDataAccessObject, userDataAccessObject, jobMatchOutputBoundary);
+
+        final JobListController jobListController = new JobListController(jobMatchInteractor);
+        jobListView.setJobListController(jobListController);
+        loggedInView.setJobListController(jobListController);
+        return this;
+    }
+
     public JFrame build() {
         final JFrame application = new JFrame("User Login Example");
         application.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
@@ -186,6 +288,4 @@ public class AppBuilder {
 
         return application;
     }
-
-
 }

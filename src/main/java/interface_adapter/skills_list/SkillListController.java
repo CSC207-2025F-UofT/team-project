@@ -1,11 +1,10 @@
 package interface_adapter.skills_list;
 
-import entity.Student;
 import use_case.course_analysis.AnalysisInputBoundary;
 import use_case.course_analysis.AnalysisInputData;
 
 /**
- * Controller for the Analysis Use Case.
+ * Controller for the Course Analysis Use Case.
  */
 public class SkillListController {
 
@@ -16,19 +15,17 @@ public class SkillListController {
     }
 
     /**
-     * Executes the Analysis Use Case.
-     * @param student student that contains the required courses to be analyzed
+     * Executes the Course Analysis Use Case.
+     * @param username the logged-in student whose courses are analyzed
      */
-    public void execute(Student student) {
-        final AnalysisInputData analysisInputData = new AnalysisInputData(student);
-
-        userAnalysisUseCaseInteractor.execute(analysisInputData);
+    public void execute(String username) {
+        userAnalysisUseCaseInteractor.execute(new AnalysisInputData(username));
     }
 
     /**
-     * Executes the "switch to SkillView" Use Case.
+     * Executes the "switch to LoggedInView" Use Case.
      */
-    public void switchToLoginView() {
-        userAnalysisUseCaseInteractor.switchToSkillListView();
+    public void switchToLoggedInView() {
+        userAnalysisUseCaseInteractor.switchToLoggedInView();
     }
 }
