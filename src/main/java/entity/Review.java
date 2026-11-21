@@ -4,7 +4,7 @@ import entity.Book;
 import java.net.Inet4Address;
 
 public class Review{
-    public static final int MIN_RATING = 1;
+    public static final int MIN_RATING = 0;
     public static final int MAX_RATING = 5;
 
     private final String openLibraryID;
