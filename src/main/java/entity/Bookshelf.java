@@ -35,7 +35,7 @@ public class Bookshelf {
      * @param book the book to be added to the bookshelf
      **/
     public void addBook(Book book){
-
+        books.add(book);
     }
 
     /**
