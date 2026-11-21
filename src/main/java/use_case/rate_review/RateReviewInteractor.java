@@ -59,9 +59,6 @@ public class RateReviewInteractor implements RateReviewInputBoundary{
             final Review review = new Review(openLibraryID, reviewRating, reviewText);
             book.setReview(review);
             dataAccessObject.saveBook(book);
-            RateReviewOutputData rateReviewOutputData =
-                    new RateReviewOutputData(book.getOpenLibraryId(), review.getRating(),
-                            review.getReview());
             rateReviewPresenter.prepareSuccessView(new RateReviewOutputData(book.getOpenLibraryId(),
                     review.getRating(), review.getReview()));
 
