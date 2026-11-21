@@ -20,6 +20,18 @@ public class SecretCodeFeedbackTest {
                 CandleType.BRIGHT,
                 CandleType.BRIGHT,
                 CandleType.BRIGHT), feedback);
+    };
+    @Test
+    void allDim() {
+
+        Guess guess = new Guess("12345");
+        List<CandleType> feedback = guess.generateFeedback("12345");
+
+        assertEquals(List.of(CandleType.BRIGHT,
+                CandleType.BRIGHT,
+                CandleType.BRIGHT,
+                CandleType.BRIGHT,
+                CandleType.BRIGHT), feedback);
     }
 };
 
