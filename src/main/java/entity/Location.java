@@ -5,7 +5,7 @@ public class Location {
 
     private final double latitude;
     private final double longitude;
-    private final LocationInfo info;
+    private LocationInfo info;
 
     public Location(double latitude, double longitude, LocationInfo info) {
         this.latitude = latitude;
@@ -23,6 +23,10 @@ public class Location {
 
     public LocationInfo getInfo() {
         return info;
+    }
+
+    public void setInfo(LocationInfo info) {
+        this.info = info;
     }
 
     private double[] getUnitVector() {

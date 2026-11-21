@@ -102,6 +102,15 @@ public class ImageImporter implements ImageImporterInterface {
         }
     }
 
+    private void deleteImage(Photo photo) {
+        try {
+            Path imagePath = resolver.getImagePath(photo);
+
+            Files.deleteIfExists(imagePath);
+
+        } catch (IOException e) {}
+    }
+
     @Override
     public List<Photo> importImages(List<String> paths, Consumer<ImageImportProgressData> onImageProcessed) {
         List<Path> imagePaths = new ArrayList<>();
@@ -145,12 +154,9 @@ public class ImageImporter implements ImageImporterInterface {
     }
 
     @Override
-    public void cleanupImage(Photo photo) {
-        try {
-            Path imagePath = resolver.getImagePath(photo);
-
-            Files.deleteIfExists(imagePath);
-
-        } catch (IOException e) {}
+    public void cleanupImages(List<Photo> photos) {
+        for (Photo photo : photos) {
+            deleteImage(photo);
+        }
     }
 }

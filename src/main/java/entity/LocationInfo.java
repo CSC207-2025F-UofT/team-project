@@ -48,7 +48,7 @@ public class LocationInfo {
         return landmark;
     }
 
-    public String getInfo(LocationInfoType infoType) {
+    public String getType(LocationInfoType infoType) {
         if (infoType == null) {
             return null;
         }
