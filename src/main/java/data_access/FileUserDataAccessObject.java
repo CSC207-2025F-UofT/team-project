@@ -3,6 +3,7 @@ package data_access;
 import entity.Student;
 import entity.StudentFactory;
 import use_case.change_password.ChangePasswordUserDataAccessInterface;
+import use_case.course_analysis.SkillDataAccessInterface;
 import use_case.login.LoginUserDataAccessInterface;
 import use_case.logout.LogoutUserDataAccessInterface;
 import use_case.signup.SignupUserDataAccessInterface;
@@ -135,18 +136,6 @@ public class FileUserDataAccessObject implements SignupUserDataAccessInterface,
     public void changeSkills(Student student) {
         accounts.put(student.getName(), student);
         save();
-    }
-
-    @Override
-    public String getCourseDescription(String course) {
-        // This would be an api call.
-        return "";
-    }
-
-    @Override
-    public String getSkill(String description) {
-        // This would be an api call.
-        return "";
     }
 
 }
