@@ -16,7 +16,7 @@ public class Canvas {
             throw new IllegalArgumentException("Canvas dimensions must be positive");
         }
         if (backgroundColor == null || backgroundColor.isEmpty() || !backgroundColor.matches("#[0-9A-Fa-f]{6}")){
-            throw new IllegalArgumentException("Canvas background color must be valid.");
+            throw new IllegalArgumentException("Canvas background color must be a valid hex code.");
         }
         this.width = width;
         this.height = height;
