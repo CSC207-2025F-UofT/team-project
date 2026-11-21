@@ -8,12 +8,14 @@ import entity.card.SpellCard;
 
 public class Board {
     private Tile[][] board = new Tile[6][6];
-
-    public Board() {}
-    public Board(Tile[][] board) {
-        this.board = board;
+    public Board() {
+        this.board = new Tile[6][6];
+        for (int i = 0; i < 6; i++) {
+            for (int j = 0; j < 6; j++) {
+                this.board[i][j] = new Tile();
+            }
+        }
     }
-
     /// Moves all cards on a tile from position (x, y) to position (i, j) on the board
     /// @param x The x position of the tile to be moved
     /// @param y The y position of the tile to be moved
@@ -56,7 +58,10 @@ public class Board {
         int score = 0;
         for(int i = 0; i < 6; i++){
             for(int j = 0; j < 6; j++){
-                score += this.board[i][j].getCharacterCard().getHP();
+                CharacterCard card = this.board[i][j].getCharacterCard();
+                if (card != null && player.equals(card.getOwner())) {
+                    score += card.getHP();
+                }
             }
         }
         return score;
