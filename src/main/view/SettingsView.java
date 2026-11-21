@@ -13,7 +13,6 @@ public class SettingsView extends JPanel {
 
         JLabel title = new JLabel("uh dis da settings n stuff");
 
-
         this.add(title);
     }
 }

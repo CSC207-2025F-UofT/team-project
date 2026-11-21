@@ -63,6 +63,7 @@ public class PokerBuilder {
         //Creates frame
         final JFrame application = new JFrame("Poker");
         application.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+        application.setUndecorated(true);
         application.setExtendedState(JFrame.MAXIMIZED_BOTH);
 
         //Tells JSwing to display the main menu

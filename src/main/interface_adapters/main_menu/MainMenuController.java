@@ -18,4 +18,8 @@ public class MainMenuController {
     public void switchToSettingsView() {
         mainMenuPresenter.switchToSettingsView();
     }
+
+    public void exitApplication() {
+        mainMenuPresenter.exitApplication();
+    }
 }

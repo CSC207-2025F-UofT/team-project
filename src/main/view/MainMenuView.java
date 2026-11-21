@@ -16,6 +16,7 @@ public class MainMenuView extends JPanel implements ActionListener {
     public final JLabel titleLabel;
     public final JButton playButton;
     public final JButton settingsButton;
+    public final JButton exitButton;
 
 
     public MainMenuView(MainMenuViewModel mainMenuViewModel) {
@@ -31,7 +32,7 @@ public class MainMenuView extends JPanel implements ActionListener {
         //Play Button set up
         playButton = new JButton(MainMenuViewModel.PLAY_LABEL);
         ViewUtils.setFont(playButton, "figtree", Font.BOLD, 28, 0.04);
-        ViewUtils.setRelativeBounds(playButton, 0.34, 0.5, 0.15, 0.1);
+        ViewUtils.setRelativeBounds(playButton, 0.255, 0.5, 0.15, 0.1);
         playButton.setBackground(new Color(9, 150, 14));
         playButton.setForeground(Color.white);
         playButton.setFocusPainted(false);
@@ -39,11 +40,19 @@ public class MainMenuView extends JPanel implements ActionListener {
 
         settingsButton = new JButton(MainMenuViewModel.SETTINGS_LABEL);
         ViewUtils.setFont(settingsButton, "figtree", Font.BOLD, 28, 0.04);
-        ViewUtils.setRelativeBounds(settingsButton, 0.51, 0.5, 0.15, 0.1);
+        ViewUtils.setRelativeBounds(settingsButton, 0.425, 0.5, 0.15, 0.1);
         settingsButton.setBackground(new Color(73, 109, 140));
         settingsButton.setForeground(Color.white);
         settingsButton.setFocusPainted(false);
         settingsButton.addActionListener(this);
+
+        exitButton = new JButton(MainMenuViewModel.EXIT_LABEL);
+        ViewUtils.setRelativeBounds(exitButton, 0.595, 0.5, 0.15, 0.1);
+        ViewUtils.setFont(exitButton, "figtree", Font.BOLD, 28, 0.04);
+        exitButton.setBackground(new Color(196, 43, 64));
+        exitButton.setForeground(Color.white);
+        exitButton.setFocusPainted(false);
+        exitButton.addActionListener(this);
 
         //colors
         this.setBackground(new Color(5,5,5));
@@ -52,6 +61,7 @@ public class MainMenuView extends JPanel implements ActionListener {
         this.add(playButton);
         this.add(titleLabel);
         this.add(settingsButton);
+        this.add(exitButton);
 
     }
 
@@ -62,6 +72,9 @@ public class MainMenuView extends JPanel implements ActionListener {
         }
         if (event.getSource().equals(settingsButton)) {
             mainMenuController.switchToSettingsView();
+        }
+        if (event.getSource().equals(exitButton)) {
+            mainMenuController.exitApplication();
         }
     }
 

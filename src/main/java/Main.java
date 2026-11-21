@@ -1,4 +1,6 @@
 
+import main.view.SoundManager;
+
 import javax.swing.*;
 
 public class Main {
@@ -14,5 +16,8 @@ public class Main {
         application.setLocationRelativeTo(null);
         application.setVisible(true);
         application.setResizable(false);
+
+        SoundManager soundManager = new SoundManager();
+        soundManager.playLoop("/Balatro_Main_Theme.wav");
     }
 }

@@ -22,6 +22,11 @@ public class ViewManager implements ViewManagerModelListener {
 
     public void viewChanged() {
         //this is the line of code that actually changes the view
+        if ("exit".equals(viewManagerModel.getActiveView())) {
+            SwingUtilities.getWindowAncestor(views).dispose();
+            //music will continue playing unless we stop running the actual program inside IntelliJ
+            System.exit(0);
+        }
         cardLayout.show(views, viewManagerModel.getActiveView());
     }
 }

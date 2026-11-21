@@ -27,4 +27,9 @@ public class MainMenuPresenter {
         this.viewManagerModel.setActiveView(SettingsViewModel.VIEW_NAME);
         this.viewManagerModel.notifyViewChanged();
     }
+
+    public void exitApplication() {
+        viewManagerModel.setActiveView("exit");
+        viewManagerModel.notifyViewChanged();
+    }
 }
