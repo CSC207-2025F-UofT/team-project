@@ -4,7 +4,7 @@ import entity.Book;
 
 public interface BookshelfDataAccessInterface {
 
-    boolean existsByOpenLibraryId(String openLibraryId);
+    boolean existsByOpenLibraryId(Book book);
 
     void saveBook(Book book);
 }

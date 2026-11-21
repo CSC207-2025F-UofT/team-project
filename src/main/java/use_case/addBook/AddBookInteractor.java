@@ -41,7 +41,7 @@ public class   AddBookInteractor implements AddBookInputBoundary {
 
         // Retrieve the selected book using its Open Library ID.
         Book book = bookDataAccessObject.getBookByOpenLibraryId(
-                inputData.getOpenLibraryId());
+                inputData.getBook());
 
         // Check whether the book could be retrieved.
         if (book == null) {
@@ -52,7 +52,7 @@ public class   AddBookInteractor implements AddBookInputBoundary {
 
         // Check whether the book already exists in the bookshelf.
         if (bookshelfDataAccessObject.existsByOpenLibraryId(
-                inputData.getOpenLibraryId())) {
+                inputData.getBook())) {
 
             addBookPresenter.prepareFailView(
                     "This book is already on your bookshelf.");
