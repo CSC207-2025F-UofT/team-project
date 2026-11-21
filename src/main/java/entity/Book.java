@@ -96,18 +96,28 @@ public class Book {
         return shelved;
     }
 
-    /*
+    /**
      * Sets whether book is added to bookshelf.
-     * Sets the date added for the book to the bookshelf.
+     * Shelving a book that was not shelved sets the date added to now;
+     * unshelving a book clears the date added.
      * @param shelved true to shelve book, false to unshelve book.
      */
     public void setShelved(boolean shelved){
-        if (this.shelved && shelved ){
+        if (shelved && !this.shelved) {
             this.dateAdded = LocalDateTime.now();
         } else if (!shelved) {
             this.dateAdded = null;
         }
         this.shelved = shelved;
+    }
+
+    /**
+     * Sets the date the book was added to the bookshelf.
+     * Used when loading a saved book, so its original date added is kept.
+     * @param dateAdded the date the book was added to the bookshelf.
+     */
+    public void setDateAdded(LocalDateTime dateAdded){
+        this.dateAdded = dateAdded;
     }
 
     /**
