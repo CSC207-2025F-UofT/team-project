@@ -3,6 +3,8 @@ package entities.Game;
 import java.util.ArrayList;
 import java.util.List;
 
+import data_access.RandomSecretCodeGen;
+
 public class CandleGame {
 
     // Refer to the API documentation for the meaning of these fields.
