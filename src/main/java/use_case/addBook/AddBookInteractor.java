@@ -56,6 +56,7 @@ public class   AddBookInteractor implements AddBookInputBoundary {
         }
 
         // Add the book to the user's bookshelf.
+        inputData.getBook().setShelved(true);
         bookshelf.addBook(inputData.getBook());
         bookshelfDataAccessObject.saveBookshelf(bookshelf);
 

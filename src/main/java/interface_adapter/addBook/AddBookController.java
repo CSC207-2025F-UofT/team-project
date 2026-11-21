@@ -15,7 +15,6 @@ public class AddBookController {
 
     /**
      * Executes the Add Book Use Case.
-     *
      */
     public void execute(Book book){
         final AddBookInputData addBookInputData = new AddBookInputData(book);
