@@ -7,11 +7,15 @@ import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.util.NavigableMap;
 
-/** No arguments runs offline. --live SYMBOL makes one real API request. */
+/** Runs a single-symbol console demo or opens the two-stock comparison screen. */
 public final class StockApiDemo {
     private StockApiDemo() { }
 
     public static void main(String[] args) {
+        if (args.length == 1 && "--compare".equals(args[0])) {
+            StockComparisonApp.main(new String[0]);
+            return;
+        }
         try {
             String symbol;
             NavigableMap<LocalDate, BigDecimal> prices;
@@ -27,13 +31,13 @@ public final class StockApiDemo {
                 }
             }
             else if (args.length == 2 && "--live".equals(args[0])) {
-                symbol = AlphaVantageClient.normalizeSymbol(args[1]);
+                symbol = StockSymbol.normalize(args[1]);
                 StockDataSource source = new AlphaVantageClient(System.getenv("ALPHA_VANTAGE_API_KEY"));
                 prices = source.getDailyClosingPrices(symbol);
                 System.out.println("LIVE RESPONSE: raw daily closing prices; not live intraday quotes.");
             }
             else {
-                throw new IllegalArgumentException("Usage: StockApiDemo [--live SYMBOL]");
+                throw new IllegalArgumentException("Usage: StockApiDemo [--live SYMBOL | --compare]");
             }
             System.out.println("Symbol: " + symbol);
             System.out.println("Daily prices: " + prices.size());

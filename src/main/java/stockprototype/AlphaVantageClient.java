@@ -13,15 +13,17 @@ import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.util.Collections;
-import java.util.Locale;
 import java.util.NavigableMap;
 import java.util.Objects;
 import java.util.TreeMap;
+import java.util.concurrent.TimeUnit;
 
 /** Only retrieves and parses data; comparison calculations belong in a use case. */
 public final class AlphaVantageClient implements StockDataSource {
+    private static final long REQUEST_GAP_NANOS = Duration.ofMillis(2500).toNanos();
     private final String apiKey;
     private final Transport transport;
+    private Long lastRequestEndNanos;
 
     public AlphaVantageClient(String apiKey) {
         this(apiKey, new HttpTransport());
@@ -38,12 +40,12 @@ public final class AlphaVantageClient implements StockDataSource {
 
     @Override
     public NavigableMap<LocalDate, BigDecimal> getDailyClosingPrices(String symbol) throws IOException {
-        String normalized = normalizeSymbol(symbol);
+        String normalized = StockSymbol.normalize(symbol);
         String query = "https://www.alphavantage.co/query?function=TIME_SERIES_DAILY"
                 + "&symbol=" + encode(normalized) + "&outputsize=compact&datatype=json&apikey=" + encode(apiKey);
         Reply reply;
         try {
-            reply = transport.get(URI.create(query));
+            reply = sendRequest(URI.create(query));
         }
         catch (InterruptedException exception) {
             Thread.currentThread().interrupt();
@@ -59,15 +61,18 @@ public final class AlphaVantageClient implements StockDataSource {
         return parseDailyPrices(reply.body, normalized);
     }
 
-    static String normalizeSymbol(String symbol) {
-        if (symbol == null) {
-            throw new IllegalArgumentException("Enter a stock symbol.");
+    /** The first request starts immediately. Later requests share one cooldown per client. */
+    private synchronized Reply sendRequest(URI uri) throws IOException, InterruptedException {
+        if (lastRequestEndNanos != null) {
+            long elapsed = System.nanoTime() - lastRequestEndNanos;
+            TimeUnit.NANOSECONDS.sleep(REQUEST_GAP_NANOS - elapsed);
         }
-        String normalized = symbol.trim().toUpperCase(Locale.ROOT);
-        if (!normalized.matches("[A-Z0-9][A-Z0-9.\\-]{0,29}")) {
-            throw new IllegalArgumentException("Enter a stock symbol using letters, digits, dots or hyphens.");
+        try {
+            return transport.get(uri);
         }
-        return normalized;
+        finally {
+            lastRequestEndNanos = System.nanoTime();
+        }
     }
 
     static NavigableMap<LocalDate, BigDecimal> parseDailyPrices(String body, String expectedSymbol)
