@@ -10,6 +10,7 @@ public class Student {
     private final String password;
     private final ArrayList<String> courses;
     private final ArrayList<String> skills;
+    private final ArrayList<JobGroup> jobGroups;
 
     /**
      * Creates a new user with the given non-empty name and non-empty password.
@@ -34,6 +35,7 @@ public class Student {
         this.password = password;
         this.courses = new ArrayList<>(courses);
         this.skills = new ArrayList<>(skills);
+        this.jobGroups = new ArrayList<>();
     }
 
     public String getName() {
@@ -47,5 +49,13 @@ public class Student {
     public ArrayList<String> getCourses() { return new ArrayList<>(this.courses); }
 
     public ArrayList<String> getSkills() { return new ArrayList<>(this.skills); }
+
+    public ArrayList<JobGroup> getJobGroups() {
+        return new ArrayList<>(this.jobGroups);
+    }
+
+    public void addJobGroup(JobGroup jobGroup) {
+        this.jobGroups.add(jobGroup);
+    }
 
 }

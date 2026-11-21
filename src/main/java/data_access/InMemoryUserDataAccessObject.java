@@ -5,6 +5,7 @@ import use_case.change_password.ChangePasswordUserDataAccessInterface;
 import use_case.login.LoginUserDataAccessInterface;
 import use_case.logout.LogoutUserDataAccessInterface;
 import use_case.signup.SignupUserDataAccessInterface;
+import use_case.job_grouping.CreateJobGroupDataAccessInterface;
 import use_case.course_analysis.AnalysisDataAccessInterface;
 
 import java.util.HashMap;
@@ -36,7 +37,7 @@ public class InMemoryUserDataAccessObject implements SignupUserDataAccessInterfa
                                                      LoginUserDataAccessInterface,
                                                      ChangePasswordUserDataAccessInterface,
                                                      LogoutUserDataAccessInterface,
-        AnalysisDataAccessInterface {
+                                                     CreateJobGroupDataAccessInterface {
 
     private final Map<String, Student> users = new HashMap<>();
 

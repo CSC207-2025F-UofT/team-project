@@ -7,6 +7,8 @@ import use_case.course_analysis.SkillDataAccessInterface;
 import use_case.login.LoginUserDataAccessInterface;
 import use_case.logout.LogoutUserDataAccessInterface;
 import use_case.signup.SignupUserDataAccessInterface;
+import use_case.course_analysis.AnalysisStudentDataAccessInterface;
+import use_case.job_grouping.CreateJobGroupDataAccessInterface;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -21,8 +23,9 @@ public class FileUserDataAccessObject implements SignupUserDataAccessInterface,
                                                  LoginUserDataAccessInterface,
                                                  ChangePasswordUserDataAccessInterface,
                                                  LogoutUserDataAccessInterface,
-                                                 SkillDataAccessInterface
-{
+                                                 AnalysisStudentDataAccessInterface,
+                                                 CreateJobGroupDataAccessInterface {
+
 
     private static final String HEADER = "username,password";
 

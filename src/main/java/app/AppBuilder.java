@@ -14,6 +14,9 @@ import interface_adapter.logout.LogoutPresenter;
 import interface_adapter.signup.SignupController;
 import interface_adapter.signup.SignupPresenter;
 import interface_adapter.signup.SignupViewModel;
+import interface_adapter.job_grouping.CreateJobGroupController;
+import interface_adapter.job_grouping.CreateJobGroupPresenter;
+import interface_adapter.job_grouping.CreateJobGroupViewModel;
 import use_case.change_password.ChangePasswordInputBoundary;
 import use_case.change_password.ChangePasswordInteractor;
 import use_case.change_password.ChangePasswordOutputBoundary;
@@ -26,10 +29,16 @@ import use_case.logout.LogoutOutputBoundary;
 import use_case.signup.SignupInputBoundary;
 import use_case.signup.SignupInteractor;
 import use_case.signup.SignupOutputBoundary;
+import use_case.job_grouping.CreateJobGroupInputBoundary;
+import use_case.job_grouping.CreateJobGroupInteractor;
+import use_case.job_grouping.CreateJobGroupOutputBoundary;
 import view.LoggedInView;
 import view.LoginView;
 import view.SignupView;
 import view.ViewManager;
+import view.CreateJobGroupView;
+
+import java.util.ArrayList;
 
 import javax.swing.*;
 import java.awt.*;
@@ -53,6 +62,8 @@ public class AppBuilder {
     private LoggedInViewModel loggedInViewModel;
     private LoggedInView loggedInView;
     private LoginView loginView;
+    private CreateJobGroupViewModel createJobGroupViewModel;
+    private CreateJobGroupView createJobGroupView;
 
     public AppBuilder() {
         cardPanel.setLayout(cardLayout);
@@ -125,6 +136,42 @@ public class AppBuilder {
 
         final LogoutController logoutController = new LogoutController(logoutInteractor);
         loggedInView.setLogoutController(logoutController);
+        return this;
+    }
+
+    /**
+     * Adds the Create Job Group View to the application.
+     * @return this builder
+     */
+    public AppBuilder addCreateJobGroupView() {
+        createJobGroupViewModel = new CreateJobGroupViewModel();
+
+        createJobGroupView = new CreateJobGroupView(
+                createJobGroupViewModel,
+                new ArrayList<>()
+        );
+
+        cardPanel.add(createJobGroupView, CreateJobGroupViewModel.VIEW_NAME);
+
+        return this;
+    }
+
+    /**
+     * Adds the Create Job Group Use Case to the application.
+     * @return this builder
+     */
+    public AppBuilder addCreateJobGroupUseCase() {
+        final CreateJobGroupOutputBoundary outputBoundary =
+                new CreateJobGroupPresenter(createJobGroupViewModel);
+
+        final CreateJobGroupInputBoundary interactor =
+                new CreateJobGroupInteractor(userDataAccessObject, outputBoundary);
+
+        final CreateJobGroupController controller =
+                new CreateJobGroupController(interactor);
+
+        createJobGroupView.setController(controller);
+
         return this;
     }
 
