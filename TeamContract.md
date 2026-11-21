@@ -61,3 +61,6 @@ Team Member Signatures:
 Syaikha Faiza Arifin
 Yuxuan Lin
 Mehal Patel
+Grace Natalia Manurung
+Frank Li
+Zhanyuan Su
