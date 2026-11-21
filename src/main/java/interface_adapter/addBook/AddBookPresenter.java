@@ -16,13 +16,12 @@ public class AddBookPresenter implements AddBookOutputBoundary {
     }
 
     @Override
-    void prepareSuccessView(AddBookOutputData response){
+    public void prepareSuccessView(AddBookOutputData response){
         this.addBookViewModel.setMessage(response.getTitle() + " by "+ response.getAuthor() +" has been successfully added to the shelf.");
     }
 
-    /**
-     * Prepares the failure view for the Add Book use case
-     * @param errorMessage the explanation of the failure
-     */
-    void prepareFailView(String errorMessage);
+    @Override
+    public void prepareFailView(String errorMessage){
+        this.addBookViewModel.setMessage(errorMessage);
+    }
 }
