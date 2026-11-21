@@ -1,9 +1,13 @@
 package entity;
 
 /**
- * Anything on the bench. Vessels, the pipette and the dropper bottle extend this.
+ * Anything on the bench. Vessels, pipettes, the dropper bottle, tools and fixed equipment
+ * extend this.
  */
-public class LabItem {
+public abstract class LabItem {
+
+  /** How close two items must be, in pixels, to count as near each other. */
+  public static final double NEAR_DISTANCE = 60;
 
   private final String id;
   private final ItemType type;
@@ -16,7 +20,7 @@ public class LabItem {
    * @param type what kind of item this is
    * @param position where it sits on the bench
    */
-  public LabItem(String id, ItemType type, Vec2 position) {
+  protected LabItem(String id, ItemType type, Vec2 position) {
     this.id = id;
     this.type = type;
     this.position = position;
@@ -36,5 +40,16 @@ public class LabItem {
 
   public void setPosition(Vec2 position) {
     this.position = position;
+  }
+
+  /**
+   * Whether another item is close enough to interact with this one.
+   *
+   * @param other the other item
+   * @return true if the two are within {@link #NEAR_DISTANCE} of each other
+   */
+  public boolean isNear(LabItem other) {
+    return Math.hypot(position.x() - other.position.x(),
+        position.y() - other.position.y()) <= NEAR_DISTANCE;
   }
 }
