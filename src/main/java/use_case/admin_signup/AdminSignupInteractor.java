@@ -49,7 +49,7 @@ public class AdminSignupInteractor implements AdminSignupInputBoundary {
                                               null);
         userDataAccessObject.save(admin);
 
-        final AdminSignupOutputData outputData = new AdminSignupOutputData(admin.getName());
+        final AdminSignupOutputData outputData = new AdminSignupOutputData(admin.getEmail());
         adminSignupPresenter.prepareSuccessView(outputData);
     }
 
