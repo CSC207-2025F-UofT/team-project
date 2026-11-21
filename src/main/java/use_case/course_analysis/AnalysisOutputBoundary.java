@@ -3,16 +3,18 @@ package use_case.course_analysis;
 /**
  * The output boundary for the Change Password Use Case.
  */
-public interface ChangePasswordOutputBoundary {
+public interface AnalysisOutputBoundary {
     /**
      * Prepares the success view for the Change Password Use Case.
      * @param outputData the output data
      */
-    void prepareSuccessView(ChangePasswordOutputData outputData);
+    void prepareSuccessView(AnalysisOutputData outputData);
 
     /**
      * Prepares the failure view for the Change Password Use Case.
      * @param errorMessage the explanation of the failure
      */
     void prepareFailView(String errorMessage);
+
+    void switchToSkillListView();
 }

@@ -1,10 +1,7 @@
 # GOAL FOR THIS WEEK:
 
-- Finish this template!
-- Decide everyone's User Stories
-
-Stretch
-- Finish UML Diagram
+- Finish working on Use cases
+- Try to get a working prototype
 
 # Project Name
 UofT Job Path Planner
