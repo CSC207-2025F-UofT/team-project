@@ -3,12 +3,15 @@ package data_access;
 import entity.Card;
 import entity.Deck;
 import use_case.add_card.AddCardDataAccessInterface;
+import use_case.edit_card.EditCardDataAccessInterface;
+import use_case.edit_card.EditCardDataAccessException;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.List;
+import java.util.Optional;
 
-public class InMemoryDeckRepository implements AddCardDataAccessInterface{
+public class InMemoryDeckRepository implements AddCardDataAccessInterface, EditCardDataAccessInterface {
 
     private final Map<Integer, Deck> decks = new HashMap<>();
     private int nextCardId = 1;
@@ -33,6 +36,50 @@ public class InMemoryDeckRepository implements AddCardDataAccessInterface{
     @Override
     public int generateCardId() {
         return nextCardId++;
+    }
+
+    @Override
+    public Optional<Card> findCard(int deckId, int cardId) {
+        Deck deck = decks.get(deckId);
+
+        if (deck == null) {
+            return Optional.empty();
+        }
+
+        for (Card card : deck.getCards()) {
+            if (card.getId() == cardId) {
+                return Optional.of(new Card(
+                        card.getId(),
+                        card.getQuestion(),
+                        card.getAnswer()
+                ));
+            }
+        }
+
+        return Optional.empty();
+
+    }
+
+    @Override
+    public void updateCard(int deckId,Card updatedCard) {
+        Deck deck = decks.get(deckId);
+
+        if (deck == null) {
+            throw new EditCardDataAccessException("Deck with id " + deckId + " not found");
+        }
+
+        for (Card existingCard : deck.getCards()) {
+            if (existingCard.getId() == updatedCard.getId()) {
+                existingCard.updateContent(
+                        updatedCard.getQuestion(),
+                        updatedCard.getAnswer()
+                );
+                return;
+            }
+        }
+
+        throw new EditCardDataAccessException("Card with id " + updatedCard.getId() + " not found in deck");
+
     }
 
     @Override
