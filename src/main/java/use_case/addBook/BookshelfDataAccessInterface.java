@@ -1,10 +1,13 @@
 package use_case.addBook;
 
 import entity.Book;
+import entity.Bookshelf;
 
 public interface BookshelfDataAccessInterface {
 
-    boolean existsByOpenLibraryId(Book book);
+    Bookshelf getBookshelf();
 
-    void saveBook(Book book);
+    boolean existsOnBookshelf(Book book);
+
+    void saveBookshelf(Bookshelf bookshelf);
 }

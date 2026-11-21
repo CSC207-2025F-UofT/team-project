@@ -1,6 +1,7 @@
 package use_case.addBook;
 
 import entity.Book;
+import entity.Bookshelf;
 
 /**
  * Coordinates the process of adding a book to the user's bookshelf.
@@ -39,19 +40,18 @@ public class   AddBookInteractor implements AddBookInputBoundary {
     @Override
     public void execute(AddBookInputData inputData) {
 
-        // Retrieve the selected book using its Open Library ID.
-        Book book = bookDataAccessObject.getBookByOpenLibraryId(
-                inputData.getBook());
+        // Retrieve the existing bookshelf.
+        Bookshelf bookshelf = bookshelfDataAccessObject.getBookshelf();
 
         // Check whether the book could be retrieved.
-        if (book == null) {
+        if (inputData.getBook() == null) {
             addBookPresenter.prepareFailView(
                     "Book could not be found.");
             return;
         }
 
         // Check whether the book already exists in the bookshelf.
-        if (bookshelfDataAccessObject.existsByOpenLibraryId(
+        if (bookshelfDataAccessObject.existsOnBookshelf(
                 inputData.getBook())) {
 
             addBookPresenter.prepareFailView(
@@ -60,10 +60,11 @@ public class   AddBookInteractor implements AddBookInputBoundary {
         }
 
         // Add the book to the user's bookshelf.
-        bookshelfDataAccessObject.saveBook(book);
+        bookshelf.addBook(inputData.getBook());
+        bookshelfDataAccessObject.saveBookshelf(bookshelf);
 
         // Notify the presenter that the book was successfully added.
-        AddBookOutputData outputData = new AddBookOutputData(book);
+        AddBookOutputData outputData = new AddBookOutputData(inputData.getBook());
 
         addBookPresenter.prepareSuccessView(outputData);
     }
