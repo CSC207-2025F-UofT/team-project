@@ -6,28 +6,24 @@ import entity.Bookshelf;
 /**
  * Coordinates the process of adding a book to the user's bookshelf.
  *
- * Retrieves the selected book using its Open Library ID, checks whether
+ * Retrieves the selected book, checks whether
  * it already exists in the bookshelf, and saves it if it is not a duplicate.
  */
 public class   AddBookInteractor implements AddBookInputBoundary {
 
-    private final BookSearchDataAccessInterface bookDataAccessObject;
     private final BookshelfDataAccessInterface bookshelfDataAccessObject;
     private final AddBookOutputBoundary addBookPresenter;
 
     /**
      * Constructs an AddBookInteractor.
      *
-     * @param bookDataAccessObject provides access to book information
      * @param bookshelfDataAccessObject provides access to bookshelf data
      * @param addBookPresenter prepares the output for the user
      */
     public AddBookInteractor(
-            BookSearchDataAccessInterface bookDataAccessObject,
             BookshelfDataAccessInterface bookshelfDataAccessObject,
             AddBookOutputBoundary addBookPresenter) {
 
-        this.bookDataAccessObject = bookDataAccessObject;
         this.bookshelfDataAccessObject = bookshelfDataAccessObject;
         this.addBookPresenter = addBookPresenter;
     }
@@ -35,7 +31,7 @@ public class   AddBookInteractor implements AddBookInputBoundary {
     /**
      * Attempts to add a selected book to the user's bookshelf.
      *
-     * @param inputData contains the Open Library ID of the selected book
+     * @param inputData contains the selected book as an object from the search.
      */
     @Override
     public void execute(AddBookInputData inputData) {
