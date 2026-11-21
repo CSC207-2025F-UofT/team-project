@@ -1,5 +1,7 @@
 package entities;
 
+import data_access.RandomSecretCodeGen;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,7 +27,7 @@ public class Candle_Game {
      * @return the secret code .
      */
     public String getSecretCode() {
-        return secretCode;
+        return RandomSecretCodeGen.generate();
     }
 
     /**

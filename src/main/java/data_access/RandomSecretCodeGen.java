@@ -13,7 +13,7 @@ public class RandomSecretCodeGen implements SecretCodeGenerator {
     }
 
     @Override
-    public String generate() {
+    public static String generate() {
         StringBuilder secretCode = new StringBuilder();
 
         for (int i = 0; i < length; i++) {
