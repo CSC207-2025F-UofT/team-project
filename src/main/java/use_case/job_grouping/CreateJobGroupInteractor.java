@@ -34,7 +34,7 @@ public class CreateJobGroupInteractor implements CreateJobGroupInputBoundary {
             userPresenter.prepareFailView("Select at least one job");
         }
         else {
-            final Student student = userDataAccessObject.getStudent(
+            final Student student = userDataAccessObject.get(
                     createJobGroupInputData.getUsername());
 
             if (student == null) {

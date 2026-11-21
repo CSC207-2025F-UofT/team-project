@@ -12,7 +12,7 @@ public interface CreateJobGroupDataAccessInterface {
      * @param username the student's username
      * @return the student
      */
-    Student getStudent(String username);
+    Student get(String username);
 
     /**
      * Saves the student's updated information.
