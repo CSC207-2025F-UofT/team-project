@@ -25,6 +25,10 @@ public class Board {
         this.wrongCount = 0;
     }
 
+    /**
+     * Sets the current question for the board.
+     * @param newQuestion the question to be put on the board
+     */
     public void setCurrentQuestion(Question newQuestion) {
         this.currentQuestion = newQuestion;
     }
@@ -45,19 +49,34 @@ public class Board {
         return this.team2;
     }
 
+    /**
+     * Gets the current active team.
+     * @return the current active team.
+     */
     public Team getActiveTeam() {
         if (this.activeTeam == 1) { return this.team1; }
         return this.team2;
     }
 
+    /**
+     * Gets the current number of wrong guesses.
+     * @return the current number of wrong guesses.
+     */
     public int getWrongCount() {
         return this.wrongCount;
     }
 
+    /**
+     * Sets the current number of wrong guesses.
+     * @param wrongCount the new number of wrong guesses.
+     */
     public void setWrongCount(int wrongCount) {
         this.wrongCount = wrongCount;
     }
 
+    /**
+     * Switches the active team.
+     */
     public void changeActiveTeam() {
         if (this.activeTeam == 1) { this.activeTeam = 2; }
         this.activeTeam = 1;
