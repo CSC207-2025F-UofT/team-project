@@ -44,10 +44,6 @@ public class RateReviewInteractor implements RateReviewInputBoundary{
             rateReviewPresenter.prepareFailView(openLibraryID
                     + " : Add book to bookshelf before reviewing it.");
 
-        //checks if both rating and review does not exist
-        } else if (reviewRating == null && reviewText.isEmpty()) {
-            rateReviewPresenter.prepareFailView(openLibraryID
-                    + " : Please enter rating and/or review.");
 
         //checks if rating is valid
         } else if (reviewRating != null &&
@@ -55,6 +51,14 @@ public class RateReviewInteractor implements RateReviewInputBoundary{
             rateReviewPresenter.prepareFailView(openLibraryID
                     + " : Invalid rating, please enter number between "
                     + Review.MIN_RATING + " - " + Review.MAX_RATING );
+
+        } else if (reviewRating == null && reviewText.isEmpty()) {
+            // nothing entered: clear the book's review
+            book.setReview(null);
+            dataAccessObject.saveBook(book);
+            rateReviewPresenter.prepareSuccessView(new RateReviewOutputData(book.getOpenLibraryId(),
+                    null, ""));
+
         }else { // saves review to book
             final Review review = new Review(openLibraryID, reviewRating, reviewText);
             book.setReview(review);
