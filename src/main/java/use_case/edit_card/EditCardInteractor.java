@@ -4,11 +4,11 @@ import entity.Card;
 
 import java.util.Optional;
 
-public class EditCardUseCaseInteractor implements EditCardInputBoundary{
+public class EditCardInteractor implements EditCardInputBoundary{
     private final EditCardDataAccessInterface dataAccess;
     private final EditCardOutputBoundary presenter;
 
-    public EditCardUseCaseInteractor(EditCardDataAccessInterface dataAccess, EditCardOutputBoundary presenter) {
+    public EditCardInteractor(EditCardDataAccessInterface dataAccess, EditCardOutputBoundary presenter) {
         this.dataAccess = dataAccess;
         this.presenter = presenter;
     }
