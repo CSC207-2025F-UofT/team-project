@@ -1,4 +1,4 @@
-package usecase.startgame;
+package yinghaousecase.startgame;
 
 public interface StartGameOutputBoundary {
 }
