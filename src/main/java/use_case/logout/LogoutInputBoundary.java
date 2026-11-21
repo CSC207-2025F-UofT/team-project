@@ -10,4 +10,5 @@ public interface LogoutInputBoundary {
      * there will be no logged-in user.
      */
     void execute();
+
 }
