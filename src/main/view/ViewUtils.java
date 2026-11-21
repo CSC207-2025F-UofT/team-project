@@ -5,6 +5,8 @@ import java.awt.*;
 import java.io.IOException;
 import java.io.InputStream;
 
+import java.net.URL;
+
 public final class ViewUtils {
 
     private static final int screenWidth;
@@ -16,9 +18,9 @@ public final class ViewUtils {
         screenWidth = screenSize.width;
         screenHeight = screenSize.height;
 
-        registerFont("/Figtree_Font/Figtree-Black.tff");
-        registerFont("/Figtree_Font/Figtree-Medium.tff");
-        registerFont("/Figtree_Font/Figtree-SemiBold");
+        registerFont("/Figtree_Font/Figtree-Black.ttf");
+        registerFont("/Figtree_Font/Figtree-Medium.ttf");
+        registerFont("/Figtree_Font/Figtree-SemiBold.ttf");
     }
 
     private ViewUtils() {}
@@ -53,5 +55,30 @@ public final class ViewUtils {
         } catch (FontFormatException | IOException e) {
             e.printStackTrace();
         }
+    }
+
+    private static ImageIcon loadImage(String filePath) {
+        URL url = ViewUtils.class.getResource(filePath);
+        if (url == null) {
+            return null;
+        }
+        return new ImageIcon(url);
+    }
+
+    public static JLabel createImage(String filePath, double xPct, double yPct, double widthPct) {
+        ImageIcon image = loadImage(filePath);
+        if (image == null || image.getIconWidth() <= 0) {
+            return new JLabel();
+        }
+
+        int x = (int) (xPct * getScreenWidth());
+        int y = (int) (yPct * getScreenHeight());
+        int width = (int) Math.round(widthPct * getScreenWidth());
+        int height = (int) Math.round(width * ((double) image.getIconHeight() / image.getIconWidth()));
+
+        Image scaledImage = image.getImage().getScaledInstance(width, height, Image.SCALE_SMOOTH);
+        JLabel label = new JLabel(new ImageIcon(scaledImage));
+        label.setBounds(x, y, width, height);
+        return label;
     }
 }
