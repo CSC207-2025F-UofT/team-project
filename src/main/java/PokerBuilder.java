@@ -58,16 +58,6 @@ public class PokerBuilder {
         application.add(cardPanel);
 
 
-        //listens for window resizes, uses CardPanel instead of application since cardpanel excludes
-        // OS window title bar
-        cardPanel.addComponentListener(new ComponentAdapter() {
-            @Override
-            public void componentResized(ComponentEvent e) {
-                UserSystemSettings.updateWindowSize();
-            }
-        });
-
-
         return application;
     }
 }
