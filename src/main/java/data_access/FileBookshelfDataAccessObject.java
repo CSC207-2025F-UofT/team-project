@@ -6,6 +6,7 @@ import entity.Review;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import use_case.addBook.BookshelfDataAccessInterface;
+import use_case.removeBook.RemoveBookDataAccessInterface;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -22,7 +23,8 @@ import java.time.LocalDateTime;
  * Books are identified by their OpenLibraryID.
  * Books that were only searched stay in {@link InMemoryBookDataAccessObject}.
  */
-public class FileBookshelfDataAccessObject implements BookshelfDataAccessInterface {
+public class FileBookshelfDataAccessObject
+        implements BookshelfDataAccessInterface, RemoveBookDataAccessInterface {
     private static final String OPEN_LIBRARY_ID = "openLibraryId";
     private static final String TITLE = "title";
     private static final String AUTHOR = "author";
@@ -90,6 +92,7 @@ public class FileBookshelfDataAccessObject implements BookshelfDataAccessInterfa
      * @param openLibraryId the OpenLibraryID of the book
      * @return the book, or null if it is not on the bookshelf
      */
+    @Override
     public Book getBook(String openLibraryId) {
         for (Book book : bookshelf.getBooks()) {
             if (book.getOpenLibraryId().equals(openLibraryId)) {
@@ -97,18 +100,6 @@ public class FileBookshelfDataAccessObject implements BookshelfDataAccessInterfa
             }
         }
         return null;
-    }
-
-    /**
-     * Removes the book with the given OpenLibraryID from the bookshelf and updates the file.
-     * @param openLibraryId the OpenLibraryID of the book to remove
-     */
-    public void removeBook(String openLibraryId) {
-        Book book = getBook(openLibraryId);
-        if (book != null) {
-            bookshelf.removeBook(book);
-            writeToFile();
-        }
     }
 
     /**
