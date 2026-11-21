@@ -8,7 +8,10 @@ import java.io.InputStream;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.NavigableMap;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -45,6 +48,37 @@ class AlphaVantageClientTest {
         assertTrue(query.get().contains("function=TIME_SERIES_DAILY"));
         assertTrue(query.get().contains("symbol=SAMPLE"));
         assertTrue(query.get().contains("outputsize=compact"));
+    }
+
+    @Test
+    void spacesStockRequestsAfterBothSuccessfulAndFailedCalls() throws IOException {
+        String sample = sample();
+        List<Long> starts = new ArrayList<>();
+        List<Long> finishes = new ArrayList<>();
+        AlphaVantageClient client = new AlphaVantageClient("test-only-key", uri -> {
+            starts.add(System.nanoTime());
+            try {
+                Thread.sleep(40);  // Simulate time spent waiting for the provider.
+                if (uri.getQuery().contains("symbol=AAPL&")) {
+                    throw new IOException("Connection closed.");
+                }
+                String symbol = uri.getQuery().contains("symbol=IBM&") ? "IBM" : "MSFT";
+                return new AlphaVantageClient.Reply(200, sample.replace("SAMPLE", symbol));
+            } finally {
+                finishes.add(System.nanoTime());
+            }
+        });
+
+        client.getDailyClosingPrices("IBM");
+        assertThrows(IllegalArgumentException.class, () -> client.getDailyClosingPrices("!"));
+        assertThrows(IOException.class, () -> client.getDailyClosingPrices("AAPL"));
+        client.getDailyClosingPrices("MSFT");
+
+        assertEquals(3, starts.size());
+        for (int i = 1; i < starts.size(); i++) {
+            assertTrue(starts.get(i) - finishes.get(i - 1) >= TimeUnit.MILLISECONDS.toNanos(2500),
+                    "Each live request needs a gap after the preceding request finishes.");
+        }
     }
 
     @Test
