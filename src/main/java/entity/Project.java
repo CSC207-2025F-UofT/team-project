@@ -3,8 +3,8 @@ package entity;
 public class Project {
     private final long id; // unique id
     private String name;
-    public Canvas canvas;
-    public boolean isPublished;
+    private boolean isPublished;
+    private Canvas canvas;
     private ColourPalette palette;
 
     public Project(long id, String name) {
@@ -25,8 +25,8 @@ public class Project {
         return id;
     }
 
-    public void changeName(String name) {
-        if (name == null) {
+    public void setName(String name) {
+        if (name == null || name.isBlank()) {
             throw new IllegalArgumentException("Project name cannot be empty.");
         }
         this.name = name;
@@ -36,19 +36,27 @@ public class Project {
         return name;
     }
 
-    public void publish() {
+    public boolean getIsPublished() {
+        return isPublished;
+    }
+
+    public void updateIsPublished() {
         isPublished = !isPublished;
     }
 
-    public void emptyCanvas() {
-        canvas = new Canvas();
-    }
-
-    public void emptyPalette() {
-        palette = new ColourPalette();
+    public Canvas getCanvas() {
+        return canvas;
     }
 
     public ColourPalette getPalette() {
         return palette;
+    }
+
+    public void setPalette(List<String> newColours) {
+        palette.setColours(newColours);
+    }
+
+    public void isEmpty() {
+        return canvas.isEmpty();
     }
 }
