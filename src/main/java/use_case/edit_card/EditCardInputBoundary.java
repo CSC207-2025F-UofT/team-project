@@ -1,4 +1,5 @@
 package use_case.edit_card;
 
-public class EditCardInputBoundary {
+public interface EditCardInputBoundary {
+    void execute(EditCardInputData inputData);
 }
