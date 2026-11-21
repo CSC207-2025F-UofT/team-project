@@ -49,6 +49,9 @@ As a player, I want to be able use spells by drawing them so that I can fight en
 ### User Story 4
 As a player, I want to be able to explore the map so I can fight new enemies, and get more rewards
 
+#### Current map MVP — Seran Naventhan
+As a player, I want to enter a world with visible dirt and water terrain so that I can see the arena where I will play.
+
 ### User Story 5
 As a user, I want to be able to log in so that I can save my data across multiple devices
 
@@ -150,21 +153,35 @@ The program determines the path for which to launch the spell (towards the curso
 That specific spell is launched from the player towards the cursor
 
 ### Use Case 5
-Name: Generate the world
+Name: Enter the world
 
 Primary Actor: Player
 
-Preconditions: The player is logged in
+Owner of the current map MVP: Seran Naventhan
 
-Trigger: The player clicks start game
+Preconditions: The game is available to start, and the player is not in an active run.
 
-Success Outcome: The world is created, with tiles and enemies spawning in
+Trigger: The player starts a game.
+
+Success Outcome: The player sees the complete dirt-and-water arena at its original tile size.
 
 Main Success Scenario:
-The user clicks start
-The map is generated
-Any entities that should be drawn are drawn
-The player enters the game loop, and can start to control the player
+1. The player starts a game.
+2. The game obtains the terrain for the starting arena.
+3. The player sees the complete arena, ready for play.
+
+Extensions:
+- 2a. No arena is identified: the player sees an explanation that an arena is required. No new arena is shown.
+- 2b. The arena is unavailable or cannot be read: the player sees a loading error. No new arena is shown.
+- 2c. The arena is empty or contains invalid terrain: the player sees an error explaining the problem,
+  including its location when available. No partial arena is shown.
+
+On any failure, an already displayed arena remains unchanged. A later successful attempt replaces
+it and clears the error.
+
+Implementation status: the loading and presentation flow is implemented and tested through its
+view model. Displaying the arena and connecting this flow to game startup are later checkpoints.
+Enemy spawning, player collision and camera behaviour are outside this map MVP.
 
 
 ### User Story 6
@@ -198,6 +215,9 @@ The game opens a file save dialogue, suggests ‘dungeon-run.png’
 | Omer Sheaffer | Prepare a Spell |
 
 | Omer Sheaffer | Save Run Card |
+
+Current milestone ownership is recorded in `docs/specs/enemy-and-fireball.md`: Seran owns the
+tile-map portion of Enter the World. The table above records the earlier project allocation.
 
 ---
 
@@ -305,18 +325,24 @@ Move the white box with WASD or the arrow keys.
 
 Run unit tests with `mvn test` (or the Maven `test` lifecycle in IntelliJ).
 
-### Architecture (core loop)
+### Architecture (core loop and map loading)
 
 - `entity/Player`: position, size and speed (no Swing).
 - `entity/TileType`: interface for immutable terrain types. `WaterTileType` has ID 0 and blocks walking; `DirtTileType` has ID 1 and permits walking.
 - `entity/TileTypeRegistry`: resolves IDs through registered terrain objects and rejects duplicate or unknown IDs.
-- `entity/TileMap`: an immutable grid of terrain objects, pixel-coordinate lookup and walkability (no Swing or file access). Map loading and rendering are not connected yet.
-- `use_case/load_map`: `MapDataAccessInterface` defines map loading, with failures reported through `MapLoadingException`. The interactor and presentation flow are a later step.
+- `entity/TileMap`: an immutable grid of terrain objects, pixel-coordinate lookup and walkability (no Swing or file access).
+- `use_case/load_map`: `LoadMapInputBoundary` and immutable `LoadMapInputData` accept a map name. `LoadMapInteractor` loads through `MapDataAccessInterface`, then sends an immutable `LoadMapOutputData` snapshot of tile IDs and tile size through `LoadMapOutputBoundary`. Invalid names and `MapLoadingException` failures go through the fail output; the input boundary returns `void`.
 - `data_access/FileMapDataAccessObject`: loads UTF-8 resources from `maps/`, resolves IDs through the supplied terrain registry, and validates the tile grid.
 - `use_case/update_game`: one tick of game rules (`UpdateGameInteractor`) with input/output boundaries.
 - `interface_adapter/game`: `GameController` (key state -> request), `GamePresenter` + `GameViewModel` (result -> what to draw).
+- `interface_adapter/map`: `MapController` wraps the map name; `MapPresenter` converts success or failure into immutable `MapState`. `MapViewModel` stores that state and fires a `state` property-change notification. The map state contains IDs, dimensions and error text, with no entities, images or file APIs. A failed load preserves the previous map; success clears the error.
 - `view`: `GameWindow` (JFrame), `GamePanel` (draws), `KeyboardInput` (records held keys).
 - `app`: `GameLoop` (60 ticks/s thread: input -> update -> repaint) and `Main` (builds and wires everything).
+
+The map flow is separate from per-tick player updates. Its controller, interactor and presenter
+are currently connected in tests using in-memory data access. Production wiring in `Main`,
+map resources and rendering remain later checkpoints. Property-change listeners run on the
+calling thread; the future Swing view is responsible for updating Swing on its event thread.
 
 ### Map resource format
 
@@ -331,7 +357,9 @@ is supplied when constructing the reader; the planned game map uses 32-pixel til
 
 Missing, empty, unreadable, or malformed maps produce `MapLoadingException`. Format errors
 identify the map name, original file line, and tile column, counted from one. Columns count
-tile entries, not characters. The game startup and view are not connected to the reader yet.
+tile entries, not characters. `LoadMapInteractor` catches loading failures and sends their
+explanation to the presenter, which adds "Unable to load map:" to the view-model error text.
+The game startup and view are not connected to this flow yet.
 
 ---
 

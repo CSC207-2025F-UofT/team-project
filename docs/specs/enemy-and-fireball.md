@@ -161,9 +161,9 @@ When map loading is wired into the application, `Main` will construct the regist
 | Layer | Change |
 | --- | --- |
 | `entity` | `TileType` interface, `WaterTileType`, `DirtTileType`, and `TileTypeRegistry`. `TileMap` holds a `TileType[][]` grid (rows × columns) and the tile size, with `getTile(col, row)`, `tileAtPixel(x, y)`, `isWalkable(x, y)` and width and height in pixels |
-| `use_case/load_map` | `MapDataAccessInterface.load(mapName)` supplies a `TileMap` or throws `MapLoadingException`. The later `LoadMapInteractor` will handle this failure through its output boundary |
+| `use_case/load_map` | `LoadMapInputBoundary.execute` accepts immutable `LoadMapInputData` and returns `void`. `LoadMapInteractor` calls `MapDataAccessInterface.load(mapName)`, converts the map to immutable `LoadMapOutputData` (tile IDs and tile size), and calls `LoadMapOutputBoundary` for success or failure |
 | `data_access` | `FileMapDataAccessObject` implements `MapDataAccessInterface`. It reads a UTF-8 classpath resource under `maps/` and parses it into a `TileMap` using the supplied terrain registry and tile size |
-| `interface_adapter` | A presenter sends the tile grid to the view once, after loading |
+| `interface_adapter/map` | `MapController` builds the request. `MapPresenter` updates immutable `MapState` in `MapViewModel` and fires a property-change notification. State contains IDs, dimensions and error text; it has no entity or image references |
 | `view` | `TileSprites` maps terrain IDs supplied by the view model to images. `GamePanel` draws the map before the player and enemy |
 | `app` | `Main` creates the terrain registry and file data-access object and runs the map load before starting the loop |
 
@@ -173,7 +173,31 @@ When map loading is wired into the application, `Main` will construct the regist
 - An unknown number stops loading with an error that names the line and column.
 - A missing or empty file is an error too, so a mistake shows up at startup instead of as a blank screen.
 - Non-integer IDs and IDs outside the Java integer range are rejected. Error locations use the original file's one-based line number and one-based tile column, including when comments or blank lines precede the error.
-- Loading failures use `MapLoadingException`, owned by `use_case/load_map`; file APIs stay in `data_access`. Wiring this failure into a presenter is part of the next implementation step.
+- Loading failures use `MapLoadingException`, owned by `use_case/load_map`; file APIs stay in `data_access`. The interactor catches these failures and calls `prepareFailView`; no loading exception escapes to the controller.
+
+**Load-map design and current checkpoint**
+
+The player goal is Enter the World (README Use Case 5). The terrain map is an entity; the map
+name, terrain IDs and tile size are values. Loading is the interactor's responsibility,
+reading and parsing belong to the data-access object, and formatting and publishing display
+state belong to the presenter. The controller only packages the request.
+
+The main scenario follows `MapController` -> `LoadMapInputBoundary` / `LoadMapInteractor` ->
+`MapDataAccessInterface` -> `TileMap` -> `LoadMapOutputBoundary` -> `MapPresenter` ->
+`MapViewModel`. Output data and state copy their arrays to keep published snapshots immutable.
+Views will read only the map view model, never the entity or use-case output data.
+
+README extension 2a (missing name) goes directly from the interactor to the failure output.
+Extensions 2b (unavailable/unreadable) and 2c (empty/malformed) arrive as `MapLoadingException`
+and follow the same failure output. The presenter keeps any previous map and publishes an
+error message; a successful retry replaces the map and clears the error. Tests cover these
+paths with in-memory data access and a recording output boundary, plus presenter state and
+notifications. No Swing or real files are needed to test the interactor.
+
+Checkpoint 4 completes this use-case and adapter flow. Production resources, cached drawing
+and startup wiring in `app` remain checkpoints 5–7. The existing game tick and movement code
+are unchanged. When the view is connected, property-change callbacks that update Swing must
+run on its event thread; `MapViewModel` does not import Swing to perform that scheduling.
 
 **Drawing**
 
