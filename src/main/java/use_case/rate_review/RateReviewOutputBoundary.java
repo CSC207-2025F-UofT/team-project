@@ -1,4 +1,6 @@
 package use_case.rate_review;
 
-public class RateReviewOutputBoundary {
+public interface RateReviewOutputBoundary {
+    void prepareSuccessView(RateReviewOutputData rateReviewOutputData);
+    void prepareFailView(String errorMessage);
 }
