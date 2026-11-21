@@ -1,4 +1,4 @@
-package interface_adaptor.search;
+package interface_adapter.search;
 
 public interface SearchViewModelListener {
 

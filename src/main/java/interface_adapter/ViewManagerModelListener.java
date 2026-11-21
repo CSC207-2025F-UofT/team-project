@@ -1,4 +1,4 @@
-package interface_adaptor;
+package interface_adapter;
 
 public interface ViewManagerModelListener {
 

@@ -1,6 +1,6 @@
-package interface_adaptor.search;
+package interface_adapter.search;
 
-import interface_adaptor.ViewManagerModel;
+import interface_adapter.ViewManagerModel;
 import use_case.search.SearchOutputBoundary;
 
 /**
