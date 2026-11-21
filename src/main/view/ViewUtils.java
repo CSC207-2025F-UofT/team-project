@@ -1,6 +1,9 @@
 package main.view;
 
+import javax.swing.*;
 import java.awt.*;
+import java.io.IOException;
+import java.io.InputStream;
 
 public final class ViewUtils {
 
@@ -12,6 +15,10 @@ public final class ViewUtils {
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
         screenWidth = screenSize.width;
         screenHeight = screenSize.height;
+
+        registerFont("/Figtree_Font/Figtree-Black.tff");
+        registerFont("/Figtree_Font/Figtree-Medium.tff");
+        registerFont("/Figtree_Font/Figtree-SemiBold");
     }
 
     private ViewUtils() {}
@@ -34,5 +41,17 @@ public final class ViewUtils {
     public static void setFont(Component comp, String font, int style, int minSize, double relativeSize) {
         int relSize = (int) (screenHeight * relativeSize);
         comp.setFont(new Font(font, style, Math.max(minSize, relSize)));
+    }
+
+    private static void registerFont(String filePath){
+        try (InputStream is = ViewUtils.class.getResourceAsStream(filePath);) {
+            if (is == null) {
+                return;
+            }
+            Font customFont = Font.createFont(Font.TRUETYPE_FONT, is);
+            GraphicsEnvironment.getLocalGraphicsEnvironment().registerFont(customFont);
+        } catch (FontFormatException | IOException e) {
+            e.printStackTrace();
+        }
     }
 }
