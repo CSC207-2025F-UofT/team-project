@@ -13,13 +13,28 @@ public class RateReviewInputData {
         this.review = review;
     }
 
+    /**
+     * Returns the review text of the selected book.
+     *
+     * @return the review text
+     */
     String getReview() {
         return review;
     }
 
+    /**
+     * Returns the rating of the selected book.
+     *
+     * @return the rating
+     */
     Integer getRating() {
         return rating;
     }
 
+    /**
+     * Returns the Open Library ID of the selected book.
+     *
+     * @return the Open Library ID
+     */
     String getOpenLibraryID() {return openLibraryID;}
 }

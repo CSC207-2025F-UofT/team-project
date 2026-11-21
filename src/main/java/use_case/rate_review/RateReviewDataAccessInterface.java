@@ -7,24 +7,15 @@ import entity.Book;
 public interface RateReviewDataAccessInterface {
 
     /**
-     * Checks if the given openLibraryID exists.
-     * @param openLibraryID the openLibraryID to look for
-     * @return true if a book with the given openLibraryID exists; false otherwise
-     */
-    boolean existsByOpenLibraryID(String openLibraryID);
-
-    /**
-     * Saves the openLibraryID.
-     * @param openLibraryID the openLibraryID to save
-     */
-    void save(Book openLibraryID);
-
-    /**
-     * Returns the user with the given username.
+     * Returns the book with the given openLibraryID.
      * @param openLibraryID the openLibraryID to look up
      * @return the book with the given openLibraryID
      */
     Book getBook(String openLibraryID);
 
+    /**
+     * Saves the given book, including its current rating and review.
+     * @param book the book to save
+     */
     void saveBook(Book book);
 }
