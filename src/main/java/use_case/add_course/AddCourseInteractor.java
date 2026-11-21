@@ -12,16 +12,16 @@ import entity.StudentFactory;
 public class AddCourseInteractor implements AddCourseInputBoundary {
 
     private final AddCourseDataAccessInterface studentDataAccessObject;
-    private final CourseValidationGateway courseValidationGateway;
+    private final CourseValidator courseValidator;
     private final AddCourseOutputBoundary addCoursePresenter;
     private final StudentFactory studentFactory;
 
     public AddCourseInteractor(AddCourseDataAccessInterface studentDataAccessObject,
-                               CourseValidationGateway courseValidationGateway,
+                               CourseValidator courseValidator,
                                AddCourseOutputBoundary addCoursePresenter,
                                StudentFactory studentFactory) {
         this.studentDataAccessObject = studentDataAccessObject;
-        this.courseValidationGateway = courseValidationGateway;
+        this.courseValidator = courseValidator;
         this.addCoursePresenter = addCoursePresenter;
         this.studentFactory = studentFactory;
     }
@@ -30,6 +30,10 @@ public class AddCourseInteractor implements AddCourseInputBoundary {
     public void execute(AddCourseInputData addCourseInputData) {
         final String username = studentDataAccessObject.getCurrentUsername();
         final Student student = studentDataAccessObject.get(username);
+        if (student == null) {
+            addCoursePresenter.prepareFailView("Please log in first.");
+            return;
+        }
         final ArrayList<String> currentCourses = student.getCourses();
 
         final List<String> addedCourses = new ArrayList<>();
@@ -46,20 +50,11 @@ public class AddCourseInteractor implements AddCourseInputBoundary {
             else if (currentCourses.contains(code) || addedCourses.contains(code)) {
                 rejectedCourses.add(code + " (already added)");
             }
+            else if (courseValidator.courseExists(code)) {
+                addedCourses.add(code);
+            }
             else {
-                try {
-                    if (courseValidationGateway.courseExists(code)) {
-                        addedCourses.add(code);
-                    }
-                    else {
-                        rejectedCourses.add(code + " (not a UofT course)");
-                    }
-                }
-                catch (CourseLookupException e) {
-                    addCoursePresenter.prepareFailView(
-                            "Could not check courses right now. Please try again.");
-                    return;
-                }
+                rejectedCourses.add(code + " (not found)");
             }
         }
 
