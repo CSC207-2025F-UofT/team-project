@@ -15,10 +15,9 @@ public class AddBookController {
 
     /**
      * Executes the Add Book Use Case.
-     *
      */
-    public void execute(String openLibraryID){
-        final AddBookInputData addBookInputData = new AddBookInputData(openLibraryID);
+    public void execute(Book book){
+        final AddBookInputData addBookInputData = new AddBookInputData(book);
         addBookInteractor.execute(addBookInputData);
     }
 

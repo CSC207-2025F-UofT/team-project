@@ -27,4 +27,22 @@ public class AddBookOutputData {
     public Book getBook() {
         return book;
     }
+
+    /**
+     * Returns the title of the book that was added.
+     *
+     * @return the added book title
+     */
+    public String getTitle() {
+        return book.getTitle();
+    }
+
+    /**
+     * Returns the author of the book that was added.
+     *
+     * @return the added book author
+     */
+    public String getAuthor() {
+        return book.getAuthor();
+    }
 }
