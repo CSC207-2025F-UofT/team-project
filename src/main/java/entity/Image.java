@@ -3,10 +3,8 @@ package entity;
 import java.awt.*;
 import java.awt.geom.Area;
 import java.awt.geom.Path2D;
+import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
-import javax.imageio.ImageIO;
 import java.util.List;
 
 public class Image extends Layer {
@@ -17,20 +15,15 @@ public class Image extends Layer {
     private String editedImagePath;
 
 
-    public Image(String name, int position, String originalImagePath)
-            throws IOException {
+    public Image(String name, int position, String originalImagePath,
+                 BufferedImage originalImage) {
 
         super(name, position);
 
         this.originalImagePath = originalImagePath;
         this.editedImagePath = originalImagePath;
-
-        this.originalImage = ImageIO.read(new File(originalImagePath));
-        if (this.originalImage == null) {
-            throw new IOException("Invalid or unsupported image file.");
-        }
-
-        this.editedImage = copyImage(this.originalImage);
+        this.originalImage = copyImage(originalImage);
+        this.editedImage = copyImage(originalImage);
     }
 
 
@@ -81,7 +74,7 @@ public class Image extends Layer {
     }
 
   
-    public void cutOut(List<Point> points) {
+    public void cutOut(List<Point2D.Double> points) {
 
         Area selection = getSelection(points);
 
@@ -96,11 +89,11 @@ public class Image extends Layer {
         graphics.drawImage(editedImage, 0, 0, null);
         graphics.dispose();
 
-        editedImage = cutout;
+        editedImage = copyImage(cutout);
     }
 
 
-    private Area getSelection(List<Point> points) {
+    private Area getSelection(List<Point2D.Double> points) {
         if (points == null || points.size() < 3) {
             throw new IllegalArgumentException(
                     "A cutout requires at least three points."
@@ -118,10 +111,4 @@ public class Image extends Layer {
         return new Area(path);
     }
 
-
-    public void saveEditedImage(String path) throws IOException {
-        File output = new File(path);
-        ImageIO.write(editedImage, "png", output);
-        editedImagePath = path;
-    }
 }
