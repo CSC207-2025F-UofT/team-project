@@ -182,8 +182,9 @@ On any failure, an already displayed arena remains unchanged. A later successful
 it and clears the error.
 
 Implementation status: the loading flow, production map, placeholder tile images and cached
-renderer are implemented and tested together without opening a window. Connecting the renderer
-to the game panel and displaying errors at startup are the next checkpoint.
+renderer are connected to startup and the game panel. Startup failures show an error dialog
+without opening a playable game; later map errors appear above the last complete background.
+Automated tests cover the startup builder, panel drawing and existing movement controls.
 Enemy spawning, player collision and camera behaviour are outside this map MVP.
 
 
@@ -324,9 +325,11 @@ Requires JDK 11+ (17 recommended).
 - IntelliJ: open the project and run `app.Main`.
 - Maven: `mvn compile exec:java -Dexec.mainClass=app.Main`, or `mvn compile` then `java -cp target/classes app.Main`.
 
-Move the white box with WASD or the arrow keys.
+Move the white box with WASD or the arrow keys over the green dirt and blue water map.
+Player-water collision is deferred, so the player can still move across water.
 
 Run unit tests with `mvn test` (or the Maven `test` lifecycle in IntelliJ).
+For environments without a desktop display, use `mvn -Djava.awt.headless=true test`.
 
 
 ### Architecture (core loop)
@@ -340,7 +343,7 @@ Run unit tests with `mvn test` (or the Maven `test` lifecycle in IntelliJ).
 ### Architecture (Load Map, Seran)
 
 Loads the terrain once at startup and prepares a cached map image, separately from the per-tick use cases.
-The loading and rendering components are implemented; startup and game-panel integration are the next checkpoint.
+Startup and game-panel integration are implemented. Final running-game verification remains a separate checkpoint.
 
 - `entity/TileType`: interface for immutable terrain types. `WaterTileType` has ID 0 and blocks walking; `DirtTileType` has ID 1 and permits walking.
 - `entity/TileTypeRegistry`: resolves IDs through registered terrain objects and rejects duplicate or unknown IDs.
@@ -349,15 +352,19 @@ The loading and rendering components are implemented; startup and game-panel int
 - `data_access/FileMapDataAccessObject`: loads UTF-8 resources from `maps/`, resolves IDs through the supplied terrain registry, and validates the tile grid.
 - `interface_adapter/map`: `MapController` wraps the map name; `MapPresenter` converts success or failure into immutable `MapState`. `MapViewModel` stores that state and fires a `state` property-change notification. The map state contains IDs, dimensions and error text, with no entities, images or file APIs. A failed load preserves the previous map; success clears the error.
 - `view/TileImageSource`: the view-only contract for looking up already loaded images by terrain ID. This is a rendering helper interface, not a use-case boundary.
-- `view/TileSprites`: loads an injected mapping of IDs to classpath image resources once and checks their dimensions. Missing, unreadable or incorrectly sized images produce an `IOException` with the resource path for startup to handle.
+- `view/TileSprites`: loads an injected mapping of IDs to classpath image resources once and checks their dimensions. Missing, unreadable or incorrectly sized images produce an `IOException` with the resource path; `MapBuilder` reports it through the startup error callback.
 - `view/MapRenderer`: depends on `TileImageSource` and reads only `MapState`. It builds a cached image at the map's pixel dimensions, rebuilds when the grid or tile size changes, and preserves the last complete image if rendering fails. Loading/rendering error text is available through `getErrorMessage()`.
-- `app` (next checkpoint): `Main` will connect the terrain registry, file reader, map use case, presenter and renderer, then request the initial map through `MapController`.
+- `view/MapLayer`: reads `MapViewModel`, draws the cached background at the top-left, and wraps error text into a banner. `GamePanel` draws the background before the player and the error banner afterward. It subscribes to map changes while displayed and removes its listener when detached; the original constructor without a map remains available.
+- `view/GameWindow.showStartupError`: displays a failure dialog before a playable window is opened.
+- `app/MapBuilder`: wires the map registry, file reader, use case, presenter and renderer; requests the starting map through `MapController`; and returns a prepared `MapLayer`. A map or image failure reports one error and returns no layer.
+- `app/Main`: supplies `level1.txt`, tile size 32 and the image mappings to `MapBuilder`. It opens the window and starts the existing loop only after map preparation succeeds.
 
 The map flow is separate from per-tick player updates. Interactor tests use in-memory data
 access; an integration test connects the real file reader, controller, interactor, presenter
-and renderer using the shipped resources. Production wiring in `Main` and drawing the cached
-image in `GamePanel` remain the next checkpoint. Property-change listeners run on the calling
-thread; the future Swing view must update Swing and use the renderer on its event thread.
+and renderer using the shipped resources. Startup wiring lives in `app`, and `GamePanel`
+draws the cached image through `MapLayer`. Property-change listeners only request repainting,
+which is safe from another thread; Swing paints and uses the renderer on its event thread.
+The first paint reads the current state, including when loading finished before subscription.
 Cached tile and map images are shared within the view and must be treated as read-only.
 
 #### Map resource format
@@ -375,7 +382,8 @@ Missing, empty, unreadable, or malformed maps produce `MapLoadingException`. For
 identify the map name, original file line, and tile column, counted from one. Columns count
 tile entries, not characters. `LoadMapInteractor` catches loading failures and sends their
 explanation to the presenter, which adds "Unable to load map:" to the view-model error text.
-The game startup and view are not connected to this flow yet.
+Startup displays that error in a dialog and does not start the loop. If a future reload fails
+after startup, the panel displays the error above the previously rendered map.
 
 #### Map resources and rendering
 
@@ -383,7 +391,7 @@ The game startup and view are not connected to this flow yet.
 The centre and outer edges are dirt, with two water areas elsewhere. The placeholder sprites
 are `src/main/resources/tiles/dirt.png` (solid green, `#00FF00`) and
 `src/main/resources/tiles/water.png` (solid blue, `#0000FF`), both opaque 32 × 32 PNGs.
-The application will supply the mapping `0 -> /tiles/water.png`, `1 -> /tiles/dirt.png`.
+`Main` supplies the mapping `0 -> /tiles/water.png`, `1 -> /tiles/dirt.png`.
 
 The renderer reads the IDs supplied by the map view model and places each image in its tile
 cell. It uses the map's dimensions rather than fitting the map to the window. Repainting the
@@ -394,6 +402,13 @@ To edit the map, change the numbers in `level1.txt` and rebuild resources before
 (for example, with `mvn compile`). Player collision and detailed tile artwork are deferred.
 The terrain data marks water as non-walkable for the enemy feature to use; integrating enemy
 movement is separate work. Fireballs should cross water.
+
+The combined resource/rendering checkpoint (original steps 5 and 6) and startup integration
+(original step 7, renumbered step 6) are implemented. The remaining checkpoint is final
+running-game verification and documentation (original step 8, renumbered step 7). Automated
+checks cover successful startup preparation, invalid maps, missing/corrupt/incorrectly sized
+images, missing image mappings, panel draw order, cache reuse, repaint subscriptions, WASD
+and arrow-key movement, and deferred player-water collision.
 
 ---
 

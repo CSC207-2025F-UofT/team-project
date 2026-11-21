@@ -157,7 +157,7 @@ public interface TileType {
 
 `TileTypeRegistry` receives a list of terrain objects and builds an ID lookup. Its `fromId(id)` returns the registered object or throws an error for an unknown ID; construction rejects duplicate IDs and null entries. Adding another terrain implementation does not require changing the registry or `TileMap`.
 
-When map loading is wired into the application, `Main` will construct the registry with one water object and one dirt object and pass it to the file reader. The map can then share those two objects across all 600 cells. If a tile later needs its own state, such as a door that opens, a `Tile` class can wrap a `TileType` plus that state.
+`MapBuilder` constructs the registry with one water object and one dirt object and passes it to the file reader. The map shares those two objects across all 600 cells. If a tile later needs its own state, such as a door that opens, a `Tile` class can wrap a `TileType` plus that state.
 
 **Where the code goes**
 
@@ -167,8 +167,8 @@ When map loading is wired into the application, `Main` will construct the regist
 | `use_case/load_map` | `LoadMapInputBoundary.execute` accepts immutable `LoadMapInputData` and returns `void`. `LoadMapInteractor` calls `MapDataAccessInterface.load(mapName)`, converts the map to immutable `LoadMapOutputData` (tile IDs and tile size), and calls `LoadMapOutputBoundary` for success or failure |
 | `data_access` | `FileMapDataAccessObject` implements `MapDataAccessInterface`. It reads a UTF-8 classpath resource under `maps/` and parses it into a `TileMap` using the supplied terrain registry and tile size |
 | `interface_adapter/map` | `MapController` builds the request. `MapPresenter` updates immutable `MapState` in `MapViewModel` and fires a property-change notification. State contains IDs, dimensions and error text; it has no entity or image references |
-| `view` | `TileSprites` implements `TileImageSource` and loads an injected ID-to-image mapping. `MapRenderer` caches the complete map image from `MapState`. Connecting this image to `GamePanel` is the next checkpoint |
-| `app` | `Main` creates the terrain registry and file data-access object and runs the map load before starting the loop |
+| `view` | `TileSprites` implements `TileImageSource`; `MapRenderer` caches the complete image from `MapState`. `MapLayer` draws the image and error banner in `GamePanel`, behind and above the player respectively. `GameWindow` displays startup errors |
+| `app` | `Main` supplies map and image configuration to `MapBuilder`, which wires and runs map loading and prepares a `MapLayer`. Startup opens the game and starts the loop only if preparation succeeds |
 
 **Parsing rules**
 
@@ -198,10 +198,11 @@ paths with in-memory data access and a recording output boundary, plus presenter
 notifications. No Swing or real files are needed to test the interactor.
 
 Checkpoint 4 completes this use-case and adapter flow. The original resource and rendering
-steps (5 and 6) are now one completed checkpoint, step 5. Step 6 connects startup and the game panel;
-step 7 performs final verification and documentation. The existing game tick and movement code
-are unchanged. When the view is connected, property-change callbacks that update Swing must
-run on its event thread; `MapViewModel` does not import Swing to perform that scheduling.
+steps (5 and 6) are now one completed checkpoint, step 5. Startup and panel integration
+(original step 7, renumbered step 6) are also implemented. Final verification and documentation
+remain original step 8, renumbered step 7. The existing game tick and movement code are unchanged.
+The panel's property-change listener only requests repainting. Swing performs the drawing on
+its event thread; the view model does not import Swing.
 
 **Drawing**
 
@@ -222,11 +223,28 @@ On the main path, the renderer reads IDs from the state and looks up each image.
 renders reuse the cache until the tile IDs or tile size change. Empty state has no image;
 loading errors remain available as display text. An unsupported image ID produces a rendering
 error and preserves the last complete image, never a partially drawn replacement. Image
-resource errors and renderer errors must be displayed when startup and the panel are wired
-in step 6. Only `app` chooses the concrete resource mappings and connects the helpers.
+resource and initial rendering errors are reported during startup. Later loading/rendering
+errors appear in the panel's error banner. Only `app` chooses the concrete resource mappings
+and connects the helpers.
+
+**Startup and panel integration (original step 7)**
+
+`Main` delegates map wiring to `MapBuilder`, which constructs the terrain registry, map
+view model, presenter, interactor and controller, then loads `level1.txt` once through the
+controller. It loads the image resources and prepares the cached map before the game loop
+starts. A failed map load or image preparation reports one error through an injected callback
+and returns no layer. `Main` supplies the startup dialog callback and returns without opening
+a playable window or starting the loop on failure. Tests supply a recording callback.
+
+`MapLayer` in `view` reads `MapViewModel` and uses the injected renderer to draw the background
+and wrapped error text. `GamePanel` draws that background before the player and any error
+banner afterward. It registers a repaint listener while displayed and removes it when
+detached. Repaint requests can arrive on any thread; rendering stays on Swing's
+event thread. Reading the current state when painting also handles a map loaded before
+the panel's listener was registered. The existing game-loop and movement rules stay unchanged.
 
 The shipped map produces a 960 × 640 image. A smaller map keeps its own pixel dimensions;
-the renderer does not stretch it to the window. The future `GamePanel` draws this image once
+the renderer does not stretch it to the window. `GamePanel` draws this image once
 per frame behind the player. All image work stays in `view`.
 
 Tests verify the real arena's dimensions and terrain, the exact solid colours and sizes of
@@ -234,6 +252,11 @@ the PNGs, rendering positions, cache reuse and replacement, and image-resource/r
 failures. A production integration test connects the real resource loader through the use-case
 and presentation flow to the renderer, without a window. It checks that a failed subsequent
 map load keeps the same rendered image and that a successful retry clears the error.
+Startup tests cover missing/blank names, unavailable/empty/malformed maps, image-loading
+failures and missing terrain-image mappings. Panel tests cover initial and later map states,
+draw order, error banners, cache reuse and listener cleanup. Movement integration tests drive
+the existing keyboard/controller/interactor/presenter flow and paint its result over the map.
+Running-game visual inspection and actual keyboard-focus checks remain part of final verification.
 
 **Confirmed collision and artwork scope**
 

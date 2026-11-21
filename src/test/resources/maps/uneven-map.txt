@@ -1,0 +1,3 @@
+# The second terrain row is missing its final column.
+1 0
+1

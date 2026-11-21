@@ -9,15 +9,19 @@ import use_case.update_game.UpdateGameInteractor;
 import view.GamePanel;
 import view.GameWindow;
 import view.KeyboardInput;
+import view.MapLayer;
 
 import javax.swing.SwingUtilities;
+import java.util.Map;
 
-/** Builds every object, connects them, and starts the game. The only class that knows them all. */
+/** Assembles the game, using MapBuilder for map wiring, and starts it on Swing's event thread. */
 public class Main {
     private static final int SCREEN_WIDTH = 960;
     private static final int SCREEN_HEIGHT = 640;
     private static final int PLAYER_SIZE = 48;
     private static final double PLAYER_SPEED = 4;
+    private static final int TILE_SIZE = 32;
+    private static final String STARTING_MAP = "level1.txt";
 
     public static void main(String[] args) {
         // Build the window on Swing's thread (Swing should only be used from that thread).
@@ -25,6 +29,14 @@ public class Main {
     }
 
     private static void start() {
+        // Load and prepare the map before opening the window or starting the loop.
+        MapLayer mapLayer = new MapBuilder().build(STARTING_MAP, TILE_SIZE,
+                Map.of(0, "/tiles/water.png", 1, "/tiles/dirt.png"),
+                message -> GameWindow.showStartupError(message));
+        if (mapLayer == null) {
+            return;
+        }
+
         // Entities
         Player player = new Player((SCREEN_WIDTH - PLAYER_SIZE) / 2.0, (SCREEN_HEIGHT - PLAYER_SIZE) / 2.0,
                 PLAYER_SIZE, PLAYER_SPEED);
@@ -38,7 +50,7 @@ public class Main {
 
         // Frameworks: Swing window, input, loop
         KeyboardInput keyboard = new KeyboardInput();
-        GamePanel panel = new GamePanel(viewModel, SCREEN_WIDTH, SCREEN_HEIGHT);
+        GamePanel panel = new GamePanel(viewModel, SCREEN_WIDTH, SCREEN_HEIGHT, mapLayer);
         panel.addKeyListener(keyboard);
 
         GameWindow window = new GameWindow(panel);
