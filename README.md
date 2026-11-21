@@ -148,7 +148,7 @@ ii. The teams score remains unchanged
 | Caleb Gawthroupe | Start a New Game |
 | Kevin Liu | Use Case |
 | Jacob Chislett | Display a new question |
-| Eric Wu | Use Case |
+| Eric Wu | Add and store questions |
 ---
 ## Entities
 ### Entity 1: Answer
