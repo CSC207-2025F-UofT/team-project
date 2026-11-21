@@ -7,6 +7,7 @@ import interface_adapters.cancel_timer.CancelTimerController;
 import interface_adapters.cancel_timer.CancelTimerPresenter;
 import interface_adapters.flashcard_studying.FlashcardStudyingViewModel;
 import interface_adapters.home.HomeViewModel;
+import interface_adapters.menu_bar.NavigationBarViewModel;
 import interface_adapters.menu_bar.SwitchViewController;
 import interface_adapters.menu_bar.SwitchViewPresenter;
 import interface_adapters.open_settings.OpenSettingsController;
@@ -54,8 +55,12 @@ public class AppBuilder {
     private HomeView homeView;
     private HomeViewModel homeViewModel;
 
+    private NavigationBarViewModel navigationBarViewModel;
+    private NavigationBarPanel navigationBarPanel;
+
     private FlashcardStudyingView flashcardStudyingView;
     private FlashcardStudyingViewModel flashcardStudyingViewModel;
+
 
     public AppBuilder() {
         cardPanel.setLayout(cardLayout);
@@ -84,10 +89,20 @@ public class AppBuilder {
         return this;
     }
 
+    /**
+     * Adds the Flashcard Studying View to the application.
+     * @return this builder
+     */
     public AppBuilder addFSView() {
         flashcardStudyingViewModel = new FlashcardStudyingViewModel();
         flashcardStudyingView = new FlashcardStudyingView(flashcardStudyingViewModel);
         cardPanel.add(flashcardStudyingView, ViewNames.STUDY_FLASHCARDS);
+        return this;
+    }
+
+    public AppBuilder addNavigationBar() {
+        navigationBarViewModel = new NavigationBarViewModel();
+        navigationBarPanel = new NavigationBarPanel(navigationBarViewModel);
         return this;
     }
 
@@ -119,11 +134,11 @@ public class AppBuilder {
     }
 
     /**
-     * Adds the Start Timer Settings Use Case to the application.
+     * Adds the Start Timer Use Case to the application.
      * @return this builder
      */
     public AppBuilder addStartTimerUseCase() {
-        final StartTimerOutputBoundary startTimerPresenter = new StartTimerPresenter(homeViewModel);
+        final StartTimerOutputBoundary startTimerPresenter = new StartTimerPresenter(homeViewModel, navigationBarViewModel);
         final StartTimerInputBoundary startTimerInteractor = new StartTimerInteractor(startTimerPresenter, timerDataAccess);
 
         StartTimerController startTimerController = new StartTimerController(startTimerInteractor);
@@ -131,8 +146,12 @@ public class AppBuilder {
         return this;
     }
 
+    /**
+     * Adds the Cancel Timer Use Case to the application.
+     * @return this builder
+     */
     public AppBuilder addCancelTimerUseCase() {
-        final CancelTimerOutputBoundary cancelTimerPresenter = new CancelTimerPresenter(homeViewModel);
+        final CancelTimerOutputBoundary cancelTimerPresenter = new CancelTimerPresenter(homeViewModel, navigationBarViewModel);
         final CancelTimerInputBoundary cancelTimerInteractor = new CancelTimerInteractor(cancelTimerPresenter, timerDataAccess);
 
         CancelTimerController cancelTimerController = new CancelTimerController(cancelTimerInteractor);
@@ -140,12 +159,16 @@ public class AppBuilder {
         return this;
     }
 
+    /**
+     * Adds the Switch View Use Case (for the menu bar) to the application.
+     * @return this builder
+     */
     public AppBuilder addSwitchViewUseCase() {
-        final SwitchViewOutputBoundary switchViewPresenter = new SwitchViewPresenter(viewManagerModel);
+        final SwitchViewOutputBoundary switchViewPresenter = new SwitchViewPresenter(navigationBarViewModel, viewManagerModel);
         final SwitchViewInputBoundary switchViewInteractor = new SwitchViewInteractor(switchViewPresenter);
 
         SwitchViewController switchViewController = new SwitchViewController(switchViewInteractor);
-        homeView.setSwitchViewController(switchViewController);
+        navigationBarPanel.setSwitchViewController(switchViewController);
         return this;
     }
 
@@ -158,7 +181,12 @@ public class AppBuilder {
         application.setSize(new Dimension(800, 600));
         application.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
-        application.add(cardPanel);
+        application.setLayout(new BorderLayout());
+        application.add(navigationBarPanel, BorderLayout.NORTH);
+        application.add(cardPanel, BorderLayout.CENTER);
+
+        navigationBarViewModel.getState().setCurrentViewName(ViewNames.HOME);
+        navigationBarViewModel.notifyStateChanged();
 
         viewManagerModel.setState(ViewNames.HOME);
         viewManagerModel.notifyViewChanged();

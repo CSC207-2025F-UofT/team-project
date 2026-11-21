@@ -4,6 +4,9 @@ import view.FontManager;
 
 import javax.swing.*;
 
+/**
+ * The Main class that builds the application.
+ */
 public class Main {
     public static void main(String[] args) {
         FontManager.loadFonts();
@@ -13,6 +16,7 @@ public class Main {
                 .addTimerSettingsView()
                 .addHomeView()
                 .addFSView()
+                .addNavigationBar()
                 .addUpdateTimerSettingsUseCase()
                 .addOpenSettingsUseCase()
                 .addStartTimerUseCase()

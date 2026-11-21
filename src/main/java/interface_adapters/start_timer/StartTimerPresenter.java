@@ -2,6 +2,7 @@ package interface_adapters.start_timer;
 
 import interface_adapters.home.HomeState;
 import interface_adapters.home.HomeViewModel;
+import interface_adapters.menu_bar.NavigationBarViewModel;
 import use_case.start_timer.StartTimerOutputBoundary;
 import use_case.start_timer.StartTimerOutputData;
 
@@ -10,9 +11,12 @@ import use_case.start_timer.StartTimerOutputData;
  */
 public class StartTimerPresenter implements StartTimerOutputBoundary {
     private final HomeViewModel homeViewModel;
+    private final NavigationBarViewModel navigationBarViewModel;
 
-    public StartTimerPresenter(HomeViewModel homeViewModel) {
+    public StartTimerPresenter(HomeViewModel homeViewModel,
+                               NavigationBarViewModel navigationBarViewModel) {
         this.homeViewModel = homeViewModel;
+        this.navigationBarViewModel = navigationBarViewModel;
     }
 
     /**
@@ -31,6 +35,10 @@ public class StartTimerPresenter implements StartTimerOutputBoundary {
 
         homeViewModel.setState(state);
         homeViewModel.notifyStateChanged();
+
+        // Notifies the Navigation Bar View Model that the timer is currently running.
+        navigationBarViewModel.getState().setTimerRunning(true);
+        navigationBarViewModel.notifyStateChanged();
     }
 
     /**
