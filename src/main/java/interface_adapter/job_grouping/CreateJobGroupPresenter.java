@@ -27,7 +27,7 @@ public class CreateJobGroupPresenter implements CreateJobGroupOutputBoundary {
         state.setSuccess(true);
 
         viewModel.setState(state);
-        viewModel.firePropertyChanged();
+        viewModel.notifyStateChanged();
     }
 
     @Override
@@ -38,6 +38,6 @@ public class CreateJobGroupPresenter implements CreateJobGroupOutputBoundary {
         state.setSuccess(false);
 
         viewModel.setState(state);
-        viewModel.firePropertyChanged();
+        viewModel.notifyStateChanged();
     }
 }
