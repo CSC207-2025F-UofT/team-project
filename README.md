@@ -113,23 +113,31 @@ Outcome: The project's layer order and visibility are updated.
 ### Use Case 5: Undo & Redo
 Primary Actor: User
 
-Preconditions: User has created or opened a Canvas and at least one editable action has been performed.
+Preconditions: User has an open project. At least one action is
+available in the undo history to undo, or in the redo history to redo.
 
-Trigger: The user clicks the undo or redo button.
+Trigger: User clicks the Undo or Redo button.
 
-Main Success Scenarios:
-1. User clicks the undo button.
-2. System reverses the most recent action.
-3. System updates the Canvas to reflect the previous state. 
-4. User selects the redo button if they want to restore the undone action.
-5. System reapplies the action.
-6. System updates the Canvas accordingly. 
+Main Success Scenario:
+1. User clicks the Undo button.
+2. System reverses the most recent reversible editing action.
+3. System updates the canvas and makes the undone action available for redo.
+4. User clicks the Redo button to restore the undone action.
+5. System reapplies the most recently undone action.
+6. System updates the canvas and makes the action available for undo again.
+7. System marks the project as having unsaved changes.
 
 Alternative Flows:
-- 1a. User selects undo when no previous actions are available. System disables the undo function.
-- 2a. User performs a new action after undoing. System clears the redo history.
-- 4a. User selects redo when no actions are available to redo. System disables the redo function.
+- 1a. No actions are available to undo. System disables the Undo button.
+- 1b. User clicks Redo directly when redo history is available.
+  The flow continues at step 5.
+- 4a. No actions are available to redo. System disables the Redo button.
+- 4b. User performs a new editing action after undoing.
+  System clears the redo history and records the new action in the undo history.
+- 4c. User continues editing without redoing. The undone change remains reversed.
 
+Outcome: The canvas reflects the undone or redone action, and the
+editing history is updated.
 Outcome: The canvas reflects the user's desired editing state.
 
 ### Use Case 6: Import Image
@@ -301,17 +309,54 @@ Alternative Flows:
 Outcome:
 
 ### Use Case 15: Sign up / Login / Logout
-Primary Actor: User
+Primary Actor: Guest / Registered User
 
 Preconditions:
+- Sign up: The guest is not logged in.
+- Login: The user is not logged in and has an existing account.
+- Logout: The user is currently logged in.
 
-Trigger:
+Trigger: The guest or user clicks Sign Up, Login, or Logout.
 
 Main Success Scenario:
 
-Alternative Flows:
+Sign Up:
+1. Guest clicks the Sign Up button.
+2. System displays a registration form.
+3. Guest enters a display name, email, password, and password confirmation.
+4. System validates the input and checks that the email is not already registered.
+5. System creates a user account with a unique user ID and securely
+   stores the password hash.
+6. System confirms successful registration and displays the login form.
 
-Outcome:
+Login:
+1. User clicks the Login button.
+2. System displays the login form.
+3. User enters their email and password.
+4. System verifies the credentials.
+5. System establishes the user's logged-in session.
+6. System displays the home page with the user's project list.
+
+Logout:
+1. User clicks the Logout button.
+2. System asks the user to confirm logout.
+3. User confirms.
+4. System ends the user's session and returns to the login page.
+
+Alternative Flows:
+- Sign Up 4a. A required field is blank, the email format is invalid,
+  or the passwords do not match. System displays an error and allows correction.
+- Sign Up 4b. The email is already registered. System asks the guest
+  to use another email or log in.
+- Login 4a. The credentials are incorrect. System displays an error
+  and allows the user to retry.
+- Logout 2a. The open project has unsaved changes. System offers
+  Save and Log Out, Discard and Log Out, or Cancel.
+  If saving fails, the user remains logged in and can retry or cancel.
+- Logout 3a. User cancels logout. System keeps the current session active.
+
+Outcome: A new account is created, an existing user is logged in,
+or the current session is ended, depending on the selected action.
 
 ---
 ## Minimal Viable Product (MVP)
