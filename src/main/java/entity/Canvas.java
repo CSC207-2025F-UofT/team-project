@@ -15,7 +15,7 @@ public class Canvas {
         if (width <= 0 || height <= 0) {
             throw new IllegalArgumentException("Canvas dimensions must be positive");
         }
-        if (backgroundColor == null || backgroundColor.isEmpty()){
+        if (backgroundColor == null || backgroundColor.isEmpty() || !backgroundColor.matches("#[0-9A-Fa-f]{6}")){
             throw new IllegalArgumentException("Canvas background color must be valid.");
         }
         this.width = width;
@@ -59,8 +59,8 @@ public class Canvas {
     }
 
     public void changeBackgroundColor(String backgroundColor){
-        if (backgroundColor == null || backgroundColor.isEmpty()){
-            throw new IllegalArgumentException("Canvas background color must be valid.");
+        if (backgroundColor == null || backgroundColor.isEmpty() || !backgroundColor.matches("#[0-9A-Fa-f]{6}")){
+            throw new IllegalArgumentException("Canvas background color must be a valid hex code.");
         }
         this.backgroundColor = backgroundColor;
     }
