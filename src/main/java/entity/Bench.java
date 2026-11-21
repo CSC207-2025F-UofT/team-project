@@ -6,7 +6,7 @@ import java.util.List;
 /**
  * The items currently on the student's bench.
  */
-public class Bench implements IBench {
+public class Bench implements BenchInterface {
 
   private final List<LabItem> items = new ArrayList<>();
 

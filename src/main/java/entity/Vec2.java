@@ -19,11 +19,11 @@ public final class Vec2 {
     this.vertical = y;
   }
 
-  public double x() {
+  public double getX() {
     return horizontal;
   }
 
-  public double y() {
+  public double getY() {
     return vertical;
   }
 

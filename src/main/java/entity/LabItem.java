@@ -49,7 +49,7 @@ public abstract class LabItem {
    * @return true if the two are within {@link #NEAR_DISTANCE} of each other
    */
   public boolean isNear(LabItem other) {
-    return Math.hypot(position.x() - other.position.x(),
-        position.y() - other.position.y()) <= NEAR_DISTANCE;
+    return Math.hypot(position.getX() - other.position.getX(),
+        position.getY() - other.position.getY()) <= NEAR_DISTANCE;
   }
 }

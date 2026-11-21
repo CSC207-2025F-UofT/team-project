@@ -5,7 +5,7 @@ import java.util.List;
 /**
  * The table where the student's equipment sits.
  */
-public interface IBench {
+public interface BenchInterface {
 
   /**
    * Puts an item on the bench.
