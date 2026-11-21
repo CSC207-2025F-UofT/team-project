@@ -8,6 +8,7 @@ public class CreateJobGroupState {
     private String groupName = "";
     private String errorMessage;
     private boolean success;
+    private String username = "";
 
     public String getGroupName() {
         return groupName;
@@ -32,4 +33,13 @@ public class CreateJobGroupState {
     public void setSuccess(boolean success) {
         this.success = success;
     }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
 }
