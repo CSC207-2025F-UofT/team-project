@@ -50,7 +50,10 @@ One enemy appears, walks toward the player using an animated sprite, and stops w
 
 **Pathfinding**
 
-The world is currently an empty 960 × 640 px box with no walls. With nothing in the way, moving in a straight line toward the player is the shortest path. Step one is that straight-line chase. Real pathfinding, such as A\* over the 30 × 20 grid of 32 px tiles in Seran's `TileMap`, only matters once tiles block movement. If water blocks movement this milestone, the enemy needs it to get around lakes. That is an open question.
+The enemy starts with straight-line chase. Seran has confirmed that enemies should respect
+water, so the enemy feature will need to use the terrain's walkability and navigate around
+water, for example with A\* over the map grid. The map provides that information; enemy
+movement and pathfinding remain Aayaan's work.
 
 **Sprites**
 
@@ -121,7 +124,7 @@ Mouse events arrive on Swing's thread, but the game loop runs on its own thread.
 
 The world becomes a grid of 32 px tiles read from a text file where each number is one tile type: 0 = water, 1 = dirt. The 960 × 640 window holds exactly 30 × 20 tiles, so a screen-sized map is a file of 20 lines with 30 numbers each. The map loads once at startup. It is not part of the per-tick path.
 
-**Map file format (proposed)**
+**Map file format**
 
 - One file per map in `src/main/resources/maps/`, for example `level1.txt`.
 - One line per row of tiles, with numbers separated by spaces. Spaces leave room for tile ids above 9 later.
@@ -164,7 +167,7 @@ When map loading is wired into the application, `Main` will construct the regist
 | `use_case/load_map` | `LoadMapInputBoundary.execute` accepts immutable `LoadMapInputData` and returns `void`. `LoadMapInteractor` calls `MapDataAccessInterface.load(mapName)`, converts the map to immutable `LoadMapOutputData` (tile IDs and tile size), and calls `LoadMapOutputBoundary` for success or failure |
 | `data_access` | `FileMapDataAccessObject` implements `MapDataAccessInterface`. It reads a UTF-8 classpath resource under `maps/` and parses it into a `TileMap` using the supplied terrain registry and tile size |
 | `interface_adapter/map` | `MapController` builds the request. `MapPresenter` updates immutable `MapState` in `MapViewModel` and fires a property-change notification. State contains IDs, dimensions and error text; it has no entity or image references |
-| `view` | `TileSprites` maps terrain IDs supplied by the view model to images. `GamePanel` draws the map before the player and enemy |
+| `view` | `TileSprites` implements `TileImageSource` and loads an injected ID-to-image mapping. `MapRenderer` caches the complete map image from `MapState`. Connecting this image to `GamePanel` is the next checkpoint |
 | `app` | `Main` creates the terrain registry and file data-access object and runs the map load before starting the loop |
 
 **Parsing rules**
@@ -194,26 +197,61 @@ error message; a successful retry replaces the map and clears the error. Tests c
 paths with in-memory data access and a recording output boundary, plus presenter state and
 notifications. No Swing or real files are needed to test the interactor.
 
-Checkpoint 4 completes this use-case and adapter flow. Production resources, cached drawing
-and startup wiring in `app` remain checkpoints 5–7. The existing game tick and movement code
+Checkpoint 4 completes this use-case and adapter flow. The original resource and rendering
+steps (5 and 6) are now one completed checkpoint, step 5. Step 6 connects startup and the game panel;
+step 7 performs final verification and documentation. The existing game tick and movement code
 are unchanged. When the view is connected, property-change callbacks that update Swing must
 run on its event thread; `MapViewModel` does not import Swing to perform that scheduling.
 
 **Drawing**
 
-The map doesn't change between ticks, so don't copy it into `GameState` every tick. When the map loads, draw all its tiles once into a single 960 × 640 `BufferedImage`. Then `GamePanel` draws that one image each frame, which takes 1 draw call instead of 600.
+The map doesn't change between ticks, so don't copy it into `GameState` every tick.
+The combined step 5 supplies `maps/level1.txt` and two 32 × 32 PNG resources under `tiles/`:
+solid green `dirt.png` and solid blue `water.png`. The map has an open dirt centre and two
+water areas, with dirt around the edges.
 
-**Walkable tiles (proposed second step)**
+`TileSprites` in `view` loads an injected ID-to-resource-path mapping once and checks that
+every image has the expected tile dimensions. It reports missing, unreadable or incorrectly
+sized images with their resource paths. It implements `TileImageSource`, a view-only image
+lookup interface (not a use-case boundary). `MapRenderer` receives that interface through
+its constructor and renders `MapState` into one cached `BufferedImage`, using the state's
+pixel dimensions. Neither helper imports entities or use cases, and neither decides terrain
+walkability. Adding an image mapping does not require a type switch in the renderer.
 
-Once the map draws, stop the player from walking onto water. In `UpdateGameInteractor`, check the player's next position against `TileMap.isWalkable` at the four corners of its hitbox. If a corner lands on water, cancel the move on that axis. Checking x and y separately lets the player slide along a shoreline instead of sticking to it.
+On the main path, the renderer reads IDs from the state and looks up each image. Repeated
+renders reuse the cache until the tile IDs or tile size change. Empty state has no image;
+loading errors remain available as display text. An unsupported image ID produces a rendering
+error and preserves the last complete image, never a partially drawn replacement. Image
+resource errors and renderer errors must be displayed when startup and the panel are wired
+in step 6. Only `app` chooses the concrete resource mappings and connects the helpers.
+
+The shipped map produces a 960 × 640 image. A smaller map keeps its own pixel dimensions;
+the renderer does not stretch it to the window. The future `GamePanel` draws this image once
+per frame behind the player. All image work stays in `view`.
+
+Tests verify the real arena's dimensions and terrain, the exact solid colours and sizes of
+the PNGs, rendering positions, cache reuse and replacement, and image-resource/rendering
+failures. A production integration test connects the real resource loader through the use-case
+and presentation flow to the renderer, without a window. It checks that a failed subsequent
+map load keeps the same rendered image and that a successful retry clears the error.
+
+**Confirmed collision and artwork scope**
+
+- Player-water collision is deferred; this map checkpoint does not change player movement.
+- Enemies should respect water. `TileMap.isWalkable` supplies the terrain rule, and the enemy
+  feature must consume it through an appropriate inner-layer dependency, not through the view.
+- Fireballs cross water; terrain walkability must not be used to block their flight.
+- Dirt is a solid green square and water is a solid blue square. Detailed artwork and camera
+  behaviour are deferred.
 
 **Done when**
 
 - [ ] `level1.txt` (30 × 20) loads, and dirt and water sprites draw behind the player
 - [ ] Editing a number in the file changes the map on the next run, with no code change
 - [ ] A bad file (uneven rows or an unknown number) stops with a clear error that names the line
-- [ ] Unit tests parse a small map string into a `TileMap` and check `tileAtPixel` and `isWalkable`
-- [ ] Second step: the player cannot walk onto water and slides along the shore
+- [x] Unit tests parse a small map string into a `TileMap` and check `tileAtPixel` and `isWalkable`
+- [x] The production arena and both placeholder PNGs load and render correctly without a window
+- [x] Cached rendering reuses unchanged terrain and preserves the last complete image on failure
 
 **Ideas for later**
 
@@ -265,7 +303,7 @@ Settle these with Aayaan, Omer and Seran before coding starts, then tick each on
 
 **For Aayaan**
 
-- [ ] Does water block the enemy this milestone? If yes, it needs grid pathfinding (A\*) over Seran's `TileMap`. If no, a straight-line chase is enough.
+- [x] Terrain decision: enemies should respect water. Integrating movement/pathfinding remains part of the enemy feature.
 - [ ] Where does the sprite art come from (made ourselves or a free asset pack), and what size are the frames?
 - [ ] Is 2 px per tick the right enemy speed, and should it stop on touching or a few pixels before?
 
@@ -278,11 +316,11 @@ Settle these with Aayaan, Omer and Seran before coding starts, then tick each on
 
 **For Seran**
 
-- [ ] 32 px tiles, or 48 px to match the player? 640 px is not a whole number of 48 px rows (13.3).
-- [ ] Does water block the player this milestone, or is the map only drawn for now?
-- [ ] Do fireballs fly over water?
-- [ ] Where does the tile art come from, and is each tile one 32 × 32 px image?
-- [ ] Space-separated numbers, or one digit per tile with no spaces (shorter, but only 10 tile types)?
+- [x] Use 32 × 32 px tiles.
+- [x] Player collision is deferred; the map is only drawn for now.
+- [x] Fireballs fly over water.
+- [x] Use one solid-colour 32 × 32 PNG per terrain type: green dirt and blue water. Artwork comes later.
+- [x] Use whitespace-separated numbers so IDs can contain more than one digit.
 
 **For both**
 

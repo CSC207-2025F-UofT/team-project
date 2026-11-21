@@ -175,12 +175,15 @@ Extensions:
 - 2b. The arena is unavailable or cannot be read: the player sees a loading error. No new arena is shown.
 - 2c. The arena is empty or contains invalid terrain: the player sees an error explaining the problem,
   including its location when available. No partial arena is shown.
+- 3a. The arena cannot be displayed: the player sees an explanation, and any previous complete
+  arena stays visible. A partially drawn replacement is not shown.
 
 On any failure, an already displayed arena remains unchanged. A later successful attempt replaces
 it and clears the error.
 
-Implementation status: the loading and presentation flow is implemented and tested through its
-view model. Displaying the arena and connecting this flow to game startup are later checkpoints.
+Implementation status: the loading flow, production map, placeholder tile images and cached
+renderer are implemented and tested together without opening a window. Connecting the renderer
+to the game panel and displaying errors at startup are the next checkpoint.
 Enemy spawning, player collision and camera behaviour are outside this map MVP.
 
 
@@ -325,41 +328,72 @@ Move the white box with WASD or the arrow keys.
 
 Run unit tests with `mvn test` (or the Maven `test` lifecycle in IntelliJ).
 
-### Architecture (core loop and map loading)
+
+### Architecture (core loop)
 
 - `entity/Player`: position, size and speed (no Swing).
+- `use_case/update_game`: one tick of game rules (`UpdateGameInteractor`) with input/output boundaries.
+- `interface_adapter/game`: `GameController` (key state -> request), `GamePresenter` + `GameViewModel` (result -> what to draw).
+- `view`: `GameWindow` (JFrame), `GamePanel` (draws), `KeyboardInput` (records held keys).
+- `app`: `GameLoop` (60 ticks/s thread: input -> player update -> mob-wave update -> repaint) and `Main` (builds and wires everything).
+
+### Architecture (Load Map, Seran)
+
+Loads the terrain once at startup and prepares a cached map image, separately from the per-tick use cases.
+The loading and rendering components are implemented; startup and game-panel integration are the next checkpoint.
+
 - `entity/TileType`: interface for immutable terrain types. `WaterTileType` has ID 0 and blocks walking; `DirtTileType` has ID 1 and permits walking.
 - `entity/TileTypeRegistry`: resolves IDs through registered terrain objects and rejects duplicate or unknown IDs.
 - `entity/TileMap`: an immutable grid of terrain objects, pixel-coordinate lookup and walkability (no Swing or file access).
 - `use_case/load_map`: `LoadMapInputBoundary` and immutable `LoadMapInputData` accept a map name. `LoadMapInteractor` loads through `MapDataAccessInterface`, then sends an immutable `LoadMapOutputData` snapshot of tile IDs and tile size through `LoadMapOutputBoundary`. Invalid names and `MapLoadingException` failures go through the fail output; the input boundary returns `void`.
 - `data_access/FileMapDataAccessObject`: loads UTF-8 resources from `maps/`, resolves IDs through the supplied terrain registry, and validates the tile grid.
-- `use_case/update_game`: one tick of game rules (`UpdateGameInteractor`) with input/output boundaries.
-- `interface_adapter/game`: `GameController` (key state -> request), `GamePresenter` + `GameViewModel` (result -> what to draw).
 - `interface_adapter/map`: `MapController` wraps the map name; `MapPresenter` converts success or failure into immutable `MapState`. `MapViewModel` stores that state and fires a `state` property-change notification. The map state contains IDs, dimensions and error text, with no entities, images or file APIs. A failed load preserves the previous map; success clears the error.
-- `view`: `GameWindow` (JFrame), `GamePanel` (draws), `KeyboardInput` (records held keys).
-- `app`: `GameLoop` (60 ticks/s thread: input -> update -> repaint) and `Main` (builds and wires everything).
+- `view/TileImageSource`: the view-only contract for looking up already loaded images by terrain ID. This is a rendering helper interface, not a use-case boundary.
+- `view/TileSprites`: loads an injected mapping of IDs to classpath image resources once and checks their dimensions. Missing, unreadable or incorrectly sized images produce an `IOException` with the resource path for startup to handle.
+- `view/MapRenderer`: depends on `TileImageSource` and reads only `MapState`. It builds a cached image at the map's pixel dimensions, rebuilds when the grid or tile size changes, and preserves the last complete image if rendering fails. Loading/rendering error text is available through `getErrorMessage()`.
+- `app` (next checkpoint): `Main` will connect the terrain registry, file reader, map use case, presenter and renderer, then request the initial map through `MapController`.
 
-The map flow is separate from per-tick player updates. Its controller, interactor and presenter
-are currently connected in tests using in-memory data access. Production wiring in `Main`,
-map resources and rendering remain later checkpoints. Property-change listeners run on the
-calling thread; the future Swing view is responsible for updating Swing on its event thread.
+The map flow is separate from per-tick player updates. Interactor tests use in-memory data
+access; an integration test connects the real file reader, controller, interactor, presenter
+and renderer using the shipped resources. Production wiring in `Main` and drawing the cached
+image in `GamePanel` remain the next checkpoint. Property-change listeners run on the calling
+thread; the future Swing view must update Swing and use the renderer on its event thread.
+Cached tile and map images are shared within the view and must be treated as read-only.
 
-### Map resource format
+#### Map resource format
 
 The file reader loads names such as `level1.txt` from `maps/` on the classpath, so it does not
-depend on the current working directory. Production maps will go in `src/main/resources/maps/`;
-small test maps currently live in `src/test/resources/maps/`.
+depend on the current working directory. The production arena is
+`src/main/resources/maps/level1.txt`; small test maps live in `src/test/resources/maps/`.
 
 Each non-comment line is one row of integer tile IDs, separated by whitespace. With the MVP
 terrain registry, `0` is water and `1` is dirt. Blank lines and lines whose first non-whitespace
 character is `#` are skipped. Every tile row must have the same number of columns. The tile size
-is supplied when constructing the reader; the planned game map uses 32-pixel tiles.
+is supplied when constructing the reader; the production arena uses 32-pixel tiles.
 
 Missing, empty, unreadable, or malformed maps produce `MapLoadingException`. Format errors
 identify the map name, original file line, and tile column, counted from one. Columns count
 tile entries, not characters. `LoadMapInteractor` catches loading failures and sends their
 explanation to the presenter, which adds "Unable to load map:" to the view-model error text.
 The game startup and view are not connected to this flow yet.
+
+#### Map resources and rendering
+
+`level1.txt` has 30 columns and 20 rows, producing a 960 × 640 map at a tile size of 32.
+The centre and outer edges are dirt, with two water areas elsewhere. The placeholder sprites
+are `src/main/resources/tiles/dirt.png` (solid green, `#00FF00`) and
+`src/main/resources/tiles/water.png` (solid blue, `#0000FF`), both opaque 32 × 32 PNGs.
+The application will supply the mapping `0 -> /tiles/water.png`, `1 -> /tiles/dirt.png`.
+
+The renderer reads the IDs supplied by the map view model and places each image in its tile
+cell. It uses the map's dimensions rather than fitting the map to the window. Repainting the
+same state reuses the cached image; error-only changes also reuse it. The helpers do not know
+about player movement, enemy behaviour, fireballs or a camera.
+
+To edit the map, change the numbers in `level1.txt` and rebuild resources before the next run
+(for example, with `mvn compile`). Player collision and detailed tile artwork are deferred.
+The terrain data marks water as non-walkable for the enemy feature to use; integrating enemy
+movement is separate work. Fireballs should cross water.
 
 ---
 
