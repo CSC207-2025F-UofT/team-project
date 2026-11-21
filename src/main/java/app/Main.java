@@ -1,20 +1,30 @@
 package app;
 
-import interface_adapters.flashcard_generator.FlashcardGeneratorController;
-import interface_adapters.home.HomeViewModel;
-import view.FlashcardGeneratorView;
 import view.FontManager;
-import view.TimerDisplayPanel;
 
 import javax.swing.*;
 
+/**
+ * The Main class that builds the application.
+ */
 public class Main {
     public static void main(String[] args) {
-        JFrame frame = new JFrame("Study Application");
+        FontManager.loadFonts();
 
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setSize(800, 600);
+        AppBuilder appBuilder = new AppBuilder();
+        JFrame application = appBuilder
+                .addTimerSettingsView()
+                .addHomeView()
+                .addFSView()
+                .addNavigationBar()
+                .addUpdateTimerSettingsUseCase()
+                .addOpenSettingsUseCase()
+                .addStartTimerUseCase()
+                .addCancelTimerUseCase()
+                .addSwitchViewUseCase()
+                .build();
 
-        frame.setVisible(true);
+        application.setLocationRelativeTo(null);
+        application.setVisible(true);
     }
 }

@@ -10,8 +10,6 @@ public class HomeViewModel {
     private HomeState state = new HomeState();
     private List<HomeViewModelListener> listeners = new ArrayList<>();
 
-    public static final String VIEW_NAME = "home";
-
     /**
      * Returns the current state of the home screen.
      * @return the current HomeState object

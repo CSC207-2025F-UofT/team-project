@@ -2,6 +2,7 @@ package interface_adapters.cancel_timer;
 
 import interface_adapters.home.HomeState;
 import interface_adapters.home.HomeViewModel;
+import interface_adapters.menu_bar.NavigationBarViewModel;
 import use_case.cancel_timer.CancelTimerOutputBoundary;
 
 /**
@@ -10,9 +11,12 @@ import use_case.cancel_timer.CancelTimerOutputBoundary;
 public class CancelTimerPresenter implements CancelTimerOutputBoundary {
 
     private final HomeViewModel homeViewModel;
+    private final NavigationBarViewModel navigationBarViewModel;
 
-    public CancelTimerPresenter(HomeViewModel homeViewModel) {
+    public CancelTimerPresenter(HomeViewModel homeViewModel,
+                                NavigationBarViewModel navigationBarViewModel) {
         this.homeViewModel = homeViewModel;
+        this.navigationBarViewModel = navigationBarViewModel;
     }
 
     /**
@@ -26,5 +30,9 @@ public class CancelTimerPresenter implements CancelTimerOutputBoundary {
 
         homeViewModel.setState(state);
         homeViewModel.notifyStateChanged();
+
+        // Notifies the Navigation Bar View Model that the timer has been cancelled.
+        navigationBarViewModel.getState().setTimerRunning(false);
+        navigationBarViewModel.notifyStateChanged();
     }
 }
