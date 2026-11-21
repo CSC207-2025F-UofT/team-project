@@ -1,4 +1,4 @@
-package entities;
+package entities.Game;
 
 public enum GameCondition {
     WON,
