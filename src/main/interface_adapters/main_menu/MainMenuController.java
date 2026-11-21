@@ -14,4 +14,8 @@ public class MainMenuController {
     public void switchToGameView() {
         mainMenuPresenter.switchToGameView();
     }
+
+    public void switchToSettingsView() {
+        mainMenuPresenter.switchToSettingsView();
+    }
 }

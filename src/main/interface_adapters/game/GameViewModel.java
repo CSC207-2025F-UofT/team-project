@@ -1,4 +1,4 @@
-package main.interface_adapters;
+package main.interface_adapters.game;
 
 public class GameViewModel {
 

@@ -1,12 +1,11 @@
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ComponentAdapter;
-import java.awt.event.ComponentEvent;
 
-import main.interface_adapters.GameViewModel;
+import main.interface_adapters.game.GameViewModel;
 import main.interface_adapters.ViewManagerModel;
 import main.interface_adapters.main_menu.*;
+import main.interface_adapters.settings.SettingsViewModel;
 import main.view.*;
 import main.view.ViewManager;
 
@@ -24,6 +23,9 @@ public class PokerBuilder {
     private GameView gameView;
     private GameViewModel gameViewModel;
 
+    private SettingsView settingsView;
+    private SettingsViewModel settingsViewModel;
+
 
     public PokerBuilder() {cardPanel.setLayout(cardLayout);}
 
@@ -32,7 +34,8 @@ public class PokerBuilder {
         this.mainMenuViewModel = new MainMenuViewModel();
         this.mainMenuView = new MainMenuView(mainMenuViewModel);
 
-        MainMenuPresenter mainMenuPresenter = new MainMenuPresenter(viewManagerModel,gameViewModel);
+        MainMenuPresenter mainMenuPresenter = new MainMenuPresenter(
+                viewManagerModel, gameViewModel, settingsViewModel);
         MainMenuController mainMenuController = new MainMenuController(mainMenuPresenter);
         mainMenuView.setMainMenuController(mainMenuController);
 
@@ -48,13 +51,24 @@ public class PokerBuilder {
         return this;
     }
 
+    public PokerBuilder addSettingsView() {
+        this.settingsViewModel = new SettingsViewModel();
+        this.settingsView = new SettingsView(settingsViewModel);
+
+        cardPanel.add(settingsView, SettingsViewModel.VIEW_NAME);
+        return this;
+    }
+
     public JFrame build() {
+        //Creates frame
         final JFrame application = new JFrame("Poker");
         application.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         application.setExtendedState(JFrame.MAXIMIZED_BOTH);
 
+        //Tells JSwing to display the main menu
         viewManagerModel.setActiveView(MainMenuViewModel.VIEW_NAME);
         viewManagerModel.notifyViewChanged();
+
         application.add(cardPanel);
 
 

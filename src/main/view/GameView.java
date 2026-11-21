@@ -1,8 +1,9 @@
 package main.view;
 
-import main.interface_adapters.GameViewModel;
+import main.interface_adapters.game.GameViewModel;
 
 import javax.swing.*;
+import java.awt.*;
 
 public class GameView extends JPanel {
 
@@ -13,7 +14,8 @@ public class GameView extends JPanel {
 
         final JLabel title = new JLabel("Yo check this out im playing poker frfr");
 
-        this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+        this.setLayout(null);
+        this.setBackground(Color.CYAN);
         this.add(title);
     }
 

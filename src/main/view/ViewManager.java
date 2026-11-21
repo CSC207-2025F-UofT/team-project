@@ -19,7 +19,9 @@ public class ViewManager implements ViewManagerModelListener {
         this.viewManagerModel.addListener(this);
     }
     @Override
+
     public void viewChanged() {
+        //this is the line of code that actually changes the view
         cardLayout.show(views, viewManagerModel.getActiveView());
     }
 }

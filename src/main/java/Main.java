@@ -8,6 +8,7 @@ public class Main {
         JFrame application = pokerBuilder
                 .addMainMenuView()
                 .addGameView()
+                .addSettingsView()
                 .build();
         
         application.setLocationRelativeTo(null);
