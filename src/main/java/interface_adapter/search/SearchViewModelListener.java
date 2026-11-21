@@ -1,9 +1,9 @@
-package interface_adaptor.search;
+package interface_adapter.search;
 
 public interface SearchViewModelListener {
 
     /**
-     * The signup state was updated.
+     * The search state was updated.
      */
     void stateChanged();
 

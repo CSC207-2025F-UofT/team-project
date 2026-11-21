@@ -1,9 +1,12 @@
-package interface_adaptor.search;
+package interface_adapter.search;
 
-import interface_adaptor.ViewManagerModel;
-import use_case.search.SearchOutputData;
+import interface_adapter.ViewManagerModel;
+import use_case.search.SearchOutputBoundary;
 
-public class SearchPresenter {
+/**
+ * The Presenter for the Search Use Case.
+ */
+public class SearchPresenter implements SearchOutputBoundary {
     private final SearchViewModel searchViewModel;
     private final ViewManagerModel viewManagerModel;
 
@@ -13,15 +16,17 @@ public class SearchPresenter {
         this.searchViewModel = searchViewModel;
     }
 
-    public void prepareSuccessView(SearchOutputData response) {
+    @Override
+    public void prepareSuccessView(String response) {
         final SearchState searchState = searchViewModel.getState();
-        searchState.setResult(response.getResult());
+        searchState.setResult(response);
         searchViewModel.notifyStateChanged();
 
         viewManagerModel.setState(SearchViewModel.VIEW_NAME);
         viewManagerModel.notifyViewChanged();
     }
 
+    @Override
     public void prepareFailView(String error) {
         final SearchState searchState = searchViewModel.getState();
         searchState.setResultError(error);

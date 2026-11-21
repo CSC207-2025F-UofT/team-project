@@ -7,8 +7,10 @@ import okhttp3.Request;
 import okhttp3.Response;
 
 import java.io.IOException;
-import java.util.List;
 
+/**
+ * DAO for user data implemented using an API.
+ */
 public class ApiSearchDataAccessObject implements SearchDataAccessInterface {
     private final OkHttpClient client = new OkHttpClient();
 
@@ -17,7 +19,12 @@ public class ApiSearchDataAccessObject implements SearchDataAccessInterface {
         dao.search("Harry Potter");
     }
 
-    public List<String> search(String query) {
+    /**
+     * Construct this DAO for searching from the API.
+     * @param query the query that pass into the API
+     * @throws IOException if there is an IOException when accessing the file
+     */
+    public String search(String query) {
         HttpUrl url = HttpUrl.get("https://openlibrary.org/search.json")
                 .newBuilder()
                 .addQueryParameter("q", query)
@@ -27,9 +34,10 @@ public class ApiSearchDataAccessObject implements SearchDataAccessInterface {
                 .url(url)
                 .build();
 
+        String body = "";
         try (Response response = client.newCall(request).execute()) {
             if (response.isSuccessful()) {
-                String body = response.body().string();
+                body = response.body().string();
                 System.out.println(body);
             } else {
                 System.out.println("Request failed with code " + response.code());
@@ -38,6 +46,6 @@ public class ApiSearchDataAccessObject implements SearchDataAccessInterface {
             e.printStackTrace();
         }
 
-        return List.of();
+        return body;
     }
 }

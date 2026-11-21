@@ -2,6 +2,9 @@ package use_case.search;
 
 import java.util.List;
 
+/**
+ * The Search Interactor.
+ */
 public class SearchInteractor implements SearchInputBoundary {
     private final SearchDataAccessInterface searchDataAccessObject;
     private final SearchOutputBoundary presenter;
@@ -12,8 +15,9 @@ public class SearchInteractor implements SearchInputBoundary {
         this.presenter = presenter;
     }
 
+    @Override
     public void execute(SearchInputData inputData) {
-        List<String> results = searchDataAccessObject.search(inputData.getQuery());
+        String results = searchDataAccessObject.search(inputData.getQuery());
         presenter.prepareSuccessView(results);
     }
 }
