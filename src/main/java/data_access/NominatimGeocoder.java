@@ -1,4 +1,4 @@
-package data_access.location;
+package data_access;
 
 import java.io.IOException;
 import java.net.URI;
