@@ -2,6 +2,7 @@ package data_access;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.nio.file.Path;
@@ -61,6 +62,50 @@ class FileApplicationDataAccessObjectTest {
         assertEquals(ApplicationStatus.APPROVED, loaded.get(0).getStatus());
         assertEquals("Welcome home", loaded.get(0).getAdminNote());
         assertEquals(ApplicationStatus.PENDING, loaded.get(1).getStatus());
+    }
+
+    @Test
+    void unsavedChangeIsNotShownAsSaved() {
+        final String path = folder.resolve(FILE_NAME).toString();
+        final FileApplicationDataAccessObject dataAccess = new FileApplicationDataAccessObject(path);
+        final Application submitted = pendingApplication("unsaved");
+        dataAccess.save(submitted);
+
+        submitted.withdraw();
+        assertEquals(ApplicationStatus.PENDING, dataAccess.getApplicationsByAdopter(ADOPTER).get(0).getStatus());
+
+        dataAccess.getApplicationsByAdopter(ADOPTER).get(0).withdraw();
+        assertEquals(ApplicationStatus.PENDING, dataAccess.getApplicationsByAdopter(ADOPTER).get(0).getStatus());
+    }
+
+    @Test
+    void failedUpdateKeepsTheSavedStatus() {
+        final Path path = folder.resolve(FILE_NAME);
+        final FileApplicationDataAccessObject dataAccess = new FileApplicationDataAccessObject(path.toString());
+        final Application application = pendingApplication("read-only");
+        dataAccess.save(application);
+        application.withdraw();
+
+        assertTrue(path.toFile().setWritable(false));
+        try {
+            assertThrows(RuntimeException.class, () -> dataAccess.save(application));
+        }
+        finally {
+            assertTrue(path.toFile().setWritable(true));
+        }
+
+        assertEquals(ApplicationStatus.PENDING, dataAccess.getApplicationsByAdopter(ADOPTER).get(0).getStatus());
+        assertTrue(dataAccess.hasActiveApplication(ADOPTER, "tama"));
+    }
+
+    @Test
+    void failedFirstSaveStoresNothing() {
+        final String path = folder.resolve("missing-folder").resolve(FILE_NAME).toString();
+        final FileApplicationDataAccessObject dataAccess = new FileApplicationDataAccessObject(path);
+        final Application application = pendingApplication("no-folder");
+
+        assertThrows(RuntimeException.class, () -> dataAccess.save(application));
+        assertTrue(dataAccess.getApplicationsByAdopter(ADOPTER).isEmpty());
     }
 
     private Application pendingApplication(String id) {
