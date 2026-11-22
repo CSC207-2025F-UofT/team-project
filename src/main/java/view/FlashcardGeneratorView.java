@@ -9,11 +9,18 @@ import javax.swing.text.StyleConstants;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+
+import interface_adapters.flashcard_generator.FlashcardGeneratorState;
+import interface_adapters.flashcard_generator.FlashcardGeneratorViewModel;
+import interface_adapters.flashcard_generator.FlashcardGeneratorViewModelListener;
+import interface_adapters.home.HomeViewModel;
 import use_case.flashcard_generator.FlashcardGeneratorInputData.TextPiece;
 
-public class FlashcardGeneratorView extends JPanel implements ActionListener {
+public class FlashcardGeneratorView extends JPanel implements ActionListener, FlashcardGeneratorViewModelListener {
 
-   private FlashcardGeneratorController controller;
+    private final FlashcardGeneratorViewModel flashcardGeneratorViewModel;
+    private FlashcardGeneratorController controller;
+    private final HomeViewModel homeViewModel;
 
    private final JLabel title;
    private final JLabel tutorialTitle;
@@ -28,8 +35,15 @@ public class FlashcardGeneratorView extends JPanel implements ActionListener {
      * Initializes all it's components, and connects the View to the Controller
      *
      */
-    public FlashcardGeneratorView(){
+    public FlashcardGeneratorView(FlashcardGeneratorViewModel flashcardGeneratorViewModel, HomeViewModel homeViewModel){
+        this.homeViewModel = homeViewModel;
+        this.flashcardGeneratorViewModel = flashcardGeneratorViewModel;
         this.setLayout(null);
+
+        TimerDisplayPanel timerPanel = new TimerDisplayPanel(homeViewModel);
+        this.add(timerPanel);
+
+        flashcardGeneratorViewModel.addListener(this); // register view as listener
 
         title = new JLabel("FLASHCARD GENERATOR!!!");
         title.setBounds(0,0,500,35);
@@ -153,5 +167,16 @@ public class FlashcardGeneratorView extends JPanel implements ActionListener {
 
         }
 
+    @Override
+    public void stateChanged() {
+
+        FlashcardGeneratorState state = flashcardGeneratorViewModel.getState();
+
+        if (state.getMessage() != null && !state.getMessage().isEmpty()) {
+
+        JOptionPane.showMessageDialog(this, state.getMessage(), "ERROR", JOptionPane.ERROR_MESSAGE);
+        }
+
     }
+}
 
