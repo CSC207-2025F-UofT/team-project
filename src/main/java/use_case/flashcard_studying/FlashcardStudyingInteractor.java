@@ -21,8 +21,25 @@ public class FlashcardStudyingInteractor implements FlashcardStudyingInputBounda
             try {
                 currentDeck = dao.loadDeck(inputData.getDeckTitle());
             } catch (IllegalStateException e) {
-                presenter.prepareFailView("hi");
+                presenter.prepareFailView("Invalid deck title");
             }
+        } else if (currentDeck == null) {
+            presenter.prepareFailView("You need to input a deck title");
+        }
+        // currentDeck is not null
+        // execute buttonClicks then
+        if (inputData.getButtonClicked() == "flip") {
+            Card currentCard = currentDeck.getCurrentCard();
+            currentCard.flip();
+            if (currentCard.getQuestionFacingUp()) {
+                presenter.prepareSuccessView(new FlashcardStudyingOutputData(currentCard.getQuestion()));
+            } else {
+                presenter.prepareSuccessView(new FlashcardStudyingOutputData(currentCard.getAnswer()));
+            }
+        } else if (inputData.getButtonClicked() == "Still learning") {
+
+        } else if (inputData.getButtonClicked() == "Knew it") {
+
         }
     }
 }
