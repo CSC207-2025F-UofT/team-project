@@ -25,16 +25,16 @@ public class NewPlayerInteractor implements NewPlayerInputBoundary{
             playerPresenter.prepareFailView("Username cannot be empty");
         }
         else {
-            final Player player = playerFactory.create(newPlayerInputData.getUsername(),
+            final Player player = playerFactory.create(newPlayerInputData.getUsername());
             playerDataAccessObject.save(player);
 
-            final SignupOutputData signupOutputData = new SignupOutputData(user.getName());
-            userPresenter.prepareSuccessView(signupOutputData);
+            final NewPlayerOutputData newPlayerOutputData = new NewPlayerOutputData(player.getName());
+            playerPresenter.prepareSuccessView(newPlayerOutputData);
         }
     }
 
     @Override
-    public void switchToLoginView() {
-        userPresenter.switchToLoginView();
+    public void switchToWelcomeView() {
+        playerPresenter.switchToWelcomeView();
     }
 }
