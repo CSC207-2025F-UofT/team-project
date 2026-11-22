@@ -3,7 +3,7 @@ package use_case.track_applications;
 /**
  * The Input Data for the Track Applications Use Case.
  */
-public class TrackApplicationsInputData {
+public final class TrackApplicationsInputData {
 
     private final String adopterId;
 

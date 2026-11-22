@@ -52,7 +52,7 @@ class TrackApplicationsPresenterTest {
     }
 
     @Test
-    void emptyListShowsAMessage() {
+    void emptyListShowsMessage() {
         presenter.prepareSuccessView(new TrackApplicationsOutputData(new ArrayList<>()));
 
         assertTrue(viewModel.getState().getRows().isEmpty());

@@ -89,7 +89,7 @@ class TrackApplicationsInteractorTest {
         assertNull(presenter.success);
     }
 
-    private static class FakeApplicationDataAccess implements TrackApplicationsDataAccessInterface {
+    private static final class FakeApplicationDataAccess implements TrackApplicationsDataAccessInterface {
         private final List<Application> applications = new ArrayList<>();
         private boolean failOnRead;
 
@@ -108,7 +108,7 @@ class TrackApplicationsInteractorTest {
         }
     }
 
-    private static class FakePetDataAccess implements TrackApplicationsPetDataAccessInterface {
+    private static final class FakePetDataAccess implements TrackApplicationsPetDataAccessInterface {
         @Override
         public String getPetName(String petId) {
             if ("mochi".equals(petId)) {
@@ -121,7 +121,7 @@ class TrackApplicationsInteractorTest {
         }
     }
 
-    private static class RecordingPresenter implements TrackApplicationsOutputBoundary {
+    private static final class RecordingPresenter implements TrackApplicationsOutputBoundary {
         private TrackApplicationsOutputData success;
         private String error;
 

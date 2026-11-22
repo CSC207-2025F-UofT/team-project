@@ -6,7 +6,7 @@ import java.util.List;
 /**
  * The View Model for the My Applications View.
  */
-public class TrackApplicationsViewModel {
+public final class TrackApplicationsViewModel {
 
     public static final String VIEW_NAME = "my applications";
 

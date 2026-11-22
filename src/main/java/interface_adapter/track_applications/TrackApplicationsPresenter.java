@@ -42,7 +42,8 @@ public class TrackApplicationsPresenter implements TrackApplicationsOutputBounda
         state.setRows(rows);
         if (rows.isEmpty()) {
             state.setMessage(NO_APPLICATIONS);
-        } else {
+        }
+        else {
             state.setMessage(SELECT_HINT);
         }
         trackApplicationsViewModel.notifyStateChanged();
