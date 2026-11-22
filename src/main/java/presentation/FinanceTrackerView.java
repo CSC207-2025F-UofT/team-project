@@ -212,7 +212,8 @@ public final class FinanceTrackerView extends JFrame {
     private void showMessage() {
         if (!viewModel.getMessage().isEmpty()) {
             JOptionPane.showMessageDialog(this, viewModel.getMessage(),
-                "Finance Tracker", JOptionPane.INFORMATION_MESSAGE);
+                "Finance Tracker", viewModel.isError()
+                    ? JOptionPane.ERROR_MESSAGE : JOptionPane.INFORMATION_MESSAGE);
         }
     }
 
