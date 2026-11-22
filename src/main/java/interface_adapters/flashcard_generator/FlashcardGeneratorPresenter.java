@@ -27,7 +27,6 @@ public class FlashcardGeneratorPresenter implements FlashcardGeneratorOutputBoun
         final FlashcardGeneratorState state = viewModel.getState();
         state.setMessage(errorMessage);
         viewModel.notifyStateChanged();
-        viewModel.notifyStateChanged();
         
     }
 

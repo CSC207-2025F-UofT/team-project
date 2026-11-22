@@ -188,9 +188,9 @@ public class AppBuilder {
      * @return this builder
      */
     public AppBuilder addFlashcardGenerator(){
-        flashcardGeneratorView = new FlashcardGeneratorView();
-
         flashcardGeneratorViewModel = new FlashcardGeneratorViewModel();
+        flashcardGeneratorView = new FlashcardGeneratorView(flashcardGeneratorViewModel, homeViewModel);
+
 
         cardPanel.add(flashcardGeneratorView,ViewNames.MAKE_FLASHCARDS);
         return this;
