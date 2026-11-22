@@ -6,7 +6,7 @@ import java.util.List;
 
 public class ColourPalette {
     private String name;
-    private String baseColour;
+    private String baseColour; // hex code
     private String schemeType;
     private final List<String> colours = new ArrayList<>();
 
