@@ -15,7 +15,7 @@ This branch is a working refactor of the application, not a parallel demo archit
 
 ## Launch
 
-Run `app.FinanceTracker`. It schedules application construction on the Swing event-dispatch thread and wires the transaction dashboard flow.
+Run `app.FinanceTracker`. It schedules application construction on the Swing event-dispatch thread and wires the transaction dashboard flow. It contains no Swing layout or event-handler implementation; those are in `view.FinanceTrackerView`.
 
 ## Current transaction dashboard flow
 
@@ -38,10 +38,10 @@ The currently usable transaction data store is `data/UserTransactions.json`. The
 
 | Owner | Use case | Status |
 |---|---|---|
-| Binwen | Login | Input/Output Data, boundaries, and Interactor scaffold added; authentication logic remains to be implemented. |
-| Mashac | Upload Receipt | Input/Output Data, boundaries, and Interactor scaffold added; receipt storage/extraction implementation remains. |
-| Will | Create Account | Interactor, Controller, Presenter, View Model, Data Access Interface, and JSON gateway added. It associates a new Account with an existing UserProfile. |
-| Gary | Change Currency | Input/Output Data, boundaries, and Interactor scaffold added. Bank of Canada HTTP client moved to the framework layer; rate/persistence gateway and Interactor logic remain. |
+| Binwen | Login | Input/Output Data, boundaries, Interactor, Controller, Presenter, and View Model added. A concrete credential gateway and login View remain. |
+| Mashac | Upload Receipt | Input/Output Data, boundaries, Interactor, Controller, Presenter, and View Model added. Concrete receipt storage/scanning and View remain. |
+| Will | Create Account | Interactor, Controller, Presenter, View Model, Data Access Interface, and JSON gateway added. It associates a new Account with an existing UserProfile. A dedicated View and authenticated-session integration remain. |
+| Gary | Change Currency | Input/Output Data, boundaries, Interactor, Controller, Presenter, View Model, Bank of Canada client, and JSON currency gateway added. A dedicated View remains. |
 
 Each use case owns its own vertical flow. Entities and appropriately focused Data Access Interfaces are shared; the team should not duplicate domain models or persistence code.
 
@@ -55,8 +55,8 @@ Each use case owns its own vertical flow. Entities and appropriately focused Dat
 ## Remaining work / verification
 
 1. Implement Binwen's Login use case and the profile creation path that populates `Profiles.json`; use password hashes, never plaintext.
-2. Add the Create Account UI entry point after a profile is authenticated, and wire it in `app.FinanceTracker`.
-3. Complete Gary's Change Currency Interactor and its Data Access implementation. Verify exchange-rate direction and handle dates with no Bank of Canada observation.
+2. Add the Login and Create Account UI entry points after a profile is authenticated, and wire them in `app.FinanceTracker`.
+3. Add a Change Currency View and verify exchange-rate direction with tests, including dates with no Bank of Canada observation.
 4. Complete Mashac's receipt storage/scanning flow and make the user confirm extracted details before creating a transaction.
 5. Migrate the dashboard's username-keyed transaction JSON to profile/account IDs once Login and Create Account are integrated.
 6. Add unit tests for entities, interactors, and JSON gateways; run `mvn test` and checkstyle before merging.
