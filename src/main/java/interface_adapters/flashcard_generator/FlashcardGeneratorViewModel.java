@@ -28,6 +28,13 @@ public class FlashcardGeneratorViewModel {
     }
 
     /**
+     * Returns the state for view model in flashcard generator use case
+     */
+    public FlashcardGeneratorState getState(){
+        return this.state;
+    }
+
+    /**
      * Add new listener to listeners in ViewModel
      */
     public void addListener(FlashcardGeneratorViewModelListener listener){
