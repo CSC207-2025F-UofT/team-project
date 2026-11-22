@@ -29,6 +29,10 @@ import view.SubmitApplicationView;
  */
 public class ApplicationsDemo {
 
+    /**
+     * Opens the demo window.
+     * @param args the command line arguments, not used
+     */
     public static void main(String[] args) {
         SwingUtilities.invokeLater(ApplicationsDemo::start);
     }
