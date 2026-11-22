@@ -19,6 +19,14 @@ public class Card {
         return answer;
     }
 
+    public String getText() {
+        if (questionFacingUp) {
+            return question;
+        } else {
+            return answer;
+        }
+    }
+
     public void flip() {
         questionFacingUp = !questionFacingUp;
     }

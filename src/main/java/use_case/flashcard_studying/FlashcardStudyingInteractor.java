@@ -28,18 +28,20 @@ public class FlashcardStudyingInteractor implements FlashcardStudyingInputBounda
         }
         // currentDeck is not null
         // execute buttonClicks then
-        if (inputData.getButtonClicked() == "flip") {
+        if (inputData.getButtonClicked().equals("flip")) {
             Card currentCard = currentDeck.getCurrentCard();
             currentCard.flip();
-            if (currentCard.getQuestionFacingUp()) {
-                presenter.prepareSuccessView(new FlashcardStudyingOutputData(currentCard.getQuestion()));
-            } else {
-                presenter.prepareSuccessView(new FlashcardStudyingOutputData(currentCard.getAnswer()));
-            }
-        } else if (inputData.getButtonClicked() == "Still learning") {
-
-        } else if (inputData.getButtonClicked() == "Knew it") {
-
+            presenter.prepareSuccessView(new FlashcardStudyingOutputData(currentCard.getText()));
+        } else if (inputData.getButtonClicked().equals("Still learning")) {
+            Card currentCard = currentDeck.getCard();
+            presenter.prepareSuccessView(new FlashcardStudyingOutputData(currentCard.getText()));
+        } else if (inputData.getButtonClicked().equals("Knew it")) {
+            currentDeck.removeCurrentCard();
+            Card currentCard = currentDeck.getCard();
+            presenter.prepareSuccessView(new FlashcardStudyingOutputData(currentCard.getText()));
         }
+
     }
+
+
 }

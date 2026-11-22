@@ -36,6 +36,11 @@ public class Deck {
         if (!studying) {
             startStudying();
         }
+        // if the deck has length 1, return the only card in it
+        if (studyingDeck.size() == 1) {
+            currentCard = studyingDeck.get(0);
+            return studyingDeck.get(0);
+        }
         // repeatedly search for a card that isn't the same as the current one
         // the deck shouldn't be null here, but currentCard might be
         Random r = new Random();
