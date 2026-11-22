@@ -14,6 +14,12 @@ public class SubmitApplicationInteractor implements SubmitApplicationInputBounda
     private final SubmitApplicationPetDataAccessInterface petDataAccess;
     private final SubmitApplicationOutputBoundary presenter;
 
+    /**
+     * Creates the interactor.
+     * @param applicationDataAccess where applications are checked and saved
+     * @param petDataAccess where pet availability and names are read
+     * @param presenter the presenter for the result
+     */
     public SubmitApplicationInteractor(SubmitApplicationDataAccessInterface applicationDataAccess,
                                        SubmitApplicationPetDataAccessInterface petDataAccess,
                                        SubmitApplicationOutputBoundary presenter) {
