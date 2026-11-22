@@ -1,5 +1,6 @@
 package entity;
 
+import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -7,10 +8,10 @@ import java.util.List;
 public class Stroke {
     private final String colour; // hex code
     private final double width;
-    private final List<Point> points = new ArrayList<>();
+    private final List<Point2D.Double> points = new ArrayList<>();
 
     public Stroke(String colour, double width) {
-        if (colour == null || !colour.matches("#[0-9A-Fa-f]{6}")) {  // the string represents hex code
+        if (colour == null || !colour.matches("#[0-9A-Fa-f]{6}")) { // the string represents hex code
             throw new IllegalArgumentException("Colour must be a hex string like #FF0000");
         }
         if (width <= 0) {
@@ -21,7 +22,7 @@ public class Stroke {
     }
 
     public void addPoint(double x, double y) {
-        points.add(new Point(x, y));
+        points.add(new Point2D.Double(x, y));
     }
 
     public String getColour() {
@@ -32,25 +33,11 @@ public class Stroke {
         return width;
     }
 
-    public List<Point> getPoints() {
-        return Collections.unmodifiableList(points);
-    }
-
-    public static class Point {
-        private final double x;
-        private final double y;
-
-        public Point(double x, double y) {
-            this.x = x;
-            this.y = y;
+    public List<Point2D.Double> getPoints() {
+        List<Point2D.Double> copies = new ArrayList<>();
+        for (Point2D.Double p : points) {
+            copies.add(new Point2D.Double(p.x, p.y));
         }
-
-        public double getX() {
-            return x;
-        }
-
-        public double getY() {
-            return y;
-        }
+        return Collections.unmodifiableList(copies);
     }
 }
