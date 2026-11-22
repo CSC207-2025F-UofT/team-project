@@ -4,7 +4,6 @@ import java.util.List;
 public class SideQuest {
     private final String name;
     private final String description;
-    private final String photoUrl;
     private final String isIndoor;
     private final double budget;
     private final double expectedTime;
@@ -24,7 +23,6 @@ public class SideQuest {
 
         this.name = name;
         this.description = description;
-        this.photoUrl = photoUrl;
         this.budget = budget;
         this.isIndoor = isIndoor;
         this.expectedTime = expectedTime;
@@ -39,10 +37,6 @@ public class SideQuest {
 
     public String getDescription() {
         return description;
-    }
-
-    public String getPhotoUrl() {
-        return photoUrl;
     }
 
     public String isIndoor() {
