@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<!DOCTYPE suppressions PUBLIC "-//Checkstyle//DTD SuppressionFilter Configuration 1.2//EN"
+    "https://checkstyle.org/dtds/suppressions_1_2.dtd">
+<suppressions>
+  <!-- Preserve the CSC207 starter's established underscore-separated architectural packages. -->
+  <suppress files="[/\\\\](use_case|interface_adapter|data_access)[/\\\\]" checks="PackageName"/>
+  <!-- Untouched starter files owned by other features. Remove when those features implement them. -->
+  <suppress files="[/\\]entity[/\\](Application|Resume|User)\.java$" checks=".*"/>
+  <suppress files="[/\\]place_holder[246]\.java$" checks=".*"/>
+</suppressions>
