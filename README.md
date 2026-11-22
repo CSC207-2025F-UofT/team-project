@@ -5,10 +5,10 @@
 ## Team Information
 
 ### Team Members
-- Member 1 (Name) – Environment & Navigation
-- Member 2 (Name) – Inventory, Persistence & Transcript
-- Member 3 (Name) – NPC Interactions, Combat & LLM
-- Member 4 (Name) – Accounts, Game Rules & Challenges
+- Zixi – Environment & Navigation
+- Lihi – Inventory, Persistence & Transcript
+- Abdul – NPC Interactions, Combat & LLM
+- Fion – Accounts, Game Rules & Challenges
 
 ---
 
