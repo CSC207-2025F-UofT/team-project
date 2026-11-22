@@ -82,4 +82,35 @@ public final class ViewUtils {
         label.setBounds(x, y, width, height);
         return label;
     }
+
+    public static void setRelativeSquareBounds(Component comp, double xPct, double yPct, double sizePct) {
+        int x = (int) (getScreenWidth() * xPct);
+        int y = (int) (getScreenHeight() * yPct);
+        int size = (int) (getScreenHeight() * sizePct);
+        comp.setBounds(x, y, size, size);
+    }
+
+    public static JButton createImageButton(String filePath, double xPct, double yPct, double widthPct) {
+        ImageIcon image = loadImage(filePath);
+        if (image == null || image.getIconWidth() <= 0) {
+            return new JButton();
+        }
+
+        int x = (int) (xPct * getScreenWidth());
+        int y = (int) (yPct * getScreenHeight());
+        int width = (int) Math.round(widthPct * getScreenWidth());
+        int height = (int) Math.round(width * ((double) image.getIconHeight() / image.getIconWidth()));
+
+        Image scaledImage = image.getImage().getScaledInstance(width, height, Image.SCALE_SMOOTH);
+
+        JButton button = new JButton();
+        button.setIcon(new ImageIcon(scaledImage));
+        button.setBounds(x, y, width, height);
+        button.setBorderPainted(false);
+        button.setContentAreaFilled(false);
+        button.setFocusPainted(false);
+        button.setOpaque(false);
+        button.setMargin(new Insets(0, 0, 0, 0));
+        return button;
+    }
 }

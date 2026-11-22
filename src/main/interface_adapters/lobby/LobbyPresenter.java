@@ -25,4 +25,20 @@ public class LobbyPresenter {
         viewManagerModel.setActiveView(MainMenuViewModel.VIEW_NAME);
         viewManagerModel.notifyViewChanged();
     }
+
+    public void addPlayer() {
+        if (lobbyViewModel.getPlayers() < 6) {
+            lobbyViewModel.addPlayer();
+        } else {
+            ;
+        }
+    }
+
+    public void removePlayer() {
+        if (lobbyViewModel.getPlayers() > 1) {
+            lobbyViewModel.removePlayer();
+        } else {
+            ;
+        }
+    }
 }

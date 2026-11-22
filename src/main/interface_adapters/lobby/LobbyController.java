@@ -11,4 +11,8 @@ public class LobbyController {
     public void switchToMainMenuView() {
         lobbyPresenter.switchToMainMenuView();
     }
+
+    public void addPlayer() {lobbyPresenter.addPlayer();}
+
+    public void removePlayer() {lobbyPresenter.removePlayer();}
  }
