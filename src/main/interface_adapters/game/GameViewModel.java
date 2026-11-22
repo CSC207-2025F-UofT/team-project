@@ -18,6 +18,8 @@ public class GameViewModel {
     public final Map<String, Map<String, String>> players = new HashMap<>();
 
     private int num_players;
+    public final Map<Integer, Integer> chips = new HashMap<>();
+    private final List<Integer> chipValues = new ArrayList<>();
 
     public GameViewModel() {
         icons.add("/Users/AI_User_Blue.png");
@@ -79,5 +81,13 @@ public class GameViewModel {
             players.put("player" + Integer.toString(i), playerInfo);
         }
 
+    }
+
+    public void setChipValues(int minBet) {
+        chipValues.add(minBet);
+        chipValues.add(minBet * 5);
+        chipValues.add(minBet * 25);
+        chipValues.add(minBet * 50);
+        chipValues.add(minBet * 100);
     }
 }

@@ -35,7 +35,14 @@ public class LobbyPresenter {
         List<String> names = List.of("Jim", "Janiel", "Janthony", "Jmarcus", "Jabriel", "Jomas");
         List<String> chips = List.of("1000", "1000", "1000", "1000", "1000", "1000");
         gameViewModel.saveOpponentData(names, chips);
-        gameViewModel.setPlayers(num_players);
+
+        gameViewModel.setChipValues(lobbyViewModel.getMinBet());
+        gameViewModel.chips.put(1, 10);
+        gameViewModel.chips.put(5, 5);
+        gameViewModel.chips.put(25, 5);
+        gameViewModel.chips.put(50, 4);
+        gameViewModel.chips.put(100, 2);
+        gameViewModel.setPlayers(num_players); //MUST GO AT END
     }
 
     public void addPlayer() {
