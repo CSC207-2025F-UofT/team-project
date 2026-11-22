@@ -1,131 +1,59 @@
 package entity;
 
-import interface_adapter.*;
-import org.json.JSONArray;
-
-import javax.swing.*;
-import java.io.IOException;
-import java.net.InetAddress;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
-import java.util.Locale;
 
-public class UserProfile {
-    private String name;
+/** A person's profile. A profile may own multiple financial Accounts. */
+public final class UserProfile {
     private final int userID;
-    private final LocalDateTime createdAt;
-    private String email;
-    private final String createdCountry;
-    private final String createdIPAddress;
-    private String password;
-    private ArrayList<Integer> accounts;
-    private String profileImage;
+    private String name;
+    private final String email;
+    private final String passwordHash;
+    private final List<Account> accounts = new ArrayList<>();
 
-    public UserProfile(String name,
-                       String email, String password) throws IOException {
-        String userDatabase = "UserData.json";
-        AccountIDControl allIDs = new AccountIDControl(userDatabase);
-        this.userID = allIDs.nextID();
-        allIDs.addUserID();
-
-        this.name = name;
-        AccountNameControl allNames = new AccountNameControl(userDatabase);
-        allNames.addUsername(name);
-
-        UserCreationControl allUsers = new UserCreationControl(userDatabase);
-        this.email = email;
-        this.createdAt = LocalDateTime.now();
-        this.createdIPAddress = InetAddress.getLocalHost().getHostAddress();
-        this.createdCountry = Locale.getDefault().getDisplayCountry();
-        this.accounts = new ArrayList<>();
-        allUsers.addData(this.createdCountry, this.createdIPAddress, this.createdAt, email, new JSONArray(this.accounts));
-
-        PasswordControl allPasswords = new PasswordControl(userDatabase);
-        this.password = password;
-        allPasswords.addPassword(password);
-        this.profileImage = "src/main/java/data/profile_images/default_profile.png";
-    }
-
-    public void addAccount (Account newAccount) throws IOException {
-      String userDatabase = "UserData.json";
-      UserCreationControl allUsers = new UserCreationControl(userDatabase);
-      if (accounts.contains(newAccount.getAccountID())) {
-        throw new IllegalArgumentException("entity.Account has already been added!");
-      } else {
-      accounts.add(newAccount.getAccountID());
-      newAccount.setMainProfile(this.userID);
-      allUsers.addAccount(userID, new JSONArray(this.accounts));
-    }}
-
-    public void createAccount (String accountName,
-                               AccountType accountType,
-                               double balance, String defaultCurrency, String password) throws IOException {
-      Account newAccount = new Account(accountName, accountType, balance, defaultCurrency, password, this.userID);
-      addAccount(newAccount);
-    }
-
-    public double getTotalBalance (String currency) throws IOException {
-      String userDatabase = "AccountData.json";
-      String currencyDatabase = "Currencies.json";
-      double balance = 0;
-      BalanceControl balances = new BalanceControl(userDatabase);
-      CurrencyControl currencies = new CurrencyControl(currencyDatabase);
-      CurrencyControl accountCurrency = new CurrencyControl(userDatabase);
-      for (int accountID: this.accounts) {
-        if (currency.equals(accountCurrency.returnCurrency(accountID))) {
-        balance += balances.returnBalance(accountID);}
-        else {
-          balance += currencies.exchange(currency,accountCurrency.returnCurrency(accountID), balances.returnBalance(accountID));
+    public UserProfile(int userID, String name, String email, String passwordHash) {
+        if (userID < 0) throw new IllegalArgumentException("User ID cannot be negative.");
+        if (name == null || name.isBlank()) throw new IllegalArgumentException("Name cannot be empty.");
+        if (email == null || email.isBlank()) throw new IllegalArgumentException("Email cannot be empty.");
+        if (passwordHash == null || passwordHash.isBlank()) {
+            throw new IllegalArgumentException("A password hash is required.");
         }
-      }
-      return balance;
+        this.userID = userID;
+        this.name = name.trim();
+        this.email = email.trim();
+        this.passwordHash = passwordHash;
     }
 
-    public ImageIcon uploadProfileImage(String imageSource) throws IOException {
-      ImageIcon profileImage = new ImageIcon(imageSource);
-      Path source = Path.of(imageSource);
-      Path destination = Path.of("src/main/java/data/profile_images", this.userID + ".png");
-      Files.createDirectories(destination.getParent());
-      Files.copy(source, destination, StandardCopyOption.REPLACE_EXISTING);
-      this.profileImage = String.valueOf(destination);
-      UserCreationControl imageUpdator = new UserCreationControl("UserData.json");
-      imageUpdator.returnImages().put(this.userID, this.profileImage);
-      imageUpdator.writeContents();
-      return profileImage;
+    public int getId() { return userID; }
+    public int getUserID() { return userID; }
+    public String getName() { return name; }
+    public String getEmail() { return email; }
+    public String getPasswordHash() { return passwordHash; }
+    public int getNumAccounts() { return accounts.size(); }
+    public List<Account> getAccounts() { return Collections.unmodifiableList(accounts); }
+
+    public void rename(String newName) {
+        if (newName == null || newName.isBlank()) {
+            throw new IllegalArgumentException("Name cannot be empty.");
+        }
+        name = newName.trim();
     }
 
-    public int getNumAccounts() {
-      return accounts.size();
+    public void addAccount(Account account) {
+        if (account == null) throw new IllegalArgumentException("Account is required.");
+        if (account.getOwnerProfileId() != userID) {
+            throw new IllegalArgumentException("This account belongs to another profile.");
+        }
+        for (Account existing : accounts) {
+            if (existing.getAccountID() == account.getAccountID()) {
+                throw new IllegalArgumentException("Account has already been added.");
+            }
+        }
+        accounts.add(account);
     }
 
-    //  Getters
-    public int getId() {
-        return userID;
+    public void removeAccount(int accountId) {
+        accounts.removeIf(account -> account.getAccountID() == accountId);
     }
-    public String getName() {
-        return name;
-    }
-    public String getEmail() {return email; }
-    public LocalDateTime getCreatedAt() {return createdAt;}
-    public String getCountry() {return createdCountry;}
-    public String getCreatedIPAddress() {return createdIPAddress;}
-    public List<Integer> getAccounts() {return accounts;}
-    public String getPassword() {return password;}
-
-    //  Setters
-    public void setName(String name) throws IOException {
-        if (name == null || name.isBlank()) {
-            throw new IllegalArgumentException("Name cannot be empty");
-        } else if (name.equals(this.name)) {
-          throw new IllegalArgumentException("The name is the same as the previous!");
-        } else {
-        this.name = name;
-        String userDatabase = "UserData.json";
-        AccountNameControl allNames = new AccountNameControl(userDatabase);
-        allNames.changeUsername(this.userID, name);
-    }}
 }
