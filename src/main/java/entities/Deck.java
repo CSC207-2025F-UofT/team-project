@@ -37,11 +37,18 @@ public class Deck {
         }
         Random r = new Random();
         int num = r.nextInt(studyingDeck.size());
+        while (studyingDeck.get(num) == currentCard) {
+            num = r.nextInt(studyingDeck.size());
+        }
         return studyingDeck.get(num);
     }
     public void addCard(Card card){
-        this.flashcardDeck.add(card);
+        flashcardDeck.add(card);
 
+    }
+
+    public void removeCurrentCard() {
+        studyingDeck.remove(currentCard);
     }
 
     public Card getCurrentCard() {
