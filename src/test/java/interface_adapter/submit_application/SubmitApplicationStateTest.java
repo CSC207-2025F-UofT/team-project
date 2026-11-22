@@ -22,4 +22,19 @@ class SubmitApplicationStateTest {
         assertEquals("", state.getSuccessMessage());
         assertEquals("", state.getError());
     }
+
+    @Test
+    void anotherAdopterDoesNotSeeOldMessages() {
+        final SubmitApplicationState state = new SubmitApplicationState();
+        state.setAdopterId("bob");
+        state.setSuccessMessage(MESSAGE);
+        state.setError(MESSAGE);
+
+        state.setAdopterId("bob");
+        assertEquals(MESSAGE, state.getSuccessMessage());
+
+        state.setAdopterId("alice");
+        assertEquals("", state.getSuccessMessage());
+        assertEquals("", state.getError());
+    }
 }

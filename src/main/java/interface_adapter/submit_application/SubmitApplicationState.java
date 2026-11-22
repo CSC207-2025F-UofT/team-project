@@ -17,7 +17,14 @@ public final class SubmitApplicationState {
         return adopterId;
     }
 
+    /**
+     * Sets the adopter who is applying. Messages for another adopter are cleared.
+     * @param adopterId the adopter who is applying
+     */
     public void setAdopterId(String adopterId) {
+        if (!Objects.equals(this.adopterId, adopterId)) {
+            clearMessages();
+        }
         this.adopterId = adopterId;
     }
 
