@@ -12,8 +12,8 @@ public class LobbyController {
         lobbyPresenter.switchToMainMenuView();
     }
 
-    public void switchToGameView() {
-        lobbyPresenter.switchToGameView();
+    public void switchToGameView(int num_players) {
+        lobbyPresenter.switchToGameView(num_players);
     }
 
     public void addPlayer() {lobbyPresenter.addPlayer();}

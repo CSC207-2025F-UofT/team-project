@@ -9,8 +9,8 @@ public class Main {
         PokerBuilder pokerBuilder = new PokerBuilder();
         JFrame application = pokerBuilder
                 .addMainMenuView()
-                .addLobbyView()
                 .addGameView()
+                .addLobbyView()
                 .addSettingsView()
                 .build();
         

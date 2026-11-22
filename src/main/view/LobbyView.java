@@ -52,12 +52,12 @@ public class LobbyView extends JPanel implements ActionListener, PropertyChangeL
         playButton.addActionListener(this);
         playButton.setBorder(BorderFactory.createLineBorder(Color.white, 2));
 
-        JLabel user = ViewUtils.createImage("/Player.png", 0, 0.3, 0.1);
+        JLabel user = ViewUtils.createImage("/Users/Player.png", 0, 0.3, 0.1);
         playerIcons.add(user);
         this.add(user);
 
         for (int i = 1; i <= 5; i++) {
-            JLabel aiIcon = ViewUtils.createImage("/AI_User.png", 0, 0.3, 0.10);
+            JLabel aiIcon = ViewUtils.createImage("/Users/AI_User_Blue.png", 0, 0.3, 0.10);
             playerIcons.add(aiIcon);
             this.add(aiIcon);
         }
@@ -197,7 +197,7 @@ public class LobbyView extends JPanel implements ActionListener, PropertyChangeL
             lobbyController.increaseMinBet();
         }
         if (event.getSource().equals(playButton)) {
-            lobbyController.switchToGameView();
+            lobbyController.switchToGameView(lobbyViewModel.getPlayers());
         }
     }
 

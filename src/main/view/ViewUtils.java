@@ -113,4 +113,10 @@ public final class ViewUtils {
         button.setMargin(new Insets(0, 0, 0, 0));
         return button;
     }
+
+    public static void setRelativeLocation(Component comp, double xPct, double yPct) {
+        int x = (int) (xPct * getScreenWidth());
+        int y = (int) (yPct * getScreenHeight());
+        comp.setLocation(x, y);
+    }
 }

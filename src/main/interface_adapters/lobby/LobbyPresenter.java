@@ -27,9 +27,10 @@ public class LobbyPresenter {
         viewManagerModel.notifyViewChanged();
     }
 
-    public void switchToGameView() {
+    public void switchToGameView(int num_players) {
         viewManagerModel.setActiveView(GameViewModel.VIEW_NAME);
         viewManagerModel.notifyViewChanged();
+        gameViewModel.setPlayers(num_players);
     }
 
     public void addPlayer() {
