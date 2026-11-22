@@ -17,7 +17,8 @@ import java.util.Set;
 /**
  * Keeps the student's lab, modules and checkpoint questions in memory, and writes the student's
  * progress to a JSON file so it is still there when the app opens again. Only progress is saved
- * (each module's answers and when it was last edited); the module content stays in code.
+ * (each module's answers, notebook and when it was last edited); the module content stays in
+ * code.
  */
 public class JsonLabDataAccessObject extends InMemoryLabDataAccessObject {
   // TODO: also save the lab and its undo snapshots, with data.LabJson, once Lab has fields.
@@ -83,6 +84,9 @@ public class JsonLabDataAccessObject extends InMemoryLabDataAccessObject {
       if (progress.getLastEdited() != null) {
         module.setLastEdited(LocalDateTime.parse(progress.getLastEdited()));
       }
+      if (progress.getNotebook() != null) {
+        module.setNotebook(progress.getNotebook());
+      }
     }
   }
 
@@ -99,7 +103,8 @@ public class JsonLabDataAccessObject extends InMemoryLabDataAccessObject {
     Map<String, ModuleProgress> progress = new LinkedHashMap<>();
     for (LabModule module : getModules()) {
       progress.put(module.getTitle(), new ModuleProgress(module.getSavedAnswers(),
-          module.getLastEdited().map(LocalDateTime::toString).orElse(null)));
+          module.getLastEdited().map(LocalDateTime::toString).orElse(null),
+          module.getNotebook()));
     }
     try {
       Path parent = file.toAbsolutePath().getParent();
@@ -127,14 +132,19 @@ public class JsonLabDataAccessObject extends InMemoryLabDataAccessObject {
     }
   }
 
-  /** One module's saved answers, and when it was last edited (ISO text, null if never). */
+  /**
+   * One module's saved answers, when it was last edited (ISO text, null if never) and its
+   * notebook (HTML).
+   */
   private static final class ModuleProgress {
     private final List<Set<Integer>> savedAnswers;
     private final String lastEdited;
+    private final String notebook;
 
-    ModuleProgress(List<Set<Integer>> savedAnswers, String lastEdited) {
+    ModuleProgress(List<Set<Integer>> savedAnswers, String lastEdited, String notebook) {
       this.savedAnswers = savedAnswers;
       this.lastEdited = lastEdited;
+      this.notebook = notebook;
     }
 
     List<Set<Integer>> getSavedAnswers() {
@@ -143,6 +153,10 @@ public class JsonLabDataAccessObject extends InMemoryLabDataAccessObject {
 
     String getLastEdited() {
       return lastEdited;
+    }
+
+    String getNotebook() {
+      return notebook;
     }
   }
 }

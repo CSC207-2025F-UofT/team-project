@@ -40,12 +40,14 @@ class JsonLabDataAccessObjectTest {
     LabModule module = first.getModule("Pre-lab").orElseThrow();
     module.setSavedAnswers(List.of(Set.of(0), Set.of(1, 2)));
     module.setLastEdited(LocalDateTime.of(2026, 11, 22, 9, 15));
+    module.setNotebook("<b>Mass:</b> 0.52 g \"wet\"\n<i>next</i>");
     first.saveModule(module);
 
     LabModule reopened = open(file).getModule("Pre-lab").orElseThrow();
     assertEquals(List.of(Set.of(0), Set.of(1, 2)), reopened.getSavedAnswers());
     assertEquals(Optional.of(LocalDateTime.of(2026, 11, 22, 9, 15)), reopened.getLastEdited());
     assertEquals(100, reopened.getQuizProgress());
+    assertEquals("<b>Mass:</b> 0.52 g \"wet\"\n<i>next</i>", reopened.getNotebook());
   }
 
   @Test
@@ -53,6 +55,7 @@ class JsonLabDataAccessObjectTest {
     LabModule module = open(folder.resolve("save.json")).getModule("Pre-lab").orElseThrow();
     assertEquals(List.of(), module.getSavedAnswers());
     assertEquals(Optional.empty(), module.getLastEdited());
+    assertEquals("", module.getNotebook());
   }
 
   @Test
