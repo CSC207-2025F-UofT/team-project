@@ -24,7 +24,12 @@ public class CandleGameInteractor implements CandleGameInputBoundary {
     public void initGame() {
         String secretCode =  secretCodeGenerator.generate();
         CandleGame game = new CandleGame(CandleGame.secretCode(), 10);
-        presenter.prepareGameView();
+
+        CandleGameOutputData outputData = new CandleGameOutputData(
+                game.getMaxTries(),
+                game.getGameCondition());
+
+        presenter.prepareGameView(outputData );
     }
 
     @Override
