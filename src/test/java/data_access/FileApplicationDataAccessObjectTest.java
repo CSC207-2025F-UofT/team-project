@@ -16,6 +16,9 @@ import entity.ApplicationStatus;
 
 class FileApplicationDataAccessObjectTest {
 
+    private static final String ADOPTER = "bob";
+    private static final String FILE_NAME = "saved.json";
+
     @TempDir
     Path folder;
 
@@ -38,5 +41,30 @@ class FileApplicationDataAccessObjectTest {
         assertTrue(reloaded.hasActiveApplication("adopter1", "mochi"));
         assertFalse(reloaded.hasActiveApplication("adopter1", "tofu"));
         assertTrue(reloaded.getApplicationsByAdopter("someone-else").isEmpty());
+    }
+
+    @Test
+    void savedStatusChangeReplacesTheOldRecord() {
+        final String path = folder.resolve(FILE_NAME).toString();
+        final FileApplicationDataAccessObject dataAccess = new FileApplicationDataAccessObject(path);
+        dataAccess.save(pendingApplication("first"));
+        dataAccess.save(pendingApplication("second"));
+
+        final Application changed = dataAccess.getApplicationsByAdopter(ADOPTER).get(0);
+        changed.updateStatus(ApplicationStatus.APPROVED, "Welcome home");
+        dataAccess.save(changed);
+
+        final List<Application> loaded =
+                new FileApplicationDataAccessObject(path).getApplicationsByAdopter(ADOPTER);
+        assertEquals(2, loaded.size());
+        assertEquals("first", loaded.get(0).getId());
+        assertEquals(ApplicationStatus.APPROVED, loaded.get(0).getStatus());
+        assertEquals("Welcome home", loaded.get(0).getAdminNote());
+        assertEquals(ApplicationStatus.PENDING, loaded.get(1).getStatus());
+    }
+
+    private Application pendingApplication(String id) {
+        return new Application(id, ADOPTER, "tama", "Condo", "One cat", "1 adult",
+                "bob@example.com", "", LocalDate.of(2026, 11, 20));
     }
 }

@@ -7,7 +7,9 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -19,12 +21,13 @@ import use_case.track_applications.TrackApplicationsDataAccessInterface;
 
 /**
  * DAO for applications, stored in a JSON file so they are kept between runs of the program.
+ * Saving an application replaces the saved one with the same id.
  */
 public class FileApplicationDataAccessObject implements SubmitApplicationDataAccessInterface,
         TrackApplicationsDataAccessInterface {
 
     private final Path jsonPath;
-    private final List<Application> applications = new ArrayList<>();
+    private final Map<String, Application> applications = new LinkedHashMap<>();
 
     /**
      * Construct this DAO for saving to and reading from a local file.
@@ -44,11 +47,12 @@ public class FileApplicationDataAccessObject implements SubmitApplicationDataAcc
             final JSONArray array = new JSONArray(text);
             for (int i = 0; i < array.length(); i++) {
                 final JSONObject json = array.getJSONObject(i);
-                applications.add(new Application(json.getString("id"), json.getString("adopterId"),
+                final Application application = new Application(json.getString("id"), json.getString("adopterId"),
                         json.getString("petId"), json.getString("housingType"), json.getString("petExperience"),
                         json.getString("householdMembers"), json.getString("contactInfo"),
                         json.getString("note"), LocalDate.parse(json.getString("submittedAt")),
-                        ApplicationStatus.valueOf(json.getString("status")), json.getString("adminNote")));
+                        ApplicationStatus.valueOf(json.getString("status")), json.getString("adminNote"));
+                applications.put(application.getId(), application);
             }
         }
         catch (IOException ex) {
@@ -58,7 +62,7 @@ public class FileApplicationDataAccessObject implements SubmitApplicationDataAcc
 
     private void write() {
         final JSONArray array = new JSONArray();
-        for (Application application : applications) {
+        for (Application application : applications.values()) {
             final JSONObject json = new JSONObject();
             json.put("id", application.getId());
             json.put("adopterId", application.getAdopterId());
@@ -83,7 +87,7 @@ public class FileApplicationDataAccessObject implements SubmitApplicationDataAcc
 
     @Override
     public boolean hasActiveApplication(String adopterId, String petId) {
-        for (Application application : applications) {
+        for (Application application : applications.values()) {
             if (application.getAdopterId().equals(adopterId) && application.getPetId().equals(petId)
                     && application.isActive()) {
                 return true;
@@ -94,12 +98,18 @@ public class FileApplicationDataAccessObject implements SubmitApplicationDataAcc
 
     @Override
     public void save(Application application) {
-        applications.add(application);
+        final String id = application.getId();
+        final Application previous = applications.put(id, application);
         try {
             write();
         }
         catch (RuntimeException ex) {
-            applications.remove(application);
+            if (previous == null) {
+                applications.remove(id);
+            }
+            else {
+                applications.put(id, previous);
+            }
             throw ex;
         }
     }
@@ -107,7 +117,7 @@ public class FileApplicationDataAccessObject implements SubmitApplicationDataAcc
     @Override
     public List<Application> getApplicationsByAdopter(String adopterId) {
         final List<Application> result = new ArrayList<>();
-        for (Application application : applications) {
+        for (Application application : applications.values()) {
             if (application.getAdopterId().equals(adopterId)) {
                 result.add(application);
             }
