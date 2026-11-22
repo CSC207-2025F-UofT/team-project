@@ -5,16 +5,14 @@ import java.util.Collections;
 import java.util.List;
 
 public class Drawing extends Layer {
-    private final int drawingId;
     private final List<Stroke> strokes = new ArrayList<>();
 
-    public Drawing(int drawingId, String name) {
-        super(name);
-        this.drawingId = drawingId;
+    public Drawing(int layerId, String name) {
+        super(layerId, name);
     }
 
     public int getDrawingId() {
-        return drawingId;
+        return getLayerId();
     }
 
     public List<Stroke> getStrokes() {
