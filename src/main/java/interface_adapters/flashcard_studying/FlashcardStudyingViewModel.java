@@ -10,7 +10,7 @@ public class FlashcardStudyingViewModel {
 
     private final List<FlashcardStudyingViewModelListener> listeners = new ArrayList<>();
 
-    public static final String VIEW_NAME = "log in";
+    public static final String VIEW_NAME = "flashcard studying";
 
     private FlashcardStudyingState state = new FlashcardStudyingState();
 
