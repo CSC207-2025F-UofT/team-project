@@ -22,6 +22,8 @@ public class Main {
                 .addStartTimerUseCase()
                 .addCancelTimerUseCase()
                 .addSwitchViewUseCase()
+                .addFlashcardGenerator()
+                .addFlashcardGeneratorUseCase()
                 .build();
 
         application.setLocationRelativeTo(null);

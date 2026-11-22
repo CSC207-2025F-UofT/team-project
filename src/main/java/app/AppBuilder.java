@@ -1,10 +1,15 @@
 package app;
 
+import data_access.FlashcardDAO;
+import data_access.FlashcardDataAccessInterface;
 import data_access.InMemoryTimerDataAccess;
 import entities.TimerSessionFactory;
 import interface_adapters.ViewManagerModel;
 import interface_adapters.cancel_timer.CancelTimerController;
 import interface_adapters.cancel_timer.CancelTimerPresenter;
+import interface_adapters.flashcard_generator.FlashcardGeneratorController;
+import interface_adapters.flashcard_generator.FlashcardGeneratorPresenter;
+import interface_adapters.flashcard_generator.FlashcardGeneratorViewModel;
 import interface_adapters.flashcard_studying.FlashcardStudyingViewModel;
 import interface_adapters.home.HomeViewModel;
 import interface_adapters.menu_bar.NavigationBarViewModel;
@@ -20,6 +25,9 @@ import interface_adapters.update_timer_settings.TimerSettingsViewModel;
 import use_case.cancel_timer.CancelTimerInputBoundary;
 import use_case.cancel_timer.CancelTimerInteractor;
 import use_case.cancel_timer.CancelTimerOutputBoundary;
+import use_case.flashcard_generator.FlashcardGeneratorInputBoundary;
+import use_case.flashcard_generator.FlashcardGeneratorInteractor;
+import use_case.flashcard_generator.FlashcardGeneratorOutputBoundary;
 import use_case.menu_bar.SwitchViewInputBoundary;
 import use_case.menu_bar.SwitchViewInteractor;
 import use_case.menu_bar.SwitchViewOutputBoundary;
@@ -60,6 +68,9 @@ public class AppBuilder {
 
     private FlashcardStudyingView flashcardStudyingView;
     private FlashcardStudyingViewModel flashcardStudyingViewModel;
+
+    private FlashcardGeneratorView flashcardGeneratorView;
+    private FlashcardGeneratorViewModel flashcardGeneratorViewModel;
 
 
     public AppBuilder() {
@@ -169,6 +180,46 @@ public class AppBuilder {
 
         SwitchViewController switchViewController = new SwitchViewController(switchViewInteractor);
         navigationBarPanel.setSwitchViewController(switchViewController);
+        return this;
+    }
+
+    /**
+     * Adds the FlashcardGeneratorView to the application
+     * @return this builder
+     */
+    public AppBuilder addFlashcardGenerator(){
+        flashcardGeneratorView = new FlashcardGeneratorView();
+
+        flashcardGeneratorViewModel = new FlashcardGeneratorViewModel();
+
+        cardPanel.add(flashcardGeneratorView,ViewNames.MAKE_FLASHCARDS);
+        return this;
+
+    }
+
+    /**
+     * Adds flashcard generator use case to AppBuilder
+     * @return
+     */
+    public AppBuilder addFlashcardGeneratorUseCase(){
+        // Initialize presenter and DAO
+        final FlashcardGeneratorOutputBoundary presenter = new FlashcardGeneratorPresenter(
+                flashcardGeneratorViewModel
+                ,viewManagerModel,
+                flashcardStudyingViewModel);
+
+        FlashcardDataAccessInterface DAO = new FlashcardDAO();
+
+        // Initialize Interactor
+        final FlashcardGeneratorInputBoundary interactor = new FlashcardGeneratorInteractor(DAO, presenter);
+
+        // Initialize controller
+        final FlashcardGeneratorController controller = new FlashcardGeneratorController(interactor);
+
+        // Set Controller for View
+        flashcardGeneratorView.setController(controller);
+
+
         return this;
     }
 
