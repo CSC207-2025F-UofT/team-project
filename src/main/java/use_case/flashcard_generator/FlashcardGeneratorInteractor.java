@@ -27,27 +27,40 @@ public class FlashcardGeneratorInteractor implements FlashcardGeneratorInputBoun
      */
     @Override
     public void execute(FlashcardGeneratorInputData data) {
-        if (data.getListTextPiece().isEmpty()){
-            presenter.prepareFailView();
+        if (data.getListTextPiece() == null || data.getListTextPiece().isEmpty()){ // No text is entered
+            presenter.prepareFailView("You have to enter at least one question and answer");
             return;
 
         }
-        else if (data.getListTextPiece().size() % 2 == 1){
-            presenter.prepareFailView();
+        else if (data.getListTextPiece().size() % 2 == 1){ // Not perfectly paired, user needs to add an answer
+            presenter.prepareFailView("Incorrect format (missing answer)");
             return;
+
+        }
+
+        for (FlashcardGeneratorInputData.TextPiece piece: data.getListTextPiece()) { //Ensure that there's no empty space
+            if (piece == null || piece.getText() == null || piece.getText().isBlank()) {
+                presenter.prepareFailView("Incorrect format (empty space)");
+                return;
+            }
 
         }
         Deck deck = new Deck("Temp title", new ArrayList<>());
-        for (int i=0; i < data.getListTextPiece().size()/2; i ++){
+        for (int i=0; i < data.getListTextPiece().size()/2; i ++){ // Creates the deck
 
                 FlashcardGeneratorInputData.TextPiece title = data.getTextPiece(2*i);
                 FlashcardGeneratorInputData.TextPiece answer = data.getTextPiece(2*i + 1);
 
-                Card flashcard = new Card(title.getText(), answer.getText());
+                if (!(title.isBold()) || answer.isBold()) { // makes sure its a bold/unbold pair
+                    presenter.prepareFailView("Incorrect format (bolding error)");
+                    return;
+                }
+            Card flashcard = new Card(title.getText(), answer.getText());
                 deck.addCard(flashcard);
 
         }
         DAO.saveDeck(deck);
-        presenter.prepareSuccessView();
+        FlashcardGeneratorOutputData output = new FlashcardGeneratorOutputData(deck.getTitle(), deck);
+        presenter.prepareSuccessView(output);
     }
 }

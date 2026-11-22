@@ -15,7 +15,7 @@ import java.awt.event.ActionListener;
 
 public class FlashcardStudyingView extends JPanel implements ActionListener, FlashcardStudyingViewModelListener {
 
-    private final FlashcardStudyingController controller;
+    private FlashcardStudyingController controller;
     private final FlashcardStudyingViewModel viewModel;
 
     private final JLabel title;
@@ -33,8 +33,7 @@ public class FlashcardStudyingView extends JPanel implements ActionListener, Fla
      * Initializes all it's components, and connects the View to the Controller
      * @param controller the Controller for FlashcardStudying
      */
-    public FlashcardStudyingView(FlashcardStudyingController controller, FlashcardStudyingViewModel viewModel){
-        this.controller = controller;
+    public FlashcardStudyingView(FlashcardStudyingViewModel viewModel){
         this.setLayout(null);
 
         this.viewModel = viewModel;
@@ -146,6 +145,10 @@ public class FlashcardStudyingView extends JPanel implements ActionListener, Fla
         displayText.setText(viewModel.getState().getText());
         errorMessage.setText(viewModel.getState().getError());
         title.setText(viewModel.getState().getDeckTitle());
+    }
+
+    public void setController(FlashcardStudyingController controller) {
+        this.controller = controller;
     }
 
 //    private void setFields(FlashcardStudyingState state) {

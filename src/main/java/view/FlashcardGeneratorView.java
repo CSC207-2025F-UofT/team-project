@@ -13,7 +13,7 @@ import use_case.flashcard_generator.FlashcardGeneratorInputData.TextPiece;
 
 public class FlashcardGeneratorView extends JPanel implements ActionListener {
 
-   private final FlashcardGeneratorController controller;
+   private FlashcardGeneratorController controller;
 
    private final JLabel title;
    private final JLabel tutorialTitle;
@@ -26,10 +26,9 @@ public class FlashcardGeneratorView extends JPanel implements ActionListener {
     /**
      * Constructs the Flashcard Generator View
      * Initializes all it's components, and connects the View to the Controller
-     * @param controller the Controller for FlashcardGenerator
+     *
      */
-    public FlashcardGeneratorView(FlashcardGeneratorController controller){
-        this.controller = controller;
+    public FlashcardGeneratorView(){
         this.setLayout(null);
 
         title = new JLabel("FLASHCARD GENERATOR!!!");
@@ -85,6 +84,15 @@ public class FlashcardGeneratorView extends JPanel implements ActionListener {
 
 
 
+
+    }
+
+    /**
+     * Sets the Controller for FlashcardGenerator
+     * @param controller the Controller to be assigned to View
+     */
+    public void setController(FlashcardGeneratorController controller){
+        this.controller = controller;
 
     }
 
