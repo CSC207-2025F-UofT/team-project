@@ -1,4 +1,4 @@
-package use_case.MakeNewPlayer;
+package use_case.makeNewPlayer;
 
 import entity.Player;
 

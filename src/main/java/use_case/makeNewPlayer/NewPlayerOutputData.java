@@ -1,4 +1,4 @@
-package use_case.MakeNewPlayer;
+package use_case.makeNewPlayer;
 
 public class NewPlayerOutputData {
     private final String username;
