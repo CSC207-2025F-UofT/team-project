@@ -53,7 +53,7 @@ final class JournalStyle {
 
     static ImageIcon loadScaledIcon(String assetName, int iconWidth, int iconHeight) {
         ImageIcon sourceIcon = new ImageIcon(Objects.requireNonNull(
-                JournalStyle.class.getResource("/journal/" + assetName + ".png"), assetName));
+                JournalStyle.class.getResource("/journal/assets/" + assetName + ".png"), assetName));
         return new ImageIcon(sourceIcon.getImage().getScaledInstance(iconWidth, iconHeight, Image.SCALE_SMOOTH));
     }
 
