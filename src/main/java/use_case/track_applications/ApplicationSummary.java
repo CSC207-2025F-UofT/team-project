@@ -5,7 +5,7 @@ import java.time.LocalDate;
 /**
  * One application as shown to the adopter who submitted it.
  */
-public class ApplicationSummary {
+public final class ApplicationSummary {
 
     private final String applicationId;
     private final String petName;

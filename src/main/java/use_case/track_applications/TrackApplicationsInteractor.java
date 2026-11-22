@@ -42,7 +42,8 @@ public class TrackApplicationsInteractor implements TrackApplicationsInputBounda
         final List<Application> applications;
         try {
             applications = applicationDataAccess.getApplicationsByAdopter(adopterId);
-        } catch (RuntimeException ex) {
+        }
+        catch (RuntimeException ex) {
             presenter.prepareFailView("Your applications could not be loaded. Please try again.");
             return;
         }
@@ -58,11 +59,14 @@ public class TrackApplicationsInteractor implements TrackApplicationsInputBounda
     /**
      * Returns the pet's name, or a placeholder if the pet can no longer be found, so one missing pet
      * does not hide the adopter's other applications.
+     * @param petId the pet
+     * @return the pet's name, or the placeholder
      */
     private String findPetName(String petId) {
         try {
             return petDataAccess.getPetName(petId);
-        } catch (RuntimeException ex) {
+        }
+        catch (RuntimeException ex) {
             return UNKNOWN_PET;
         }
     }
