@@ -7,6 +7,7 @@ import okhttp3.Response;
 import okhttp3.RequestBody;
 import okhttp3.MediaType;
 
+import java.io.FileWriter;
 import java.io.IOException;
 
 public class GetMovieData {
@@ -26,6 +27,46 @@ public class GetMovieData {
 
         this.client = new OkHttpClient();
         this.token = token;
+    }
+    // get method version to be used for API calls for use case #1
+    public void get(String endpoint, String b){
+
+        String url = BASE_URL + endpoint;
+
+        Request request = new Request.Builder()
+                .url(url)
+                .get()
+                .addHeader("accept", "application/json")
+                .addHeader("Authorization", "Bearer " + token)
+                .build();
+
+
+        try (Response response = client.newCall(request).execute()) {
+            if (!response.isSuccessful()) {
+                throw new IOException(
+                        "API request failed: " + response.code()
+                );
+            }
+
+            if (response.body() == null) {
+                throw new IOException("Empty response body");
+            }
+
+            // Step 1: Get the JSON response
+            String jsonResponse = response.body().string();
+            System.out.println(jsonResponse);
+
+            // Step 2: Save JSON into a file
+            try (FileWriter file = new FileWriter("movie.json")) {
+
+                file.write(jsonResponse);
+            }
+
+            System.out.println("Movie JSON saved successfully!");
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     // GET: Retrieve information from TMDB
