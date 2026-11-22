@@ -33,6 +33,7 @@ public final class FinanceTrackerView extends JFrame {
         buildWindow();
         controller.loadUsers();
         refresh();
+        if (viewModel.isError()) showMessage();
         if (users.getItemCount() > 0) {
             users.setSelectedIndex(0);
             loadSelectedUser();
@@ -138,6 +139,7 @@ public final class FinanceTrackerView extends JFrame {
         if (selected == null) return;
         controller.loadUser(selected.toString());
         refresh();
+        if (viewModel.isError()) showMessage();
     }
 
     private void showAddDialog() {
