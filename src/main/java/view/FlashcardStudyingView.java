@@ -26,6 +26,7 @@ public class FlashcardStudyingView extends JPanel implements ActionListener, Fla
     private final JButton knewItButton;
     private final JButton stillLearningButton;
     private final JButton flipButton;
+    private final JLabel errorMessage;
 
     /**
      * Constructs the Flashcard Studying View
@@ -101,7 +102,10 @@ public class FlashcardStudyingView extends JPanel implements ActionListener, Fla
         displayText.setBorder(border);
         this.add(displayText);
 
-
+        errorMessage = new JLabel("");
+        errorMessage.setBounds(100,700,150,35);
+        errorMessage.setFont(new Font("Chalkduster",Font.BOLD, 25));
+        this.add(errorMessage);
 
 
 
@@ -140,6 +144,7 @@ public class FlashcardStudyingView extends JPanel implements ActionListener, Fla
     @Override
     public void stateChanged() {
         displayText.setText(viewModel.getState().getText());
+        errorMessage.setText(viewModel.getState().getError());
         title.setText(viewModel.getState().getDeckTitle());
     }
 
