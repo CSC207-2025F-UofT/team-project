@@ -21,6 +21,7 @@ public final class ViewUtils {
         registerFont("/Figtree_Font/Figtree-Black.ttf");
         registerFont("/Figtree_Font/Figtree-Medium.ttf");
         registerFont("/Figtree_Font/Figtree-SemiBold.ttf");
+        registerFont("/Figtree Font/Figtree ExtraBold");
     }
 
     private ViewUtils() {}

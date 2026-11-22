@@ -5,6 +5,8 @@ import java.awt.*;
 import main.interface_adapters.game.GameViewModel;
 import main.interface_adapters.ViewManagerModel;
 import main.interface_adapters.main_menu.*;
+import main.interface_adapters.settings.SettingsController;
+import main.interface_adapters.settings.SettingsPresenter;
 import main.interface_adapters.settings.SettingsViewModel;
 import main.view.*;
 import main.view.ViewManager;
@@ -37,7 +39,7 @@ public class PokerBuilder {
         MainMenuPresenter mainMenuPresenter = new MainMenuPresenter(
                 viewManagerModel, gameViewModel, settingsViewModel);
         MainMenuController mainMenuController = new MainMenuController(mainMenuPresenter);
-        mainMenuView.setMainMenuController(mainMenuController);
+        mainMenuView.setController(mainMenuController);
 
         cardPanel.add(mainMenuView, MainMenuViewModel.VIEW_NAME);
         return this;
@@ -54,6 +56,11 @@ public class PokerBuilder {
     public PokerBuilder addSettingsView() {
         this.settingsViewModel = new SettingsViewModel();
         this.settingsView = new SettingsView(settingsViewModel);
+
+        SettingsPresenter settingsPresenter = new SettingsPresenter(viewManagerModel,
+                settingsViewModel, mainMenuViewModel);
+        SettingsController settingsController = new SettingsController(settingsPresenter);
+        settingsView.setController(settingsController);
 
         cardPanel.add(settingsView, SettingsViewModel.VIEW_NAME);
         return this;

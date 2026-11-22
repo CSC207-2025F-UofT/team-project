@@ -37,6 +37,7 @@ public class MainMenuView extends JPanel implements ActionListener {
         playButton.setForeground(Color.white);
         playButton.setFocusPainted(false);
         playButton.addActionListener(this);
+        playButton.setBorder(BorderFactory.createLineBorder(Color.white, 2));
 
         settingsButton = new JButton(MainMenuViewModel.SETTINGS_LABEL);
         ViewUtils.setFont(settingsButton, "Figtree Black", Font.BOLD, 28, 0.04);
@@ -45,6 +46,7 @@ public class MainMenuView extends JPanel implements ActionListener {
         settingsButton.setForeground(Color.white);
         settingsButton.setFocusPainted(false);
         settingsButton.addActionListener(this);
+        settingsButton.setBorder(BorderFactory.createLineBorder(Color.white, 2));
 
         exitButton = new JButton(MainMenuViewModel.EXIT_LABEL);
         ViewUtils.setRelativeBounds(exitButton, 0.595, 0.5, 0.15, 0.1);
@@ -53,6 +55,7 @@ public class MainMenuView extends JPanel implements ActionListener {
         exitButton.setForeground(Color.white);
         exitButton.setFocusPainted(false);
         exitButton.addActionListener(this);
+        exitButton.setBorder(BorderFactory.createLineBorder(Color.white, 2));
 
         //colors
         this.setBackground(new Color(5,5,5));
@@ -77,7 +80,7 @@ public class MainMenuView extends JPanel implements ActionListener {
         }
     }
 
-    public void setMainMenuController(MainMenuController mainMenuController) {
+    public void setController(MainMenuController mainMenuController) {
         this.mainMenuController = mainMenuController;
     }
 }
