@@ -1,10 +1,7 @@
 package use_case.dashboard;
 
-import entity.dashboard.DashboardItem;
-
 import java.util.ArrayList;
 import java.util.List;
-import java.util.RandomAccess;
 
 /**
  * Output data for new analytics outputs.
