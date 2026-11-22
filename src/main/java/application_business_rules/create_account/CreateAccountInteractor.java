@@ -1,17 +1,9 @@
 package application_business_rules.create_account;
 
-/**
- * Create Account use case.
- *
- * TODO: Complete after the legacy Account and UserProfile entities have been
- * converted to persistence-free domain entities. The Interactor must:
- * 1. validate input and ownership,
- * 2. obtain the UserProfile through AccountDataAccessInterface,
- * 3. create a financial Account (not a login identity),
- * 4. associate it with that UserProfile,
- * 5. save both through the data access interface,
- * 6. send Output Data to the Output Boundary.
- */
+import entity.Account;
+import entity.UserProfile;
+
+/** Creates a financial account and associates it with an existing UserProfile. */
 public final class CreateAccountInteractor implements CreateAccountInputBoundary {
     private final AccountDataAccessInterface accountDataAccess;
     private final CreateAccountOutputBoundary presenter;
@@ -24,8 +16,45 @@ public final class CreateAccountInteractor implements CreateAccountInputBoundary
 
     @Override
     public void execute(CreateAccountInputData inputData) {
-        throw new UnsupportedOperationException(
-            "Complete after the domain entities are migrated from the legacy persistence-coupled model."
-        );
+        try {
+            if (inputData.getAccountName() == null || inputData.getAccountName().isBlank()) {
+                presenter.prepareFailView("Account name cannot be empty.");
+                return;
+            }
+            if (inputData.getAccountType() == null) {
+                presenter.prepareFailView("Choose an account type.");
+                return;
+            }
+            if (inputData.getInitialBalance() == null || inputData.getInitialBalance().signum() < 0) {
+                presenter.prepareFailView("Initial balance cannot be negative.");
+                return;
+            }
+            if (inputData.getCurrencyCode() == null
+                    || !inputData.getCurrencyCode().matches("[A-Z]{3}")) {
+                presenter.prepareFailView("Enter a valid three-letter currency code.");
+                return;
+            }
+
+            UserProfile profile = accountDataAccess.getUserProfile(inputData.getUserProfileId());
+            if (profile == null) {
+                presenter.prepareFailView("User profile could not be found.");
+                return;
+            }
+            if (accountDataAccess.accountNameExists(profile.getId(), inputData.getAccountName())) {
+                presenter.prepareFailView("You already have an account with that name.");
+                return;
+            }
+
+            Account account = new Account(accountDataAccess.nextAccountId(), profile.getId(),
+                inputData.getAccountName(), inputData.getAccountType(),
+                inputData.getInitialBalance(), inputData.getCurrencyCode());
+            profile.addAccount(account);
+            accountDataAccess.saveAccount(account, profile);
+
+            presenter.prepareSuccessView(new CreateAccountOutputData(
+                account.getAccountID(), account.getAccountName(), false));
+        } catch (IllegalArgumentException exception) {
+            presenter.prepareFailView(exception.getMessage());
+        }
     }
 }
