@@ -5,6 +5,7 @@ import adapter.viewmodel.DashboardViewModel;
 import adapter.viewmodel.ModuleState;
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dialog;
 import java.awt.Dimension;
@@ -167,24 +168,30 @@ public class DashboardView extends JPanel implements PropertyChangeListener {
     Theme.showDimmed(dialog);
   }
 
+  /**
+   * Opens the quiz with the module's notebook beside it. The same notebook carries on into the
+   * lab, so notes taken during the quiz are still there.
+   */
   private void openQuiz(ModuleState module) {
+    // TODO: load the module's saved notebook, and save it on the way back to the dashboard.
+    NotebookPanel notebook = new NotebookPanel();
     HeaderBar header = new HeaderBar("Pre-Procedure Quiz", this::showCompoundSearch, null);
-    quizView.open(module, this::showDashboard, () -> showQuizComplete(module));
+    quizView.open(module, this::showDashboard, () -> showQuizComplete(module, notebook));
     JScrollPane scroll = new JScrollPane(quizView);
     scroll.getVerticalScrollBar().setUnitIncrement(16);
-    showPage.accept(header.above(scroll));
+    showPage.accept(header.above(besideNotebook(scroll, notebook)));
   }
 
   /**
    * The "Good Job!" popup. Exit Module, Save Progress and closing it go to the dashboard (the
    * answers are already saved); Proceed to Experiment opens the next scene.
    */
-  private void showQuizComplete(ModuleState module) {
+  private void showQuizComplete(ModuleState module, NotebookPanel notebook) {
     JDialog dialog = new JDialog(SwingUtilities.getWindowAncestor(this), module.getTitle(),
         Dialog.ModalityType.APPLICATION_MODAL);
     Runnable[] next = {this::showDashboard};
     dialog.setContentPane(new QuizCompletePanel(dialog::dispose, dialog::dispose, () -> {
-      next[0] = () -> showLab(module);
+      next[0] = () -> showLab(module, notebook);
       dialog.dispose();
     }));
     dialog.pack();
@@ -194,9 +201,9 @@ public class DashboardView extends JPanel implements PropertyChangeListener {
     next[0].run();
   }
 
-  private void showLab(ModuleState module) {
+  private void showLab(ModuleState module, NotebookPanel notebook) {
     showPage.accept(new HeaderBar(module.getTitle(), this::showCompoundSearch, null)
-        .above(createNextScene()));
+        .above(besideNotebook(createNextScene(), notebook)));
   }
 
   private JPanel createNextScene() {
@@ -206,13 +213,16 @@ public class DashboardView extends JPanel implements PropertyChangeListener {
     JButton back = new JButton("Back to Dashboard");
     back.addActionListener(event -> showDashboard());
     lab.add(back);
+    return lab;
+  }
 
-    NotebookPanel notebook = new NotebookPanel();
+  /** A page with the module's notebook as a column on its right. */
+  private static JPanel besideNotebook(Component page, NotebookPanel notebook) {
     notebook.setPreferredSize(new Dimension(320, 0));
-    JPanel scene = new JPanel(new BorderLayout());
-    scene.add(lab, BorderLayout.CENTER);
-    scene.add(notebook, BorderLayout.EAST);
-    return scene;
+    JPanel row = new JPanel(new BorderLayout());
+    row.add(page, BorderLayout.CENTER);
+    row.add(notebook, BorderLayout.EAST);
+    return row;
   }
 
   /** Reloads the modules, so Progress is current, then shows the dashboard. */
