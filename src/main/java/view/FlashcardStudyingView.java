@@ -19,7 +19,9 @@ public class FlashcardStudyingView extends JPanel implements ActionListener, Fla
     private final FlashcardStudyingViewModel viewModel;
 
     private final JLabel title;
-    private final JLabel deckTitle;
+    private final JTextField deckTitle;
+    private final JLabel titleLabel;
+    private final JButton startButton;
     private final JLabel displayText;
     private final JButton knewItButton;
     private final JButton stillLearningButton;
@@ -28,7 +30,7 @@ public class FlashcardStudyingView extends JPanel implements ActionListener, Fla
     /**
      * Constructs the Flashcard Studying View
      * Initializes all it's components, and connects the View to the Controller
-     * @param controller the Controller for FlashcardGenerator
+     * @param controller the Controller for FlashcardStudying
      */
     public FlashcardStudyingView(FlashcardStudyingController controller, FlashcardStudyingViewModel viewModel){
         this.controller = controller;
@@ -43,10 +45,23 @@ public class FlashcardStudyingView extends JPanel implements ActionListener, Fla
         title.setAlignmentX(Component.CENTER_ALIGNMENT);
         this.add(title);
 
-        deckTitle = new JLabel("TUTORIAL");
-        deckTitle.setBounds(10,70,200,35);
+        deckTitle = new JTextField(20);
+        deckTitle.setBounds(250,65,200,35);
         deckTitle.setFont(new Font("Chalkduster",Font.BOLD, 25));
         this.add(deckTitle);
+
+        titleLabel = new JLabel("Deck name: ");
+        titleLabel.setBounds(100,65,150,35);
+        titleLabel.setFont(new Font("Chalkduster",Font.BOLD, 25));
+        this.add(titleLabel);
+
+        startButton = new JButton("Start");
+        startButton.setBounds(600,65, 100,35);
+        startButton.setFont(new Font("Chalkduster", Font.PLAIN, 30));
+        startButton.setBackground(Color.BLUE);
+        startButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        startButton.addActionListener(this);
+        this.add(startButton);
 
 
         flipButton = new JButton("Flip");
@@ -73,7 +88,7 @@ public class FlashcardStudyingView extends JPanel implements ActionListener, Fla
         stillLearningButton.addActionListener(this);
         this.add(stillLearningButton);
 
-        displayText = new JLabel();
+        displayText = new JLabel("");
         displayText.setHorizontalAlignment(SwingConstants.CENTER);
         displayText.setVerticalAlignment(SwingConstants.CENTER);
         displayText.setBounds(100,100,600,300);
@@ -98,6 +113,13 @@ public class FlashcardStudyingView extends JPanel implements ActionListener, Fla
 
     @Override
     public void actionPerformed(ActionEvent e) {
+        if (e.getSource() == startButton) {
+            System.out.println("Click " + e.getActionCommand());
+            final FlashcardStudyingState currentState = viewModel.getState();
+            currentState.setText(deckTitle.getText());
+            viewModel.setState(currentState);
+        }
+
         if (e.getSource() == flipButton) {
             System.out.println("Click " + e.getActionCommand());
             final FlashcardStudyingState currentState = viewModel.getState();
@@ -113,7 +135,7 @@ public class FlashcardStudyingView extends JPanel implements ActionListener, Fla
 
     @Override
     public void stateChanged() {
-        displayText.setText(viewModel.getState().getFront());
+        displayText.setText(viewModel.getState().getText());
         title.setText(viewModel.getState().getDeckTitle());
     }
 
