@@ -23,23 +23,27 @@ public class Deck {
     private void stopStudying() {
         studying = false;
         studyingDeck = null;
+        currentCard = null;
     }
 
     public Card getCard() {
-        // if we've finished the deck,
+        // if we've finished the deck, stop
         if (studyingDeck == null) {
-            currentCard = null;
             stopStudying();
             return null;
         }
+        //if this is the first card, turn on studying
         if (!studying) {
             startStudying();
         }
+        // repeatedly search for a card that isn't the same as the current one
+        // the deck shouldn't be null here, but currentCard might be
         Random r = new Random();
         int num = r.nextInt(studyingDeck.size());
         while (studyingDeck.get(num) == currentCard) {
             num = r.nextInt(studyingDeck.size());
         }
+        currentCard = studyingDeck.get(num);
         return studyingDeck.get(num);
     }
     public void addCard(Card card){
