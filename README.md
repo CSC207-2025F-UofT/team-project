@@ -43,7 +43,7 @@
 
 | Name | GitHub | Email | Message for Your Future Self |
 |------|--------|-------|------------------------------|
-| Pauline Nguyen | [papql](https://github.com/papql) | pauline.nguyen@mail.utoronto.ca | kinda want molly tea |
+| Pauline Nguyen | [papql (if you see meow has committed thats my laptop name) ](https://github.com/papql) | pauline.nguyen@mail.utoronto.ca | kinda want molly tea |
 | Lucy Liu | [NOVAx1216-coder](https://github.com/NOVAx1216-coder) | lucymeichen.liu@mail.utoronto.ca | Locked in and Linked Out! |
 | Joon Park | [kdaster](https://github.com/kdaster) | jooner.park@mail.utoronto.ca | |
 | Serena Ganbaatar | [serena-gb](https://github.com/serena-gb) | saruul.ganbaatar@mail.utoronto.ca | This too shall pass. |
