@@ -80,6 +80,45 @@ class NotebookPanelTest {
     assertEquals(2, notebook.text.getCaretPosition());
   }
 
+  @Test
+  void emptyNotebookSavesAsEmpty() {
+    assertEquals("", new NotebookPanel().getHtml());
+  }
+
+  @Test
+  void savedNotesComeBackWithStylesSpacingAndEquations() throws Exception {
+    NotebookPanel notebook = new NotebookPanel();
+    // Leading line break, double spaces, a tab and characters HTML treats specially.
+    notebook.text.setText("\nmass  0.52 g\t<wet> & \"cold\"\nmp ");
+    notebook.text.select(1, 5);
+    notebook.toggle(StyleConstants.Bold);
+    notebook.toggle(StyleConstants.Italic);
+    notebook.text.select(30, 32);
+    notebook.toggle(StyleConstants.StrikeThrough);
+    notebook.text.setCaretPosition(notebook.text.getDocument().getLength());
+    notebook.insertEquation("\\mathrm{H_{2}O}");
+    String typed = notebook.text.getText();
+
+    NotebookPanel reopened = new NotebookPanel();
+    reopened.setHtml(notebook.getHtml());
+    assertEquals(typed, reopened.text.getText());
+    assertTrue(isOn(styleAt(reopened, 1), "B"));
+    assertTrue(isOn(styleAt(reopened, 1), "I"));
+    assertFalse(isOn(styleAt(reopened, 5), "B"));
+    assertTrue(isOn(styleAt(reopened, 30), "S"));
+    Object icon = StyleConstants.getIcon(styleAt(reopened, typed.length() - 2));
+    assertEquals("\\mathrm{H_{2}O}", ((ChemistryLatex.EquationIcon) icon).getLatex());
+    assertEquals(notebook.getHtml(), reopened.getHtml(), "saving again changes nothing");
+  }
+
+  @Test
+  void loadingEmptyNotesClearsTheNotebook() {
+    NotebookPanel notebook = new NotebookPanel();
+    notebook.text.setText("old");
+    notebook.setHtml("");
+    assertEquals("", notebook.getHtml());
+  }
+
   private static void press(NotebookPanel notebook, KeyStroke key) {
     Object name = notebook.text.getInputMap().get(key);
     notebook.text.getActionMap().get(name)
