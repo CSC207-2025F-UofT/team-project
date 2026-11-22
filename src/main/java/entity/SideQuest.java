@@ -13,7 +13,6 @@ public class SideQuest {
 
     public SideQuest(String name,
                      String description,
-                     String photoUrl,
                      String isIndoor,
                      double budget,
                      double expectedTime,
