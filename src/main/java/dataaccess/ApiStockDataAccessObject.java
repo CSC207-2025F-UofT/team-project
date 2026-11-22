@@ -12,12 +12,13 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Optional;
+import usecase.setriskprofile.SetRiskProfileStockDataAccessInterface;
 
 /**
  * Implementation of the Data Access Object (DAO) for accessing stock data that uses the Massive.com
  * API.
  */
-public class ApiStockDataAccessObject {
+public class ApiStockDataAccessObject implements SetRiskProfileStockDataAccessInterface {
   // TODO: After we add data access interfaces to our use cases, make this class implement them.
   private final PolygonRestClient client;
 
@@ -47,6 +48,7 @@ public class ApiStockDataAccessObject {
    * @param to End day of the time period
    * @return A list of aggregate objects for each day in the specified range
    */
+  @Override
   public ArrayList<DailyAggregate> getDailyAggregates(Stock stock, LocalDate from, LocalDate to) {
     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
     AggregatesDTO aggs = client.getAggregatesBlocking(
