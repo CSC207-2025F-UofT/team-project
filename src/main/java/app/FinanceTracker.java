@@ -16,7 +16,6 @@ import java.nio.file.Path;
 /**
  * Main Component / composition root.
  * This is the class to run to launch Finance Tracker.
- * It creates concrete implementations and connects the Clean Architecture flow.
  */
 public final class FinanceTracker {
     private FinanceTracker() {

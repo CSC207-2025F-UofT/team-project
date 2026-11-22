@@ -16,19 +16,18 @@ public class Transaction {
     private final LocalDate date;
     private final Account account;
     private final String transactionCurrency;
-    private final Category category;
     private final String note;
 
     /** Constructor used by the existing income/expense dashboard data. */
     public Transaction(int id, TransactionType type, BigDecimal amount,
                        String description, LocalDate date) {
-        this(id, type, amount, description, date, null, null, null, null);
+        this(id, type, amount, description, date, null, null, null);
     }
 
     /** Constructor for transactions associated with a financial account. */
     public Transaction(int id, TransactionType type, BigDecimal amount,
                        String description, LocalDate date, Account account,
-                       String transactionCurrency, Category category, String note) {
+                       String transactionCurrency, String note) {
         if (id < 0) throw new IllegalArgumentException("Transaction ID cannot be negative.");
         if (type == null) throw new IllegalArgumentException("Transaction type is required.");
         if (amount == null || amount.signum() <= 0) {
@@ -44,7 +43,6 @@ public class Transaction {
         this.date = Objects.requireNonNull(date, "Date is required.");
         this.account = account;
         this.transactionCurrency = transactionCurrency;
-        this.category = category;
         this.note = note;
         if (account != null && (transactionCurrency == null || transactionCurrency.isBlank())) {
             throw new IllegalArgumentException("Currency is required for account transactions.");
@@ -59,7 +57,6 @@ public class Transaction {
     public String getDescription() { return description; }
     public Account getAccount() { return account; }
     public String getCurrency() { return transactionCurrency; }
-    public Category getCategory() { return category; }
     public String getNote() { return note; }
 
     /** Applies an already-converted amount to the linked account balance. */
