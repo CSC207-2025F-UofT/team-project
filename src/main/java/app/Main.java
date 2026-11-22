@@ -10,7 +10,9 @@ public class Main {
         SwingUtilities.invokeLater(() -> {
             JFrame application = new AppBuilder()
                     .addGameView()
+                    .addDialogueView()
                     .addNewGameUseCase()
+                    .addTalkToNpcUseCase()
                     .build();
             application.setSize(480, 360);
             application.setLocationRelativeTo(null);
