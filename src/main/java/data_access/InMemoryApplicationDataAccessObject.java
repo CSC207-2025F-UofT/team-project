@@ -12,7 +12,8 @@ import use_case.track_applications.TrackApplicationsDataAccessInterface;
 /**
  * In-memory implementation of the DAO for storing applications. This implementation does
  * NOT persist data between runs of the program.
- * Saving an application replaces the saved one with the same id.
+ * Saving an application replaces the saved one with the same id. Changes to an application
+ * are stored only when it is saved.
  */
 public class InMemoryApplicationDataAccessObject implements SubmitApplicationDataAccessInterface,
         TrackApplicationsDataAccessInterface {
@@ -32,7 +33,7 @@ public class InMemoryApplicationDataAccessObject implements SubmitApplicationDat
 
     @Override
     public void save(Application application) {
-        applications.put(application.getId(), application);
+        applications.put(application.getId(), application.copy());
     }
 
     @Override
@@ -40,7 +41,7 @@ public class InMemoryApplicationDataAccessObject implements SubmitApplicationDat
         final List<Application> result = new ArrayList<>();
         for (Application application : applications.values()) {
             if (application.getAdopterId().equals(adopterId)) {
-                result.add(application);
+                result.add(application.copy());
             }
         }
         return result;

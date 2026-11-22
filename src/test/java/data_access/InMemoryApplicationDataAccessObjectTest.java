@@ -26,6 +26,19 @@ class InMemoryApplicationDataAccessObjectTest {
         assertEquals(ApplicationStatus.WITHDRAWN, dataAccess.getApplicationsByAdopter(ADOPTER).get(0).getStatus());
     }
 
+    @Test
+    void unsavedChangeIsNotShownAsSaved() {
+        final InMemoryApplicationDataAccessObject dataAccess = new InMemoryApplicationDataAccessObject();
+        final Application application = pendingApplication();
+        dataAccess.save(application);
+
+        application.withdraw();
+        assertEquals(ApplicationStatus.PENDING, dataAccess.getApplicationsByAdopter(ADOPTER).get(0).getStatus());
+
+        dataAccess.getApplicationsByAdopter(ADOPTER).get(0).withdraw();
+        assertEquals(ApplicationStatus.PENDING, dataAccess.getApplicationsByAdopter(ADOPTER).get(0).getStatus());
+    }
+
     private Application pendingApplication() {
         return new Application("a1", ADOPTER, "mochi", "House", "Had two cats",
                 "2 adults", "me@example.com", "", LocalDate.of(2026, 11, 16));
