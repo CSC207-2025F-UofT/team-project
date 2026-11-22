@@ -32,7 +32,7 @@ public class AddSideQuestInteractor implements AddSideQuestInputBoundary{
         SideQuest sideQuest = new SideQuest(inputData.getName(), inputData.getDescription(), inputData.getPhotoUrl(),
                 inputData.isIndoor(), inputData.getBudget(), inputData.getExpectedTime(), inputData.getExp(),
                 inputData.getLocation(), inputData.getInterests()
-        )
+        );
     }
 }
 
