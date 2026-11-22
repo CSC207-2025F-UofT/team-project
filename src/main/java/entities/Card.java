@@ -22,4 +22,8 @@ public class Card {
     public void flip() {
         questionFacingUp = !questionFacingUp;
     }
+
+    public boolean getQuestionFacingUp() {
+        return questionFacingUp;
+    }
 }
