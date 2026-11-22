@@ -2,9 +2,12 @@ package data_access;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.AccessDeniedException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+import java.nio.file.StandardOpenOption;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -79,10 +82,30 @@ public class FileApplicationDataAccessObject implements SubmitApplicationDataAcc
             array.put(json);
         }
         try {
-            Files.write(jsonPath, array.toString(2).getBytes(StandardCharsets.UTF_8));
+            replaceFile(array.toString(2));
         }
         catch (IOException ex) {
             throw new RuntimeException(ex);
+        }
+    }
+
+    // The old file is replaced only after the new one is completely written,
+    // so a save that fails halfway cannot damage it.
+    private void replaceFile(String text) throws IOException {
+        final Path target = jsonPath.toAbsolutePath();
+        // Needed because moving a file onto a read-only file would succeed on macOS and Linux.
+        if (Files.exists(target) && !Files.isWritable(target)) {
+            throw new AccessDeniedException(target.toString());
+        }
+        final Path temporaryFile = Files.createTempFile(target.getParent(), "applications-", ".tmp");
+        try {
+            Files.write(temporaryFile, text.getBytes(StandardCharsets.UTF_8),
+                    StandardOpenOption.WRITE, StandardOpenOption.SYNC);
+            Files.move(temporaryFile, target,
+                    StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
+        }
+        finally {
+            Files.deleteIfExists(temporaryFile);
         }
     }
 

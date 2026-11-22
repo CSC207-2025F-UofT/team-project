@@ -5,6 +5,8 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDate;
 import java.util.List;
@@ -106,6 +108,23 @@ class FileApplicationDataAccessObjectTest {
 
         assertThrows(RuntimeException.class, () -> dataAccess.save(application));
         assertTrue(dataAccess.getApplicationsByAdopter(ADOPTER).isEmpty());
+    }
+
+    @Test
+    void saveNeverWritesOverTheOldFile() throws IOException {
+        final Path path = folder.resolve(FILE_NAME);
+        final FileApplicationDataAccessObject dataAccess = new FileApplicationDataAccessObject(path.toString());
+        final Application application = pendingApplication("replaced");
+        dataAccess.save(application);
+
+        // A second name for the old file: it changes too if save writes over that file.
+        final Path oldFile = Files.createLink(folder.resolve("old.json"), path);
+        final String oldText = Files.readString(oldFile);
+        application.withdraw();
+        dataAccess.save(application);
+
+        assertEquals(oldText, Files.readString(oldFile));
+        assertFalse(new FileApplicationDataAccessObject(path.toString()).hasActiveApplication(ADOPTER, "tama"));
     }
 
     private Application pendingApplication(String id) {
