@@ -6,14 +6,28 @@ import java.util.List;
 
 public class ColourPalette {
     private String name;
-    private final String baseColour; // hex code
-    private final String schemeType;
+    private String baseColour;
+    private String schemeType;
     private final List<String> colours = new ArrayList<>();
+
+    // Creates an empty palette when a new project is created.
+    public ColourPalette() {
+        this.name = "Untitled Palette";
+    }
 
     public ColourPalette(String name, String baseColour, String schemeType) {
         setName(name);
         this.baseColour = validateHex(baseColour);
-        this.schemeType = schemeType;
+        this.schemeType = validateSchemeType(schemeType);
+    }
+
+    // Fills the palette once the user picks a base colour and scheme.
+    public void generate(String baseColour, String schemeType, List<String> newColours) {
+        String validBase = validateHex(baseColour);
+        String validScheme = validateSchemeType(schemeType);
+        setColours(newColours);
+        this.baseColour = validBase;
+        this.schemeType = validScheme;
     }
 
     public String getName() {
@@ -79,5 +93,12 @@ public class ColourPalette {
             throw new IllegalArgumentException("Colour must be a hex string like #FF0000");
         }
         return colour.toUpperCase();
+    }
+
+    private static String validateSchemeType(String schemeType) {
+        if (schemeType == null || schemeType.isBlank()) {
+            throw new IllegalArgumentException("Scheme type cannot be empty");
+        }
+        return schemeType;
     }
 }
