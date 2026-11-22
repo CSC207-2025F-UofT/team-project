@@ -30,8 +30,10 @@ entertainment
 ### User Story 6:
 #### As a user of the movie finder I want to see past comments or movie ratings so that I can look at other's opinion about the movie and also the overall rating of a movie.
 ### User Story 7:
-#### As a user [type of user] I want to filter and sort movies so that I can [some benefit]
+#### As a user of the movie finder I want to have a watchlist page so that I can view my watchlist later.
 ### User Story 8:
+#### As a user [type of user] I want to filter and sort movies so that I can [some benefit]
+### User Story 9:
 #### As a user [type of user] I want to be able to log in/log out so that I can [some benefit]
 
 ---
@@ -189,21 +191,49 @@ the system does not display any comments or ratings
 3a. A reviewer has not provided an individual rating
 The system displays the review without a rating or shows "Not rated"
 
+### Use Case 7
+Use Case: View watchlist
+
+Primary actor: User who wants to see the movies they saved to watch later
+
+Preconditions:
+
+The user is logged in.
+Trigger: The user clicks the "My Watchlist" button.
+
+
+Success outcome: The system displays every movie in the user's watchlist with its poster and title, including movies saved before the user last logged out.
+
+Main success scenario:
+
+The user clicks the "My Watchlist" button.
+The system retrieves the movies saved in the user's watchlist.
+The system displays the poster and title of each movie.
+
+Extensions:
+
+2a. The user's watchlist is empty.
+The system displays a message that the watchlist is empty.
+
+3a. A movie poster is unavailable or fails to load.
+The system displays "No poster" in place of the image and still shows the title.
+
 (Add additional use cases as needed.)
 ---
 ## Minimal Viable Product (MVP)
-| Team Member | MVP Use Case |
-|-------------|--------------|
-| Mehal Patel | Use Case #1: Search a movie|
-| Grace Manurung | Use Case #6: Comments and Ratings |
-| Syaikha Faiza Arifin | Use Case #3: Add a movie to watchlist |
-| Yuxuan Lin | Use Case #4: Add a movie to favourites |
-| Frank Li | Use Case #2: View movie details |
-| Zhanyuan Su | Use Case#5：View movie posters |
+| Team Member | MVP Use Case                                                    |
+|-------------|-----------------------------------------------------------------|
+| Mehal Patel | Use Case #1: Search a movie                                     |
+| Grace Manurung | Use Case #6: Comments and Ratings                               |
+| Syaikha Faiza Arifin | Use Case #3 and #7: Add a movie to watchlist and View Watchlist |
+| Yuxuan Lin | Use Case #4: Add a movie to favourites                          |
+| Frank Li | Use Case #2: View movie details                                 |
+| Zhanyuan Su | Use Case#5：View movie posters                                   |
 ---
 ## Entities
 ### Entity 1: Movie
 ### Entity 2: User 
+### Entity 3: Watchlist Movie
 (Add additional entities as needed.)
 ---
 ## API Usage
