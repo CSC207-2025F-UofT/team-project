@@ -1,5 +1,6 @@
 package data_access;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -125,6 +126,17 @@ class FileApplicationDataAccessObjectTest {
 
         assertEquals(oldText, Files.readString(oldFile));
         assertFalse(new FileApplicationDataAccessObject(path.toString()).hasActiveApplication(ADOPTER, "tama"));
+    }
+
+    @Test
+    void failedSaveLeavesNoTemporaryFile() throws IOException {
+        final Path path = folder.resolve(FILE_NAME);
+        final FileApplicationDataAccessObject dataAccess = new FileApplicationDataAccessObject(path.toString());
+        final Application application = pendingApplication("blocked");
+        Files.createDirectory(path);
+
+        assertThrows(RuntimeException.class, () -> dataAccess.save(application));
+        assertArrayEquals(new String[] {FILE_NAME}, folder.toFile().list());
     }
 
     private Application pendingApplication(String id) {
