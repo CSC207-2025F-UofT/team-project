@@ -1,6 +1,6 @@
 package application_business_rules.upload_receipt;
 
-/** TODO: Mashac implements receipt storage/extraction orchestration here. */
+/** Stores a receipt and asks the injected extraction service for candidate details. */
 public final class UploadReceiptInteractor implements UploadReceiptInputBoundary {
     private final ReceiptDataAccessInterface dataAccess;
     private final UploadReceiptOutputBoundary presenter;
@@ -13,6 +13,22 @@ public final class UploadReceiptInteractor implements UploadReceiptInputBoundary
 
     @Override
     public void execute(UploadReceiptInputData inputData) {
-        throw new UnsupportedOperationException("Upload Receipt use case not implemented yet.");
+        try {
+            if (inputData.getFileContents() == null || inputData.getFileContents().length == 0) {
+                presenter.prepareFailView("Choose a receipt file first.");
+                return;
+            }
+            String reference = dataAccess.storeReceipt(inputData.getUserProfileId(),
+                inputData.getFileName(), inputData.getFileContents());
+            UploadReceiptOutputData extracted = dataAccess.extractReceiptDetails(reference);
+            if (extracted == null) {
+                presenter.prepareFailView("Receipt details could not be extracted.");
+                return;
+            }
+            presenter.prepareSuccessView(new UploadReceiptOutputData(
+                extracted.getMerchant(), extracted.getTotal(), extracted.getDate(), reference));
+        } catch (RuntimeException exception) {
+            presenter.prepareFailView(exception.getMessage());
+        }
     }
 }
