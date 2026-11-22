@@ -46,5 +46,5 @@ public abstract class AccountTransaction {
     public Category getCategory() { return category; }
     public String getNote() { return note; }
 
-    public abstract void applyToAccount();
+    public abstract void applyToAccount(BigDecimal amountInAccountCurrency);
 }
