@@ -5,7 +5,7 @@ import java.time.LocalDate;
 /**
  * An adopter's application to adopt one specific pet.
  */
-public class Application {
+public final class Application {
 
     private final String id;
     private final String adopterId;
@@ -21,6 +21,15 @@ public class Application {
 
     /**
      * Creates a new application with status PENDING.
+     * @param id the application's id
+     * @param adopterId the adopter who is applying
+     * @param petId the pet being applied for
+     * @param housingType the adopter's housing type
+     * @param petExperience the adopter's experience with pets
+     * @param householdMembers who lives in the adopter's home
+     * @param contactInfo how the shelter can reach the adopter
+     * @param note an optional note
+     * @param submittedAt the day the application was submitted
      * @throws IllegalArgumentException if a required value is missing
      */
     public Application(String id, String adopterId, String petId, String housingType, String petExperience,
@@ -31,6 +40,17 @@ public class Application {
 
     /**
      * Creates an application with a given status, for example when loading saved data.
+     * @param id the application's id
+     * @param adopterId the adopter who is applying
+     * @param petId the pet being applied for
+     * @param housingType the adopter's housing type
+     * @param petExperience the adopter's experience with pets
+     * @param householdMembers who lives in the adopter's home
+     * @param contactInfo how the shelter can reach the adopter
+     * @param note an optional note
+     * @param submittedAt the day the application was submitted
+     * @param status the application's status
+     * @param adminNote the shelter's note, may be empty
      * @throws IllegalArgumentException if a required value is missing
      */
     public Application(String id, String adopterId, String petId, String housingType, String petExperience,
@@ -43,13 +63,13 @@ public class Application {
         this.petExperience = require(petExperience, "Pet experience");
         this.householdMembers = require(householdMembers, "Household members");
         this.contactInfo = require(contactInfo, "Contact information");
-        this.note = note == null ? "" : note.trim();
+        this.note = emptyIfNull(note).trim();
         if (submittedAt == null || status == null) {
             throw new IllegalArgumentException("Date and status are required.");
         }
         this.submittedAt = submittedAt;
         this.status = status;
-        this.adminNote = adminNote == null ? "" : adminNote;
+        this.adminNote = emptyIfNull(adminNote);
     }
 
     private static String require(String value, String fieldName) {
@@ -57,6 +77,14 @@ public class Application {
             throw new IllegalArgumentException(fieldName + " is required.");
         }
         return value.trim();
+    }
+
+    private static String emptyIfNull(String value) {
+        String result = value;
+        if (result == null) {
+            result = "";
+        }
+        return result;
     }
 
     /**
@@ -82,13 +110,14 @@ public class Application {
      * Records the shelter's decision.
      * @param newStatus the new status
      * @param newAdminNote a note for the adopter, may be empty
+     * @throws IllegalArgumentException if the new status is missing
      */
     public void updateStatus(ApplicationStatus newStatus, String newAdminNote) {
         if (newStatus == null) {
             throw new IllegalArgumentException("Status is required.");
         }
         this.status = newStatus;
-        this.adminNote = newAdminNote == null ? "" : newAdminNote;
+        this.adminNote = emptyIfNull(newAdminNote);
     }
 
     public String getId() {
