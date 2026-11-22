@@ -32,6 +32,11 @@ class SubmitApplicationInteractorTest {
                 "me@example.com", "I work from home");
     }
 
+    private SubmitApplicationInputData inputFrom(String adopterId) {
+        return new SubmitApplicationInputData(adopterId, "mochi", "Condo", "One cat", "1 adult",
+                "bob@example.com", "");
+    }
+
     @Test
     void successCreatesPendingApplication() {
         interactor.execute(input("mochi", "Apartment"));
@@ -71,6 +76,24 @@ class SubmitApplicationInteractorTest {
         assertEquals("You already have an application for this pet.", presenter.error);
         assertNull(presenter.success);
         assertEquals(1, applicationDataAccess.getApplicationsByAdopter("adopter1").size());
+    }
+
+    @Test
+    void idsDifferingOnlyBySpaceAreSeparateAdopters() {
+        final String bob = "bob";
+        final String bobWithSpace = "bob ";
+
+        interactor.execute(inputFrom(bobWithSpace));
+        assertTrue(applicationDataAccess.getApplicationsByAdopter(bob).isEmpty());
+        assertEquals(1, applicationDataAccess.getApplicationsByAdopter(bobWithSpace).size());
+
+        interactor.execute(inputFrom(bob));
+        assertNull(presenter.error);
+        assertEquals(1, applicationDataAccess.getApplicationsByAdopter(bob).size());
+
+        interactor.execute(inputFrom(bobWithSpace));
+        assertEquals("You already have an application for this pet.", presenter.error);
+        assertEquals(1, applicationDataAccess.getApplicationsByAdopter(bobWithSpace).size());
     }
 
     @Test
