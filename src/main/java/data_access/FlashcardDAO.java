@@ -37,8 +37,8 @@ public class FlashcardDAO implements FlashcardDataAccessInterface {
             for(Card card : deck.getFlashcardDeck() ){
                 // Add each card to the deck
                 JsonObject cardJson = new JsonObject();
-                cardJson.addProperty("question", card.get_question());
-                cardJson.addProperty("answer", card.get_answer());
+                cardJson.addProperty("question", card.getQuestion());
+                cardJson.addProperty("answer", card.getAnswer());
 
                 cardsJson.add(cardJson);
             }
@@ -61,7 +61,7 @@ public class FlashcardDAO implements FlashcardDataAccessInterface {
      * @return the Entity Deck mapped to deckId
      */
     @Override
-    public Deck loadDeck(String deckId) {
+    public Deck loadDeck(String deckId) throws IllegalStateException {
         Path file = folder.resolve(deckId + ".json");
 
         try (Reader reader = Files.newBufferedReader(file)) {
