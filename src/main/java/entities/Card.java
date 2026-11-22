@@ -11,11 +11,11 @@ public class Card {
         questionFacingUp = true;
     }
 
-    public String get_question() {
+    public String getQuestion() {
         return question;
     }
 
-    public String get_answer() {
+    public String getAnswer() {
         return answer;
     }
 
