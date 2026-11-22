@@ -2,8 +2,9 @@ package use_case.watchlist;
 
 import entity.Watchlist;
 
-public interface watchListDataAccessInterface {
-    Watchlist load(String username);
+public interface WatchListDataAccessInterface {
+
+    Watchlist get(String username);
 
     void save(String username, Watchlist watchlist);
 }
