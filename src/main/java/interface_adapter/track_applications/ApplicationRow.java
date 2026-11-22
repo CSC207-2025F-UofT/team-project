@@ -3,7 +3,7 @@ package interface_adapter.track_applications;
 /**
  * One application, formatted as text for the My Applications table.
  */
-public class ApplicationRow {
+public final class ApplicationRow {
 
     private final String petName;
     private final String submittedAt;
