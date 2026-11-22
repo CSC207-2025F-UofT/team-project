@@ -32,6 +32,15 @@ class ApplicationTest {
     }
 
     @Test
+    void idsAreKeptExactlyAsGiven() {
+        final Application application = new Application(" a1 ", "bob ", " pet1", "House", "Had two cats",
+                "2 adults", "me@example.com", "", LocalDate.of(2026, 11, 16));
+        assertEquals(" a1 ", application.getId());
+        assertEquals("bob ", application.getAdopterId());
+        assertEquals(" pet1", application.getPetId());
+    }
+
+    @Test
     void withdrawOnlyWhilePending() {
         final Application application = newApplication();
         application.withdraw();

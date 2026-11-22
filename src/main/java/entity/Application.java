@@ -56,9 +56,9 @@ public final class Application {
     public Application(String id, String adopterId, String petId, String housingType, String petExperience,
                        String householdMembers, String contactInfo, String note, LocalDate submittedAt,
                        ApplicationStatus status, String adminNote) {
-        this.id = require(id, "Application id");
-        this.adopterId = require(adopterId, "Adopter");
-        this.petId = require(petId, "Pet");
+        this.id = requireId(id, "Application id");
+        this.adopterId = requireId(adopterId, "Adopter");
+        this.petId = requireId(petId, "Pet");
         this.housingType = require(housingType, "Housing type");
         this.petExperience = require(petExperience, "Pet experience");
         this.householdMembers = require(householdMembers, "Household members");
@@ -77,6 +77,12 @@ public final class Application {
             throw new IllegalArgumentException(fieldName + " is required.");
         }
         return value.trim();
+    }
+
+    // Ids are never trimmed: "bob" and "bob " are different users.
+    private static String requireId(String value, String fieldName) {
+        require(value, fieldName);
+        return value;
     }
 
     private static String emptyIfNull(String value) {
