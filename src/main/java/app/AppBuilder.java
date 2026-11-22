@@ -192,6 +192,7 @@ public class AppBuilder {
         flashcardGeneratorView = new FlashcardGeneratorView(flashcardGeneratorViewModel, homeViewModel);
 
 
+        // Add view to card layout
         cardPanel.add(flashcardGeneratorView,ViewNames.MAKE_FLASHCARDS);
         return this;
 
