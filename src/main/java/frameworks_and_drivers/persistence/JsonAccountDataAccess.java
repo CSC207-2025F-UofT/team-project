@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.LocalDateTime;
 
 /** JSON implementation of the Create Account use case's Data Access Interface. */
 public final class JsonAccountDataAccess implements AccountDataAccessInterface {
@@ -55,7 +56,8 @@ public final class JsonAccountDataAccess implements AccountDataAccessInterface {
                             userProfileId, accountRow.getString("name"),
                             AccountType.valueOf(accountRow.getString("type")),
                             new BigDecimal(accountRow.getString("balance")),
-                            accountRow.getString("currency"));
+                            accountRow.getString("currency"),
+                            LocalDateTime.parse(accountRow.getString("createdAt")));
                         profile.addAccount(account);
                     }
                 }
