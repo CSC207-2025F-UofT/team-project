@@ -88,6 +88,15 @@ public final class Application {
     }
 
     /**
+     * Returns a separate copy of this application, so changing one does not change the other.
+     * @return the copy
+     */
+    public Application copy() {
+        return new Application(id, adopterId, petId, housingType, petExperience, householdMembers, contactInfo,
+                note, submittedAt, status, adminNote);
+    }
+
+    /**
      * Returns whether the shelter is still considering this application.
      * @return true if the status is PENDING or INTERVIEW
      */
