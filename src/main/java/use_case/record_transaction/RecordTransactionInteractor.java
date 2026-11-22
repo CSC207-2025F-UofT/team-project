@@ -11,6 +11,8 @@ import java.math.BigDecimal;
 public class RecordTransactionInteractor
         implements RecordTransactionInputBoundary {
 
+    private static final BigDecimal MAX_AMOUNT = new BigDecimal("50000.00");
+
     private final RecordTransactionDataAccessInterface transactionDataAccess;
     private final RecordTransactionOutputBoundary transactionPresenter;
 
@@ -38,13 +40,26 @@ public class RecordTransactionInteractor
             return;
         }
 
+        final String amountText = inputData.getAmount().strip();
+        if (!amountText.matches("[0-9]+(\\.[0-9]{1,2})?")) {
+            transactionPresenter.prepareFailView(
+                    "Use a plain number with up to 2 decimal places.");
+            return;
+        }
+
         final BigDecimal amount;
         try {
-            amount = new BigDecimal(inputData.getAmount().strip());
+            amount = new BigDecimal(amountText);
         }
         catch (NumberFormatException exception) {
             transactionPresenter.prepareFailView(
                     "Please enter a valid number for the amount.");
+            return;
+        }
+
+        if (amount.compareTo(MAX_AMOUNT) > 0) {
+            transactionPresenter.prepareFailView(
+                    "Amount must be " + MAX_AMOUNT.toPlainString() + " or less.");
             return;
         }
 
