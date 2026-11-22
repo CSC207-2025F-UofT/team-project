@@ -13,10 +13,11 @@ import adapter.presenter.SubmitQuizPresenter;
 import adapter.viewmodel.CompoundViewModel;
 import adapter.viewmodel.DashboardViewModel;
 import adapter.viewmodel.QuizViewModel;
-import data.InMemoryLabDataAccessObject;
+import data.JsonLabDataAccessObject;
 import data.PubChemCompoundDataAccessObject;
 import data.RandomChoiceOrderer;
 import java.awt.GraphicsEnvironment;
+import java.nio.file.Path;
 import java.time.Clock;
 import java.util.Random;
 import javax.swing.JFrame;
@@ -43,7 +44,8 @@ public class LabApp {
    */
   public static void main(String[] args) {
     // TODO: create the UML's SampleAssigner and pass it to the DAO.
-    InMemoryLabDataAccessObject dataAccess = new InMemoryLabDataAccessObject();
+    JsonLabDataAccessObject dataAccess = new JsonLabDataAccessObject(
+        Path.of(System.getProperty("user.home"), ".chm136-virtual-lab", "save.json"));
 
     DashboardViewModel dashboardViewModel = new DashboardViewModel();
     LoadDashboardController loadDashboardController = new LoadDashboardController(
