@@ -2,7 +2,10 @@ package app;
 
 import data_access.FileUserDataAccessObject;
 import data_access.GoogleDesktopIdentityGateway;
+import data_access.InMemoryTransactionDataAccessObject;
+
 import entity.UserFactory;
+
 import interface_adapter.ViewManagerModel;
 import interface_adapter.google_login.GoogleLoginController;
 import interface_adapter.logged_in.ChangePasswordController;
@@ -13,9 +16,14 @@ import interface_adapter.login.LoginPresenter;
 import interface_adapter.login.LoginViewModel;
 import interface_adapter.logout.LogoutController;
 import interface_adapter.logout.LogoutPresenter;
+import interface_adapter.record_transaction.RecordTransactionController;
+import interface_adapter.record_transaction.RecordTransactionPresenter;
+import interface_adapter.record_transaction.RecordTransactionState;
+import interface_adapter.record_transaction.RecordTransactionViewModel;
 import interface_adapter.signup.SignupController;
 import interface_adapter.signup.SignupPresenter;
 import interface_adapter.signup.SignupViewModel;
+
 import use_case.change_password.ChangePasswordInputBoundary;
 import use_case.change_password.ChangePasswordInteractor;
 import use_case.change_password.ChangePasswordOutputBoundary;
@@ -27,11 +35,16 @@ import use_case.login.LoginOutputData;
 import use_case.logout.LogoutInputBoundary;
 import use_case.logout.LogoutInteractor;
 import use_case.logout.LogoutOutputBoundary;
+import use_case.record_transaction.RecordTransactionInputBoundary;
+import use_case.record_transaction.RecordTransactionInteractor;
+import use_case.record_transaction.RecordTransactionOutputBoundary;
 import use_case.signup.SignupInputBoundary;
 import use_case.signup.SignupInteractor;
 import use_case.signup.SignupOutputBoundary;
+
 import view.LoggedInView;
 import view.LoginView;
+import view.RecordTransactionView;
 import view.SignupView;
 import view.ViewManager;
 
@@ -52,12 +65,18 @@ public class AppBuilder {
     // DAO version using local file storage
     final FileUserDataAccessObject userDataAccessObject = new FileUserDataAccessObject("users.csv", userFactory);
 
+    private final InMemoryTransactionDataAccessObject transactionDataAccessObject =
+            new InMemoryTransactionDataAccessObject(userDataAccessObject);
+
     private SignupView signupView;
     private SignupViewModel signupViewModel;
     private LoginViewModel loginViewModel;
     private LoggedInViewModel loggedInViewModel;
     private LoggedInView loggedInView;
     private LoginView loginView;
+
+    private RecordTransactionView recordTransactionView;
+    private RecordTransactionViewModel recordTransactionViewModel;
 
     public AppBuilder() {
         cardPanel.setLayout(cardLayout);
@@ -183,6 +202,43 @@ public class AppBuilder {
                 }
             }.execute();
         });
+        return this;
+    }
+
+    public AppBuilder addRecordTransactionView() {
+        recordTransactionViewModel = new RecordTransactionViewModel();
+        recordTransactionView = new RecordTransactionView(recordTransactionViewModel);
+
+        cardPanel.add(recordTransactionView, RecordTransactionViewModel.VIEW_NAME);
+        return this;
+    }
+
+    public AppBuilder addRecordTransactionUseCase() {
+        final RecordTransactionOutputBoundary presenter =
+                new RecordTransactionPresenter(recordTransactionViewModel);
+
+        final RecordTransactionInputBoundary interactor =
+                new RecordTransactionInteractor(transactionDataAccessObject, presenter);
+
+        final RecordTransactionController controller =
+                new RecordTransactionController(interactor);
+
+        recordTransactionView.setRecordTransactionController(controller);
+
+        loggedInView.setShowRecordTransaction(() -> {
+            // Start with a fresh form whenever this screen opens.
+            recordTransactionViewModel.setState(new RecordTransactionState());
+            recordTransactionViewModel.notifyStateChanged();
+
+            viewManagerModel.setState(RecordTransactionViewModel.VIEW_NAME);
+            viewManagerModel.notifyViewChanged();
+        });
+
+        recordTransactionView.setBackAction(() -> {
+            viewManagerModel.setState(LoggedInViewModel.VIEW_NAME);
+            viewManagerModel.notifyViewChanged();
+        });
+
         return this;
     }
 

@@ -13,11 +13,13 @@ public class Main {
                 .addLoginView()
                 .addSignupView()
                 .addLoggedInView()
+                .addRecordTransactionView() // added for transaction record
                 .addSignupUseCase()
                 .addLoginUseCase()
                 .addChangePasswordUseCase()
                 .addLogoutUseCase()
                 .addGoogleLoginUseCase()
+                .addRecordTransactionUseCase() // added for transaction record
                 .build();
 
         application.pack();
