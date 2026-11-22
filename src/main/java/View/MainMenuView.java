@@ -1,3 +1,5 @@
+package View;
+
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import javax.swing.BoxLayout;
@@ -8,7 +10,7 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 
-import MainMenuViewModel;
+//import MainMenuViewModel;
 
 public class MainMenuView {
 
@@ -32,14 +34,14 @@ public class MainMenuView {
                     JPanel buttonPanel = new JPanel();
                     JButton play = new JButton("Play");
                     buttonPanel.add(play);
-                    JButton stats = new JButton("Check Stats");
+                    JButton stats = new JButton("View Stats");
                     buttonPanel.add(stats);
 
                     play.addActionListener(new ActionListener() {
                         @Override
                         public void actionPerformed(ActionEvent e) {
                             String username = usernameField.getText();
-                            mainMenuViewModel.setState();
+                            //mainMenuViewModel.setState();
                         }
                     });
                     JPanel mainPanel = new JPanel();
