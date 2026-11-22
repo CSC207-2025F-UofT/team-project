@@ -1,0 +1,35 @@
+{
+  "npcs": [
+    {
+      "id": "shawarma_lady",
+      "name": "Shawarma Lady",
+      "startNodeId": "greeting",
+      "nodes": [
+        {
+          "id": "greeting",
+          "text": "Next! What'll it be, kid? And before you ask: no, there is no student discount.",
+          "options": [
+            {
+              "id": "ask_about_day",
+              "text": "Ask how her day is going",
+              "message": "She talks your ear off for ten minutes about her grandkids. It is weirdly comforting, but your legs are tired from standing in line.",
+              "energy": -5,
+              "sanity": 10,
+              "academic": 0,
+              "money": 0
+            },
+            {
+              "id": "complain_about_prices",
+              "text": "Complain about the prices",
+              "message": "She points her tongs at you. \"You think tahini grows on trees? Next!\" Everyone in line is staring. You walk away embarrassed.",
+              "energy": 0,
+              "sanity": -10,
+              "academic": 0,
+              "money": 0
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
