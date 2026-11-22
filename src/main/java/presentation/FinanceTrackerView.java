@@ -24,6 +24,7 @@ public final class FinanceTrackerView extends JFrame {
     private final JLabel incomeTotal = new JLabel();
     private final JLabel expenseTotal = new JLabel();
     private final JLabel balance = new JLabel();
+    private boolean updatingUsers;
 
     public FinanceTrackerView(TransactionDashboardController controller,
                               TransactionDashboardViewModel viewModel) {
@@ -64,7 +65,9 @@ public final class FinanceTrackerView extends JFrame {
 
         JPanel actions = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         actions.setOpaque(false);
-        users.addActionListener(event -> loadSelectedUser());
+        users.addActionListener(event -> {
+            if (!updatingUsers) loadSelectedUser();
+        });
         actions.add(new JLabel("Profile:"));
         actions.add(users);
         JButton add = new JButton("Add Transaction");
@@ -190,9 +193,11 @@ public final class FinanceTrackerView extends JFrame {
 
     private void refresh() {
         String selected = (String) users.getSelectedItem();
+        updatingUsers = true;
         users.removeAllItems();
         for (String user : viewModel.getUsers()) users.addItem(user);
         if (selected != null) users.setSelectedItem(selected);
+        updatingUsers = false;
 
         incomeRows.clear();
         for (Transaction transaction : viewModel.getIncome()) incomeRows.addElement(transaction);
