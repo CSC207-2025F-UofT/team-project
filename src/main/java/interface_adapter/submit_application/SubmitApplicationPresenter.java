@@ -10,6 +10,10 @@ public class SubmitApplicationPresenter implements SubmitApplicationOutputBounda
 
     private final SubmitApplicationViewModel submitApplicationViewModel;
 
+    /**
+     * Creates the presenter.
+     * @param submitApplicationViewModel the view model to update
+     */
     public SubmitApplicationPresenter(SubmitApplicationViewModel submitApplicationViewModel) {
         this.submitApplicationViewModel = submitApplicationViewModel;
     }
