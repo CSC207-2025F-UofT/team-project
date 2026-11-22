@@ -7,6 +7,8 @@ import main.interface_adapters.main_menu.MainMenuViewModel;
 import main.view.GameView;
 import main.view.MainMenuView;
 
+import java.util.List;
+
 public class LobbyPresenter {
 
     private final ViewManagerModel viewManagerModel;
@@ -30,6 +32,9 @@ public class LobbyPresenter {
     public void switchToGameView(int num_players) {
         viewManagerModel.setActiveView(GameViewModel.VIEW_NAME);
         viewManagerModel.notifyViewChanged();
+        List<String> names = List.of("Jim", "Janiel", "Janthony", "Jmarcus", "Jabriel", "Jomas");
+        List<String> chips = List.of("1000", "1000", "1000", "1000", "1000", "1000");
+        gameViewModel.saveOpponentData(names, chips);
         gameViewModel.setPlayers(num_players);
     }
 
