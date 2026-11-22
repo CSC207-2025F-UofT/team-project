@@ -9,8 +9,13 @@ public interface CreationOutputBoundary {
     void prepareSuccessView(CreationOutputData outputData);
 
     /**
-     * Prepares the failure view for the CreatFile Use Case.
+     * Prepares the failure view for the creating a document use case.
      * @param errorMessage the explanation of the failure
      */
     void prepareFailView(String errorMessage);
+
+    /**
+     * Switches to the New Document View.
+     */
+    void switchToNewDocumentView();
 }

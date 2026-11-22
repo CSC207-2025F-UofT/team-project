@@ -11,7 +11,7 @@ public class SavingInputData {
         this.document = document;
     }
 
-    Document getDocument() {
+    public Document getDocument() {
         return document;
     }
 }

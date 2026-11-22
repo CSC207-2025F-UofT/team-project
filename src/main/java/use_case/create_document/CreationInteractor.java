@@ -31,4 +31,9 @@ public class CreationInteractor implements CreationInputBoundary {
             userPresenter.prepareSuccessView(outputData);
         }
     }
+
+    @Override
+    public void switchToNewDocumentView() {
+        userPresenter.switchToNewDocumentView();
+    }
 }

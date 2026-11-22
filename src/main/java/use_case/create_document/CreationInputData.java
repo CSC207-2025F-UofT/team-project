@@ -12,11 +12,11 @@ public class CreationInputData {
         this.creator = creator;
     }
 
-    String getDocumentName() {
+    public String getDocumentName() {
         return documentName;
     }
 
-    User getCreator() {
+    public User getCreator() {
         return creator;
     }
 }
