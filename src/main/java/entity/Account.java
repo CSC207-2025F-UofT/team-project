@@ -1,237 +1,91 @@
 package entity;
 
-import interface_adapter.*;
-
-import java.io.IOException;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.net.InetAddress;
-import java.util.Locale;
+import java.util.Objects;
 
-
-public class Account {
-
-    // Attributes
+/** A financial account owned by one UserProfile. No persistence or UI dependencies. */
+public final class Account {
     private final int accountID;
+    private final int ownerProfileId;
     private String accountName;
     private AccountType accountType;
-    private double balance;
-    private String defaultCurrency;
+    private BigDecimal balance;
+    private String currency;
     private final LocalDateTime createdAt;
-    private final String createdIPAddress;
-    private String password;
-    private final String createdCountry;
-    private int mainProfile;
 
-    // Constructor
-    public Account(String accountName,
-                   AccountType accountType,
-                   double balance, String defaultCurrency, String password, int mainProfile) throws IOException, IllegalArgumentException {
-
-      String userDatabase = "AccountData.json";
-      String currencyDatabase = "Currencies.json";
-      AccountNameControl allUsers = new AccountNameControl(userDatabase);
-      CurrencyControl allCurrencies = new CurrencyControl(currencyDatabase);
-
-      if (accountName == null || accountName.isBlank() || password == null || password.isBlank()) {
-        throw new IllegalArgumentException(
-            "entity.Account name or password cannot be empty!"
-        );
-      } else if (allUsers.usernameTaken(accountName)) {
-        throw new IllegalArgumentException(
-            "entity.Account name has already been taken!"
-        );
-      } else if (!accountName.matches("[\\\\x21-\\\\x7E]+") || !password.matches("[\\\\x21-\\\\x7E]+")) {
-        throw new IllegalArgumentException(
-            "entity.Account name or password contains illegal characters, please restrict usage to only English letters, numbers, and symbols."
-        );
-      } else if (accountName.equals(password)) {
-        throw new IllegalArgumentException(
-            "entity.Account name can not be identical to the password!"
-        );
-      } else if (balance < 0) {
-        throw new IllegalArgumentException(
-            "Initial balance cannot be less than 0" + defaultCurrency + "!"
-        );
-      } else if (!allCurrencies.validCurrency(defaultCurrency)) {
-        throw new IllegalArgumentException("The currency type is not supported. Please try again with another currency.");
-      } else {
-        this.accountName = accountName;
-        allUsers.addUsername(accountName);
-
-        AccountIDControl allIDs = new AccountIDControl(userDatabase);
-        this.accountID = allIDs.nextID();
-        allIDs.addUserID();
-
-        this.password = password;
-        PasswordControl allPasswords = new PasswordControl(userDatabase);
-        allPasswords.addPassword(password);
-
-        this.accountType = accountType;
-
-        this.balance = balance;
-        BalanceControl allBalances = new BalanceControl(userDatabase);
-        allBalances.initiateBalance(balance);
-
-        this.defaultCurrency = defaultCurrency;
-        CurrencyControl currencySetter = new CurrencyControl(userDatabase);
-        currencySetter.addCurrency(defaultCurrency);
-
-        this.createdIPAddress = InetAddress.getLocalHost().getHostAddress();
-        this.createdCountry = Locale.getDefault().getDisplayCountry();
-        this.createdAt = LocalDateTime.now();
-        this.mainProfile = mainProfile;
-        AccountCreationControl allCreation = new AccountCreationControl(userDatabase);
-        allCreation.addData(this.createdCountry, this.createdIPAddress, this.createdAt, mainProfile);
-
-        String stringID = String.valueOf(this.accountID);
-        TransactionControl expense = new TransactionControl("Expenditures.json");
-
-        expense.addAccount(stringID);
-
-        TransactionControl revenue = new TransactionControl("Revenues.json");
-        revenue.addAccount(stringID);
-      }
-    }
-
-    // Getters
-    public int getAccountID() {
-        return accountID;
-    }
-
-    public String getAccountName() {
-        return accountName;
-    }
-
-    public String getPassword() {
-      return password;
-    }
-
-    public AccountType getAccountType() {
-        return accountType;
-    }
-
-    public double getBalance() {
-        return balance;
-    }
-
-    public String getCurrency() {
-        return defaultCurrency;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public String getIPAddress() {
-      return createdIPAddress;}
-
-    public String getCreatedCountry() {
-      return createdCountry;
-    }
-
-    public int getMainProfile() {return mainProfile;}
-
-    // Setters
-    public void setAccountName(String accountName) throws IOException {
-      String userDatabase = "AccountData.json";
-      AccountNameControl allUsers = new AccountNameControl(userDatabase);
-      if (this.accountName.equals(accountName)) {
-        throw new IllegalArgumentException("The new account name must be different from the old.");
-      } else if (accountName.equals(password)) {
-        throw new IllegalArgumentException("entity.Account name can not be identical to the password!");
-      } else if (accountName.isBlank()) {
-        throw new IllegalArgumentException("entity.Account name cannot be empty!");
-      } else if (allUsers.usernameTaken(accountName)) {
-        throw new IllegalArgumentException("entity.Account name has already been taken!");
-      } else if (!accountName.matches("[\\\\x21-\\\\x7E]+")) {
-        throw new IllegalArgumentException("\"entity.Account name contains illegal characters, please restrict usage to only English letters, numbers, and symbols.");
-      } else {
-        this.accountName = accountName;
-        allUsers.changeUsername(accountID, accountName);
-      }
-    }
-
-    public void setAccountType(AccountType accountType) {
-        this.accountType = accountType;
-    }
-
-    public void setPassword(String password) throws IOException {
-      String userDatabase = "AccountData.json";
-      PasswordControl allPasswords = new PasswordControl(userDatabase);
-      if (this.password.equals(password)) {
-        throw new IllegalArgumentException("The new password must be different from the old.");
-      } else if (accountName.equals(password)) {
-        throw new IllegalArgumentException("Password can not be identical to the account name!");
-      } else if (password.isBlank()) {
-        throw new IllegalArgumentException("password cannot be empty!");
-      } else if (!password.matches("[\\\\x21-\\\\x7E]+")) {
-        throw new IllegalArgumentException("\"Password contains illegal characters, please restrict usage to only English letters, numbers, and symbols.");
-      } else {
-        this.password = password;
-        allPasswords.changePassword(accountID, password);
-      }
-    }
-
-    public void setCurrency(String defaultCurrency) throws IOException {
-      String currencyDatabase = "Currencies.json";
-      String userDatabase = "AccountData.json";
-      CurrencyControl allCurrencies = new CurrencyControl(currencyDatabase);
-      CurrencyControl currencySetter = new CurrencyControl(userDatabase);
-
-      if (!allCurrencies.validCurrency(defaultCurrency)) {
-        throw new IllegalArgumentException("The currency type is not supported. Please try again with another currency.");
-      } else {
-        balance = allCurrencies.exchange(defaultCurrency, this.defaultCurrency, balance);
-        this.defaultCurrency = defaultCurrency;
-        currencySetter.changeCurrency(accountID, defaultCurrency);
-        BalanceControl allBalances = new BalanceControl(userDatabase);
-        allBalances.updateBalance(accountID, balance);
-      }
-    }
-
-    public void setMainProfile(int newMainProfile) throws IOException {
-      this.mainProfile = newMainProfile;
-      String userDatabase = "AccountData.json";
-      AccountCreationControl allCreation = new AccountCreationControl(userDatabase);
-      allCreation.changeMainProfile(this.accountID, newMainProfile);
-    }
-
-    // Balance operations
-    public void deposit(double amount, String depositCurrency) throws IOException {
-      String currencyDatabase = "Currencies.json";
-      String userDatabase = "AccountData.json";
-      CurrencyControl allCurrencies = new CurrencyControl(currencyDatabase);
-      if (amount <= 0) {
-          throw new IllegalArgumentException(
-              "Amount must be positive");
-        } else if (!allCurrencies.validCurrency(depositCurrency)) {
-          throw new IllegalArgumentException("The currency type is not supported. Please try again with another currency.");
-      } else {
-          balance += allCurrencies.exchange(defaultCurrency, depositCurrency, amount);
-          BalanceControl allBalances = new BalanceControl(userDatabase);
-          allBalances.updateBalance(accountID, balance);
+    public Account(int accountID, int ownerProfileId, String accountName,
+                   AccountType accountType, BigDecimal initialBalance, String currency) {
+        if (accountID < 0 || ownerProfileId < 0) {
+            throw new IllegalArgumentException("IDs cannot be negative.");
         }
+        if (accountName == null || accountName.isBlank()) {
+            throw new IllegalArgumentException("Account name cannot be empty.");
+        }
+        if (accountType == null) throw new IllegalArgumentException("Account type is required.");
+        if (initialBalance == null || initialBalance.signum() < 0) {
+            throw new IllegalArgumentException("Initial balance cannot be negative.");
+        }
+        if (currency == null || !currency.matches("[A-Z]{3}")) {
+            throw new IllegalArgumentException("Currency must be a three-letter ISO code.");
+        }
+        this.accountID = accountID;
+        this.ownerProfileId = ownerProfileId;
+        this.accountName = accountName.trim();
+        this.accountType = accountType;
+        this.balance = initialBalance;
+        this.currency = currency;
+        this.createdAt = LocalDateTime.now();
     }
 
-    public void withdraw(double amount, String withdrawCurrency) throws IOException {
-      String currencyDatabase = "Currencies.json";
-      String userDatabase = "AccountData.json";
-      CurrencyControl allCurrencies = new CurrencyControl(currencyDatabase);
+    public int getAccountID() { return accountID; }
+    public int getId() { return accountID; }
+    public int getOwnerProfileId() { return ownerProfileId; }
+    public String getAccountName() { return accountName; }
+    public AccountType getAccountType() { return accountType; }
+    public BigDecimal getBalance() { return balance; }
+    public String getCurrency() { return currency; }
+    public LocalDateTime getCreatedAt() { return createdAt; }
 
-      if (amount <= 0) {
-            throw new IllegalArgumentException(
-                    "Amount must be positive"
-            );}
-      else if (!allCurrencies.validCurrency(withdrawCurrency)) {
-        throw new IllegalArgumentException("The currency type is not supported. Please try again with another currency.");
-      } else if (balance < allCurrencies.exchange(defaultCurrency, withdrawCurrency, amount)) {
-        throw new IllegalArgumentException(
-            "Cannot withdraw amount greater than existing balance!"
-        );
-        } else {
-        balance -= allCurrencies.exchange(defaultCurrency, withdrawCurrency, amount);
-        BalanceControl allBalances = new BalanceControl(userDatabase);
-        allBalances.updateBalance(accountID, balance);
+    public void rename(String newName) {
+        if (newName == null || newName.isBlank()) {
+            throw new IllegalArgumentException("Account name cannot be empty.");
+        }
+        accountName = newName.trim();
+    }
+
+    public void changeType(AccountType newType) {
+        accountType = Objects.requireNonNull(newType, "Account type is required.");
+    }
+
+    public void deposit(BigDecimal amount) {
+        requirePositive(amount);
+        balance = balance.add(amount);
+    }
+
+    public void withdraw(BigDecimal amount) {
+        requirePositive(amount);
+        if (balance.compareTo(amount) < 0) {
+            throw new IllegalArgumentException("Insufficient funds.");
+        }
+        balance = balance.subtract(amount);
+    }
+
+    /** Applies a rate expressed as target-currency units per source-currency unit. */
+    public void changeCurrency(String targetCurrency, BigDecimal exchangeRate) {
+        if (targetCurrency == null || !targetCurrency.matches("[A-Z]{3}")) {
+            throw new IllegalArgumentException("Currency must be a three-letter ISO code.");
+        }
+        if (exchangeRate == null || exchangeRate.signum() <= 0) {
+            throw new IllegalArgumentException("Exchange rate must be positive.");
+        }
+        balance = balance.multiply(exchangeRate).setScale(2, java.math.RoundingMode.HALF_UP);
+        currency = targetCurrency;
+    }
+
+    private void requirePositive(BigDecimal amount) {
+        if (amount == null || amount.signum() <= 0) {
+            throw new IllegalArgumentException("Amount must be positive.");
         }
     }
 }
