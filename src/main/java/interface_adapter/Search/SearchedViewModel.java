@@ -1,4 +1,4 @@
 package interface_adapter.Search;
 
-public class SearchViewModel {
+public class SearchedViewModel {
 }

@@ -30,8 +30,10 @@ entertainment
 ### User Story 6:
 #### As a user of the movie finder I want to see past comments or movie ratings so that I can look at other's opinion about the movie and also the overall rating of a movie.
 ### User Story 7:
-#### As a user [type of user] I want to filter and sort movies so that I can [some benefit]
+#### As a user of the movie finder I want to have a watchlist page so that I can view my watchlist later.
 ### User Story 8:
+#### As a user [type of user] I want to filter and sort movies so that I can [some benefit]
+### User Story 9:
 #### As a user [type of user] I want to be able to log in/log out so that I can [some benefit]
 
 ---
@@ -164,44 +166,74 @@ Extensions:
 The system displays a default placeholder image instead.
 
 ### Use Case 6
-Use Case: View past comments and movie ratings
+Use Case: View past comments and individual reviewer ratings
 
-Primary actor: User clicking the movie posters and the past comments and ratings will pop up
+Primary actor: User who wants to read movie reviews and individual reviewer ratings
 
 Precondition: 
-The user is logged in.
-The user has searched for a movie and can view its poster.
+The user is logged in
+The user has searched for a movie and can view its poster
 
-Trigger: User clicks on the movie poster.
+Trigger: User clicks on the movie poster
 
-Success Outcome: The user can view the available comments and overall rating of the selected movie.
+Success Outcome: The user can view the available comments and individual rating of the selected movie.
 
 Main success scenario:
 User clicks on the movie poster
 The system retrieves the comments and ratings associated with the selected movie
-The system displays the available comments and overall movie rating
+The system displays the available comments and individual movie rating
 
 Extensions:
 2a. No comments or ratings are available for the selected movie
 the system displays a message indicating that no comments or ratings are available
 the system does not display any comments or ratings
 
+3a. A reviewer has not provided an individual rating
+The system displays the review without a rating or shows "Not rated"
+
+### Use Case 7
+Use Case: View watchlist
+
+Primary actor: User who wants to see the movies they saved to watch later
+
+Preconditions:
+
+The user is logged in.
+Trigger: The user clicks the "My Watchlist" button.
+
+
+Success outcome: The system displays every movie in the user's watchlist with its poster and title, including movies saved before the user last logged out.
+
+Main success scenario:
+
+The user clicks the "My Watchlist" button.
+The system retrieves the movies saved in the user's watchlist.
+The system displays the poster and title of each movie.
+
+Extensions:
+
+2a. The user's watchlist is empty.
+The system displays a message that the watchlist is empty.
+
+3a. A movie poster is unavailable or fails to load.
+The system displays "No poster" in place of the image and still shows the title.
 
 (Add additional use cases as needed.)
 ---
 ## Minimal Viable Product (MVP)
-| Team Member | MVP Use Case |
-|-------------|--------------|
-| Mehal Patel | Use Case #1: Search a movie|
-| Grace Manurung | Use Case #6: Comments and Ratings |
-| Syaikha Faiza Arifin | Use Case #3: Add a movie to watchlist |
-| Yuxuan Lin | Use Case #4: Add a movie to favourites |
-| Frank Li | Use Case #2: View movie details |
-| Zhanyuan Su | Use Case#5：View movie posters |
+| Team Member | MVP Use Case                                                    |
+|-------------|-----------------------------------------------------------------|
+| Mehal Patel | Use Case #1: Search a movie                                     |
+| Grace Manurung | Use Case #6: Comments and Ratings                               |
+| Syaikha Faiza Arifin | Use Case #3 and #7: Add a movie to watchlist and View Watchlist |
+| Yuxuan Lin | Use Case #4: Add a movie to favourites                          |
+| Frank Li | Use Case #2: View movie details                                 |
+| Zhanyuan Su | Use Case#5：View movie posters                                   |
 ---
 ## Entities
 ### Entity 1: Movie
 ### Entity 2: User 
+### Entity 3: Watchlist Movie
 (Add additional entities as needed.)
 ---
 ## API Usage
