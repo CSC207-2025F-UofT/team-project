@@ -4,6 +4,7 @@ import com.sun.tools.javac.Main;
 import main.interface_adapters.ViewManagerModel;
 import main.interface_adapters.game.GameViewModel;
 import main.interface_adapters.main_menu.MainMenuViewModel;
+import main.view.GameView;
 import main.view.MainMenuView;
 
 public class LobbyPresenter {
@@ -26,6 +27,11 @@ public class LobbyPresenter {
         viewManagerModel.notifyViewChanged();
     }
 
+    public void switchToGameView() {
+        viewManagerModel.setActiveView(GameViewModel.VIEW_NAME);
+        viewManagerModel.notifyViewChanged();
+    }
+
     public void addPlayer() {
         if (lobbyViewModel.getPlayers() < 6) {
             lobbyViewModel.addPlayer();
@@ -35,8 +41,24 @@ public class LobbyPresenter {
     }
 
     public void removePlayer() {
-        if (lobbyViewModel.getPlayers() > 1) {
+        if (lobbyViewModel.getPlayers() > 2) {
             lobbyViewModel.removePlayer();
+        } else {
+            ;
+        }
+    }
+
+    public void increaseMinBet() {
+        if (lobbyViewModel.betAmounts.indexOf(lobbyViewModel.getMinBet()) < 6) {
+            lobbyViewModel.increaseMinBet();
+        } else {
+            ;
+        }
+    }
+
+    public void decreaseMinBet() {
+        if (lobbyViewModel.betAmounts.indexOf(lobbyViewModel.getMinBet()) > 0) {
+           lobbyViewModel.decreaseMinBet();
         } else {
             ;
         }

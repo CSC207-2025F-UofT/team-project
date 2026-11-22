@@ -1,6 +1,7 @@
 
 import javax.swing.*;
 import java.awt.*;
+import java.net.URL;
 
 import main.interface_adapters.game.GameViewModel;
 import main.interface_adapters.ViewManagerModel;
@@ -97,6 +98,11 @@ public class PokerBuilder {
         viewManagerModel.notifyViewChanged();
 
         application.add(cardPanel);
+        URL iconUrl = getClass().getResource("/PokerLogo.png");
+        if (iconUrl != null) {
+            ImageIcon icon = new ImageIcon(iconUrl);
+            application.setIconImage(icon.getImage());
+        }
 
 
         return application;

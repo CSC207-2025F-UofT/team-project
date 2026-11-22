@@ -12,7 +12,15 @@ public class LobbyController {
         lobbyPresenter.switchToMainMenuView();
     }
 
+    public void switchToGameView() {
+        lobbyPresenter.switchToGameView();
+    }
+
     public void addPlayer() {lobbyPresenter.addPlayer();}
 
     public void removePlayer() {lobbyPresenter.removePlayer();}
+
+    public void increaseMinBet() {lobbyPresenter.increaseMinBet();}
+
+    public void decreaseMinBet() {lobbyPresenter.decreaseMinBet();}
  }
