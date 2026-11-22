@@ -17,46 +17,13 @@ public class FileWatchlistDataAccessObject {
   private final Path watchlistFile;
 
   /**
-   * Returns the directory used to store app-specific configuration/preference files, following
-   * standard OS conventions on Windows, macOS, and Linux.
-   *
-   * @return The OS-specific configuration directory
-   */
-  private static Path getConfigDir() {
-    final String appName = "JavaStockTracker";
-    String os = System.getProperty("os.name").toLowerCase();
-    String userHome = System.getProperty("user.home");
-
-    if (os.contains("win")) {
-      // Windows: %APPDATA%\AppName
-      String appData = System.getenv("APPDATA");
-      return Path.of(appData != null ? appData : userHome, appName);
-    } else if (os.contains("mac")) {
-      // macOS: ~/Library/Application Support/AppName
-      return Path.of(userHome, "Library", "Application Support", appName);
-    } else {
-      // Linux/Unix (XDG Base Directory spec): ~/.config/appname
-      String xdgConfig = System.getenv("XDG_CONFIG_HOME");
-      return xdgConfig != null
-              ? Path.of(xdgConfig, appName.toLowerCase())
-              : Path.of(userHome, ".config", appName.toLowerCase());
-    }
-  }
-
-  /**
    * Creates a new data access object.
    *
    * @param fileName The name of the file to store the watchlist
    * @throws IOException If the directory to contain the watchlist file could not be created
    */
   public FileWatchlistDataAccessObject(String fileName) throws IOException {
-    if ("".equals(fileName)) {
-      throw new IllegalArgumentException("File name cannot be empty");
-    }
-
-    Path configDir = getConfigDir();
-    Files.createDirectories(configDir);
-    watchlistFile = configDir.resolve(fileName);
+    watchlistFile = AppConfigDirectory.resolve(fileName);
   }
 
   /**
