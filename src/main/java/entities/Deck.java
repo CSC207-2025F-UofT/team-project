@@ -43,6 +43,10 @@ public class Deck {
         this.flashcardDeck.add(card);
 
     }
+
+    public Card getCurrentCard() {
+        return currentCard;
+    }
     public String getTitle(){return this.title;}
     public ArrayList<Card> getFlashcardDeck(){ return this.flashcardDeck;}
     public void setTitle(String title){ this.title = title;}
