@@ -28,7 +28,7 @@ public class FlashcardStudyingInteractor implements FlashcardStudyingInputBounda
         }
         // currentDeck is not null
         // execute buttonClicks then
-        if (inputData.getButtonClicked().equals("flip")) {
+        if (inputData.getButtonClicked().equals("Flip")) {
             Card currentCard = currentDeck.getCurrentCard();
             currentCard.flip();
             presenter.prepareSuccessView(new FlashcardStudyingOutputData(currentCard.getText()));

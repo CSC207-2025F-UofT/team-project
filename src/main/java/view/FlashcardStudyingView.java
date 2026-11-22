@@ -118,16 +118,20 @@ public class FlashcardStudyingView extends JPanel implements ActionListener, Fla
             final FlashcardStudyingState currentState = viewModel.getState();
             currentState.setText(deckTitle.getText());
             viewModel.setState(currentState);
+            controller.execute("Start", deckTitle.getText());
         }
 
         if (e.getSource() == flipButton) {
             System.out.println("Click " + e.getActionCommand());
             final FlashcardStudyingState currentState = viewModel.getState();
+            controller.execute("Flip");
         }
         else if (e.getSource() == knewItButton) {
             System.out.println("Click " + e.getActionCommand());
+            controller.execute("Knew it");
         } else if (e.getSource() == stillLearningButton) {
             System.out.println("Click " + e.getActionCommand());
+            controller.execute("Still learning");
         }
 
 
