@@ -41,6 +41,13 @@ public class RecordTransactionInteractor
         }
 
         final String amountText = inputData.getAmount().strip();
+
+        if (amountText.length() > 20) {
+            transactionPresenter.prepareFailView(
+                    "The amount is too long.");
+            return;
+        }
+
         if (!amountText.matches("[0-9]+(\\.[0-9]{1,2})?")) {
             transactionPresenter.prepareFailView(
                     "Use a plain number with up to 2 decimal places.");
