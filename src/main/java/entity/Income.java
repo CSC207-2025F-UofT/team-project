@@ -8,9 +8,8 @@ public final class Income extends AccountTransaction {
                   String transactionCurrency, Category category, String note) {
         super(amount, date, description, account, transactionCurrency, category, note);
     }
-
     @Override
-    public void applyToAccount() {
-        account.deposit(amount, transactionCurrency);
+    public void applyToAccount(BigDecimal amountInAccountCurrency) {
+        account.deposit(amountInAccountCurrency);
     }
 }
