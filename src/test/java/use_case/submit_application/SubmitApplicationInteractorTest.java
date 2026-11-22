@@ -167,6 +167,27 @@ class SubmitApplicationInteractorTest {
         assertTrue(applicationDataAccess.getApplicationsByAdopter("adopter1").isEmpty());
     }
 
+    @Test
+    void duplicateCheckFailureIsReported() {
+        final SubmitApplicationDataAccessInterface failingDataAccess = new SubmitApplicationDataAccessInterface() {
+            @Override
+            public boolean hasActiveApplication(String adopterId, String petId) {
+                throw new RuntimeException("applications file missing");
+            }
+
+            @Override
+            public void save(Application application) {
+                applicationDataAccess.save(application);
+            }
+        };
+        new SubmitApplicationInteractor(failingDataAccess, new FakePetDataAccess(), presenter)
+                .execute(input("mochi", "House"));
+
+        assertEquals("Your application could not be checked. Please try again.", presenter.error);
+        assertNull(presenter.success);
+        assertTrue(applicationDataAccess.getApplicationsByAdopter("adopter1").isEmpty());
+    }
+
     private static final class FakePetDataAccess implements SubmitApplicationPetDataAccessInterface {
         @Override
         public boolean isAvailable(String petId) {

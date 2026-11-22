@@ -38,8 +38,10 @@ public class SubmitApplicationInteractor implements SubmitApplicationInputBounda
             return;
         }
         final boolean available;
+        final boolean alreadyApplied;
         try {
             available = petId != null && petDataAccess.isAvailable(petId);
+            alreadyApplied = applicationDataAccess.hasActiveApplication(adopterId, petId);
         }
         catch (RuntimeException ex) {
             presenter.prepareFailView("Your application could not be checked. Please try again.");
@@ -49,7 +51,7 @@ public class SubmitApplicationInteractor implements SubmitApplicationInputBounda
             presenter.prepareFailView("This pet is no longer available.");
             return;
         }
-        if (applicationDataAccess.hasActiveApplication(adopterId, petId)) {
+        if (alreadyApplied) {
             presenter.prepareFailView("You already have an application for this pet.");
             return;
         }
