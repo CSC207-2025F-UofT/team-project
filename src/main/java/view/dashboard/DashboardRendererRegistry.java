@@ -1,7 +1,6 @@
 package view.dashboard;
 
-import entity.dashboard.DashboardDataCatalog;
-import entity.dashboard.DashboardItem;
+import interface_adapter.dashboard.DashboardController;
 import interface_adapter.dashboard.DashboardItemState;
 import interface_adapter.dashboard.DashboardStateCatalog;
 
@@ -18,12 +17,12 @@ public class DashboardRendererRegistry {
         return dashboardRenderers.get(dashboardItemType);
     }
 
-    public void registerAll() {
+    public void registerAll(DashboardController dashboardController) {
         register(DashboardStateCatalog.TableState.class, new TableRenderer());
+        register(DashboardStateCatalog.NestedState.class, new NestedRenderer(this));
+        register(DashboardStateCatalog.DropdownState.class, new DropdownRenderer(dashboardController));
     }
     private <T extends DashboardItemState> void register(Class<T> type, DashboardRenderer dashboardRenderer) {
         dashboardRenderers.put(type, dashboardRenderer);
     }
-
-
 }

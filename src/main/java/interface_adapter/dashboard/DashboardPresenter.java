@@ -1,16 +1,14 @@
 package interface_adapter.dashboard;
 
-import entity.dashboard.DashboardDataCatalog;
-import entity.dashboard.DashboardItem;
+import entity.LocationInfoType;
+import use_case.dashboard.DashboardOutputDataCatalog;
 import use_case.dashboard.AnalyticsType;
-import use_case.dashboard.DashboardInputBoundary;
 import use_case.dashboard.DashboardOutputBoundary;
 import use_case.dashboard.DashboardOutputData;
-import view.dashboard.DashboardView;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class DashboardPresenter implements DashboardOutputBoundary {
     private final DashboardViewModel dashboardViewModel;
@@ -22,33 +20,63 @@ public class DashboardPresenter implements DashboardOutputBoundary {
     public void prepareSuccessView(DashboardOutputData dashboardOutputData) {
         AnalyticsType analyticsType = dashboardOutputData.getAnalyticsType();
         switch (analyticsType) {
-            case MOST_VISITED_COUNTRIES -> mostVisitedCountries(dashboardOutputData);
+            case MOST_VISITED -> mostVisited(dashboardOutputData);
         }
     }
     public void prepareFailureView(String msg) {
         // TODO
     }
 
-    private void mostVisitedCountries(DashboardOutputData data) {
+    private void mostVisited(DashboardOutputData data) {
         // for this analytics, there's only a table
-        DashboardDataCatalog.MostVisitedCountries mostVisitedCountries =
-                (DashboardDataCatalog.MostVisitedCountries) data.getDashboardItems().get(0);
-        List<List<String>> renderedEntries = mostVisitedCountries.countryVisits().stream()
-                .map(country -> List.<String>of(country.country(), country.numberOfTimesVisited().toString(),
-                        String.join(", ", country.dates().stream().map(LocalDate::toString).toList()))
+        DashboardOutputDataCatalog.MostVisited mostVisited =
+                (DashboardOutputDataCatalog.MostVisited) data.getDashboardItems().getFirst();
+        List<List<String>> renderedEntries = mostVisited.placeVisits().stream()
+                .map(placeVisit -> List.<String>of(placeVisit.place(),
+                                placeVisit.numberOfTimesVisited().toString(),
+                                String.join(", ", placeVisit.dates().stream().map(LocalDate::toString).toList()),
+                                String.join(", ", placeVisit.landmarks()))
                 )
                 .toList();
-        DashboardItemState state = new DashboardStateCatalog.TableState(
-                "Most Visited Countries",
-                List.of("Country", "Number of Times Visited", "Dates Visited", "Landmarks Visited"),
-                renderedEntries
-        );
-        DashboardState currentState = dashboardViewModel.getState();
-        currentState.removeAllStates();
-        currentState.addItemState(state);
+        String typeOfPlace = resolveLocationTypeString(mostVisited.typeOfPlace());
+        DashboardState currentState = buildMostVisitedState(typeOfPlace, renderedEntries);
         dashboardViewModel.setState(currentState);
         dashboardViewModel.firePropertyChanged();
     }
 
+    private DashboardState buildMostVisitedState(String typeOfPlace, List<List<String>> renderedEntries) {
+        DashboardItemState state = new DashboardStateCatalog.NestedState(List.of(
+            new DashboardStateCatalog.DropdownState(
+                    "most-visited",
+                    "Most visited by ...",
+                    List.of(
+                            "Country",
+                            "Province/State",
+                            "County",
+                            "City",
+                            "Continent"
+                    )
+            ),
+            new DashboardStateCatalog.TableState(
+                    "Most Visited " + typeOfPlace,
+                    List.of(typeOfPlace, "Number of Times Visited", "Dates Visited", "Landmarks Visited"),
+                    renderedEntries
+            )
+        ));
+        DashboardState currentState = dashboardViewModel.getState();
+        currentState.removeAllStates();
+        currentState.addItemState(state);
+        return currentState;
+    }
 
+    private String resolveLocationTypeString(LocationInfoType locationInfoType) {
+        Map<LocationInfoType, String> stringMap = Map.of(
+                LocationInfoType.COUNTRY, "Countries",
+                LocationInfoType.CITY, "Cities",
+                LocationInfoType.CONTINENT, "Continents",
+                LocationInfoType.STATE, "Provinces/States",
+                LocationInfoType.COUNTY, "Counties"
+        );
+        return stringMap.get(locationInfoType);
+    }
 }

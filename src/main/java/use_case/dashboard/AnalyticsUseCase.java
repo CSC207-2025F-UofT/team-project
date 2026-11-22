@@ -1,12 +1,13 @@
 package use_case.dashboard;
 
 import entity.LocationInfo;
+import entity.LocationInfoType;
 import entity.Trip;
-import entity.dashboard.DashboardDataCatalog;
 import use_case.PhotoAccessInterface;
 import use_case.TripAccessInterface;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -31,57 +32,65 @@ public class AnalyticsUseCase implements DashboardInputBoundary {
     public void execute(DashboardInputData dashboardInputData) {
         AnalyticsType analyticsType = dashboardInputData.getAnalyticsType();
         switch (analyticsType) {
-            case MOST_VISITED_COUNTRIES: mostVisitedCountries();
+            case MOST_VISITED: mostVisited(dashboardInputData);
         }
     }
 
-    private void mostVisitedCountries() {
-        DashboardOutputData data = new DashboardOutputData(AnalyticsType.MOST_VISITED_COUNTRIES);
-        data.addDashboardItem(computeMostVisitedCountries());
+    private void mostVisited(DashboardInputData dashboardInputData) {
+        Optional<LocationInfoType> locationInfoType = ((DashboardInputDataCatalog.MostVisitedInputData)dashboardInputData).locationInfoType();
+        DashboardOutputData data = new DashboardOutputData(AnalyticsType.MOST_VISITED);
+        LocationInfoType locationType = locationInfoType.orElse(LocationInfoType.COUNTRY); // default location type
+        data.addDashboardItem(computeMostVisited(locationType));
         presenter.prepareSuccessView(data);
     }
 
-    private DashboardDataCatalog.MostVisitedCountries computeMostVisitedCountries() {
+    private DashboardOutputDataCatalog.MostVisited computeMostVisited(LocationInfoType locationInfoType) {
+        Function<LocationInfo, String> locationSelector = info -> info.getType(locationInfoType);
         List<Trip> trips = tripAccess.getTrips();
-        Map<String, Long> numVisitsByCountry = trips.stream()
+        Map<String, Long> numVisitsByPlace = trips.stream()
                 .flatMap(trip -> photoAccess.getPhotosByTripId(trip.getId()).stream()
-                        .map(photo -> photo.getLocation().getInfo().getCountry())
+                        .map(photo -> locationSelector.apply(photo.getLocation().getInfo()))
+                        .filter(Objects::nonNull)
                         .collect(Collectors.toSet())
                         .stream()
                 )
                 .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
 
-        Map<String, List<LocationInfo>> locationsByCountry = trips.stream()
+        Map<String, List<LocationInfo>> locationsByPlace = trips.stream()
                 .flatMap(trip -> photoAccess.getPhotosByTripId(trip.getId()).stream())
                 .map(photo -> photo.getLocation().getInfo())
-                .collect(Collectors.groupingBy(LocationInfo::getCountry));
+                .filter(Objects::nonNull)
+                .collect(Collectors.groupingBy(locationSelector));
 
-        List<DashboardDataCatalog.CountryVisit> countryVisits = locationsByCountry
+        List<DashboardOutputDataCatalog.Visit> visits = locationsByPlace
                 .entrySet()
                 .stream()
                 .map(entry -> {
-                    String country = entry.getKey();
+                    String place = entry.getKey();
                     List<LocationInfo> locations = entry.getValue();
-                    Integer numberOfTimesVisited = numVisitsByCountry.get(country).intValue();
+                    Integer numberOfTimesVisited = numVisitsByPlace.get(place).intValue();
                     List<String> landmarks = locations.stream()
                             .map(LocationInfo::getLandmark)
+                            .filter(Objects::nonNull)
                             .toList();
                     List<LocalDate> dates = trips.stream()
-                            .filter(trip -> getCountriesByTrip(trip).contains(country))
-                            .map(trip -> trip.getStartTime().toLocalDate())
+                            .filter(trip -> getPlacesByTrip(trip, locationSelector).contains(place))
+                            .map(Trip::getStartTime)
+                            .filter(Objects::nonNull)
+                            .map(LocalDateTime::toLocalDate)
                             .toList();
-                    return new DashboardDataCatalog.CountryVisit(country, numberOfTimesVisited, dates, landmarks);
+                    return new DashboardOutputDataCatalog.Visit(place, numberOfTimesVisited, dates, landmarks);
                 })
-                .sorted(Comparator.comparingInt(DashboardDataCatalog.CountryVisit::numberOfTimesVisited).reversed())
+                .sorted(Comparator.comparingInt(DashboardOutputDataCatalog.Visit::numberOfTimesVisited).reversed())
                 .limit(RANKING_LIMIT)
                 .toList();
 
-        return new DashboardDataCatalog.MostVisitedCountries(countryVisits);
+        return new DashboardOutputDataCatalog.MostVisited(locationInfoType, visits);
     }
 
-    private List<String> getCountriesByTrip(Trip trip) {
+    private List<String> getPlacesByTrip(Trip trip, Function<LocationInfo, String> locationSelector) {
         return photoAccess.getPhotosByTripId(trip.getId()).stream()
-                .map(photo -> photo.getLocation().getInfo().getCountry())
+                .map(photo -> locationSelector.apply(photo.getLocation().getInfo()))
                 .toList();
     }
 }

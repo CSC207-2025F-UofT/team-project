@@ -1,7 +1,5 @@
 package interface_adapter.dashboard;
 
-import entity.dashboard.DashboardItem;
-
 import java.util.ArrayList;
 import java.util.List;
 

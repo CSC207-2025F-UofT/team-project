@@ -1,12 +1,11 @@
 package view.dashboard;
 
-import entity.dashboard.DashboardItem;
 import interface_adapter.dashboard.DashboardItemState;
 
 import javax.swing.*;
 
 /**
- * Randerer for a component on the dashboard.
+ * Renderer for a component on the dashboard.
  */
 public interface DashboardRenderer<T extends DashboardItemState> {
 

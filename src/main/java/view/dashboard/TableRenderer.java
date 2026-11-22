@@ -5,13 +5,16 @@ import interface_adapter.dashboard.DashboardStateCatalog;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.JTableHeader;
 import javax.swing.table.TableCellRenderer;
+import java.awt.*;
 import java.util.List;
 
 /**
  * Render analytics table given a table state.
  */
 public class TableRenderer implements DashboardRenderer<DashboardStateCatalog.TableState> {
+    private final float TITLE_SIZE = 15f;
     @Override
     public JComponent render(DashboardStateCatalog.TableState tableState) {
         String[] columns = tableState.columns().toArray(new String[0]);
@@ -26,6 +29,13 @@ public class TableRenderer implements DashboardRenderer<DashboardStateCatalog.Ta
                 return false;
             }
         };
-        return new JTable(model);
+        JPanel tablePanel = new JPanel();
+        tablePanel.setLayout(new BoxLayout(tablePanel, BoxLayout.Y_AXIS));
+        JLabel title = new JLabel(tableState.title());
+        title.setFont(title.getFont().deriveFont(Font.BOLD, TITLE_SIZE));
+        tablePanel.add(title);
+        JTable table = new JTable(model);
+        tablePanel.add(new JScrollPane(table));
+        return tablePanel;
     }
 }

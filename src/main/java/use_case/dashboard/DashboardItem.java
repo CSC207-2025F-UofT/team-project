@@ -1,4 +1,4 @@
-package entity.dashboard;
+package use_case.dashboard;
 
 /**
  * general dashboard item entity.
