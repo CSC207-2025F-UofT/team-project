@@ -11,6 +11,8 @@ import interface_adapters.flashcard_generator.FlashcardGeneratorController;
 import interface_adapters.flashcard_generator.FlashcardGeneratorPresenter;
 import interface_adapters.flashcard_generator.FlashcardGeneratorViewModel;
 import interface_adapters.flashcard_studying.FlashcardStudyingViewModel;
+import interface_adapters.flashcard_studying.FlashcardStudyingController;
+import interface_adapters.flashcard_studying.FlashcardStudyingPresenter;
 import interface_adapters.home.HomeViewModel;
 import interface_adapters.menu_bar.NavigationBarViewModel;
 import interface_adapters.menu_bar.SwitchViewController;
@@ -28,6 +30,9 @@ import use_case.cancel_timer.CancelTimerOutputBoundary;
 import use_case.flashcard_generator.FlashcardGeneratorInputBoundary;
 import use_case.flashcard_generator.FlashcardGeneratorInteractor;
 import use_case.flashcard_generator.FlashcardGeneratorOutputBoundary;
+import use_case.flashcard_studying.FlashcardStudyingInputBoundary;
+import use_case.flashcard_studying.FlashcardStudyingInteractor;
+import use_case.flashcard_studying.FlashcardStudyingOutputBoundary;
 import use_case.menu_bar.SwitchViewInputBoundary;
 import use_case.menu_bar.SwitchViewInteractor;
 import use_case.menu_bar.SwitchViewOutputBoundary;
@@ -108,6 +113,29 @@ public class AppBuilder {
         flashcardStudyingViewModel = new FlashcardStudyingViewModel();
         flashcardStudyingView = new FlashcardStudyingView(flashcardStudyingViewModel);
         cardPanel.add(flashcardStudyingView, ViewNames.STUDY_FLASHCARDS);
+        return this;
+    }
+
+    /**
+     * Adds flashcard studying use case to AppBuilder
+     * @return
+     */
+    public AppBuilder addFSUseCase(){
+        // Initialize presenter and DAO
+        final FlashcardStudyingOutputBoundary presenter = new FlashcardStudyingPresenter(
+                flashcardStudyingViewModel);
+
+        FlashcardDataAccessInterface DAO = new FlashcardDAO();
+
+        // Initialize Interactor
+        final FlashcardStudyingInputBoundary interactor = new FlashcardStudyingInteractor(presenter, DAO);
+
+        // Initialize controller
+        final FlashcardStudyingController controller = new FlashcardStudyingController(interactor);
+
+        // Set Controller for View
+        flashcardStudyingView.setController(controller);
+
         return this;
     }
 
