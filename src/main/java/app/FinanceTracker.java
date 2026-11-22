@@ -8,7 +8,7 @@ import frameworks_and_drivers.persistence.JsonTransactionDataAccess;
 import interface_adapter.transactions.TransactionDashboardController;
 import interface_adapter.transactions.TransactionDashboardPresenter;
 import interface_adapter.transactions.TransactionDashboardViewModel;
-import presentation.FinanceTrackerView;
+import view.FinanceTrackerView;
 
 import javax.swing.SwingUtilities;
 import java.nio.file.Path;
