@@ -9,11 +9,18 @@ import javax.swing.text.StyleConstants;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+
+import interface_adapters.flashcard_generator.FlashcardGeneratorState;
+import interface_adapters.flashcard_generator.FlashcardGeneratorViewModel;
+import interface_adapters.flashcard_generator.FlashcardGeneratorViewModelListener;
+import interface_adapters.home.HomeViewModel;
 import use_case.flashcard_generator.FlashcardGeneratorInputData.TextPiece;
 
-public class FlashcardGeneratorView extends JPanel implements ActionListener {
+public class FlashcardGeneratorView extends JPanel implements ActionListener, FlashcardGeneratorViewModelListener {
 
-   private FlashcardGeneratorController controller;
+    private final FlashcardGeneratorViewModel flashcardGeneratorViewModel;
+    private FlashcardGeneratorController controller;
+    private final HomeViewModel homeViewModel;
 
    private final JLabel title;
    private final JLabel tutorialTitle;
@@ -28,23 +35,31 @@ public class FlashcardGeneratorView extends JPanel implements ActionListener {
      * Initializes all it's components, and connects the View to the Controller
      *
      */
-    public FlashcardGeneratorView(){
+    public FlashcardGeneratorView(FlashcardGeneratorViewModel flashcardGeneratorViewModel, HomeViewModel homeViewModel){
+        this.homeViewModel = homeViewModel;
+        this.flashcardGeneratorViewModel = flashcardGeneratorViewModel;
         this.setLayout(null);
+
+        TimerDisplayPanel timerPanel = new TimerDisplayPanel(homeViewModel);
+        timerPanel.setLocation(10, 425);
+        this.add(timerPanel);
+
+        flashcardGeneratorViewModel.addListener(this); // register view as listener
 
         title = new JLabel("FLASHCARD GENERATOR!!!");
         title.setBounds(0,0,500,35);
-        title.setFont(new Font("Chalkduster",Font.BOLD, 30));
+        title.setFont(FontManager.getWinkle(30f));
         this.add(title);
 
         tutorialTitle = new JLabel("TUTORIAL");
         tutorialTitle.setBounds(10,70,200,35);
-        tutorialTitle.setFont(new Font("Chalkduster",Font.BOLD, 25));
+        tutorialTitle.setFont(FontManager.getGinny(25f));
         this.add(tutorialTitle);
 
         tutorial = new JTextArea("Add Tutorial later...");
         tutorial.setEditable(false);
         tutorial.setBounds(10,120, 300,300);
-        tutorial.setFont(new Font("Chalkduster",Font.BOLD, 12));
+        tutorial.setFont(FontManager.getAppleGaramond(12f));
         tutorial.setOpaque(false);
         tutorial.setBackground(new Color(0,0,0,0));
         this.add(tutorial);
@@ -53,7 +68,6 @@ public class FlashcardGeneratorView extends JPanel implements ActionListener {
         textInput.setEditable(true);
         textInput.setBounds(400,100, 375, 350);
         textInput.setFont(new Font("Arial", Font.PLAIN, 12));
-        this.add(textInput);
 
         scrollPane = new JScrollPane(textInput);
         scrollPane.setBounds(400,100,375,350);
@@ -63,7 +77,7 @@ public class FlashcardGeneratorView extends JPanel implements ActionListener {
 
         generateButton = new JButton("Generate");
         generateButton.setBounds(420,470, 200,60);
-        generateButton.setFont(new Font("Chalkduster", Font.PLAIN, 30));
+        generateButton.setFont(FontManager.getWinkle(30f));
         generateButton.setBackground(Color.LIGHT_GRAY);
         generateButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
         generateButton.addActionListener(this);
@@ -71,8 +85,7 @@ public class FlashcardGeneratorView extends JPanel implements ActionListener {
 
         boldButton = new JButton("Bold");
         boldButton.setBounds(630,470, 100,60);
-        boldButton.setFont(new Font("Chalkduster", Font.PLAIN, 30));
-        boldButton.setBackground(Color.LIGHT_GRAY);
+        boldButton.setFont(FontManager.getWinkle(30f));        boldButton.setBackground(Color.LIGHT_GRAY);
         boldButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
         boldButton.addActionListener(this);
         this.add(boldButton);
@@ -153,5 +166,16 @@ public class FlashcardGeneratorView extends JPanel implements ActionListener {
 
         }
 
+    @Override
+    public void stateChanged() {
+
+        FlashcardGeneratorState state = flashcardGeneratorViewModel.getState();
+
+        if (state.getMessage() != null && !state.getMessage().isEmpty()) {
+
+        JOptionPane.showMessageDialog(this, state.getMessage(), "ERROR", JOptionPane.ERROR_MESSAGE);
+        }
+
     }
+}
 
