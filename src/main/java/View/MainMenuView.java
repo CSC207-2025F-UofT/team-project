@@ -10,7 +10,7 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 
-//import MainMenuViewModel;
+//import MainMenuViewManager;
 
 public class MainMenuView {
 
