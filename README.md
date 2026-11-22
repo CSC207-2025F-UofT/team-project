@@ -665,8 +665,6 @@ A circle on the map: a centre and a radius. It holds the rule for what counts as
 
 ## How to Run (Complete Later After Implementation)
 
-[Instructions for running the program.]
-
 [Back to top](#linked-out)
 
 ---
