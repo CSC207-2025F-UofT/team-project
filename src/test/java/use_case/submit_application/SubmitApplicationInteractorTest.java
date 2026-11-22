@@ -145,6 +145,28 @@ class SubmitApplicationInteractorTest {
         assertTrue(applicationDataAccess.getApplicationsByAdopter("adopter1").isEmpty());
     }
 
+    @Test
+    void availabilityCheckFailureIsReported() {
+        final SubmitApplicationPetDataAccessInterface failingPetDataAccess =
+                new SubmitApplicationPetDataAccessInterface() {
+                    @Override
+                    public boolean isAvailable(String petId) {
+                        throw new RuntimeException("pet file missing");
+                    }
+
+                    @Override
+                    public String getPetName(String petId) {
+                        return "Mochi";
+                    }
+                };
+        new SubmitApplicationInteractor(applicationDataAccess, failingPetDataAccess, presenter)
+                .execute(input("mochi", "House"));
+
+        assertEquals("Your application could not be checked. Please try again.", presenter.error);
+        assertNull(presenter.success);
+        assertTrue(applicationDataAccess.getApplicationsByAdopter("adopter1").isEmpty());
+    }
+
     private static final class FakePetDataAccess implements SubmitApplicationPetDataAccessInterface {
         @Override
         public boolean isAvailable(String petId) {
