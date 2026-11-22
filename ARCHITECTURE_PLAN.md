@@ -1,62 +1,64 @@
-# Finance Tracker Clean Architecture Redesign
+# Finance Tracker — Refactoring Notes
 
-This branch is based on `AccountDataBase`. The existing implementation is retained while the new design is introduced and migrated incrementally.
+This branch is a working refactor of the application, not a parallel demo architecture. The launch class remains `app.FinanceTracker`; it is now the Main Component / composition root.
 
-## Layering (following the course Chapter 11 model)
+## Current package responsibilities
 
-- `entity`: business entities and enterprise rules only.
-- `use_case`: Interactors, Input/Output Data, Input/Output Boundaries, and Data Access Interfaces.
+- `entity`: persistence-free business objects (`UserProfile`, `Account`, `Transaction`, `Category`, and enums).
+- `application_business_rules`: use cases, Input/Output Data, Input/Output Boundaries, and Data Access Interfaces.
 - `interface_adapter`: Controllers, Presenters, and View Models.
-- `frameworks_drivers`: Views, concrete JSON/database Data Access implementations, external API clients, and other details.
-- `app`: Main component / composition root. It creates concrete objects and injects them through the use-case interfaces.
+- `view`: Swing presentation only.
+- `frameworks_and_drivers.persistence`: concrete JSON data access implementations.
+- `frameworks_and_drivers.currency`: Bank of Canada HTTP client.
+- `app.FinanceTracker`: Main Component. Creates concrete gateways, interactors, presenters, controllers, and the View.
+- `data/`: mutable JSON application data, kept outside `src/main/java`.
 
-The dependency rule applies to source-code dependencies: entities know nothing about outer layers; use cases know entities and use-case-owned interfaces; adapters implement/translate those interfaces; frameworks and drivers are replaceable details.
+## Launch
 
-## Shared domain model
+Run `app.FinanceTracker`. It schedules application construction on the Swing event-dispatch thread and wires the transaction dashboard flow.
 
-- One `UserProfile` represents one person/login identity.
-- One `UserProfile` can own zero or more financial `Account` objects.
-- `Account` represents a Cash, Chequing, Savings, or other financial account. It is not a login identity and must not contain a username/password.
-- Transactions belong to a financial account and use one canonical `Transaction` / `Income` / `Expense` model.
-- Currency is a value/setting associated with an account or profile according to the chosen product rule; currency conversion is performed by a use case through a use-case-owned interface, not by an entity reading JSON or calling the network.
+## Current transaction dashboard flow
 
-## Team use-case ownership
+`FinanceTrackerView -> TransactionDashboardController -> TransactionDashboardInputBoundary -> TransactionDashboardInteractor -> TransactionDataAccessInterface -> JsonTransactionDataAccess -> data/UserTransactions.json`
 
-| Owner | Use case | Main responsibility |
+The Interactor calculates totals and creates Transaction entities. The Presenter maps Output Data to the View Model. The Swing View renders state and forwards actions; it does not call HTTP or JSON directly.
+
+The currently usable transaction data store is `data/UserTransactions.json`. The local HTTP server, HTTP client, API-specific transaction DTO, and username-based `TransactionControl_App` were removed because they duplicated the direct JSON transaction path without adding useful application behaviour.
+
+## Domain model
+
+- `UserProfile` represents a person/login profile.
+- A profile owns zero or more financial `Account` objects.
+- `Account` represents a Cash, Savings, Chequing, or other financial account. It has no password.
+- `Transaction` is the single transaction entity. `TransactionType` distinguishes income and expense; optional account/category/currency fields support the richer account-owned transaction use case.
+- Monetary values use `BigDecimal`.
+- Entities do not read/write JSON, make HTTP requests, access Swing, or touch the filesystem.
+
+## Team use cases
+
+| Owner | Use case | Status |
 |---|---|---|
-| Binwen | Login | Authenticate a UserProfile and report success/failure. Password verification and credential lookup are behind the Login use case's Data Access Interface. |
-| Mashac | Upload Receipt | Accept a receipt, store it, extract candidate transaction details, and return them for user confirmation. It should not silently create a financial transaction unless that behaviour is explicitly included in the use case. |
-| Will | Create Account | Create a financial Account for the currently authenticated UserProfile and associate it with that profile. This does not create another login/profile. |
-| Gary | Change Currency | Change the selected account/profile currency using a currency-rate Data Access Interface. Convert the balance consistently and persist the new currency and converted balance together. |
+| Binwen | Login | Input/Output Data, boundaries, and Interactor scaffold added; authentication logic remains to be implemented. |
+| Mashac | Upload Receipt | Input/Output Data, boundaries, and Interactor scaffold added; receipt storage/extraction implementation remains. |
+| Will | Create Account | Interactor, Controller, Presenter, View Model, Data Access Interface, and JSON gateway added. It associates a new Account with an existing UserProfile. |
+| Gary | Change Currency | Input/Output Data, boundaries, and Interactor scaffold added. Bank of Canada HTTP client moved to the framework layer; rate/persistence gateway and Interactor logic remain. |
 
-Each use case has its own vertical flow but shares entities and focused Data Access interfaces. No duplicated entity or persistence model per teammate.
+Each use case owns its own vertical flow. Entities and appropriately focused Data Access Interfaces are shared; the team should not duplicate domain models or persistence code.
 
-## Standard flow for each use case
+## Data storage
 
-View -> Controller -> Input Boundary -> Interactor -> Data Access Interface / Entity -> Output Boundary -> Presenter -> View Model -> View.
+- `data/UserTransactions.json` is the current dashboard's preserved working JSON data.
+- `data/Profiles.json` is the new canonical profile/account data schema used by `JsonAccountDataAccess`. It starts empty; profile registration/login must populate it.
+- The previous parallel `AccountData.json`, `UserData.json`, and `Currencies.json` stores were removed from the refactor branch. They were not connected to the working dashboard flow; the old user file also contained plaintext credentials.
+- The empty `Expenditures.json` and `Revenues.json` files and their transaction-control implementation were removed.
 
-The Interactor's input-boundary method returns void. It sends an Output Data object to the Output Boundary; the Presenter updates the View Model.
+## Remaining work / verification
 
-## Migration rules
+1. Implement Binwen's Login use case and the profile creation path that populates `Profiles.json`; use password hashes, never plaintext.
+2. Add the Create Account UI entry point after a profile is authenticated, and wire it in `app.FinanceTracker`.
+3. Complete Gary's Change Currency Interactor and its Data Access implementation. Verify exchange-rate direction and handle dates with no Bank of Canada observation.
+4. Complete Mashac's receipt storage/scanning flow and make the user confirm extracted details before creating a transaction.
+5. Migrate the dashboard's username-keyed transaction JSON to profile/account IDs once Login and Create Account are integrated.
+6. Add unit tests for entities, interactors, and JSON gateways; run `mvn test` and checkstyle before merging.
 
-1. Preserve useful behaviour and public domain concepts where possible, but remove persistence, HTTP, Swing, filesystem, and API calls from entities.
-2. Replace the two transaction representations (account-ID based and username based) with one canonical transaction model and one repository/data-access path.
-3. Treat the existing username/password fields in the old `Account` as legacy login data. Move identity/credentials to `UserProfile`; financial accounts should not contain passwords.
-4. Keep mutable JSON files outside Java source/resources and give each concrete Data Access class one consistent path/configuration.
-5. Keep the existing Bank of Canada currency client as an outer-layer implementation if its response parsing and rate direction are verified. The Change Currency Interactor must not depend on the HTTP client.
-6. Keep existing receipt-related code if it exists and is useful; otherwise provide an interface boundary for the receipt scanner/storage dependency.
-7. Do not delete legacy code until the replacement use case is wired, tested, and the old references have been removed.
-
-## Existing implementation assessment
-
-- The current `Account` and `UserProfile` constructors perform JSON persistence and call outer-layer controls. These need to become plain domain objects.
-- The current `Transaction` constructor writes JSON and loads currency data. Transaction creation and persistence must move to the Record/Create Transaction use case and its Data Access Interface.
-- The current `SignUpInteractor` imports its Data Access Interface from `interface_adapter`, has no injected Presenter, and reverses the password-match condition. It is not a reliable completed login implementation.
-- `FinanceTracker` combines Swing presentation, API calls, server lifecycle, and analytics calculations.
-- `ApiTransaction` / `TransactionControl_App` / `UserTransactions.json` are a second transaction schema keyed by username. They should be migrated into the canonical account-owned transaction model, not retained as a second source of truth.
-- `CurrencyAPI` is a useful starting point for the Bank of Canada integration, but `CurrencyControl` currently combines rate lookup, JSON persistence, conversion, and account currency storage.
-- The existing create/delete transaction flow in the local HTTP API is the closest end-to-end feature, but it is not a complete Clean Architecture use case and currently uses the separate username-based transaction schema. Reuse its user-facing behaviour, not its architecture.
-
-## Safety of migration
-
-This is a redesign branch. The original `AccountDataBase` branch remains unchanged. Migrate in small commits and run the Maven build/tests after each vertical slice.
+The original `AccountDataBase` branch is unchanged. This branch is intentionally incremental so the team can review the migration without losing the starting point.
