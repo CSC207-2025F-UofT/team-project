@@ -157,10 +157,9 @@ public final class FinanceTrackerView extends JFrame {
         try {
             TransactionType transactionType = type.getSelectedIndex() == 0
                 ? TransactionType.INCOME : TransactionType.EXPENSE;
-            Transaction transaction = new Transaction(0, transactionType,
+            controller.addTransaction(selectedUser(), transactionType,
                 new BigDecimal(amount.getText().trim()), description.getText().trim(),
                 LocalDate.parse(date.getText().trim()));
-            controller.addTransaction(selectedUser(), transaction);
             refresh();
             showMessage();
         } catch (NumberFormatException exception) {
