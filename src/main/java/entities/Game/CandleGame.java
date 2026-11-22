@@ -3,8 +3,6 @@ package entities.Game;
 import java.util.ArrayList;
 import java.util.List;
 
-import data_access.RandomSecretCodeGen;
-
 public class CandleGame {
 
     // Refer to the API documentation for the meaning of these fields.
@@ -46,6 +44,9 @@ public class CandleGame {
         return guesses.size();
     }
 
+    public void setGameCondition(GameCondition gameCondition) {
+        this.gameCondition = gameCondition;
+    }
 
     /**
      * Returns the current condition of the game
