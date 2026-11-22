@@ -52,7 +52,7 @@ public final class TransactionDashboardInteractor implements TransactionDashboar
     private void presentUser(String userName, String message) throws IOException {
         List<Transaction> income = dataAccess.getTransactions(userName, TransactionType.INCOME);
         List<Transaction> expenses = dataAccess.getTransactions(userName, TransactionType.EXPENSE);
-        presenter.present(new TransactionDashboardOutputData(Collections.emptyList(), income, expenses,
+        presenter.present(new TransactionDashboardOutputData(null, income, expenses,
             total(income), total(expenses), message));
     }
 
