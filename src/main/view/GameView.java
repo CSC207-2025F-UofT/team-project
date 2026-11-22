@@ -15,7 +15,7 @@ public class GameView extends JPanel {
         final JLabel title = new JLabel("Yo check this out im playing poker frfr");
 
         this.setLayout(null);
-        this.setBackground(Color.CYAN);
+        this.setBackground(new Color(5,5,5));
         this.add(title);
     }
 
