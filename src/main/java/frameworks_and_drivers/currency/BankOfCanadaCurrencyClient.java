@@ -40,11 +40,11 @@ public final class BankOfCanadaCurrencyClient {
         }
 
         JSONObject json = new JSONObject(response.body());
-        if (json.getJSONArray("observations").isEmpty()) {
+        if (json.getJSONArray("observations").length() == 0) {
             throw new IOException("No exchange-rate observation is available for " + date + ".");
         }
         String value = json.getJSONArray("observations").getJSONObject(0)
-            .getJSONObject(series).getString("v");
+            .getJSONObject(series).get("v").toString();
         return new BigDecimal(value);
     }
 }
