@@ -10,11 +10,15 @@ public class FlashcardStudyingInputData {
         this.deckTitle = deckTitle;
     }
 
+    public FlashcardStudyingInputData(String buttonClicked) {
+        this.buttonClicked = buttonClicked;
+    }
+
     public String getButtonClicked() {
         return buttonClicked;
     }
 
-    public String deckTitle() {
+    public String getDeckTitle() {
         return deckTitle;
     }
 }
