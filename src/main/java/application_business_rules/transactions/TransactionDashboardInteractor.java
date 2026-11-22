@@ -7,7 +7,7 @@ import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.List;
 
-/** Coordinates dashboard actions and calculates totals, independent of Swing and JSON. */
+/** Coordinates dashboard actions and calculations without knowing about Swing or JSON. */
 public final class TransactionDashboardInteractor implements TransactionDashboardInputBoundary {
     private final TransactionDataAccessInterface dataAccess;
     private final TransactionDashboardOutputBoundary presenter;
@@ -29,7 +29,9 @@ public final class TransactionDashboardInteractor implements TransactionDashboar
                     presentUser(input.getUserName(), "");
                     break;
                 case ADD_TRANSACTION:
-                    dataAccess.addTransaction(input.getUserName(), input.getTransaction());
+                    Transaction transaction = new Transaction(0, input.getType(), input.getAmount(),
+                        input.getDescription(), input.getDate());
+                    dataAccess.addTransaction(input.getUserName(), transaction);
                     presentUser(input.getUserName(), "Transaction added successfully.");
                     break;
                 case DELETE_TRANSACTION:
