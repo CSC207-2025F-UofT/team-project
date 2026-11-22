@@ -8,9 +8,8 @@ public final class Expense extends AccountTransaction {
                    String transactionCurrency, Category category, String note) {
         super(amount, date, description, account, transactionCurrency, category, note);
     }
-
     @Override
-    public void applyToAccount() {
-        account.withdraw(amount, transactionCurrency);
+    public void applyToAccount(BigDecimal amountInAccountCurrency) {
+        account.withdraw(amountInAccountCurrency);
     }
 }
