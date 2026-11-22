@@ -70,7 +70,7 @@ public class MainMenuView extends JPanel implements ActionListener {
     @Override
     public void actionPerformed(ActionEvent event) {
         if (event.getSource().equals(playButton)) {
-            mainMenuController.switchToGameView();
+            mainMenuController.switchToLobbyView();
         }
         if (event.getSource().equals(settingsButton)) {
             mainMenuController.switchToSettingsView();

@@ -25,4 +25,18 @@ public class SoundManager {
             e.printStackTrace();
         }
     }
+
+    public void setVolumePercentage(int percentage) {
+        if (clip != null && clip.isControlSupported(FloatControl.Type.MASTER_GAIN)) {
+            FloatControl gainControl = (FloatControl) clip.getControl(FloatControl.Type.MASTER_GAIN);
+            if (percentage <= 0) {
+                gainControl.setValue(gainControl.getMinimum());
+            } else {
+                float dB = (float) (Math.log10(percentage / 100.0) * 20.0);
+                float clamped = Math.max(gainControl.getMinimum(), Math.min(gainControl.getMaximum(), dB));
+                gainControl.setValue(clamped);
+            }
+        }
+    }
 }
+

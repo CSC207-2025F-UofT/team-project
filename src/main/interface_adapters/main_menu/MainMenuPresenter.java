@@ -2,24 +2,25 @@ package main.interface_adapters.main_menu;
 
 import main.interface_adapters.game.GameViewModel;
 import main.interface_adapters.ViewManagerModel;
+import main.interface_adapters.lobby.LobbyViewModel;
 import main.interface_adapters.settings.SettingsViewModel;
 
 // implements MainMenuOutputBoundary
 public class MainMenuPresenter {
 
     private final ViewManagerModel viewManagerModel;
-    private final GameViewModel gameViewModel;
+    private final LobbyViewModel lobbyViewModel;
     private final SettingsViewModel settingsViewModel;
 
-    public MainMenuPresenter(ViewManagerModel viewManagerModel, GameViewModel gameViewModel,
+    public MainMenuPresenter(ViewManagerModel viewManagerModel, LobbyViewModel lobbyViewModel,
                              SettingsViewModel settingsViewModel) {
         this.viewManagerModel = viewManagerModel;
-        this.gameViewModel = gameViewModel;
+        this.lobbyViewModel = lobbyViewModel;
         this.settingsViewModel = settingsViewModel;
     }
 
-    public void switchToGameView() {
-        this.viewManagerModel.setActiveView(GameViewModel.VIEW_NAME);
+    public void switchToLobbyView() {
+        this.viewManagerModel.setActiveView(LobbyViewModel.VIEW_NAME);
         this.viewManagerModel.notifyViewChanged();
     }
 

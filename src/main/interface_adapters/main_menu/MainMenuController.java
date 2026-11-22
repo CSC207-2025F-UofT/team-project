@@ -11,8 +11,8 @@ public class MainMenuController {
         this.mainMenuPresenter = mainMenuPresenter;
     }
 
-    public void switchToGameView() {
-        mainMenuPresenter.switchToGameView();
+    public void switchToLobbyView() {
+        mainMenuPresenter.switchToLobbyView();
     }
 
     public void switchToSettingsView() {

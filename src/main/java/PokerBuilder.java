@@ -4,6 +4,9 @@ import java.awt.*;
 
 import main.interface_adapters.game.GameViewModel;
 import main.interface_adapters.ViewManagerModel;
+import main.interface_adapters.lobby.LobbyController;
+import main.interface_adapters.lobby.LobbyPresenter;
+import main.interface_adapters.lobby.LobbyViewModel;
 import main.interface_adapters.main_menu.*;
 import main.interface_adapters.settings.SettingsController;
 import main.interface_adapters.settings.SettingsPresenter;
@@ -22,6 +25,9 @@ public class PokerBuilder {
     private MainMenuView mainMenuView;
     private MainMenuViewModel mainMenuViewModel;
 
+    private LobbyView lobbyView;
+    private LobbyViewModel lobbyViewModel;
+
     private GameView gameView;
     private GameViewModel gameViewModel;
 
@@ -37,11 +43,24 @@ public class PokerBuilder {
         this.mainMenuView = new MainMenuView(mainMenuViewModel);
 
         MainMenuPresenter mainMenuPresenter = new MainMenuPresenter(
-                viewManagerModel, gameViewModel, settingsViewModel);
+                viewManagerModel, lobbyViewModel, settingsViewModel);
         MainMenuController mainMenuController = new MainMenuController(mainMenuPresenter);
         mainMenuView.setController(mainMenuController);
 
         cardPanel.add(mainMenuView, MainMenuViewModel.VIEW_NAME);
+        return this;
+    }
+
+    public PokerBuilder addLobbyView() {
+        this.lobbyViewModel = new LobbyViewModel();
+        this.lobbyView = new LobbyView(lobbyViewModel);
+
+        LobbyPresenter lobbyPresenter = new LobbyPresenter(viewManagerModel, lobbyViewModel,
+                mainMenuViewModel, gameViewModel);
+        LobbyController lobbyController = new LobbyController(lobbyPresenter);
+        lobbyView.setController(lobbyController);
+
+        cardPanel.add(lobbyView, LobbyViewModel.VIEW_NAME);
         return this;
     }
 

@@ -120,7 +120,7 @@ public class SettingsView extends JPanel implements ActionListener {
 
         this.add(subStatWinRateLabel);
         this.add(subStatWinRateAmountLabel);
-        this.add(subStatBigWinPanel);
+        this.add(subStatWinRatePanel);
 
         this.add(profilePicture);
         this.add(statsTitle);
