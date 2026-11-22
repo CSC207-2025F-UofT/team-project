@@ -29,13 +29,33 @@ public final class Account {
         if (currency == null || !currency.matches("[A-Z]{3}")) {
             throw new IllegalArgumentException("Currency must be a three-letter ISO code.");
         }
+        this(accountID, ownerProfileId, accountName, accountType, initialBalance,
+            currency, LocalDateTime.now());
+    }
+
+    public Account(int accountID, int ownerProfileId, String accountName,
+                   AccountType accountType, BigDecimal initialBalance, String currency,
+                   LocalDateTime createdAt) {
+        if (accountID < 0 || ownerProfileId < 0) {
+            throw new IllegalArgumentException("IDs cannot be negative.");
+        }
+        if (accountName == null || accountName.isBlank()) {
+            throw new IllegalArgumentException("Account name cannot be empty.");
+        }
+        if (accountType == null) throw new IllegalArgumentException("Account type is required.");
+        if (initialBalance == null || initialBalance.signum() < 0) {
+            throw new IllegalArgumentException("Initial balance cannot be negative.");
+        }
+        if (currency == null || !currency.matches("[A-Z]{3}")) {
+            throw new IllegalArgumentException("Currency must be a three-letter ISO code.");
+        }
         this.accountID = accountID;
         this.ownerProfileId = ownerProfileId;
         this.accountName = accountName.trim();
         this.accountType = accountType;
         this.balance = initialBalance;
         this.currency = currency;
-        this.createdAt = LocalDateTime.now();
+        this.createdAt = Objects.requireNonNull(createdAt, "Creation date is required.");
     }
 
     public int getAccountID() { return accountID; }
