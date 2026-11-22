@@ -1,68 +1,33 @@
 package entity;
 
-import interface_adapter.CurrencyControl;
-import interface_adapter.TransactionControl;
-
-import java.io.IOException;
+import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.Objects;
 
-public abstract class Transaction {
+/** A dashboard transaction record. Persistence is handled by a Data Access implementation. */
+public final class Transaction {
+    private final int id;
+    private final TransactionType type;
+    private final BigDecimal amount;
+    private final String description;
+    private final LocalDate date;
 
-    protected int transactionID;
-    protected double amount;
-    protected LocalDate date;
-    protected String description;
-    protected Account account;
-    protected String transactionCurrency;
-    protected Category category;
-    protected String note;
-
-    protected Transaction(double amount,
-                          LocalDate date, String description,
-                          Account account, String transactionCurrency, Category category, String note, String source) throws IOException {
-      String currencyDatabase = "Currencies.json";
-      CurrencyControl allCurrencies = new CurrencyControl(currencyDatabase);
-        if (amount <= 0) {
-          throw new IllegalArgumentException(
-              "Amount must be positive"
-          );
-        } else if (!allCurrencies.validCurrency(transactionCurrency)) {
-            throw new IllegalArgumentException("The currency type is not supported. Please try again with another currency.");
-        } else {
-          TransactionControl transaction = new TransactionControl(source);
-            this.transactionID = transaction.writeTransactions(account, amount, date, description, category, note, transactionCurrency);
-            this.amount = amount;
-            this.date = date;
-            this.note = note;
-            this.description = description;
-            this.category = category;
-            this.account = account;
-            this.transactionCurrency = transactionCurrency;
-    }}
-
-    // Getters
-    public int getTransactionID() {
-        return transactionID;
+    public Transaction(int id, TransactionType type, BigDecimal amount,
+                       String description, LocalDate date) {
+        if (id < 0) throw new IllegalArgumentException("Transaction ID cannot be negative.");
+        if (type == null) throw new IllegalArgumentException("Transaction type is required.");
+        if (amount == null || amount.signum() <= 0) throw new IllegalArgumentException("Amount must be positive.");
+        if (description == null || description.isBlank()) throw new IllegalArgumentException("Description cannot be empty.");
+        this.id = id;
+        this.type = type;
+        this.amount = amount;
+        this.description = description.trim();
+        this.date = Objects.requireNonNull(date, "Date is required.");
     }
 
-    public double getAmount() {
-        return amount;
-    }
-
-    public LocalDate getDate() {
-        return date;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public Account getAccount() {
-        return account;
-    }
-
-    public String getCurrency() {return transactionCurrency;}
-
-    // Abstract method
-    public abstract void execute() throws IOException;
+    public int getId() { return id; }
+    public TransactionType getType() { return type; }
+    public BigDecimal getAmount() { return amount; }
+    public String getDescription() { return description; }
+    public LocalDate getDate() { return date; }
 }
