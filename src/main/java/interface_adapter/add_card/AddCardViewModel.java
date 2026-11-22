@@ -4,6 +4,8 @@ import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 
 public class AddCardViewModel {
+    public static final String CARD_ADDED = "cardAdded";
+    public static final String ERROR = "error, unable to add card";
     private final PropertyChangeSupport support = new PropertyChangeSupport(this);
 
     private int cardId;
@@ -27,11 +29,15 @@ public class AddCardViewModel {
     public void setError(String error){
         this.error = error;
         this.message = "";
-        support.firePropertyChange("error cardNotAdded", null, error);
+        support.firePropertyChange(ERROR, null, error);
     }
 
     public void addPropertyChangeListener(PropertyChangeListener listener) {
         support.addPropertyChangeListener(listener);
+    }
+
+    public void removePropertyChangeListener(PropertyChangeListener listener) {
+        support.removePropertyChangeListener(listener);
     }
 
     public int getCardId() {

@@ -1,7 +1,7 @@
 package use_case.add_card;
 
 public interface AddCardInputBoundary {
-    void execute(AddCardInputData InputData);
+    void execute(AddCardInputData inputData);
 }
 
 // AddCardInteractor should implement this
