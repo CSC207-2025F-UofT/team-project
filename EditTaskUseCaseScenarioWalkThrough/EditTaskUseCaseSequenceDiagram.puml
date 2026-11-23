@@ -1,0 +1,65 @@
+@startuml
+title Story 2A — Edit task information and completion progress
+hide footbox
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+
+actor Student as User
+boundary "EditTaskView" as View
+control "EditTaskController" as Controller
+control "EditTaskInteractor" as Edit
+participant "Task DAO" as DAO
+control "EditTaskPresenter" as Presenter
+participant "EditTaskViewModel" as VM
+
+== Open the editor ==
+User -> View : Select one of my tasks and open Edit
+note over User, View
+  The selected task supplies the two IDs and current values.
+  Show title, description, deadline, estimated hours,
+  completion progress and difficulty.
+end note
+View --> User : Show the prefilled form
+User -> View : Change one or more fields
+
+alt Save
+  User -> View : Click Save
+  View -> Controller : Submit the selected task ID and all six form values
+  Controller -> Controller : Build EditTaskInputData with the logged-in user's ID
+  Controller -> Edit : execute(inputData) via EditTaskInputBoundary
+  Edit -> DAO : findById(userId, taskId)
+  DAO --> Edit : Optional<StudentTask>
+
+  alt Task not found
+    Edit -> Presenter : prepareFailView("Task not found.")
+  else Task found
+    Edit -> Edit : Check deadline, hours, progress and difficulty
+    alt Invalid field
+      Edit -> Presenter : prepareFailView(field-specific message)
+    else Valid fields
+      Edit -> Edit : Construct updated StudentTask with original IDs,\nall six values and validated progress cast to byte
+      Edit -> DAO : update(updatedTask)
+      DAO --> Edit : saved
+      alt saved == true
+        Edit -> Presenter : prepareSuccessView(EditTaskOutputData)
+      else saved == false
+        Edit -> Presenter : prepareFailView("Task could not be updated.")
+      end
+    end
+  end
+
+  Presenter -> VM : Set saved values and confirmation, or set error
+  VM -> View : Notify view of state change
+  View --> User : On success, show updated task and confirmation.\nOn failure, show the error and keep the form open.
+else Cancel
+  User -> View : Click Cancel
+  View --> User : Ask whether to discard unsaved changes
+  alt Confirm discard
+    User -> View : Discard
+    View --> User : Close editor; saved task stays unchanged
+  else Continue editing
+    User -> View : Keep editing
+    View --> User : Show the form with unsaved values
+  end
+end
+@enduml

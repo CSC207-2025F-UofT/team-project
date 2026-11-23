@@ -1,0 +1,7 @@
+Scenario WalkThrough: The user changes the Completion Progress from 20% to 50%.
+- A student opens “CSC207 Assignment” and sees the form prefilled with the task’s current values.
+- They change the completion progress from 20% to 50% and click Save.
+- The controller sends the form data to the interactor, which finds the task using the student’s ID
+  and task ID, validates the input, and saves the update through the DAO. The task keeps its original
+  ID and all other field values.
+- The presenter updates the view model, and the screen shows 50% progress with a confirmation message.
