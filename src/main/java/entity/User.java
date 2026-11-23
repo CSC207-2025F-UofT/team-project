@@ -12,7 +12,7 @@ public class User {
     private final String email;
     private final String passwordHash;
     private final Role role;
-    private final String preference;
+    private final AdopterPreferences preference;
 
     /**
      * Creates a new user.
@@ -27,7 +27,7 @@ public class User {
      * @throws IllegalArgumentException if any required field is null or empty,
      *                                  or if an admin is given a non-null preference
      */
-    public User(String name, String id, String email, String passwordHash, Role role, String preference) {
+    public User(String name, String id, String email, String passwordHash, Role role, AdopterPreferences preference) {
         if ("".equals(name)) {
             throw new IllegalArgumentException("Username cannot be empty");
         }
@@ -79,7 +79,7 @@ public class User {
         return role;
     }
 
-    public String getPreference() {
+    public AdopterPreferences getPreference() {
         return preference;
     }
 }
