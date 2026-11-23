@@ -1,0 +1,40 @@
+@startuml seq-uc3-browse-pets
+title UC3 Browse Pets: sequence (opening the gallery)
+
+skinparam sequenceMessageAlign left
+autonumber
+
+actor Visitor
+participant "AppBuilder" as Builder
+participant "GalleryView" as View
+participant "BrowsePetsController" as Controller
+participant "BrowsePetsInteractor\n<<BrowsePetsInputBoundary>>" as Interactor
+participant "InMemoryPetDataAccess\n<<BrowsePetsDataAccessInterface>>" as DAO
+participant "BrowsePetsPresenter\n<<BrowsePetsOutputBoundary>>" as Presenter
+participant "GalleryViewModel" as VM
+
+Visitor -> Builder : starts the app (Main)
+Builder -> View : new GalleryView(controller, viewModel)
+Builder -> View : loadAll()
+View -> Controller : browse(empty list of filters)
+Controller -> Interactor : execute(new BrowsePetsInputData(filters))
+
+Interactor -> DAO : getAvailablePets()
+DAO --> Interactor : AVAILABLE pets
+Interactor -> Interactor : keep pets that match every filter
+Interactor -> Presenter : presentPets(new BrowsePetsOutputData(pets))
+
+loop for each pet
+  Presenter -> Presenter : new PetCardData(name,\n"Cat, Tabby, 2 years old", "Status: Available")
+end
+Presenter -> VM : setCards(cards)
+VM -> View : property change "cards"
+View -> View : showCards(cards)
+View --> Visitor : grid of pet cards
+
+note over Interactor, VM
+  If no pet matches, the view shows
+  "No pets match your filters."
+end note
+
+@enduml

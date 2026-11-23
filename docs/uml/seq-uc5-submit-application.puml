@@ -1,0 +1,45 @@
+@startuml seq-uc5-submit-application
+title UC5 Submit an Application: sequence (success path)
+
+skinparam sequenceMessageAlign left
+autonumber
+
+actor Adopter
+participant "SubmitApplicationView" as View
+participant "SubmitApplicationController" as Controller
+participant "SubmitApplicationInteractor\n<<SubmitApplicationInputBoundary>>" as Interactor
+participant "FilePetDataAccessObject\n<<SubmitApplicationPetDataAccessInterface>>" as PetDAO
+participant "FileApplicationDataAccessObject\n<<SubmitApplicationDataAccessInterface>>" as AppDAO
+participant "Application" as App
+participant "SubmitApplicationPresenter\n<<SubmitApplicationOutputBoundary>>" as Presenter
+participant "SubmitApplicationViewModel" as VM
+
+Adopter -> View : fills in the form,\nclicks "Submit application"
+View -> Controller : execute(adopterId, petId, housingType,\npetExperience, householdMembers, contactInfo, note)
+Controller -> Controller : new SubmitApplicationInputData(...)
+Controller -> Interactor : execute(inputData)
+
+Interactor -> PetDAO : isAvailable(petId)
+PetDAO --> Interactor : true
+Interactor -> AppDAO : hasActiveApplication(adopterId, petId)
+AppDAO --> Interactor : false
+Interactor -> PetDAO : getPetName(petId)
+PetDAO --> Interactor : "Mochi"
+create App
+Interactor -> App : new Application(..., status = PENDING)
+Interactor -> AppDAO : save(application)
+AppDAO -> AppDAO : write applications JSON file
+
+Interactor -> Presenter : prepareSuccessView(\nnew SubmitApplicationOutputData(id, "Mochi"))
+Presenter -> VM : state.setSuccessMessage(...)\nnotifyStateChanged()
+VM -> View : stateChanged()
+View --> Adopter : "Your application for Mochi was submitted."
+
+note over Interactor, Presenter
+  Failure paths call prepareFailView(message) instead:
+  not logged in, pet not available, already applied,
+  missing required field, pet name or save failed.
+  The view then shows the error in red.
+end note
+
+@enduml

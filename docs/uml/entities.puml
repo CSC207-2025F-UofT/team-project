@@ -1,0 +1,123 @@
+@startuml entities
+title PawPortal: Entities (Enterprise Business Rules)
+
+skinparam classAttributeIconSize 0
+skinparam packageStyle rectangle
+hide empty members
+
+package "entity" #FFF4D6 {
+
+  class User {
+    - name : String
+    - id : String
+    - email : String
+    - passwordHash : String
+    - role : Role
+    - preference : String
+  }
+
+  enum "User.Role" as Role {
+    ADOPTER
+    ADMIN
+  }
+
+  class UserFactory {
+    + create(name, id, email, passwordHash, role, preference) : User
+  }
+
+  class AdopterPreferences {
+    - hasChildren : boolean
+    - hasOtherPets : boolean
+    - canHandleMedicalNeeds : boolean
+    - canHandleKitten : boolean
+    - canHandlePregnantAnimal : boolean
+    - preferredSpecies : Species
+  }
+
+  class Pet {
+    - id : String
+    - name : String
+    - species : Species
+    - breed : String
+    - ageYears : int
+    - sex : PetSex
+    - temperamentTags : List<Temperament>
+    - healthNotes : String
+    - needsMedication : boolean
+    - vaccinated : boolean
+    - spayedNeutered : boolean
+    - adoptionFee : BigDecimal
+    - photoPath : String
+    - status : PetStatus
+  }
+
+  enum Species {
+    CAT
+  }
+
+  enum PetSex {
+    FEMALE
+    MALE
+    UNKNOWN
+  }
+
+  enum PetStatus {
+    AVAILABLE
+    PENDING
+    ADOPTED
+  }
+
+  enum Temperament {
+    AFFECTIONATE
+    SHY
+    PLAYFUL
+    CALM
+    ENERGETIC
+    GOOD_WITH_KIDS
+    INDEPENDENT
+  }
+
+  class Application {
+    - id : String
+    - adopterId : String
+    - petId : String
+    - housingType : String
+    - petExperience : String
+    - householdMembers : String
+    - contactInfo : String
+    - note : String
+    - submittedAt : LocalDate
+    - status : ApplicationStatus
+    - adminNote : String
+    + isActive() : boolean
+    + withdraw() : void
+    + updateStatus(newStatus : ApplicationStatus, adminNote : String) : void
+  }
+
+  enum ApplicationStatus {
+    PENDING
+    INTERVIEW
+    APPROVED
+    REJECTED
+    WITHDRAWN
+  }
+}
+
+User --> "1" Role : role
+UserFactory ..> User : creates
+AdopterPreferences --> "1" Species : preferredSpecies
+Pet --> "1" Species
+Pet --> "1" PetSex
+Pet --> "1" PetStatus
+Pet --> "0..*" Temperament : temperamentTags
+Application --> "1" ApplicationStatus
+Application ..> User : adopterId (stored as id)
+Application ..> Pet : petId (stored as id)
+
+note bottom of User
+  Getters are omitted in this diagram.
+  preference is still a String;
+  AdopterPreferences is not linked to User yet.
+end note
+
+@enduml

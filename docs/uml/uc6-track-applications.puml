@@ -1,0 +1,117 @@
+@startuml uc6-track-applications
+title UC6 Track My Applications: Clean Architecture classes
+
+left to right direction
+skinparam classAttributeIconSize 0
+skinparam packageStyle rectangle
+skinparam nodesep 30
+skinparam ranksep 60
+hide empty members
+
+package "View\n(Frameworks & Drivers)" as FDView #E2F4E2 {
+  class MyApplicationsView {
+    + refresh() : void
+    + stateChanged() : void
+  }
+}
+
+package "Interface Adapters" as IA #DDEBFF {
+  class TrackApplicationsController {
+    + execute(adopterId) : void
+  }
+  class TrackApplicationsPresenter {
+    + prepareSuccessView(outputData) : void
+    + prepareFailView(errorMessage) : void
+  }
+  class TrackApplicationsViewModel {
+    + getState() : TrackApplicationsState
+    + notifyStateChanged() : void
+  }
+  class TrackApplicationsState {
+    adopterId, message
+    rows : List<ApplicationRow>
+  }
+  class ApplicationRow {
+    petName, submittedAt,
+    status, adminNote
+  }
+  interface TrackApplicationsViewModelListener {
+    + stateChanged() : void
+  }
+}
+
+package "Application Business Rules" as ABR #FDE2E2 {
+  interface TrackApplicationsInputBoundary {
+    + execute(inputData) : void
+  }
+  class TrackApplicationsInputData {
+    adopterId
+  }
+  class TrackApplicationsInteractor {
+    + execute(inputData) : void
+    - findPetName(petId) : String
+  }
+  interface TrackApplicationsOutputBoundary {
+    + prepareSuccessView(outputData) : void
+    + prepareFailView(errorMessage) : void
+  }
+  class TrackApplicationsOutputData {
+    applications : List<ApplicationSummary>
+  }
+  class ApplicationSummary {
+    applicationId, petName,
+    submittedAt, status, adminNote
+  }
+  interface TrackApplicationsDataAccessInterface {
+    + getApplicationsByAdopter(adopterId) : List<Application>
+  }
+  interface TrackApplicationsPetDataAccessInterface {
+    + getPetName(petId) : String
+  }
+}
+
+package "Enterprise Business Rules" as EBR #FFF4D6 {
+  class Application
+}
+
+package "Data Access\n(Frameworks & Drivers)" as FDData #E2F4E2 {
+  class FileApplicationDataAccessObject
+  class InMemoryApplicationDataAccessObject
+}
+
+' View and view model
+MyApplicationsView --> TrackApplicationsController : calls
+MyApplicationsView --> TrackApplicationsViewModel : reads
+MyApplicationsView ..|> TrackApplicationsViewModelListener
+TrackApplicationsViewModel --> TrackApplicationsState
+TrackApplicationsState --> "0..*" ApplicationRow
+TrackApplicationsViewModel --> TrackApplicationsViewModelListener : notifies
+
+' Input side
+TrackApplicationsController ..> TrackApplicationsInputData : creates
+TrackApplicationsController --> TrackApplicationsInputBoundary
+TrackApplicationsInputBoundary <|.. TrackApplicationsInteractor
+
+' Output side
+TrackApplicationsPresenter ..|> TrackApplicationsOutputBoundary
+TrackApplicationsPresenter --> TrackApplicationsViewModel : updates
+TrackApplicationsPresenter ..> ApplicationRow : creates
+TrackApplicationsOutputBoundary <-- TrackApplicationsInteractor
+TrackApplicationsOutputData <.. TrackApplicationsInteractor : creates
+TrackApplicationsOutputData --> "0..*" ApplicationSummary
+
+' Data access side
+TrackApplicationsInteractor --> TrackApplicationsDataAccessInterface
+TrackApplicationsInteractor --> TrackApplicationsPetDataAccessInterface
+TrackApplicationsInteractor ..> Application : reads
+TrackApplicationsDataAccessInterface <|.. FileApplicationDataAccessObject
+TrackApplicationsDataAccessInterface <|.. InMemoryApplicationDataAccessObject
+Application <.. FileApplicationDataAccessObject : saves / loads
+
+note bottom of TrackApplicationsPetDataAccessInterface
+  No class on main implements this yet.
+  FilePetDataAccessObject (UC2) should
+  add it when the screens are wired.
+end note
+
+@enduml
