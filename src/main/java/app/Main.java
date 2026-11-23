@@ -1,6 +1,6 @@
 package app;
-import javaex.swing.*;
 
 public class Main {
-    return null;
+    public static void main(String[] args) {
+    }
 }
