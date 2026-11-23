@@ -1,6 +1,6 @@
 package use_case.welcomeMenu;
 
-public class WelcomeInteractor {
+public class WelcomeInteractor implements WelcomeInputBoundary {
     //private final WelcomeDataAccessInterface welcomeDataAccessObject;
     private final WelcomeOutputBoundary welcomePresenter;
 

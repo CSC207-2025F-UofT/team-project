@@ -60,6 +60,7 @@ public class PlayerDataAccessObject implements NewPlayerDataAccessInterface, Ret
         final BufferedWriter writer;
         try {
             writer = new BufferedWriter(new FileWriter(csvFile));
+            writer.write(HEADER);
             writer.newLine();
 
             for (Player player : accounts.values()) {
@@ -77,11 +78,13 @@ public class PlayerDataAccessObject implements NewPlayerDataAccessInterface, Ret
     @Override
     public void save(Player player) {
         accounts.put(player.getName(), player);
+        currentUsername = player.getName();
         this.save();
     }
 
     @Override
     public Player get(String username) {
+        currentUsername = username;
         return accounts.get(username);
     }
 

@@ -22,13 +22,12 @@ public class NewPlayerInteractor implements NewPlayerInputBoundary{
 
     @Override
     public void execute(NewPlayerInputData newPlayerInputData) {
-        //TODO
         if ("".equals(newPlayerInputData.getUsername())) {
             playerPresenter.prepareFailView("Username cannot be empty");
         }
         else if (playerDataAccessObject.existsByName(newPlayerInputData.getUsername())) {
             final Player returningPlayer = returningPlayerDataAccessObject.get(newPlayerInputData.getUsername());
-            final NewPlayerOutputData newPlayerOutputData = new NewPlayerOutputData(returningPlayerDataAccessObject.getCurrentUsername());
+            final NewPlayerOutputData newPlayerOutputData = new NewPlayerOutputData(returningPlayer.getName());
             playerPresenter.prepareSuccessView(newPlayerOutputData);
         }
         else {

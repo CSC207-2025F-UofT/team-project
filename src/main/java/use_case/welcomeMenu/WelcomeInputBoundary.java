@@ -2,7 +2,7 @@ package use_case.welcomeMenu;
 
 import use_case.welcomeMenu.WelcomeInputData;
 
-public class WelcomeInputBoundary {
+public interface WelcomeInputBoundary {
     /**
      * Executes use case 1.
      * @param welcomeInputData the input data
