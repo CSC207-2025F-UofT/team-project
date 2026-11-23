@@ -7,23 +7,19 @@ public class WelcomeController {
     /**
      * The controller for the Welcome menu.
      */
-    public class LoginController {
+    private final WelcomeInputBoundary welcomeUseCaseInteractor;
 
-        private final WelcomeInputBoundary welcomeUseCaseInteractor;
+    public WelcomeController(WelcomeInputBoundary welcomeUseCaseInteractor) {
+        this.welcomeUseCaseInteractor = welcomeUseCaseInteractor;
+    }
 
-        public WelcomeController(WelcomeInputBoundary welcomeUseCaseInteractor) {
-            this.welcomeUseCaseInteractor = welcomeUseCaseInteractor;
-        }
+    /**
+     * Executes the Welcome menu.
+     * @param username the username of the user logging in
+     */
+    public void execute(String username, String password) {
+        final WelcomeInputData welcomeInputData = new WelcomeInputData(username);
 
-        /**
-         * Executes the Login Use Case.
-         * @param username the username of the user logging in
-         * @param password the password of the user logging in
-         */
-        public void execute(String username, String password) {
-            final WelcomeInputData welcomeInputData = new WelcomeInputData(
-                    username, password);
-
-            welcomeUseCaseInteractor.execute(welcomeInputData);
-        }
+        welcomeUseCaseInteractor.execute(welcomeInputData);
+    }
 }
