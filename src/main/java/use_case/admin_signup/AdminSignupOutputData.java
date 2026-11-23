@@ -5,13 +5,13 @@ package use_case.admin_signup;
  */
 public class AdminSignupOutputData {
 
-    private final String username;
+    private final String email;
 
-    public AdminSignupOutputData(String username) {
-        this.username = username;
+    public AdminSignupOutputData(String email) {
+        this.email = email;
     }
 
-    public String getUsername() {
-        return username;
+    public String getEmail() {
+        return email;
     }
 }

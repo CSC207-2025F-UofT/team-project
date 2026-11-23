@@ -1,0 +1,108 @@
+@startuml uc3-browse-pets
+title UC3 Browse and Filter Pets: Clean Architecture classes
+
+left to right direction
+skinparam classAttributeIconSize 0
+skinparam packageStyle rectangle
+skinparam nodesep 30
+skinparam ranksep 60
+hide empty members
+
+package "View\n(Frameworks & Drivers)" as FDView #E2F4E2 {
+  class GalleryView {
+    + VIEW_NAME : String
+    + loadAll() : void
+    + propertyChange(event) : void
+  }
+}
+
+package "Interface Adapters" as IA #DDEBFF {
+  class BrowsePetsController {
+    + browse(filters : List<PetFilter>) : void
+  }
+  class BrowsePetsPresenter {
+    + presentPets(outputData) : void
+  }
+  class GalleryViewModel {
+    + CARDS : String
+    + getCards() : List<PetCardData>
+    + setCards(cards) : void
+    + addPropertyChangeListener(listener) : void
+  }
+  class PetCardData {
+    name, summary, status
+  }
+}
+
+package "Application Business Rules" as ABR #FDE2E2 {
+  interface BrowsePetsInputBoundary {
+    + execute(inputData) : void
+  }
+  class BrowsePetsInputData {
+    filters : List<PetFilter>
+  }
+  interface PetFilter {
+    + matches(pet : Pet) : boolean
+  }
+  class BrowsePetsInteractor {
+    + execute(inputData) : void
+  }
+  interface BrowsePetsOutputBoundary {
+    + presentPets(outputData) : void
+  }
+  class BrowsePetsOutputData {
+    pets : List<Pet>
+  }
+  interface BrowsePetsDataAccessInterface {
+    + getAvailablePets() : List<Pet>
+  }
+}
+
+package "Enterprise Business Rules" as EBR #FFF4D6 {
+  class Pet
+  enum PetStatus
+}
+
+package "Data Access\n(Frameworks & Drivers)" as FDData #E2F4E2 {
+  class InMemoryPetDataAccess {
+    + withSampleData() : InMemoryPetDataAccess
+    + getAvailablePets() : List<Pet>
+  }
+}
+
+' View and view model
+GalleryView --> BrowsePetsController : calls
+GalleryView --> GalleryViewModel : listens
+GalleryViewModel --> "0..*" PetCardData
+
+' Input side
+BrowsePetsController ..> BrowsePetsInputData : creates
+BrowsePetsController --> BrowsePetsInputBoundary
+BrowsePetsInputBoundary <|.. BrowsePetsInteractor
+BrowsePetsInputData --> "0..*" PetFilter
+
+' Output side
+BrowsePetsPresenter ..|> BrowsePetsOutputBoundary
+BrowsePetsPresenter --> GalleryViewModel : updates
+BrowsePetsPresenter ..> PetCardData : creates
+BrowsePetsOutputBoundary <-- BrowsePetsInteractor
+BrowsePetsOutputData <.. BrowsePetsInteractor : creates
+
+' Data access side
+BrowsePetsInteractor --> BrowsePetsDataAccessInterface
+BrowsePetsInteractor ..> PetFilter : applies every filter
+BrowsePetsDataAccessInterface <|.. InMemoryPetDataAccess
+Pet <.. InMemoryPetDataAccess : sample pets
+BrowsePetsOutputData --> "0..*" Pet
+Pet --> PetStatus
+
+' Layer skip to discuss
+BrowsePetsPresenter -[#red,dashed]-> Pet : skips use case layer
+BrowsePetsPresenter -[#red,dashed]-> PetStatus
+
+note bottom of InMemoryPetDataAccess
+  The gallery uses sample pets for now.
+  No PetFilter implementation exists yet.
+end note
+
+@enduml

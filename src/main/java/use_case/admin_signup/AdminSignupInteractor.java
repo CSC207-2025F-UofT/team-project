@@ -21,16 +21,24 @@ public class AdminSignupInteractor implements AdminSignupInputBoundary {
     private final AdminSignupUserDataAccessInterface userDataAccessObject;
     private final AdminSignupOutputBoundary adminSignupPresenter;
     private final UserFactory userFactory;
-    private final AdminInviteCodeChecker inviteCodeChecker;
+    private final String expectedInviteCode;
 
+    /**
+     * Creates the interactor.
+     * @param userDataAccessObject where users are checked and saved
+     * @param adminSignupPresenter the presenter for the result
+     * @param userFactory creates the new admin user
+     * @param expectedInviteCode the valid admin invite code; if null or empty, every code is rejected,
+     *                           so nobody can sign up as an admin
+     */
     public AdminSignupInteractor(AdminSignupUserDataAccessInterface userDataAccessObject,
                                  AdminSignupOutputBoundary adminSignupPresenter,
                                  UserFactory userFactory,
-                                 AdminInviteCodeChecker inviteCodeChecker) {
+                                 String expectedInviteCode) {
         this.userDataAccessObject = userDataAccessObject;
         this.adminSignupPresenter = adminSignupPresenter;
         this.userFactory = userFactory;
-        this.inviteCodeChecker = inviteCodeChecker;
+        this.expectedInviteCode = expectedInviteCode;
     }
 
     @Override
@@ -49,7 +57,7 @@ public class AdminSignupInteractor implements AdminSignupInputBoundary {
                                               null);
         userDataAccessObject.save(admin);
 
-        final AdminSignupOutputData outputData = new AdminSignupOutputData(admin.getName());
+        final AdminSignupOutputData outputData = new AdminSignupOutputData(admin.getEmail());
         adminSignupPresenter.prepareSuccessView(outputData);
     }
 
@@ -57,7 +65,7 @@ public class AdminSignupInteractor implements AdminSignupInputBoundary {
      * Returns the first validation error, or null if the input is valid.
      */
     private String validate(AdminSignupInputData input) {
-        if (!inviteCodeChecker.isValid(input.getInviteCode())) {
+        if (!isValidInviteCode(input.getInviteCode())) {
             return "Invalid admin invite code.";
         }
         if (isEmpty(input.getUsername())) {
@@ -88,6 +96,18 @@ public class AdminSignupInteractor implements AdminSignupInputBoundary {
             return "Email is already registered.";
         }
         return null;
+    }
+
+    /**
+     * Checks the entered invite code against the expected one.
+     * Uses a constant-time comparison, so the code cannot be guessed from response timing.
+     */
+    private boolean isValidInviteCode(String code) {
+        if (isEmpty(expectedInviteCode) || code == null) {
+            return false;
+        }
+        return MessageDigest.isEqual(expectedInviteCode.getBytes(StandardCharsets.UTF_8),
+                                     code.getBytes(StandardCharsets.UTF_8));
     }
 
     /**

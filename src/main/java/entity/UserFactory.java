@@ -6,7 +6,7 @@ import entity.User.Role;
  */
 public class UserFactory {
 
-    public User create(String name, String id, String email, String passwordHash, Role role, String preference) {
+    public User create(String name, String id, String email, String passwordHash, Role role, AdopterPreferences preference) {
         return new User(name, id, email, passwordHash, role, preference);
     }
 }

@@ -32,6 +32,15 @@ class ApplicationTest {
     }
 
     @Test
+    void idsAreKeptExactlyAsGiven() {
+        final Application application = new Application(" a1 ", "bob ", " pet1", "House", "Had two cats",
+                "2 adults", "me@example.com", "", LocalDate.of(2026, 11, 16));
+        assertEquals(" a1 ", application.getId());
+        assertEquals("bob ", application.getAdopterId());
+        assertEquals(" pet1", application.getPetId());
+    }
+
+    @Test
     void withdrawOnlyWhilePending() {
         final Application application = newApplication();
         application.withdraw();
@@ -49,5 +58,14 @@ class ApplicationTest {
         application.updateStatus(ApplicationStatus.REJECTED, null);
         assertFalse(application.isActive());
         assertEquals("", application.getAdminNote());
+    }
+
+    @Test
+    void changingCopyDoesNotChangeOriginal() {
+        final Application application = newApplication();
+        final Application copy = application.copy();
+        copy.withdraw();
+        assertEquals(application.getId(), copy.getId());
+        assertEquals(ApplicationStatus.PENDING, application.getStatus());
     }
 }

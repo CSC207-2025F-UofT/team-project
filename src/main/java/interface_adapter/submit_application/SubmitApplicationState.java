@@ -1,5 +1,7 @@
 package interface_adapter.submit_application;
 
+import java.util.Objects;
+
 /**
  * The state for the Submit Application View Model.
  */
@@ -15,7 +17,14 @@ public final class SubmitApplicationState {
         return adopterId;
     }
 
+    /**
+     * Sets the adopter who is applying. Messages for another adopter are cleared.
+     * @param adopterId the adopter who is applying
+     */
     public void setAdopterId(String adopterId) {
+        if (!Objects.equals(this.adopterId, adopterId)) {
+            clearMessages();
+        }
         this.adopterId = adopterId;
     }
 
@@ -23,7 +32,14 @@ public final class SubmitApplicationState {
         return petId;
     }
 
+    /**
+     * Sets the pet being applied for. Messages about another pet are cleared.
+     * @param petId the pet being applied for
+     */
     public void setPetId(String petId) {
+        if (!Objects.equals(this.petId, petId)) {
+            clearMessages();
+        }
         this.petId = petId;
     }
 
@@ -49,5 +65,10 @@ public final class SubmitApplicationState {
 
     public void setSuccessMessage(String successMessage) {
         this.successMessage = successMessage;
+    }
+
+    private void clearMessages() {
+        error = "";
+        successMessage = "";
     }
 }

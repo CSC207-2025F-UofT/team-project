@@ -32,6 +32,11 @@ class SubmitApplicationInteractorTest {
                 "me@example.com", "I work from home");
     }
 
+    private SubmitApplicationInputData inputFrom(String adopterId) {
+        return new SubmitApplicationInputData(adopterId, "mochi", "Condo", "One cat", "1 adult",
+                "bob@example.com", "");
+    }
+
     @Test
     void successCreatesPendingApplication() {
         interactor.execute(input("mochi", "Apartment"));
@@ -71,6 +76,24 @@ class SubmitApplicationInteractorTest {
         assertEquals("You already have an application for this pet.", presenter.error);
         assertNull(presenter.success);
         assertEquals(1, applicationDataAccess.getApplicationsByAdopter("adopter1").size());
+    }
+
+    @Test
+    void idsDifferingOnlyBySpaceAreSeparateAdopters() {
+        final String bob = "bob";
+        final String bobWithSpace = "bob ";
+
+        interactor.execute(inputFrom(bobWithSpace));
+        assertTrue(applicationDataAccess.getApplicationsByAdopter(bob).isEmpty());
+        assertEquals(1, applicationDataAccess.getApplicationsByAdopter(bobWithSpace).size());
+
+        interactor.execute(inputFrom(bob));
+        assertNull(presenter.error);
+        assertEquals(1, applicationDataAccess.getApplicationsByAdopter(bob).size());
+
+        interactor.execute(inputFrom(bobWithSpace));
+        assertEquals("You already have an application for this pet.", presenter.error);
+        assertEquals(1, applicationDataAccess.getApplicationsByAdopter(bobWithSpace).size());
     }
 
     @Test
@@ -118,6 +141,49 @@ class SubmitApplicationInteractorTest {
                 .execute(input("mochi", "House"));
 
         assertEquals("The pet's details could not be loaded. Please try again.", presenter.error);
+        assertNull(presenter.success);
+        assertTrue(applicationDataAccess.getApplicationsByAdopter("adopter1").isEmpty());
+    }
+
+    @Test
+    void availabilityCheckFailureIsReported() {
+        final SubmitApplicationPetDataAccessInterface failingPetDataAccess =
+                new SubmitApplicationPetDataAccessInterface() {
+                    @Override
+                    public boolean isAvailable(String petId) {
+                        throw new RuntimeException("pet file missing");
+                    }
+
+                    @Override
+                    public String getPetName(String petId) {
+                        return "Mochi";
+                    }
+                };
+        new SubmitApplicationInteractor(applicationDataAccess, failingPetDataAccess, presenter)
+                .execute(input("mochi", "House"));
+
+        assertEquals("Your application could not be checked. Please try again.", presenter.error);
+        assertNull(presenter.success);
+        assertTrue(applicationDataAccess.getApplicationsByAdopter("adopter1").isEmpty());
+    }
+
+    @Test
+    void duplicateCheckFailureIsReported() {
+        final SubmitApplicationDataAccessInterface failingDataAccess = new SubmitApplicationDataAccessInterface() {
+            @Override
+            public boolean hasActiveApplication(String adopterId, String petId) {
+                throw new RuntimeException("applications file missing");
+            }
+
+            @Override
+            public void save(Application application) {
+                applicationDataAccess.save(application);
+            }
+        };
+        new SubmitApplicationInteractor(failingDataAccess, new FakePetDataAccess(), presenter)
+                .execute(input("mochi", "House"));
+
+        assertEquals("Your application could not be checked. Please try again.", presenter.error);
         assertNull(presenter.success);
         assertTrue(applicationDataAccess.getApplicationsByAdopter("adopter1").isEmpty());
     }
