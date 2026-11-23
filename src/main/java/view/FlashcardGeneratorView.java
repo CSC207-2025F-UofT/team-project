@@ -1,8 +1,11 @@
 package view;
 
 import interface_adapters.flashcard_generator.FlashcardGeneratorController;
+
+import java.io.IOException;
 import java.util.List;
 import java.util.ArrayList;
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.text.*;
 import javax.swing.text.StyleConstants;
@@ -22,7 +25,10 @@ public class FlashcardGeneratorView extends JPanel implements ActionListener, Fl
     private FlashcardGeneratorController controller;
     private final HomeViewModel homeViewModel;
 
+    private Image backgroundImage;
+
    private final JLabel title;
+   private final JLabel title2;
    private final JLabel tutorialTitle;
    private final JTextPane textInput;
    private final JTextArea tutorial;
@@ -41,32 +47,50 @@ public class FlashcardGeneratorView extends JPanel implements ActionListener, Fl
         this.setLayout(null);
 
         TimerDisplayPanel timerPanel = new TimerDisplayPanel(homeViewModel);
+        timerPanel.setBounds(300, 0, 225, 85);
         this.add(timerPanel);
+
+        try{
+            backgroundImage = ImageIO.read(getClass().getResourceAsStream("/images/flash"));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
 
         flashcardGeneratorViewModel.addListener(this); // register view as listener
 
-        title = new JLabel("FLASHCARD GENERATOR!!!");
-        title.setBounds(0,0,500,35);
-        title.setFont(FontManager.getWinkle(30f));
+        title = new JLabel("FLASHCARD");
+        title.setBounds(0,20,500,40);
+        title.setFont(FontManager.getWinkle(50f));
         this.add(title);
 
+        title2 = new JLabel("GENERATOR!!!");
+        title2.setBounds(0,75,500,40);
+        title2.setFont(FontManager.getWinkle(50f));
+        this.add(title2);
+
         tutorialTitle = new JLabel("TUTORIAL");
-        tutorialTitle.setBounds(10,70,200,35);
-        tutorialTitle.setFont(FontManager.getGinny(25f));
+        tutorialTitle.setBounds(10,130,200,35);
+        tutorialTitle.setFont(FontManager.getGinny(45f));
         this.add(tutorialTitle);
 
-        tutorial = new JTextArea("Add Tutorial later...");
+        tutorial = new JTextArea("• Write your question (make sure it's bolded using the BOLD button) \n" +
+                "• Write your answer (make sure it's NOT bolded) \n" +
+                "• Repeat this until you have completed your deck. Click generate \n" +
+                "•Enjoy your new study set!! \n" +
+                "*TIP* Make sure questions are in BOLD and answers are UNBOLDED for generation to work properly");
         tutorial.setEditable(false);
-        tutorial.setBounds(10,120, 300,300);
-        tutorial.setFont(FontManager.getAppleGaramond(12f));
+        tutorial.setBounds(10,170, 350,300);
+        tutorial.setFont(FontManager.getAppleGaramond(20f));
         tutorial.setOpaque(false);
         tutorial.setBackground(new Color(0,0,0,0));
+        tutorial.setLineWrap(true);
+        tutorial.setWrapStyleWord(true);
         this.add(tutorial);
 
         textInput = new JTextPane();
         textInput.setEditable(true);
         textInput.setBounds(400,100, 375, 350);
-        textInput.setFont(new Font("Arial", Font.PLAIN, 12));
+        textInput.setFont(new Font("Arial", Font.PLAIN, 17));
 
         scrollPane = new JScrollPane(textInput);
         scrollPane.setBounds(400,100,375,350);
