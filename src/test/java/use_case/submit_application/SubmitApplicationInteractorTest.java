@@ -122,7 +122,7 @@ class SubmitApplicationInteractorTest {
         assertTrue(applicationDataAccess.getApplicationsByAdopter("adopter1").isEmpty());
     }
 
-    private static class FakePetDataAccess implements SubmitApplicationPetDataAccessInterface {
+    private static final class FakePetDataAccess implements SubmitApplicationPetDataAccessInterface {
         @Override
         public boolean isAvailable(String petId) {
             return "mochi".equals(petId);
@@ -134,7 +134,7 @@ class SubmitApplicationInteractorTest {
         }
     }
 
-    private static class RecordingPresenter implements SubmitApplicationOutputBoundary {
+    private static final class RecordingPresenter implements SubmitApplicationOutputBoundary {
         private SubmitApplicationOutputData success;
         private String error;
 

@@ -21,7 +21,11 @@ import interface_adapter.track_applications.TrackApplicationsViewModelListener;
 /**
  * The View that lists the adopter's applications and their status.
  */
-public class MyApplicationsView extends JPanel implements TrackApplicationsViewModelListener {
+public final class MyApplicationsView extends JPanel implements TrackApplicationsViewModelListener {
+
+    private static final int PADDING = 12;
+    private static final int GAP = 8;
+    private static final String BLANK = " ";
 
     private final TrackApplicationsViewModel trackApplicationsViewModel;
     private TrackApplicationsController trackApplicationsController;
@@ -34,8 +38,8 @@ public class MyApplicationsView extends JPanel implements TrackApplicationsViewM
         }
     };
     private final JTable table = new JTable(tableModel);
-    private final JLabel messageLabel = new JLabel(" ");
-    private final JLabel noteLabel = new JLabel(" ");
+    private final JLabel messageLabel = new JLabel(BLANK);
+    private final JLabel noteLabel = new JLabel(BLANK);
     private List<ApplicationRow> rows;
 
     /**
@@ -47,8 +51,8 @@ public class MyApplicationsView extends JPanel implements TrackApplicationsViewM
         this.trackApplicationsViewModel.addListener(this);
         this.rows = trackApplicationsViewModel.getState().getRows();
 
-        setLayout(new BorderLayout(8, 8));
-        setBorder(BorderFactory.createEmptyBorder(12, 12, 12, 12));
+        setLayout(new BorderLayout(GAP, GAP));
+        setBorder(BorderFactory.createEmptyBorder(PADDING, PADDING, PADDING, PADDING));
 
         final JButton refreshButton = new JButton("Refresh");
         refreshButton.addActionListener(event -> refresh());
@@ -79,8 +83,9 @@ public class MyApplicationsView extends JPanel implements TrackApplicationsViewM
         final int selected = table.getSelectedRow();
         if (selected >= 0 && selected < rows.size()) {
             noteLabel.setText("Shelter's note: " + rows.get(selected).getAdminNote());
-        } else {
-            noteLabel.setText(" ");
+        }
+        else {
+            noteLabel.setText(BLANK);
         }
     }
 
@@ -93,7 +98,7 @@ public class MyApplicationsView extends JPanel implements TrackApplicationsViewM
             tableModel.addRow(new Object[] {row.getPetName(), row.getSubmittedAt(), row.getStatus()});
         }
         messageLabel.setText(state.getMessage());
-        noteLabel.setText(" ");
+        noteLabel.setText(BLANK);
     }
 
     public String getViewName() {

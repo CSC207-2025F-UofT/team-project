@@ -6,7 +6,7 @@ import java.util.List;
 /**
  * The state for the Track Applications View Model.
  */
-public class TrackApplicationsState {
+public final class TrackApplicationsState {
 
     private String adopterId = "";
     private List<ApplicationRow> rows = new ArrayList<>();

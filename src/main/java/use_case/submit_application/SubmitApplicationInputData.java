@@ -3,7 +3,7 @@ package use_case.submit_application;
 /**
  * The Input Data for the Submit Application Use Case.
  */
-public class SubmitApplicationInputData {
+public final class SubmitApplicationInputData {
 
     private final String adopterId;
     private final String petId;
@@ -13,6 +13,16 @@ public class SubmitApplicationInputData {
     private final String contactInfo;
     private final String note;
 
+    /**
+     * Creates the input data.
+     * @param adopterId the adopter who is applying
+     * @param petId the pet being applied for
+     * @param housingType the adopter's housing type
+     * @param petExperience the adopter's experience with pets
+     * @param householdMembers who lives in the adopter's home
+     * @param contactInfo how the shelter can reach the adopter
+     * @param note an optional note
+     */
     public SubmitApplicationInputData(String adopterId, String petId, String housingType, String petExperience,
                                       String householdMembers, String contactInfo, String note) {
         this.adopterId = adopterId;

@@ -5,7 +5,7 @@ import java.util.List;
 /**
  * Output Data for the Track Applications Use Case.
  */
-public class TrackApplicationsOutputData {
+public final class TrackApplicationsOutputData {
 
     private final List<ApplicationSummary> applications;
 
