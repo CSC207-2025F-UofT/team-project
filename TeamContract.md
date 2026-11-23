@@ -27,6 +27,7 @@ Just be nice!
 
 * We will make decisions about our team project be made with a majority vote and discussion.
 ---
+
 ## Conflict resolution
 
 * How will your team resolve conflicts?
