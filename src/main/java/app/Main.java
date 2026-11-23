@@ -1,6 +1,7 @@
 package app;
 
 import data_access.DemoJobSource;
+import data_access.FileProfileDataAccess;
 import data_access.GreenhouseJobSource;
 import data_access.JobBoard;
 import java.awt.GraphicsEnvironment;
@@ -111,9 +112,18 @@ public final class Main {
             });
     JFrame window = new JFrame("Internship Finder and Tracker");
     window.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+    Path defaultProfile =
+        Path.of(System.getProperty("user.home"), ".intern-finder", "profile.json");
+    Path profilePath =
+        Path.of(System.getProperty("internfinder.profile", defaultProfile.toString()));
     window.add(
-        FinderApplication.createView(
-            source, worker, SwingUtilities::invokeLater, new DesktopLinkOpener(), sourceLabel));
+        ProfileApplication.createTabs(
+            source,
+            new FileProfileDataAccess(profilePath),
+            worker,
+            SwingUtilities::invokeLater,
+            new DesktopLinkOpener(),
+            sourceLabel));
     window.addWindowListener(
         new WindowAdapter() {
           @Override

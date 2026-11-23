@@ -1,8 +1,8 @@
 # Shared job contract and Ling compatibility review
 
-This is the implemented UC4 contract on `feature/finder`. It is available for the
-Profile/Recommendation feature to consume; it is not a claim that the team has
-already approved or integrated those features.
+UC4 and UC7 now use this job-source contract. The snapshot below records the
+original Finder review of the proposed profile diagrams. The current implementation
+and diagrams are in the [profile design](profile.md).
 
 ## Reviewed snapshot
 
