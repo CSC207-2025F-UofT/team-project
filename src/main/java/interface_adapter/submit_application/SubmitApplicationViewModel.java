@@ -6,7 +6,7 @@ import java.util.List;
 /**
  * The View Model for the Submit Application View.
  */
-public class SubmitApplicationViewModel {
+public final class SubmitApplicationViewModel {
 
     public static final String VIEW_NAME = "submit application";
 
@@ -22,10 +22,17 @@ public class SubmitApplicationViewModel {
         this.state = state;
     }
 
+    /**
+     * Registers a listener that is told when the state changes.
+     * @param listener the listener to add
+     */
     public void addListener(SubmitApplicationViewModelListener listener) {
         listeners.add(listener);
     }
 
+    /**
+     * Tells every listener that the state changed.
+     */
     public void notifyStateChanged() {
         for (SubmitApplicationViewModelListener listener : listeners) {
             listener.stateChanged();

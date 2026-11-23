@@ -1,5 +1,6 @@
 package app;
 
+feature/a-app-shell
 import java.awt.CardLayout;
 
 import javax.swing.JFrame;
@@ -42,5 +43,3 @@ public class AppBuilder {
         frame.setLocationRelativeTo(null);
         viewManagerModel.setActiveView(GalleryView.VIEW_NAME);
         return frame;
-    }
-}

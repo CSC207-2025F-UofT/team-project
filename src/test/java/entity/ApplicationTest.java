@@ -25,8 +25,10 @@ class ApplicationTest {
 
     @Test
     void missingRequiredFieldIsRejected() {
-        assertThrows(IllegalArgumentException.class, () -> new Application("a1", "adopter1", "pet1", " ",
-                "Had two cats", "2 adults", "me@example.com", "", LocalDate.of(2026, 11, 16)));
+        assertThrows(IllegalArgumentException.class, () -> {
+            new Application("a1", "adopter1", "pet1", " ",
+                "Had two cats", "2 adults", "me@example.com", "", LocalDate.of(2026, 11, 16));
+        });
     }
 
     @Test

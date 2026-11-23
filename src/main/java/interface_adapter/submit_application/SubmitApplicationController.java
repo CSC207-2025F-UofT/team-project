@@ -10,6 +10,10 @@ public class SubmitApplicationController {
 
     private final SubmitApplicationInputBoundary submitApplicationInteractor;
 
+    /**
+     * Creates the controller.
+     * @param submitApplicationInteractor the interactor that handles the request
+     */
     public SubmitApplicationController(SubmitApplicationInputBoundary submitApplicationInteractor) {
         this.submitApplicationInteractor = submitApplicationInteractor;
     }
