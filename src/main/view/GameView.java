@@ -3,6 +3,7 @@ package main.view;
 import main.interface_adapters.game.GameViewModel;
 
 import javax.swing.*;
+import javax.swing.text.View;
 import java.awt.*;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
@@ -28,6 +29,7 @@ public class GameView extends JPanel implements PropertyChangeListener {
         this.setBackground(new Color(5, 5, 5));
         this.add(pokerTable);
 
+        revealFlop("/cards/card_clubs_04.png", "/cards/card_diamonds_12.png", "/cards/card_hearts_13.png");
     }
 
     public void updatePlayers(int totalPlayers) {
@@ -141,4 +143,17 @@ public class GameView extends JPanel implements PropertyChangeListener {
         updatePlayerChips();
     }
 
+    public void revealFlop(String card1, String card2, String card3) {
+        JLabel flop1 = ViewUtils.createImage(card1, 0.365, 0.55, 0.045);
+        JLabel flop2 = ViewUtils.createImage(card2, 0.415, 0.55, 0.045);
+        JLabel flop3 = ViewUtils.createImage(card3, 0.465, 0.55, 0.045);
+        this.add(flop1);
+        this.add(flop2);
+        this.add(flop3);
+        this.setComponentZOrder(flop1, 0);
+        this.setComponentZOrder(flop2, 0);
+        this.setComponentZOrder(flop3, 0);
+        this.revalidate();
+        this.repaint();
+    }
 }
