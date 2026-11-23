@@ -13,6 +13,11 @@ public class Main {
                     .addDialogueView()
                     .addNewGameUseCase()
                     .addTalkToNpcUseCase()
+                    .addLoginView()
+                    .addSignupView()
+                    .addLoginUseCase()
+                    .addSignupUseCase()
+                    .addLogoutUseCase()
                     .build();
             application.setSize(480, 360);
             application.setLocationRelativeTo(null);
