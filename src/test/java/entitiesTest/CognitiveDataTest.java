@@ -24,4 +24,29 @@ public class CognitiveDataTest {
 
         assertEquals(expected, data.getCognitiveResults());
     }
+
+    /**
+     * test the getters
+     */
+    @Test
+    void builderSetsFields() {
+        Date d = new Date();
+        CognitiveData data = new CognitiveData.CogBuilder(d)
+                .mood("happy")
+                .cogTest("CogSci", 85.0)
+                .productivityRating(7.0)
+                .build();
+
+        assertEquals(d, data.getDate());
+        assertEquals("happy", data.getMood());
+        assertEquals(85.0, data.getCogTestResult());
+        assertEquals(7.0, data.getProductivityRating());
+    }
+
+    @Test
+    void builderUsesDefaults() {
+        CognitiveData data = new CognitiveData.CogBuilder(new Date()).build();
+        assertEquals("none", data.getMood());
+        assertEquals(0.0, data.getProductivityRating());
+    }
 }

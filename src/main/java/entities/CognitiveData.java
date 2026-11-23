@@ -66,4 +66,12 @@ public class CognitiveData {
         return dict;
     }
 
+    /**
+     * getters to get each field of a CognitiveData object
+     */
+    public Date getDate() { return date; }
+    public String getMood() { return mood; }
+    public String getCogTestType() { return (String) cogTest[0]; }
+    public Double getCogTestResult() { return (Double) cogTest[1]; }
+    public Double getProductivityRating() { return productivityRating; }
 }
