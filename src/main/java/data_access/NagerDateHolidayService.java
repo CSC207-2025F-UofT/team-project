@@ -13,7 +13,6 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.LocalDate;
 import java.util.HashMap;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
@@ -26,9 +25,9 @@ public class NagerDateHolidayService implements HolidayService {
 
     @Override
     public Optional<String> getHolidayName(LocalDate date, String countryCode) {
-        String upperCaseCountry = countryCode.toUpperCase(Locale.ROOT);
+        String upperCaseCountry = countryCode.toUpperCase();
         String cacheCode = upperCaseCountry + "-" + date.getYear();
-
+ 9
         try {
             Map<LocalDate, String> holidays = cache.get(cacheCode);
 
