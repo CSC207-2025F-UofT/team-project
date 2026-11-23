@@ -79,8 +79,8 @@ Coordination issues: [energy and state #9](https://github.com/yuanyx233/team-pro
 [question API/navigation #11](https://github.com/yuanyx233/team-project/issues/11).
 These interfaces are proposals for review, not an agreed or completed team integration.
 
-The inspected baseline is main `03f4400` (UC2, the UC3 shell, and UC4/UC5), the `uc1-choose-major` branch,
-and UC3's new `ExamBattle` at `3c51fad`. The battle permits up to five answers, so EXAM question requests now
+The inspected baseline is main `59c2805` (including UC2 and UC3's ExamBattle) and the `uc1-choose-major` branch.
+The battle permits up to five answers, so EXAM question requests now
 support up to five questions. This does not change the three-question UC2 challenge or UC3's battle rules.
 
 | Actual teammate code | Remaining connection |
@@ -90,7 +90,7 @@ support up to five questions. This does not change the three-question UC2 challe
 | `AcademicRecord.getSelectedMajor/getCourseProgress` | Use this same record across buildings and Continue |
 | `CourseProgress.getCourseId` | No challenge result or preparation-point fields yet |
 | `FileGameStateDataAccessObject` | Does not persist academic progress yet; Continue replaces Player |
-| `AppBuilder` and `GameView` | Own the shared state and navigation; Lecture Hall remains a placeholder |
+| `Main.createView` / `Main.showGame` and `GameView` | Construct the shared state and navigation; the default app still needs its real Lecture Hall state adapter |
 
 The UC1 demo currently uses COMP1/COMP2, BIO1/BIO2, HIST1/HIST2. They have not been assumed as agreed IDs.
 UC2 treats IDs as opaque and receives a `QuestionTopic` explicitly. Do not infer identity from the course name
@@ -123,10 +123,16 @@ After those APIs are agreed, create the page on the EDT with the **same shared s
 ```java
 ClassChallengeView lecture = ClassChallengeFactory.create(
         sharedChallengeStateAdapter, () -> navigation.setActiveView("street"));
+GameView game = new GameView(title, residence, navigation, lecture);
 ```
 
 `sharedChallengeStateAdapter` is the proposed external adapter, not an existing concrete class.
-Replace GameView's lecture placeholder with this page. The page refreshes when shown; `refresh()` can also
+The four-argument GameView constructor accepts this exact page instance; the existing three-argument
+constructor retains its placeholder for callers without the shared adapter. Create the real page in
+`Main.showGame`, where the shared state and navigation are constructed. PR #14 moved this wiring from
+the deleted AppBuilder into Main.
+
+The page refreshes when shown; `refresh()` can also
 be called explicitly after a state replacement. Use `requestLeave()` when navigating away or closing a
 window, so an unfinished challenge goes through confirmation. It invokes the supplied navigation callback
 only after the state adapter successfully releases the activity.
@@ -150,6 +156,12 @@ hint eligibility, energy policy, grading and final exam persistence.
 `QuestionSession` supports editing exam answers, checking completeness, counting correct answers and using
 one hint. `useHint(index)` returns the index of one wrong option to hide; it does not award points or change
 answers. UC2 never uses the exam hint. Correct answers are absent from classroom output until feedback.
+
+`ExamBattle` can finish after three, four or five submitted answers. `QuestionSession.isComplete()` means
+every loaded question has an answer; it can still be false after a battle ends early. The UC3 interactor
+must use the battle end condition and agree on how early endings affect the score. The current README
+requires answers for all required questions; the battle owner needs to document which questions remain
+required after an early ending. This is tracked in #11; UC2 does not choose a new grading rule.
 
 ## Six courses and introductory selection
 
