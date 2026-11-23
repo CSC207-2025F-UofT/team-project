@@ -51,7 +51,7 @@ class RemovePlannedMealInteractorTest {
 
         assertNull(presenter.error);
         assertEquals("Pasta", presenter.success.getRemovedRecipeName());
-        assertTrue(presenter.success.getMealPlan().getMeals().isEmpty());
+        assertTrue(presenter.success.getWeek().isEmpty());
         assertTrue(dao.getMealPlan(MONDAY).getMeals().isEmpty());
     }
 

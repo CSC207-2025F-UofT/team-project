@@ -11,6 +11,7 @@ import interface_adapter.move_planned_meal.MovePlannedMealPresenter;
 import interface_adapter.remove_planned_meal.RemovePlannedMealPresenter;
 import org.junit.jupiter.api.Test;
 import use_case.load_meal_plan.LoadMealPlanOutputData;
+import use_case.meal_plan.MealPlanWeekOutputData;
 import use_case.move_planned_meal.MovePlannedMealOutputData;
 import use_case.remove_planned_meal.RemovePlannedMealOutputData;
 
@@ -43,6 +44,10 @@ class MealPlanPresentersTest {
         return plan;
     }
 
+    private static MealPlanWeekOutputData week(MealPlan plan) {
+        return MealPlanWeekOutputData.from(plan);
+    }
+
     private static MealPlanSlotViewData slot(MealPlanState state, DayOfWeek day, String mealType) {
         for (MealPlanSlotViewData slot : state.getSlots()) {
             if (slot.getDay() == day && slot.getMealType().equals(mealType)) {
@@ -59,7 +64,7 @@ class MealPlanPresentersTest {
         viewModel.addListener(listener);
 
         new LoadMealPlanPresenter(viewModel)
-                .prepareSuccessView(new LoadMealPlanOutputData(planWithPasta(), false));
+                .prepareSuccessView(new LoadMealPlanOutputData(week(planWithPasta())));
 
         MealPlanState state = viewModel.getState();
         assertEquals(1, listener.calls);
@@ -88,7 +93,7 @@ class MealPlanPresentersTest {
         MealPlanViewModel viewModel = new MealPlanViewModel();
 
         new LoadMealPlanPresenter(viewModel)
-                .prepareSuccessView(new LoadMealPlanOutputData(new MealPlan(MONDAY), true));
+                .prepareSuccessView(new LoadMealPlanOutputData(week(new MealPlan(MONDAY))));
 
         assertEquals(MealPlanPresenterHelper.EMPTY_WEEK_HINT, viewModel.getState().getMessage());
         assertEquals(21, viewModel.getState().getSlots().size());
@@ -100,12 +105,12 @@ class MealPlanPresentersTest {
         viewModel.getState().setError("old error");
 
         new RemovePlannedMealPresenter(viewModel)
-                .prepareSuccessView(new RemovePlannedMealOutputData(planWithPasta(), "Soup"));
+                .prepareSuccessView(new RemovePlannedMealOutputData(week(planWithPasta()), "Soup"));
         assertEquals("Removed Soup.", viewModel.getState().getMessage());
         assertEquals("", viewModel.getState().getError());
 
         new MovePlannedMealPresenter(viewModel)
-                .prepareSuccessView(new MovePlannedMealOutputData(planWithPasta(), "Pasta"));
+                .prepareSuccessView(new MovePlannedMealOutputData(week(planWithPasta()), "Pasta"));
         assertEquals("Moved Pasta.", viewModel.getState().getMessage());
     }
 
@@ -113,7 +118,7 @@ class MealPlanPresentersTest {
     void failViewsShowErrorAndKeepGrid() {
         MealPlanViewModel viewModel = new MealPlanViewModel();
         new LoadMealPlanPresenter(viewModel)
-                .prepareSuccessView(new LoadMealPlanOutputData(planWithPasta(), false));
+                .prepareSuccessView(new LoadMealPlanOutputData(week(planWithPasta())));
         CountingListener listener = new CountingListener();
         viewModel.addListener(listener);
 

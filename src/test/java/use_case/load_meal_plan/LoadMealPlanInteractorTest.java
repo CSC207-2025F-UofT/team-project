@@ -6,6 +6,7 @@ import entity.MealSlot;
 import entity.MealType;
 import entity.PlannedMeal;
 import org.junit.jupiter.api.Test;
+import use_case.meal_plan.MealSlotOutputData;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
@@ -37,10 +38,12 @@ class LoadMealPlanInteractorTest {
 
         new LoadMealPlanInteractor(dao, presenter).execute(new LoadMealPlanInputData(MONDAY));
 
-        assertSame(plan, presenter.output.getMealPlan());
+        assertEquals(MONDAY, presenter.output.getWeek().getWeekStart());
         assertFalse(presenter.output.isEmpty());
-        assertEquals("Spicy Arrabiata Penne",
-                presenter.output.getMealPlan().getMeals().get(mondayLunch).getRecipeName());
+        MealSlotOutputData lunch = presenter.output.getWeek().getSlots().get(1);
+        assertEquals(mondayLunch.getDay(), lunch.getDay());
+        assertEquals("LUNCH", lunch.getMealType());
+        assertEquals("Spicy Arrabiata Penne", lunch.getRecipeName());
     }
 
     @Test
@@ -50,9 +53,9 @@ class LoadMealPlanInteractorTest {
         new LoadMealPlanInteractor(new InMemoryMealPlanDataAccessObject(), presenter)
                 .execute(new LoadMealPlanInputData(MONDAY));
 
-        assertNotNull(presenter.output.getMealPlan());
-        assertEquals(MONDAY, presenter.output.getMealPlan().getWeekStart());
-        assertTrue(presenter.output.getMealPlan().getMeals().isEmpty());
+        assertNotNull(presenter.output.getWeek());
+        assertEquals(MONDAY, presenter.output.getWeek().getWeekStart());
+        assertEquals(21, presenter.output.getWeek().getSlots().size());
         assertTrue(presenter.output.isEmpty());
     }
 
@@ -71,6 +74,8 @@ class LoadMealPlanInteractorTest {
     void anyDayOfTheWeekLoadsThatWeeksMonday() {
         InMemoryMealPlanDataAccessObject dao = new InMemoryMealPlanDataAccessObject();
         MealPlan plan = new MealPlan(MONDAY);
+        plan.assign(new MealSlot(DayOfWeek.FRIDAY, MealType.DINNER),
+                new PlannedMeal("1", "Pasta", List.of()));
         dao.saveMealPlan(plan);
         CapturingPresenter presenter = new CapturingPresenter();
         LocalDate thursday = MONDAY.plusDays(3);
@@ -78,9 +83,11 @@ class LoadMealPlanInteractorTest {
 
         LoadMealPlanInteractor interactor = new LoadMealPlanInteractor(dao, presenter);
         interactor.execute(new LoadMealPlanInputData(thursday));
-        assertSame(plan, presenter.output.getMealPlan());
+        assertEquals(MONDAY, presenter.output.getWeek().getWeekStart());
+        assertFalse(presenter.output.isEmpty());
         interactor.execute(new LoadMealPlanInputData(sunday));
-        assertSame(plan, presenter.output.getMealPlan());
+        assertEquals(MONDAY, presenter.output.getWeek().getWeekStart());
+        assertFalse(presenter.output.isEmpty());
     }
 
     @Test
@@ -92,7 +99,7 @@ class LoadMealPlanInteractorTest {
         new LoadMealPlanInteractor(dao, presenter)
                 .execute(new LoadMealPlanInputData(MONDAY.plusDays(7)));
 
-        assertEquals(MONDAY.plusDays(7), presenter.output.getMealPlan().getWeekStart());
+        assertEquals(MONDAY.plusDays(7), presenter.output.getWeek().getWeekStart());
         assertTrue(presenter.output.isEmpty());
     }
 }

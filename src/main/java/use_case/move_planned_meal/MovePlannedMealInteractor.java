@@ -3,6 +3,7 @@ package use_case.move_planned_meal;
 import entity.MealPlan;
 import entity.MealSlot;
 import entity.PlannedMeal;
+import use_case.meal_plan.MealPlanWeekOutputData;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
@@ -62,6 +63,7 @@ public class MovePlannedMealInteractor implements MovePlannedMealInputBoundary {
 
         plan.move(from, to);
         dataAccess.saveMealPlan(plan);
-        presenter.prepareSuccessView(new MovePlannedMealOutputData(plan, meal.getRecipeName()));
+        presenter.prepareSuccessView(new MovePlannedMealOutputData(
+                MealPlanWeekOutputData.from(plan), meal.getRecipeName()));
     }
 }

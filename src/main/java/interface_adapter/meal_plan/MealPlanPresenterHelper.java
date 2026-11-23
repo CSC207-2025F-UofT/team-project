@@ -1,16 +1,15 @@
 package interface_adapter.meal_plan;
 
-import entity.MealPlan;
-import entity.MealSlot;
-import entity.PlannedMeal;
-import entity.RecipeIngredient;
+import use_case.meal_plan.MealPlanWeekOutputData;
+import use_case.meal_plan.MealSlotOutputData;
+import use_case.meal_plan.PlannedIngredientOutputData;
 
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Turns a MealPlan into the 21 cells the meal plan page shows. Shared by the
- * load, remove and move presenters so the grid always looks the same.
+ * Turns the week from the output data into the 21 cells the meal plan page shows.
+ * Shared by the load, remove and move presenters so the grid always looks the same.
  */
 public final class MealPlanPresenterHelper {
 
@@ -25,32 +24,28 @@ public final class MealPlanPresenterHelper {
      * is set to a hint pointing to the Recipes page; otherwise to the given message.
      *
      * @param state the state to update
-     * @param mealPlan the week to show
+     * @param week the week to show
      * @param message the message to show when the week is not empty
      */
-    public static void applyPlan(MealPlanState state, MealPlan mealPlan, String message) {
+    public static void applyWeek(MealPlanState state, MealPlanWeekOutputData week, String message) {
         List<MealPlanSlotViewData> slots = new ArrayList<>();
-        for (MealSlot slot : MealSlot.allSlots()) {
-            slots.add(toViewData(slot, mealPlan.getMeals().get(slot)));
+        for (MealSlotOutputData slot : week.getSlots()) {
+            slots.add(toViewData(slot));
         }
-        state.setWeekStart(mealPlan.getWeekStart());
+        state.setWeekStart(week.getWeekStart());
         state.setSlots(slots);
-        state.setMessage(mealPlan.getMeals().isEmpty() ? EMPTY_WEEK_HINT : message);
+        state.setMessage(week.isEmpty() ? EMPTY_WEEK_HINT : message);
         state.setError("");
     }
 
-    private static MealPlanSlotViewData toViewData(MealSlot slot, PlannedMeal meal) {
-        String mealType = slot.getMealType().name();
-        if (meal == null) {
-            return new MealPlanSlotViewData(slot.getDay(), mealType, "", false, List.of());
-        }
+    private static MealPlanSlotViewData toViewData(MealSlotOutputData slot) {
         List<String> lines = new ArrayList<>();
-        for (RecipeIngredient ingredient : meal.getIngredients()) {
-            String measure = ingredient.getMeasureDescription();
-            String name = ingredient.getDisplayName();
-            lines.add(measure == null || measure.isBlank() ? name : name + ": " + measure);
+        for (PlannedIngredientOutputData ingredient : slot.getIngredients()) {
+            String measure = ingredient.getMeasure();
+            String name = ingredient.getName();
+            lines.add(measure.isEmpty() ? name : name + ": " + measure);
         }
-        return new MealPlanSlotViewData(
-                slot.getDay(), mealType, meal.getRecipeName(), meal.isCooked(), lines);
+        return new MealPlanSlotViewData(slot.getDay(), slot.getMealType(),
+                slot.getRecipeName(), slot.isCooked(), lines);
     }
 }

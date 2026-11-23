@@ -1,33 +1,30 @@
 package use_case.load_meal_plan;
 
-import entity.MealPlan;
+import use_case.meal_plan.MealPlanWeekOutputData;
 
 /**
  * Output data for loading a meal plan.
  */
 public class LoadMealPlanOutputData {
 
-    private final MealPlan mealPlan;
-    private final boolean empty;
+    private final MealPlanWeekOutputData week;
 
     /**
      * Creates output data.
      *
-     * @param mealPlan the week to show (never null)
-     * @param empty true if no meals are planned for the week
+     * @param week the week to show (never null)
      */
-    public LoadMealPlanOutputData(MealPlan mealPlan, boolean empty) {
-        this.mealPlan = mealPlan;
-        this.empty = empty;
+    public LoadMealPlanOutputData(MealPlanWeekOutputData week) {
+        this.week = week;
     }
 
     /**
-     * Returns the meal plan to show.
+     * Returns the week to show.
      *
-     * @return the meal plan
+     * @return the week
      */
-    public MealPlan getMealPlan() {
-        return mealPlan;
+    public MealPlanWeekOutputData getWeek() {
+        return week;
     }
 
     /**
@@ -36,6 +33,6 @@ public class LoadMealPlanOutputData {
      * @return true if no meals are planned
      */
     public boolean isEmpty() {
-        return empty;
+        return week.isEmpty();
     }
 }

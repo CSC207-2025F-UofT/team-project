@@ -25,7 +25,7 @@ public class LoadMealPlanPresenter implements LoadMealPlanOutputBoundary {
     @Override
     public void prepareSuccessView(LoadMealPlanOutputData outputData) {
         MealPlanState state = viewModel.getState();
-        MealPlanPresenterHelper.applyPlan(state, outputData.getMealPlan(), "");
+        MealPlanPresenterHelper.applyWeek(state, outputData.getWeek(), "");
         viewModel.setState(state);
         viewModel.notifyStateChanged();
     }

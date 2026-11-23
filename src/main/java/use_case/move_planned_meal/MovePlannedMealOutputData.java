@@ -1,33 +1,33 @@
 package use_case.move_planned_meal;
 
-import entity.MealPlan;
+import use_case.meal_plan.MealPlanWeekOutputData;
 
 /**
  * Output data for moving a planned meal.
  */
 public class MovePlannedMealOutputData {
 
-    private final MealPlan mealPlan;
+    private final MealPlanWeekOutputData week;
     private final String movedRecipeName;
 
     /**
      * Creates output data.
      *
-     * @param mealPlan the week after the move
+     * @param week the week after the move
      * @param movedRecipeName the name of the recipe that was moved
      */
-    public MovePlannedMealOutputData(MealPlan mealPlan, String movedRecipeName) {
-        this.mealPlan = mealPlan;
+    public MovePlannedMealOutputData(MealPlanWeekOutputData week, String movedRecipeName) {
+        this.week = week;
         this.movedRecipeName = movedRecipeName;
     }
 
     /**
-     * Returns the updated meal plan.
+     * Returns the week after the move.
      *
-     * @return the meal plan
+     * @return the week
      */
-    public MealPlan getMealPlan() {
-        return mealPlan;
+    public MealPlanWeekOutputData getWeek() {
+        return week;
     }
 
     /**

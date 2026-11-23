@@ -3,6 +3,7 @@ package use_case.remove_planned_meal;
 import entity.MealPlan;
 import entity.MealSlot;
 import entity.PlannedMeal;
+import use_case.meal_plan.MealPlanWeekOutputData;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
@@ -45,6 +46,7 @@ public class RemovePlannedMealInteractor implements RemovePlannedMealInputBounda
 
         plan.remove(slot);
         dataAccess.saveMealPlan(plan);
-        presenter.prepareSuccessView(new RemovePlannedMealOutputData(plan, meal.getRecipeName()));
+        presenter.prepareSuccessView(new RemovePlannedMealOutputData(
+                MealPlanWeekOutputData.from(plan), meal.getRecipeName()));
     }
 }

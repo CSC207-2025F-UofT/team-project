@@ -25,7 +25,7 @@ public class RemovePlannedMealPresenter implements RemovePlannedMealOutputBounda
     @Override
     public void prepareSuccessView(RemovePlannedMealOutputData outputData) {
         MealPlanState state = viewModel.getState();
-        MealPlanPresenterHelper.applyPlan(state, outputData.getMealPlan(),
+        MealPlanPresenterHelper.applyWeek(state, outputData.getWeek(),
                 "Removed " + outputData.getRemovedRecipeName() + ".");
         viewModel.setState(state);
         viewModel.notifyStateChanged();

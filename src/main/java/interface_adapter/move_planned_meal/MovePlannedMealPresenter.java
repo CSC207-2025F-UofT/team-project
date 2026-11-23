@@ -25,7 +25,7 @@ public class MovePlannedMealPresenter implements MovePlannedMealOutputBoundary {
     @Override
     public void prepareSuccessView(MovePlannedMealOutputData outputData) {
         MealPlanState state = viewModel.getState();
-        MealPlanPresenterHelper.applyPlan(state, outputData.getMealPlan(),
+        MealPlanPresenterHelper.applyWeek(state, outputData.getWeek(),
                 "Moved " + outputData.getMovedRecipeName() + ".");
         viewModel.setState(state);
         viewModel.notifyStateChanged();

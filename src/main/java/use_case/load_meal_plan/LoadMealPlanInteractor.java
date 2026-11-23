@@ -1,6 +1,7 @@
 package use_case.load_meal_plan;
 
 import entity.MealPlan;
+import use_case.meal_plan.MealPlanWeekOutputData;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
@@ -33,7 +34,7 @@ public class LoadMealPlanInteractor implements LoadMealPlanInputBoundary {
                 .with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
         MealPlan saved = dataAccess.getMealPlan(weekStart);
         MealPlan toShow = saved == null ? new MealPlan(weekStart) : saved;
-        boolean empty = toShow.getMeals().isEmpty();
-        presenter.prepareSuccessView(new LoadMealPlanOutputData(toShow, empty));
+        presenter.prepareSuccessView(
+                new LoadMealPlanOutputData(MealPlanWeekOutputData.from(toShow)));
     }
 }
