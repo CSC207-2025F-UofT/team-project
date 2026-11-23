@@ -40,7 +40,7 @@ public class InMemoryPetDataAccess implements BrowsePetsDataAccessInterface {
                 List.of(Temperament.PLAYFUL, Temperament.GOOD_WITH_KIDS), PetStatus.AVAILABLE));
         sample.add(sample("3", "Shadow", Species.CAT, "Black cat", 6, PetSex.MALE,
                 List.of(Temperament.SHY, Temperament.INDEPENDENT), PetStatus.AVAILABLE));
-        sample.add(sample("4", "Pepper", Species.CAT, "Orange tabby", 1, PetSex.FEMALE,
+        sample.add(sample("4", "Pepper", Species.CAT, "Ginger", 1, PetSex.FEMALE,
                 List.of(Temperament.ENERGETIC), PetStatus.AVAILABLE));
         sample.add(sample("5", "Olive", Species.CAT, "Calico", 3, PetSex.FEMALE,
                 List.of(Temperament.PLAYFUL), PetStatus.ADOPTED));
