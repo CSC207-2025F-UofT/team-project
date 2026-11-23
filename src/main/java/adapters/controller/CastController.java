@@ -1,7 +1,7 @@
 package adapters.controller;
 
-import usecase.castspell.CastInputBoundary;
-import usecase.castspell.CastInputData;
+import yuhangusecase.castspell.CastInputBoundary;
+import yuhangusecase.castspell.CastInputData;
 
 public class CastController {
     private final CastInputBoundary castInteractor;

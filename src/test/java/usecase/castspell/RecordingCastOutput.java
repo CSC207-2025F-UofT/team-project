@@ -1,5 +1,8 @@
 package usecase.castspell;
 
+import yuhangusecase.castspell.CastOutputBoundary;
+import yuhangusecase.castspell.CastOutputData;
+
 public class RecordingCastOutput implements CastOutputBoundary {
     private CastOutputData outputData;
     private String errorMessage;

@@ -1,4 +1,4 @@
-package usecase.castspell;
+package yuhangusecase.castspell;
 
 import entity.Player;
 import entity.board.Board;

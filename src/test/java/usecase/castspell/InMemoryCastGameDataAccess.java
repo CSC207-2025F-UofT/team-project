@@ -3,6 +3,7 @@ package usecase.castspell;
 import entity.PendingCast;
 import entity.Player;
 import entity.board.Board;
+import yuhangusecase.castspell.CastGameDataAccess;
 
 import java.util.Objects;
 

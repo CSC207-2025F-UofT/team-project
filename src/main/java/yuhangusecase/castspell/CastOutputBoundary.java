@@ -1,4 +1,4 @@
-package usecase.castspell;
+package yuhangusecase.castspell;
 
 public interface CastOutputBoundary {
     void prepareSuccessView(CastOutputData outputData);

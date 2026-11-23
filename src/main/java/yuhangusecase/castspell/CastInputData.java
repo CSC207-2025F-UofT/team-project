@@ -1,18 +1,18 @@
-package usecase.castspell;
+package yuhangusecase.castspell;
 
-public class CastOutputData {
+public class CastInputData {
     private final String playerName;
     private final int x;
     private final int y;
-    private final String spellName;
+    private final int spellIndex;
     private final String direction;
 
-    public CastOutputData(String playerName, int x, int y,
-                          String spellName, String direction) {
+    public CastInputData(String playerName, int x, int y,
+                         int spellIndex, String direction) {
         this.playerName = playerName;
         this.x = x;
         this.y = y;
-        this.spellName = spellName;
+        this.spellIndex = spellIndex;
         this.direction = direction;
     }
 
@@ -28,8 +28,8 @@ public class CastOutputData {
         return y;
     }
 
-    public String getSpellName() {
-        return spellName;
+    public int getSpellIndex() {
+        return spellIndex;
     }
 
     public String getDirection() {

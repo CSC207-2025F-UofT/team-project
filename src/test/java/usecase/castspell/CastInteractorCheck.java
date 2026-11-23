@@ -9,6 +9,9 @@ import entity.card.CharacterCard;
 import entity.card.SpellCard;
 import entity.card.SpellCardFactory;
 import adapters.controller.CastController;
+import yuhangusecase.castspell.CastInputData;
+import yuhangusecase.castspell.CastInteractor;
+import yuhangusecase.castspell.CastOutputData;
 
 import java.util.ArrayList;
 
