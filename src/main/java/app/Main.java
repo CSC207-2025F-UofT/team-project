@@ -22,6 +22,11 @@ public class Main {
                 .addGoogleLoginUseCase()
                 .addRecordTransactionUseCase() // added for transaction record
                 .addViewBudgetProgressUseCase() // added for budget progress view
+                .addAdoptPetView()
+                .addInteractWithPetView()
+                .addInteractWithPetUseCase()
+                .addGetPetPictureUseCase()
+                .addAdoptPetUseCase()
                 .build();
 
         application.pack();
