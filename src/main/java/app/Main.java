@@ -13,11 +13,15 @@ public class Main {
                 .addLoginView()
                 .addSignupView()
                 .addLoggedInView()
+                .addRecordTransactionView() // added for transaction record
+                .addViewBudgetProgressView() // added for budget progress view
                 .addSignupUseCase()
                 .addLoginUseCase()
                 .addChangePasswordUseCase()
                 .addLogoutUseCase()
                 .addGoogleLoginUseCase()
+                .addRecordTransactionUseCase() // added for transaction record
+                .addViewBudgetProgressUseCase() // added for budget progress view
                 .addAdoptPetView()
                 .addInteractWithPetView()
                 .addInteractWithPetUseCase()
