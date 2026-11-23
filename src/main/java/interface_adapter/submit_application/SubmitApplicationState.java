@@ -3,7 +3,7 @@ package interface_adapter.submit_application;
 /**
  * The state for the Submit Application View Model.
  */
-public class SubmitApplicationState {
+public final class SubmitApplicationState {
 
     private String adopterId = "";
     private String petId = "";
