@@ -9,6 +9,4 @@ public interface ReturningPlayerDataAccessInterface {
      * @return the player stored at username if the username exists
      */
     Player get(String username);
-
-    String getCurrentUsername();
 }

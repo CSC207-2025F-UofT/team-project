@@ -10,6 +10,7 @@ import javax.swing.WindowConstants;
 import view.NewPlayerView;
 import view.ViewManager;
 import view.WelcomeView;
+import data_access.GameDataAccessObject;
 import data_access.PlayerDataAccessObject;
 import entity.PlayerFactory;
 import interface_adapter.ViewManagerModel;
@@ -37,8 +38,9 @@ public class WelcomeDemo {
             final PlayerDataAccessObject dao = new PlayerDataAccessObject("players.csv", playerFactory);
             final NewPlayerPresenter presenter =
                     new NewPlayerPresenter(viewManagerModel, newPlayerViewModel, welcomeViewModel);
+            final GameDataAccessObject gameState = new GameDataAccessObject();
             final NewPlayerInteractor interactor =
-                    new NewPlayerInteractor(dao, presenter, playerFactory, dao);
+                    new NewPlayerInteractor(dao, presenter, playerFactory, dao, gameState);
             newPlayerView.setNewPlayerController(new NewPlayerController(interactor));
 
             // Card layout holding both views

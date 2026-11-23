@@ -20,8 +20,6 @@ public class PlayerDataAccessObject implements NewPlayerDataAccessInterface, Ret
     private final Map<String, Integer> headers = new LinkedHashMap<>();
     private final Map<String, Player> accounts = new HashMap<>();
 
-    private String currentUsername;
-
     /**
      * Construct this DAO for saving to and reading from a local file.
      * @param csvPath the path of the file to save to
@@ -78,19 +76,12 @@ public class PlayerDataAccessObject implements NewPlayerDataAccessInterface, Ret
     @Override
     public void save(Player player) {
         accounts.put(player.getName(), player);
-        currentUsername = player.getName();
         this.save();
     }
 
     @Override
     public Player get(String username) {
-        currentUsername = username;
         return accounts.get(username);
-    }
-
-    @Override
-    public String getCurrentUsername() {
-        return currentUsername;
     }
 
     @Override
