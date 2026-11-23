@@ -29,7 +29,7 @@ public class MovieDetailInteractor implements MovieDetailInputBoundary {
                 movie.getDescription(),
                 movie.getRating(),
                 movie.getReleaseDate(),
-                ""
+                movie.getPosterPath()
         );
         movieDetailPresenter.prepareSuccessView(outputData);
     }
