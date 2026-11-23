@@ -86,8 +86,7 @@ class StudentTask {
   - completionProgress : byte
   - difficultyLevel : DifficultyLevel
   + fieldsValidation() : boolean
-  + inputValidation(deadline : LocalDate, estimatedHours : double, progress : byte,
-      difficultyLevel : DifficultyLevel) : boolean
+  + inputValidation(deadline : LocalDate, estimatedHours : double, progress : byte) : boolean
 }
 
 abstract class User {
