@@ -11,6 +11,7 @@ public interface get_dataInputBoundary {
     /**
      * Executes the switch to login view use case.
      */
-    //TODO have to switch to view displaying the data
+    // TODO have to switch to something
+    void switchToLoginView();
 
 }

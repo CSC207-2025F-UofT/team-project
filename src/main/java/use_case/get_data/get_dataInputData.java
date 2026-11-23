@@ -4,4 +4,6 @@ public class get_dataInputData {
     private final String username;
 
     public get_dataInputData(String username) { this.username = username; }
+    public String getUsername() { return username; }
 }
+

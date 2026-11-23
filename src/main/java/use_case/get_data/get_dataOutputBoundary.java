@@ -13,8 +13,4 @@ public interface get_dataOutputBoundary {
      */
     void prepareFailView(String errorMessage);
 
-    /**
-     * Switches to the Login View.
-     */
-    //TODO have to switch to view displaying the data
 }
