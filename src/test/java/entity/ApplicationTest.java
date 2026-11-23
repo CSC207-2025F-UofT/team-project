@@ -59,4 +59,13 @@ class ApplicationTest {
         assertFalse(application.isActive());
         assertEquals("", application.getAdminNote());
     }
+
+    @Test
+    void changingCopyDoesNotChangeOriginal() {
+        final Application application = newApplication();
+        final Application copy = application.copy();
+        copy.withdraw();
+        assertEquals(application.getId(), copy.getId());
+        assertEquals(ApplicationStatus.PENDING, application.getStatus());
+    }
 }
