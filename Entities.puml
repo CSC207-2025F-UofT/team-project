@@ -103,11 +103,12 @@ abstract class User {
 
 abstract class TasksUser {
   - tasks : List<Task>
-  - taskFactory : TaskFactory
+  + {final} taskFactory : TaskFactory
 }
 
 class StudentTasksUser {
   - countryCode : String
+  + {final} studentTaskFactory : StudentUserFactory
 }
 
 abstract class TaskSortingStrategy<T extends Task> {
@@ -195,11 +196,12 @@ TaskUserFactory <|-- StudentUserFactory
 
 abstract class TaskFactory {
   - nextUniqueID : int
-  + createTask() : Task
+  + createTask(uniqueUserId : String) : Task
 }
 
 class StudentTaskFactory {
-  + createTask() : StudentTask
+  + createTask(uniqueUserId : String, title : String, description : String, deadline : LocalDate,
+  estimatedHoursToCompleteTask : double, completionProgress : byte, difficultyLevel : DifficultyLevel) : StudentTask
 }
 
 TaskFactory <|-- StudentTaskFactory
