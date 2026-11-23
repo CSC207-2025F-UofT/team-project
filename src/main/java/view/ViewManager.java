@@ -1,31 +1,37 @@
 package view;
 
+import java.awt.CardLayout;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+
+import javax.swing.JPanel;
+
 import interface_adapter.ViewManagerModel;
 
-import interface_adapter.ViewManagerModelListener;
-import javax.swing.*;
-import java.awt.*;
-
-
 /**
- * The View Manager for the program. It listens to the ViewManagerModel
- * and shows the View that is currently active.
+ * Shows the screen chosen in the {@link ViewManagerModel}. Screens are stacked in a CardLayout.
  */
-public class ViewManager implements ViewManagerModelListener {
+public class ViewManager implements PropertyChangeListener {
     private final CardLayout cardLayout;
     private final JPanel views;
-    private final ViewManagerModel viewManagerModel;
 
-    public ViewManager(JPanel views, CardLayout cardLayout, ViewManagerModel viewManagerModel) {
+    /**
+     * Creates a view manager and starts listening to the model.
+     *
+     * @param views the panel that holds every screen, using the given layout
+     * @param cardLayout the layout of {@code views}
+     * @param model the model that says which screen to show
+     */
+    public ViewManager(JPanel views, CardLayout cardLayout, ViewManagerModel model) {
         this.views = views;
         this.cardLayout = cardLayout;
-        this.viewManagerModel = viewManagerModel;
-        this.viewManagerModel.addListener(this);
+        model.addPropertyChangeListener(this);
     }
 
-
     @Override
-    public void viewChanged() {
-        cardLayout.show(views, viewManagerModel.getCurrentViewName());
+    public void propertyChange(PropertyChangeEvent event) {
+        if (ViewManagerModel.ACTIVE_VIEW.equals(event.getPropertyName())) {
+            cardLayout.show(views, (String) event.getNewValue());
+        }
     }
 }

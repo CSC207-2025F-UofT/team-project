@@ -1,34 +1,44 @@
 package interface_adapter;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
 
 /**
- * Model for the View Manager. Its state is the name of the View which
- * is currently active. An initial state of "" is used.
+ * Remembers which screen is showing and tells listeners when it changes.
  */
 public class ViewManagerModel {
+    /** Name of the property fired when the active screen changes. */
+    public static final String ACTIVE_VIEW = "activeView";
 
-    private final List<ViewManagerModelListener> listeners = new ArrayList<>();
+    private final PropertyChangeSupport support = new PropertyChangeSupport(this);
+    private String activeView;
 
-    private String currentViewName = "";
-
-    public String getCurrentViewName() {
-        return this.currentViewName;
+    /**
+     * Returns the name of the screen that should be showing.
+     *
+     * @return the active view name, or null if none was chosen yet
+     */
+    public String getActiveView() {
+        return activeView;
     }
 
-    public void setState(String currentViewName) {
-        this.currentViewName = currentViewName;
+    /**
+     * Switches to another screen and notifies listeners.
+     *
+     * @param viewName the name the screen was registered under
+     */
+    public void setActiveView(String viewName) {
+        final String old = this.activeView;
+        this.activeView = viewName;
+        support.firePropertyChange(ACTIVE_VIEW, old, viewName);
     }
 
-    public void addListener(ViewManagerModelListener listener) {
-        listeners.add(listener);
+    /**
+     * Registers a listener for screen changes.
+     *
+     * @param listener the listener to notify
+     */
+    public void addPropertyChangeListener(PropertyChangeListener listener) {
+        support.addPropertyChangeListener(listener);
     }
-
-    public void notifyViewChanged() {
-        for (ViewManagerModelListener listener : listeners) {
-            listener.viewChanged();
-        }
-    }
-
 }
