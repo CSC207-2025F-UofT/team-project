@@ -323,6 +323,8 @@ integrated into the game.
 ---
 ## Design Diagrams
 ### UML Class Diagram
+- [US4 — Rest, Start a New Day, and Save Progress](docs/uml/us4-class-diagram.puml)
+
 ### Sequence Diagrams
 
 ---
