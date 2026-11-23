@@ -12,7 +12,7 @@ import javax.swing.SwingUtilities;
 
 //import MainMenuViewManager;
 
-public class MainMenuView {
+public class EnterUsernameView {
 
     static final int WIDTH = 300;
     static final int HEIGHT = 200;

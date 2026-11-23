@@ -9,8 +9,6 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
-//import MainMenuViewModel;
-
 public class WelcomeView {
     static final int WIDTH = 300;
     static final int HEIGHT = 200;
@@ -22,7 +20,6 @@ public class WelcomeView {
             () -> {
 
                 JPanel welcomePanel = new JPanel();
-                //entities.player.getUsername()
                 welcomePanel.add(new JLabel("Welcome, [username]"));
 
                 JPanel buttonPanel = new JPanel();
