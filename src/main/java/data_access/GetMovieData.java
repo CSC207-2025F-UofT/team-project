@@ -32,48 +32,6 @@ public class GetMovieData {
         this.client = new OkHttpClient();
         this.token = token;
     }
-    // get method version to be used for API calls for use case #1
-    public String[][] get(String endpoint, String b) throws IOException {
-
-        String url = BASE_URL + endpoint;
-
-        Request request = new Request.Builder()
-                .url(url)
-                .get()
-                .addHeader("accept", "application/json")
-                .addHeader("Authorization", "Bearer " + token)
-                .build();
-
-        String jsonResponse = executeRequest(request);
-//            JSONObject obj = response.body(); doesnt work
-        JSONObject responseJSONobject = new JSONObject(jsonResponse);
-        JSONArray results = responseJSONobject.getJSONArray("results");
-
-        String[][] finalData = new String[results.length()][];
-        int ind = 0;
-        for(int i =0; i < results.length(); i++){
-            if(results.getJSONObject(i).isNull("poster_path")) {
-                finalData[i] = new String[]{
-                        results.getJSONObject(i).getString("title"),
-                        results.getJSONObject(i).getString("overview"),
-                        results.getJSONObject(i).getString("release_date"),
-                        String.valueOf(results.getJSONObject(i).getInt("id")),
-                        ""};
-            } else {
-                finalData[i] = new String[]{
-                        results.getJSONObject(i).getString("title"),
-                        results.getJSONObject(i).getString("overview"),
-                        results.getJSONObject(i).getString("release_date"),
-                        String.valueOf(results.getJSONObject(i).getInt("id")),
-                        results.getJSONObject(i).getString("poster_path")};
-            }
-
-        }
-        System.out.println(Arrays.deepToString(finalData));
-        return finalData;
-
-
-    }
 
     // GET: Retrieve information from TMDB
     public String get(String endpoint) throws IOException {
