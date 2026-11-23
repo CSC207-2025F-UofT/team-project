@@ -14,8 +14,10 @@ import org.json.JSONObject;
 
 import entity.AnswerCity;
 import entity.City;
+import use_case.start_round.StartRoundDataAccessInterface;
+import use_case.submit_guess.SubmitGuessDataAccessInterface;
 
-public class JSONCityDataAccessObject implements CityDataAccessInterface {
+public class JSONCityDataAccessObject implements StartRoundDataAccessInterface, SubmitGuessDataAccessInterface {
     private final List<AnswerCity> answerCities = new ArrayList<>();
     private final Map<String, City> guessableCities = new HashMap<>();
     private final Random random = new Random();
