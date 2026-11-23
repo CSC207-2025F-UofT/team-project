@@ -35,6 +35,15 @@ and save their progress.
 **Why we are building it:** The project’s purpose is entertainment. It offers a simplified, fictional university experience rather than predicting real course
 workloads or academic performance.
 
+**Supported course content:** UC1 owns scraping the UofT major catalogue for display. Only the following
+three majors are playable; other scraped majors must not assign unsupported courses.
+
+| Playable major | Assigned courses |
+|---|---|
+| CS | Programming Foundation; Software Design |
+| Biology | Cell Biology; Ecology |
+| History | World History; Historical Perspective |
+
 ---
 ## User Stories
 ### US1 — Choose a Major
@@ -123,7 +132,7 @@ As a student player, I want to rest at my residence to start a new day with real
 3. The system checks that its challenge is unfinished and the player has sufficient energy.
 4. The system explains the challenge and its energy cost.
 5. The player confirms participation.
-6. The system deducts energy and presents a short set of questions.
+6. The system loads and validates three API questions, then deducts 20 energy once and presents the challenge.
 7. The player answers each question and receives immediate feedback.
 8. The system records completion and awards preparation points based on correct answers.
 9. The system displays the challenge result and updated energy.
@@ -132,11 +141,14 @@ As a student player, I want to rest at my residence to start a new day with real
 - **3a — The challenge is already completed:** The system displays the previous result without deducting energy or awarding additional points.
 - **3b — Insufficient energy:** The system suggests resting. The challenge does not start and no energy is deducted.
 - **5a — The player cancels before starting:** Nothing changes.
-- **6a — Questions cannot be loaded:** The system uses bundled fallback questions. If no suitable questions are available, it cancels the challenge and refunds the deducted energy.
+- **6a — Questions cannot be loaded:** The question gateway throws an error and the screen explains the failure. No energy is deducted and no challenge starts. The player may retry; there is no local question bank.
 - **7a — No answer is selected:** The system requests an answer without advancing.
 - **7b — The player leaves early:** The system confirms cancellation. No completion or preparation points are recorded; spent energy is not refunded.
 
 **MVP boundary:** One class challenge per assigned course. Preparation points do not directly change course grades.
+
+**UC2 rules:** Each correct answer earns one preparation point. Points are recorded only after all
+three answers and final confirmation. Completed results can be viewed without charging or rewarding again.
 
 ---
 
@@ -170,7 +182,7 @@ As a student player, I want to rest at my residence to start a new day with real
 - **3a — The exam is already completed:** The system displays the existing result without starting another attempt or deducting energy.
 - **3b — Insufficient energy:** The system suggests resting. The exam does not start and no energy is deducted.
 - **5a — The player cancels before starting:** Nothing changes.
-- **6a — Questions cannot be loaded:** The system uses bundled fallback questions. If none are available, it cancels the exam and refunds the deducted energy.
+- **6a — Questions cannot be loaded:** The shared question gateway throws an error instead of using local questions. UC3 must leave no energy cost or exam result when loading fails.
 - **7a — The player requests an unlocked hint:** The system displays one hint for the selected question and marks the exam's hint as used.
 - **7b — The player cancels the exam:** The system confirms cancellation. No grade is recorded; spent energy is not refunded.
 - **8a — Required answers are missing:** The system identifies unanswered questions and allows completion before resubmission.
@@ -282,10 +294,15 @@ Represents the player's confirmed major, assigned courses, and academic progress
 Tracks class completion, preparation points, and the exam result for one assigned course.
 
 ### Question
-Represents a multiple-choice question, its answer options, correct answer, explanation, and optional hint.
+Represents an immutable multiple-choice question with a stable source ID, answer options, a zero-based
+correct answer, and an optional explanation. A simple hint can eliminate one incorrect option.
 
 ### QuestionSession
 Represents an active class challenge or exam, tracking questions, submitted answers, completion status, and hint usage.
+
+### ChallengeResult
+Represents a completed class challenge: correct answer count, total question count, and preparation points.
+It contains no exam grade. The shared academic record and checkpoint adapter still need to store it.
 
 ### GameDay
 Represents the current day number and the real date it is matched to. Resting advances it to the next day.
@@ -305,11 +322,23 @@ Represents one game day's weather: the real date, the game condition (clear, clo
 ---
 ## API Usage
 
-**Planned US2/US3 API:** [Hugging Face Datasets API](https://huggingface.co/docs/dataset-viewer/index) with the
+**US2/US3 API:** [Hugging Face Datasets API](https://huggingface.co/docs/dataset-viewer/index) with the
 [MMLU dataset](https://huggingface.co/datasets/cais/mmlu)
 
-**How it will be used:** Suggestion only: university-level multiple-choice questions for classes and exams, with
-each course mapped to an MMLU subject.
+**How it is used:** The shared `QuestionGateway` loads questions from the public Hugging Face dataset-viewer
+rows endpoint. All six courses have separate practice/exam selections from introductory MMLU categories:
+`high_school_computer_science`, `high_school_biology`, and `high_school_world_history`.
+
+MMLU has no difficulty parameter. Curated remote row references select basic programming, software concepts,
+cell biology, ecology, world events, and source interpretation. This is a basic selection, not a guaranteed
+difficulty rating. MMLU also has no explanations; classroom feedback shows correctness and the source answer.
+
+Requests have a five-second timeout. Network, HTTP and invalid-data failures throw `QuestionLoadException`.
+There is no bundled question bank, offline cache or fallback. The stored row references contain no question
+text or answers and cannot be used offline. Practice and exam IDs are disjoint for each course.
+
+**Question API verification:** Real Java calls passed for all six courses in both purposes on 2026-11-23
+(36 questions across 12 requests, no API key). Normal automated tests use test-only fixtures, without network.
 
 **Planned US4 API:** [Open-Meteo Historical Weather API](https://open-meteo.com/en/docs/historical-weather-api)
 
@@ -323,13 +352,23 @@ integrated into the game.
 ---
 ## Design Diagrams
 ### UML Class Diagram
+- [UC2 architecture and interaction sequence](docs/uc2-integration.md)
 - [US4 — Rest, Start a New Day, and Save Progress](docs/uml/us4-class-diagram.puml)
 
 ### Sequence Diagrams
 
 ---
 ## How to Run
-[Instructions for running the program.]
+Use Java 11 or newer and Maven. Run `mvn test` to build and check all modules.
+The shared application starts with `mvn exec:java`; the Lecture Hall in that application remains a placeholder
+until the shared academic/state adapter is connected.
+
+To try the UC2 page now, run `view.ClassChallengePreview` from the test source set in IntelliJ, with an
+optional argument `cs`, `biology`, or `history`. This preview uses test-only player/course state and the
+real Hugging Face API. It does not save or represent a fully integrated game.
+
+See [UC2 integration and command-line instructions](docs/uc2-integration.md) for the factory, adapter contract,
+test commands, and live API check.
 
 ---
 ## Notes
