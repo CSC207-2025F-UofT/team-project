@@ -12,14 +12,14 @@ class AdopterPreferencesTest {
 
     @Test
     void gettersReturnConstructorValues() {
-        AdopterPreferences prefs = new AdopterPreferences(true, false, true, false, true, Species.DOG);
+        AdopterPreferences prefs = new AdopterPreferences(true, false, true, false, true, Species.CAT);
 
         assertTrue(prefs.hasChildren());
         assertFalse(prefs.hasOtherPets());
         assertTrue(prefs.canHandleMedicalNeeds());
         assertFalse(prefs.canHandleKitten());
         assertTrue(prefs.canHandlePregnantAnimal());
-        assertEquals(Species.DOG, prefs.getPreferredSpecies());
+        assertEquals(Species.CAT, prefs.getPreferredSpecies());
     }
 
     @Test
@@ -41,7 +41,7 @@ class AdopterPreferencesTest {
     @Test
     void differentValuesAreNotEqual() {
         AdopterPreferences a = new AdopterPreferences(true, true, false, false, true, Species.CAT);
-        AdopterPreferences b = new AdopterPreferences(true, true, false, false, true, Species.DOG);
+        AdopterPreferences b = new AdopterPreferences(true, true, false, false, true, null);
 
         assertNotEquals(a, b);
         assertNotEquals(a, null);
