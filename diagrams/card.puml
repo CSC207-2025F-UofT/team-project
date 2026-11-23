@@ -1,0 +1,54 @@
+@startuml
+
+hide empty members
+
+' Main card class
+abstract class Card
+
+' Card categories
+abstract class ColoredCard {
+    - color: CardColor
+    + getColor(): CardColor
+}
+
+class WildCard {
+    + chooseColor(): CardColor
+}
+
+' Independent capability
+interface CardEffect {
+    + applyEffect(game: Game): void
+}
+
+' Concrete colored cards
+class NumberCard {
+    - number: int
+    + getNumber(): int
+}
+
+class SkipCard
+class ReverseCard
+class DrawTwoCard
+
+' Concrete wild cards
+class WildDrawFourCard
+
+' Inheritance / implementation
+Card <|-- ColoredCard
+Card <|-- WildCard
+
+ColoredCard <|-- NumberCard
+ColoredCard <|-- SkipCard
+ColoredCard <|-- ReverseCard
+ColoredCard <|-- DrawTwoCard
+
+WildCard <|-- WildDrawFourCard
+
+' Card effects
+CardEffect <|.. WildCard
+CardEffect <|.. SkipCard
+CardEffect <|.. ReverseCard
+CardEffect <|.. DrawTwoCard
+CardEffect <|.. WildDrawFourCard
+
+@enduml

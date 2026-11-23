@@ -1,0 +1,12 @@
+@startuml
+class GameSettings {
+    - numBots: int
+    - cardsDealt: int
+
+    + GameSettings(numBots: int, cardsDealt: int)
+    + getNumBots(): int
+    + setNumBots(numBots: int): void
+    + getCardsDealt(): int
+    + setCardsDealt(cardsDealt: int): void
+}
+@enduml

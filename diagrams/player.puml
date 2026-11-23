@@ -1,0 +1,22 @@
+@startuml
+class Player {
+    - id: String
+    - hand: List<Card>
+    - unoDeclared: boolean
+
+    + Player(id: String, hand: List<Card>)
+    + takeCards(cards: List<Card>): void
+    + playCard(index: int): Card
+    + getId(): String
+    + getHand(): List<Card>
+    + hasDeclaredUno(): boolean
+    + declaredUno(): void
+}
+class BotPlayer {
+    + BotPlayer(id:String, hand: List<Card>)
+    + chooseCard(playableCards: List<Card>): Card
+    + chooseColour(): CardColor
+}
+
+Player <|-- BotPlayer
+@enduml
