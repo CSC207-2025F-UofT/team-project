@@ -10,9 +10,9 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 
-//import MainMenuViewModel;
+//import MainMenuViewManager;
 
-public class MainMenuView {
+public class EnterUsernameView {
 
     static final int WIDTH = 300;
     static final int HEIGHT = 200;

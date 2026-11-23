@@ -1,15 +1,15 @@
 package View;
 
-//import interface_adapter.ViewManagerModel;
+import java.awt.CardLayout;
 
-//import interface_adapter.ViewManagerModelListener;
-import javax.swing.*;
-import java.awt.*;
+import javax.swing.JPanel;
 
+import interface_adapter.ViewManagerModel;
+import interface_adapter.ViewManagerModelListener;
 
 /**
- * The View Manager for the program. It listens for property change events
- * in the ViewManagerModel and updates which View should be visible.
+ * The View Manager for the program. It listens for changes in the
+ * ViewManagerModel and updates which View should be visible.
  */
 public class ViewManager implements ViewManagerModelListener {
     private final CardLayout cardLayout;
@@ -22,7 +22,6 @@ public class ViewManager implements ViewManagerModelListener {
         this.viewManagerModel = viewManagerModel;
         this.viewManagerModel.addListener(this);
     }
-
 
     @Override
     public void viewChanged() {
