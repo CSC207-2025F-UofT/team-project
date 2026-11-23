@@ -1,5 +1,4 @@
 # Linked Out
-java -cp target/journal-preview:src/main/resources view.journal.JournalPreview
 
 ## Table of Contents
 
