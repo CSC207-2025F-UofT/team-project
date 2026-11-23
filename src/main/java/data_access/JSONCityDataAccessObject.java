@@ -17,7 +17,7 @@ import entity.City;
 import use_case.start_round.StartRoundDataAccessInterface;
 import use_case.submit_guess.SubmitGuessDataAccessInterface;
 
-public class JSONCityDataAccessObject implements StartRoundDataAccessInterface, SubmitGuessDataAccessInterface {
+public class JSONCityDataAccessObject implements StartRoundDataAccessInterface {
     private final List<AnswerCity> answerCities = new ArrayList<>();
     private final Map<String, City> guessableCities = new HashMap<>();
     private final Random random = new Random();
@@ -66,11 +66,6 @@ public class JSONCityDataAccessObject implements StartRoundDataAccessInterface, 
     @Override
     public AnswerCity getRandomAnswerCity() {
         return answerCities.get(random.nextInt(answerCities.size()));
-    }
-
-    @Override
-    public City findCityByName(String name) {
-        return guessableCities.get(key(name));
     }
 
     private static JSONArray readJsonArray(String filePath) {
