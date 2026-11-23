@@ -3,6 +3,7 @@ package data_access;
 import entity.Transaction;
 import use_case.login.LoginUserDataAccessInterface;
 import use_case.record_transaction.RecordTransactionDataAccessInterface;
+import use_case.view_budget_progress.ViewBudgetProgressTransactionDataAccessInterface;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -14,7 +15,8 @@ import java.util.Map;
  * Stores transactions per account for the current application run.
  */
 public class InMemoryTransactionDataAccessObject
-        implements RecordTransactionDataAccessInterface {
+        implements RecordTransactionDataAccessInterface,
+            ViewBudgetProgressTransactionDataAccessInterface {
 
     private final LoginUserDataAccessInterface userDataAccess;
     private final Map<String, List<Transaction>> transactions = new HashMap<>();

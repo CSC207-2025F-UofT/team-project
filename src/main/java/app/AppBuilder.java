@@ -3,6 +3,7 @@ package app;
 import data_access.FileUserDataAccessObject;
 import data_access.GoogleDesktopIdentityGateway;
 import data_access.InMemoryTransactionDataAccessObject;
+import data_access.InMemoryBudgetDataAccessObject;
 
 import entity.UserFactory;
 
@@ -23,6 +24,9 @@ import interface_adapter.record_transaction.RecordTransactionViewModel;
 import interface_adapter.signup.SignupController;
 import interface_adapter.signup.SignupPresenter;
 import interface_adapter.signup.SignupViewModel;
+import interface_adapter.view_budget_progress.ViewBudgetProgressController;
+import interface_adapter.view_budget_progress.ViewBudgetProgressPresenter;
+import interface_adapter.view_budget_progress.ViewBudgetProgressViewModel;
 
 import use_case.change_password.ChangePasswordInputBoundary;
 import use_case.change_password.ChangePasswordInteractor;
@@ -41,12 +45,14 @@ import use_case.record_transaction.RecordTransactionOutputBoundary;
 import use_case.signup.SignupInputBoundary;
 import use_case.signup.SignupInteractor;
 import use_case.signup.SignupOutputBoundary;
+import use_case.view_budget_progress.ViewBudgetProgressInteractor;
 
 import view.LoggedInView;
 import view.LoginView;
 import view.RecordTransactionView;
 import view.SignupView;
 import view.ViewManager;
+import view.ViewBudgetProgressView;
 
 import javax.swing.*;
 import java.awt.*;
@@ -68,6 +74,9 @@ public class AppBuilder {
     private final InMemoryTransactionDataAccessObject transactionDataAccessObject =
             new InMemoryTransactionDataAccessObject(userDataAccessObject);
 
+    private final InMemoryBudgetDataAccessObject budgetDataAccessObject =
+            new InMemoryBudgetDataAccessObject();
+
     private SignupView signupView;
     private SignupViewModel signupViewModel;
     private LoginViewModel loginViewModel;
@@ -78,8 +87,15 @@ public class AppBuilder {
     private RecordTransactionView recordTransactionView;
     private RecordTransactionViewModel recordTransactionViewModel;
 
+    private ViewBudgetProgressViewModel budgetProgressViewModel;
+    private ViewBudgetProgressView budgetProgressView;
+
     public AppBuilder() {
         cardPanel.setLayout(cardLayout);
+
+        // FOR TEST PURPOSE
+        budgetDataAccessObject.saveDailyLimit(
+                "username_test", new java.math.BigDecimal("100.00"));
     }
 
     public AppBuilder addSignupView() {
@@ -239,6 +255,35 @@ public class AppBuilder {
             viewManagerModel.notifyViewChanged();
         });
 
+        return this;
+    }
+
+    public AppBuilder addViewBudgetProgressView() {
+        budgetProgressViewModel = new ViewBudgetProgressViewModel();
+        budgetProgressView = new ViewBudgetProgressView(budgetProgressViewModel);
+        cardPanel.add(budgetProgressView, ViewBudgetProgressViewModel.VIEW_NAME);
+        return this;
+    }
+
+    public AppBuilder addViewBudgetProgressUseCase() {
+        final ViewBudgetProgressPresenter presenter =
+                new ViewBudgetProgressPresenter(budgetProgressViewModel);
+        final ViewBudgetProgressInteractor interactor =
+                new ViewBudgetProgressInteractor(
+                        transactionDataAccessObject, budgetDataAccessObject, presenter);
+        final ViewBudgetProgressController controller =
+                new ViewBudgetProgressController(interactor);
+        budgetProgressView.setController(controller);
+
+        loggedInView.setShowBudgetProgress(() -> {
+            controller.execute();
+            viewManagerModel.setState(ViewBudgetProgressViewModel.VIEW_NAME);
+            viewManagerModel.notifyViewChanged();
+        });
+        budgetProgressView.setBackAction(() -> {
+            viewManagerModel.setState(LoggedInViewModel.VIEW_NAME);
+            viewManagerModel.notifyViewChanged();
+        });
         return this;
     }
 
