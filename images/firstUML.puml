@@ -1,0 +1,135 @@
+@startuml
+
+' GUI and Application
+
+class FlashcardPanel {
+    -deckList
+    --
+    +displayDecks()
+    +displayCards()
+    +handleUserAction()
+}
+
+class FlashcardApp {
+    -studyStrategy : StudyStrategy
+    -deckImporter : DeckImporter
+    -deckExporter : DeckExporter
+    --
+    +accessSettings()
+    +studyMode()
+    +importDeck()
+    +exportDeck()
+}
+
+FlashcardPanel --> FlashcardApp : sends user actions
+FlashcardApp ..> StudyStrategy : uses
+FlashcardApp ..> DeckImporter : uses
+FlashcardApp ..> DeckExporter : uses
+
+' Users and Authors
+
+class User {
+    -username : String
+    -password : String
+    -decksCreated : List<Deck>
+    -decksJoined : List<Deck>
+    --
+    +editUserName()
+    +updatePassword()
+    +addDeckCreated()
+    +addDeckJoined()
+    +leaveDeckJoined()
+}
+
+class Author {
+    +editPermissions()
+}
+Author --|> User
+
+' Decks and Cards
+
+class Deck {
+    -title : String
+    -permissions
+    -author : Author
+    -userList : List<User>
+    --
+    +addCard(card : Card)
+    +deleteCard(card : Card)
+    +editCard(card : Card)
+    +reorderCards()
+    +selectCards()
+    +updateUserNames()
+}
+
+class Card {
+    -belongsToDeck : Deck
+    -front : String
+    -back : String
+    -position : int
+    {static} -totalCards : int
+    --
+    +editFront()
+    +editBack()
+    +changePosition()
+    +changeDeck(deck : Deck)
+}
+
+User  -->  Deck : creates
+User  --> Deck : joins
+Deck ..> Card : a collection of
+
+' Study Mode Abstraction
+
+interface StudyStrategy {
+    +study(deck : Deck)
+}
+
+class StandardStudyMode {
+    +study(deck : Deck)
+}
+
+class SelectedCardsStudyMode {
+    +study(deck : Deck)
+}
+
+class ConnectStudyMode {
+    +study(deck : Deck)
+}
+
+StandardStudyMode ..|> StudyStrategy
+SelectedCardsStudyMode ..|> StudyStrategy
+ConnectStudyMode ..|> StudyStrategy
+
+' Import and Export Abstractions
+
+interface DeckImporter {
+    +importDeck()
+}
+
+interface DeckExporter {
+    +exportDeck()
+}
+
+class FileDeckImporter {
+    +importDeck()
+}
+
+class FileDeckExporter {
+    +exportDeck()
+}
+
+FileDeckImporter ..|> DeckImporter
+FileDeckExporter ..|> DeckExporter
+
+' Permissions
+
+class PermissionManager {
+    +addPermission()
+    +updatePermission()
+    +checkPermission()
+}
+
+Author ..> PermissionManager : manages
+PermissionManager ..> Deck : controls access
+@enduml
