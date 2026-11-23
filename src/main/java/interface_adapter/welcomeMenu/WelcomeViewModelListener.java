@@ -1,4 +1,4 @@
-package interface_adapter.WelcomeMenu;
+package interface_adapter.welcomeMenu;
 
 public interface WelcomeViewModelListener {
     /**

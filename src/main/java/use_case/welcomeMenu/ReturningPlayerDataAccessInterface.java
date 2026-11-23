@@ -1,7 +1,6 @@
-package use_case.WelcomeMenu;
+package use_case.welcomeMenu;
 
 import entity.Player;
-import interface_adapter.WelcomeMenu.WelcomeState;
 
 public interface ReturningPlayerDataAccessInterface {
     /**

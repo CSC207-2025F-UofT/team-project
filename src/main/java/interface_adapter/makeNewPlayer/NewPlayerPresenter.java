@@ -1,8 +1,8 @@
 package interface_adapter.makeNewPlayer;
 
-//import interface_adapter.ViewManagerModel;
-import interface_adapter.WelcomeMenu.WelcomeState;
-import interface_adapter.WelcomeMenu.WelcomeViewModel;
+import interface_adapter.ViewManagerModel;
+import interface_adapter.welcomeMenu.WelcomeState;
+import interface_adapter.welcomeMenu.WelcomeViewModel;
 import use_case.makeNewPlayer.NewPlayerOutputBoundary;
 import use_case.makeNewPlayer.NewPlayerOutputData;
 

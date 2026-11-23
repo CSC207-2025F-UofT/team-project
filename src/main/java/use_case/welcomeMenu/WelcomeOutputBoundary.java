@@ -1,4 +1,4 @@
-package use_case.WelcomeMenu;
+package use_case.welcomeMenu;
 
 public interface WelcomeOutputBoundary {
     /**

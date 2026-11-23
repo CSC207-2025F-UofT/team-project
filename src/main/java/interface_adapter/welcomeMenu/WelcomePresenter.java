@@ -1,9 +1,9 @@
-package interface_adapter.WelcomeMenu;
+package interface_adapter.welcomeMenu;
 
 import interface_adapter.start_round.StartRoundViewModel;
 import interface_adapter.start_round.StartRoundState;
-import use_case.WelcomeMenu.WelcomeOutputBoundary;
-import use_case.WelcomeMenu.WelcomeOutputData;
+import use_case.welcomeMenu.WelcomeOutputBoundary;
+import use_case.welcomeMenu.WelcomeOutputData;
 
 public class WelcomePresenter implements WelcomeOutputBoundary {
     private final WelcomeViewModel welcomeViewModel;
