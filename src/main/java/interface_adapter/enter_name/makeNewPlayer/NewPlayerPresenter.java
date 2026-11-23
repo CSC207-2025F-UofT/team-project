@@ -1,10 +1,10 @@
-package interface_adapter.makeNewPlayer;
+package interface_adapter.enter_name.makeNewPlayer;
 
 import interface_adapter.ViewManagerModel;
-import interface_adapter.welcomeMenu.WelcomeState;
-import interface_adapter.welcomeMenu.WelcomeViewModel;
-import use_case.makeNewPlayer.NewPlayerOutputBoundary;
-import use_case.makeNewPlayer.NewPlayerOutputData;
+import interface_adapter.enter_name.welcomeMenu.WelcomeState;
+import interface_adapter.enter_name.welcomeMenu.WelcomeViewModel;
+import use_case.enter_name.makeNewPlayer.NewPlayerOutputBoundary;
+import use_case.enter_name.makeNewPlayer.NewPlayerOutputData;
 
 public class NewPlayerPresenter implements NewPlayerOutputBoundary{
     private final NewPlayerViewModel newPlayerViewModel;

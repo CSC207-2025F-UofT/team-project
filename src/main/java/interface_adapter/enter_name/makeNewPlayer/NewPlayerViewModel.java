@@ -1,4 +1,4 @@
-package interface_adapter.makeNewPlayer;
+package interface_adapter.enter_name.makeNewPlayer;
 
 import java.util.ArrayList;
 import java.util.List;

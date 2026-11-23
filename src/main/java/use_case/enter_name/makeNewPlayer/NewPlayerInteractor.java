@@ -1,8 +1,8 @@
-package use_case.makeNewPlayer;
+package use_case.enter_name.makeNewPlayer;
 
 import entity.Player;
 import entity.PlayerFactory;
-import use_case.welcomeMenu.ReturningPlayerDataAccessInterface;
+import use_case.enter_name.welcomeMenu.ReturningPlayerDataAccessInterface;
 
 public class NewPlayerInteractor implements NewPlayerInputBoundary{
     private final NewPlayerDataAccessInterface playerDataAccessObject;

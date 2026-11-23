@@ -1,4 +1,4 @@
-package interface_adapter.welcomeMenu;
+package interface_adapter.enter_name.welcomeMenu;
 
 public interface WelcomeViewModelListener {
     /**

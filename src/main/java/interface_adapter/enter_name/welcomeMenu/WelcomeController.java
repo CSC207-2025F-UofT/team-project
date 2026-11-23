@@ -1,7 +1,7 @@
-package interface_adapter.welcomeMenu;
+package interface_adapter.enter_name.welcomeMenu;
 
-import use_case.welcomeMenu.WelcomeInputBoundary;
-import use_case.welcomeMenu.WelcomeInputData;
+import use_case.enter_name.welcomeMenu.WelcomeInputBoundary;
+import use_case.enter_name.welcomeMenu.WelcomeInputData;
 
 public class WelcomeController {
     /**

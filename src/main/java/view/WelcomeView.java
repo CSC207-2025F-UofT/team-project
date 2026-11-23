@@ -4,8 +4,8 @@ import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
-import interface_adapter.welcomeMenu.WelcomeViewModel;
-import interface_adapter.welcomeMenu.WelcomeViewModelListener;
+import interface_adapter.enter_name.welcomeMenu.WelcomeViewModel;
+import interface_adapter.enter_name.welcomeMenu.WelcomeViewModelListener;
 
 
 /**

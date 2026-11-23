@@ -13,11 +13,11 @@ import view.WelcomeView;
 import data_access.PlayerDataAccessObject;
 import entity.PlayerFactory;
 import interface_adapter.ViewManagerModel;
-import interface_adapter.makeNewPlayer.NewPlayerController;
-import interface_adapter.makeNewPlayer.NewPlayerPresenter;
-import interface_adapter.makeNewPlayer.NewPlayerViewModel;
-import interface_adapter.welcomeMenu.WelcomeViewModel;
-import use_case.makeNewPlayer.NewPlayerInteractor;
+import interface_adapter.enter_name.makeNewPlayer.NewPlayerController;
+import interface_adapter.enter_name.makeNewPlayer.NewPlayerPresenter;
+import interface_adapter.enter_name.makeNewPlayer.NewPlayerViewModel;
+import interface_adapter.enter_name.welcomeMenu.WelcomeViewModel;
+import use_case.enter_name.makeNewPlayer.NewPlayerInteractor;
 
 public class WelcomeDemo {
 

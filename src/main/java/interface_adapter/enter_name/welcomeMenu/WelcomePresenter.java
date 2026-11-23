@@ -1,10 +1,10 @@
-//package interface_adapter.welcomeMenu;
+//package interface_adapter.enter_name.welcomeMenu;
 //
 //import interface_adapter.ViewManagerModel;
 //import interface_adapter.start_round.StartRoundViewModel;
 //import interface_adapter.start_round.StartRoundState;
-//import use_case.welcomeMenu.WelcomeOutputBoundary;
-//import use_case.welcomeMenu.WelcomeOutputData;
+//import use_case.enter_name.welcomeMenu.WelcomeOutputBoundary;
+//import use_case.enter_name.welcomeMenu.WelcomeOutputData;
 //
 //public class WelcomePresenter implements WelcomeOutputBoundary {
 //    private final WelcomeViewModel welcomeViewModel;

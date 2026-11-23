@@ -1,4 +1,4 @@
-package use_case.makeNewPlayer;
+package use_case.enter_name.makeNewPlayer;
 
 /**
  * The Input Data for Use Case 1.

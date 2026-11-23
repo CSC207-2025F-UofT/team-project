@@ -10,10 +10,10 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
-import interface_adapter.makeNewPlayer.NewPlayerController;
-import interface_adapter.makeNewPlayer.NewPlayerState;
-import interface_adapter.makeNewPlayer.NewPlayerViewModel;
-import interface_adapter.makeNewPlayer.NewPlayerViewModelListener;
+import interface_adapter.enter_name.makeNewPlayer.NewPlayerController;
+import interface_adapter.enter_name.makeNewPlayer.NewPlayerState;
+import interface_adapter.enter_name.makeNewPlayer.NewPlayerViewModel;
+import interface_adapter.enter_name.makeNewPlayer.NewPlayerViewModelListener;
 
 
 /**
