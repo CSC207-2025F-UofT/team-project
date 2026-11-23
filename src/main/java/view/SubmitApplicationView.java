@@ -21,7 +21,12 @@ import interface_adapter.submit_application.SubmitApplicationViewModelListener;
 /**
  * The View for applying to adopt one specific pet.
  */
-public class SubmitApplicationView extends JPanel implements SubmitApplicationViewModelListener {
+public final class SubmitApplicationView extends JPanel implements SubmitApplicationViewModelListener {
+
+    private static final int PADDING = 12;
+    private static final int LABEL_WIDTH = 160;
+    private static final int LABEL_HEIGHT = 20;
+    private static final String BLANK = " ";
 
     private final SubmitApplicationViewModel submitApplicationViewModel;
     private SubmitApplicationController submitApplicationController;
@@ -33,16 +38,20 @@ public class SubmitApplicationView extends JPanel implements SubmitApplicationVi
     private final JTextField householdMembersField = new JTextField(25);
     private final JTextField contactInfoField = new JTextField(25);
     private final JTextArea noteArea = new JTextArea(3, 25);
-    private final JLabel errorLabel = new JLabel(" ");
-    private final JLabel successLabel = new JLabel(" ");
+    private final JLabel errorLabel = new JLabel(BLANK);
+    private final JLabel successLabel = new JLabel(BLANK);
     private final JButton submitButton = new JButton("Submit application");
 
+    /**
+     * Creates the view.
+     * @param submitApplicationViewModel the view model this view displays
+     */
     public SubmitApplicationView(SubmitApplicationViewModel submitApplicationViewModel) {
         this.submitApplicationViewModel = submitApplicationViewModel;
         this.submitApplicationViewModel.addListener(this);
 
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
-        setBorder(BorderFactory.createEmptyBorder(12, 12, 12, 12));
+        setBorder(BorderFactory.createEmptyBorder(PADDING, PADDING, PADDING, PADDING));
         errorLabel.setForeground(Color.RED);
         noteArea.setLineWrap(true);
         noteArea.setBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY));
@@ -69,19 +78,27 @@ public class SubmitApplicationView extends JPanel implements SubmitApplicationVi
     private static JPanel row(String label, Component field) {
         final JPanel panel = new JPanel();
         final JLabel jLabel = new JLabel(label);
-        jLabel.setPreferredSize(new Dimension(160, 20));
+        jLabel.setPreferredSize(new Dimension(LABEL_WIDTH, LABEL_HEIGHT));
         panel.add(jLabel);
         panel.add(field);
         panel.setAlignmentX(Component.LEFT_ALIGNMENT);
         return panel;
     }
 
+    private static String blankIfEmpty(String text) {
+        String result = text;
+        if (result.isEmpty()) {
+            result = BLANK;
+        }
+        return result;
+    }
+
     @Override
     public void stateChanged() {
         final SubmitApplicationState state = submitApplicationViewModel.getState();
         title.setText("Apply to adopt " + state.getPetName());
-        errorLabel.setText(state.getError().isEmpty() ? " " : state.getError());
-        successLabel.setText(state.getSuccessMessage().isEmpty() ? " " : state.getSuccessMessage());
+        errorLabel.setText(blankIfEmpty(state.getError()));
+        successLabel.setText(blankIfEmpty(state.getSuccessMessage()));
         if (!state.getSuccessMessage().isEmpty()) {
             housingTypeBox.setSelectedIndex(0);
             petExperienceField.setText("");
