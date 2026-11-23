@@ -108,7 +108,7 @@ Id, name, email, passwordHash
 role: ADOPTER or ADMIN
 preferences (an AdopterPreferences object, adopters only)
 ### Pet
-id, name, species (CAT / DOG), breed, ageYears, sex
+id, name, breed, ageYears, sex
 temperamentTags (list, for example "affectionate", "shy", "good with kids")
 healthNotes, needsMedication, vaccinated, spayedNeutered
 adoptionFee, photoPath
@@ -128,26 +128,11 @@ preferredSpecies
 ---
 ## API Usage
 **API Name: TheCatAPI**
-**Documentation:** [ https://homeatlastrescue.ca ]
+**Documentation:** [ https://developers.thecatapi.com/ ]
 **How it is used in the program: When an admin picks a breed in the Add/Edit Pet form, 
 the program calls the API to fetch general breed information (typical temperament and a 
 reference photo).**
 
-**API Name: TorontoCat**
-**Documentation:** [ https://torontocatrescue.ca/ ]
-**How it is used in the program: When an admin picks a breed in the Add/Edit Pet form,
-the program calls the API to fetch general breed information (typical temperament and a
-reference photo).**
-
-**API Name: **
-**Documentation:** [ https://northtorontocatrescue.com/ ]
-**How it is used in the program: When an admin picks a breed in the Add/Edit Pet form,
-the program calls the API to fetch general breed information (typical temperament and a
-reference photo).**
-
-https://www.torontohumanesociety.com/cats/
-https://teamcatrescue.com/
-https://annexcatrescue.ca/
 ---
 ## Design Diagrams
 ### UML Class Diagram
