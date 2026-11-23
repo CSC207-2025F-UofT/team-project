@@ -9,5 +9,7 @@ public interface SubmitGuessDataAccessInterface {
 
   Round getCurrentRound();
 
+  boolean isAlreadyGuessed();
+
   void saveRound(Round round);
 }

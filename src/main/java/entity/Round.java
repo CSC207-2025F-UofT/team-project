@@ -2,6 +2,7 @@ package entity;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.List;
 
 /**
@@ -13,7 +14,7 @@ public class Round {
     public static final int MAX_ATTEMPTS = GameRules.MAX_ATTEMPTS;
 
     private final AnswerCity target;
-    private final List<City> guesses = new ArrayList<>();
+    private final LinkedHashSet<City> guesses = new LinkedHashSet<City>();
     private RoundStatus status = RoundStatus.IN_PROGRESS;
 
     public Round(AnswerCity target) {
@@ -24,9 +25,9 @@ public class Round {
         return target;
     }
 
-    /** The guesses made so far, oldest first. Read-only. */
-    public List<City> getGuesses() {
-        return Collections.unmodifiableList(guesses);
+    // Guesses made so far
+    public LinkedHashSet<City> getGuesses() {
+        return guesses;
     }
 
     public RoundStatus getStatus() {

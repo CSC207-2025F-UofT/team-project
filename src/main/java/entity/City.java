@@ -6,6 +6,10 @@ public class City {
     private final double lat;
     private final double lon;
 
+    public boolean equals(City city) {
+        return city.getName().equals(name);
+    }
+
     public City(
         String name,
         double lat,
