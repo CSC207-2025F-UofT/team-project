@@ -146,7 +146,53 @@ reference photo).**
 
 ### UML Class Diagram
 
+The diagrams are drawn with PlantUML. The source files are in [`docs/uml`](docs/uml).
+
+#### Entities
+
+![Entities](docs/uml/entities.png)
+
+#### Clean Architecture Layers
+
+![Clean Architecture Layers](docs/uml/architecture.png)
+
+#### Use Case 1: Sign up / Log in
+
+![Use Case 1: Sign up / Log in](docs/uml/uc1-signup-login.png)
+
+#### Use Case 2: Add / Edit / Remove a Pet
+
+![Use Case 2: Add / Edit / Remove a Pet](docs/uml/uc2-manage-pet.png)
+
+#### Use Case 3: Browse and Filter Pets
+
+![Use Case 3: Browse and Filter Pets](docs/uml/uc3-browse-pets.png)
+
+#### Use Case 5: Submit an Application
+
+![Use Case 5: Submit an Application](docs/uml/uc5-submit-application.png)
+
+#### Use Case 6: Track My Applications
+
+![Use Case 6: Track My Applications](docs/uml/uc6-track-applications.png)
+
 ### Sequence Diagrams
+
+#### Use Case 2: Add a Pet
+
+![Use Case 2: Add a Pet](docs/uml/seq-uc2-add-pet.png)
+
+#### Use Case 3: Browse Pets
+
+![Use Case 3: Browse Pets](docs/uml/seq-uc3-browse-pets.png)
+
+#### Use Case 5: Submit an Application
+
+![Use Case 5: Submit an Application](docs/uml/seq-uc5-submit-application.png)
+
+#### Use Case 6: Track My Applications
+
+![Use Case 6: Track My Applications](docs/uml/seq-uc6-track-applications.png)
 
 ---
 
