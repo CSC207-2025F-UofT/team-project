@@ -3,14 +3,22 @@ package org.example.cocktailcraft.app;
 import org.example.cocktailcraft.data_access.CocktailJsonReader;
 import org.example.cocktailcraft.data_access.SearchCocktailDataAccessObject;
 import org.example.cocktailcraft.entity.Cocktail;
+import org.example.cocktailcraft.interface_adapter.click.ClickController;
+import org.example.cocktailcraft.interface_adapter.click.ClickPresenter;
+import org.example.cocktailcraft.interface_adapter.click.ClickViewModel;
 import org.example.cocktailcraft.interface_adapter.search.SearchController;
 import org.example.cocktailcraft.interface_adapter.search.SearchPresenter;
 import org.example.cocktailcraft.interface_adapter.search.SearchViewModel;
+import org.example.cocktailcraft.use_case.click.ClickDataAccessInterface;
+import org.example.cocktailcraft.use_case.click.ClickInputBoundary;
+import org.example.cocktailcraft.use_case.click.ClickInteractor;
+import org.example.cocktailcraft.use_case.click.ClickOutputBoundary;
 import org.example.cocktailcraft.use_case.search.SearchDataAccessInterface;
 import org.example.cocktailcraft.use_case.search.SearchInputBoundary;
 import org.example.cocktailcraft.use_case.search.SearchInteractor;
 import org.example.cocktailcraft.use_case.search.SearchOutputBoundary;
 import org.example.cocktailcraft.view.browse.MainPageView;
+import org.example.cocktailcraft.view.click.ClickView;
 import org.example.cocktailcraft.view.search.SearchView;
 
 import java.io.IOException;
@@ -22,6 +30,10 @@ public class AppBuilder {
     private SearchViewModel searchViewModel;
     private SearchView searchView;
     private MainPageView mainPageView;
+    private List<Cocktail> cocktails;
+    private ClickViewModel clickViewModel;
+    private ClickView clickView;
+    private ClickController clickController;
 
     public AppBuilder addSearchView() {
         searchViewModel = new SearchViewModel();
@@ -32,14 +44,14 @@ public class AppBuilder {
     public AppBuilder addSearchUseCase() {
         final List<Cocktail> cocktails;
         try {
-            cocktails = new CocktailJsonReader().readAll();
+            this.cocktails = new CocktailJsonReader().readAll();
         }
         catch (IOException exception) {
             throw new UncheckedIOException(exception);
         }
 
         final SearchDataAccessInterface searchDataAccessObject =
-                new SearchCocktailDataAccessObject(cocktails);
+                new SearchCocktailDataAccessObject(this.cocktails);
 
         final SearchOutputBoundary searchOutputBoundary =
                 new SearchPresenter(searchViewModel);
@@ -54,8 +66,29 @@ public class AppBuilder {
         return this;
     }
 
+    public AppBuilder addClickUseCase() {
+        clickViewModel = new ClickViewModel();
+        clickView = new ClickView(clickViewModel);
+
+        final ClickDataAccessInterface clickDataAccessObject =
+                new CocktailJsonReader();
+
+        final ClickOutputBoundary clickOutputBoundary =
+                new ClickPresenter(clickViewModel);
+
+        final ClickInputBoundary clickInteractor =
+                new ClickInteractor(clickDataAccessObject, clickOutputBoundary);
+
+        clickController = new ClickController(clickInteractor);
+
+        return this;
+    }
+
     public AppBuilder addMainPageView() {
-        mainPageView = new MainPageView(searchView, searchViewModel);
+        mainPageView = new MainPageView(searchView,
+                cocktails,
+                clickController,
+                clickView);
         return this;
     }
 

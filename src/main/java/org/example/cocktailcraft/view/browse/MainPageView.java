@@ -1,15 +1,17 @@
 package org.example.cocktailcraft.view.browse;
 
+import org.example.cocktailcraft.entity.Cocktail;
+import org.example.cocktailcraft.interface_adapter.click.ClickController;
+import org.example.cocktailcraft.view.click.ClickView;
 import org.example.cocktailcraft.view.search.SearchView;
 
 import java.awt.BorderLayout;
-import javax.swing.BorderFactory;
-import javax.swing.JButton;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
+import java.util.List;
+import javax.swing.*;
 
 public class MainPageView extends JPanel {
-    public MainPageView(SearchView search) {
+    public MainPageView(SearchView search, List<Cocktail> cocktails,
+                        ClickController clickController, ClickView clickView) {
         super(new BorderLayout(12, 12));
         setBorder(BorderFactory.createEmptyBorder(12, 12, 12, 12));
         JPanel header = new JPanel(new BorderLayout());
@@ -22,7 +24,37 @@ public class MainPageView extends JPanel {
 
         JPanel catalog = new JPanel(new BorderLayout());
         catalog.add(new JLabel("Explore Cocktails"), BorderLayout.NORTH);
-        catalog.add(new JLabel("Cocktail cards and images will appear here."), BorderLayout.CENTER);
+
+        DefaultListModel<String> model = new DefaultListModel<>();
+
+        for (Cocktail cocktail : cocktails) {
+            model.addElement(cocktail.getName());
+        }
+
+        JList<String> cocktailList = new JList<>(model);
+
+        cocktailList.addListSelectionListener(e -> {
+            if (!e.getValueIsAdjusting()) {
+                int index = cocktailList.getSelectedIndex();
+
+                if (index != -1) {
+                    Cocktail selectedCocktail = cocktails.get(index);
+                    clickController.execute(selectedCocktail.getId());
+                }
+            }
+        });
+
+        catalog.add(new JScrollPane(cocktailList), BorderLayout.CENTER);
+
         add(catalog, BorderLayout.CENTER);
+
+        JSplitPane splitPane = new JSplitPane(
+                JSplitPane.HORIZONTAL_SPLIT,
+                catalog,
+                clickView
+        );
+
+        add(splitPane, BorderLayout.CENTER);
     }
+
 }
