@@ -14,7 +14,8 @@ public class get_dataInteractor implements get_dataInputBoundary {
     public void execute(get_dataInputData inputData) {
         try {
             presenter.prepareSuccessView(
-                    new get_dataOutputData(dao.fetchByUsername(inputData.getUsername())));
+                    new get_dataOutputData(dao.fetchByUsername(inputData.getUsername()))
+            );
         } catch (RuntimeException ex) {
             presenter.prepareFailView(ex.getMessage());
         }

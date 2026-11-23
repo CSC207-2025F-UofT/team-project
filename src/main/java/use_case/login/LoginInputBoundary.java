@@ -2,6 +2,6 @@ package use_case.login;
 
 
 public interface LoginInputBoundary {
-    void execute(LoginInputBoundary inputData);
+    void execute(LoginInputData inputData);
     void switchToLoginView();
 }

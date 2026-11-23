@@ -8,10 +8,5 @@ public interface get_dataInputBoundary {
      */
     void execute(get_dataInputData get_dataInputData);
 
-    /**
-     * Executes the switch to login view use case.
-     */
-    // TODO have to switch to something
-    void switchToLoginView();
 
 }
