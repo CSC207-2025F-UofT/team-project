@@ -15,9 +15,8 @@ public class AddClothingPresenter implements AddClothingOutputBoundary {
 
     /**
      * Connects the presenter to the screen's ViewModel and the screen switcher.
-     *
-     * @param viewModel the Add Clothing ViewModel
-     * @param viewManagerModel switches screens
+     * viewModel the Add Clothing ViewModel
+     * viewManagerModel switches screens
      */
     public AddClothingPresenter(AddClothingViewModel viewModel, ViewManagerModel viewManagerModel) {
         this.viewModel = viewModel;

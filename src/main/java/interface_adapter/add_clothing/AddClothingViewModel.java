@@ -14,10 +14,9 @@ import java.util.List;
  * and tells the View to redraw when something changes.
  */
 public class AddClothingViewModel extends ViewModel<AddClothingState> {
-    public static final String CHOOSE = "Choose…";
+    public static final String CHOOSE = "Choose!";
     public static final String TOP = "Top";
     public static final String BOTTOM = "Bottom";
-    public static final String SHOES = "Shoes";
 
     /** Starts with an empty state. */
     public AddClothingViewModel() {
@@ -26,19 +25,17 @@ public class AddClothingViewModel extends ViewModel<AddClothingState> {
     }
 
     /**
-     * Category dropdown choices, with "Choose…" first.
-     *
-     * @return the choices
+     * picking category from dropdown and choices within category
      */
     public List<String> getCategoryChoices() {
-        return Arrays.asList(CHOOSE, TOP, BOTTOM, SHOES);
+        return Arrays.asList(CHOOSE, TOP, BOTTOM);
     }
 
     /**
-     * Type dropdown choices for the picked category, with "Choose…" first.
+     * Type dropdown choices for the picked category, with "Choose…" first. and then the choices inside the category
      *
-     * @param categoryLabel "Top", "Bottom" or "Shoes" (anything else gives just "Choose…")
-     * @return the choices
+     *  categoryLabel "Top", "Bottom" or "Shoes" (anything else gives just "Choose…")
+     *  the choices
      */
     public List<String> getSubCategoryChoices(String categoryLabel) {
         final List<String> choices = new ArrayList<>();
@@ -49,16 +46,11 @@ public class AddClothingViewModel extends ViewModel<AddClothingState> {
         else if (BOTTOM.equals(categoryLabel)) {
             choices.addAll(ClothingOptions.subCategoriesFor(Category.BOTTOM));
         }
-        else if (SHOES.equals(categoryLabel)) {
-            choices.addAll(ClothingOptions.subCategoriesFor(Category.SHOES));
-        }
         return choices;
     }
 
     /**
-     * Colour dropdown choices, with "Choose…" first.
-     *
-     * @return the choices
+     * colour dropdown choices, with "Choose…" first hehe
      */
     public List<String> getColorChoices() {
         return withChoose(ClothingOptions.COLORS);

@@ -13,25 +13,22 @@ public class AddClothingController {
     private final AddClothingInputBoundary interactor;
 
     /**
-     * Connects the controller to the interactor.
-     *
-     * @param interactor does the actual work
+     * Connects the controller to the interactor which does the ACTUAL work
      */
     public AddClothingController(AddClothingInputBoundary interactor) {
         this.interactor = interactor;
     }
 
     /**
-     * Save was clicked.
-     *
-     * @param name text in the Name box
-     * @param categoryLabel "Top", "Bottom", "Shoes" or "Choose…"
-     * @param subCategory picked type, or "Choose…"
-     * @param color picked colour, or "Choose…"
-     * @param style picked style, or "Choose…"
-     * @param layer Layer: Yes
-     * @param weatherRating slider value, -5 to 5
-     * @param imageSourcePath the picked picture's path ("" if none)
+     * Save was clicked after
+     * name text in the Name box
+     * categoryLabel "Top", "Bottom", "Shoes" or "Choose…"
+     * subCategory picked type, or "Choose…"
+     * color picked colour, or "Choose…"
+     * style picked style, or "Choose…"
+     * Layer: Yes
+     * weatherRating slider value, -10 to 10
+     * imageSourcePath the picked picture's path ("" if none)
      */
     public void execute(String name, String categoryLabel, String subCategory, String color,
                         String style, boolean layer, int weatherRating, String imageSourcePath) {
