@@ -21,7 +21,7 @@ How the code is laid out and the decisions everyone agreed to follow. Read this 
 `ArchitectureImportTest` fails if anything in `entity` or `use_case` imports Swing, AWT, SQL, JSON, HTTP, or an outer layer.
 
 ## File naming (same for all five use cases)
-Each use case has a subpackage in both `use_case` and `interface_adapter`: `enter_name`, `start_round`, `submit_guess`, `finish_round`, `view_stats`.
+Each use case has a subpackage in both `use_case` and `interface_adapter`: `enter_name`, `start_round`, `submit_guess`, `finish_round`, `view_stats`. Enter Name is split into two subfolders inside `enter_name`: `makeNewPlayer` (typing a name) and `welcomeMenu` (the main menu greeting).
 
 Using Submit Guess as the example:
 - `use_case/submit_guess/`: `SubmitGuessInputBoundary`, `SubmitGuessInputData`, `SubmitGuessInteractor`, `SubmitGuessOutputBoundary`, `SubmitGuessOutputData`, `SubmitGuessDataAccessInterface`
@@ -36,15 +36,19 @@ Interfaces live in `use_case`. Each use case only sees the methods it needs.
 
 | Data source | Use case | Interface | Methods |
 |---|---|---|---|
-| Player storage | Enter Name | `EnterNameDataAccessInterface` | `playerExists(name)`, `getPlayer(name)`, `savePlayer(player)` |
-| Player storage | Finish Round | `FinishRoundDataAccessInterface` | `savePlayer(player)` |
-| Player storage | View Stats | `ViewStatsDataAccessInterface` | `getPlayer(name)` |
+| Player storage | Enter Name | `enter_name/makeNewPlayer/NewPlayerDataAccessInterface` | `existsByName(name)`, `save(player)` |
+| Player storage | Enter Name | `enter_name/welcomeMenu/ReturningPlayerDataAccessInterface` | `get(name)` |
+| Player storage | Finish Round | `FinishRoundDataAccessInterface` | `save(player)` |
+| Player storage | View Stats | `ViewStatsDataAccessInterface` | `get(name)` |
+
+Player storage methods use the lab 6 names (`existsByName`, `get`, `save`) in every interface, because one player storage class implements all of them.
 | City dataset | Start Round | `StartRoundDataAccessInterface` | `getRandomAnswerCity()` |
 | City dataset | Submit Guess | `SubmitGuessDataAccessInterface` | `findCityByName(name)` |
 | Images | Start Round, Submit Guess | `shared/ImageDataAccessInterface` | `getImage(city, zoomStep)` returns raw bytes |
 
 Classes in `data_access`, one per data source:
-- `InMemoryPlayerDataAccessObject`: fake (HashMap). The SQLite version replaces it and implements the same three interfaces.
+- `InMemoryPlayerDataAccessObject`: fake (HashMap). Ingrid's SQLite version replaces it and implements the same four interfaces.
+- `PlayerDataAccessObject`: Regan's CSV version (saves usernames to `players.csv`, which is git-ignored). Used by `WelcomeDemo` until the SQLite version is ready, then deleted.
 - `JSONCityDataAccessObject`: real. Reads `src/main/resources/data/answer_cities.json` (round targets, with landmarks) and `guessable_cities.json` (everything you can guess, with aliases like "NYC").
 - `MapboxImageDataAccessObject`: builds the Mapbox URL. Zoom step 1 to 5 maps to Mapbox zoom 17 to 13.
 - `PlaceholderImageDataAccessObject`: fake. Same picture every time; used when there's no Mapbox token.
@@ -52,7 +56,7 @@ Classes in `data_access`, one per data source:
 When something can't be read, saved or fetched, data access objects throw `use_case.shared.DataAccessException`. Interactors catch it and send an error to their presenter.
 
 ## Shared game state
-`GameDataAccessObject` holds the current player and current round in memory. It isn't static or global: `AppBuilder` creates one and passes it in. Interactors only see it through these interfaces in `use_case/shared`:
+`GameDataAccessObject` holds the current player and current round in memory. It isn't static or global: `AppBuilder` creates one and passes it in. Player storage does **not** track who's logged in; Enter Name calls `setCurrentPlayer(player)` and everyone else reads it from here. Interactors only see it through these interfaces in `use_case/shared`:
 - `CurrentPlayerDataAccessInterface`: `getCurrentPlayer()`, `setCurrentPlayer(player)`
 - `CurrentRoundDataAccessInterface`: `getCurrentRound()`, `setCurrentRound(round)`
 
@@ -68,7 +72,8 @@ When something can't be read, saved or fetched, data access objects throw `use_c
 `app/AppBuilder` has one empty method per use case (`addEnterNameUseCase()`, etc.). Fill in only yours. Its comment says which data access objects your interactor gets. `AppBuilder` is the only file that names concrete data access classes, so swapping a fake for the real one is a one-line change there.
 
 ## Views
-- Screens: `MainMenuView`, `GameView`, `StatsView`, and the `ResultView` popup. `ViewManager` switches screens when `ViewManagerModel` changes.
+- Screens: `NewPlayerView` (type your name), `MainMenuView`, `GameView`, `StatsView`, and the `ResultView` popup. `ViewManager` switches screens when `ViewManagerModel` changes.
+- `MainMenuView` gets its greeting from Enter Name's `WelcomeViewModel`.
 - The buttons currently switch screens directly so the flow can be clicked through. Each one has a `TODO` saying which controller replaces it.
 - **Rule:** views only call controllers and only read from view models. They never touch interactors, entities or data access.
 
@@ -76,7 +81,7 @@ When something can't be read, saved or fetched, data access objects throw `use_c
 1. **How a round ends.** Submit Guess's output data says whether the round is in progress, won or lost. Its presenter updates the Submit Guess view model, and `GameView` then calls the Finish Round controller. The Submit Guess and Finish Round interactors never call each other.
 2. **Valid guesses.** Only cities in `guessable_cities.json` (including aliases). Anything else gets "not a known city" and doesn't use up an attempt. Empty guesses and repeat guesses don't use an attempt either.
 3. **Formatting happens in presenters.** Interactors output plain data (distance as a number, direction as a value). Presenters turn it into text like "1,240 km northeast".
-4. **Fakes and real classes behave the same.** For example, `getPlayer` returns `null` for an unknown name in both the in-memory and SQLite versions.
+4. **Fakes and real classes behave the same.** For example, `get` returns `null` for an unknown name in both the in-memory and SQLite versions.
 5. **Import check.** Nothing in `entity` or `use_case` imports Swing, SQL, JSON or HTTP classes (enforced by `ArchitectureImportTest`).
 6. **Mapbox zoom numbers live in `MapboxImageDataAccessObject`.** Entities and use cases only know the zoom step 1 to 5 (`Round.getZoomStep()`).
 
