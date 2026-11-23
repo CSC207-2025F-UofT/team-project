@@ -4,15 +4,19 @@ import entities.Stock;
 import entities.Watchlist;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.List;
 import org.json.JSONArray;
+import org.json.JSONException;
+import usecase.viewstockinfo.ViewStockInfoWatchlistDataAccessInterface;
 
 /**
  * Implementation of the Data Access Object (DAO) for the watchlist that uses a JSON file to
  * persist the data.
  */
-public class FileWatchlistDataAccessObject {
+public class FileWatchlistDataAccessObject implements ViewStockInfoWatchlistDataAccessInterface {
   // TODO: After we add data access interfaces to our use cases, make this class implement them.
   private final Path watchlistFile;
 
@@ -42,6 +46,17 @@ public class FileWatchlistDataAccessObject {
     }
 
     return new Watchlist(stocksList);
+  }
+
+  @Override
+  public List<Stock> getWatchlistStocks() throws IOException {
+    try {
+      return readWatchlist().getStocks();
+    } catch (NoSuchFileException e) {
+      return List.of();
+    } catch (JSONException | IllegalArgumentException e) {
+      throw new IOException("Invalid watchlist data", e);
+    }
   }
 
   /**
