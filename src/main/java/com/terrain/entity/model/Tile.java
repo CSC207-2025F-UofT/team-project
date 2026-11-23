@@ -17,6 +17,14 @@ public class Tile {
         this.elevation = elevation;
     }
 
+    public TileType getType() {
+        return type;
+    }
+
+    public void setType(TileType type) {
+        this.type = type;
+    }
+
     // TODO: MAYBE: Add other properties like moisture, temperature, etc. depending on the needs of the terrain
     //  generation. or, Tile.type could use an enum that includes different types of terrain (e.g., water, grass,
     //  stone, etc.)
