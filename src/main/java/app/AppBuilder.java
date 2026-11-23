@@ -11,6 +11,7 @@ import data_access.JSONCityDataAccessObject;
 import data_access.MapboxImageDataAccessObject;
 import data_access.PlaceholderImageDataAccessObject;
 import interface_adapter.ViewManagerModel;
+import interface_adapter.enter_name.welcomeMenu.WelcomeViewModel;
 import use_case.shared.ImageDataAccessInterface;
 import view.GameView;
 import view.MainMenuView;
@@ -45,6 +46,7 @@ public class AppBuilder {
     private final ViewManagerModel viewManagerModel = new ViewManagerModel();
     private final ViewManager viewManager = new ViewManager(cardPanel, cardLayout, viewManagerModel);
 
+    private WelcomeViewModel welcomeViewModel;
     private MainMenuView mainMenuView;
     private GameView gameView;
     private StatsView statsView;
@@ -63,7 +65,8 @@ public class AppBuilder {
     // ================= Views =================
 
     public AppBuilder addMainMenuView() {
-        mainMenuView = new MainMenuView(viewManagerModel);
+        welcomeViewModel = new WelcomeViewModel();
+        mainMenuView = new MainMenuView(viewManagerModel, welcomeViewModel);
         cardPanel.add(mainMenuView, MainMenuView.VIEW_NAME);
         return this;
     }
@@ -94,8 +97,9 @@ public class AppBuilder {
     //   XController controller = new XController(interactor);
     //   <the view>.setXController(controller);
 
-    /** Use Case 1 (Regan). Interactor gets: playerDataAccessObject (as EnterNameDataAccessInterface),
-     *  gameDataAccessObject (as CurrentPlayerDataAccessInterface). */
+    /** Use Case 1 (Regan). NewPlayerInteractor gets: playerDataAccessObject (as NewPlayerDataAccessInterface
+     *  and ReturningPlayerDataAccessInterface), a PlayerFactory, and gameDataAccessObject
+     *  (as CurrentPlayerDataAccessInterface). Its presenter updates welcomeViewModel. */
     public AppBuilder addEnterNameUseCase() {
         return this;
     }

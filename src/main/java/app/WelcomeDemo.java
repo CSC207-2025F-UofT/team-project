@@ -7,9 +7,9 @@ import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 
+import view.MainMenuView;
 import view.NewPlayerView;
 import view.ViewManager;
-import view.WelcomeView;
 import data_access.GameDataAccessObject;
 import data_access.PlayerDataAccessObject;
 import entity.PlayerFactory;
@@ -31,7 +31,7 @@ public class WelcomeDemo {
 
             // Views
             final NewPlayerView newPlayerView = new NewPlayerView(newPlayerViewModel);
-            final WelcomeView welcomeView = new WelcomeView(welcomeViewModel);
+            final MainMenuView mainMenuView = new MainMenuView(viewManagerModel, welcomeViewModel);
 
             // Use case wiring
             final PlayerFactory playerFactory = new PlayerFactory();
@@ -47,7 +47,7 @@ public class WelcomeDemo {
             final CardLayout cardLayout = new CardLayout();
             final JPanel views = new JPanel(cardLayout);
             views.add(newPlayerView, newPlayerView.getViewName());
-            views.add(welcomeView, welcomeView.getViewName());
+            views.add(mainMenuView, mainMenuView.getViewName());
 
             new ViewManager(views, cardLayout, viewManagerModel);
 

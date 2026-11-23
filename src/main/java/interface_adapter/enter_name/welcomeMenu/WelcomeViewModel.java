@@ -4,12 +4,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * The view model for the Welcome view.
+ * The view model for the main menu (MainMenuView): holds the greeting's username.
  */
 public class WelcomeViewModel {
     private final List<WelcomeViewModelListener> listeners = new ArrayList<>();
 
-    public static final String VIEW_NAME = "log in";
+    public static final String VIEW_NAME = "main menu";
 
     private WelcomeState state = new WelcomeState();
 
