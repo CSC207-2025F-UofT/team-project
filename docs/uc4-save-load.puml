@@ -1,0 +1,77 @@
+@startuml
+title Person D — Model View Presenter for local scenes
+
+actor User
+participant "ScenePanel (View)" as View
+participant ScenePresenter as Presenter
+participant "Save / Load controller" as Controller
+participant "Save / Load interactor (Model)" as Model
+participant FileSceneDataAccess as Files
+participant InMemorySceneDataAccess as Current
+participant "Local JSON scene file" as Json
+participant SimulationViewModel as Display
+
+User -> View : Click Save Scene or Load Scene
+View -> Presenter : saveRequested() or loadRequested()
+Presenter -> View : chooseSaveFile() or chooseLoadFile()
+View --> Presenter : selected path or cancel
+
+opt User selected a file
+    Presenter -> Controller : execute(path)
+    Controller -> Model : execute(input data)
+    alt Save
+        Model -> Files : getCurrentScene()
+        Files -> Current : getCurrentScene()
+        Current --> Files : scene
+        Files --> Model : scene
+        alt Valid scene
+            Model -> Files : save(path, scene, overwrite)
+            Files -> Json : attempt write
+            alt Saved
+                Files --> Model : true
+                Model -> Presenter : prepareSuccessView(output)
+            else Existing file
+                Files --> Model : false
+                Model -> Presenter : prepareOverwriteView(output)
+                Presenter -> View : confirmOverwrite(fileName)
+                View --> Presenter : yes or no
+                opt User confirms
+                    Presenter -> Controller : execute(path, true)
+                    ref over Controller, Json : Repeat save with replacement enabled
+                end
+            else Write failed
+                Files --> Model : SceneFileException
+                Model -> Presenter : prepareFailView(message)
+            end
+        else No terrain or invalid preset
+            Model -> Presenter : prepareFailView(message)
+        end
+    else Load
+        Model -> Files : load(path)
+        Files -> Json : read scene
+        alt Valid scene
+            Files --> Model : rebuilt scene
+            Model -> Files : getHeightGrid(terrain)
+            Files --> Model : samples
+            Model -> Files : replaceCurrentScene(scene)
+            Files -> Current : replaceCurrentScene(scene)
+            Model -> Presenter : prepareSuccessView(output)
+        else Read or validation failed
+            Model -> Presenter : prepareFailView(message)
+        end
+    end
+    opt Success or error to display
+        Presenter -> Display : update scene or status
+        Display -> Presenter : displayChanged(state, camera)
+        Presenter -> View : display(state, camera)
+    end
+end
+
+group Camera input
+    User -> View : Press a movement key or drag
+    View -> Presenter : moveCamera(...) or dragTo(mouseX)
+    Presenter -> Display : setCamera(pose)
+    Display -> Presenter : displayChanged(state, camera)
+    Presenter -> View : display(state, camera)
+end
+@enduml
