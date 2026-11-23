@@ -40,17 +40,24 @@ PawPortal is a pet adoption portal for a nonprofit animal shelter.
 
 ---
 ## User Stories
-### User Story 1
-As a visitor, I want to browse and filter all adoptable pets without logging in, 
+### User Story 1 (Audrey Luo)
+As a visitor, I want to browse and filter all adoptable pets without logging in,
 so that I'm not blocked by an approval step before I can see who is available.
-### User Story 2
-As an adopter, I want to see how a pet's needs (for example, daily medication or a quiet home) line up with my own situation, 
+
+### User Story 2 (Audrey Luo)
+As an adopter, I want to see how a pet's needs (for example, daily medication or a quiet home) line up with my own situation,
 so that I can decide whether to apply with full information instead of guessing.
-### User Story 3
-As an adopter, I want to submit an application for one specific pet and track its status online, 
+
+### User Story 3 (Xiangyu Zhou)
+As an adopter, I want to submit an application for one specific pet and track its status online,
 so that I always know where things stand without depending on someone replying to a message.
-### User Story 4
-As a shelter admin, I want to publish and maintain accurate pet profiles and review applications in one place, 
+
+### User Story 4 (Kenny Gu)
+As a shelter admin, I want to publish and maintain accurate pet profiles,
+so that visitors always see up-to-date information about each animal.
+
+### User Story 5 (Xinmeng Zhang)
+As a shelter admin, I want to review applications and update their status in one place,
 so that animals are matched with suitable adopters efficiently.
 
 ---
