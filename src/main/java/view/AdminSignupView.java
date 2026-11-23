@@ -1,17 +1,24 @@
 package view;
 
+import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+import javax.swing.BoxLayout;
+import javax.swing.JButton;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JPasswordField;
+import javax.swing.JTextField;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
+
 import interface_adapter.admin_signup.AdminSignupController;
 import interface_adapter.admin_signup.AdminSignupState;
 import interface_adapter.admin_signup.AdminSignupViewModel;
-
 import interface_adapter.admin_signup.AdminSignupViewModelListener;
-
-import javax.swing.*;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
-import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
 /**
  * The View for the Admin Signup Use Case.
@@ -31,6 +38,10 @@ public class AdminSignupView extends JPanel implements ActionListener, AdminSign
     private final JButton cancel;
     private final JButton toLogin;
 
+    /**
+     * Creates the shelter account form.
+     * @param signupViewModel displays account creation feedback
+     */
     public AdminSignupView(AdminSignupViewModel signupViewModel) {
         this.signupViewModel = signupViewModel;
         signupViewModel.addListener(this);
@@ -277,13 +288,20 @@ public class AdminSignupView extends JPanel implements ActionListener, AdminSign
 
     @Override
     public void actionPerformed(ActionEvent evt) {
-        JOptionPane.showMessageDialog(this, "Cancel not implemented yet.");
+        signupController.switchToLoginView();
     }
 
     @Override
     public void stateChanged() {
         if (signupViewModel.getState().getSignupError() != null) {
             JOptionPane.showMessageDialog(this, signupViewModel.getState().getSignupError());
+        } else {
+            usernameInputField.setText("");
+            idInputField.setText("");
+            emailInputField.setText("");
+            passwordInputField.setText("");
+            repeatPasswordInputField.setText("");
+            inviteCodeInputField.setText("");
         }
     }
 

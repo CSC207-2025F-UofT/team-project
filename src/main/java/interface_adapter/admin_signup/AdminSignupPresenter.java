@@ -30,7 +30,7 @@ public class AdminSignupPresenter implements AdminSignupOutputBoundary {
         loginState.setEmail(response.getEmail());
         loginViewModel.notifyStateChanged();
 
-        viewManagerModel.setActiveView(LoginViewModel.VIEW_NAME);
+        switchToLoginView();
     }
 
     @Override
@@ -42,6 +42,8 @@ public class AdminSignupPresenter implements AdminSignupOutputBoundary {
 
     @Override
     public void switchToLoginView() {
+        adminSignupViewModel.setState(new AdminSignupState());
+        adminSignupViewModel.notifyStateChanged();
         viewManagerModel.setActiveView(LoginViewModel.VIEW_NAME);
     }
 }
