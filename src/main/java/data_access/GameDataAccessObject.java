@@ -1,36 +1,36 @@
 package data_access;
 
-import entity.AnswerCity;
-import entity.City;
+import entity.Player;
 import entity.Round;
-import use_case.submit_guess.SubmitGuessDataAccessInterface;
-import use_case.start_round.StartRoundDataAccessInterface;
+import use_case.shared.CurrentPlayerDataAccessInterface;
+import use_case.shared.CurrentRoundDataAccessInterface;
 
-public class GameDataAccessObject implements SubmitGuessDataAccessInterface, StartRoundDataAccessInterface {
-    private final CityDataAccessInterface cityData;
+/**
+ * In-memory game state: the current player and the current round.
+ * One instance is created in AppBuilder and passed to the interactors that need it.
+ * Each interactor only sees it through the interface(s) it needs.
+ */
+public class GameDataAccessObject implements CurrentPlayerDataAccessInterface, CurrentRoundDataAccessInterface {
+    private Player currentPlayer;
     private Round currentRound;
 
-    public GameDataAccessObject(CityDataAccessInterface cityData) {
-        this.cityData = cityData;
+    @Override
+    public Player getCurrentPlayer() {
+        return currentPlayer;
     }
 
     @Override
-    public AnswerCity getRandomAnswerCity() {
-        return cityData.getRandomAnswerCity();
+    public void setCurrentPlayer(Player player) {
+        this.currentPlayer = player;
     }
 
     @Override
-    public void saveRound(Round round) {
-        currentRound = round;
+    public Round getCurrentRound() {
+        return currentRound;
     }
 
-//    @Override
-//    public City findCityByName(String name) {
-//        return cityData.findCityByName(name);
-//    }
-//
-//    @Override
-//    public Round getCurrentRound() {
-//        return currentRound;
-//    }
+    @Override
+    public void setCurrentRound(Round round) {
+        this.currentRound = round;
+    }
 }
