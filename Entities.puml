@@ -78,7 +78,6 @@ abstract class Task {
 ' - The `deadline`
 ' - The `estimated number of hours`
 ' - The `completion progress`
-' - The `difficultyLevel`
 class StudentTask {
   - title : String
   - description : String
