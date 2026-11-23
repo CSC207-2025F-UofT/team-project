@@ -63,4 +63,26 @@ class MealPlanTest {
         assertThrows(IllegalArgumentException.class, () -> plan.move(dinner, null));
         assertEquals(1, plan.uncookedMeals().size());
     }
+
+    @Test
+    void rejectsNonMondayWeekStart() {
+        LocalDate tuesday = LocalDate.of(2026, 11, 17);
+        LocalDate sunday = LocalDate.of(2026, 11, 15);
+        assertEquals(DayOfWeek.TUESDAY, tuesday.getDayOfWeek());
+        assertEquals(DayOfWeek.SUNDAY, sunday.getDayOfWeek());
+
+        assertThrows(IllegalArgumentException.class, () -> new MealPlan(tuesday));
+        assertThrows(IllegalArgumentException.class, () -> new MealPlan(sunday));
+        assertEquals(monday, new MealPlan(monday).getWeekStart());
+    }
+
+    @Test
+    void removeRejectsNullAndIgnoresEmptySlot() {
+        MealPlan plan = new MealPlan(monday);
+        MealSlot empty = new MealSlot(DayOfWeek.WEDNESDAY, MealType.BREAKFAST);
+
+        assertThrows(IllegalArgumentException.class, () -> plan.remove(null));
+        plan.remove(empty);
+        assertTrue(plan.getMeals().isEmpty());
+    }
 }

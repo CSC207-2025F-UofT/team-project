@@ -1,5 +1,6 @@
 package entity;
 
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -19,10 +20,14 @@ public class MealPlan {
      * Creates an empty meal plan for the given week.
      *
      * @param weekStart the Monday that starts the week
+     * @throws IllegalArgumentException if weekStart is null or not a Monday
      */
     public MealPlan(LocalDate weekStart) {
         if (weekStart == null) {
             throw new IllegalArgumentException("Week start cannot be null");
+        }
+        if (weekStart.getDayOfWeek() != DayOfWeek.MONDAY) {
+            throw new IllegalArgumentException("Week start must be a Monday");
         }
         this.weekStart = weekStart;
     }
@@ -65,8 +70,12 @@ public class MealPlan {
      * Removes the meal in the given slot.
      *
      * @param slot the slot to clear
+     * @throws IllegalArgumentException if slot is null
      */
     public void remove(MealSlot slot) {
+        if (slot == null) {
+            throw new IllegalArgumentException("Slot cannot be null");
+        }
         meals.remove(slot);
     }
 
