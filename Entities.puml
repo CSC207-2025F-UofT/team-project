@@ -53,7 +53,7 @@ abstract class Task {
 ' - The estimated number of hours needed to complete the task must be positive
 ' - The completion progress must be an integer between 0 and 100. Both 0 and 100 are allowed.
 ' - The `deadline` field cannot be empty, and it could be a date that has already passed.
-' - The `uniqueUserId` field cannot be empty
+' - The `uniqueUserId` field cannot be 0 (the default initializing value)
 ' The constructor of `StudentTask` should use the method `fieldsValidation()` to double-check the validity of the
 '     object created, and throw an error if the item is not valid.
 ' The setter of `StudentTask` should use the method `fieldsValidation()` to double-check the validity of the object

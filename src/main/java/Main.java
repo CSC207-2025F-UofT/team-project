@@ -6,8 +6,7 @@ public class Main {
     public static void main(String[] args) {
         HolidayService holidayService = new NagerDateHolidayService();
 
-        MonitoringInteractor monitoringInteractor =
-                new MonitoringInteractor(holidayService);
+        MonitoringInteractor monitoringInteractor = new MonitoringInteractor(holidayService);
 
     }
 }
