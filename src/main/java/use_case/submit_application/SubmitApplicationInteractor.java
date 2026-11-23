@@ -37,11 +37,21 @@ public class SubmitApplicationInteractor implements SubmitApplicationInputBounda
             presenter.prepareFailView("Please log in before applying.");
             return;
         }
-        if (petId == null || !petDataAccess.isAvailable(petId)) {
+        final boolean available;
+        final boolean alreadyApplied;
+        try {
+            available = petId != null && petDataAccess.isAvailable(petId);
+            alreadyApplied = applicationDataAccess.hasActiveApplication(adopterId, petId);
+        }
+        catch (RuntimeException ex) {
+            presenter.prepareFailView("Your application could not be checked. Please try again.");
+            return;
+        }
+        if (!available) {
             presenter.prepareFailView("This pet is no longer available.");
             return;
         }
-        if (applicationDataAccess.hasActiveApplication(adopterId, petId)) {
+        if (alreadyApplied) {
             presenter.prepareFailView("You already have an application for this pet.");
             return;
         }
