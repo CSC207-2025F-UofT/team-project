@@ -12,8 +12,8 @@ public class OpponentInfoPanel extends JPanel {
     private final String playerIdentifer;
     private final JLabel nameLabel;
     private JLabel chipsLabel;
-    private JLabel card1Label;
-    private JLabel card2Label;
+    private CardLabel card1Label;
+    private CardLabel card2Label;
     private JLabel role;
     private final double x;
 
@@ -41,8 +41,11 @@ public class OpponentInfoPanel extends JPanel {
         ViewUtils.setFont(chipsLabel, "Figtree SemiBold", Font.PLAIN, 16, 0.02);
         ViewUtils.setRelativeBounds(chipsLabel, 0.01, 0.037, 0.15, 0.04);
 
-        updateCards("/cardHolders/blank_card.png", "/cardHolders/blank_card.png");
+        card1Label = new CardLabel("/cards/null_card.png", "", 0.1, 0.07, 0.025);
+        card2Label = new CardLabel("/cards/null_card.png", "", 0.12, 0.07, 0.025);
 
+        this.add(card1Label);
+        this.add(card2Label);
         this.add(nameLabel);
         this.add(chipsLabel);
     }
@@ -51,20 +54,19 @@ public class OpponentInfoPanel extends JPanel {
         chipsLabel.setText(newAmount);
     }
 
-    public void updateCards(String card1Path, String card2Path) {
-        card1Label = ViewUtils.createImage(card1Path, 0.1, 0.07, 0.025);
-        card2Label = ViewUtils.createImage(card2Path, 0.12, 0.07, 0.025);
-
-        this.add(card1Label);
-        this.add(card2Label);
-        this.revalidate();
-        this.repaint();
+    public void updateCards(String card1Path, String card2Path, String status) {
+        card1Label.setRealFilePath(card1Path);
+        card2Label.setRealFilePath(card2Path);
+        card1Label.updateStatus(status);
+        card2Label.updateStatus(status);
     }
 
     public void updateRole(String filePath) {
-        if (filePath.equals("") && role != null) {
+        if (role != null) {
             this.remove(role);
-        } else {
+            role = null;
+        }
+        if (filePath != null && !filePath.isEmpty()) {
             role = ViewUtils.createImage(filePath, 0.005, 0.073, 0.025);
             this.add(role);
             this.setComponentZOrder(role, 0);

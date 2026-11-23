@@ -2,6 +2,7 @@ package main.view;
 
 import main.interface_adapters.game.GameController;
 import main.interface_adapters.game.GameViewModel;
+import main.view.swing_assets.CardLabel;
 import main.view.swing_assets.OpponentInfoPanel;
 import main.view.swing_assets.PlayerChoicePanel;
 
@@ -12,15 +13,17 @@ import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
-
 
 public class GameView extends JPanel implements PropertyChangeListener {
 
     private final GameViewModel gameViewModel;
     private GameController gameController;
-    private List<JLabel> players = new ArrayList<>();
-    private List<Color> playerColors = new ArrayList<>();
+    private final List<JLabel> players = new ArrayList<>();
+    private final List<OpponentInfoPanel> infoPanels = new ArrayList<>();
+    private final List<CardLabel> communityCardLabels = new ArrayList<>();
+    private final List<JLabel> chipLabels = new ArrayList<>();
 
     public PlayerChoicePanel playerChoice = new PlayerChoicePanel();
 
@@ -28,10 +31,8 @@ public class GameView extends JPanel implements PropertyChangeListener {
     private final JLabel chipsHeldLabel;
     private JLabel role;
 
-    private JLabel card1;
-    private JLabel card2;
-
-    private final List<OpponentInfoPanel> infoPanels = new ArrayList<>();
+    private final CardLabel card1;
+    private final CardLabel card2;
 
     public GameView(GameViewModel gameViewModel) {
         this.gameViewModel = gameViewModel;
@@ -43,19 +44,26 @@ public class GameView extends JPanel implements PropertyChangeListener {
 
         nameLabel = new JLabel(gameViewModel.getName());
         ViewUtils.setFont(nameLabel, "Figtree SemiBold", Font.PLAIN, 28, 0.06);
-        ViewUtils.setRelativeBounds(nameLabel, 0.01, 0.78 , 0.28, 0.1);
+        ViewUtils.setRelativeBounds(nameLabel, 0.01, 0.78, 0.28, 0.1);
         nameLabel.setForeground(new Color(171, 221, 255));
 
-        chipsHeldLabel = new JLabel("$" + gameViewModel.getChipsHeld());
+        chipsHeldLabel = new JLabel("$" + Integer.toString(gameViewModel.getChipsHeld()));
         chipsHeldLabel.setForeground(new Color(241, 251, 255));
         ViewUtils.setFont(chipsHeldLabel, "Figtree SemiBold", Font.PLAIN, 16, 0.05);
         ViewUtils.setRelativeBounds(chipsHeldLabel, 0.01, 0.86, 0.28, 0.06);
 
-        revealFlop("/cards/card_clubs_04.png", "/cards/card_diamonds_12.png", "/cards/card_hearts_13.png");
-        revealTurn("/cards/card_spades_09.png");
-        revealRiver("/cards/card_diamonds_10.png");
+        card1 = new CardLabel("/cards/null_card.png", "", 0.205, 0.9, 0.055);
+        card2 = new CardLabel("/cards/null_card.png", "", 0.248, 0.9, 0.055);
 
+        double[] communityX = {0.4035, 0.4375, 0.4725, 0.507, 0.5415};
+        for (double xPos : communityX) {
+            CardLabel communityCard = new CardLabel("/cards/null_card.png", "", xPos, 0.55, 0.045);
+            communityCardLabels.add(communityCard);
+            this.add(communityCard);
+        }
 
+        this.add(card1);
+        this.add(card2);
         this.add(playerChoice);
         this.add(nameLabel);
         this.add(chipsHeldLabel);
@@ -71,7 +79,6 @@ public class GameView extends JPanel implements PropertyChangeListener {
         }
         players.clear();
         infoPanels.clear();
-        playerColors.clear();
 
         int numOpp = totalPlayers - 1;
         List<String> userIcons = gameViewModel.generateUsers();
@@ -117,57 +124,75 @@ public class GameView extends JPanel implements PropertyChangeListener {
     }
 
     public void updatePlayerChips() {
+        for (JLabel c : chipLabels) {
+            this.remove(c);
+        }
+        chipLabels.clear();
+
         Random random = new Random();
-        for (int i = 0; i < gameViewModel.chips.get(1); i++) {
-            double stackY = 0.725 - (i * 0.0035);
-            String variant = Integer.toString(random.nextInt (2) + 1);
-            JLabel oneChip = ViewUtils.createImage("/chips/white_chip" + variant + ".png", 0.42, stackY, 0.03);
-            this.add(oneChip);
-            this.setComponentZOrder(oneChip, 0);
+        int[] denominations = {1, 5, 25, 50, 100};
+        String[] prefixes = {"white_chip", "red_chip", "green_chip", "blue_chip", "black_chip"};
+        double[] xPositions = {0.42, 0.45, 0.48, 0.51, 0.54};
+
+        for (int d = 0; d < denominations.length; d++) {
+            int count = gameViewModel.chips.getOrDefault(denominations[d], 0);
+            for (int i = 0; i < count; i++) {
+                double stackY = 0.725 - (i * 0.0035);
+                String variant = Integer.toString(random.nextInt(2) + 1);
+                JLabel chip = ViewUtils.createImage(
+                        "/chips/" + prefixes[d] + variant + ".png",
+                        xPositions[d],
+                        stackY,
+                        0.03
+                );
+                chipLabels.add(chip);
+                this.add(chip);
+                this.setComponentZOrder(chip, 0);
+            }
         }
-        for (int i = 0; i < gameViewModel.chips.get(5); i++) {
-            double stackY = 0.725 - (i * 0.0035);
-            String variant = Integer.toString(random.nextInt(2) + 1);
-            JLabel fiveChip = ViewUtils.createImage("/chips/red_chip" + variant + ".png", 0.45, stackY, 0.03);
-            this.add(fiveChip);
-            this.setComponentZOrder(fiveChip, 0);
-        }
-        for (int i = 0; i < gameViewModel.chips.get(25); i++) {
-            double stackY = 0.725 - (i * 0.0035);
-            String variant = Integer.toString(random.nextInt(2) + 1);
-            JLabel twentyFiveChip = ViewUtils.createImage("/chips/green_chip" + variant + ".png", 0.48, stackY, 0.03);
-            this.add(twentyFiveChip);
-            this.setComponentZOrder(twentyFiveChip, 0);
-        }
-        for (int i = 0; i < gameViewModel.chips.get(50); i++) {
-            double stackY = 0.725 - (i * 0.0035);
-            String variant = Integer.toString(random.nextInt(2) + 1);
-            JLabel fiftyChip = ViewUtils.createImage("/chips/blue_chip" + variant + ".png", 0.51, stackY, 0.03);
-            this.add(fiftyChip);
-            this.setComponentZOrder(fiftyChip, 0);
-        }
-        for (int i = 0; i < gameViewModel.chips.get(100); i++) {
-            double stackY = 0.725 - (i * 0.0035);
-            String variant = Integer.toString(random.nextInt(2) + 1);
-            JLabel hundredChip = ViewUtils.createImage("/chips/black_chip" + variant + ".png", 0.54, stackY, 0.03);
-            this.add(hundredChip);
-            this.setComponentZOrder(hundredChip, 0);
-        }
+
         this.revalidate();
         this.repaint();
     }
 
     @Override
-    public void propertyChange(PropertyChangeEvent evt){
-        updatePlayers(gameViewModel.getPlayers());
-        updatePlayerChips();
-        nameLabel.setText(gameViewModel.getName());
-        chipsHeldLabel.setText(gameViewModel.getChipsHeld());
-        if (evt.getPropertyName().equals("gameStart")) {
-            gameController.gameStarted();
-        }
-        if (evt.getPropertyName().equals("beginDealing")) {
+    public void propertyChange(PropertyChangeEvent evt) {
+        String eventName = evt.getPropertyName();
+
+        if ("gameStart".equals(eventName)) {
+            updatePlayers(gameViewModel.getPlayers());
+            updatePlayerChips();
+            nameLabel.setText(gameViewModel.getName());
+            chipsHeldLabel.setText("$" + Integer.toString(gameViewModel.getChipsHeld()));
+            if (gameController != null) {
+                gameController.gameStarted();
+            }
+        } else if ("beginDealing".equals(eventName)) {
             beginDealing();
+        } else if ("playerCardsUpdated".equals(eventName)) {
+            updatePlayerCards();
+        } else if ("opponentCardsUpdated".equals(eventName)) {
+            int oppIdx = (int) evt.getNewValue();
+            updateOpponentCards(oppIdx);
+        } else if ("communityCardsUpdated".equals(eventName)) {
+            updateCommunityCards();
+        } else if ("turnStateChanged".equals(eventName)) {
+            playerChoice.configureChips(
+                    gameViewModel.chips,
+                    gameViewModel.getChipValues(),
+                    gameViewModel.getCurrentBetToMatch()
+            );
+            playerChoice.setTurnState(gameViewModel.getTurnState());
+            this.setComponentZOrder(playerChoice, 0);
+        } else if ("chipsUpdated".equals(eventName)) {
+            updatePlayerChips();
+            chipsHeldLabel.setText("$" + gameViewModel.getChipsHeld());
+        } else if ("opponentChipsUpdated".equals(eventName)) {
+            int oppIdx = (int) evt.getNewValue();
+            if (oppIdx >= 0 && oppIdx < infoPanels.size()) {
+                String newChips = gameViewModel.players.get("player" + oppIdx).get("Chips");
+                infoPanels.get(oppIdx).updateChips("$" + newChips);
+            }
         }
     }
 
@@ -178,7 +203,6 @@ public class GameView extends JPanel implements PropertyChangeListener {
         int sbIdx = (totalPlayers == 2) ? dealerIdx : (dealerIdx + 1) % totalPlayers;
         int bbIdx = (totalPlayers == 2) ? (dealerIdx + 1) % totalPlayers : (dealerIdx + 2) % totalPlayers;
 
-        // 1. Assign roles for all seats (0 = you, 1..totalPlayers-1 = AI opponents)
         String[] seatRoles = new String[totalPlayers];
         Arrays.fill(seatRoles, "");
 
@@ -190,9 +214,9 @@ public class GameView extends JPanel implements PropertyChangeListener {
             seatRoles[dealerIdx] = "/blinds/dealer_small_blind.png";
         }
 
-        // 2. Update your own role icon (index 0)
         if (role != null) {
             this.remove(role);
+            role = null;
         }
         if (!seatRoles[0].isEmpty()) {
             role = ViewUtils.createImage(seatRoles[0], 0.01, 0.915, 0.045);
@@ -200,42 +224,56 @@ public class GameView extends JPanel implements PropertyChangeListener {
             this.setComponentZOrder(role, 0);
         }
 
-        // 3. Update active AI opponent panels (indices 1 to totalPlayers - 1)
         for (int i = 0; i < infoPanels.size(); i++) {
             infoPanels.get(i).updateRole(seatRoles[i + 1]);
         }
 
-        this.revalidate();
-        this.repaint();
+        // 3. Update active AI opponent panels (indices 1 to totalPlayers - 1)
+        for (int i = 0; i < infoPanels.size(); i++) {
+            infoPanels.get(i).updateRole(seatRoles[i + 1]);
+            updateOpponentCards(i);
+        }
 
-    }
+        // 4. Refresh your hole cards ("revealed") and the 5 community cards ("hidden")
+        updatePlayerCards();
+        updateCommunityCards();
 
-    public void revealFlop(String card1, String card2, String card3) {
-        JLabel flop1 = ViewUtils.createImage(card1, 0.4105, 0.55, 0.045);
-        JLabel flop2 = ViewUtils.createImage(card2, 0.4415, 0.55, 0.045);
-        JLabel flop3 = ViewUtils.createImage(card3, 0.4725, 0.55, 0.045);
-        this.add(flop1);
-        this.add(flop2);
-        this.add(flop3);
-        this.setComponentZOrder(flop1, 0);
-        this.setComponentZOrder(flop2, 0);
-        this.setComponentZOrder(flop3, 0);
         this.revalidate();
         this.repaint();
     }
 
-    public void revealTurn(String card) {
-        JLabel turn1 = ViewUtils.createImage(card, 0.5035, 0.55, 0.045);
-        this.add(turn1);
-        this.setComponentZOrder(turn1, 0);
+    private void updatePlayerCards() {
+        card1.setRealFilePath(gameViewModel.getPlayerCard1());
+        card2.setRealFilePath(gameViewModel.getPlayerCard2());
+        card1.updateStatus(gameViewModel.getPlayerCardStatus());
+        card2.updateStatus(gameViewModel.getPlayerCardStatus());
+        this.setComponentZOrder(card1, 0);
+        this.setComponentZOrder(card2, 0);
         this.revalidate();
         this.repaint();
     }
 
-    public void revealRiver(String card) {
-        JLabel river1 = ViewUtils.createImage(card, 0.5345, 0.55, 0.045);
-        this.add(river1);
-        this.setComponentZOrder(river1, 0);
+    private void updateOpponentCards(int oppIdx) {
+        if (oppIdx >= 0 && oppIdx < infoPanels.size()) {
+            Map<String, String> oppData = gameViewModel.players.get("player" + oppIdx);
+            if (oppData != null) {
+                infoPanels.get(oppIdx).updateCards(
+                        oppData.get("Card1"),
+                        oppData.get("Card2"),
+                        oppData.get("CardStatus")
+                );
+            }
+        }
+    }
+
+    private void updateCommunityCards() {
+        List<String> paths = gameViewModel.getCommunityCards();
+        List<String> statuses = gameViewModel.getCommunityCardStatuses();
+        for (int i = 0; i < communityCardLabels.size(); i++) {
+            communityCardLabels.get(i).setRealFilePath(paths.get(i));
+            communityCardLabels.get(i).updateStatus(statuses.get(i));
+            this.setComponentZOrder(communityCardLabels.get(i), 0);
+        }
         this.revalidate();
         this.repaint();
     }
@@ -243,11 +281,4 @@ public class GameView extends JPanel implements PropertyChangeListener {
     public void setController(GameController gameController) {
         this.gameController = gameController;
     }
-    /*
-    public void playerTurn() {
-        JPanel choicePanel = new JPanel();
-        choicePanel.set
-
-
-    }*/
 }

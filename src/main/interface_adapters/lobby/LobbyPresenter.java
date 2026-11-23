@@ -40,7 +40,6 @@ public class LobbyPresenter {
         List<String> chips = List.of("1000", "1000", "1000", "1000", "1000", "1000");
         gameViewModel.saveOpponentData(names, chips);
         gameViewModel.setName(SettingsViewModel.USER_NAME);
-        gameViewModel.setChipsHeld(SettingsViewModel.USER_MONEY);
 
         gameViewModel.setChipValues(lobbyViewModel.getMinBet());
         gameViewModel.chips.put(1, 10);
