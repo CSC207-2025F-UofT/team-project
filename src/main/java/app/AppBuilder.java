@@ -116,6 +116,11 @@ public class AppBuilder {
     private ViewBudgetProgressView budgetProgressView;
 
     public AppBuilder() {
+        view.settings.ThemeManager.initialize();
+
+        // cardPanel is created before this constructor runs.
+        SwingUtilities.updateComponentTreeUI(cardPanel);
+
         cardPanel.setLayout(cardLayout);
 
         // FOR TEST PURPOSE
@@ -414,6 +419,8 @@ public class AppBuilder {
 
         viewManagerModel.setState(LoginViewModel.VIEW_NAME);
         viewManagerModel.notifyViewChanged();
+
+        view.settings.SettingsMenu.install(application);
 
         return application;
     }
