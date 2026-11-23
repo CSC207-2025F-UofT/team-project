@@ -283,6 +283,14 @@ The diagrams are drawn with PlantUML. The source files are in [`docs/uml`](docs/
 
 ![Use Case 6: Track My Applications](docs/uml/uc6-track-applications.png)
 
+#### Use Case 7: Review Applications
+
+_Diagram to be added when this use case is merged into `main`._
+
+#### Use Case 8: Update Application Status
+
+_Diagram to be added when this use case is merged into `main`._
+
 ### Sequence Diagrams
 
 #### Use Case 1: Log in
@@ -308,6 +316,14 @@ The diagrams are drawn with PlantUML. The source files are in [`docs/uml`](docs/
 #### Use Case 6: Track My Applications
 
 ![Use Case 6: Track My Applications](docs/uml/seq-uc6-track-applications.png)
+
+#### Use Case 7: Review Applications
+
+_Diagram to be added when this use case is merged into `main`._
+
+#### Use Case 8: Update Application Status
+
+_Diagram to be added when this use case is merged into `main`._
 
 ---
 
