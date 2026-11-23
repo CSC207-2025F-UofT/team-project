@@ -2,8 +2,13 @@ package use_case.add_side_quest;
 
 import entity.SideQuest;
 
-public class AddSideQuestInteractor implements AddSideQuestInputBoundary{
+public class AddSideQuestInteractor implements AddSideQuestInputBoundary {
 
+    private final AddSideQuestDataAccessInterface dataAccess;
+
+    public AddSideQuestInteractor(AddSideQuestDataAccessInterface dataAccess) {
+        this.dataAccess = dataAccess;
+    }
     @Override
     public void execute(AddSideQuestInputData inputData){
         if (inputData.getName() == null || inputData.getName().trim().isEmpty()){
@@ -32,7 +37,9 @@ public class AddSideQuestInteractor implements AddSideQuestInputBoundary{
         SideQuest sideQuest = new SideQuest(inputData.getName(), inputData.getDescription(), inputData.getPhotoUrl(),
                 inputData.isIndoor(), inputData.getBudget(), inputData.getExpectedTime(), inputData.getExp(),
                 inputData.getLocation(), inputData.getInterests()
-        )
+        );
+
+        dataAccess.save(sideQuest);
     }
 }
 
