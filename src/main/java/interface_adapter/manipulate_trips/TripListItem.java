@@ -1,4 +1,4 @@
-package interface_adapter.list_trips;
+package interface_adapter.manipulate_trips;
 
 /** One row of the trip list, formatted for display. */
 public class TripListItem {

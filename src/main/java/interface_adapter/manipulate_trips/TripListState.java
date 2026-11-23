@@ -1,4 +1,4 @@
-package interface_adapter.list_trips;
+package interface_adapter.manipulate_trips;
 
 import java.util.ArrayList;
 import java.util.List;
