@@ -590,7 +590,7 @@ The `SideQuest` entity is used by the Add Side Quest use case. User-provided val
 
 **Instance variables:** username: String, profilePicturePath: String, exp: int, password: String
 
-**Constant:** EXP_PER_LEVEL = 100
+**Constant:** EXP_PER_LEVEL = 300
 
 **Methods:** getUsername(), getProfilePicturePath(), getExp(), getPassword(), addExp(int expPerQuest), getLevel(), getExpToNextLevel(), setProfilePicturePath(String path)
 
