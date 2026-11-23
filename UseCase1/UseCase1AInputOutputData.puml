@@ -1,0 +1,84 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+
+autonumber
+
+participant "TaskFormView" as View
+participant "TaskController" as Controller
+participant "TaskValidator" as Validator
+participant "TaskService" as Service
+participant "TaskRepository" as Repo
+database "Local Storage\n(JSON / SQLite)" as Storage
+participant "MonitoringView" as Monitor
+
+== Input Data ==
+
+View -> Controller: createTask(TaskInput)
+note right of View
+  **TaskInput**
+  userId (from active session)
+  title, description, deadline
+  estimatedHours (optional)
+  difficultyLevel (optional enum)
+end note
+
+== Apply Defaults ==
+
+Controller -> Service: createTask(TaskInput)
+opt estimatedHours not provided
+    Service -> Service: estimatedHours = 10
+end
+opt difficultyLevel not provided
+    Service -> Service: difficultyLevel = AVERAGE
+end
+
+== Validation ==
+
+Service -> Validator: validate(TaskInput)
+Validator --> Service: ValidationResult
+
+alt estimatedHours is not a positive number
+    Service --> Controller: ValidationError("Hours must be positive")
+    Controller --> View: Show error, request valid value
+else deadline is missing or invalid
+    Service --> Controller: ValidationError("Invalid or missing deadline")
+    Controller --> View: Show error, task not saved
+else input is valid
+
+    == Create Entity ==
+
+    Service -> Service: taskId = generateUniqueId()
+    Service -> Service: new AcademicTask(taskId, userId, title,\ndescription, deadline, estimatedHours,\ndifficultyLevel, completionProgress = 0%)
+
+    == Persist ==
+
+    Service -> Repo: save(AcademicTask)
+    Repo -> Storage: write AcademicTask record
+    Storage --> Repo: write successful
+    Repo --> Service: saved AcademicTask
+
+    == Output Data ==
+
+    Service --> Controller: TaskCreatedResult(AcademicTask)
+    Controller --> View: Confirmation: task successfully created
+    Controller -> Monitor: refresh(userId)
+    Monitor -> Repo: findByUserId(userId)
+    Repo -> Storage: read tasks
+    Storage --> Repo: AcademicTask list
+    Repo --> Monitor: AcademicTask list
+    note right of Monitor
+      Saved tasks are also restored from
+      storage when the app restarts.
+    end note
+end
+
+== Cancel Task Creation ==
+
+View -> Controller: cancelCreation()
+Controller --> View: Request cancellation confirmation
+View -> Controller: confirmCancellation()
+Controller -> Service: discardDraft(TaskInput)
+Service --> Controller: Draft discarded (nothing persisted)
+Controller --> View: Task not saved, use case ends
+
+@enduml
