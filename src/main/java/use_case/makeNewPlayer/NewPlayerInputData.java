@@ -6,7 +6,7 @@ package use_case.makeNewPlayer;
 public class NewPlayerInputData {
     private final String username;
 
-    public NewPlayerInputData(String username, String password, String repeatPassword) {
+    public NewPlayerInputData(String username) {
         this.username = username;
     }
 

@@ -17,11 +17,11 @@ public class NewPlayerController {
      * Executes making a new player.
      * @param username the username to sign up
      */
-    public void execute(String username, String password1, String password2) {
-        final NewPlayerInputData signupInputData = new NewPlayerInputData(
-                username, password1, password2);
+    public void execute(String username) {
+        final NewPlayerInputData newPlayerInputData = new NewPlayerInputData(
+                username);
 
-        newPlayerUseCaseInteractor.execute(signupInputData);
+        newPlayerUseCaseInteractor.execute(newPlayerInputData);
     }
 
     /**

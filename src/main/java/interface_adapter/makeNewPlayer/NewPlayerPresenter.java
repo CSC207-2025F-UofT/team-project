@@ -22,7 +22,7 @@ public class NewPlayerPresenter implements NewPlayerOutputBoundary{
     @Override
     public void prepareSuccessView(NewPlayerOutputData response) {
         // On success, switch to the login view.
-        final WelcomeState welcomeState = WelcomeViewModel.getState();
+        final WelcomeState welcomeState = welcomeViewModel.getState();
         welcomeState.setUsername(response.getUsername());
         welcomeViewModel.notifyStateChanged();
 
