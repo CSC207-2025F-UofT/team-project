@@ -1,8 +1,20 @@
 package app;
 
+import java.awt.Dimension;
+import javax.swing.JFrame;
+import javax.swing.SwingUtilities;
+import view.GameView;
+
 public class Main {
     public static void main(String[] args) {
-        // TODO: add the Swing window in S2.
-        System.out.println("Stressdew Valley");
+        SwingUtilities.invokeLater(() -> {
+            JFrame window = new JFrame("Stressdew Valley");
+            window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+            window.setContentPane(new GameView());
+            window.setSize(800, 550);
+            window.setMinimumSize(new Dimension(720, 480));
+            window.setLocationRelativeTo(null);
+            window.setVisible(true);
+        });
     }
 }
