@@ -1,0 +1,228 @@
+@startuml us4-class-diagram
+' US4 — Rest, Start a New Day, and Save Progress (UC4 + UC5).
+' app.Main only wires these objects together and is omitted.
+
+title US4 — Rest, Start a New Day, and Save Progress
+skinparam classAttributeIconSize 0
+hide empty members
+
+package view {
+  class TitleView {
+    + TitleView(viewModel: TitleViewModel, controller: ContinueGameController, onNewGame: Runnable)
+  }
+  class ResidenceView {
+    - dayLabel: JLabel
+    - weatherLabel: JLabel
+    - energyLabel: JLabel
+    - saveLabel: JLabel
+    - retryButton: JButton
+    + ResidenceView(viewModel: RestViewModel, controller: RestController)
+  }
+}
+
+package interface_adapter {
+  class ViewManagerModel {
+    - activeView: String
+    + setActiveView(activeView: String): void
+  }
+}
+
+package interface_adapter.continue_game {
+  class ContinueGameController {
+    + execute(): void
+  }
+  class ContinueGamePresenter {
+    + prepareSuccessView(outputData: ContinueGameOutputData): void
+    + prepareFailView(message: String): void
+  }
+  class TitleViewModel {
+    - message: String
+    + setMessage(message: String): void
+  }
+}
+
+package interface_adapter.rest {
+  class RestController {
+    + execute(): void
+    + retrySave(): void
+  }
+  class RestPresenter {
+    + prepareSuccessView(outputData: RestOutputData): void
+    + prepareSaveRetryView(saved: boolean): void
+  }
+  class RestViewModel {
+    - dayText: String
+    - weatherText: String
+    - energyText: String
+    - saveText: String
+    - retryAvailable: boolean
+    + setState(dayText: String, weatherText: String, energyText: String): void
+    + setSaveStatus(saveText: String, retryAvailable: boolean): void
+  }
+  class ResidenceFormat <<utility>> {
+    + {static} day(dayNumber: int, date: LocalDate): String
+    + {static} weather(condition: WeatherCondition, high: double, low: double): String
+    + {static} noWeather(): String
+    + {static} energy(energy: int, maxEnergy: int): String
+  }
+}
+
+package use_case.rest {
+  interface RestInputBoundary {
+    + execute(): void
+    + retrySave(): void
+  }
+  class RestInteractor {
+    + execute(): void
+    + retrySave(): void
+  }
+  interface RestOutputBoundary {
+    + prepareSuccessView(outputData: RestOutputData): void
+    + prepareSaveRetryView(saved: boolean): void
+  }
+  class RestOutputData {
+    - dayNumber: int
+    - date: LocalDate
+    - condition: WeatherCondition
+    - highTemperature: double
+    - lowTemperature: double
+    - energy: int
+    - maxEnergy: int
+    - saved: boolean
+  }
+  interface RestGameStateDataAccessInterface {
+    + getCurrentDay(): GameDay
+    + setCurrentDay(day: GameDay): void
+    + getPlayer(): Player
+    + setCurrentWeather(weather: DailyWeather): void
+    + saveCheckpoint(): void
+  }
+  interface RestWeatherDataAccessInterface {
+    + getWeather(date: LocalDate): DailyWeather
+  }
+  class SaveFailedException
+}
+
+package use_case.continue_game {
+  interface ContinueGameInputBoundary {
+    + execute(): void
+  }
+  class ContinueGameInteractor {
+    + execute(): void
+  }
+  interface ContinueGameOutputBoundary {
+    + prepareSuccessView(outputData: ContinueGameOutputData): void
+    + prepareFailView(message: String): void
+  }
+  class ContinueGameOutputData {
+    - dayNumber: int
+    - date: LocalDate
+    - condition: WeatherCondition
+    - highTemperature: double
+    - lowTemperature: double
+    - energy: int
+    - maxEnergy: int
+    + hasWeather(): boolean
+  }
+  interface ContinueGameDataAccessInterface {
+    + hasCheckpoint(): boolean
+    + loadCheckpoint(): void
+    + getCurrentDay(): GameDay
+    + getPlayer(): Player
+    + getCurrentWeather(): DailyWeather
+  }
+  class InvalidCheckpointException
+}
+
+package data_access {
+  class FileGameStateDataAccessObject {
+    - file: Path
+    - currentDay: GameDay
+    - player: Player
+    - currentWeather: DailyWeather
+  }
+  class OpenMeteoWeatherDataAccessObject {
+    + {static} DEFAULT_BASE_URL: String
+    - baseUrl: String
+    + getWeather(date: LocalDate): DailyWeather
+    ~ {static} parseDay(response: JSONObject, date: LocalDate): DailyWeather
+  }
+  class BundledWeatherDataAccessObject {
+    - data: JSONObject
+    + getWeather(date: LocalDate): DailyWeather
+  }
+}
+
+package entity {
+  class GameDay {
+    - dayNumber: int
+    - startDate: LocalDate
+    + getRealDate(): LocalDate
+    + next(): GameDay
+  }
+  class Player {
+    - energy: int
+    - maxEnergy: int
+    + restoreEnergyToPercent(percent: int): void
+  }
+  class DailyWeather {
+    - date: LocalDate
+    - condition: WeatherCondition
+    - highTemperature: double
+    - lowTemperature: double
+    + getEnergyRestorePercent(): int
+  }
+  enum WeatherCondition {
+    CLEAR (100%)
+    CLOUDY (95%)
+    RAIN (85%)
+    SNOW (80%)
+    + {static} fromWmoCode(wmoCode: int): WeatherCondition
+  }
+}
+
+' View layer
+TitleView --> ContinueGameController
+TitleView ..> TitleViewModel : observes
+ResidenceView --> RestController
+ResidenceView ..> RestViewModel : observes
+
+' UC4 — Rest
+RestController --> RestInputBoundary
+RestInteractor ..|> RestInputBoundary
+RestInteractor --> RestOutputBoundary
+RestInteractor --> RestGameStateDataAccessInterface
+RestInteractor --> RestWeatherDataAccessInterface
+RestInteractor ..> RestOutputData : creates
+RestInteractor ..> SaveFailedException : handles
+RestPresenter ..|> RestOutputBoundary
+RestPresenter --> RestViewModel
+RestPresenter ..> ResidenceFormat
+
+' UC5 — Continue
+ContinueGameController --> ContinueGameInputBoundary
+ContinueGameInteractor ..|> ContinueGameInputBoundary
+ContinueGameInteractor --> ContinueGameOutputBoundary
+ContinueGameInteractor --> ContinueGameDataAccessInterface
+ContinueGameInteractor ..> ContinueGameOutputData : creates
+ContinueGameInteractor ..> InvalidCheckpointException : handles
+ContinueGamePresenter ..|> ContinueGameOutputBoundary
+ContinueGamePresenter --> TitleViewModel
+ContinueGamePresenter --> RestViewModel
+ContinueGamePresenter --> ViewManagerModel
+ContinueGamePresenter ..> ResidenceFormat
+
+' Data access
+FileGameStateDataAccessObject ..|> RestGameStateDataAccessInterface
+FileGameStateDataAccessObject ..|> ContinueGameDataAccessInterface
+FileGameStateDataAccessObject --> GameDay
+FileGameStateDataAccessObject --> Player
+FileGameStateDataAccessObject --> DailyWeather
+OpenMeteoWeatherDataAccessObject ..|> RestWeatherDataAccessInterface
+BundledWeatherDataAccessObject ..|> RestWeatherDataAccessInterface
+OpenMeteoWeatherDataAccessObject --> RestWeatherDataAccessInterface : fallback
+
+' Entities
+DailyWeather --> WeatherCondition
+
+@enduml
