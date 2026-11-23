@@ -13,7 +13,8 @@ public final class QuestionApiCheck {
         HuggingFaceQuestionGateway gateway = new HuggingFaceQuestionGateway();
         for (QuestionTopic topic : QuestionTopic.values()) {
             for (QuestionPurpose purpose : QuestionPurpose.values()) {
-                java.util.List<Question> questions = gateway.getQuestions(topic, purpose, 3);
+                int count = purpose == QuestionPurpose.EXAM ? 5 : 3;
+                java.util.List<Question> questions = gateway.getQuestions(topic, purpose, count);
                 System.out.println(topic + " " + purpose + ": " + questions.size()
                         + " live questions; first ID=" + questions.get(0).getId());
             }

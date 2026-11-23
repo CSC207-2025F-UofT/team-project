@@ -328,6 +328,8 @@ Represents one game day's weather: the real date, the game condition (clear, clo
 **How it is used:** The shared `QuestionGateway` loads questions from the public Hugging Face dataset-viewer
 rows endpoint. All six courses have separate practice/exam selections from introductory MMLU categories:
 `high_school_computer_science`, `high_school_biology`, and `high_school_world_history`.
+Practice supports up to three questions; exams support up to five to accommodate UC3's new `ExamBattle`.
+Existing three-question exam requests remain supported. UC2 challenges still contain exactly three questions.
 
 MMLU has no difficulty parameter. Curated remote row references select basic programming, software concepts,
 cell biology, ecology, world events, and source interpretation. This is a basic selection, not a guaranteed
@@ -338,7 +340,8 @@ There is no bundled question bank, offline cache or fallback. The stored row ref
 text or answers and cannot be used offline. Practice and exam IDs are disjoint for each course.
 
 **Question API verification:** Real Java calls passed for all six courses in both purposes on 2026-11-23
-(36 questions across 12 requests, no API key). Normal automated tests use test-only fixtures, without network.
+(48 questions across 12 requests: three practice and five exam questions per course, no API key).
+Normal automated tests use test-only fixtures, without network.
 
 **Planned US4 API:** [Open-Meteo Historical Weather API](https://open-meteo.com/en/docs/historical-weather-api)
 

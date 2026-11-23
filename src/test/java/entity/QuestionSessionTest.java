@@ -31,4 +31,17 @@ class QuestionSessionTest {
         assertThrows(IllegalStateException.class, () -> session.useHint(1));
         assertEquals(2, session.getCorrectCount());
     }
+
+    @Test void fiveQuestionExamRequiresAllAnswersAndStillAllowsOnlyOneHint() {
+        QuestionSession session = new QuestionSession(List.of(question("1", 0), question("2", 1),
+                question("3", 2), question("4", 3), question("5", 0)));
+        for (int index = 0; index < 4; index++) { session.answer(index, index); }
+        assertFalse(session.isComplete());
+        assertEquals(1, session.useHint(4));
+        assertFalse(session.isComplete());
+        session.answer(4, 0);
+        assertTrue(session.isComplete());
+        assertEquals(5, session.getCorrectCount());
+        assertThrows(IllegalStateException.class, () -> session.useHint(0));
+    }
 }

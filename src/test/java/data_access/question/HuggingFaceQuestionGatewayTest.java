@@ -36,14 +36,22 @@ class HuggingFaceQuestionGatewayTest {
                     assertFalse(uri.getQuery().contains("difficulty"));
                     return fixture(selection);
                 });
-                List<Question> questions = gateway.getQuestions(topic, purpose, 3);
-                assertEquals(3, questions.size());
+                int count = purpose == QuestionPurpose.EXAM ? 5 : 3;
+                List<Question> questions = gateway.getQuestions(topic, purpose, count);
+                assertEquals(count, questions.size());
                 for (Question question : questions) {
                     assertEquals(2, question.getCorrectAnswer());
                     assertTrue(question.getExplanation().isEmpty());
                     assertTrue(practice.add(question.getId()), "Practice and exam must not overlap");
                 }
                 assertEquals(1, gateway.getQuestions(topic, purpose, 1).size());
+                List<Question> three = gateway.getQuestions(topic, purpose, 3);
+                for (int index = 0; index < 3; index++) {
+                    assertEquals(questions.get(index).getId(), three.get(index).getId());
+                }
+                if (purpose == QuestionPurpose.EXAM) {
+                    assertEquals(4, gateway.getQuestions(topic, purpose, 4).size());
+                }
             }
         }
     }
@@ -62,10 +70,23 @@ class HuggingFaceQuestionGatewayTest {
             fail("Invalid requests must not reach the service");
             return "";
         });
-        for (int count : new int[]{0, 4}) {
-            assertThrows(IllegalArgumentException.class, () -> gateway.getQuestions(
-                    QuestionTopic.ECOLOGY, QuestionPurpose.EXAM, count));
+        for (QuestionPurpose purpose : QuestionPurpose.values()) {
+            int tooMany = purpose == QuestionPurpose.EXAM ? 6 : 4;
+            for (int count : new int[]{0, tooMany}) {
+                assertThrows(IllegalArgumentException.class, () -> gateway.getQuestions(
+                        QuestionTopic.ECOLOGY, purpose, count));
+            }
         }
+    }
+
+    @Test void missingFifthExamQuestionFailsInsteadOfReturningAShorterSession() throws Exception {
+        MmluSelection selection = MmluSelection.forCourse(QuestionTopic.CELL_BIOLOGY, QuestionPurpose.EXAM);
+        String response = fixture(selection).replace("\"row_idx\":" + selection.rows.get(4),
+                "\"row_idx\":999");
+        HuggingFaceQuestionGateway gateway = new HuggingFaceQuestionGateway(uri -> response);
+        assertEquals(3, gateway.getQuestions(QuestionTopic.CELL_BIOLOGY, QuestionPurpose.EXAM, 3).size());
+        assertThrows(QuestionLoadException.class, () -> gateway.getQuestions(
+                QuestionTopic.CELL_BIOLOGY, QuestionPurpose.EXAM, 5));
     }
 
     @Test void preservesInterruptStatus() {

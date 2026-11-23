@@ -38,10 +38,11 @@ public final class HuggingFaceQuestionGateway implements QuestionGateway {
             throws QuestionLoadException {
         Objects.requireNonNull(topic);
         Objects.requireNonNull(purpose);
-        if (count < 1 || count > 3) {
-            throw new IllegalArgumentException("The current course selection supports 1 to 3 questions");
-        }
         MmluSelection selection = MmluSelection.forCourse(topic, purpose);
+        if (count < 1 || count > selection.rows.size()) {
+            throw new IllegalArgumentException(purpose + " supports 1 to "
+                    + selection.rows.size() + " questions per course");
+        }
         URI uri = URI.create(ENDPOINT + "?dataset=cais%2Fmmlu&config=" + selection.subject
                 + "&split=test&offset=" + selection.offset + "&length=50");
         final String body;

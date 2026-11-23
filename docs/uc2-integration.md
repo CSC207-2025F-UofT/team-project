@@ -79,7 +79,9 @@ Coordination issues: [energy and state #9](https://github.com/yuanyx233/team-pro
 [question API/navigation #11](https://github.com/yuanyx233/team-project/issues/11).
 These interfaces are proposals for review, not an agreed or completed team integration.
 
-The inspected baseline is main `1d6dbec` (UC3 shell plus UC4/UC5) and the new `uc1-choose-major` branch:
+The inspected baseline is main `03f4400` (UC2, the UC3 shell, and UC4/UC5), the `uc1-choose-major` branch,
+and UC3's new `ExamBattle` at `3c51fad`. The battle permits up to five answers, so EXAM question requests now
+support up to five questions. This does not change the three-question UC2 challenge or UC3's battle rules.
 
 | Actual teammate code | Remaining connection |
 |---|---|
@@ -137,11 +139,12 @@ schema have been added. `FakeChallengeState` and the preview exist only under `s
 ```java
 QuestionGateway gateway = new HuggingFaceQuestionGateway();
 List<Question> exam = gateway.getQuestions(
-        QuestionTopic.SOFTWARE_DESIGN, QuestionPurpose.EXAM, 3);
+        QuestionTopic.SOFTWARE_DESIGN, QuestionPurpose.EXAM, 5);
 ```
 
 The gateway returns exactly the requested number of distinct questions, or throws `QuestionLoadException`.
-This selection currently supports one to three questions per course and purpose. UC3 owns answer hiding,
+The selection supports one to three PRACTICE questions and one to five EXAM questions per course.
+Existing three-question exam requests retain the same questions and ordering. UC3 owns answer hiding,
 hint eligibility, energy policy, grading and final exam persistence.
 
 `QuestionSession` supports editing exam answers, checking completeness, counting correct answers and using
@@ -152,12 +155,12 @@ answers. UC2 never uses the exam hint. Correct answers are absent from classroom
 
 | Course / QuestionTopic | MMLU subject | Practice row IDs | Exam row IDs |
 |---|---|---|---|
-| Programming Foundation / PROGRAMMING_FOUNDATION | high_school_computer_science | 1, 21, 29 | 59, 60, 72 |
-| Software Design / SOFTWARE_DESIGN | high_school_computer_science | 4, 20, 34 | 57, 63, 93 |
-| Cell Biology / CELL_BIOLOGY | high_school_biology | 5, 18, 19 | 62, 67, 97 |
-| Ecology / ECOLOGY | high_school_biology | 8, 21, 26 | 64, 82, 91 |
-| World History / WORLD_HISTORY | high_school_world_history | 15, 23, 49 | 53, 57, 89 |
-| Historical Perspective / HISTORICAL_PERSPECTIVE | high_school_world_history | 5, 38, 41 | 59, 64, 65 |
+| Programming Foundation / PROGRAMMING_FOUNDATION | high_school_computer_science | 1, 21, 29 | 59, 60, 72, 65, 83 |
+| Software Design / SOFTWARE_DESIGN | high_school_computer_science | 4, 20, 34 | 57, 63, 93, 69, 71 |
+| Cell Biology / CELL_BIOLOGY | high_school_biology | 5, 18, 19 | 62, 67, 97, 84, 99 |
+| Ecology / ECOLOGY | high_school_biology | 8, 21, 26 | 64, 82, 91, 79, 88 |
+| World History / WORLD_HISTORY | high_school_world_history | 15, 23, 49 | 53, 57, 89, 62, 68 |
+| Historical Perspective / HISTORICAL_PERSPECTIVE | high_school_world_history | 5, 38, 41 | 59, 64, 65, 79, 97 |
 
 The provider is a dataset API, not a question-generation service. It has **no difficulty setting**. These
 remote selections favour elementary operations, specifications/testing/documentation, cell structures,
@@ -203,7 +206,8 @@ java -cp "target/classes:$HOME/.m2/repository/com/google/code/gson/gson/2.11.0/g
 ```
 
 Verified on 2026-11-23 with Java 17 compiling with `--release 11`: all 12 course/purpose requests returned
-three valid remote questions (36 total). Failures propagate from the check program. It uses no API key.
+the requested three practice or five exam questions (48 total). An initial service HTTP 502 propagated
+as an error; a separate manual rerun passed all requests. The check has no automatic fallback or API key.
 
 To preview the Swing page with test state and real questions:
 
@@ -221,6 +225,5 @@ Optional UI images for review:
 mvn test -Duc2.render.dir=/tmp/uc2-ui-review
 ```
 
-The branch is `feat/uc2-class-challenge` in `yuanyx233/team-project`. It incorporates the latest main shell
-and keeps teammates' existing setup. Changes should be reviewed by two teammates before merging, as required
-by TeamContract.md.
+The initial UC2 implementation was merged into `yuanyx233/team-project` main through PR #13. Further
+changes should be reviewed by two teammates before merging, as required by TeamContract.md.
