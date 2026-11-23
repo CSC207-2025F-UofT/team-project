@@ -6,8 +6,8 @@ package entities;
 public class RegularUser extends User {
     private Boolean doneTest = false;
 
-    public RegularUser(String username, String role) {
-        super(username, role);
+    public RegularUser(String username) {
+        super(username, "Regular User");
     }
 
     /**
