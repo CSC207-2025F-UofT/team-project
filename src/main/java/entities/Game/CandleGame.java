@@ -70,9 +70,7 @@ public class CandleGame {
     }
 
     public void addGuess(Guess guess) {
-        if (gameCondition != GameCondition.ON_GOING ){
-            throw new IllegalStateException("Game is over."); }
-        if (getAttemptsRemaining() <= 0) {
+        if (gameCondition != GameCondition.ON_GOING || getAttemptsRemaining() <= 0) {
             throw new IllegalStateException("Game is over.");
         }
         guesses.add(guess);
