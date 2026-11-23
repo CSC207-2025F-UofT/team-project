@@ -1,8 +1,20 @@
-package use_case.list_trips;
+package use_case.manipulate_trips;
 
 /** Implemented by presenter. Interactor reports results through this. */
-public interface ListTripsOutputBoundary {
-    void prepareSuccessView(ListTripsOutputData outputData);
+public interface ManipulateTripsOutputBoundary {
+    void prepareTripListView(ListTripsOutputData outputData);
 
-    void prepareFailView(String errorMessage);
+    void prepareTripListFailView(String errorMessage);
+
+    void prepareTripDetailsView(TripDetailsOutputData outputData);
+
+    void prepareTripDetailsFailView(String errorMessage);
+
+    void prepareSplitSuccessView(SplitTripOutputData outputData);
+
+    void prepareSplitFailView(String errorMessage);
+
+    void prepareMergeSuccessView(MergeTripsOutputData outputData);
+
+    void prepareMergeFailView(String errorMessage);
 }

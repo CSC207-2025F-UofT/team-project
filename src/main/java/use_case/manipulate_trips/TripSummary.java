@@ -1,4 +1,4 @@
-package use_case.list_trips;
+package use_case.manipulate_trips;
 
 import java.time.LocalDateTime;
 

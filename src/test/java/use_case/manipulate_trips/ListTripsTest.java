@@ -1,4 +1,4 @@
-package use_case.list_trips;
+package use_case.manipulate_trips;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -20,7 +20,8 @@ import use_case.TripAccessInterface;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class ListTripsInteractorTest {
+/** Tests ManipulateTripsInteractor.listTrips(). */
+class ListTripsTest {
 
     static class FakeDataAccess implements TripAccessInterface, PhotoAccessInterface {
         final List<Trip> trips = new ArrayList<>();
@@ -69,30 +70,19 @@ class ListTripsInteractorTest {
         @Override public void writePhotos(List<Photo> toWrite) { throw new UnsupportedOperationException(); }
     }
 
-    /** Records what the interactor sent, instead of updating a real ViewModel. */
-    static class CapturingPresenter implements ListTripsOutputBoundary {
-        ListTripsOutputData success;
-        String failure;
-
-        @Override
-        public void prepareSuccessView(ListTripsOutputData outputData) { success = outputData; }
-
-        @Override
-        public void prepareFailView(String errorMessage) { failure = errorMessage; }
-    }
-
+    
     private static final LocationInfo MONTREAL = new LocationInfo("Montreal", null, "Quebec", "Canada", "North America");
     private static final LocationInfo QUEBEC = new LocationInfo("Quebec City", null, "Quebec", "Canada", "North America");
 
     private FakeDataAccess dao;
     private CapturingPresenter presenter;
-    private ListTripsInteractor interactor;
+    private ManipulateTripsInteractor interactor;
 
     @BeforeEach
     void setUp() {
         dao = new FakeDataAccess();
         presenter = new CapturingPresenter();
-        interactor = new ListTripsInteractor(dao, dao, presenter);
+        interactor = new ManipulateTripsInteractor(dao, dao, presenter, () -> "unused");
     }
 
     private static Photo photo(String id, LocalDateTime time, LocationInfo info) {
@@ -109,10 +99,10 @@ class ListTripsInteractorTest {
         dao.addTrip(new Trip("new", "New", null, null), photo("b", day(20), MONTREAL));
         dao.addTrip(new Trip("mid", "Mid", null, null), photo("c", day(10), MONTREAL));
 
-        interactor.execute();
+        interactor.listTrips();
 
         List<String> ids = new ArrayList<>();
-        presenter.success.getTrips().forEach(t -> ids.add(t.getId()));
+        presenter.tripList.getTrips().forEach(t -> ids.add(t.getId()));
         assertEquals(List.of("new", "mid", "old"), ids);
     }
 
@@ -121,9 +111,9 @@ class ListTripsInteractorTest {
         dao.addTrip(new Trip("undated", "Undated", null, null), photo("a", null, MONTREAL));
         dao.addTrip(new Trip("dated", "Dated", null, null), photo("b", day(1), MONTREAL));
 
-        interactor.execute();
+        interactor.listTrips();
 
-        assertEquals("undated", presenter.success.getTrips().get(1).getId());
+        assertEquals("undated", presenter.tripList.getTrips().get(1).getId());
     }
 
     @Test
@@ -133,9 +123,9 @@ class ListTripsInteractorTest {
                 photo("early", day(1), MONTREAL),
                 photo("mid", day(2), MONTREAL));
 
-        interactor.execute();
+        interactor.listTrips();
 
-        TripSummary summary = presenter.success.getTrips().get(0);
+        TripSummary summary = presenter.tripList.getTrips().get(0);
         assertEquals(3, summary.getPhotoCount());
         assertEquals("Montreal, Canada", summary.getLocationLabel());
         assertEquals("early", summary.getCoverPhotoId());   // earliest photo, not first added
@@ -149,47 +139,47 @@ class ListTripsInteractorTest {
                 photo("a", day(1), QUEBEC),
                 photo("b", day(2), MONTREAL));
 
-        interactor.execute();
+        interactor.listTrips();
 
-        assertEquals("Quebec City, Canada", presenter.success.getTrips().get(0).getLocationLabel());
+        assertEquals("Quebec City, Canada", presenter.tripList.getTrips().get(0).getLocationLabel());
     }
 
     @Test
     void photosWithoutLocationGiveNullLabel() {
         dao.addTrip(new Trip("t", "Trip", null, null), photo("a", day(1), null));
 
-        interactor.execute();
+        interactor.listTrips();
 
-        assertNull(presenter.success.getTrips().get(0).getLocationLabel());
+        assertNull(presenter.tripList.getTrips().get(0).getLocationLabel());
     }
 
     @Test
     void tripWithNoPhotosHasNoCover() {
         dao.addTrip(new Trip("t", "Empty", day(1), day(1)));
 
-        interactor.execute();
+        interactor.listTrips();
 
-        TripSummary summary = presenter.success.getTrips().get(0);
+        TripSummary summary = presenter.tripList.getTrips().get(0);
         assertEquals(0, summary.getPhotoCount());
         assertNull(summary.getCoverPhotoId());
     }
 
     @Test
     void emptyArchiveSucceedsWithEmptyList() {
-        interactor.execute();
+        interactor.listTrips();
 
-        assertNull(presenter.failure);
-        assertTrue(presenter.success.getTrips().isEmpty());
+        assertNull(presenter.tripListFailure);
+        assertTrue(presenter.tripList.getTrips().isEmpty());
     }
 
     @Test
     void tripAccessErrorGoesToFailView() {
         dao.tripError = new TripAccessException("disk on fire");
 
-        interactor.execute();
+        interactor.listTrips();
 
-        assertNull(presenter.success);
-        assertTrue(presenter.failure.contains("disk on fire"));
+        assertNull(presenter.tripList);
+        assertTrue(presenter.tripListFailure.contains("disk on fire"));
     }
 
     @Test
@@ -197,17 +187,17 @@ class ListTripsInteractorTest {
         dao.addTrip(new Trip("t", "Trip", null, null), photo("a", day(1), MONTREAL));
         dao.photoError = new PhotoAccessException("photos gone");
 
-        interactor.execute();
+        interactor.listTrips();
 
-        assertNull(presenter.success);
-        assertTrue(presenter.failure.contains("photos gone"));
+        assertNull(presenter.tripList);
+        assertTrue(presenter.tripListFailure.contains("photos gone"));
     }
 
     @Test
     void programmingErrorsAreNotHiddenAsFailView() {
         dao.tripError = new IllegalStateException("bug");
 
-        assertThrows(IllegalStateException.class, () -> interactor.execute());
-        assertNull(presenter.failure);
+        assertThrows(IllegalStateException.class, () -> interactor.listTrips());
+        assertNull(presenter.tripListFailure);
     }
 }
