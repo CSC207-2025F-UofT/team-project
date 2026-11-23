@@ -7,6 +7,7 @@ import javax.swing.JPanel;
 import javax.swing.WindowConstants;
 
 import data_access.InMemoryPetDataAccess;
+import interface_adapter.SwitchViewController;
 import interface_adapter.ViewManagerModel;
 import interface_adapter.browse_pets.BrowsePetsController;
 import interface_adapter.browse_pets.BrowsePetsPresenter;
@@ -15,10 +16,14 @@ import interface_adapter.manage_pet.ManagePetController;
 import interface_adapter.manage_pet.ManagePetPresenter;
 import interface_adapter.manage_pet.ManagePetViewModel;
 import use_case.manage_pet.ManagePetDataAccessInterface;
-import use_case.browse_pets.BrowsePetsDataAccessInterface;
 import use_case.browse_pets.BrowsePetsInteractor;
 import use_case.manage_pet.ManagePetInteractor;
+import interface_adapter.view_pet_details.PetDetailViewModel;
+import interface_adapter.view_pet_details.ViewPetDetailsController;
+import interface_adapter.view_pet_details.ViewPetDetailsPresenter;
+import use_case.view_pet_details.ViewPetDetailsInteractor;
 import view.GalleryView;
+import view.PetDetailView;
 import view.ManagePetView;
 import view.ViewManager;
 
@@ -37,12 +42,22 @@ public final class AppBuilder {
      * @return this builder
      */
     public AppBuilder addGalleryView() {
-        final BrowsePetsDataAccessInterface petData = InMemoryPetDataAccess.withSampleData();
+        final InMemoryPetDataAccess petData = InMemoryPetDataAccess.withSampleData();
+
+        final PetDetailViewModel detailViewModel = new PetDetailViewModel();
+        final ViewPetDetailsPresenter detailsPresenter =
+                new ViewPetDetailsPresenter(detailViewModel, viewManagerModel);
+        final ViewPetDetailsController detailsController =
+                new ViewPetDetailsController(new ViewPetDetailsInteractor(petData, detailsPresenter));
+        final PetDetailView detailView = new PetDetailView(
+                detailViewModel, new SwitchViewController(viewManagerModel), GalleryView.VIEW_NAME);
+        views.add(detailView, PetDetailViewModel.VIEW_NAME);
+
         final GalleryViewModel galleryViewModel = new GalleryViewModel();
         final BrowsePetsPresenter presenter = new BrowsePetsPresenter(galleryViewModel);
         final BrowsePetsInteractor interactor = new BrowsePetsInteractor(petData, presenter);
         final BrowsePetsController controller = new BrowsePetsController(interactor);
-        final GalleryView galleryView = new GalleryView(controller, galleryViewModel);
+        final GalleryView galleryView = new GalleryView(controller, galleryViewModel, detailsController);
         galleryView.loadAll();
         views.add(galleryView, GalleryView.VIEW_NAME);
         return this;
