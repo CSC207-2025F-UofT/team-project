@@ -8,7 +8,7 @@ import org.example.cocktailcraft.use_case.customize.CustomizeInputData;
 public class CustomizeController {
     private final CustomizeInputBoundary interactor;
 
-    public CustomizeController(CustomizeInputBoundary interactor){
+    public CustomizeController(CustomizeInputBoundary interactor) {
         this.interactor = interactor;
     }
 
@@ -17,7 +17,7 @@ public class CustomizeController {
             String ownerId,
             String originalCocktailId,
             String name,
-            List<RecipeIngredient> ingredients){
+            List<RecipeIngredient> ingredients) {
 
         CustomizeInputData inputData = new CustomizeInputData(
                 customRecipeId,
