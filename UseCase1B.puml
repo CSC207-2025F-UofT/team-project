@@ -1,0 +1,38 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+
+autonumber
+
+actor User
+participant System
+database "Stored Users" as Users
+
+== Request Login ==
+
+User -> System: Choose to log in on welcome screen
+System --> User: Display login screen
+
+== Authentication ==
+
+alt User enters credentials
+    User -> System: Enter username and password, click Login
+    System -> Users: Check entered information against stored users
+    Users --> System: Match result
+
+    alt Username or password does not match
+        System --> User: Display error message
+    else Information matches
+        System --> User: User is logged in
+        System --> User: Send confirmation message
+    end
+
+else User cancels login
+    == Cancel Login ==
+    User -> System: Cancel login
+    System --> User: Pop up window to confirm cancellation
+    User -> System: Confirm cancellation
+    System -> System: Discard unsaved login information
+    System --> User: Use case ends
+end
+
+@enduml
