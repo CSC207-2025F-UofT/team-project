@@ -65,7 +65,21 @@ Side Quest App focused on Productivity & Entertainment
 
 ## Use Cases
 
-### Use Case 1: LogIn, SetUsername, SetProfilePicture, CheckLevel
+### Use Case 1: Profile
+
+**Lead:** Lucy
+
+#### 1.1 Sign Up
+
+
+#### 1.2 Log In
+
+
+#### 1.3 View Profile Page
+
+
+#### 1.4 Set Profile Picture
+
 
 ### Use Case 2: Progress
 
@@ -303,7 +317,7 @@ User can view the activity type, budget, and location of the sidequest and decid
 | Team Member | MVP Use Case |
 |-------------|--------------|
 | Pauline | [Create a Text Journal Entry](#pauline) |
-| Lucy | LogIn, SetUsername |
+| Lucy | Sign Up, Log In |
 | Joon | **Recommend Quest** <br> **Precondition** <br> The user has completed the questionnaire, and their preference has been logged into the system. <br> **Trigger** <br> The user opens up the quest recommendation page. <br> **Main Scenario** <br> 1. The user opens up the system, and navigates to the quest recommendation page. <br> 2. The system displays a list of sidequests based on the user’s preference, from the sidequest that is closest to a certain limit. <br> 3. The user accepts certain sidequests, and the system logs the quest into the current quests. <br> **Alternate Scenario** <br> The user declines certain sidequests, and the recommendation engine removes the sidequest from the list and the UI. |
 | Serena | [Find a Nearby Side Quest on the Map](#serena) |
 | Issac | Create Side Quests |
@@ -568,7 +582,20 @@ The `SideQuest` entity is used by the Add Side Quest use case. User-provided val
 </details>
 
 
-### Entity 2: User (Profile/Person Entity)
+### Entity 2: User
+<details>
+<summary>Entity details</summary>
+
+**User** (Lucy): a user of LinkedOut.
+
+**Instance variables:** username: String, profilePicturePath: String, exp: int, password: String
+
+**Constant:** EXP_PER_LEVEL = 100
+
+**Methods:** getUsername(), getProfilePicturePath(), getExp(), getPassword(), addExp(int expPerQuest), getLevel(), getExpToNextLevel(), setProfilePicturePath(String path)
+
+</details>
+
 
 ### Entity 3: UserQuest and QuestStatus
 
