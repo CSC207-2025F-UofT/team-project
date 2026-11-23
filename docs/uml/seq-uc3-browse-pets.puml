@@ -1,22 +1,20 @@
 @startuml seq-uc3-browse-pets
-title UC3 Browse Pets: sequence (opening the gallery)
+title UC3 Browse and Filter Pets: sequence (choosing filters)
 
 skinparam sequenceMessageAlign left
 autonumber
 
 actor Visitor
-participant "AppBuilder" as Builder
 participant "GalleryView" as View
 participant "BrowsePetsController" as Controller
 participant "BrowsePetsInteractor\n<<BrowsePetsInputBoundary>>" as Interactor
-participant "InMemoryPetDataAccess\n<<BrowsePetsDataAccessInterface>>" as DAO
+participant "FilePetDataAccessObject\n<<BrowsePetsDataAccessInterface>>" as DAO
 participant "BrowsePetsPresenter\n<<BrowsePetsOutputBoundary>>" as Presenter
 participant "GalleryViewModel" as VM
 
-Visitor -> Builder : starts the app (Main)
-Builder -> View : new GalleryView(controller, viewModel)
-Builder -> View : loadAll()
-View -> Controller : browse(empty list of filters)
+Visitor -> View : opens the gallery and chooses\nage, temperament and health filters
+View -> Controller : browse(age, temperaments,\nnoMedicalNeedsOnly)
+Controller -> Controller : create AgeRangeFilter,\nTemperamentFilter, HealthNeedsFilter
 Controller -> Interactor : execute(new BrowsePetsInputData(filters))
 
 Interactor -> DAO : getAvailablePets()
@@ -25,16 +23,16 @@ Interactor -> Interactor : keep pets that match every filter
 Interactor -> Presenter : presentPets(new BrowsePetsOutputData(pets))
 
 loop for each pet
-  Presenter -> Presenter : new PetCardData(name,\n"Cat, Tabby, 2 years old", "Status: Available")
+  Presenter -> Presenter : new PetCardData(name,\n"Cat, Tabby, 2 years old", status)
 end
 Presenter -> VM : setCards(cards)
 VM -> View : property change "cards"
-View -> View : showCards(cards)
-View --> Visitor : grid of pet cards
+View -> View : show the pet cards
+View --> Visitor : cards of the matching pets
 
 note over Interactor, VM
-  If no pet matches, the view shows
-  "No pets match your filters."
+  If no pet matches, the gallery says so
+  and the visitor can clear the filters.
 end note
 
 @enduml

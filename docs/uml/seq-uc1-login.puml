@@ -1,0 +1,34 @@
+@startuml seq-uc1-login
+title UC1 Log in: sequence (success path)
+
+skinparam sequenceMessageAlign left
+autonumber
+
+actor User
+participant "LoginView" as View
+participant "LoginController" as Controller
+participant "LoginInteractor\n<<LoginInputBoundary>>" as Interactor
+participant "FileUserDataAccessObject\n<<LoginUserDataAccessInterface>>" as DAO
+participant "LoginPresenter\n<<LoginOutputBoundary>>" as Presenter
+participant "LoginViewModel" as VM
+participant "ViewManagerModel" as VMM
+
+User -> View : enters email and password, logs in
+View -> Controller : execute(email, password)
+Controller -> Interactor : execute(new LoginInputData(email, password))
+Interactor -> DAO : getByEmail(email)
+DAO --> Interactor : User
+Interactor -> Interactor : compare the password hash
+Interactor -> DAO : setCurrentUserId(id)
+Interactor -> Presenter : prepareSuccessView(\nnew LoginOutputData(username, id, role))
+Presenter -> VM : clear the login form
+Presenter -> VMM : setActiveView(Manage Pets for an admin,\notherwise the gallery)
+VMM --> User : shows the home screen for the role
+
+note over Interactor, Presenter
+  Empty fields, an unknown email or a wrong password:
+  the interactor calls prepareFailView(message)
+  and the login form shows the error.
+end note
+
+@enduml
