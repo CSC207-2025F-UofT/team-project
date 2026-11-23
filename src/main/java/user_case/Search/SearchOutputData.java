@@ -1,38 +1,43 @@
 package user_case.Search;
 
 
+import entity.Movie;
+
+import java.util.List;
+
 /**
  * Output Data for the Search Use Case.
  */
 public class SearchOutputData {
 
 
-    private final String name;
-    private final String description;
-    private final int rating;
-    private final String releaseDate;
+    private final String[][] outputList;
 
-    public SearchOutputData(String name, int rating, String description, String releaseDate) {
-        this.name = name;
-        this.rating = rating;
-        this.description = description;
-        this.releaseDate = releaseDate;
+    public SearchOutputData(List<Movie> movies) {
+        outputList = new String[movies.size()][];
+        int index = 0;
+        for(Movie movie: movies){
+            outputList[index] = new String[] {movie.getName(), movie.getDescription(), movie.getPosterPath()};
+            index++;
+        }
     }
 
-    public String getName() {
-        return name;
-    }
+    public String[][] getOutputList(){return outputList;}
 
-    public String getReleaseDate() {
-        return releaseDate;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public int getRating() {
-        return rating;
-    }
+//    public String getName() {
+//        return name;
+//    }
+//
+//    public String getReleaseDate() {
+//        return releaseDate;
+//    }
+//
+//    public String getDescription() {
+//        return description;
+//    }
+//
+//    public int getRating() {
+//        return rating;
+//    }
 }
 
