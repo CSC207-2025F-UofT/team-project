@@ -15,6 +15,7 @@ import entity.StockLevel;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import use_case.add_pantry_item.AddPantryItemDataAccessInterface;
 import use_case.generate_shopping_list.PantryReader;
 import use_case.load_pantry.LoadPantryDataAccessInterface;
 import use_case.update_stock_level.UpdateStockLevelDataAccessInterface;
@@ -24,7 +25,7 @@ import use_case.update_stock_level.UpdateStockLevelDataAccessInterface;
  */
 public class FilePantryDataAccessObject
         implements LoadPantryDataAccessInterface, PantryReader,
-        UpdateStockLevelDataAccessInterface {
+        UpdateStockLevelDataAccessInterface, AddPantryItemDataAccessInterface {
     private static final String KEY_ITEMS = "items";
     private static final String KEY_NAME = "name";
     private static final String KEY_EXPIRY_DATE = "expiryDate";
