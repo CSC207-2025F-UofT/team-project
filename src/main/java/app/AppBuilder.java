@@ -1,6 +1,7 @@
 package app;
 
 import java.awt.BorderLayout;
+import java.util.UUID;
 
 import javax.swing.JComponent;
 import javax.swing.JFrame;
@@ -16,23 +17,25 @@ import interface_adapter.ViewNames;
 import interface_adapter.dashboard.DashboardController;
 import interface_adapter.dashboard.DashboardPresenter;
 import interface_adapter.dashboard.DashboardViewModel;
-import interface_adapter.list_trips.ListTripsController;
-import interface_adapter.list_trips.ListTripsPresenter;
-import interface_adapter.list_trips.TripListViewModel;
+import interface_adapter.manipulate_trips.ManipulateTripsController;
+import interface_adapter.manipulate_trips.ManipulateTripsPresenter;
+import interface_adapter.manipulate_trips.TripDetailsViewModel;
+import interface_adapter.manipulate_trips.TripListViewModel;
 import interface_adapter.load_photos.LoadPhotoController;
 import interface_adapter.load_photos.LoadPhotoPresenter;
 import interface_adapter.load_photos.PhotoImageViewModel;
 import use_case.ImageReaderInterface;
 import use_case.dashboard.AnalyticsUseCase;
-import use_case.list_trips.ListTripsInputBoundary;
-import use_case.list_trips.ListTripsInteractor;
-import use_case.list_trips.ListTripsOutputBoundary;
+import use_case.manipulate_trips.ManipulateTripsInputBoundary;
+import use_case.manipulate_trips.ManipulateTripsInteractor;
+import use_case.manipulate_trips.ManipulateTripsOutputBoundary;
 import use_case.load_photos.LoadPhotoInputBoundary;
 import use_case.load_photos.LoadPhotoInteractor;
 import use_case.load_photos.LoadPhotoOutputBoundary;
 import view.NavigationBar;
 import view.PlaceholderView;
 import view.TripListView;
+import view.TripDetailsView;
 import view.ViewManager;
 import view.dashboard.DashboardView;
 import view.components.ThumbnailCache;
@@ -58,6 +61,8 @@ public class AppBuilder {
 
     private TripListViewModel tripListViewModel;
     private TripListView tripListView;
+    private TripDetailsViewModel tripDetailsViewModel;
+    private TripDetailsView tripDetailsView;
 
 
     public AppBuilder() {
@@ -76,10 +81,21 @@ public class AppBuilder {
         return addScreen("Trips", ViewNames.TRIPS, tripListView);
     }
 
-    public AppBuilder addListTripsUseCase() {
-        ListTripsOutputBoundary presenter = new ListTripsPresenter(tripListViewModel);
-        ListTripsInputBoundary interactor = new ListTripsInteractor(dataAccess, dataAccess, presenter);
-        tripListView.setListTripsController(new ListTripsController(interactor));
+    public AppBuilder addTripDetailsView() {
+        tripDetailsViewModel = new TripDetailsViewModel();
+        tripDetailsView = new TripDetailsView(tripDetailsViewModel, viewManagerModel, thumbnailCache);
+        viewManager.addView(ViewNames.TRIP_DETAILS, tripDetailsView);
+        return this;
+    }
+
+    public AppBuilder addManipulateTripsUseCase() {
+        ManipulateTripsOutputBoundary presenter = 
+                new ManipulateTripsPresenter(tripListViewModel, tripDetailsViewModel, viewManagerModel);
+        ManipulateTripsInputBoundary interactor = new ManipulateTripsInteractor(dataAccess, dataAccess, presenter,
+                () -> "trip-" + UUID.randomUUID());
+        ManipulateTripsController controller = new ManipulateTripsController(interactor);
+        tripListView.setManipulateTripsController(controller);
+        tripDetailsView.setManipulateTripsController(controller);
         return this;
     }
 

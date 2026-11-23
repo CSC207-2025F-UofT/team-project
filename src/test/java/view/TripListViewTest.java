@@ -7,9 +7,9 @@ import javax.swing.SwingUtilities;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import interface_adapter.list_trips.ListTripsController;
-import interface_adapter.list_trips.TripListItem;
-import interface_adapter.list_trips.TripListViewModel;
+import interface_adapter.manipulate_trips.ManipulateTripsController;
+import interface_adapter.manipulate_trips.TripListItem;
+import interface_adapter.manipulate_trips.TripListViewModel;
 import interface_adapter.load_photos.LoadPhotoController;
 import interface_adapter.load_photos.PhotoImageViewModel;
 import view.components.ThumbnailCache;
@@ -59,13 +59,22 @@ class TripListViewTest {
         assertEquals("Couldn't load trips: boom", view.getMessageLabel().getText());
     }
 
-    @Test
-    void activationRunsController() {
-        int[] calls = {0};
-        view.setListTripsController(new ListTripsController(() -> calls[0]++));
+    @Test 
+    void activationListsTrips() {
+        RecordingTripsInteractor interactor = new RecordingTripsInteractor();
+        view.setManipulateTripsController(new ManipulateTripsController(interactor));
 
         view.onActivated();
 
-        assertEquals(1, calls[0]);
+        assertEquals(1, interactor.listCalls);
+    }
+
+    @Test
+    void openTripViewsThatTrip() {
+        RecordingTripsInteractor interactor = new RecordingTripsInteractor();
+        view.setManipulateTripsController(new ManipulateTripsController(interactor));
+        view.requestMerge(List.of("t1", "t2"));
+
+        assertEquals(List.of("t1", "t2"), interactor.merged.getTripIds());
     }
 }

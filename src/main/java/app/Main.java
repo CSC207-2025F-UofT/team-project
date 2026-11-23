@@ -6,9 +6,10 @@ public class Main {
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> new AppBuilder()
                 .addTripListView()
+                .addTripDetailsView()
                 .addMapView()
                 .addDashBoardView()
-                .addListTripsUseCase()
+                .addManipulateTripsUseCase()
                 .build()
                 .setVisible(true));
     }

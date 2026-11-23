@@ -1,4 +1,4 @@
-package interface_adapter.list_trips;
+package interface_adapter.manipulate_trips;
 
 import interface_adapter.ViewModel;
 import interface_adapter.ViewNames;

@@ -11,7 +11,7 @@ import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.ListCellRenderer;
 
-import interface_adapter.list_trips.TripListItem;
+import interface_adapter.manipulate_trips.TripListItem;
 
 /** Draws one trip as [thumbnail] Name / dates / place · photos. */
 public class TripCardRenderer extends JPanel implements ListCellRenderer<TripListItem> {
@@ -51,7 +51,7 @@ public class TripCardRenderer extends JPanel implements ListCellRenderer<TripLis
 
         setBackground(isSelected ? list.getSelectionBackground() : list.getBackground());
         for (JLabel label : new JLabel[] {name, dates, details}) {
-            label.setForeground(isSelected ? list.getSelectionBackground() : list.getForeground());
+            label.setForeground(isSelected ? list.getSelectionForeground() : list.getForeground());
         }
         return this;
     }
