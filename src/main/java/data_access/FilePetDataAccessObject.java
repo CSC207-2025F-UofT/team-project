@@ -19,6 +19,7 @@ import entity.PetSex;
 import entity.PetStatus;
 import entity.Species;
 import entity.Temperament;
+import use_case.browse_pets.BrowsePetsDataAccessInterface;
 import use_case.manage_pet.ManagePetDataAccessInterface;
 import use_case.submit_application.SubmitApplicationPetDataAccessInterface;
 import use_case.track_applications.TrackApplicationsPetDataAccessInterface;
@@ -26,7 +27,7 @@ import use_case.track_applications.TrackApplicationsPetDataAccessInterface;
 /**
  * Stores pet profiles in a local JSON file and supplies pet details to application submission.
  */
-public class FilePetDataAccessObject implements ManagePetDataAccessInterface,
+public class FilePetDataAccessObject implements ManagePetDataAccessInterface, BrowsePetsDataAccessInterface,
         SubmitApplicationPetDataAccessInterface, TrackApplicationsPetDataAccessInterface {
 
     private final Path jsonPath;
@@ -37,13 +38,29 @@ public class FilePetDataAccessObject implements ManagePetDataAccessInterface,
      * @param jsonPath the pet data file
      */
     public FilePetDataAccessObject(Path jsonPath) {
+        this(jsonPath, List.of());
+    }
+
+    /**
+     * Opens the pet store with a default catalog for the first run.
+     * @param jsonPath the pet data file
+     * @param initialPets the listings to use when the file is absent
+     */
+    public FilePetDataAccessObject(Path jsonPath, List<Pet> initialPets) {
         this.jsonPath = jsonPath.toAbsolutePath();
-        this.pets = load();
+        this.pets = load(initialPets);
     }
 
     @Override
     public synchronized List<Pet> getPets() {
         return new ArrayList<>(pets.values());
+    }
+
+    @Override
+    public synchronized List<Pet> getAvailablePets() {
+        return pets.values().stream()
+                .filter(pet -> pet.getStatus() == PetStatus.AVAILABLE)
+                .toList();
     }
 
     @Override
@@ -98,7 +115,7 @@ public class FilePetDataAccessObject implements ManagePetDataAccessInterface,
         return pet.getName();
     }
 
-    private Map<String, Pet> load() {
+    private Map<String, Pet> load(List<Pet> initialPets) {
         final Map<String, Pet> loaded = new LinkedHashMap<>();
         try {
             final JSONArray array = new JSONArray(Files.readString(jsonPath));
@@ -108,11 +125,11 @@ public class FilePetDataAccessObject implements ManagePetDataAccessInterface,
                     throw new JSONException("Duplicate pet ID: " + pet.getId());
                 }
             }
-        }
-        catch (NoSuchFileException ex) {
-            return loaded;
-        }
-        catch (IOException | JSONException | IllegalArgumentException ex) {
+        } catch (NoSuchFileException ex) {
+            for (Pet pet : initialPets) {
+                loaded.put(pet.getId(), pet);
+            }
+        } catch (IOException | JSONException | IllegalArgumentException ex) {
             throw new IllegalStateException("Could not load pets from " + jsonPath, ex);
         }
         return loaded;

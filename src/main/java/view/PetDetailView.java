@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.event.KeyEvent;
+import java.util.function.BiConsumer;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -30,6 +31,8 @@ public class PetDetailView extends JPanel implements PetDetailViewModelListener 
     private final JLabel photoLabel = new JLabel("No photo yet", SwingConstants.CENTER);
     private final JPanel linesPanel = new JPanel();
     private final JLabel errorLabel = new JLabel();
+    private final JButton applyButton = new JButton("Apply to adopt");
+    private BiConsumer<String, String> applyHandler;
 
     /**
      * Creates the detail page.
@@ -74,10 +77,39 @@ public class PetDetailView extends JPanel implements PetDetailViewModelListener 
         content.add(Box.createVerticalStrut(GAP));
         content.add(linesPanel);
         content.add(errorLabel);
+        content.add(Box.createVerticalStrut(GAP));
+        applyButton.setMnemonic(KeyEvent.VK_A);
+        applyButton.getAccessibleContext().setAccessibleName("Apply to adopt this cat");
+        applyButton.addActionListener(event -> apply());
+        applyButton.setVisible(false);
+        content.add(applyButton);
         for (java.awt.Component component : content.getComponents()) {
             ((javax.swing.JComponent) component).setAlignmentX(LEFT_ALIGNMENT);
         }
         add(content, BorderLayout.CENTER);
+    }
+
+    /**
+     * Sets what happens when the visitor presses Apply. Until this is set the Apply button stays hidden.
+     *
+     * @param applyHandler receives the cat's id and name
+     */
+    public void setApplyHandler(BiConsumer<String, String> applyHandler) {
+        this.applyHandler = applyHandler;
+        showApplyButtonIfPossible();
+    }
+
+    private void apply() {
+        final PetDetailState state = viewModel.getState();
+        if (applyHandler != null && state.getErrorMessage().isEmpty()) {
+            applyHandler.accept(state.getPetId(), state.getName());
+        }
+    }
+
+    private void showApplyButtonIfPossible() {
+        final PetDetailState state = viewModel.getState();
+        applyButton.setVisible(applyHandler != null && !state.getPetId().isEmpty()
+                && state.getErrorMessage().isEmpty());
     }
 
     @Override
@@ -100,5 +132,7 @@ public class PetDetailView extends JPanel implements PetDetailViewModelListener 
         }
         linesPanel.revalidate();
         linesPanel.repaint();
+        showApplyButtonIfPossible();
+        applyButton.getAccessibleContext().setAccessibleName("Apply to adopt " + state.getName());
     }
 }

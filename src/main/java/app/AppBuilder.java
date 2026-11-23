@@ -1,8 +1,13 @@
 package app;
 
+import java.awt.BorderLayout;
 import java.awt.CardLayout;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 
+import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
@@ -10,15 +15,30 @@ import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.WindowConstants;
 
+import data_access.CatApiBreedDataAccess;
 import data_access.FileApplicationDataAccessObject;
 import data_access.FilePetDataAccessObject;
+import data_access.FileUserDataAccessObject;
 import data_access.InMemoryPetDataAccess;
-import interface_adapter.SwitchViewController;
+import data_access.PetCatalog;
+import entity.Pet;
+import entity.UserFactory;
 import interface_adapter.ApplicationNavigator;
+import interface_adapter.SwitchViewController;
 import interface_adapter.ViewManagerModel;
+import interface_adapter.admin_signup.AdminSignupController;
+import interface_adapter.admin_signup.AdminSignupPresenter;
+import interface_adapter.admin_signup.AdminSignupViewModel;
 import interface_adapter.browse_pets.BrowsePetsController;
 import interface_adapter.browse_pets.BrowsePetsPresenter;
 import interface_adapter.browse_pets.GalleryViewModel;
+import interface_adapter.view_pet_details.PetDetailViewModel;
+import interface_adapter.view_pet_details.ViewPetDetailsController;
+import interface_adapter.view_pet_details.ViewPetDetailsPresenter;
+import interface_adapter.login.LoginController;
+import interface_adapter.login.LoginPresenter;
+import interface_adapter.login.LoginState;
+import interface_adapter.login.LoginViewModel;
 import interface_adapter.manage_pet.ManagePetController;
 import interface_adapter.manage_pet.ManagePetPresenter;
 import interface_adapter.manage_pet.ManagePetViewModel;
@@ -28,18 +48,22 @@ import interface_adapter.submit_application.SubmitApplicationViewModel;
 import interface_adapter.track_applications.TrackApplicationsController;
 import interface_adapter.track_applications.TrackApplicationsPresenter;
 import interface_adapter.track_applications.TrackApplicationsViewModel;
-import use_case.manage_pet.ManagePetDataAccessInterface;
+import use_case.admin_signup.AdminSignupInteractor;
+import use_case.browse_pets.BrowsePetsDataAccessInterface;
 import use_case.browse_pets.BrowsePetsInteractor;
-import use_case.manage_pet.ManagePetInteractor;
-import interface_adapter.view_pet_details.PetDetailViewModel;
-import interface_adapter.view_pet_details.ViewPetDetailsController;
-import interface_adapter.view_pet_details.ViewPetDetailsPresenter;
+import use_case.view_pet_details.ViewPetDetailsDataAccessInterface;
 import use_case.view_pet_details.ViewPetDetailsInteractor;
+import use_case.login.LoginInteractor;
+import use_case.manage_pet.BreedLookupInteractor;
+import use_case.manage_pet.ManagePetDataAccessInterface;
+import use_case.manage_pet.ManagePetInteractor;
 import use_case.submit_application.SubmitApplicationInteractor;
 import use_case.track_applications.TrackApplicationsInteractor;
+import view.AdminSignupView;
 import view.GalleryView;
-import view.PetDetailView;
+import view.LoginView;
 import view.ManagePetView;
+import view.PetDetailView;
 import view.MyApplicationsView;
 import view.SubmitApplicationView;
 import view.ViewManager;
@@ -53,6 +77,32 @@ public final class AppBuilder {
     private final ViewManagerModel viewManagerModel = new ViewManagerModel();
     private final ViewManager viewManager = new ViewManager(views, cardLayout, viewManagerModel);
     private ApplicationNavigator applicationNavigator;
+    private PetDetailView petDetailView;
+
+    static AppBuilder forDataDirectory(Path dataDirectory, Path applicationDirectory, String inviteCode)
+            throws IOException {
+        Files.createDirectories(dataDirectory);
+        final Path petFile = dataDirectory.resolve("pets.json");
+        final Path previousPetFile = applicationDirectory.resolve("pets.json");
+        final List<Pet> initialPets;
+        if (Files.exists(petFile)) {
+            initialPets = List.of();
+        } else if (Files.exists(previousPetFile)) {
+            initialPets = new FilePetDataAccessObject(previousPetFile).getPets();
+        } else {
+            initialPets = InMemoryPetDataAccess.withSampleData().getAvailablePets();
+        }
+        final FilePetDataAccessObject pets = new FilePetDataAccessObject(petFile, initialPets);
+        final UserFactory userFactory = new UserFactory();
+        final FileUserDataAccessObject users = new FileUserDataAccessObject(dataDirectory.resolve("users.json"),
+                userFactory);
+        final AppBuilder builder = new AppBuilder();
+        builder.addShelterLogin(users, userFactory, inviteCode);
+        builder.addPetManagementView(pets, users);
+        builder.addGalleryView(pets, new PetCatalog(pets),
+                builder.navigationButton("Shelter login", LoginViewModel.VIEW_NAME));
+        return builder.addApplicationViews(pets, applicationDirectory.resolve("applications.json"));
+    }
 
     /**
      * Adds the pet gallery screen.
@@ -60,25 +110,91 @@ public final class AppBuilder {
      * @return this builder
      */
     public AppBuilder addGalleryView() {
-        final InMemoryPetDataAccess petData = InMemoryPetDataAccess.withSampleData();
+        final InMemoryPetDataAccess sampleData = InMemoryPetDataAccess.withSampleData();
+        addGalleryView(sampleData, sampleData, null);
+        return this;
+    }
 
+    private void addGalleryView(BrowsePetsDataAccessInterface petData, ViewPetDetailsDataAccessInterface detailData,
+                                JButton shelterLogin) {
         final PetDetailViewModel detailViewModel = new PetDetailViewModel();
         final ViewPetDetailsPresenter detailsPresenter =
                 new ViewPetDetailsPresenter(detailViewModel, viewManagerModel);
         final ViewPetDetailsController detailsController =
-                new ViewPetDetailsController(new ViewPetDetailsInteractor(petData, detailsPresenter));
-        final PetDetailView detailView = new PetDetailView(
+                new ViewPetDetailsController(new ViewPetDetailsInteractor(detailData, detailsPresenter));
+        petDetailView = new PetDetailView(
                 detailViewModel, new SwitchViewController(viewManagerModel), GalleryView.VIEW_NAME);
-        views.add(detailView, PetDetailViewModel.VIEW_NAME);
+        views.add(petDetailView, PetDetailViewModel.VIEW_NAME);
+        connectApplyButton();
 
         final GalleryViewModel galleryViewModel = new GalleryViewModel();
         final BrowsePetsPresenter presenter = new BrowsePetsPresenter(galleryViewModel);
         final BrowsePetsInteractor interactor = new BrowsePetsInteractor(petData, presenter);
         final BrowsePetsController controller = new BrowsePetsController(interactor);
         final GalleryView galleryView = new GalleryView(controller, galleryViewModel, detailsController);
-        galleryView.loadAll();
-        views.add(galleryView, GalleryView.VIEW_NAME);
-        return this;
+        final JPanel gallery = shelterLogin == null ? galleryView : withNavigation(galleryView, shelterLogin);
+        views.add(gallery, GalleryView.VIEW_NAME);
+        viewManagerModel.addPropertyChangeListener(event -> {
+            if (ViewManagerModel.ACTIVE_VIEW.equals(event.getPropertyName())
+                    && GalleryView.VIEW_NAME.equals(event.getNewValue())) {
+                galleryView.loadAll();
+            }
+        });
+    }
+
+    private void connectApplyButton() {
+        if (petDetailView != null && applicationNavigator != null) {
+            petDetailView.setApplyHandler(applicationNavigator::startApplication);
+        }
+    }
+
+    private void addShelterLogin(FileUserDataAccessObject users, UserFactory userFactory, String inviteCode) {
+        final LoginViewModel loginViewModel = new LoginViewModel();
+        final LoginPresenter loginPresenter = new LoginPresenter(viewManagerModel, loginViewModel);
+        final LoginView loginView = new LoginView(loginViewModel, () -> {
+            loginViewModel.setState(new LoginState());
+            loginViewModel.notifyStateChanged();
+            viewManagerModel.setActiveView(GalleryView.VIEW_NAME);
+        });
+        loginView.setLoginController(new LoginController(new LoginInteractor(users, loginPresenter)));
+        if (inviteCode == null || inviteCode.isBlank()) {
+            views.add(loginView, LoginViewModel.VIEW_NAME);
+        } else {
+            final AdminSignupViewModel signupViewModel = new AdminSignupViewModel();
+            final AdminSignupPresenter signupPresenter =
+                    new AdminSignupPresenter(viewManagerModel, signupViewModel, loginViewModel);
+            final AdminSignupView signupView = new AdminSignupView(signupViewModel);
+            final AdminSignupInteractor signupInteractor =
+                    new AdminSignupInteractor(users, signupPresenter, userFactory, inviteCode);
+            signupView.setSignupController(new AdminSignupController(signupInteractor));
+            views.add(signupView, AdminSignupViewModel.VIEW_NAME);
+            final JButton signup = navigationButton("Create shelter account", AdminSignupViewModel.VIEW_NAME);
+            views.add(withNavigation(loginView, signup), LoginViewModel.VIEW_NAME);
+        }
+    }
+
+    private void addPetManagementView(ManagePetDataAccessInterface pets, FileUserDataAccessObject users) {
+        final JButton signOut = new JButton("Sign out");
+        signOut.addActionListener(event -> {
+            users.setCurrentUserId(null);
+            viewManagerModel.setActiveView(GalleryView.VIEW_NAME);
+        });
+        views.add(withNavigation(buildPetManagement(pets), signOut), ManagePetViewModel.VIEW_NAME);
+    }
+
+    private JButton navigationButton(String label, String destination) {
+        final JButton button = new JButton(label);
+        button.addActionListener(event -> viewManagerModel.setActiveView(destination));
+        return button;
+    }
+
+    private static JPanel withNavigation(JPanel screen, JButton button) {
+        final JPanel panel = new JPanel(new BorderLayout());
+        final JPanel navigation = new JPanel();
+        navigation.add(button);
+        panel.add(navigation, BorderLayout.NORTH);
+        panel.add(screen, BorderLayout.CENTER);
+        return panel;
     }
 
     /**
@@ -89,9 +205,12 @@ public final class AppBuilder {
      * @return this builder
      */
     public AppBuilder addApplicationViews() {
+        return addApplicationViews(new FilePetDataAccessObject(Path.of("pets.json")), Path.of("applications.json"));
+    }
+
+    private AppBuilder addApplicationViews(FilePetDataAccessObject petData, Path applicationFile) {
         final FileApplicationDataAccessObject applicationData =
-                new FileApplicationDataAccessObject("applications.json");
-        final FilePetDataAccessObject petData = new FilePetDataAccessObject(Path.of("pets.json"));
+                new FileApplicationDataAccessObject(applicationFile.toString());
 
         final SubmitApplicationViewModel submitViewModel = new SubmitApplicationViewModel();
         final SubmitApplicationView submitView = new SubmitApplicationView(submitViewModel);
@@ -108,6 +227,7 @@ public final class AppBuilder {
         views.add(myApplicationsView, TrackApplicationsViewModel.VIEW_NAME);
 
         applicationNavigator = new ApplicationNavigator(viewManagerModel, submitViewModel, trackViewModel);
+        connectApplyButton();
         return this;
     }
 
@@ -130,7 +250,9 @@ public final class AppBuilder {
         final ManagePetViewModel viewModel = new ManagePetViewModel();
         final ManagePetPresenter presenter = new ManagePetPresenter(viewModel);
         final ManagePetInteractor interactor = new ManagePetInteractor(petDataAccess, presenter);
-        final ManagePetController controller = new ManagePetController(interactor);
+        final CatApiBreedDataAccess breedDataAccess = new CatApiBreedDataAccess(System.getenv("THE_CAT_API_KEY"));
+        final ManagePetController controller = new ManagePetController(interactor,
+                new BreedLookupInteractor(breedDataAccess));
         final ManagePetView view = new ManagePetView(controller, viewModel);
         controller.refresh();
         return view;
@@ -147,6 +269,12 @@ public final class AppBuilder {
         menu.add(myApplications);
         final JMenuBar menuBar = new JMenuBar();
         menuBar.add(menu);
+        viewManagerModel.addPropertyChangeListener(event -> {
+            final Object activeView = event.getNewValue();
+            menu.setEnabled(!ManagePetViewModel.VIEW_NAME.equals(activeView)
+                    && !AdminSignupViewModel.VIEW_NAME.equals(activeView)
+                    && !LoginViewModel.VIEW_NAME.equals(activeView));
+        });
         return menuBar;
     }
 
@@ -158,13 +286,17 @@ public final class AppBuilder {
     public JFrame build() {
         final JFrame frame = new JFrame("PawPortal");
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-        frame.add(views);
+        frame.add(buildViews());
         if (applicationNavigator != null) {
             frame.setJMenuBar(createMenuBar());
         }
         frame.setSize(900, 600);
         frame.setLocationRelativeTo(null);
-        viewManagerModel.setActiveView(GalleryView.VIEW_NAME);
         return frame;
+    }
+
+    JPanel buildViews() {
+        viewManagerModel.setActiveView(GalleryView.VIEW_NAME);
+        return views;
     }
 }

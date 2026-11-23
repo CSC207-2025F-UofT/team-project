@@ -1,20 +1,42 @@
 package interface_adapter.manage_pet;
 
 import java.util.List;
+import java.util.Optional;
 
+import use_case.manage_pet.BreedLookupInputBoundary;
 import use_case.manage_pet.ManagePetInputBoundary;
 import use_case.manage_pet.ManagePetInputData;
 
 /** Translates Swing form actions into pet management requests. */
 public final class ManagePetController {
     private final ManagePetInputBoundary interactor;
+    private final BreedLookupInputBoundary breedLookup;
 
     /**
      * Creates a controller with the use case's input boundary.
      * @param interactor the input boundary
      */
     public ManagePetController(ManagePetInputBoundary interactor) {
+        this(interactor, name -> Optional.empty());
+    }
+
+    /**
+     * Creates a controller for listing changes and breed suggestions.
+     * @param interactor the listing input boundary
+     * @param breedLookup the breed lookup input boundary
+     */
+    public ManagePetController(ManagePetInputBoundary interactor, BreedLookupInputBoundary breedLookup) {
         this.interactor = interactor;
+        this.breedLookup = breedLookup;
+    }
+
+    /**
+     * Looks up general breed information without editing the listing.
+     * @param name the typed breed name
+     * @return suggestions when the breed is known
+     */
+    public Optional<BreedReferenceViewData> lookupBreed(String name) {
+        return breedLookup.lookup(name).map(ManagePetPresenter::toViewData);
     }
 
     /** Refreshes the listings. */

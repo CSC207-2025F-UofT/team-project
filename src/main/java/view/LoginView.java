@@ -1,21 +1,28 @@
 package view;
 
+import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+import javax.swing.BoxLayout;
+import javax.swing.JButton;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JPasswordField;
+import javax.swing.JTextField;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
+
 import interface_adapter.login.LoginController;
 import interface_adapter.login.LoginState;
 import interface_adapter.login.LoginViewModel;
-
 import interface_adapter.login.LoginViewModelListener;
-import javax.swing.*;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
-import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
 /**
  * The View for when the user is logging into the program.
  */
-public class LoginView extends JPanel implements ActionListener, LoginViewModelListener {
+public class LoginView extends JPanel implements LoginViewModelListener {
 
     private final LoginViewModel loginViewModel;
 
@@ -28,7 +35,12 @@ public class LoginView extends JPanel implements ActionListener, LoginViewModelL
     private final JButton cancel;
     private LoginController loginController = null;
 
-    public LoginView(LoginViewModel loginViewModel) {
+    /**
+     * Creates the login screen.
+     * @param loginViewModel displays login state and errors
+     * @param cancelLogin returns to the public gallery
+     */
+    public LoginView(LoginViewModel loginViewModel, Runnable cancelLogin) {
 
         this.loginViewModel = loginViewModel;
         this.loginViewModel.addListener(this);
@@ -62,7 +74,7 @@ public class LoginView extends JPanel implements ActionListener, LoginViewModelL
                 }
         );
 
-        cancel.addActionListener(this);
+        cancel.addActionListener(event -> cancelLogin.run());
 
         emailInputField.getDocument().addDocumentListener(new DocumentListener() {
 
@@ -131,14 +143,6 @@ public class LoginView extends JPanel implements ActionListener, LoginViewModelL
         return panel;
     }
 
-    /**
-     * React to a button click that results in evt.
-     * @param evt the ActionEvent to react to
-     */
-    public void actionPerformed(ActionEvent evt) {
-        System.out.println("Click " + evt.getActionCommand());
-    }
-
     @Override
     public void stateChanged() {
         setFields(loginViewModel.getState());
@@ -146,7 +150,12 @@ public class LoginView extends JPanel implements ActionListener, LoginViewModelL
     }
 
     private void setFields(LoginState state) {
-        emailInputField.setText(state.getEmail());
+        if (!emailInputField.getText().equals(state.getEmail())) {
+            emailInputField.setText(state.getEmail());
+        }
+        if (state.getPassword().isEmpty()) {
+            passwordInputField.setText("");
+        }
     }
 
     public void setLoginController(LoginController loginController) {

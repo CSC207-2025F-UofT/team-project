@@ -10,6 +10,9 @@ import entity.Temperament;
 
 /** Display state observed by the pet management screen. */
 public final class ManagePetViewModel {
+    /** Name the pet management screen is registered under in the view manager. */
+    public static final String VIEW_NAME = "manage pets";
+
     private final PropertyChangeSupport changes = new PropertyChangeSupport(this);
     private List<PetViewData> pets = List.of();
     private List<PetViewData> availablePets = List.of();

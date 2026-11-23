@@ -1,6 +1,10 @@
 package app;
 
+import java.io.IOException;
+import java.nio.file.Path;
+
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 
 /**
@@ -15,8 +19,15 @@ public class Main {
      */
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
-            final JFrame frame = new AppBuilder().addGalleryView().addApplicationViews().build();
-            frame.setVisible(true);
+            final Path dataDirectory = Path.of(System.getProperty("user.home"), ".pawportal");
+            try {
+                final String inviteCode = System.getenv("PAWPORTAL_ADMIN_INVITE_CODE");
+                final JFrame frame = AppBuilder.forDataDirectory(dataDirectory, Path.of("."), inviteCode).build();
+                frame.setVisible(true);
+            } catch (IOException | IllegalStateException exception) {
+                JOptionPane.showMessageDialog(null, "Could not open PawPortal data in " + dataDirectory + ".",
+                        "PawPortal", JOptionPane.ERROR_MESSAGE);
+            }
         });
     }
 }
