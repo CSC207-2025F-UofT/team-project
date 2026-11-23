@@ -1,7 +1,9 @@
 package app;
 
 import data_access.FileUserDataAccessObject;
+import data_access.InMemoryPetDataAccessObject;
 import data_access.GoogleDesktopIdentityGateway;
+import data_access.ApiPetImageDataAccessObject;
 import entity.UserFactory;
 import interface_adapter.ViewManagerModel;
 import interface_adapter.google_login.GoogleLoginController;
@@ -16,6 +18,14 @@ import interface_adapter.logout.LogoutPresenter;
 import interface_adapter.signup.SignupController;
 import interface_adapter.signup.SignupPresenter;
 import interface_adapter.signup.SignupViewModel;
+import interface_adapter.adopt_pet.AdoptPetViewModel;
+import interface_adapter.interact_with_pet.InteractWithPetController;
+import interface_adapter.interact_with_pet.InteractWithPetPresenter;
+import interface_adapter.interact_with_pet.InteractWithPetViewModel;
+import interface_adapter.get_pet_picture.GetPetPictureController;
+import interface_adapter.get_pet_picture.GetPetPicturePresenter;
+import interface_adapter.adopt_pet.AdoptPetController;
+import interface_adapter.adopt_pet.AdoptPetPresenter;
 import use_case.change_password.ChangePasswordInputBoundary;
 import use_case.change_password.ChangePasswordInteractor;
 import use_case.change_password.ChangePasswordOutputBoundary;
@@ -30,10 +40,17 @@ import use_case.logout.LogoutOutputBoundary;
 import use_case.signup.SignupInputBoundary;
 import use_case.signup.SignupInteractor;
 import use_case.signup.SignupOutputBoundary;
+import use_case.interact_with_pet.InteractWithPetInteractor;
+import use_case.get_pet_picture.GetPetPictureInteractor;
+import use_case.get_pet_picture.GetPetPictureOutputBoundary;
+import use_case.adopt_pet.AdoptPetInteractor;
 import view.LoggedInView;
 import view.LoginView;
 import view.SignupView;
 import view.ViewManager;
+import view.AdoptPetView;
+import view.InteractWithPetView;
+
 
 import javax.swing.*;
 import java.awt.*;
@@ -58,6 +75,14 @@ public class AppBuilder {
     private LoggedInViewModel loggedInViewModel;
     private LoggedInView loggedInView;
     private LoginView loginView;
+    private final InMemoryPetDataAccessObject petDataAccessObject =
+            new InMemoryPetDataAccessObject();
+
+    private AdoptPetViewModel adoptPetViewModel;
+    private InteractWithPetViewModel interactWithPetViewModel;
+
+    private AdoptPetView adoptPetView;
+    private InteractWithPetView interactWithPetView;
 
     public AppBuilder() {
         cardPanel.setLayout(cardLayout);
@@ -81,6 +106,47 @@ public class AppBuilder {
         loggedInViewModel = new LoggedInViewModel();
         loggedInView = new LoggedInView(loggedInViewModel);
         cardPanel.add(loggedInView, LoggedInViewModel.VIEW_NAME);
+        return this;
+    }
+
+    public AppBuilder addAdoptPetView() {
+        adoptPetViewModel = new AdoptPetViewModel();
+        adoptPetView = new AdoptPetView(adoptPetViewModel);
+
+        cardPanel.add(adoptPetView, AdoptPetViewModel.VIEW_NAME);
+        return this;
+    }
+
+    public AppBuilder addInteractWithPetView() {
+        interactWithPetViewModel = new InteractWithPetViewModel();
+        interactWithPetView =
+                new InteractWithPetView(interactWithPetViewModel);
+
+        cardPanel.add(
+                interactWithPetView,
+                InteractWithPetViewModel.VIEW_NAME
+        );
+        return this;
+    }
+
+    public AppBuilder addInteractWithPetUseCase() {
+        InteractWithPetPresenter presenter =
+                new InteractWithPetPresenter(
+                        adoptPetViewModel,
+                        interactWithPetViewModel,
+                        viewManagerModel
+                );
+
+        InteractWithPetInteractor interactor =
+                new InteractWithPetInteractor(
+                        petDataAccessObject,
+                        presenter
+                );
+
+        InteractWithPetController controller =
+                new InteractWithPetController(interactor);
+
+        loggedInView.setInteractWithPetController(controller);
         return this;
     }
 
@@ -183,6 +249,59 @@ public class AppBuilder {
                 }
             }.execute();
         });
+        return this;
+    }
+
+    public AppBuilder addGetPetPictureUseCase() {
+        ApiPetImageDataAccessObject imageDataAccess =
+                new ApiPetImageDataAccessObject();
+
+        GetPetPicturePresenter presenter =
+                new GetPetPicturePresenter(adoptPetViewModel);
+
+        GetPetPictureOutputBoundary uiOutput =
+                new GetPetPictureOutputBoundary() {
+                    @Override
+                    public void prepareSuccessView(String imageUrl) {
+                        SwingUtilities.invokeLater(
+                                () -> presenter.prepareSuccessView(imageUrl)
+                        );
+                    }
+
+                    @Override
+                    public void prepareFailView(String errorMessage) {
+                        SwingUtilities.invokeLater(
+                                () -> presenter.prepareFailView(errorMessage)
+                        );
+                    }
+                };
+
+        GetPetPictureInteractor interactor =
+                new GetPetPictureInteractor(imageDataAccess, uiOutput);
+
+        GetPetPictureController controller =
+                new GetPetPictureController(interactor);
+
+        adoptPetView.setGetPetPictureController(controller);
+
+        return this;
+    }
+
+    public AppBuilder addAdoptPetUseCase() {
+        AdoptPetPresenter presenter = new AdoptPetPresenter(
+                adoptPetViewModel,
+                interactWithPetViewModel,
+                viewManagerModel
+        );
+
+        AdoptPetInteractor interactor = new AdoptPetInteractor(
+                petDataAccessObject,
+                presenter
+        );
+
+        AdoptPetController controller = new AdoptPetController(interactor);
+        adoptPetView.setAdoptPetController(controller);
+
         return this;
     }
 
