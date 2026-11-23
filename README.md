@@ -51,7 +51,9 @@ and view and edit them through My Custom Cocktails so that I can keep and reuse 
 ### User Story 3 [Jiaqi]
 As a user, I want to register an account, log in and log out, and access my personal profile so that I can securely manage my account and revisit my favourite cocktails and customized recipes.
 ### User Story 4 [Wenqian]
-As a user, I want to browse cocktails on the main page and save my favourite cocktails so that I can easily find and revisit them later.
+As a user, I want to browse cocktails on the main page and view the details of the recipes that I'm interested so that I can decide which cocktails I would like to make.
+### User Story 5 [Wenqian]
+As a user, I want to save my favourite cocktails so that I can easily find and revisit them later.
 
 ---
 
@@ -73,7 +75,7 @@ The user must enter a name, select at least one base spirit, or both.
 1. The user enters a name and/or selects base spirits in the Home search area.
 2. The user clicks Search.
 3. The system finds matching cocktails. Name matching is case-insensitive and
-   supports partial matches. A cocktail may match any selected spirit; when both
+   supports partial matches. A cocktail must match every selected spirit; when both
    name and spirit criteria are provided, both must be satisfied.
 4. The system displays matching cocktails using the same card layout as Home.
 5. The user selects a card to open Cocktail Details.
@@ -172,23 +174,54 @@ Invalid registration information
   2. The user remains on the Login page and can try again later.
 
 ### Use Case 4 [Wenqian]
-PRECONDTION
+**INPUT**
+
+Cocktail ID
+
+**OUTPUT**
+
+Cocktail details displyes
+
+**PRECONDTION**
+
 1. The application is running.
 2. The user is on the main page.
-
-MAIN SUCCESS SCENARIO
-1. User browses the cocktails.
-2. User click the cocktail.
-3. The system display the detail of this cocktail.
-4. User selects a cocktail they like.
-5. User clicks the "Favourite" button.
-6. The system saves the selected cocktail to the user's favourites.
    
-EXTENSION
-1. If the cocktail is already saved, the system informs the user and ask user whether to remove it from favourites.
-2. If saving fails, the system displays an error message.
+**MAIN SUCCESS SCENARIO**
 
-(Add additional use cases as needed.)
+1. User browses the cocktails displayed on the main page.
+2. User selects a cocktail.
+3. The system retrieves the cocktail details using its ID.
+4. The system displays the cocktail details to the user.
+   
+**EXTENSION**
+
+1. The selected cocktail does not exist.
+2. The system displays an error message.
+
+
+### Use Case 5 [Wenqian]
+**INPUT**
+
+User ID and Cocktail ID
+
+**OUTPUT**
+
+Updated favourite status
+
+**MAIN SUCCESS SCENARIO**
+
+1. User selects the favourite button (heart icon) on a cocktail.
+2. The system checks whether the cocktail is already in the user's favourites.
+3. If it is not a favourite, the system adds it to the user's favourites.
+4. If it is already a favourite, the system removes it.
+5. The system updates the heart icon to reflect the new favourite status.
+   
+**EXTENSION**
+
+1. The system cannot update the user's favourite list.
+2. The system displays an error message.
+
 ---
 
 ## Minimal Viable Product (MVP)

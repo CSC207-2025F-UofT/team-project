@@ -1,9 +1,21 @@
 package org.example.cocktailcraft.app;
 
-import javax.swing.SwingUtilities;
+import javax.swing.JFrame;
 
 public class Main {
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> new AppBuilder().build().setVisible(true));
+        AppBuilder appBuilder = new AppBuilder();
+        JFrame application = appBuilder
+                .addSearchView()
+                .addSearchUseCase()
+                .addClickUseCase()
+                .addMainPageView()
+                .build();
+
+        application.pack();
+        application.setLocationRelativeTo(null);
+        application.setVisible(true);
+
+        }
     }
-}
+
