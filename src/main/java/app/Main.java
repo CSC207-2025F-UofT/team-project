@@ -15,7 +15,7 @@ public class Main {
      */
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
-            final JFrame frame = new AppBuilder().addGalleryView().build();
+            final JFrame frame = new AppBuilder().addGalleryView().addApplicationViews().build();
             frame.setVisible(true);
         });
     }

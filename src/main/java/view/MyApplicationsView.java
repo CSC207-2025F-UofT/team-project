@@ -1,6 +1,8 @@
 package view;
 
 import java.awt.BorderLayout;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.util.List;
 
 import javax.swing.BorderFactory;
@@ -70,12 +72,23 @@ public final class MyApplicationsView extends JPanel implements TrackApplication
         add(top, BorderLayout.NORTH);
         add(new JScrollPane(table), BorderLayout.CENTER);
         add(bottom, BorderLayout.SOUTH);
+
+        // Load the latest applications every time the screen is opened.
+        addComponentListener(new ComponentAdapter() {
+            @Override
+            public void componentShown(ComponentEvent event) {
+                refresh();
+            }
+        });
     }
 
     /**
      * Asks for the current adopter's applications again.
      */
     public void refresh() {
+        if (trackApplicationsController == null) {
+            return;
+        }
         trackApplicationsController.execute(trackApplicationsViewModel.getState().getAdopterId());
     }
 
