@@ -1,23 +1,22 @@
 package interface_adapter.makeNewPlayer;
 
 //import interface_adapter.ViewManagerModel;
-//import interface_adapter.welcome.WelcomeState;
-//import interface_adapter.welcome.WelcomeViewModel;
+import interface_adapter.WelcomeMenu.WelcomeState;
+import interface_adapter.WelcomeMenu.WelcomeViewModel;
 import use_case.makeNewPlayer.NewPlayerOutputBoundary;
 import use_case.makeNewPlayer.NewPlayerOutputData;
 
 public class NewPlayerPresenter implements NewPlayerOutputBoundary{
     private final NewPlayerViewModel newPlayerViewModel;
-    //private final MainMenuViewModel loginViewModel;
+    private final WelcomeViewModel welcomeViewModel;
     private final ViewManagerModel viewManagerModel;
 
     public NewPlayerPresenter(ViewManagerModel viewManagerModel,
-                           SignupViewModel signupViewModel//,
-                           //LoginViewModel loginViewModel
-    ) {
+                           NewPlayerViewModel newPlayerViewModel,
+                           WelcomeViewModel welcomeViewModel) {
         this.viewManagerModel = viewManagerModel;
         this.newPlayerViewModel = newPlayerViewModel;
-        //this.loginViewModel = loginViewModel;
+        this.welcomeViewModel = welcomeViewModel;
     }
 
     @Override
@@ -39,8 +38,8 @@ public class NewPlayerPresenter implements NewPlayerOutputBoundary{
     }
 
     @Override
-    public void switchToLoginView() {
-        viewManagerModel.setState(LoginViewModel.VIEW_NAME);
+    public void switchToWelcomeView() {
+        viewManagerModel.setState(WelcomeViewModel.VIEW_NAME);
         viewManagerModel.notifyViewChanged();
     }
 
