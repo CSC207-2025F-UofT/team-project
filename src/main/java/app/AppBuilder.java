@@ -2,23 +2,34 @@ package app;
 
 import dataaccess.ApiStockDataAccessObject;
 import dataaccess.CachedStockHistoryDataAccessObject;
+import dataaccess.EstimateROIDataAccessObject;                    // NEW
 import dataaccess.FileRiskProfileSettingsDataAccessObject;
 import dataaccess.FileWatchlistDataAccessObject;
+import interfaceadapter.estimateroi.EstimateROIController;        // NEW
+import interfaceadapter.estimateroi.EstimateROIPresenter;         // NEW
+import interfaceadapter.estimateroi.EstimateROIViewModel;         // NEW
 import interfaceadapter.setriskprofile.SetRiskProfileController;
 import interfaceadapter.setriskprofile.SetRiskProfilePresenter;
 import interfaceadapter.setriskprofile.SetRiskProfileViewModel;
 import interfaceadapter.viewstockinfo.ViewStockInfoController;
 import interfaceadapter.viewstockinfo.ViewStockInfoPresenter;
 import interfaceadapter.viewstockinfo.ViewStockInfoViewModel;
+import java.awt.BorderLayout;                                     // NEW
 import java.io.IOException;
 import javax.swing.JFrame;
+import javax.swing.JPanel;                                        // NEW
 import javax.swing.JTabbedPane;
+import javax.swing.SwingUtilities;                                // NEW
 import javax.swing.WindowConstants;
+import usecase.estimateroi.EstimateROIInputBoundary;              // NEW
+import usecase.estimateroi.EstimateRoiInteractor;                 // NEW
 import usecase.setriskprofile.SetRiskProfileInputBoundary;
 import usecase.setriskprofile.SetRiskProfileInteractor;
 import usecase.shared.projection.TargetGainSellStrategy;
 import usecase.viewstockinfo.ViewStockInfoInputBoundary;
 import usecase.viewstockinfo.ViewStockInfoInteractor;
+import usecase.viewstockinfo.ViewStockInfoOutputData;             // NEW
+import view.EstimateROIView;                                      // NEW
 import view.SetRiskProfileView;
 import view.ViewStockInfoView;
 
@@ -80,7 +91,7 @@ public class AppBuilder {
   }
 
   /**
-   * Adds and wires the Stock Info tab.
+   * Adds and wires the Stock Info tab, including the Estimate ROI panel.
    *
    * @return This builder
    * @throws IOException If the watchlist directory cannot be opened
@@ -93,12 +104,36 @@ public class AppBuilder {
             new FileWatchlistDataAccessObject(WATCHLIST_FILE), presenter);
     ViewStockInfoController controller = new ViewStockInfoController(interactor);
     ViewStockInfoView view = new ViewStockInfoView(viewModel, controller);
+
+    //Estimate ROI (Use Case 4)
+    EstimateROIViewModel roiViewModel = new EstimateROIViewModel();
+    EstimateROIInputBoundary roiInteractor = new EstimateRoiInteractor(
+            new EstimateROIDataAccessObject(stockDataAccessObject),
+            new EstimateROIPresenter(roiViewModel));
+    EstimateROIView roiView = new EstimateROIView(roiViewModel,
+            new EstimateROIController(roiInteractor));
+
+    //tell the ROI panel which stock the user is currently viewing
+    viewModel.addPropertyChangeListener(evt -> {
+      if (ViewStockInfoViewModel.RESULT_PROPERTY.equals(evt.getPropertyName())) {
+        ViewStockInfoOutputData result = viewModel.getState().getResult();
+        String ticker = result == null ? null : result.getTicker();
+        SwingUtilities.invokeLater(() -> roiView.setTicker(ticker));
+      }
+    });
+
+    //put the Stock Info view and the ROI panel together in one tab
+    JPanel stockTab = new JPanel(new BorderLayout());
+    stockTab.add(view, BorderLayout.CENTER);
+    stockTab.add(roiView, BorderLayout.SOUTH);
+
+    // CHANGED: "view" became "stockTab" in the two lines marked below
     tabs.addChangeListener(event -> {
-      if (tabs.getSelectedComponent() == view) {
+      if (tabs.getSelectedComponent() == stockTab) {      // was: == view
         controller.loadWatchlist();
       }
     });
-    tabs.addTab("Stock Info", view);
+    tabs.addTab("Stock Info", stockTab);                   // was: view
     return this;
   }
 
