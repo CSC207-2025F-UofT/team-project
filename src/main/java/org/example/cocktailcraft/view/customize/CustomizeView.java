@@ -190,4 +190,14 @@ public class CustomizeView extends JPanel implements CustomizeViewModelListener 
             messageLabel.setText(" ");
         }
     }
+
+    public void setCancelAction(Runnable action) {
+        cancelButton.addActionListener(event -> {
+            if (ingredientTable.isEditing()) {
+                ingredientTable.getCellEditor().cancelCellEditing();
+            }
+
+            action.run();
+        });
+    }
 }
