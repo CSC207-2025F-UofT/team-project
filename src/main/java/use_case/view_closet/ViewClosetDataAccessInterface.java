@@ -7,4 +7,5 @@ import java.util.List;
  * TODO: RIE
  */
 public interface ViewClosetDataAccessInterface {
+    List<ClothingItem> getAllItems();
 }
