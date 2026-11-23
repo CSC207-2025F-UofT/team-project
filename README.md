@@ -372,6 +372,63 @@ Implemented by `data_access.InMemoryGameStateDataAccessObject`. Interactors get 
 
 **Use case: `use_case/new_game/`**: `NewGameInputBoundary.execute(NewGameInputData)` → `NewGameInteractor` (creates the game with `GameState.startNew()`, saves it, presents it) → `NewGameOutputBoundary.prepareSuccessView(NewGameOutputData)` → `NewGamePresenter` (fills `HudViewModel`, switches to `"game"`). `NewGameInputData` is empty for now; Story 1 adds the username.
 
+### Talking to characters (Story 4)
+
+Merged in the Story 4 PR. Stories 7 and 11 build on these.
+
+**Entities (implemented now)**
+
+| Class | What you can rely on |
+|---|---|
+| `NPC` | `id, name, startNodeId` and a list of nodes. `getNode(nodeId)` returns the node or `null`; `getStartNode()` is where every conversation begins. `locationId` and `persona` arrive with Stories 7 and 11. |
+| `DialogueNode` | `id, text` (what the character says) and its options. `getOption(optionId)` returns the option or `null`. |
+| `DialogueOption` | `id, text` (the words on the button) and an `Outcome`. For now every option ends the conversation; Story 7 adds `nextNodeId`. |
+
+**Content: `src/main/resources/dialogues.json`**
+
+```json
+{
+  "npcs": [
+    {
+      "id": "shawarma_lady",
+      "name": "Shawarma Lady",
+      "startNodeId": "greeting",
+      "nodes": [
+        {
+          "id": "greeting",
+          "text": "What the character says.",
+          "options": [
+            {
+              "id": "ask_about_day",
+              "text": "The words on the button",
+              "message": "What happens when the player picks it.",
+              "energy": -5, "sanity": 10, "academic": 0, "money": 0
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
+```
+
+`message` and the four stat changes are optional (they default to an empty message and 0). Adding a character or a response means editing this file only, with no code change. The file is read with `org.json`, which this story adds to `pom.xml`.
+
+**Use case: `use_case/talk_to_npc/`**: `TalkToNpcInputBoundary` has three methods, one per step of a conversation.
+
+- `start(StartTalkInputData)`: looks up the character and presents their greeting and options (`prepareDialogueView`). Changes nothing in the game.
+- `choose(ChooseOptionInputData)`: finds the option by `npcId, nodeId, optionId`, hands its `Outcome` to `GameState.apply`, and presents the message and the new stats (`prepareResultView`). The output data has a `gameOver` flag for when a stat hit 0.
+- `leave()`: goes back to the game screen (`prepareGameView`).
+
+Anything that goes wrong (no game, game already over, unknown character or option) goes to `prepareFailView(message)`. Characters come from `DialogueDataAccessInterface.getNpc(npcId)`, implemented by `data_access.JsonDialogueDataAccessObject`.
+
+**Screens**
+
+- `interface_adapter.talk_to_npc.DialogueViewModel` / `DialogueState`: who is talking, what they said, the options, and after a choice the result message. It fires `"state"` to redraw and `"error"` to show an error message.
+- `view.DialogueView` (card `"dialogue"`) shows the `StatsPanel`, the speech and one button per option, then a Back button after a choice.
+- `view.GameView` now has a **temporary** "Talk to the Shawarma Lady" button (`GameView.SHAWARMA_LADY_ID`). Story 7 replaces it with whoever is at the player's building.
+- `TalkToNpcPresenter` updates `HudViewModel` after a choice by copying the current `HudState` and replacing the four stats, so the day is kept.
+
 ## API Usage
 
 **API Name:** Open-Meteo (weather forecast, free, no API key)
