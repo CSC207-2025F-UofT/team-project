@@ -3,9 +3,9 @@ package use_case.makeNewPlayer;
 public interface NewPlayerInputBoundary {
     /**
      * Executes use case 1.
-     * @param NewPlayerInputData the input data
+     * @param newPlayerInputData the input data
      */
-    void execute(NewPlayerInputData signupInputData);
+    void execute(NewPlayerInputData newPlayerInputData);
 
     /**
      * Executes the switch to welcome view.
