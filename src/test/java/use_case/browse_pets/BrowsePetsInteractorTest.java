@@ -24,16 +24,16 @@ class BrowsePetsInteractorTest {
         }
     }
 
-    private Pet pet(String id, Species species, PetStatus status) {
-        return new Pet(id, "Pet" + id, species, "Mixed", 2, PetSex.FEMALE, List.of(), "", false, true, true,
+    private Pet pet(String id, int age, PetStatus status) {
+        return new Pet(id, "Pet" + id, Species.CAT, "Mixed", age, PetSex.FEMALE, List.of(), "", false, true, true,
                 BigDecimal.TEN, "", status);
     }
 
     private FakePresenter run(List<PetFilter> filters) {
         final InMemoryPetDataAccess dataAccess = new InMemoryPetDataAccess(List.of(
-                pet("1", Species.CAT, PetStatus.AVAILABLE),
-                pet("2", Species.DOG, PetStatus.AVAILABLE),
-                pet("3", Species.DOG, PetStatus.ADOPTED)));
+                pet("1", 1, PetStatus.AVAILABLE),
+                pet("2", 5, PetStatus.AVAILABLE),
+                pet("3", 5, PetStatus.ADOPTED)));
         final FakePresenter presenter = new FakePresenter();
         new BrowsePetsInteractor(dataAccess, presenter).execute(new BrowsePetsInputData(filters));
         return presenter;
@@ -46,7 +46,9 @@ class BrowsePetsInteractorTest {
 
     @Test
     void adoptedPetsAreNeverShown() {
-        final FakePresenter presenter = run(List.of(new SpeciesFilter(Species.DOG)));
+        final PetFilter olderThanThree = pet -> pet.getAgeYears() > 3;
+
+        final FakePresenter presenter = run(List.of(olderThanThree));
 
         assertEquals(1, presenter.shown.size());
         assertEquals("2", presenter.shown.get(0).getId());
@@ -54,8 +56,9 @@ class BrowsePetsInteractorTest {
 
     @Test
     void allFiltersMustPass() {
+        final PetFilter olderThanThree = pet -> pet.getAgeYears() > 3;
         final PetFilter rejectEverything = pet -> false;
 
-        assertEquals(0, run(List.of(new SpeciesFilter(Species.DOG), rejectEverything)).shown.size());
+        assertEquals(0, run(List.of(olderThanThree, rejectEverything)).shown.size());
     }
 }
