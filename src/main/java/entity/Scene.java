@@ -51,17 +51,14 @@ public class Scene {
         balls.add(Objects.requireNonNull(ball, "ball"));
     }
 
-    /** Removes the first matching ball; returns whether a ball was removed. */
     public boolean removeBall(Ball ball) {
         return balls.remove(ball);
     }
 
-    /** Returns an unmodifiable view of the balls in this scene. */
     public List<Ball> getBalls() {
         return Collections.unmodifiableList(balls);
     }
 
-    /** Creates an independent scene with copied ball state. */
     public Scene copy() {
         Scene copy = new Scene(terrain);
         copy.gravity = gravity;
