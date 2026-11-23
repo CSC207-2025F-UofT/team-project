@@ -22,7 +22,6 @@ public final class SceneSnapshot {
         return new SceneSnapshot(states);
     }
 
-    /** Restores captured position and velocity by the balls' current list order. */
     public void restore(Scene scene) {
         Objects.requireNonNull(scene, "scene");
         if (scene.getBalls().size() != ballStates.size()) {
