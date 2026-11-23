@@ -1,0 +1,55 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+
+autonumber
+
+participant "LoginView" as View
+participant "AuthController" as Controller
+participant "AuthService" as Service
+participant "UserRepository" as Repo
+database "Stored Users" as Storage
+participant "SessionManager" as Session
+
+== Input Data ==
+
+View -> Controller: login(LoginInput)
+note right of View
+  **LoginInput**
+  username
+  password
+end note
+
+== Credential Check ==
+
+Controller -> Service: authenticate(LoginInput)
+Service -> Repo: findByUsername(username)
+Repo -> Storage: read user record
+Storage --> Repo: User or not found
+Repo --> Service: User or null
+
+alt user not found or password does not match
+    Service --> Controller: AuthError("Invalid username or password")
+    Controller --> View: Display error message
+else credentials match
+
+    == Create Session ==
+
+    Service -> Session: createSession(User)
+    Session --> Service: UserSession(userId, username)
+
+    == Output Data ==
+
+    Service --> Controller: LoginResult(UserSession)
+    Controller --> View: Confirmation: user is now logged in
+end
+
+== Cancel Login ==
+
+View -> Controller: cancelLogin()
+Controller --> View: Request cancellation confirmation
+View -> Controller: confirmCancellation()
+Controller -> Service: discardLoginInput(LoginInput)
+Service --> Controller: Input discarded (nothing saved)
+Controller --> View: Use case ends
+
+@enduml
