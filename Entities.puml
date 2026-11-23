@@ -35,6 +35,8 @@ enum SortingStrategy {
 }
 
 ' CA - Canada, US - USA, ET - Ethiopia, IN - India, FR - France, GH - Ghana
+' There are more country codes, below is just an example.
+' The implementation would contain a much more comprehensive list.
 enum Country {
   CA
   US
