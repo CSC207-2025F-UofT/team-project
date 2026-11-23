@@ -27,7 +27,9 @@ Using Submit Guess as the example:
 - `use_case/submit_guess/`: `SubmitGuessInputBoundary`, `SubmitGuessInputData`, `SubmitGuessInteractor`, `SubmitGuessOutputBoundary`, `SubmitGuessOutputData`, `SubmitGuessDataAccessInterface`
 - `interface_adapter/submit_guess/`: `SubmitGuessController`, `SubmitGuessPresenter`, `SubmitGuessViewModel` (and a `SubmitGuessState` if you want one)
 
-Each person creates their own files on their own branch. View models can extend `interface_adapter.ViewModel<T>`.
+Each person creates their own files on their own branch.
+
+View models follow the lab 6 (`ca-login`) style: each one has its own listener interface, e.g. `SubmitGuessViewModelListener` with `stateChanged()`, plus `addListener(...)` and `notifyStateChanged()` on the view model. The view implements the listener and registers itself. Put the view's `VIEW_NAME` and label text in its view model, like `SignupViewModel` in lab 6.
 
 ## Data access
 Interfaces live in `use_case`. Each use case only sees the methods it needs.
