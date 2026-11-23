@@ -149,6 +149,8 @@ public class LoggedInView extends JPanel implements ActionListener, LoggedInView
 
     public void setShowBudgetProgress(Runnable action) {
         viewBudgetProgress.addActionListener(event -> action.run());
+    }
+
     public void setInteractWithPetController(
             InteractWithPetController interactWithPetController) {
         this.interactWithPetController = interactWithPetController;

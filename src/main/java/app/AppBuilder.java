@@ -350,6 +350,9 @@ public class AppBuilder {
             viewManagerModel.setState(LoggedInViewModel.VIEW_NAME);
             viewManagerModel.notifyViewChanged();
         });
+        return this;
+        }
+
     public AppBuilder addGetPetPictureUseCase() {
         ApiPetImageDataAccessObject imageDataAccess =
                 new ApiPetImageDataAccessObject();
