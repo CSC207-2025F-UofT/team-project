@@ -20,6 +20,7 @@ import entity.PetSex;
 import entity.PetStatus;
 import entity.Species;
 import entity.Temperament;
+import use_case.track_applications.TrackApplicationsPetDataAccessInterface;
 
 class FilePetDataAccessObjectTest {
 
@@ -50,6 +51,15 @@ class FilePetDataAccessObjectTest {
         assertEquals(new BigDecimal("145.50"), loaded.getAdoptionFee());
         assertEquals("photos/mochi.jpg", loaded.getPhotoPath());
         assertEquals(PetStatus.AVAILABLE, loaded.getStatus());
+    }
+
+    @Test
+    void namesPetsForTrackApplications() {
+        final FilePetDataAccessObject pets = new FilePetDataAccessObject(folder.resolve("pets.json"));
+        pets.add(pet("Mochi", PetStatus.AVAILABLE));
+
+        final TrackApplicationsPetDataAccessInterface petNames = pets;
+        assertEquals("Mochi", petNames.getPetName("pet-1"));
     }
 
     @Test
