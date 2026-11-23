@@ -42,10 +42,10 @@ import use_case.change_password.ChangePasswordInputBoundary;
 import use_case.change_password.ChangePasswordInteractor;
 import use_case.change_password.ChangePasswordOutputBoundary;
 import use_case.google_login.GoogleLoginInteractor;
+import use_case.google_login.GoogleIdentityGateway;
 import use_case.login.LoginInputBoundary;
 import use_case.login.LoginInteractor;
 import use_case.login.LoginOutputBoundary;
-import use_case.login.LoginOutputData;
 import use_case.logout.LogoutInputBoundary;
 import use_case.logout.LogoutInteractor;
 import use_case.logout.LogoutOutputBoundary;
@@ -100,6 +100,7 @@ public class AppBuilder {
     private LoggedInViewModel loggedInViewModel;
     private LoggedInView loggedInView;
     private LoginView loginView;
+    private SwingWorker<String, Void> googleLoginWorker;
     private final InMemoryPetDataAccessObject petDataAccessObject =
             new InMemoryPetDataAccessObject();
 
@@ -245,44 +246,59 @@ public class AppBuilder {
             return this;
         }
 
-        LoginPresenter presenter = new LoginPresenter(viewManagerModel, loggedInViewModel, loginViewModel);
-        LoginOutputBoundary uiOutput = new LoginOutputBoundary() {
-            @Override
-            public void prepareSuccessView(LoginOutputData response) {
-                SwingUtilities.invokeLater(() -> presenter.prepareSuccessView(response));
-            }
+        return addGoogleLoginUseCase(new GoogleDesktopIdentityGateway(clientId, clientSecret));
+    }
 
-            @Override
-            public void prepareFailView(String error) {
-                SwingUtilities.invokeLater(() -> presenter.prepareFailView(error));
+    // Package visibility allows tests to supply an identity gateway without a browser.
+    AppBuilder addGoogleLoginUseCase(GoogleIdentityGateway gateway) {
+        LoginPresenter presenter = new LoginPresenter(viewManagerModel, loggedInViewModel, loginViewModel);
+        loginView.setGoogleLoginCancelAction(() -> {
+            SwingWorker<String, Void> pending = googleLoginWorker;
+            if (pending != null) {
+                // Invalidate first: an already queued completion must not start a session.
+                googleLoginWorker = null;
+                pending.cancel(true);
+                loginView.setGoogleLoginPending(false);
+                presenter.prepareFailView("Google sign-in cancelled. You can try again.");
             }
-        };
-        GoogleLoginController controller = new GoogleLoginController(new GoogleLoginInteractor(
-                new GoogleDesktopIdentityGateway(clientId, clientSecret), userDataAccessObject, uiOutput));
+        });
         loginView.setGoogleLoginAction(() -> {
+            if (googleLoginWorker != null) {
+                return;
+            }
             loginView.setGoogleLoginPending(true);
-            new SwingWorker<Void, Void>() {
+            googleLoginWorker = new SwingWorker<String, Void>() {
                 @Override
-                protected Void doInBackground() {
-                    controller.execute();
-                    return null;
+                protected String doInBackground() throws Exception {
+                    return gateway.authenticate();
                 }
 
                 @Override
                 protected void done() {
+                    if (googleLoginWorker != this) {
+                        return;
+                    }
+                    googleLoginWorker = null;
                     loginView.setGoogleLoginPending(false);
                     try {
-                        get();
+                        String subject = get();
+                        // Commit the session on the EDT, serialized with cancellation.
+                        new GoogleLoginController(new GoogleLoginInteractor(
+                                () -> subject, userDataAccessObject, presenter)).execute();
                     }
                     catch (InterruptedException exception) {
                         Thread.currentThread().interrupt();
                         presenter.prepareFailView("Google sign-in was interrupted.");
                     }
                     catch (ExecutionException exception) {
-                        presenter.prepareFailView("Google sign-in could not finish. Try again.");
+                        Throwable cause = exception.getCause();
+                        String message = cause instanceof java.io.IOException
+                                ? cause.getMessage() : "Google sign-in could not finish. Try again.";
+                        presenter.prepareFailView(message);
                     }
                 }
-            }.execute();
+            };
+            googleLoginWorker.execute();
         });
         return this;
     }
