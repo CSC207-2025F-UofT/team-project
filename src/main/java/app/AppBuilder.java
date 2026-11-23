@@ -3,8 +3,12 @@ package app;
 import data_access.FileUserDataAccessObject;
 import data_access.InMemoryPetDataAccessObject;
 import data_access.GoogleDesktopIdentityGateway;
+import data_access.InMemoryTransactionDataAccessObject;
+import data_access.InMemoryBudgetDataAccessObject;
+
 import data_access.ApiPetImageDataAccessObject;
 import entity.UserFactory;
+
 import interface_adapter.ViewManagerModel;
 import interface_adapter.google_login.GoogleLoginController;
 import interface_adapter.logged_in.ChangePasswordController;
@@ -15,9 +19,17 @@ import interface_adapter.login.LoginPresenter;
 import interface_adapter.login.LoginViewModel;
 import interface_adapter.logout.LogoutController;
 import interface_adapter.logout.LogoutPresenter;
+import interface_adapter.record_transaction.RecordTransactionController;
+import interface_adapter.record_transaction.RecordTransactionPresenter;
+import interface_adapter.record_transaction.RecordTransactionState;
+import interface_adapter.record_transaction.RecordTransactionViewModel;
 import interface_adapter.signup.SignupController;
 import interface_adapter.signup.SignupPresenter;
 import interface_adapter.signup.SignupViewModel;
+import interface_adapter.view_budget_progress.ViewBudgetProgressController;
+import interface_adapter.view_budget_progress.ViewBudgetProgressPresenter;
+import interface_adapter.view_budget_progress.ViewBudgetProgressViewModel;
+
 import interface_adapter.adopt_pet.AdoptPetViewModel;
 import interface_adapter.interact_with_pet.InteractWithPetController;
 import interface_adapter.interact_with_pet.InteractWithPetPresenter;
@@ -37,17 +49,24 @@ import use_case.login.LoginOutputData;
 import use_case.logout.LogoutInputBoundary;
 import use_case.logout.LogoutInteractor;
 import use_case.logout.LogoutOutputBoundary;
+import use_case.record_transaction.RecordTransactionInputBoundary;
+import use_case.record_transaction.RecordTransactionInteractor;
+import use_case.record_transaction.RecordTransactionOutputBoundary;
 import use_case.signup.SignupInputBoundary;
 import use_case.signup.SignupInteractor;
 import use_case.signup.SignupOutputBoundary;
+import use_case.view_budget_progress.ViewBudgetProgressInteractor;
+
 import use_case.interact_with_pet.InteractWithPetInteractor;
 import use_case.get_pet_picture.GetPetPictureInteractor;
 import use_case.get_pet_picture.GetPetPictureOutputBoundary;
 import use_case.adopt_pet.AdoptPetInteractor;
 import view.LoggedInView;
 import view.LoginView;
+import view.RecordTransactionView;
 import view.SignupView;
 import view.ViewManager;
+import view.ViewBudgetProgressView;
 import view.AdoptPetView;
 import view.InteractWithPetView;
 
@@ -69,6 +88,12 @@ public class AppBuilder {
     // DAO version using local file storage
     final FileUserDataAccessObject userDataAccessObject = new FileUserDataAccessObject("users.csv", userFactory);
 
+    private final InMemoryTransactionDataAccessObject transactionDataAccessObject =
+            new InMemoryTransactionDataAccessObject(userDataAccessObject);
+
+    private final InMemoryBudgetDataAccessObject budgetDataAccessObject =
+            new InMemoryBudgetDataAccessObject();
+
     private SignupView signupView;
     private SignupViewModel signupViewModel;
     private LoginViewModel loginViewModel;
@@ -84,8 +109,18 @@ public class AppBuilder {
     private AdoptPetView adoptPetView;
     private InteractWithPetView interactWithPetView;
 
+    private RecordTransactionView recordTransactionView;
+    private RecordTransactionViewModel recordTransactionViewModel;
+
+    private ViewBudgetProgressViewModel budgetProgressViewModel;
+    private ViewBudgetProgressView budgetProgressView;
+
     public AppBuilder() {
         cardPanel.setLayout(cardLayout);
+
+        // FOR TEST PURPOSE
+        budgetDataAccessObject.saveDailyLimit(
+                "username_test", new java.math.BigDecimal("100.00"));
     }
 
     public AppBuilder addSignupView() {
@@ -252,6 +287,69 @@ public class AppBuilder {
         return this;
     }
 
+    public AppBuilder addRecordTransactionView() {
+        recordTransactionViewModel = new RecordTransactionViewModel();
+        recordTransactionView = new RecordTransactionView(recordTransactionViewModel);
+
+        cardPanel.add(recordTransactionView, RecordTransactionViewModel.VIEW_NAME);
+        return this;
+    }
+
+    public AppBuilder addRecordTransactionUseCase() {
+        final RecordTransactionOutputBoundary presenter =
+                new RecordTransactionPresenter(recordTransactionViewModel);
+
+        final RecordTransactionInputBoundary interactor =
+                new RecordTransactionInteractor(transactionDataAccessObject, presenter);
+
+        final RecordTransactionController controller =
+                new RecordTransactionController(interactor);
+
+        recordTransactionView.setRecordTransactionController(controller);
+
+        loggedInView.setShowRecordTransaction(() -> {
+            // Start with a fresh form whenever this screen opens.
+            recordTransactionViewModel.setState(new RecordTransactionState());
+            recordTransactionViewModel.notifyStateChanged();
+
+            viewManagerModel.setState(RecordTransactionViewModel.VIEW_NAME);
+            viewManagerModel.notifyViewChanged();
+        });
+
+        recordTransactionView.setBackAction(() -> {
+            viewManagerModel.setState(LoggedInViewModel.VIEW_NAME);
+            viewManagerModel.notifyViewChanged();
+        });
+
+        return this;
+    }
+
+    public AppBuilder addViewBudgetProgressView() {
+        budgetProgressViewModel = new ViewBudgetProgressViewModel();
+        budgetProgressView = new ViewBudgetProgressView(budgetProgressViewModel);
+        cardPanel.add(budgetProgressView, ViewBudgetProgressViewModel.VIEW_NAME);
+        return this;
+    }
+
+    public AppBuilder addViewBudgetProgressUseCase() {
+        final ViewBudgetProgressPresenter presenter =
+                new ViewBudgetProgressPresenter(budgetProgressViewModel);
+        final ViewBudgetProgressInteractor interactor =
+                new ViewBudgetProgressInteractor(
+                        transactionDataAccessObject, budgetDataAccessObject, presenter);
+        final ViewBudgetProgressController controller =
+                new ViewBudgetProgressController(interactor);
+        budgetProgressView.setController(controller);
+
+        loggedInView.setShowBudgetProgress(() -> {
+            controller.execute();
+            viewManagerModel.setState(ViewBudgetProgressViewModel.VIEW_NAME);
+            viewManagerModel.notifyViewChanged();
+        });
+        budgetProgressView.setBackAction(() -> {
+            viewManagerModel.setState(LoggedInViewModel.VIEW_NAME);
+            viewManagerModel.notifyViewChanged();
+        });
     public AppBuilder addGetPetPictureUseCase() {
         ApiPetImageDataAccessObject imageDataAccess =
                 new ApiPetImageDataAccessObject();
