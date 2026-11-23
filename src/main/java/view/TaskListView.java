@@ -8,8 +8,13 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.List;
 
+// TODO: Connect task editing to the main window. When the user selects a task and clicks Edit,
+//  call EditTaskView.open(...). After a successful save, refresh both lists using their respective
+//  sorting and filtering rules. For example, a task marked 100% complete should disappear from the
+//  incomplete-task list. Once this flow works, remove the temporary TaskListView.
+
 /**
- * This is a emporary task list for exercising the Edit Task use case while the main view is in development.
+ * This is a temporary task list for exercising the Edit Task use case while the main view is in development.
  *
  * <p>The main view can reuse the selection listener and the Edit Task button handler below.
  * Enable editing when the user selects a task, then pass that task and the signed-in user's ID
@@ -22,20 +27,14 @@ import java.util.List;
 public class TaskListView extends JPanel {
     public TaskListView(int currentUserId, List<EditTaskOutputData> tasks,
                         EditTaskController controller, EditTaskViewModel viewModel) {
+
         super(new BorderLayout(6, 6));
         setBorder(BorderFactory.createEmptyBorder(12, 12, 12, 12));
+
         DefaultListModel<EditTaskOutputData> model = new DefaultListModel<>();
         tasks.stream().filter(task -> task.getUniqueUserId() == currentUserId).forEach(model::addElement);
-        JList<EditTaskOutputData> list = new JList<>(model);
-        list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        list.setVisibleRowCount(6);
-        DefaultListCellRenderer renderer = new DefaultListCellRenderer();
-        renderer.putClientProperty("html.disable", true);
-        list.setCellRenderer((source, task, index, selected, focus) -> {
-            String title = task.getTitle().isEmpty() ? "(Untitled)" : task.getTitle();
-            String text = String.format("%s   ·   %s   ·   %d%%", title, task.getDeadline(), task.getCompletionProgress());
-            return renderer.getListCellRendererComponent(source, text, index, selected, focus);
-        });
+        JList<EditTaskOutputData> list = createList(model);
+
         JLabel heading = new JLabel("My tasks");
         heading.setLabelFor(list);
         add(heading, BorderLayout.NORTH);
@@ -54,5 +53,22 @@ public class TaskListView extends JPanel {
         JPanel actions = new JPanel(new FlowLayout(FlowLayout.TRAILING));
         actions.add(edit);
         add(actions, BorderLayout.SOUTH);
+    }
+
+    /**
+     * Creates the list
+     */
+    private static JList<EditTaskOutputData> createList(DefaultListModel<EditTaskOutputData> model) {
+        JList<EditTaskOutputData> list = new JList<>(model);
+        list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        list.setVisibleRowCount(6);
+        DefaultListCellRenderer renderer = new DefaultListCellRenderer();
+        renderer.putClientProperty("html.disable", true);
+        list.setCellRenderer((source, task, index, selected, focus) -> {
+            String title = task.getTitle().isEmpty() ? "(Untitled)" : task.getTitle();
+            String text = String.format("%s   ·   %s   ·   %d%%", title, task.getDeadline(), task.getCompletionProgress());
+            return renderer.getListCellRendererComponent(source, text, index, selected, focus);
+        });
+        return list;
     }
 }

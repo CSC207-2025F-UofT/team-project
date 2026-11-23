@@ -28,9 +28,14 @@ public class AppBuilder {
     public AppBuilder() {
         new ViewManager(cardPanel, cardLayout, viewManagerModel);
         WelcomeView welcome = new WelcomeView(new WelcomeViewModel());
+
+        // TODO: This Open sample tasks is just for demo and testing, it should be removed after the user is
+        //  able to enter the actual task lists.
         JButton openTasks = new JButton("Open sample tasks");
         openTasks.addActionListener(event -> show(SAMPLE_TASKS));
         welcome.add(openTasks);
+
+        // TODO: This should be kept, since we have a welcome page at the beginning of the app.
         cardPanel.add(welcome, WelcomeViewModel.VIEW_NAME);
 
         // This branch has no login or persistent task list yet.
@@ -41,15 +46,27 @@ public class AppBuilder {
                         today.plusDays(7), 10, (byte) 20, (byte) 2),
                 new StudentTask(2, sampleUserId, "Write unit tests", "", today.plusDays(3),
                         3, (byte) 0, (byte) 1));
+
+        // TODO: The DAO should be replaced with the real DAO after it is implemented.
         InMemoryTaskDataAccess dao = new InMemoryTaskDataAccess(samples);
-        EditTaskViewModel viewModel = new EditTaskViewModel();
-        EditTaskPresenter presenter = new EditTaskPresenter(viewModel);
-        EditTaskController controller = new EditTaskController(new EditTaskInteractor(dao, presenter));
+
+        // TODO: These should be kept: viewModel, presenter, controller, interactor for editTask use case.
+        EditTaskViewModel editTaskViewModel = new EditTaskViewModel();
+        EditTaskPresenter editTaskPresenter = new EditTaskPresenter(editTaskViewModel);
+        EditTaskInteractor editTaskInteractor = new EditTaskInteractor(dao, editTaskPresenter);
+        EditTaskController editTaskController = new EditTaskController(editTaskInteractor);
+
+        // TODO: After sign-in, use the authenticated user's ID to load their tasks from
+        //  the shared DAO. Populate the task list with those results and remove the sample data.
         List<EditTaskOutputData> rows = samples.stream().map(task -> new EditTaskOutputData(
                 task.getUniqueTaskId(), task.getUniqueUserId(), task.getTitle(), task.getDescription(),
                 task.getDeadline(), task.getEstimatedHoursToCompleteTask(), task.getCompletionProgress(),
                 task.getDifficultyLevel())).collect(Collectors.toList());
-        cardPanel.add(new TaskListView(sampleUserId, rows, controller, viewModel), SAMPLE_TASKS);
+
+        // TODO: Register the main view in cardPanel under its own view name and navigate
+        //  there after sign-in. Then remove the sample button, this TaskListView registration,
+        //  and the SAMPLE_TASKS constant.
+        cardPanel.add(new TaskListView(sampleUserId, rows, editTaskController, editTaskViewModel), SAMPLE_TASKS);
     }
 
     private void show(String name) {

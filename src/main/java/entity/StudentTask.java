@@ -28,7 +28,7 @@ public class StudentTask extends Task{
     public StudentTask(int uniqueTaskId, int uniqueUserId, String title, String description, LocalDate deadline, double estimatedHoursToCompleteTask, byte completionProgress, byte difficultyLevel) {
         super(uniqueTaskId, uniqueUserId);
         this.title = title == null ? "" : title;
-        this.description = description;
+        this.description = description == null ? "" : description;
         this.deadline = deadline;
         this.estimatedHoursToCompleteTask = estimatedHoursToCompleteTask;
         this.completionProgress = completionProgress;
@@ -44,7 +44,7 @@ public class StudentTask extends Task{
     }
 
     public void setDescription(String newDescription) {
-        this.description = newDescription;
+        this.description = newDescription == null ? "" :newDescription;
     }
 
     /**

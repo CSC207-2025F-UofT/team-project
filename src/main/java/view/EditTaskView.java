@@ -61,6 +61,9 @@ public class EditTaskView extends JPanel {
         add(actions, constraints);
     }
 
+    // TODO: Update the standalone editor preview. If the team keeps EditTaskView.main(), update its tooltip
+    //  to direct users to the main window for editing. If the preview is no longer needed, remove main() and
+    //  keep EditTaskView.open(...) for the main window.
     /** Opens a standalone layout preview with sample data. */
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
