@@ -18,7 +18,8 @@ public class DeckAccess {
     }
 
     public boolean canEdit() {
-        return this.role == AccessRole.EDITOR || this.role == AccessRole.OWNER;
+        //return this.role == AccessRole.EDITOR || this.role == AccessRole.OWNER;
+        return false;
     }
 
     public int getDeckId() {

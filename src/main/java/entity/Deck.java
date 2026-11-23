@@ -44,7 +44,7 @@ public class Deck {
     for (int i = 0; i < cards.size(); i++) {
       if (cards.get(i).getId() == id) {
         cards.remove(i);
-      break;
+        break;
       }
     } // end of for loop checking each card
 
