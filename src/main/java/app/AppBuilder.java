@@ -6,11 +6,17 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.WindowConstants;
 
+import data_access.InMemoryPetDataAccess;
 import interface_adapter.ViewManagerModel;
+import interface_adapter.browse_pets.BrowsePetsController;
+import interface_adapter.browse_pets.BrowsePetsPresenter;
+import interface_adapter.browse_pets.GalleryViewModel;
 import interface_adapter.manage_pet.ManagePetController;
 import interface_adapter.manage_pet.ManagePetPresenter;
 import interface_adapter.manage_pet.ManagePetViewModel;
 import use_case.manage_pet.ManagePetDataAccessInterface;
+import use_case.browse_pets.BrowsePetsDataAccessInterface;
+import use_case.browse_pets.BrowsePetsInteractor;
 import use_case.manage_pet.ManagePetInteractor;
 import view.GalleryView;
 import view.ManagePetView;
@@ -31,7 +37,14 @@ public final class AppBuilder {
      * @return this builder
      */
     public AppBuilder addGalleryView() {
-        views.add(new GalleryView(), GalleryView.VIEW_NAME);
+        final BrowsePetsDataAccessInterface petData = InMemoryPetDataAccess.withSampleData();
+        final GalleryViewModel galleryViewModel = new GalleryViewModel();
+        final BrowsePetsPresenter presenter = new BrowsePetsPresenter(galleryViewModel);
+        final BrowsePetsInteractor interactor = new BrowsePetsInteractor(petData, presenter);
+        final BrowsePetsController controller = new BrowsePetsController(interactor);
+        final GalleryView galleryView = new GalleryView(controller, galleryViewModel);
+        galleryView.loadAll();
+        views.add(galleryView, GalleryView.VIEW_NAME);
         return this;
     }
 
