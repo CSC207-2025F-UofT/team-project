@@ -134,7 +134,7 @@ As a student, I want to create academic tasks with deadlines and workload estima
 2. The user can specify the estimated number of hours required to complete the task, defaulting to 10 hours if unspecified.
 3. The user can specify the task's difficulty, defaulting to Average if unspecified.
 4. The system validates task information before saving and prevents invalid task entries.
-5. Each task is assigned a unique identifier and an initial completion progress of 0%.
+5. Each task is assigned a unique identifier and a default initial completion progress of 0%, the student may override the default completion progress.
 6. Tasks are saved locally using JSON or SQLite and remain available after the application is restarted.
 7. When a Monitoring View is opened/reopened, it is able to retrieve the latest task information, including newly created tasks.
 

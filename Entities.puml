@@ -2,7 +2,8 @@
 'https://plantuml.com/class-diagram
 ' `..|>` represents Interface Realization/Implementation (dashed line with an open arrow).
 ' `--|>` represents Inheritance/Generalization (solid line with an open arrow).
-' `o-->` represents Aggregation (a hollow diamond pointing to the owner/container). The "\*" indicates multiplicity (e.g., Drawing holds multiple Shape objects).
+' `o-->` represents Aggregation (a hollow diamond pointing to the owner/container).
+'     The "\*" indicates multiplicity (e.g., Drawing holds multiple Shape objects).
 skinparam dpi 120
 skinparam classAttributeIconSize 0
 hide empty members
@@ -33,30 +34,23 @@ enum SortingStrategy {
   +toString(): String
 }
 
-abstract class BusinessMappings {
-  + addMapping : Map<Object, Object>
-}
-
-' Maps with keys and values being both one-to-one and onto
-abstract class BusinessOneToOneCorrespondenceMappings
-
 ' CA - Canada, US - USA, ET - Ethiopia, IN - India, FR - France, GH - Ghana
-class CountryCodeAndCountryMappings {
-  - countryNameToCountryCodeMapping : Map<String, String>
-  - countryCodeToCountryNameMapping : Map<String, String>
-  + getCountryCode(name : String) : String
-  + getCountryNameMapping(code : String) : String
+enum Country {
+  CA
+  US
+  ET
+  IN
+  FR
+  GH
+  --
+  -displayName: String
+  --
+  +getDisplayName(): String
+  +toString(): String
 }
 
-class TaskSortingStrategyNameMappings {
- - strategyNameToSortingStrategyMapping : Map<SortingStrategy, TaskSortingStrategy>
- - sortingStrategyToStrategyNameMapping : Map<TaskSortingStrategy, SortingStrategy>
- + getTaskSortingStrategy(name : SortingStrategy) : TaskSortingStrategy
- + getStrategyName(strategy : TaskSortingStrategy) : SortingStrategy
-}
-
-' The uniqueId is only unique per user
-' The uniqueUserId reflects the user that owns the task
+' The `uniqueTaskId` is only unique per user
+' The `uniqueUserId` reflects the user that owns the `Task`
 abstract class Task {
   - {final} uniqueTaskId : int
   - {final} uniqueUserId : int
@@ -67,10 +61,10 @@ abstract class Task {
 ' The `fieldsValidation()` method checks the following in the fields of the StudentTask object:
 ' - The estimated number of hours needed to complete the task must be positive
 ' - The completion progress must be an integer between 0 and 100. Both 0 and 100 are allowed.
-' - The `deadline` field cannot be empty, and it could be a date that has already passed.
+' - The `deadline` field cannot be empty, and it can be a date that has already passed.
 ' - The `uniqueUserId` field cannot be 0 (the default initializing value)
-' - Neither the title nor the description can be null, although they can be empty string.
-' - The difficulty level cannot be null
+' - Neither the title nor the description can be null, although they can be empty strings.
+' - The difficulty level cannot be `null`.
 ' The constructor of `StudentTask` should use the method `fieldsValidation()` to double-check the validity of the
 '     object created, and throw an error if the item is not valid.
 ' The setter of `StudentTask` should use the method `fieldsValidation()` to double-check the validity of the object
@@ -78,7 +72,7 @@ abstract class Task {
 ' The `inputValidation()` method checks the following inputs, which may or may not be fields of the StudentTask object.
 '     This method would be used in the setter methods of the following fields, before the changes, to prevent illegal
 '     inputs from modifying these fields of the `StudentTask` object. In addition, this method can be used in the use
-'     cases to prevent user entering bad data, corrupting the `StudentTask`.
+'     cases to prevent users from entering bad data, corrupting the `StudentTask`.
 ' - The `deadline`
 ' - The `estimated number of hours`
 ' - The `completion progress`
@@ -101,45 +95,39 @@ abstract class User {
   - {final} uniqueUserId : int
 }
 
-abstract class TasksUser {
-  - tasks : List<Task>
-  + {final} taskFactory : TaskFactory
+abstract class TaskUser<T extends Task> {
+  - tasks : List<T>
 }
 
-class StudentTasksUser {
+class StudentTaskUser {
   - countryCode : String
-  + {final} studentTaskFactory : StudentUserFactory
+  + {final} studentTaskFactory : StudentTaskFactory
 }
 
 abstract class TaskSortingStrategy<T extends Task> {
-  + {abstract} sort(tasks : List<T>) : List<T>
+  + {abstract} sort(tasks : List<T>, today : LocalDate) : List<T>
 }
 
 class StudentTaskSortingStrategy {
-  + sort(studentTasks : List<StudentTask>) : List<StudentTask>
+  + sort(studentTasks : List<StudentTask>, today : LocalDate) : List<StudentTask>
 }
 
 ' Country code is in ISO 3166-1 alpha-2 code
 class Holidays {
-  - countryCodeToHolidays: Map<String,Set<LocalDate>>
+  - countryCodeToHolidays: Map<Country, Set<LocalDate>>
 }
 
-BusinessMappings <|-- BusinessOneToOneCorrespondenceMappings
-BusinessOneToOneCorrespondenceMappings <|-- CountryCodeAndCountryMappings
-BusinessOneToOneCorrespondenceMappings <|-- TaskSortingStrategyNameMappings
 
 Task <|-- StudentTask
 
-User <|-- TasksUser
-TasksUser <|-- StudentTasksUser
+User <|-- TaskUser
+TaskUser <|-- StudentTaskUser : T = StudentTask
 
-Task <--o TasksUser
+Task <--o TaskUser
 
-TaskSortingStrategy <|-- StudentTaskSortingStrategy
+TaskSortingStrategy <|-- StudentTaskSortingStrategy : T = StudentTask
 
-TaskSortingStrategy <--o TaskSortingStrategyNameMappings
 DifficultyLevel <--o StudentTask
-SortingStrategy <--o TaskSortingStrategyNameMappings
 
 @enduml
 
@@ -147,7 +135,8 @@ SortingStrategy <--o TaskSortingStrategyNameMappings
 'https://plantuml.com/class-diagram
 ' `..|>` represents Interface Realization/Implementation (dashed line with an open arrow).
 ' `--|>` represents Inheritance/Generalization (solid line with an open arrow).
-' `o-->` represents Aggregation (a hollow diamond pointing to the owner/container). The "\*" indicates multiplicity (e.g., Drawing holds multiple Shape objects).
+' `o-->` represents Aggregation (a hollow diamond pointing to the owner/container).
+'     The "\*" indicates multiplicity (e.g., Drawing holds multiple Shape objects).
 skinparam dpi 120
 skinparam classAttributeIconSize 0
 hide empty members
@@ -156,67 +145,36 @@ hide empty members
 ' Factories
 ' ========
 
-abstract class TasksUser
-
-abstract class BusinessMappingsFactory {
-  + createMapping() : BusinessMapping
-}
-
-abstract class BusinessOneToOneCorrespondenceMappingsFactory {
-  + createMapping() : BusinessOneToOneCorrespondenceMapping
-}
-
-class CountryCodeAndCountryMappingsFactory {
-  + createMapping() : CountryCodeAndCountryMapping
-}
-
-class StrategyToStrategyNameMappingsFactory {
-  + createMapping() : StrategyToStrategyNameMapping
-}
-
-BusinessMappingsFactory <|-- BusinessOneToOneCorrespondenceMappingsFactory
-BusinessOneToOneCorrespondenceMappingsFactory <|-- CountryCodeAndCountryMappingsFactory
-BusinessOneToOneCorrespondenceMappingsFactory <|-- StrategyToStrategyNameMappingsFactory
+abstract class TaskUser
 
 abstract class UserFactory {
   - nextUniqueID : int
-  + createUser() : User
-}
-
-abstract class TaskUserFactory {
-  + createUser() : TaskUser
+  # generateNextUniqueId() : int
 }
 
 class StudentUserFactory {
-  + createUser() : StudentUser
+  + createStudentUser(countryCode : String) : StudentTaskUser
 }
 
-UserFactory <|-- TaskUserFactory
-TaskUserFactory <|-- StudentUserFactory
+UserFactory <|-- StudentUserFactory
 
 abstract class TaskFactory {
-  - nextUniqueID : int
-  + createTask(uniqueUserId : String) : Task
+  - nextUniqueId : int
+  # generateNextUniqueId() : int
 }
 
 class StudentTaskFactory {
-  + createTask(uniqueUserId : String, title : String, description : String, deadline : LocalDate,
+  + createStudentTask(uniqueUserId : int, title : String, description : String, deadline : LocalDate,
   estimatedHoursToCompleteTask : double, completionProgress : byte, difficultyLevel : DifficultyLevel) : StudentTask
 }
 
 TaskFactory <|-- StudentTaskFactory
 
-abstract class TaskSortingStrategyFactory {
-  + createStrategy() : TaskSortingStrategy
-}
+' The following TaskUser is a continuation of the PlantUML diagram described above.
+TaskFactory <--o TaskUser
 
 class StudentTaskSortingStrategyFactory {
-  + createStrategy() : StudentTaskSortingStrategy
+  + createStrategy(strategyName : SortingStrategy) : StudentTaskSortingStrategy
 }
-
-TaskSortingStrategyFactory <|-- StudentTaskSortingStrategyFactory
-
-' The following TaskUser is a continuation from the PlantUML diagram described above
-TaskFactory <--o TasksUser
 
 @enduml
