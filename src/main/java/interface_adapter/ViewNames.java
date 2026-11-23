@@ -1,4 +1,4 @@
-package interface_adapter.add_clothing;
+package interface_adapter;
 
 public class ViewNames {
     public static final String LOGIN = "login";
