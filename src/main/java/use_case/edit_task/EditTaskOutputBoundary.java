@@ -1,4 +1,6 @@
 package use_case.edit_task;
 
-public class EditTaskOutputBoundary {
+public interface EditTaskOutputBoundary {
+    void prepareFailView(String message);
+    void prepareSuccessView(EditTaskOutputData outputData);
 }

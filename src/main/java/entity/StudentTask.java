@@ -54,7 +54,7 @@ public class StudentTask extends Task{
      * @throws IllegalArgumentException if the new deadline is null.
      */
     public void setDeadline(LocalDate newDeadline) {
-        if (!fieldsValidation()) {
+        if (!fieldsValidation() || !inputValidation(this.getUniqueUserId(), newDeadline, this.estimatedHoursToCompleteTask, this.completionProgress)) {
             throw new IllegalStateException("The task has invalid fields.");
         }
         LocalDate previousDeadline = this.deadline;
@@ -74,7 +74,7 @@ public class StudentTask extends Task{
      * @throws IllegalArgumentException if the new estimated hour is not finite or is not positive.
      */
     public void setEstimatedHoursToCompleteTask(double newEstimatedHoursToCompleteTask) {
-        if (!fieldsValidation()) {
+        if (!fieldsValidation() || !inputValidation(this.getUniqueUserId(), this.getDeadline(), newEstimatedHoursToCompleteTask, this.completionProgress)) {
             throw new IllegalStateException("The task has invalid fields.");
         }
         double previousEstimatedHours = this.estimatedHoursToCompleteTask;
@@ -93,7 +93,7 @@ public class StudentTask extends Task{
      * @throws IllegalArgumentException if the updated information is less than 0 or greater than 100.
      */
     public void setCompletionProgress(byte newCompletionProgress) {
-        if (!fieldsValidation()) {
+        if (!fieldsValidation() || !inputValidation(this.getUniqueUserId(), this.getDeadline(), this.getEstimatedHoursToCompleteTask(), newCompletionProgress)) {
             throw new IllegalStateException("The task has invalid fields.");
         }
         byte previousCompletionProgress = this.completionProgress;
@@ -111,6 +111,7 @@ public class StudentTask extends Task{
 
     /**
      * Check if all fields entered are valid, if not, throw an error.
+     * The title and the description cannot be null, but are allowed to be empty string.
      */
     public boolean fieldsValidation() {
         return inputValidation(
@@ -118,7 +119,9 @@ public class StudentTask extends Task{
                 this.deadline,
                 this.estimatedHoursToCompleteTask,
                 this.completionProgress
-        );
+        )
+                && this.title != null
+                && this.description != null;
     }
 
     /*
