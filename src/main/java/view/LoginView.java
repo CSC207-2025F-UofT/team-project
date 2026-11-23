@@ -27,7 +27,7 @@ public class LoginView extends JPanel implements ActionListener, LoginViewModelL
     private final JButton logIn;
     private final JButton signUp;
     private final JButton googleLogin = new JButton("Continue with Google");
-    private final JButton cancelGoogleLogin = new JButton("Cancel Google sign-in");
+    private final JButton cancelGoogleLogin = new JButton("Cancel Google Sign-In");
     private LoginController loginController = null;
     private Runnable showSignup;
 
@@ -45,7 +45,7 @@ public class LoginView extends JPanel implements ActionListener, LoginViewModelL
                 new JLabel("Password"), passwordInputField);
 
         final JPanel buttons = new JPanel();
-        logIn = new JButton("log in");
+        logIn = new JButton("Log In");
         buttons.add(logIn);
         signUp = new JButton("Sign Up");
         buttons.add(signUp);
