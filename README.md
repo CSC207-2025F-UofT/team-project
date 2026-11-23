@@ -5,10 +5,10 @@
 ## Team Information
 
 ### Team Members
-- Member 1 (Name) – Environment & Navigation
-- Member 2 (Name) – Inventory, Persistence & Transcript
-- Member 3 (Name) – NPC Interactions, Combat & LLM
-- Member 4 (Name) – Accounts, Game Rules & Challenges
+- Zixi – Environment & Navigation
+- Lihi – Inventory, Persistence & Transcript
+- Abdul – NPC Interactions, Combat & LLM
+- Fion – Accounts, Game Rules & Challenges
 
 ---
 
@@ -328,12 +328,106 @@ Plain Java; no Swing, JSON, SQL or API dependencies. Entities appear in the phas
 - **Location:** `id, name, description, openDays, closedInBadWeather, requiresUnlock, npcIds, challengeIds, pickupItemIds, shopPrices`.
 - **Item / Buff / Inventory:** item has `id, name, description, instantEffects, buff`; buff has `ChallengeKind appliesTo` (REACTION, MEMORY, FIGHT) and `difficultyDelta`; inventory holds up to 5 items.
 - **NPC / DialogueNode / DialogueOption:** NPC has `id, name, locationId, persona, startNodeId`; node has `text, options`; option has `text` and either `nextNodeId`, a final `Outcome`, or `fightOpponentId`.
-- **Outcome:** `effects, itemsGained, itemsLost, unlockedLocationIds, timeBlocksUsed, message`.
+- **Outcome:** `effects, itemsGained, itemsLost, unlockedLocationIds, timeBlocksUsed, newLocationId, message`. Immutable; built with `Outcome.Builder` (unset parts default to no effect, empty lists, 0 blocks, `null` location = stay put, empty message).
 - **GameState:** `day, timeBlocksLeft, player, forecast, inventory, activeBuffs, currentLocationId, unlockedLocationIds, pickedUpToday, eventLog, daySummaries`. Methods: `apply(Outcome) → GameStatus` (IN_PROGRESS, DAY_ENDED, WON, LOST), `effectiveDifficulty(kind)`, `consumeBuffs(kind)`, `startNextDay()`.
 - **EventRecord / DaySummary / RunSummary:** a logged event (`day, source, message, effects`); an end-of-day snapshot (`day, weather, stats`); a finished run (`result, daysSurvived, finalStats, gradeLetter`).
 - **User:** `username, passwordHash`.
 
 ---
+
+### Skeleton contract (Story 2)
+
+Merged in the Story 2 skeleton PR. Build your story against these; if you need to change one, say so in your PR and update this section.
+
+**Entities (implemented now)**
+
+| Class | What you can rely on |
+|---|---|
+| `StatEffects` | Immutable deltas `(energy, sanity, academic, money)`; `StatEffects.NONE`. |
+| `Player` | `createNew()` = 100 / 100 / 50 / $50. `applyEffects(StatEffects)` clamps Energy, Sanity, Academic Survival to 0–100 and Money to ≥ 0. `isOutOfStat()` is true when Energy, Sanity or Academic Survival is 0 (Money 0 is not a loss). |
+| `Outcome` | See above. Every use case that changes the game builds one. |
+| `GameState` | `startNew()` = Day 1 of `TOTAL_DAYS` (7) at `START_LOCATION_ID` (`"residence"`). `apply(Outcome) → GameStatus`: applies effects, moves the player if `newLocationId != null`, sets `LOST` when a stat hits 0; once `WON`/`LOST` it ignores further outcomes. Time blocks, items, weather, logging and end-of-day are added to `apply` by later stories without changing its signature. |
+| `GameStatus` | `IN_PROGRESS, DAY_ENDED, WON, LOST`. |
+
+**Shared use case interface**
+
+```java
+package use_case;
+public interface GameStateDataAccessInterface {
+    void saveGameState(GameState gameState);  // replaces the current game
+    GameState getGameState();                 // null before New Game
+}
+```
+
+Implemented by `data_access.InMemoryGameStateDataAccessObject`. Interactors get the current game from it, call `apply(outcome)`, and never call each other. In tests, use your own small fake (see `NewGameInteractorTest`).
+
+**Shared interface adapters and views**
+
+- `interface_adapter.ViewModel<T>`: base class with `getViewName()`, `getState()/setState(T)`, `firePropertyChanged()` / `firePropertyChanged(String)` and `addPropertyChangeListener(...)`. The default property name is `"state"`.
+- `ViewManagerModel`: its state is the card name on screen. To switch screens, call `setState(viewName); firePropertyChanged();`.
+- `interface_adapter.hud.HudViewModel` / `HudState`: `day, totalDays, energy, sanity, academicSurvival, money`. **Every presenter whose use case changes stats updates this view model**, and `view.StatsPanel` redraws itself. Later stories add fields here (time blocks in Story 8, location in Story 5).
+- `view.GameView` (card `"game"`) holds the `StatsPanel` at the top; later stories fill its centre.
+- `view.StartView` (card `"start"`) is a **temporary** New Game button. Story 1's `TitleView` replaces it and calls the same `NewGameController.execute()`.
+- `app.AppBuilder`: each story adds its own `addXView()` and `addXUseCase()` methods and chains them in `Main`. Add views before the use cases that need them.
+
+**Use case: `use_case/new_game/`**: `NewGameInputBoundary.execute(NewGameInputData)` → `NewGameInteractor` (creates the game with `GameState.startNew()`, saves it, presents it) → `NewGameOutputBoundary.prepareSuccessView(NewGameOutputData)` → `NewGamePresenter` (fills `HudViewModel`, switches to `"game"`). `NewGameInputData` is empty for now; Story 1 adds the username.
+
+### Talking to characters (Story 4)
+
+Merged in the Story 4 PR. Stories 7 and 11 build on these.
+
+**Entities (implemented now)**
+
+| Class | What you can rely on |
+|---|---|
+| `NPC` | `id, name, startNodeId` and a list of nodes. `getNode(nodeId)` returns the node or `null`; `getStartNode()` is where every conversation begins. `locationId` and `persona` arrive with Stories 7 and 11. |
+| `DialogueNode` | `id, text` (what the character says) and its options. `getOption(optionId)` returns the option or `null`. |
+| `DialogueOption` | `id, text` (the words on the button) and an `Outcome`. For now every option ends the conversation; Story 7 adds `nextNodeId`. |
+
+**Content: `src/main/resources/dialogues.json`**
+
+```json
+{
+  "npcs": [
+    {
+      "id": "shawarma_lady",
+      "name": "Shawarma Lady",
+      "startNodeId": "greeting",
+      "nodes": [
+        {
+          "id": "greeting",
+          "text": "What the character says.",
+          "options": [
+            {
+              "id": "ask_about_day",
+              "text": "The words on the button",
+              "message": "What happens when the player picks it.",
+              "energy": -5, "sanity": 10, "academic": 0, "money": 0
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
+```
+
+`message` and the four stat changes are optional (they default to an empty message and 0). Adding a character or a response means editing this file only, with no code change. The file is read with `org.json`, which this story adds to `pom.xml`.
+
+**Use case: `use_case/talk_to_npc/`**: `TalkToNpcInputBoundary` has three methods, one per step of a conversation.
+
+- `start(StartTalkInputData)`: looks up the character and presents their greeting and options (`prepareDialogueView`). Changes nothing in the game.
+- `choose(ChooseOptionInputData)`: finds the option by `npcId, nodeId, optionId`, hands its `Outcome` to `GameState.apply`, and presents the message and the new stats (`prepareResultView`). The output data has a `gameOver` flag for when a stat hit 0.
+- `leave()`: goes back to the game screen (`prepareGameView`).
+
+Anything that goes wrong (no game, game already over, unknown character or option) goes to `prepareFailView(message)`. Characters come from `DialogueDataAccessInterface.getNpc(npcId)`, implemented by `data_access.JsonDialogueDataAccessObject`.
+
+**Screens**
+
+- `interface_adapter.talk_to_npc.DialogueViewModel` / `DialogueState`: who is talking, what they said, the options, and after a choice the result message. It fires `"state"` to redraw and `"error"` to show an error message.
+- `view.DialogueView` (card `"dialogue"`) shows the `StatsPanel`, the speech and one button per option, then a Back button after a choice.
+- `view.GameView` now has a **temporary** "Talk to the Shawarma Lady" button (`GameView.SHAWARMA_LADY_ID`). Story 7 replaces it with whoever is at the player's building.
+- `TalkToNpcPresenter` updates `HudViewModel` after a choice by copying the current `HudState` and replacing the four stats, so the day is kept.
 
 ## API Usage
 
@@ -419,7 +513,7 @@ entity/            Player, StatEffects, Weather, WeatherCondition, Location, Ite
                    NPC, DialogueNode, DialogueOption, Outcome, GameState, GameStatus,
                    EventRecord, DaySummary, RunSummary, User
 use_case/
-  start_game/ navigate/ collect_item/ use_item/ talk_to_npc/ end_day/ study_spot/
+  new_game/ navigate/ collect_item/ use_item/ talk_to_npc/ end_day/ study_spot/
   save_game/ load_game/ view_transcript/ login/ signup/ logout/
   (each with Input/OutputBoundary, InputData, OutputData, Interactor)
   DAO interfaces: WeatherDataAccessInterface, LocationDataAccessInterface, ItemDataAccessInterface,
@@ -518,13 +612,11 @@ This README is the single source of truth for scope, stories and ownership. When
 
 ## How to Run
 
-1. Requires a JDK and Maven. `pom.xml` currently targets Java 11; the version is still to be confirmed with the TA.
+1. Requires JDK 17 or newer and Maven. `pom.xml` compiles with `release 17` and uses JUnit 5 (Surefire 3.2.5). Java 17 is still to be confirmed with the TA.
 2. Clone the repository and open it in IntelliJ (or run `mvn compile`).
 3. Weather needs no key. For LLM-written NPC replies (Story 11 onwards), set `LLM_API_KEY` (environment variable or a git-ignored `.env`); without it the game uses scripted dialogue.
-4. Run `app.Main`. The database file `data/uofteart.db` is created automatically on first run.
+4. Run `app.Main`. It currently opens a New Game button that leads to the Day 1 stats screen. From Story 3 onwards, the database file `data/uofteart.db` is created automatically on first run.
 5. Run tests with `mvn test` (no network or key needed).
-
-*(Update once the build is set up in Story 2.)*
 
 ---
 
