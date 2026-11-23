@@ -1,6 +1,6 @@
 package view;
 
-import app.AppBuilder;
+import app.Main;
 import data_access.FileGameStateDataAccessObject;
 import entity.GameDay;
 import entity.Player;
@@ -25,7 +25,7 @@ class GameViewTest {
     @Test
     void navigateToBuildingsAndBack() throws Exception {
         SwingUtilities.invokeAndWait(() -> {
-            JPanel root = new AppBuilder(directory.resolve("checkpoint.json")).build();
+            JPanel root = Main.createView(directory.resolve("checkpoint.json"));
             GameView view = (GameView) root.getComponent(0);
             assertEquals("title", currentPage(view).getName());
             button(currentPage(view), "Continue").doClick();
@@ -57,7 +57,7 @@ class GameViewTest {
         new FileGameStateDataAccessObject(checkpoint,
                 new GameDay(4, LocalDate.of(2025, 9, 2)), new Player(35, 100)).saveCheckpoint();
         SwingUtilities.invokeAndWait(() -> {
-            JPanel root = new AppBuilder(checkpoint).build();
+            JPanel root = Main.createView(checkpoint);
             GameView view = (GameView) root.getComponent(0);
             button(currentPage(view), "Continue").doClick();
             assertEquals("residence", currentPage(view).getName());
