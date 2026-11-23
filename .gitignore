@@ -36,3 +36,5 @@ build/
 
 ### Mac OS ###
 .DS_Store
+### Local IDE settings (run configs hold API keys) ###
+.idea/
