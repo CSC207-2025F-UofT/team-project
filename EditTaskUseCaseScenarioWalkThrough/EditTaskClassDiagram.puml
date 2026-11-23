@@ -1,0 +1,173 @@
+@startuml
+!pragma layout smetana
+title Story 2A | Edit Task — class diagram
+skinparam shadowing false
+skinparam classAttributeIconSize 0
+skinparam classBackgroundColor #FFFFFF
+skinparam packageStyle rectangle
+skinparam defaultFontSize 14
+hide empty members
+legend top left
+  White = current Java implementation
+  <back:#FFF0CD> Gold </back> = proposed signature or member
+  + public    - private    # protected    {readOnly} final field
+endlegend
+
+package "view" {
+  class EditTaskView <<existing shell; proposed members>> #FFF0CD {
+    -controller: EditTaskController
+    -viewModel: EditTaskViewModel
+    +EditTaskView(controller: EditTaskController,\n    viewModel: EditTaskViewModel)
+    +showTask(task: EditTaskOutputData): void
+    -onSave(): void
+    -onCancel(): void
+    +stateChanged(): void
+  }
+}
+package "interface_adapter.edit_task (proposed)" {
+  class EditTaskController #FFF0CD {
+    -inputBoundary: EditTaskInputBoundary
+    +EditTaskController(inputBoundary: EditTaskInputBoundary)
+    +execute(uniqueTaskId: int, uniqueUserId: int,\n    title: String, description: String,\n    deadline: LocalDate, estimatedHoursToCompleteTask: double,\n    completionProgress: int, difficultyLevel: byte): void
+  }
+  class EditTaskPresenter #FFF0CD {
+    -viewModel: EditTaskViewModel
+    +EditTaskPresenter(viewModel: EditTaskViewModel)
+    +prepareSuccessView(outputData: EditTaskOutputData): void
+    +prepareFailView(message: String): void
+  }
+  class EditTaskViewModel #FFF0CD {
+    -savedTask: EditTaskOutputData
+    -message: String
+    -saveSuccessful: boolean
+    -listeners: List<EditTaskViewModelListener>
+    +getSavedTask(): EditTaskOutputData
+    +getMessage(): String
+    +isSaveSuccessful(): boolean
+    +setSuccess(outputData: EditTaskOutputData): void
+    +setError(message: String): void
+    +addListener(listener: EditTaskViewModelListener): void
+    +notifyStateChanged(): void
+  }
+  interface EditTaskViewModelListener #FFF0CD {
+    +stateChanged(): void
+  }
+}
+package "use_case.edit_task" {
+interface EditTaskInputBoundary {
+  +execute(editTaskInputData: EditTaskInputData): void
+}
+class EditTaskInteractor {
+  -editTaskDataAccessObject: EditTaskUserDataAccessInterface {readOnly}
+  -editTaskPresenter: EditTaskOutputBoundary {readOnly}
+  +EditTaskInteractor(editTaskDataAccessObject: EditTaskUserDataAccessInterface,\n    editTaskPresenter: EditTaskOutputBoundary)
+  +execute(editTaskInputData: EditTaskInputData): void
+}
+interface EditTaskOutputBoundary {
+  +prepareFailView(message: String): void
+  +prepareSuccessView(outputData: EditTaskOutputData): void
+}
+interface EditTaskUserDataAccessInterface {
+  +findById(uniqueUserId: int, uniqueTaskId: int): Optional<StudentTask>
+  +update(updatedTask: StudentTask): boolean
+}
+class EditTaskInputData {
+  -uniqueTaskId: int {readOnly}
+  -uniqueUserId: int {readOnly}
+  -title: String {readOnly}
+  -description: String {readOnly}
+  -deadline: LocalDate {readOnly}
+  -estimatedHoursToCompleteTask: double {readOnly}
+  -completionProgress: int {readOnly}
+  -difficultyLevel: byte {readOnly}
+  +EditTaskInputData(uniqueTaskId: int, uniqueUserId: int,\n    title: String, description: String,\n    deadline: LocalDate, estimatedHoursToCompleteTask: double,\n    completionProgress: int, difficultyLevel: byte)
+  +getUniqueTaskId(): int
+  +getUniqueUserId(): int
+  +getTitle(): String
+  +getDescription(): String
+  +getDeadline(): LocalDate
+  +getEstimatedHoursToCompleteTask(): double
+  +getCompletionProgress(): int
+  +getDifficultyLevel(): byte
+}
+class EditTaskOutputData {
+  -uniqueTaskId: int {readOnly}
+  -uniqueUserId: int {readOnly}
+  -title: String {readOnly}
+  -description: String {readOnly}
+  -deadline: LocalDate {readOnly}
+  -estimatedHoursToCompleteTask: double {readOnly}
+  -completionProgress: int {readOnly}
+  -difficultyLevel: byte {readOnly}
+  +EditTaskOutputData(uniqueTaskId: int, uniqueUserId: int,\n    title: String, description: String,\n    deadline: LocalDate, estimatedHoursToCompleteTask: double,\n    completionProgress: int, difficultyLevel: byte)
+  +getUniqueTaskId(): int
+  +getUniqueUserId(): int
+  +getTitle(): String
+  +getDescription(): String
+  +getDeadline(): LocalDate
+  +getEstimatedHoursToCompleteTask(): double
+  +getCompletionProgress(): int
+  +getDifficultyLevel(): byte
+}
+}
+package "entity" {
+abstract class Task {
+  -uniqueTaskId: int {readOnly}
+  -uniqueUserId: int {readOnly}
+  #Task(uniqueTaskId: int, uniqueUserId: int)
+  +getUniqueTaskId(): int
+  +getUniqueUserId(): int
+}
+class StudentTask {
+  -title: String
+  -description: String
+  -deadline: LocalDate
+  -estimatedHoursToCompleteTask: double
+  -completionProgress: byte
+  -difficultyLevel: byte
+  +StudentTask(uniqueTaskId: int, uniqueUserId: int,\n    title: String, description: String,\n    deadline: LocalDate, estimatedHoursToCompleteTask: double,\n    completionProgress: byte, difficultyLevel: byte)
+  +getTitle(): String
+  +getDescription(): String
+  +getDeadline(): LocalDate
+  +getEstimatedHoursToCompleteTask(): double
+  +getCompletionProgress(): byte
+  +getDifficultyLevel(): byte
+  +setTitle(newTitle: String): void
+  +setDescription(newDescription: String): void
+  +setDeadline(newDeadline: LocalDate): void
+  +setEstimatedHoursToCompleteTask(newEstimatedHoursToCompleteTask: double): void
+  +setCompletionProgress(newCompletionProgress: byte): void
+  +setDifficultyLevel(newDifficultyLevel: byte): void
+  +fieldsValidation(): boolean
+  {static} +inputValidation(userId: int, deadline: LocalDate,\n    estimatedHours: double, progress: int): boolean
+}
+package "data_access" {
+class InMemoryTaskDataAccess {
+  -tasksByUser: Map<Integer, Map<Integer, StudentTask>> {readOnly}
+  +InMemoryTaskDataAccess(initialTasks: List<StudentTask>)
+  +findById(userId: int, taskId: int): Optional<StudentTask>
+  +update(updatedTask: StudentTask): boolean
+}
+}
+
+EditTaskView --> EditTaskController
+EditTaskView --> EditTaskViewModel
+EditTaskView ..|> EditTaskViewModelListener
+EditTaskViewModel --> "*" EditTaskViewModelListener
+EditTaskViewModel --> EditTaskOutputData
+EditTaskPresenter --> EditTaskViewModel
+EditTaskController --> EditTaskInputBoundary
+EditTaskController ..> EditTaskInputData : creates
+EditTaskInteractor ..|> EditTaskInputBoundary
+EditTaskInputBoundary ..> EditTaskInputData
+EditTaskInteractor --> EditTaskUserDataAccessInterface
+EditTaskInteractor --> EditTaskOutputBoundary
+EditTaskInteractor ..> EditTaskOutputData : creates
+EditTaskInteractor ..> StudentTask : creates updated task
+EditTaskOutputBoundary ..> EditTaskOutputData
+EditTaskPresenter ..|> EditTaskOutputBoundary
+InMemoryTaskDataAccess ..|> EditTaskUserDataAccessInterface
+EditTaskUserDataAccessInterface ..> StudentTask
+InMemoryTaskDataAccess --> "*" StudentTask : stores
+StudentTask --|> Task
+@enduml
