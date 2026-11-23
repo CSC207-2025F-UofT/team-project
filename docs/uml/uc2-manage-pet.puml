@@ -1,17 +1,12 @@
 @startuml uc2-manage-pet
 title UC2 Add / Edit / Remove a Pet: Clean Architecture classes
 
-left to right direction
 skinparam classAttributeIconSize 0
 skinparam packageStyle rectangle
-skinparam nodesep 30
-skinparam ranksep 60
+skinparam linetype ortho
+skinparam nodesep 40
+skinparam ranksep 50
 hide empty members
-
-package "View\n(Frameworks & Drivers)" as FDView #E2F4E2 {
-  class ManagePetView
-  class PetForm
-}
 
 package "Interface Adapters" as IA #DDEBFF {
   class ManagePetController {
@@ -19,6 +14,7 @@ package "Interface Adapters" as IA #DDEBFF {
     + add(name, species, breed, ageYears, sex, ...) : void
     + edit(id, name, species, breed, ageYears, sex, ...) : void
     + remove(id) : void
+    + lookupBreed(name) : Optional<BreedReferenceViewData>
   }
   class ManagePetPresenter {
     + prepareSuccessView(outputData) : void
@@ -29,29 +25,23 @@ package "Interface Adapters" as IA #DDEBFF {
     + getAvailablePets() : List<PetViewData>
     + getMessage() : String
     + hasError() : boolean
-    + getSpeciesOptions() : String[]
-    + getSexOptions() : String[]
-    + getTemperamentOptions() : String[]
   }
   class PetViewData {
-    id, name, species, breed, ageYears, sex,
+    id, name, breed, ageYears, sex,
     temperamentTags, adoptionFee, status, ...
+  }
+  class BreedReferenceViewData {
+    name, temperament, photo
   }
 }
 
 package "Application Business Rules" as ABR #FDE2E2 {
-  interface ManagePetInputBoundary {
-    + refresh() : void
-    + add(inputData) : void
-    + edit(petId, inputData) : void
-    + remove(petId) : void
-  }
   class ManagePetInputData {
     name, species, breed, ageYears, sex,
     temperamentTags, healthNotes, needsMedication,
     vaccinated, spayedNeutered, adoptionFee, photoPath
   }
-  class ManagePetInteractor {
+  interface ManagePetInputBoundary {
     + refresh() : void
     + add(inputData) : void
     + edit(petId, inputData) : void
@@ -62,13 +52,9 @@ package "Application Business Rules" as ABR #FDE2E2 {
     + prepareFailView(message) : void
   }
   class ManagePetOutputData {
-    pets : List<PetDetails>
-    message
+    pets : List<PetDetails>, message
   }
-  class "ManagePetOutputData.PetDetails" as PetDetails {
-    id, name, species, breed, ageYears, sex,
-    temperamentTags, adoptionFee, status, available, ...
-  }
+  class ManagePetInteractor
   interface ManagePetDataAccessInterface {
     + getPets() : List<Pet>
     + findById(id) : Pet
@@ -76,58 +62,89 @@ package "Application Business Rules" as ABR #FDE2E2 {
     + update(pet) : boolean
     + remove(id) : boolean
   }
+  interface BreedLookupInputBoundary {
+    + lookup(breedName) : Optional<BreedReference>
+  }
+  class BreedLookupInteractor
+  class BreedReference {
+    name, temperament, photo
+  }
+  interface BreedReferenceDataAccessInterface {
+    + findByName(name) : Optional<BreedReference>
+  }
 }
 
 package "Enterprise Business Rules" as EBR #FFF4D6 {
   class Pet
   enum Species
   enum PetSex
-  enum Temperament
   enum PetStatus
+  enum Temperament
 }
 
-package "Data Access\n(Frameworks & Drivers)" as FDData #E2F4E2 {
+package "Frameworks & Drivers: View" as FDV #E2F4E2 {
+  class ManagePetView
+  class PetForm
+}
+
+package "Frameworks & Drivers: Data Access" as FDD #E2F4E2 {
   class FilePetDataAccessObject
+  class CatApiBreedDataAccess {
+    calls TheCatAPI
+  }
 }
 
-' View and view model
-ManagePetView --> ManagePetController : calls
-PetForm --> ManagePetController : calls add / edit
-ManagePetView --> ManagePetViewModel : listens
-PetForm --> ManagePetViewModel : reads options
-ManagePetViewModel --> "0..*" PetViewData
+IA -[hidden]right- ABR
+ABR -[hidden]right- EBR
+IA -[hidden]down- FDV
+ABR -[hidden]down- FDD
 
-' Input side
-ManagePetController ..> ManagePetInputData : creates
-ManagePetController --> ManagePetInputBoundary
-ManagePetInputBoundary <|.. ManagePetInteractor
+ManagePetController -[hidden]down- ManagePetPresenter
+ManagePetPresenter -down-> ManagePetViewModel : updates
+ManagePetViewModel -right-> "0..*" PetViewData
+ManagePetController .down.> BreedReferenceViewData : creates
 
-' Output side
-ManagePetPresenter ..|> ManagePetOutputBoundary
-ManagePetPresenter --> ManagePetViewModel : updates
-PetViewData --> PetDetails : wraps
-ManagePetOutputBoundary <-- ManagePetInteractor
-ManagePetOutputData <.. ManagePetInteractor : creates
-ManagePetOutputData --> "0..*" PetDetails
+ManagePetInputData -[hidden]down- ManagePetInputBoundary
+ManagePetInputBoundary -[hidden]down- ManagePetOutputBoundary
+ManagePetOutputBoundary -[hidden]down- ManagePetOutputData
+ManagePetOutputData -[hidden]down- BreedLookupInputBoundary
 
-' Data access side
-ManagePetInteractor --> ManagePetDataAccessInterface
-ManagePetInteractor ..> Pet : creates
-Pet --> Species
-Pet --> PetSex
-Pet --> Temperament
-Pet --> PetStatus
-ManagePetDataAccessInterface <|.. FilePetDataAccessObject
-Pet <.. FilePetDataAccessObject : saves / loads
+ManagePetController -right-> ManagePetInputData : creates
+ManagePetController -right-> ManagePetInputBoundary
+ManagePetController -right-> BreedLookupInputBoundary
+ManagePetPresenter -right-|> ManagePetOutputBoundary
+ManagePetPresenter .right.> ManagePetOutputData : reads
 
-' Layer skip to discuss
-ManagePetViewModel -[#red,dashed]-> Species : skips use case layer
-ManagePetViewModel -[#red,dashed]-> PetSex
-ManagePetViewModel -[#red,dashed]-> Temperament
+ManagePetInteractor -left-|> ManagePetInputBoundary
+ManagePetInteractor .left.> ManagePetInputData : reads
+ManagePetInteractor -left-> ManagePetOutputBoundary
+ManagePetInteractor .left.> ManagePetOutputData : creates
+ManagePetInteractor -down-> ManagePetDataAccessInterface
+ManagePetInteractor -right-> Pet : creates
 
-note bottom of FilePetDataAccessObject
-  Also implements
-  SubmitApplicationPetDataAccessInterface (UC5).
+BreedLookupInteractor -left-|> BreedLookupInputBoundary
+BreedLookupInteractor -down-> BreedReferenceDataAccessInterface
+BreedLookupInteractor .left.> BreedReference : returns
+
+Pet -down-> Species
+Pet -down-> PetSex
+Pet -down-> PetStatus
+Pet -down-> Temperament
+
+ManagePetView -up-> ManagePetController : calls
+ManagePetView -up-> ManagePetViewModel : listens
+PetForm -up-> ManagePetController : add / edit / look up breed
+
+FilePetDataAccessObject -up-|> ManagePetDataAccessInterface
+FilePetDataAccessObject .up.> Pet : saves / loads
+CatApiBreedDataAccess -up-|> BreedReferenceDataAccessInterface
+
+ManagePetViewModel -[#red,dashed]right-> Species : skips use case layer
+
+note bottom of CatApiBreedDataAccess
+  The breed lookup returns its result to the controller
+  directly, without an output boundary and presenter.
+  ManagePetViewModel also uses PetSex and Temperament.
 end note
 
 @enduml

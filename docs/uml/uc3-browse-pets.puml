@@ -1,50 +1,38 @@
 @startuml uc3-browse-pets
 title UC3 Browse and Filter Pets: Clean Architecture classes
 
-left to right direction
 skinparam classAttributeIconSize 0
 skinparam packageStyle rectangle
-skinparam nodesep 30
-skinparam ranksep 60
+skinparam linetype ortho
+skinparam nodesep 40
+skinparam ranksep 50
 hide empty members
-
-package "View\n(Frameworks & Drivers)" as FDView #E2F4E2 {
-  class GalleryView {
-    + VIEW_NAME : String
-    + loadAll() : void
-    + propertyChange(event) : void
-  }
-}
 
 package "Interface Adapters" as IA #DDEBFF {
   class BrowsePetsController {
-    + browse(filters : List<PetFilter>) : void
+    + browse(age : AgeFilterOption,\n  temperaments : Set<Temperament>,\n  noMedicalNeedsOnly : boolean) : void
   }
   class BrowsePetsPresenter {
     + presentPets(outputData) : void
   }
   class GalleryViewModel {
-    + CARDS : String
     + getCards() : List<PetCardData>
     + setCards(cards) : void
-    + addPropertyChangeListener(listener) : void
   }
   class PetCardData {
     name, summary, status
   }
+  enum AgeFilterOption {
+    ANY, UNDER_ONE, ONE_TO_THREE,
+    FOUR_TO_SEVEN, EIGHT_PLUS
+  }
 }
 
 package "Application Business Rules" as ABR #FDE2E2 {
-  interface BrowsePetsInputBoundary {
-    + execute(inputData) : void
-  }
   class BrowsePetsInputData {
     filters : List<PetFilter>
   }
-  interface PetFilter {
-    + matches(pet : Pet) : boolean
-  }
-  class BrowsePetsInteractor {
+  interface BrowsePetsInputBoundary {
     + execute(inputData) : void
   }
   interface BrowsePetsOutputBoundary {
@@ -53,6 +41,15 @@ package "Application Business Rules" as ABR #FDE2E2 {
   class BrowsePetsOutputData {
     pets : List<Pet>
   }
+  class BrowsePetsInteractor {
+    + execute(inputData) : void
+  }
+  interface PetFilter {
+    + matches(pet : Pet) : boolean
+  }
+  class AgeRangeFilter
+  class TemperamentFilter
+  class HealthNeedsFilter
   interface BrowsePetsDataAccessInterface {
     + getAvailablePets() : List<Pet>
   }
@@ -60,49 +57,66 @@ package "Application Business Rules" as ABR #FDE2E2 {
 
 package "Enterprise Business Rules" as EBR #FFF4D6 {
   class Pet
+  enum Temperament
   enum PetStatus
 }
 
-package "Data Access\n(Frameworks & Drivers)" as FDData #E2F4E2 {
-  class InMemoryPetDataAccess {
-    + withSampleData() : InMemoryPetDataAccess
-    + getAvailablePets() : List<Pet>
+package "Frameworks & Drivers: View" as FDV #E2F4E2 {
+  class GalleryView {
+    + loadAll() : void
   }
 }
 
-' View and view model
-GalleryView --> BrowsePetsController : calls
-GalleryView --> GalleryViewModel : listens
-GalleryViewModel --> "0..*" PetCardData
+package "Frameworks & Drivers: Data Access" as FDD #E2F4E2 {
+  class FilePetDataAccessObject
+}
 
-' Input side
-BrowsePetsController ..> BrowsePetsInputData : creates
-BrowsePetsController --> BrowsePetsInputBoundary
-BrowsePetsInputBoundary <|.. BrowsePetsInteractor
-BrowsePetsInputData --> "0..*" PetFilter
+IA -[hidden]right- ABR
+ABR -[hidden]right- EBR
+IA -[hidden]down- FDV
+ABR -[hidden]down- FDD
 
-' Output side
-BrowsePetsPresenter ..|> BrowsePetsOutputBoundary
-BrowsePetsPresenter --> GalleryViewModel : updates
-BrowsePetsPresenter ..> PetCardData : creates
-BrowsePetsOutputBoundary <-- BrowsePetsInteractor
-BrowsePetsOutputData <.. BrowsePetsInteractor : creates
+BrowsePetsController -[hidden]down- BrowsePetsPresenter
+BrowsePetsPresenter -down-> GalleryViewModel : updates
+GalleryViewModel -right-> "0..*" PetCardData
+BrowsePetsPresenter .right.> PetCardData : creates
+AgeFilterOption -[hidden]up- BrowsePetsController
+BrowsePetsController .left.> AgeFilterOption
 
-' Data access side
-BrowsePetsInteractor --> BrowsePetsDataAccessInterface
-BrowsePetsInteractor ..> PetFilter : applies every filter
-BrowsePetsDataAccessInterface <|.. InMemoryPetDataAccess
-Pet <.. InMemoryPetDataAccess : sample pets
-BrowsePetsOutputData --> "0..*" Pet
-Pet --> PetStatus
+BrowsePetsInputData -[hidden]down- BrowsePetsInputBoundary
+BrowsePetsInputBoundary -[hidden]down- BrowsePetsOutputBoundary
+BrowsePetsOutputBoundary -[hidden]down- BrowsePetsOutputData
 
-' Layer skip to discuss
-BrowsePetsPresenter -[#red,dashed]-> Pet : skips use case layer
-BrowsePetsPresenter -[#red,dashed]-> PetStatus
+BrowsePetsController -right-> BrowsePetsInputData : creates
+BrowsePetsController -right-> BrowsePetsInputBoundary
+BrowsePetsPresenter -right-|> BrowsePetsOutputBoundary
+BrowsePetsPresenter .right.> BrowsePetsOutputData : reads
 
-note bottom of InMemoryPetDataAccess
-  The gallery uses sample pets for now.
-  No PetFilter implementation exists yet.
+BrowsePetsInteractor -left-|> BrowsePetsInputBoundary
+BrowsePetsInteractor .left.> BrowsePetsInputData : reads
+BrowsePetsInteractor -left-> BrowsePetsOutputBoundary
+BrowsePetsInteractor .left.> BrowsePetsOutputData : creates
+BrowsePetsInteractor -down-> BrowsePetsDataAccessInterface
+BrowsePetsInteractor -down-> PetFilter : applies every filter
+AgeRangeFilter -up-|> PetFilter
+TemperamentFilter -up-|> PetFilter
+HealthNeedsFilter -up-|> PetFilter
+BrowsePetsInteractor -right-> Pet
+Pet -down-> Temperament
+Pet -down-> PetStatus
+
+GalleryView -up-> BrowsePetsController : calls
+GalleryView -up-> GalleryViewModel : listens
+
+FilePetDataAccessObject -up-|> BrowsePetsDataAccessInterface
+FilePetDataAccessObject .up.> Pet : saves / loads
+
+BrowsePetsPresenter -[#red,dashed]right-> Pet : skips use case layer
+
+note bottom of FilePetDataAccessObject
+  Also skipping the use case layer: BrowsePetsPresenter
+  uses PetStatus, and BrowsePetsController and
+  GalleryView use Temperament.
 end note
 
 @enduml
