@@ -4,6 +4,7 @@ import com.sun.tools.javac.Main;
 import main.interface_adapters.ViewManagerModel;
 import main.interface_adapters.game.GameViewModel;
 import main.interface_adapters.main_menu.MainMenuViewModel;
+import main.interface_adapters.settings.SettingsViewModel;
 import main.view.GameView;
 import main.view.MainMenuView;
 
@@ -15,13 +16,16 @@ public class LobbyPresenter {
     private final LobbyViewModel lobbyViewModel;
     private final MainMenuViewModel mainMenuViewModel;
     private final GameViewModel gameViewModel;
+    private final SettingsViewModel settingsViewModel;
 
     public LobbyPresenter(ViewManagerModel viewManagerModel, LobbyViewModel lobbyViewModel,
-                          MainMenuViewModel mainMenuViewModel, GameViewModel gameViewModel) {
+                          MainMenuViewModel mainMenuViewModel, GameViewModel gameViewModel,
+                          SettingsViewModel settingsViewModel) {
         this.viewManagerModel = viewManagerModel;
         this.lobbyViewModel = lobbyViewModel;
         this.mainMenuViewModel = mainMenuViewModel;
         this.gameViewModel = gameViewModel;
+        this.settingsViewModel = settingsViewModel;
     }
 
     public void switchToMainMenuView() {
@@ -35,6 +39,8 @@ public class LobbyPresenter {
         List<String> names = List.of("Jim", "Janiel", "Janthony", "Jmarcus", "Jabriel", "Jomas");
         List<String> chips = List.of("1000", "1000", "1000", "1000", "1000", "1000");
         gameViewModel.saveOpponentData(names, chips);
+        gameViewModel.setName(SettingsViewModel.USER_NAME);
+        gameViewModel.setChipsHeld(SettingsViewModel.USER_MONEY);
 
         gameViewModel.setChipValues(lobbyViewModel.getMinBet());
         gameViewModel.chips.put(1, 10);
@@ -42,7 +48,8 @@ public class LobbyPresenter {
         gameViewModel.chips.put(25, 5);
         gameViewModel.chips.put(50, 4);
         gameViewModel.chips.put(100, 2);
-        gameViewModel.setPlayers(num_players); //MUST GO AT END
+        gameViewModel.setPlayers(num_players);
+        gameViewModel.startGame(); //MUST GO AT END
     }
 
     public void addPlayer() {

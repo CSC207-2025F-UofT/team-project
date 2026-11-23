@@ -3,6 +3,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.net.URL;
 
+import main.interface_adapters.game.GameController;
+import main.interface_adapters.game.GamePresenter;
 import main.interface_adapters.game.GameViewModel;
 import main.interface_adapters.ViewManagerModel;
 import main.interface_adapters.lobby.LobbyController;
@@ -57,7 +59,7 @@ public class PokerBuilder {
         this.lobbyView = new LobbyView(lobbyViewModel);
 
         LobbyPresenter lobbyPresenter = new LobbyPresenter(viewManagerModel, lobbyViewModel,
-                mainMenuViewModel, gameViewModel);
+                mainMenuViewModel, gameViewModel, settingsViewModel);
         LobbyController lobbyController = new LobbyController(lobbyPresenter);
         lobbyView.setController(lobbyController);
 
@@ -69,6 +71,10 @@ public class PokerBuilder {
         this.gameViewModel = new GameViewModel();
         this.gameView = new GameView(gameViewModel);
 
+        GamePresenter gamePresenter = new GamePresenter(gameViewModel, settingsViewModel, viewManagerModel);
+        GameController gameController = new GameController(gamePresenter);
+        gameView.setController(gameController);
+        gameView.playerChoice.setController(gameController);
         cardPanel.add(gameView, GameViewModel.VIEW_NAME);
         return this;
     }

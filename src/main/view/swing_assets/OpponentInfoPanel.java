@@ -1,9 +1,9 @@
-package main.view;
+package main.view.swing_assets;
 
 import main.interface_adapters.game.GameViewModel;
+import main.view.ViewUtils;
 
 import javax.swing.*;
-import javax.swing.text.View;
 import java.awt.*;
 
 public class OpponentInfoPanel extends JPanel {
@@ -14,6 +14,7 @@ public class OpponentInfoPanel extends JPanel {
     private JLabel chipsLabel;
     private JLabel card1Label;
     private JLabel card2Label;
+    private JLabel role;
     private final double x;
 
     private final GameViewModel gameViewModel;
@@ -58,5 +59,17 @@ public class OpponentInfoPanel extends JPanel {
         this.add(card2Label);
         this.revalidate();
         this.repaint();
+    }
+
+    public void updateRole(String filePath) {
+        if (filePath.equals("") && role != null) {
+            this.remove(role);
+        } else {
+            role = ViewUtils.createImage(filePath, 0.005, 0.073, 0.025);
+            this.add(role);
+            this.setComponentZOrder(role, 0);
+        }
+        revalidate();
+        repaint();
     }
 }

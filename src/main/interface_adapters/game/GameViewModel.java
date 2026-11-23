@@ -17,7 +17,11 @@ public class GameViewModel {
     private List<Color> playerColors;
     public final Map<String, Map<String, String>> players = new HashMap<>();
 
+    public String playerTurn;
+    private String name;
+    private String chipsHeld;
     private int num_players;
+    private int dealer;
     public final Map<Integer, Integer> chips = new HashMap<>();
     private final List<Integer> chipValues = new ArrayList<>();
 
@@ -30,10 +34,28 @@ public class GameViewModel {
 
     }
 
+    public void startGame() {
+        if (num_players == 0) {
+            return;
+        } else if (chips.equals(new HashMap<>())) {
+            return;
+        } else if (chipValues.isEmpty()) {
+            return;
+        } else if (chipsHeld == null) {
+            return;
+        } else if (players.isEmpty()) {
+            return;
+        }
+        support.firePropertyChange("gameStart", null, null);
+    }
+
+    public void beginDealing() {
+        support.firePropertyChange("beginDealing", null, null);
+    }
+
     public void setPlayers(int num) {
         int old_players = num_players;
         num_players = num;
-        support.firePropertyChange("num_players", old_players, num_players);
     }
 
     public int getPlayers() {
@@ -89,5 +111,35 @@ public class GameViewModel {
         chipValues.add(minBet * 25);
         chipValues.add(minBet * 50);
         chipValues.add(minBet * 100);
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getName() {
+        return(name);
+    }
+
+    public void setChipsHeld(String chips) {
+        this.chipsHeld = chips;
+    }
+
+    public String getChipsHeld() {
+        return(chipsHeld);
+    }
+
+    public int getDealer() {
+        return dealer;
+    }
+
+    public void setDealer(int newDealer) {
+        dealer = newDealer;
+    }
+
+    public void playerCheck() {
+        String old_value = playerTurn;
+        playerTurn = "false";
+        support.firePropertyChange("playerTurn", old_value, playerTurn);
     }
 }
