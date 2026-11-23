@@ -1,7 +1,9 @@
 package interface_adapter.login;
 
+import entity.User.Role;
 import interface_adapter.ViewManagerModel;
 import interface_adapter.browse_pets.GalleryViewModel;
+import interface_adapter.manage_pet.ManagePetViewModel;
 import use_case.login.LoginOutputBoundary;
 import use_case.login.LoginOutputData;
 
@@ -13,6 +15,11 @@ public class LoginPresenter implements LoginOutputBoundary {
     private final LoginViewModel loginViewModel;
     private final ViewManagerModel viewManagerModel;
 
+    /**
+     * Creates the presenter for login and the home screen transition.
+     * @param viewManagerModel switches screens after login
+     * @param loginViewModel displays login feedback
+     */
     public LoginPresenter(ViewManagerModel viewManagerModel,
                           LoginViewModel loginViewModel) {
         this.viewManagerModel = viewManagerModel;
@@ -25,8 +32,9 @@ public class LoginPresenter implements LoginOutputBoundary {
         this.loginViewModel.setState(new LoginState());
         this.loginViewModel.notifyStateChanged();
 
-        // switch to the pet gallery
-        this.viewManagerModel.setActiveView(GalleryViewModel.VIEW_NAME);
+        final String homeView = response.getRole() == Role.ADMIN
+                ? ManagePetViewModel.VIEW_NAME : GalleryViewModel.VIEW_NAME;
+        this.viewManagerModel.setActiveView(homeView);
     }
 
     @Override
