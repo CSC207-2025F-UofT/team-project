@@ -4,6 +4,7 @@ import use_case.add_clothing.AddClothingInputBoundary;
 import use_case.add_clothing.AddClothingInputData;
 
 import java.util.Locale;
+import java.util.Objects;
 
 /**
  * Called by the Add Clothing screen when the user clicks Save, Cancel or Home.
@@ -34,13 +35,13 @@ public class AddClothingController {
                         String style, boolean layer, int weatherRating, String imageSourcePath) {
         interactor.execute(new AddClothingInputData(
                 name,
-                clean(categoryLabel).toUpperCase(Locale.ROOT),
+                clean(categoryLabel).toUpperCase(), // cuz the enum values are upper case
                 clean(subCategory),
                 clean(color),
                 clean(style),
                 layer,
                 weatherRating,
-                imageSourcePath == null ? "" : imageSourcePath));
+                Objects.requireNonNullElse(imageSourcePath, ""))); // we can change this line
     }
 
     /** Cancel or Home was clicked. */
@@ -50,7 +51,7 @@ public class AddClothingController {
 
     /** Turns the "Choose…" placeholder into an empty answer. */
     private static String clean(String value) {
-        if (value == null || AddClothingViewModel.CHOOSE.equals(value)) {
+        if (value == null || Objects.equals(value, AddClothingViewModel.CHOOSE)) {
             return "";
         }
         return value;
