@@ -9,6 +9,10 @@ import okhttp3.MediaType;
 
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.Arrays;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 public class GetMovieData {
 
@@ -29,7 +33,7 @@ public class GetMovieData {
         this.token = token;
     }
     // get method version to be used for API calls for use case #1
-    public void get(String endpoint, String b){
+    public String[][] get(String endpoint, String b) throws IOException {
 
         String url = BASE_URL + endpoint;
 
@@ -40,33 +44,35 @@ public class GetMovieData {
                 .addHeader("Authorization", "Bearer " + token)
                 .build();
 
+        String jsonResponse = executeRequest(request);
+//            JSONObject obj = response.body(); doesnt work
+        JSONObject responseJSONobject = new JSONObject(jsonResponse);
+        JSONArray results = responseJSONobject.getJSONArray("results");
 
-        try (Response response = client.newCall(request).execute()) {
-            if (!response.isSuccessful()) {
-                throw new IOException(
-                        "API request failed: " + response.code()
-                );
+        String[][] finalData = new String[results.length()][];
+        int ind = 0;
+        for(int i =0; i < results.length(); i++){
+            if(results.getJSONObject(i).isNull("poster_path")) {
+                finalData[i] = new String[]{
+                        results.getJSONObject(i).getString("title"),
+                        results.getJSONObject(i).getString("overview"),
+                        results.getJSONObject(i).getString("release_date"),
+                        String.valueOf(results.getJSONObject(i).getInt("id")),
+                        ""};
+            } else {
+                finalData[i] = new String[]{
+                        results.getJSONObject(i).getString("title"),
+                        results.getJSONObject(i).getString("overview"),
+                        results.getJSONObject(i).getString("release_date"),
+                        String.valueOf(results.getJSONObject(i).getInt("id")),
+                        results.getJSONObject(i).getString("poster_path")};
             }
 
-            if (response.body() == null) {
-                throw new IOException("Empty response body");
-            }
-
-            // Step 1: Get the JSON response
-            String jsonResponse = response.body().string();
-            System.out.println(jsonResponse);
-
-            // Step 2: Save JSON into a file
-            try (FileWriter file = new FileWriter("movie.json")) {
-
-                file.write(jsonResponse);
-            }
-
-            System.out.println("Movie JSON saved successfully!");
-
-        } catch (IOException e) {
-            e.printStackTrace();
         }
+        System.out.println(Arrays.deepToString(finalData));
+        return finalData;
+
+
     }
 
     // GET: Retrieve information from TMDB
