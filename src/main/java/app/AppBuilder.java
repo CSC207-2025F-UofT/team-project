@@ -85,7 +85,7 @@ public class AppBuilder {
 
     public AppBuilder addLoginView() {
         loginViewModel = new LoginViewModel();
-        loginView = new LoginView(loginViewModel);
+        loginView = new LoginView(loginViewModel, viewManagerModel);
         cardPanel.add(loginView, LoginViewModel.VIEW_NAME);
         return this;
     }
