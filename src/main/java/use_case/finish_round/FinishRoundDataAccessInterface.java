@@ -5,5 +5,5 @@ import use_case.shared.DataAccessException;
 
 /** Player storage, as seen by Finish Round. */
 public interface FinishRoundDataAccessInterface {
-    void savePlayer(Player player) throws DataAccessException;
+    void save(Player player) throws DataAccessException;
 }
