@@ -52,11 +52,11 @@ public class LoggedInView extends JPanel implements ActionListener, LoggedInView
         logOut = new JButton("Log Out");
         buttons.add(logOut);
 
-        returnToHome = new JButton("Return");
-        buttons.add(returnToHome);
-
         changePassword = new JButton("Change Password");
         buttons.add(changePassword);
+
+        returnToHome = new JButton("Return");
+        buttons.add(returnToHome);
 
         logOut.addActionListener(this);
         returnToHome.addActionListener(this);
