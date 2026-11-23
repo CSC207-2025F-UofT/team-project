@@ -2,34 +2,34 @@ package app;
 
 import dataaccess.ApiStockDataAccessObject;
 import dataaccess.CachedStockHistoryDataAccessObject;
-import dataaccess.EstimateROIDataAccessObject;                    // NEW
+import dataaccess.EstimateRoiDataAccessObject;
 import dataaccess.FileRiskProfileSettingsDataAccessObject;
 import dataaccess.FileWatchlistDataAccessObject;
-import interfaceadapter.estimateroi.EstimateROIController;        // NEW
-import interfaceadapter.estimateroi.EstimateROIPresenter;         // NEW
-import interfaceadapter.estimateroi.EstimateROIViewModel;         // NEW
+import interfaceadapter.estimateroi.EstimateRoiController;
+import interfaceadapter.estimateroi.EstimateRoiPresenter;
+import interfaceadapter.estimateroi.EstimateRoiViewModel;
 import interfaceadapter.setriskprofile.SetRiskProfileController;
 import interfaceadapter.setriskprofile.SetRiskProfilePresenter;
 import interfaceadapter.setriskprofile.SetRiskProfileViewModel;
 import interfaceadapter.viewstockinfo.ViewStockInfoController;
 import interfaceadapter.viewstockinfo.ViewStockInfoPresenter;
 import interfaceadapter.viewstockinfo.ViewStockInfoViewModel;
-import java.awt.BorderLayout;                                     // NEW
+import java.awt.BorderLayout;
 import java.io.IOException;
 import javax.swing.JFrame;
-import javax.swing.JPanel;                                        // NEW
+import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
-import javax.swing.SwingUtilities;                                // NEW
+import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
-import usecase.estimateroi.EstimateROIInputBoundary;              // NEW
-import usecase.estimateroi.EstimateRoiInteractor;                 // NEW
+import usecase.estimateroi.EstimateRoiInputBoundary;
+import usecase.estimateroi.EstimateRoiInteractor;
 import usecase.setriskprofile.SetRiskProfileInputBoundary;
 import usecase.setriskprofile.SetRiskProfileInteractor;
 import usecase.shared.projection.TargetGainSellStrategy;
 import usecase.viewstockinfo.ViewStockInfoInputBoundary;
 import usecase.viewstockinfo.ViewStockInfoInteractor;
-import usecase.viewstockinfo.ViewStockInfoOutputData;             // NEW
-import view.EstimateROIView;                                      // NEW
+import usecase.viewstockinfo.ViewStockInfoOutputData;
+import view.EstimateRoiView;
 import view.SetRiskProfileView;
 import view.ViewStockInfoView;
 
@@ -105,15 +105,15 @@ public class AppBuilder {
     ViewStockInfoController controller = new ViewStockInfoController(interactor);
     ViewStockInfoView view = new ViewStockInfoView(viewModel, controller);
 
-    //Estimate ROI (Use Case 4)
-    EstimateROIViewModel roiViewModel = new EstimateROIViewModel();
-    EstimateROIInputBoundary roiInteractor = new EstimateRoiInteractor(
-            new EstimateROIDataAccessObject(stockDataAccessObject),
-            new EstimateROIPresenter(roiViewModel));
-    EstimateROIView roiView = new EstimateROIView(roiViewModel,
-            new EstimateROIController(roiInteractor));
+    // Estimate ROI (Use Case 4)
+    EstimateRoiViewModel roiViewModel = new EstimateRoiViewModel();
+    EstimateRoiInputBoundary roiInteractor = new EstimateRoiInteractor(
+            new EstimateRoiDataAccessObject(stockDataAccessObject),
+            new EstimateRoiPresenter(roiViewModel));
+    EstimateRoiView roiView = new EstimateRoiView(roiViewModel,
+            new EstimateRoiController(roiInteractor));
 
-    //tell the ROI panel which stock the user is currently viewing
+    // Tell the ROI panel which stock the user is currently viewing
     viewModel.addPropertyChangeListener(evt -> {
       if (ViewStockInfoViewModel.RESULT_PROPERTY.equals(evt.getPropertyName())) {
         ViewStockInfoOutputData result = viewModel.getState().getResult();
@@ -122,18 +122,17 @@ public class AppBuilder {
       }
     });
 
-    //put the Stock Info view and the ROI panel together in one tab
+    // Put the Stock Info view and the ROI panel together in one tab
     JPanel stockTab = new JPanel(new BorderLayout());
     stockTab.add(view, BorderLayout.CENTER);
     stockTab.add(roiView, BorderLayout.SOUTH);
 
-    // CHANGED: "view" became "stockTab" in the two lines marked below
     tabs.addChangeListener(event -> {
-      if (tabs.getSelectedComponent() == stockTab) {      // was: == view
+      if (tabs.getSelectedComponent() == stockTab) {
         controller.loadWatchlist();
       }
     });
-    tabs.addTab("Stock Info", stockTab);                   // was: view
+    tabs.addTab("Stock Info", stockTab);
     return this;
   }
 
