@@ -1,9 +1,11 @@
 package org.example.cocktailcraft.interface_adapter.click;
 
-import org.example.cocktailcraft.entity.Cocktail;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ClickState {
     private String cocktailId = "";
+    private List<String> ingredients = new ArrayList<>();
     private String cocktailError;
 
     public String getCocktailId(){
@@ -20,5 +22,13 @@ public class ClickState {
 
     public void setCocktailError(String cocktailError){
         this.cocktailError = cocktailError;
+    }
+
+    public List<String> getIngredients() {
+        return ingredients;
+    }
+
+    public void setIngredients(List<String> ingredients) {
+        this.ingredients = ingredients;
     }
 }

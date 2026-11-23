@@ -26,7 +26,9 @@ public class ClickInteractor implements ClickInputBoundary{
             final List<RecipeIngredient> ingredients = clickDataAccessObject.get(cocktailID).getIngredients();
             List<String> result = new ArrayList<>();
             for(RecipeIngredient ingredient: ingredients){
-                String cocktail = ingredient.getName() + ingredient.getAmount() + ingredient.getUnit();
+                String cocktail = ingredient.getName() + ": " +
+                        ingredient.getAmount() + " " +
+                        ingredient.getUnit();
                 result.add(cocktail);
             }
 
