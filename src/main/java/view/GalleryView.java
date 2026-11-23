@@ -39,7 +39,7 @@ import interface_adapter.browse_pets.PetCardData;
  */
 public class GalleryView extends JPanel implements PropertyChangeListener {
     /** Name this screen is registered under in the view manager. */
-    public static final String VIEW_NAME = "gallery";
+    public static final String VIEW_NAME = GalleryViewModel.VIEW_NAME;
 
     private static final int COLUMNS = 3;
     private static final int GAP = 12;

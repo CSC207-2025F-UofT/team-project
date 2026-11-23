@@ -1,6 +1,7 @@
 package interface_adapter.login;
 
 import interface_adapter.ViewManagerModel;
+import interface_adapter.browse_pets.GalleryViewModel;
 import use_case.login.LoginOutputBoundary;
 import use_case.login.LoginOutputData;
 
@@ -8,9 +9,6 @@ import use_case.login.LoginOutputData;
  * The Presenter for the Login Use Case.
  */
 public class LoginPresenter implements LoginOutputBoundary {
-
-    // TODO: replace with GalleryView.VIEW_NAME once feature/a-browse-skeleton is merged.
-    private static final String GALLERY_VIEW_NAME = "gallery";
 
     private final LoginViewModel loginViewModel;
     private final ViewManagerModel viewManagerModel;
@@ -28,8 +26,7 @@ public class LoginPresenter implements LoginOutputBoundary {
         this.loginViewModel.notifyStateChanged();
 
         // switch to the pet gallery
-        this.viewManagerModel.setState(GALLERY_VIEW_NAME);
-        this.viewManagerModel.notifyViewChanged();
+        this.viewManagerModel.setActiveView(GalleryViewModel.VIEW_NAME);
     }
 
     @Override

@@ -8,6 +8,9 @@ import java.util.List;
  * What the gallery screen shows. The view listens for changes to the cards.
  */
 public class GalleryViewModel {
+    /** Name the gallery screen is registered under in the view manager. */
+    public static final String VIEW_NAME = "gallery";
+
     /** Name of the property fired when the list of cards changes. */
     public static final String CARDS = "cards";
 
