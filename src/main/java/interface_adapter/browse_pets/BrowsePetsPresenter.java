@@ -34,7 +34,7 @@ public class BrowsePetsPresenter implements BrowsePetsOutputBoundary {
     private PetCardData toCard(Pet pet) {
         final String age = pet.getAgeYears() == 1 ? "1 year old" : pet.getAgeYears() + " years old";
         final String summary = capitalize(pet.getSpecies().name()) + ", " + pet.getBreed() + ", " + age;
-        return new PetCardData(pet.getName(), summary, statusText(pet.getStatus()));
+        return new PetCardData(pet.getId(), pet.getName(), summary, statusText(pet.getStatus()));
     }
 
     private String statusText(PetStatus status) {

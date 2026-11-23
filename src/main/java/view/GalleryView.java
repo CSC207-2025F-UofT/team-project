@@ -7,6 +7,8 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.EnumMap;
@@ -33,6 +35,7 @@ import interface_adapter.browse_pets.BrowsePetsController;
 import interface_adapter.browse_pets.FilterLabels;
 import interface_adapter.browse_pets.GalleryViewModel;
 import interface_adapter.browse_pets.PetCardData;
+import interface_adapter.view_pet_details.ViewPetDetailsController;
 
 /**
  * The pet gallery screen: a filter panel on the left and a scrollable grid of pet cards.
@@ -45,6 +48,7 @@ public class GalleryView extends JPanel implements PropertyChangeListener {
     private static final int GAP = 12;
 
     private final BrowsePetsController controller;
+    private final ViewPetDetailsController detailsController;
     private final JPanel cardGrid = new JPanel(new GridLayout(0, COLUMNS, GAP, GAP));
     private final JComboBox<AgeFilterOption> ageBox = new JComboBox<>(AgeFilterOption.values());
     private final Map<Temperament, JCheckBox> temperamentBoxes = new EnumMap<>(Temperament.class);
@@ -56,10 +60,13 @@ public class GalleryView extends JPanel implements PropertyChangeListener {
      *
      * @param controller starts the browse use case when a filter changes
      * @param viewModel the model whose cards this view draws
+     * @param detailsController opens the detail page when a card is chosen
      */
-    public GalleryView(BrowsePetsController controller, GalleryViewModel viewModel) {
+    public GalleryView(BrowsePetsController controller, GalleryViewModel viewModel,
+                       ViewPetDetailsController detailsController) {
         super(new BorderLayout());
         this.controller = controller;
+        this.detailsController = detailsController;
         viewModel.addPropertyChangeListener(this);
         getAccessibleContext().setAccessibleName("Pet gallery");
 
@@ -179,10 +186,21 @@ public class GalleryView extends JPanel implements PropertyChangeListener {
         card.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(Color.GRAY),
                 BorderFactory.createEmptyBorder(10, 10, 10, 10)));
-        card.setPreferredSize(new Dimension(180, 110));
+        card.setPreferredSize(new Dimension(180, 140));
         card.add(new JLabel(data.getName()));
         card.add(new JLabel(data.getSummary()));
         card.add(new JLabel(data.getStatus()));
+        final JButton detailsButton = new JButton("View details");
+        detailsButton.getAccessibleContext().setAccessibleName("View details for " + data.getName());
+        detailsButton.addActionListener(event -> detailsController.show(data.getPetId()));
+        card.add(Box.createVerticalStrut(6));
+        card.add(detailsButton);
+        card.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent event) {
+                detailsController.show(data.getPetId());
+            }
+        });
         card.getAccessibleContext().setAccessibleName("Pet card: " + data.getName());
         card.getAccessibleContext().setAccessibleDescription(data.getSummary() + ". " + data.getStatus());
         return card;
