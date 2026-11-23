@@ -61,7 +61,7 @@ public class User {
     public int getLevel() {
         int level;
         level = exp / EXP_PER_LEVEL + 1;
-        return level;
+        return level; // levels start at 1
     }
     public int getExpToNextLevel() {
         int remainingExp;

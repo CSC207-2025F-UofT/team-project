@@ -20,8 +20,12 @@ public class SignupInteractor implements SignupInputBoundary{
         } else if (inputData.getPassword() == null || inputData.getPassword().isBlank()) {
             presenter.prepareFailView("Please input a valid password.");
             return;
+        } else if (userDataAccess.existsByName(inputData.getUsername())){
+                presenter.prepareFailView("Username already exists! Please Login.");
+                return;
         }
-    }
 
-    // still needs to check if username already exists
+        User newAccount = new User(inputData.getUsername(), inputData.getPassword());
+        userDataAccess.save(newAccount);
+    }
 }
