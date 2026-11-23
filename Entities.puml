@@ -104,12 +104,11 @@ class StudentTaskUser {
   + {final} studentTaskFactory : StudentTaskFactory
 }
 
-abstract class TaskSortingStrategy<T extends Task> {
-  + {abstract} sort(tasks : List<T>, today : LocalDate) : List<T>
+class SortingByDueDateStrategy {
 }
 
-class StudentTaskSortingStrategy {
-  + sort(studentTasks : List<StudentTask>, today : LocalDate) : List<StudentTask>
+class SortingBySuggestedHoursToWorkPerDayStrategy {
+  - today : LocalDate
 }
 
 ' Country code is in ISO 3166-1 alpha-2 code
@@ -117,6 +116,7 @@ class Holidays {
   - countryCodeToHolidays: Map<Country, Set<LocalDate>>
 }
 
+interface Comparator<Task>
 
 Task <|-- StudentTask
 
@@ -125,9 +125,10 @@ TaskUser <|-- StudentTaskUser : T = StudentTask
 
 Task <--o TaskUser
 
-TaskSortingStrategy <|-- StudentTaskSortingStrategy : T = StudentTask
-
 DifficultyLevel <--o StudentTask
+
+Comparator <|.. SortingByDueDateStrategy
+Comparator <|.. SortingBySuggestedHoursToWorkPerDayStrategy
 
 @enduml
 
@@ -174,7 +175,7 @@ TaskFactory <|-- StudentTaskFactory
 TaskFactory <--o TaskUser
 
 class StudentTaskSortingStrategyFactory {
-  + createStrategy(strategyName : SortingStrategy) : StudentTaskSortingStrategy
+  + createStrategy(strategyName : SortingStrategy) : SortingByDueDateStrategy
 }
 
 @enduml

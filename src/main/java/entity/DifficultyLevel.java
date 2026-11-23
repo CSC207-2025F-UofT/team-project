@@ -1,8 +1,10 @@
 package entity;
 
 public enum DifficultyLevel {
-  BY_DUE_DATE("By Due Date"),
-  BY_SUGGESTED_HOURS_TO_WORK_PER_DAY("By Suggested Hours To Work Per Day");
+
+  EASY("Easy"),
+  AVERAGE("Average"),
+  DIFFICULT("Difficult");
 
   private final String displayName;
 
