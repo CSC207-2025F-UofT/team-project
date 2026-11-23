@@ -13,4 +13,5 @@ public interface get_dataOutputBoundary {
      */
     void prepareFailView(String errorMessage);
 
+    void switchToUserViewGraphView();
 }

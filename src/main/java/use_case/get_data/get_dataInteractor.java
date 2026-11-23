@@ -20,4 +20,8 @@ public class get_dataInteractor implements get_dataInputBoundary {
             presenter.prepareFailView(ex.getMessage());
         }
     }
+    @Override
+    public void switchToUserViewGraphView() {
+        presenter.switchToUserViewGraphView();
+    }
 }

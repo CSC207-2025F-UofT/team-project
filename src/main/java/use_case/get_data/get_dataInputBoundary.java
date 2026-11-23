@@ -7,6 +7,7 @@ public interface get_dataInputBoundary {
      * @param get_dataInputData the input data
      */
     void execute(get_dataInputData get_dataInputData);
+    void switchToUserViewGraphView();
 
 
 }

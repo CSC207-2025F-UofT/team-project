@@ -28,7 +28,7 @@ public class LoginInteractor implements LoginInputBoundary {
             presenter.prepareFailView("Username doesn't exists. Please Sign up.");
         }
         else {
-            final User user = dao.get(inputData.getUsername());
+            final User user = dao.get(username);
             presenter.prepareSuccessView(new LoginOutputData(username, user.getRole()));
         }
     }

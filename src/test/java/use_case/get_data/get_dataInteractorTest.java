@@ -40,6 +40,8 @@ public class get_dataInteractorTest {
         get_dataOutputData success = null;
         String error = null;
         int calls = 0;
+        boolean switchedToUserViewGraphView = false;
+
 
         @Override
         public void prepareSuccessView(get_dataOutputData outputData) {
@@ -51,6 +53,11 @@ public class get_dataInteractorTest {
         public void prepareFailView(String errorMessage) {
             error = errorMessage;
             calls++;
+        }
+
+        @Override
+        public void switchToUserViewGraphView() {
+            switchedToUserViewGraphView = true;
         }
     }
 
@@ -109,5 +116,13 @@ public class get_dataInteractorTest {
         assertNull(presenter.success);
         assertEquals("HTTP 500: server error", presenter.error);
         assertEquals(1, presenter.calls);
+    }
+
+    @Test
+    void switchToUserViewGraphViewDelegatesToPresenter() {
+        interactor.switchToUserViewGraphView();
+
+        assertTrue(presenter.switchedToUserViewGraphView);
+        assertEquals(0, presenter.calls);
     }
 }

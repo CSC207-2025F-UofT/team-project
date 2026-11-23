@@ -21,8 +21,8 @@ import use_case.get_data.get_dataDataAccessInterface;
 public class SupabaseCognitiveDataAccessObject implements get_dataDataAccessInterface {
     private static final String BASE_URL =
             "https://lycetkmgbgkdgcbxhezw.supabase.co/rest/v1/CogSci";
-    private static final String TEST_TYPE = "Attention"; // placeholder; assuming we will build attention test first.
-
+    // TODO change this for 2 tests idk how to do this
+    private static final String TEST_TYPE = "";
     private final OkHttpClient client = new OkHttpClient();
     private static final String API_KEY = "sb_publishable_0dPA21pu1aHGE195Aw8YVw_lm45wA_b";
 
