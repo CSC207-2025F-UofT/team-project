@@ -1,15 +1,20 @@
 package data_access;
 
-import java.io.BufferedWriter;
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.util.ArrayList;
+import java.nio.file.NoSuchFileException;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import entity.AdopterPreferences;
+import entity.Species;
 import entity.User;
 import entity.User.Role;
 import entity.UserFactory;
@@ -18,7 +23,7 @@ import use_case.login.LoginUserDataAccessInterface;
 import use_case.signup.SignupUserDataAccessInterface;
 
 /**
- * DAO for user data implemented using a CSV file to persist the data.
+ * DAO for user data implemented using a JSON file to persist the data.
  * Users are keyed by id; email is also unique.
  * The currently logged-in user is kept in memory only.
  */
@@ -26,188 +31,183 @@ public class FileUserDataAccessObject implements SignupUserDataAccessInterface,
                                                  AdminSignupUserDataAccessInterface,
                                                  LoginUserDataAccessInterface {
 
-    private static final String[] COLUMNS = {"username", "id", "email", "passwordHash", "role", "preference"};
-    private static final String HEADER = String.join(",", COLUMNS);
+    private static final String PREFERENCE = "preference";
+    private static final String PREFERRED_SPECIES = "preferredSpecies";
 
-    private final File csvFile;
+    private final Path jsonPath;
     private final UserFactory userFactory;
-    private final Map<String, User> usersById = new LinkedHashMap<>();
-    private final Map<String, String> idByEmail = new HashMap<>();
+    private Map<String, User> usersById = new LinkedHashMap<>();
+    private Map<String, String> idByEmail = new HashMap<>();
 
     private String currentUserId;
 
     /**
-     * Construct this DAO for saving to and reading from a local file.
-     * @param csvPath the path of the file to save to
+     * Opens the user store, or starts with no users if the file is absent.
+     * @param jsonPath the user data file
      * @param userFactory factory for creating user objects
-     * @throws RuntimeException if there is an IOException when accessing the file,
-     *                          or if the file has an unexpected format
+     * @throws IllegalStateException if the file exists but cannot be read or has an unexpected format
      */
-    public FileUserDataAccessObject(String csvPath, UserFactory userFactory) {
-        this.csvFile = new File(csvPath);
+    public FileUserDataAccessObject(Path jsonPath, UserFactory userFactory) {
+        this.jsonPath = jsonPath.toAbsolutePath();
         this.userFactory = userFactory;
+        load();
+    }
 
-        if (!csvFile.exists() || csvFile.length() == 0) {
-            writeFile();
+    // ---------- Reading ----------
+
+    private void load() {
+        try {
+            final JSONArray array = new JSONArray(Files.readString(jsonPath));
+            for (int i = 0; i < array.length(); i++) {
+                final User user = readUser(array.getJSONObject(i));
+                if (usersById.containsKey(user.getId())) {
+                    throw new JSONException("Duplicate user ID: " + user.getId());
+                }
+                if (idByEmail.containsKey(user.getEmail())) {
+                    throw new JSONException("Duplicate user email: " + user.getEmail());
+                }
+                usersById.put(user.getId(), user);
+                idByEmail.put(user.getEmail(), user.getId());
+            }
+        }
+        catch (NoSuchFileException ex) {
+            // First run: no file yet, so there are no users.
+        }
+        catch (IOException | JSONException | IllegalArgumentException ex) {
+            throw new IllegalStateException("Could not load users from " + jsonPath, ex);
+        }
+    }
+
+    private User readUser(JSONObject json) {
+        final AdopterPreferences preference;
+        if (json.isNull(PREFERENCE)) {
+            preference = null;
         }
         else {
-            readFile();
+            preference = readPreference(json.getJSONObject(PREFERENCE));
         }
+        return userFactory.create(json.getString("username"), json.getString("id"),
+                json.getString("email"), json.getString("passwordHash"),
+                Role.valueOf(json.getString("role")), preference);
     }
 
-    private void readFile() {
-        final String content;
+    private static AdopterPreferences readPreference(JSONObject json) {
+        final Species species;
+        if (json.isNull(PREFERRED_SPECIES)) {
+            species = null;
+        }
+        else {
+            species = Species.valueOf(json.getString(PREFERRED_SPECIES));
+        }
+        return new AdopterPreferences(
+                json.getBoolean("hasChildren"),
+                json.getBoolean("hasOtherPets"),
+                json.getBoolean("canHandleMedicalNeeds"),
+                json.getBoolean("canHandleKitten"),
+                json.getBoolean("canHandlePregnantAnimal"),
+                species);
+    }
+
+    // ---------- Writing ----------
+
+    private static JSONObject writeUser(User user) {
+        final JSONObject json = new JSONObject();
+        json.put("username", user.getName());
+        json.put("id", user.getId());
+        json.put("email", user.getEmail());
+        json.put("passwordHash", user.getPasswordHash());
+        json.put("role", user.getRole().name());
+        if (user.getPreference() == null) {
+            json.put(PREFERENCE, JSONObject.NULL);
+        }
+        else {
+            json.put(PREFERENCE, writePreference(user.getPreference()));
+        }
+        return json;
+    }
+
+    private static JSONObject writePreference(AdopterPreferences preference) {
+        final JSONObject json = new JSONObject();
+        json.put("hasChildren", preference.hasChildren());
+        json.put("hasOtherPets", preference.hasOtherPets());
+        json.put("canHandleMedicalNeeds", preference.canHandleMedicalNeeds());
+        json.put("canHandleKitten", preference.canHandleKitten());
+        json.put("canHandlePregnantAnimal", preference.canHandlePregnantAnimal());
+        if (preference.getPreferredSpecies() == null) {
+            json.put(PREFERRED_SPECIES, JSONObject.NULL);
+        }
+        else {
+            json.put(PREFERRED_SPECIES, preference.getPreferredSpecies().name());
+        }
+        return json;
+    }
+
+    /**
+     * Writes the given users to the file, replacing it only once the full snapshot is written.
+     */
+    private void writeFile(Map<String, User> users) {
+        final JSONArray array = new JSONArray();
+        for (User user : users.values()) {
+            array.put(writeUser(user));
+        }
+
+        Path temporaryPath = null;
         try {
-            content = Files.readString(csvFile.toPath());
+            temporaryPath = Files.createTempFile(jsonPath.getParent(), "users-", ".tmp");
+            Files.writeString(temporaryPath, array.toString(2));
+            Files.move(temporaryPath, jsonPath, StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
         }
         catch (IOException ex) {
-            throw new RuntimeException(ex);
-        }
-
-        final List<List<String>> rows = parseCsv(content);
-        final String header = rows.isEmpty() ? "" : String.join(",", rows.get(0));
-        if (!HEADER.equals(header)) {
-            throw new RuntimeException(String.format("header should be%n: %s%n but was:%n%s", HEADER, header));
-        }
-
-        for (int i = 1; i < rows.size(); i++) {
-            final List<String> col = rows.get(i);
-            if (col.size() == 1 && col.get(0).isEmpty()) {
-                // skip blank lines
-                continue;
-            }
-            if (col.size() != COLUMNS.length) {
-                throw new RuntimeException("Malformed row " + i + " in " + csvFile + ": " + col);
-            }
-            final String preference = col.get(5).isEmpty() ? null : col.get(5);
-            put(userFactory.create(col.get(0), col.get(1), col.get(2), col.get(3),
-                                   Role.valueOf(col.get(4)), preference));
-        }
-    }
-
-    private void writeFile() {
-        try (BufferedWriter writer = Files.newBufferedWriter(csvFile.toPath())) {
-            writer.write(HEADER);
-            writer.newLine();
-
-            for (User user : usersById.values()) {
-                writer.write(String.join(",",
-                        escape(user.getName()),
-                        escape(user.getId()),
-                        escape(user.getEmail()),
-                        escape(user.getPasswordHash()),
-                        escape(user.getRole().name()),
-                        escape(user.getPreference())));
-                writer.newLine();
-            }
-        }
-        catch (IOException ex) {
-            throw new RuntimeException(ex);
-        }
-    }
-
-    private void put(User user) {
-        final User previous = usersById.put(user.getId(), user);
-        if (previous != null) {
-            idByEmail.remove(previous.getEmail());
-        }
-        idByEmail.put(user.getEmail(), user.getId());
-    }
-
-    // ---------- CSV helpers ----------
-
-    /**
-     * Quotes a field if it contains a comma, quote or line break; null becomes an empty field.
-     */
-    private static String escape(String field) {
-        if (field == null) {
-            return "";
-        }
-        if (field.contains(",") || field.contains("\"") || field.contains("\n") || field.contains("\r")) {
-            return "\"" + field.replace("\"", "\"\"") + "\"";
-        }
-        return field;
-    }
-
-    /**
-     * Parses CSV text into rows of fields, supporting double-quoted fields
-     * (with "" as an escaped quote and line breaks inside quotes).
-     */
-    private static List<List<String>> parseCsv(String content) {
-        final List<List<String>> rows = new ArrayList<>();
-        List<String> row = new ArrayList<>();
-        final StringBuilder field = new StringBuilder();
-        boolean inQuotes = false;
-
-        for (int i = 0; i < content.length(); i++) {
-            final char c = content.charAt(i);
-            if (inQuotes) {
-                if (c == '"' && i + 1 < content.length() && content.charAt(i + 1) == '"') {
-                    field.append('"');
-                    i++;
+            if (temporaryPath != null) {
+                try {
+                    Files.deleteIfExists(temporaryPath);
                 }
-                else if (c == '"') {
-                    inQuotes = false;
-                }
-                else {
-                    field.append(c);
+                catch (IOException cleanupFailure) {
+                    ex.addSuppressed(cleanupFailure);
                 }
             }
-            else if (c == '"') {
-                inQuotes = true;
-            }
-            else if (c == ',') {
-                row.add(field.toString());
-                field.setLength(0);
-            }
-            else if (c == '\n' || c == '\r') {
-                if (c == '\r' && i + 1 < content.length() && content.charAt(i + 1) == '\n') {
-                    i++;
-                }
-                row.add(field.toString());
-                field.setLength(0);
-                rows.add(row);
-                row = new ArrayList<>();
-            }
-            else {
-                field.append(c);
-            }
+            throw new IllegalStateException("Could not save users to " + jsonPath, ex);
         }
-        if (field.length() > 0 || !row.isEmpty()) {
-            row.add(field.toString());
-            rows.add(row);
-        }
-        return rows;
     }
 
     // ---------- Signup / Admin signup ----------
 
     @Override
-    public boolean existsById(String id) {
+    public synchronized boolean existsById(String id) {
         return usersById.containsKey(id);
     }
 
     @Override
-    public boolean existsByEmail(String email) {
+    public synchronized boolean existsByEmail(String email) {
         return idByEmail.containsKey(email);
     }
 
     @Override
-    public void save(User user) {
-        put(user);
-        writeFile();
+    public synchronized void save(User user) {
+        final Map<String, User> updatedUsers = new LinkedHashMap<>(usersById);
+        final Map<String, String> updatedEmails = new HashMap<>(idByEmail);
+        final User previous = updatedUsers.put(user.getId(), user);
+        if (previous != null) {
+            updatedEmails.remove(previous.getEmail());
+        }
+        updatedEmails.put(user.getEmail(), user.getId());
+
+        // Only update memory after the file has been written successfully.
+        writeFile(updatedUsers);
+        usersById = updatedUsers;
+        idByEmail = updatedEmails;
     }
 
     // ---------- Login ----------
 
     @Override
-    public User getByEmail(String email) {
+    public synchronized User getByEmail(String email) {
         final String id = idByEmail.get(email);
         return id == null ? null : usersById.get(id);
     }
 
     @Override
-    public void setCurrentUserId(String id) {
+    public synchronized void setCurrentUserId(String id) {
         currentUserId = id;
     }
 }
