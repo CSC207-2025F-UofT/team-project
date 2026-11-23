@@ -25,7 +25,8 @@ class AppBuilderTest {
             try {
                 assertEquals("CocktailCraft", frame.getTitle());
                 assertTrue(frame.getContentPane() instanceof MainPageView);
-                for (String label : new String[] {"Base spirits", "Search", "Clear", "Profile"}) {
+                assertTrue(findButton(frame.getContentPane(), "Base spirits").isEnabled());
+                for (String label : new String[] {"Search", "Clear", "Profile"}) {
                     JButton button = findButton(frame.getContentPane(), label);
                     assertNotNull(button, label);
                     assertFalse(button.isEnabled(), label);

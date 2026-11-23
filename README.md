@@ -73,7 +73,7 @@ The user must enter a name, select at least one base spirit, or both.
 1. The user enters a name and/or selects base spirits in the Home search area.
 2. The user clicks Search.
 3. The system finds matching cocktails. Name matching is case-insensitive and
-   supports partial matches. A cocktail may match any selected spirit; when both
+   supports partial matches. A cocktail must match every selected spirit; when both
    name and spirit criteria are provided, both must be satisfied.
 4. The system displays matching cocktails using the same card layout as Home.
 5. The user selects a card to open Cocktail Details.

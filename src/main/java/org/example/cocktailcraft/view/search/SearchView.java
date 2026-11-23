@@ -1,18 +1,61 @@
 package org.example.cocktailcraft.view.search;
 
-import javax.swing.JButton;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JTextField;
+import org.example.cocktailcraft.entity.Tags;
+import org.example.cocktailcraft.interface_adapter.search.SearchController;
+import org.example.cocktailcraft.interface_adapter.search.SearchViewModel;
+
+import javax.swing.*;
+import java.util.*;
 
 public class SearchView extends JPanel {
-    public SearchView() {
+    private final Map<Tags.BaseSpirit, JCheckBox> spiritOptions = new EnumMap<>(Tags.BaseSpirit.class);
+    private final SearchViewModel searchViewModel;
+    private final JTextField nameInputField = new JTextField(22);
+    private SearchController searchController;
+
+    public SearchView(SearchViewModel searchViewModel) {
+        this.searchViewModel = searchViewModel;
+
         add(new JLabel("Cocktail name:"));
-        add(new JTextField(22));
-        for (String label : new String[] {"Base spirits", "Search", "Clear"}) {
-            JButton button = new JButton(label);
-            button.setEnabled(false);
-            add(button);
+        add(nameInputField);
+        JButton selector = new JButton("Base spirits");
+        JPopupMenu dropdown = new JPopupMenu();
+        for (Tags.BaseSpirit spirit : Tags.BaseSpirit.values()) {
+            String name = spirit.name().toLowerCase(Locale.ROOT);
+            JCheckBox option = new JCheckBox(Character.toUpperCase(name.charAt(0)) + name.substring(1));
+            spiritOptions.put(spirit, option);
+            option.addActionListener(event -> {
+                int count = getSelectedBaseSpirits().size();
+                selector.setText(count == 0 ? "Base spirits" : "Base spirits (" + count + ")");
+            });
+            dropdown.add(option);
         }
+        selector.setComponentPopupMenu(dropdown);
+        selector.addActionListener(event -> dropdown.show(selector, 0, selector.getHeight()));
+        add(selector);
+
+        JButton searchButton = new JButton("Search");
+        searchButton.addActionListener(event ->
+                searchController.execute(nameInputField.getText(), getSelectedBaseSpirits()));
+        add(searchButton);
+
+        JButton clearButton = new JButton("Clear");
+        clearButton.setEnabled(false);
+        add(clearButton);
     }
+
+    public Set<Tags.BaseSpirit> getSelectedBaseSpirits() {
+        Set<Tags.BaseSpirit> selected = EnumSet.noneOf(Tags.BaseSpirit.class);
+        spiritOptions.forEach((spirit, option) -> {
+            if (option.isSelected()) {
+                selected.add(spirit);
+            }
+        });
+        return Set.copyOf(selected);
+    }
+
+    public void setSearchController(SearchController searchController) {
+        this.searchController = searchController;
+    }
+
 }
