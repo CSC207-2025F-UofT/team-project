@@ -2,6 +2,7 @@ package view;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridLayout;
@@ -20,9 +21,11 @@ import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
+import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.ScrollPaneConstants;
 
 import entity.Temperament;
 import interface_adapter.browse_pets.AgeFilterOption;
@@ -71,7 +74,9 @@ public class GalleryView extends JPanel implements PropertyChangeListener {
         cardGrid.setBorder(BorderFactory.createEmptyBorder(GAP, GAP, GAP, GAP));
         final JPanel gridHolder = new JPanel(new BorderLayout());
         gridHolder.add(cardGrid, BorderLayout.NORTH);
-        add(new JScrollPane(gridHolder), BorderLayout.CENTER);
+        final JScrollPane scrollPane = new JScrollPane(gridHolder);
+        scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+        add(scrollPane, BorderLayout.CENTER);
     }
 
     private JPanel buildFilterPanel() {
@@ -112,6 +117,9 @@ public class GalleryView extends JPanel implements PropertyChangeListener {
         clearButton.getAccessibleContext().setAccessibleName("Clear filters");
         clearButton.addActionListener(event -> clearFilters());
         panel.add(clearButton);
+        for (Component component : panel.getComponents()) {
+            ((JComponent) component).setAlignmentX(Component.LEFT_ALIGNMENT);
+        }
         return panel;
     }
 
@@ -171,7 +179,7 @@ public class GalleryView extends JPanel implements PropertyChangeListener {
         card.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(Color.GRAY),
                 BorderFactory.createEmptyBorder(10, 10, 10, 10)));
-        card.setPreferredSize(new Dimension(220, 110));
+        card.setPreferredSize(new Dimension(180, 110));
         card.add(new JLabel(data.getName()));
         card.add(new JLabel(data.getSummary()));
         card.add(new JLabel(data.getStatus()));
