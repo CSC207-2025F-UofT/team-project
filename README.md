@@ -243,7 +243,6 @@ In every alternative flow, nothing is saved and no XP is given.
 
 </details>
 
-
 ### Use Case 5: <Recommendations Quests>
 **1. Take the Questionnaire** <br>
 The user answers a list of questions about interests, activity type, allocated budget, etc. and the system saves the user’s preferences. <br>
@@ -615,7 +614,7 @@ A circle on the map: a centre and a radius. It holds the rule for what counts as
 
 **Constants:** MIN_RADIUS_KM = 0.5, MAX_RADIUS_KM = 10, DEFAULT_RADIUS_KM = 2
 
-**Methods:** getters, contains(point: Location): boolean. The constructor throws IllegalArgumentException if the radius is outside MIN_RADIUS_KM to MAX_RADIUS_KM. contains returns true when centre.distanceTo(point) is at most radiusKm.
+**Methods:** getters, distanceFromCentre(point: Location): double, contains(point: Location): boolean. The constructor throws IllegalArgumentException if the centre is null or the radius is outside MIN_RADIUS_KM to MAX_RADIUS_KM. contains returns true when centre.distanceTo(point) is at most radiusKm.
 
 **Reason to change:** the rule for which quests count as nearby (for example, new radius limits).
 
@@ -627,11 +626,13 @@ A circle on the map: a centre and a radius. It holds the rule for what counts as
 
 ## API Usage
 
-* **API Name:**
-* **Documentation:** [Link]
-* **How it is used in the program:**
+**Map (Use Case 4)**
 
-[Complete Later, Map API & Camera API]
+* **API Name:** OpenStreetMap tile server (web API), drawn with the JXMapViewer2 library
+* **Documentation:** [OSM tile usage policy](https://operations.osmfoundation.org/policies/tiles/), [JXMapViewer2](https://github.com/msteiger/jxmapviewer2)
+* **How it is used in the program:** The Map tab downloads 256x256 map images from `https://tile.openstreetmap.org/{zoom}/{x}/{y}.png` for the area around the user. JXMapViewer2 (a Swing library, not a web API) requests those tiles, caches them on disk, and draws them. Only the `view` layer uses the library; the rest of the app works with its own `Location` entity. If tiles cannot be downloaded, the map shows a blank background and the "you are here" marker and pins are still drawn.
+
+[Complete Later: Camera API]
 
 [Back to top](#linked-out)
 
