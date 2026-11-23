@@ -15,7 +15,6 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
-import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 
@@ -112,11 +111,13 @@ public class RecordTransactionView extends JPanel
         typeInputField.setSelectedItem(state.getType());
 
         if (state.getError() != null) {
-            messageLabel.setForeground(Color.RED);
+            view.settings.ThemeManager.setMessageColor(
+                    messageLabel, "App.error");
             messageLabel.setText(state.getError());
         }
         else {
-            messageLabel.setForeground(new Color(0, 100, 0));
+            view.settings.ThemeManager.setMessageColor(
+                    messageLabel, "App.success");
             messageLabel.setText(state.getSuccessMessage() == null
                     ? " " : state.getSuccessMessage());
         }
