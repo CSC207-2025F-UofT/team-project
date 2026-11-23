@@ -50,4 +50,38 @@ class CustomizePresenterTest {
         assertTrue(state.isSaved());
         assertEquals(List.of("custom-001"), notifiedIds);
     }
+
+    @Test
+    void preservesInputAndNotifiesOnFailure() {
+        CustomizeViewModel viewModel = new CustomizeViewModel();
+
+        List<RecipeIngredient> ingredients =
+                List.of(new RecipeIngredient("Sugar", "1", "tsp"));
+
+        CustomizeState state = viewModel.getState();
+        state.setCustomRecipeId("custom-001");
+        state.setOriginalCocktailId("mojito");
+        state.setName("My Mojito");
+        state.setIngredients(ingredients);
+        state.setSaved(true);
+
+        List<String> notifiedErrors = new ArrayList<>();
+        viewModel.addListener(() ->
+                notifiedErrors.add(viewModel.getState().getErrorMessage()));
+
+        CustomizePresenter presenter = new CustomizePresenter(viewModel);
+        String message = "Unable to save the recipe.";
+
+        presenter.prepareFailView(message);
+
+        assertEquals(message, state.getErrorMessage());
+        assertFalse(state.isSaved());
+
+        assertEquals("custom-001", state.getCustomRecipeId());
+        assertEquals("mojito", state.getOriginalCocktailId());
+        assertEquals("My Mojito", state.getName());
+        assertEquals(ingredients, state.getIngredients());
+
+        assertEquals(List.of(message), notifiedErrors);
+    }
 }
