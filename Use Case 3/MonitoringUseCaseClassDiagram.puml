@@ -1,0 +1,157 @@
+@startuml
+!pragma layout smetana
+title Story 3 | Monitoring — class diagram
+
+skinparam shadowing false
+skinparam classAttributeIconSize 0
+skinparam packageStyle rectangle
+skinparam defaultFontSize 14
+hide empty members
+
+legend top left
+  White = current implementation
+  <back:#FFF0CD> Gold </back> = proposed interface-adapter or view class
+  + public    - private    {readOnly} final field
+endlegend
+
+package "view (proposed)" {
+    class MonitoringView #FFF0CD {
+        -controller: MonitoringController
+        -viewModel: MonitoringViewModel
+        +MonitoringView(controller: MonitoringController,\nviewModel: MonitoringViewModel)
+        -onOpenMonitoring(): void
+        +stateChanged(): void
+    }
+}
+
+package "interface_adapter.monitoring (proposed)" {
+    class MonitoringController #FFF0CD {
+        -inputBoundary: MonitoringInputBoundary
+        +MonitoringController(inputBoundary: MonitoringInputBoundary)
+        +execute(uniqueUserId: int): void
+    }
+
+    class MonitoringPresenter #FFF0CD {
+        -viewModel: MonitoringViewModel
+        +MonitoringPresenter(viewModel: MonitoringViewModel)
+        +prepareSuccessView(outputData: MonitoringOutputData): void
+        +prepareFailView(errorMessage: String): void
+    }
+
+    class MonitoringViewModel #FFF0CD {
+        -tasks: List<MonitoringTaskData>
+        -errorMessage: String
+        +setSuccess(outputData: MonitoringOutputData): void
+        +setError(errorMessage: String): void
+        +getTasks(): List<MonitoringTaskData>
+        +getErrorMessage(): String
+    }
+}
+
+package "use_case.monitoring" {
+    interface MonitoringInputBoundary {
+        +execute(inputData: MonitoringInputData): void
+    }
+
+    class MonitoringInteractor {
+        -monitoringDataAccessObject: MonitoringDataAccessInterface {readOnly}
+        -holidayService: HolidayService {readOnly}
+        -monitoringPresenter: MonitoringOutputBoundary {readOnly}
+        +MonitoringInteractor(dataAccess: MonitoringDataAccessInterface,\nholidayService: HolidayService,\npresenter: MonitoringOutputBoundary)
+        +execute(inputData: MonitoringInputData): void
+    }
+
+    class MonitoringInputData {
+        -uniqueUserId: int {readOnly}
+        +MonitoringInputData(uniqueUserId: int)
+        +getUniqueUserId(): int
+    }
+
+    interface MonitoringOutputBoundary {
+        +prepareSuccessView(outputData: MonitoringOutputData): void
+        +prepareFailView(errorMessage: String): void
+    }
+
+    class MonitoringOutputData {
+        -tasks: List<MonitoringTaskData> {readOnly}
+        +MonitoringOutputData(tasks: List<MonitoringTaskData>)
+        +getTasks(): List<MonitoringTaskData>
+    }
+
+    class MonitoringTaskData {
+        -uniqueTaskId: int {readOnly}
+        -title: String {readOnly}
+        -deadline: LocalDate {readOnly}
+        -completionProgress: byte {readOnly}
+        -difficultyLevel: DifficultyLevel {readOnly}
+        -overdue: boolean {readOnly}
+        -holidayName: Optional<String> {readOnly}
+        +isOverdue(): boolean
+        +getHolidayName(): Optional<String>
+    }
+
+    interface MonitoringDataAccessInterface {
+        +getTasksByUserId(uniqueUserId: int): List<StudentTask>
+        +getCountryCodeByUserId(uniqueUserId: int): String
+    }
+
+    interface HolidayService {
+        +getHolidayName(date: LocalDate,\ncountryCode: String): Optional<String>
+    }
+}
+
+package "data_access" {
+    class NagerDateHolidayService {
+        -BASE_URL: String {static}
+        -cache: Map<String, Map<LocalDate, String>>
+        +getHolidayName(date: LocalDate,\ncountryCode: String): Optional<String>
+    }
+
+    class MonitoringDataAccessObject #FFF0CD {
+        +getTasksByUserId(uniqueUserId: int): List<StudentTask>
+        +getCountryCodeByUserId(uniqueUserId: int): String
+    }
+}
+
+package "entity" {
+    abstract class Task {
+        -uniqueTaskId: int {readOnly}
+        -uniqueUserId: int {readOnly}
+        +getUniqueTaskId(): int
+        +getUniqueUserId(): int
+    }
+
+    class StudentTask {
+        -title: String
+        -deadline: LocalDate
+        -completionProgress: byte
+        -difficultyLevel: DifficultyLevel
+        +getTitle(): String
+        +getDeadline(): LocalDate
+        +getCompletionProgress(): byte
+        +getDifficultyLevel(): DifficultyLevel
+    }
+}
+
+MonitoringView --> MonitoringController
+MonitoringView --> MonitoringViewModel
+MonitoringController --> MonitoringInputBoundary
+MonitoringController ..> MonitoringInputData : creates
+
+MonitoringInteractor ..|> MonitoringInputBoundary
+MonitoringInteractor --> MonitoringDataAccessInterface
+MonitoringInteractor --> HolidayService
+MonitoringInteractor --> MonitoringOutputBoundary
+MonitoringInteractor ..> MonitoringOutputData : creates
+MonitoringOutputData --> "*" MonitoringTaskData
+
+MonitoringPresenter ..|> MonitoringOutputBoundary
+MonitoringPresenter --> MonitoringViewModel
+MonitoringViewModel --> "*" MonitoringTaskData
+
+NagerDateHolidayService ..|> HolidayService
+MonitoringDataAccessObject ..|> MonitoringDataAccessInterface
+MonitoringDataAccessInterface ..> StudentTask
+
+StudentTask --|> Task
+@enduml

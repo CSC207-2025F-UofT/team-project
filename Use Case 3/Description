@@ -1,0 +1,14 @@
+Scenario WalkThrough: The user opens Monitoring and sees incomplete tasks, with overdue tasks first and public-holiday warnings.
+
+- A student opens the Monitoring View while logged in.
+- The controller creates MonitoringInputData using the logged-in student's ID and sends it to the MonitoringInteractor.
+- The interactor gets that student's saved tasks and country code through the DAO.
+- The interactor removes tasks with 100% completion progress.
+- It marks incomplete tasks whose deadline is today or earlier as overdue. Overdue tasks are placed before upcoming tasks.
+- Tasks are sorted by deadline and tasks with the same deadline are sorted alphabetically by title.
+- For each displayed task, the interactor calls HolidayService with the task deadline and the student's country code.
+If the date is a public holiday, the holiday name is included in the output data.
+- The interactor sends MonitoringOutputData to the presenter.
+- The presenter updates the MonitoringViewModel, and the Monitoring view displays each task with its deadline,
+overdue status, and public-holiday warning when present.
+- Tasks that are 100% complete are not shown.
