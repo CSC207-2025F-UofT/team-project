@@ -9,7 +9,7 @@ package com.terrain.entity.model;
  */
 public class TerrainRules {
     /** How far above sea level the sand extends. */
-    public static final double SAND_HEIGHT = 2.0; // TODO decide if this should be a parameter instead
+    public static final double SAND_HEIGHT = 2.0; // TODO decide if this should be a parameter instead (also need to make sure this stays adjacent to river)
     /** Minimum tree density for a tile to count as forest rather than grass. */
     public static final double FOREST_DENSITY = 0.3; // TODO decide whether density in relation to this decides tiletype probabilistically
 
@@ -58,6 +58,6 @@ public class TerrainRules {
         if (tile.getTreeDensity() >= FOREST_DENSITY) {
             return TileType.FOREST;
         }
-        return TileType.GRASS;
+        return TileType.GRASS; // TODO Else, should return same? Potential that other default's can exist
     }
 }
