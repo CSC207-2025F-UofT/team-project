@@ -4,6 +4,9 @@ import java.awt.CardLayout;
 import java.nio.file.Path;
 
 import javax.swing.JFrame;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.WindowConstants;
 
@@ -118,6 +121,20 @@ public final class AppBuilder {
         return view;
     }
 
+    private JMenuBar createMenuBar() {
+        final JMenuItem gallery = new JMenuItem("Pet Gallery");
+        gallery.addActionListener(event -> viewManagerModel.setActiveView(GalleryView.VIEW_NAME));
+        final JMenuItem myApplications = new JMenuItem("My Applications");
+        myApplications.addActionListener(event -> applicationNavigator.showMyApplications());
+
+        final JMenu menu = new JMenu("Go to");
+        menu.add(gallery);
+        menu.add(myApplications);
+        final JMenuBar menuBar = new JMenuBar();
+        menuBar.add(menu);
+        return menuBar;
+    }
+
     /**
      * Creates the window showing the first screen.
      *
@@ -127,6 +144,9 @@ public final class AppBuilder {
         final JFrame frame = new JFrame("PawPortal");
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         frame.add(views);
+        if (applicationNavigator != null) {
+            frame.setJMenuBar(createMenuBar());
+        }
         frame.setSize(900, 600);
         frame.setLocationRelativeTo(null);
         viewManagerModel.setActiveView(GalleryView.VIEW_NAME);
