@@ -1,5 +1,7 @@
 package view;
 
+import interface_adapter.ViewManagerModel;
+import interface_adapter.home.HomeViewModel;
 import interface_adapter.login.LoginController;
 import interface_adapter.login.LoginState;
 import interface_adapter.login.LoginViewModel;
@@ -18,6 +20,7 @@ import java.awt.event.ActionListener;
 public class LoginView extends JPanel implements ActionListener, LoginViewModelListener {
 
     private final LoginViewModel loginViewModel;
+    private final ViewManagerModel viewManagerModel;
 
     private final JTextField usernameInputField = new JTextField(15);
     private final JLabel loginErrorField = new JLabel();
@@ -28,9 +31,10 @@ public class LoginView extends JPanel implements ActionListener, LoginViewModelL
     private final JButton cancel;
     private LoginController loginController = null;
 
-    public LoginView(LoginViewModel loginViewModel) {
+    public LoginView(LoginViewModel loginViewModel, ViewManagerModel viewManagerModel) {
 
         this.loginViewModel = loginViewModel;
+        this.viewManagerModel = viewManagerModel;
         this.loginViewModel.addListener(this);
 
         final JLabel title = new JLabel("Login Screen");
@@ -126,7 +130,10 @@ public class LoginView extends JPanel implements ActionListener, LoginViewModelL
      * @param evt the ActionEvent to react to
      */
     public void actionPerformed(ActionEvent evt) {
-        System.out.println("Click " + evt.getActionCommand());
+        if (evt.getSource().equals(cancel)) {
+            viewManagerModel.setState(HomeViewModel.VIEW_NAME);
+            viewManagerModel.notifyViewChanged();
+        }
     }
 
     @Override
