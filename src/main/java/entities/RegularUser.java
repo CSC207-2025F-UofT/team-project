@@ -6,13 +6,16 @@ package entities;
 public class RegularUser extends User {
     private Boolean doneTest = false;
 
-    public RegularUser(String username) {
-        super(username);
+    public RegularUser(String username, String role) {
+        super(username, role);
     }
 
     /**
      * Indicates a User has completed a cognitive test today
      */
     private void doneTest() { this.doneTest = true; }
+
+    @Override
+    public String getRole() { return "Regular User"; }
 
 }

@@ -6,7 +6,10 @@ package entities;
 public class Researcher extends User {
 
     public Researcher(String username) {
-        super(username);
+        super(username, role);
     }
+
+    @Override
+    public String getRole() { return "Researcher"; }
 
 }
