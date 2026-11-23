@@ -2,6 +2,8 @@ package entity;
 
 /** A User of LinkedOut */
 public class User {
+    public static final int EXP_PER_LEVEL = 100;
+
     private final String username;
 
     private String profilePicturePath;
@@ -48,5 +50,25 @@ public class User {
 
     public String getPassword(){
         return password;
+    }
+
+    public void addExp(int expPerQuest) {
+        if (expPerQuest <= 0) {
+            throw new IllegalArgumentException("addExp must be positive");
+        }
+        exp += expPerQuest;
+    }
+    public int getLevel() {
+        int level;
+        level = exp / EXP_PER_LEVEL + 1;
+        return level;
+    }
+    public int getExpToNextLevel() {
+        int remainingExp;
+        remainingExp = exp % EXP_PER_LEVEL;
+        return EXP_PER_LEVEL - remainingExp;
+    }
+    public void setProfilePicturePath(String path) {
+        this.profilePicturePath = path;
     }
 }
