@@ -11,3 +11,53 @@ The readme should include information such as:
 By keeping this README up-to-date,
 your team will find it easier to prepare for the final presentation
 at the end of the term.
+
+## The game of Set and its complications
+Digitise the board game "Set" and its complications (anti-set and ghost set).
+
+## Rules of "Set"
+SET is a fast-paced card game that challenges players to spot patterns, compare features, and think 
+quickly. The goal is to identify groups of three cards, called a Set, in which each feature is 
+either exactly the same on all three cards or completely different on all three.
+
+The Set deck contains 81 cards, and every card has four features (colour, number, shape, and shading) 
+with three possible variations of each.
+
+The goal of the game is to find the most Sets of all players.
+
+If there are no sets on the field, three cards are added to the field.
+
+## Rules of "Anti-Set"
+Anti-set is a complication of the base game that uses the same cards and the same definition of a 
+set, in which player need to find two sets that share the same card. 
+The shared card doesn't have to be on the field, but the other four cards (the anti-set)
+have to be. The player must collect these four cards in pairs (each pair is one of the sets that 
+ends in the shared card).
+
+## Rules of "Ghost Set"
+Ghost set is a further complication of the base game with the same deck and field. The goal is to find 
+three pairs of cards such that the "finishing" cards (a card that would make a given pair a set)
+of the pairs make a set. As any two disjoint (non-intersecting) sets make a ghost set, there is an 
+optional rule banning this kind of ghost set.
+
+### User Stories
+
+As a user I want…
+- be able to see the field of 12 Set cards at a time
+- be able to ask for a hint if I cannot find a set
+- be able to select three and see if it is a set (according to the rules of set)
+- be able to pause the game
+- be able to exit the game without exiting the app
+- be able to play with multiple people chosen at random from currently active users who also chose the multiplayer option
+- be able to change the colour scheme of the cards (sets of three colours)
+- be able to play alone and see how many sets I get
+- be able to see how much time the game took
+- be able to create a private game with access by code
+- be able to switch the game mode to anti-set (choose 4 cards instead of three)
+- to not be stuck on a field with no sets: automatically add 3 cards to the field
+- be able to switch the game mode to ghost set (choose six cards in order at a time and check if they generate a ghost set)
+- be able to see the ghost set my cards make if it is correct
+- be able to restrict the game of ghost set to not include two disjoint sets variants as correct
+- be able to set the mode of the game when entering a private game/multiplayer
+- be able to play different modes of the game when in multiplayer (like one person plays set and the other anti-set)
+- be able to see the rules for every mode of the game
