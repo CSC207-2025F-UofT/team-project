@@ -8,12 +8,15 @@ import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
+import java.awt.Image;
 import java.awt.Insets;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
+import java.util.concurrent.ExecutionException;
 
 import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
@@ -22,15 +25,19 @@ import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
+import javax.swing.ImageIcon;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
+import javax.swing.SwingWorker;
 import javax.swing.WindowConstants;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
+import interface_adapter.manage_pet.BreedReferenceViewData;
 import interface_adapter.manage_pet.ManagePetController;
 import interface_adapter.manage_pet.ManagePetViewModel;
 import interface_adapter.manage_pet.PetViewData;
@@ -39,6 +46,8 @@ import interface_adapter.manage_pet.PetViewData;
  * Shared form for adding a new pet and updating an existing pet.
  */
 final class PetForm extends JPanel {
+    private static final String BREED_REFERENCE_TITLE = "Breed reference";
+
     private final ManagePetController controller;
     private final ManagePetViewModel viewModel;
     private final PetViewData pet;
@@ -76,7 +85,7 @@ final class PetForm extends JPanel {
 
         addRow(0, "Name", name);
         addRow(1, "Species", species);
-        addRow(2, "Breed", breed);
+        addRow(2, "Breed", createBreedInput());
         addRow(3, "Age (whole years)", age);
         addRow(4, "Sex", sex);
         addRow(5, "Temperament tags", createTemperamentOptions());
@@ -137,6 +146,84 @@ final class PetForm extends JPanel {
         constraints.weightx = 1.0;
         constraints.fill = GridBagConstraints.HORIZONTAL;
         add(field, constraints);
+    }
+
+    private JPanel createBreedInput() {
+        final JPanel panel = new JPanel(new BorderLayout(6, 0));
+        final JButton lookup = new JButton("Look up breed");
+        breed.getAccessibleContext().setAccessibleName("Breed");
+        panel.add(breed, BorderLayout.CENTER);
+        panel.add(lookup, BorderLayout.EAST);
+        lookup.addActionListener(event -> lookUpBreed(lookup));
+        return panel;
+    }
+
+    private void lookUpBreed(JButton lookup) {
+        final String query = breed.getText().strip();
+        lookup.setEnabled(false);
+        lookup.setText("Looking up…");
+        final SwingWorker<Optional<BreedReferenceViewData>, Void> worker = new SwingWorker<>() {
+            @Override
+            protected Optional<BreedReferenceViewData> doInBackground() {
+                return controller.lookupBreed(query);
+            }
+
+            @Override
+            protected void done() {
+                lookup.setEnabled(true);
+                lookup.setText("Look up breed");
+                if (isShowing() && query.equalsIgnoreCase(breed.getText().strip())) {
+                    showLookupResult(this);
+                }
+            }
+        };
+        worker.execute();
+    }
+
+    private void showLookupResult(SwingWorker<Optional<BreedReferenceViewData>, Void> worker) {
+        try {
+            final Optional<BreedReferenceViewData> reference = worker.get();
+            if (reference.isPresent()) {
+                showBreedReference(reference.get());
+            } else {
+                JOptionPane.showMessageDialog(this, "No exact match. Try the full breed name or continue manually.",
+                        BREED_REFERENCE_TITLE, JOptionPane.INFORMATION_MESSAGE);
+            }
+        } catch (InterruptedException exception) {
+            Thread.currentThread().interrupt();
+        } catch (ExecutionException exception) {
+            final Throwable cause = exception.getCause();
+            final String message = cause instanceof IllegalArgumentException || cause instanceof IllegalStateException
+                    ? cause.getMessage() : "Breed lookup is unavailable. You can still fill in the form.";
+            JOptionPane.showMessageDialog(this, message, BREED_REFERENCE_TITLE, JOptionPane.WARNING_MESSAGE);
+        }
+    }
+
+    private void showBreedReference(BreedReferenceViewData reference) {
+        final JPanel result = new JPanel(new BorderLayout(0, 8));
+        final String traits = reference.getTemperament().isBlank() ? "Unavailable" : reference.getTemperament();
+        final JTextArea summary = new JTextArea(reference.getName() + "\nTypical temperament: " + traits
+                + "\nSource: TheCatAPI", 4, 32);
+        summary.setEditable(false);
+        summary.setLineWrap(true);
+        summary.setWrapStyleWord(true);
+        summary.setOpaque(false);
+        result.add(summary, BorderLayout.NORTH);
+        final JLabel photo = new JLabel("Reference photo unavailable", JLabel.CENTER);
+        final byte[] referencePhoto = reference.getPhoto();
+        if (referencePhoto.length > 0) {
+            final ImageIcon icon = new ImageIcon(referencePhoto);
+            if (icon.getIconWidth() > 0 && icon.getIconHeight() > 0) {
+                final double scale = Math.min(1.0, Math.min(250.0 / icon.getIconWidth(), 170.0 / icon.getIconHeight()));
+                final int width = Math.max(1, (int) (icon.getIconWidth() * scale));
+                final int height = Math.max(1, (int) (icon.getIconHeight() * scale));
+                photo.setText("");
+                photo.setIcon(new ImageIcon(icon.getImage().getScaledInstance(width, height, Image.SCALE_SMOOTH)));
+                photo.getAccessibleContext().setAccessibleName("Breed reference photo");
+            }
+        }
+        result.add(photo, BorderLayout.CENTER);
+        JOptionPane.showMessageDialog(this, result, BREED_REFERENCE_TITLE, JOptionPane.PLAIN_MESSAGE);
     }
 
     private JPanel createTemperamentOptions() {

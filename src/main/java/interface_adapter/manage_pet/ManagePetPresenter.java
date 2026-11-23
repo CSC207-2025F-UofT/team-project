@@ -3,6 +3,7 @@ package interface_adapter.manage_pet;
 import java.util.ArrayList;
 import java.util.List;
 
+import use_case.manage_pet.BreedReference;
 import use_case.manage_pet.ManagePetOutputBoundary;
 import use_case.manage_pet.ManagePetOutputData;
 import use_case.manage_pet.ManagePetOutputData.PetDetails;
@@ -17,6 +18,10 @@ public final class ManagePetPresenter implements ManagePetOutputBoundary {
      */
     public ManagePetPresenter(ManagePetViewModel viewModel) {
         this.viewModel = viewModel;
+    }
+
+    static BreedReferenceViewData toViewData(BreedReference reference) {
+        return new BreedReferenceViewData(reference.getName(), reference.getTemperament(), reference.getPhoto());
     }
 
     @Override

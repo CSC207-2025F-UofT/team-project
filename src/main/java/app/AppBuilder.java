@@ -15,6 +15,7 @@ import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.WindowConstants;
 
+import data_access.CatApiBreedDataAccess;
 import data_access.FileApplicationDataAccessObject;
 import data_access.FilePetDataAccessObject;
 import data_access.FileUserDataAccessObject;
@@ -46,6 +47,7 @@ import use_case.admin_signup.AdminSignupInteractor;
 import use_case.browse_pets.BrowsePetsDataAccessInterface;
 import use_case.browse_pets.BrowsePetsInteractor;
 import use_case.login.LoginInteractor;
+import use_case.manage_pet.BreedLookupInteractor;
 import use_case.manage_pet.ManagePetDataAccessInterface;
 import use_case.manage_pet.ManagePetInteractor;
 import use_case.submit_application.SubmitApplicationInteractor;
@@ -219,7 +221,9 @@ public final class AppBuilder {
         final ManagePetViewModel viewModel = new ManagePetViewModel();
         final ManagePetPresenter presenter = new ManagePetPresenter(viewModel);
         final ManagePetInteractor interactor = new ManagePetInteractor(petDataAccess, presenter);
-        final ManagePetController controller = new ManagePetController(interactor);
+        final CatApiBreedDataAccess breedDataAccess = new CatApiBreedDataAccess(System.getenv("THE_CAT_API_KEY"));
+        final ManagePetController controller = new ManagePetController(interactor,
+                new BreedLookupInteractor(breedDataAccess));
         final ManagePetView view = new ManagePetView(controller, viewModel);
         controller.refresh();
         return view;
