@@ -17,9 +17,9 @@ public class WelcomeController {
      * Executes the Welcome menu.
      * @param username the username of the user logging in
      */
-    public void execute(String username, String password) {
-        final WelcomeInputData welcomeInputData = new WelcomeInputData(username);
-
-        welcomeUseCaseInteractor.execute(welcomeInputData);
-    }
+//    public void execute(String username) {
+//        final WelcomeInputData welcomeInputData = new WelcomeInputData(username);
+//
+//        welcomeUseCaseInteractor.execute(welcomeInputData);
+//
 }
