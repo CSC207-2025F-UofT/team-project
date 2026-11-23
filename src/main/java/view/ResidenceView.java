@@ -22,7 +22,7 @@ public class ResidenceView extends JPanel {
     private final JLabel saveLabel = new JLabel();
     private final JButton retryButton = new JButton("Retry save");
 
-    public ResidenceView(RestViewModel viewModel, RestController controller) {
+    public ResidenceView(RestViewModel viewModel, RestController controller, Runnable back) {
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
         setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
@@ -40,8 +40,11 @@ public class ResidenceView extends JPanel {
         retryButton.addActionListener(e -> controller.retrySave());
         retryButton.setVisible(false);
 
+        JButton backButton = new JButton("Back to Street");
+        backButton.addActionListener(e -> back.run());
+
         for (JComponent c : new JComponent[]{title, dayLabel, weatherLabel, energyLabel, restButton,
-                saveLabel, retryButton}) {
+                saveLabel, retryButton, backButton}) {
             c.setAlignmentX(Component.LEFT_ALIGNMENT);
             add(c);
         }
