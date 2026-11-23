@@ -24,7 +24,7 @@ public class MealDbRecipeDataAccessObject implements RecipeDataAccessInterface {
     }
 
     @Override
-    public List<Recipe> searchByName(){
+    public List<Recipe> searchByName(String keyword){
         //TODO: Use case 1
     }
 
