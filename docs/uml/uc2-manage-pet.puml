@@ -1,0 +1,133 @@
+@startuml uc2-manage-pet
+title UC2 Add / Edit / Remove a Pet: Clean Architecture classes
+
+left to right direction
+skinparam classAttributeIconSize 0
+skinparam packageStyle rectangle
+skinparam nodesep 30
+skinparam ranksep 60
+hide empty members
+
+package "View\n(Frameworks & Drivers)" as FDView #E2F4E2 {
+  class ManagePetView
+  class PetForm
+}
+
+package "Interface Adapters" as IA #DDEBFF {
+  class ManagePetController {
+    + refresh() : void
+    + add(name, species, breed, ageYears, sex, ...) : void
+    + edit(id, name, species, breed, ageYears, sex, ...) : void
+    + remove(id) : void
+  }
+  class ManagePetPresenter {
+    + prepareSuccessView(outputData) : void
+    + prepareFailView(message) : void
+  }
+  class ManagePetViewModel {
+    + getPets() : List<PetViewData>
+    + getAvailablePets() : List<PetViewData>
+    + getMessage() : String
+    + hasError() : boolean
+    + getSpeciesOptions() : String[]
+    + getSexOptions() : String[]
+    + getTemperamentOptions() : String[]
+  }
+  class PetViewData {
+    id, name, species, breed, ageYears, sex,
+    temperamentTags, adoptionFee, status, ...
+  }
+}
+
+package "Application Business Rules" as ABR #FDE2E2 {
+  interface ManagePetInputBoundary {
+    + refresh() : void
+    + add(inputData) : void
+    + edit(petId, inputData) : void
+    + remove(petId) : void
+  }
+  class ManagePetInputData {
+    name, species, breed, ageYears, sex,
+    temperamentTags, healthNotes, needsMedication,
+    vaccinated, spayedNeutered, adoptionFee, photoPath
+  }
+  class ManagePetInteractor {
+    + refresh() : void
+    + add(inputData) : void
+    + edit(petId, inputData) : void
+    + remove(petId) : void
+  }
+  interface ManagePetOutputBoundary {
+    + prepareSuccessView(outputData) : void
+    + prepareFailView(message) : void
+  }
+  class ManagePetOutputData {
+    pets : List<PetDetails>
+    message
+  }
+  class "ManagePetOutputData.PetDetails" as PetDetails {
+    id, name, species, breed, ageYears, sex,
+    temperamentTags, adoptionFee, status, available, ...
+  }
+  interface ManagePetDataAccessInterface {
+    + getPets() : List<Pet>
+    + findById(id) : Pet
+    + add(pet) : void
+    + update(pet) : boolean
+    + remove(id) : boolean
+  }
+}
+
+package "Enterprise Business Rules" as EBR #FFF4D6 {
+  class Pet
+  enum Species
+  enum PetSex
+  enum Temperament
+  enum PetStatus
+}
+
+package "Data Access\n(Frameworks & Drivers)" as FDData #E2F4E2 {
+  class FilePetDataAccessObject
+}
+
+' View and view model
+ManagePetView --> ManagePetController : calls
+PetForm --> ManagePetController : calls add / edit
+ManagePetView --> ManagePetViewModel : listens
+PetForm --> ManagePetViewModel : reads options
+ManagePetViewModel --> "0..*" PetViewData
+
+' Input side
+ManagePetController ..> ManagePetInputData : creates
+ManagePetController --> ManagePetInputBoundary
+ManagePetInputBoundary <|.. ManagePetInteractor
+
+' Output side
+ManagePetPresenter ..|> ManagePetOutputBoundary
+ManagePetPresenter --> ManagePetViewModel : updates
+PetViewData --> PetDetails : wraps
+ManagePetOutputBoundary <-- ManagePetInteractor
+ManagePetOutputData <.. ManagePetInteractor : creates
+ManagePetOutputData --> "0..*" PetDetails
+
+' Data access side
+ManagePetInteractor --> ManagePetDataAccessInterface
+ManagePetInteractor ..> Pet : creates
+Pet --> Species
+Pet --> PetSex
+Pet --> Temperament
+Pet --> PetStatus
+ManagePetDataAccessInterface <|.. FilePetDataAccessObject
+Pet <.. FilePetDataAccessObject : saves / loads
+
+' Layer skip to discuss
+ManagePetViewModel -[#red,dashed]-> Species : skips use case layer
+ManagePetViewModel -[#red,dashed]-> PetSex
+ManagePetViewModel -[#red,dashed]-> Temperament
+
+note bottom of FilePetDataAccessObject
+  Also implements
+  SubmitApplicationPetDataAccessInterface (UC5).
+end note
+
+@enduml
