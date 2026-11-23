@@ -39,7 +39,7 @@ public class MealDbRecipeDataAccessObject implements RecipeDataAccessInterface {
     }
 
     @Override
-    public List<String> getCategory(){
+    public List<String> getCategories(){
         JSONArray data = request("list.php?c=list").optJSONArray("meals");
         List<String> categories = new ArrayList<>();
         if (data == null){
