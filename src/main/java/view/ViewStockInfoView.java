@@ -9,12 +9,17 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.Paint;
 import java.beans.PropertyChangeEvent;
 import java.text.DateFormat;
 import java.text.NumberFormat;
+import java.time.DayOfWeek;
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
+import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
@@ -34,15 +39,22 @@ import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.DateAxis;
-import org.jfree.chart.labels.StandardXYToolTipGenerator;
-import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
-import org.jfree.data.xy.XYSeries;
-import org.jfree.data.xy.XYSeriesCollection;
+import org.jfree.chart.axis.NumberAxis;
+import org.jfree.chart.labels.HighLowItemLabelGenerator;
+import org.jfree.chart.plot.XYPlot;
+import org.jfree.chart.renderer.xy.CandlestickRenderer;
+import org.jfree.data.xy.DefaultOHLCDataset;
+import org.jfree.data.xy.OHLCDataItem;
 import usecase.viewstockinfo.PricePoint;
 import usecase.viewstockinfo.ViewStockInfoOutputData;
 
-/** Shows a stock's end-of-day table and one year of closing prices. */
+/** Shows a stock's end-of-day table and a year of weekly candlesticks. */
 public class ViewStockInfoView extends JPanel {
+  private static final Color UP_CANDLE = new Color(0, 128, 96);
+  private static final Color DOWN_CANDLE = new Color(190, 55, 64);
+  private static final Color FLAT_CANDLE = new Color(85, 93, 104);
+  private static final int MAX_CANDLE_WIDTH_DAYS = 4;
+
   private final ViewStockInfoController controller;
   private final JPanel watchlistRows = new JPanel();
   private final List<JButton> viewButtons = new ArrayList<>();
@@ -50,7 +62,7 @@ public class ViewStockInfoView extends JPanel {
   private final ChartPanel chartPanel = new ChartPanel(null, false);
   private boolean lookupInProgress;
   private final DefaultTableModel tableModel = new DefaultTableModel(
-          new String[]{"Date", "Latest close", "Change", "Change %", "High", "Low", "Volume"}, 0) {
+          new String[] {"Date", "Latest close", "Change", "Change %", "High", "Low", "Volume"}, 0) {
     @Override
     public Class<?> getColumnClass(int columnIndex) {
       if (columnIndex == 0) {
@@ -189,7 +201,7 @@ public class ViewStockInfoView extends JPanel {
     int last = days.size() - 1;
     DailyAggregate day = days.get(last);
     LocalDate latest = prices.get(last).getDate();
-    tableModel.addRow(new Object[]{latest, day.getClose(),
+    tableModel.addRow(new Object[] {latest, day.getClose(),
         formatChange(result.getDailyChange(), false),
         formatChange(result.getDailyChangePercent(), true),
         day.getHigh(), day.getLow(), day.getVolume()});
@@ -211,28 +223,78 @@ public class ViewStockInfoView extends JPanel {
   }
 
   private static JFreeChart createChart(ViewStockInfoOutputData result) {
-    XYSeries series = new XYSeries(result.getTicker());
-    for (PricePoint point : result.getPriceHistory()) {
-      series.add(chartTime(point.getDate()), point.getClose());
-    }
-    JFreeChart chart = ChartFactory.createTimeSeriesChart(
-            result.getTicker() + " · 1-year closing price", "Trading date", "Close",
-            new XYSeriesCollection(series), false, false, false);
-    DateAxis axis = (DateAxis) chart.getXYPlot().getDomainAxis();
+    DefaultOHLCDataset dataset = new DefaultOHLCDataset(result.getTicker(),
+            groupIntoWeeks(result.getDailyAggregates(), result.getPriceHistory()));
+    JFreeChart chart = ChartFactory.createCandlestickChart(
+            result.getTicker() + " · 1-year weekly candlesticks", "Last trading day of week",
+            "Price", dataset, false);
+    XYPlot plot = chart.getXYPlot();
+    plot.setBackgroundPaint(Color.WHITE);
+    plot.setDomainGridlinePaint(Color.LIGHT_GRAY);
+    plot.setRangeGridlinePaint(Color.LIGHT_GRAY);
+
+    DateAxis axis = (DateAxis) plot.getDomainAxis();
     TimeZone chartTimeZone = TimeZone.getTimeZone("UTC");
     axis.setTimeZone(chartTimeZone);
-    axis.setRange(chartTime(result.getFrom()), chartTime(result.getTo().plusDays(1)));
+    // Pad the year by half a candle so that a partial week is visible at either edge.
+    int edgePaddingDays = MAX_CANDLE_WIDTH_DAYS / 2;
+    axis.setRange(chartTime(result.getFrom().minusDays(edgePaddingDays)),
+            chartTime(result.getTo().plusDays(edgePaddingDays + 1)));
 
-    XYLineAndShapeRenderer renderer = (XYLineAndShapeRenderer) chart.getXYPlot().getRenderer();
-    renderer.setDefaultShapesVisible(series.getItemCount() == 1);
+    NumberAxis priceAxis = (NumberAxis) plot.getRangeAxis();
+    priceAxis.setAutoRangeIncludesZero(false);
+
+    // Use the per-candle paint for the body, outline, and both wicks.
+    CandlestickRenderer renderer = new CandlestickRenderer() {
+      @Override
+      public Paint getItemPaint(int series, int item) {
+        double open = dataset.getOpenValue(series, item);
+        double close = dataset.getCloseValue(series, item);
+        if (close == open) {
+          return FLAT_CANDLE;
+        }
+        return close > open ? UP_CANDLE : DOWN_CANDLE;
+      }
+    };
+    renderer.setUpPaint(null);
+    renderer.setDownPaint(null);
+    renderer.setDrawVolume(false);
+    renderer.setMaxCandleWidthInMilliseconds(Duration.ofDays(MAX_CANDLE_WIDTH_DAYS).toMillis());
     DateFormat tooltipDate = DateFormat.getDateInstance();
     tooltipDate.setTimeZone(chartTimeZone);
-    renderer.setDefaultToolTipGenerator(new StandardXYToolTipGenerator(
-            "{1} · {2}", tooltipDate, NumberFormat.getNumberInstance()));
+    renderer.setDefaultToolTipGenerator(new HighLowItemLabelGenerator(
+            tooltipDate, NumberFormat.getNumberInstance()));
+    plot.setRenderer(renderer);
     return chart;
   }
 
-  private static double chartTime(LocalDate date) {
+  private static OHLCDataItem[] groupIntoWeeks(List<DailyAggregate> days, List<PricePoint> prices) {
+    List<OHLCDataItem> weeks = new ArrayList<>();
+    int first = 0;
+    while (first < days.size()) {
+      DailyAggregate openingDay = days.get(first);
+      LocalDate weekEnd = prices.get(first).getDate().with(TemporalAdjusters.nextOrSame(
+              DayOfWeek.SUNDAY));
+      double high = openingDay.getHigh();
+      double low = openingDay.getLow();
+      double volume = openingDay.getVolume();
+      int last = first;
+      while (last + 1 < days.size() && !prices.get(last + 1).getDate().isAfter(weekEnd)) {
+        last++;
+        DailyAggregate day = days.get(last);
+        high = Math.max(high, day.getHigh());
+        low = Math.min(low, day.getLow());
+        volume += day.getVolume();
+      }
+      Date date = new Date(chartTime(prices.get(last).getDate()));
+      weeks.add(new OHLCDataItem(date, openingDay.getOpen(), high, low,
+              days.get(last).getClose(), volume));
+      first = last + 1;
+    }
+    return weeks.toArray(new OHLCDataItem[0]);
+  }
+
+  private static long chartTime(LocalDate date) {
     return date.atStartOfDay().toInstant(ZoneOffset.UTC).toEpochMilli();
   }
 

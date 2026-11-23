@@ -8,6 +8,11 @@ import usecase.viewstockinfo.ViewStockInfoOutputData;
 public class ViewStockInfoPresenter implements ViewStockInfoOutputBoundary {
   private final ViewStockInfoViewModel viewModel;
 
+  /**
+   * Creates a presenter for watchlist and stock lookup results.
+   *
+   * @param viewModel The view model to update with results and errors
+   */
   public ViewStockInfoPresenter(ViewStockInfoViewModel viewModel) {
     this.viewModel = viewModel;
   }

@@ -26,6 +26,12 @@ public class CachedStockHistoryDataAccessObject implements ViewStockInfoStockDat
   private final ApiStockDataAccessObject api;
   private final Path cacheDirectory;
 
+  /**
+   * Creates a stock history data access object that uses the app's configuration directory
+   * for its cache.
+   *
+   * @param api The data access object used to fetch fresh stock history
+   */
   public CachedStockHistoryDataAccessObject(ApiStockDataAccessObject api) {
     this(api, AppConfigDirectory.getPath().resolve("stock-history"));
   }
