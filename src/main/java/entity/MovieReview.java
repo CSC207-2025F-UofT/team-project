@@ -26,6 +26,5 @@ public class MovieReview {
     public Double getRating() {
         return rating;
     }
-
 }
 
