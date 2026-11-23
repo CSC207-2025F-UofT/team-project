@@ -38,12 +38,14 @@ public class ForestFeature extends Feature {
                 }
 
                 // adjust tree density based on distance from center and smoothness
+                double tileTreeDensity = td; // start with base tree density
                 if (distanceFromCenter > r * sm) {
-                    td *= (r - distanceFromCenter) / (r * (1 - sm));
+                    // adjust per-tile density based on distance from center and smoothness
+                    tileTreeDensity *= (r - distanceFromCenter) / (r * (1 - sm));
                 }
 
                 // randomly decide whether to place a tree based on the adjusted tree density
-                if (td > 0.5 && random.nextDouble() < td) {
+                if (tileTreeDensity > 0.5) {
                     map.getTile(mapX, mapY).setType(TileType.FOREST); // set type to forest
                 }
             }
