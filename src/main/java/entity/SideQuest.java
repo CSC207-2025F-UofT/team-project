@@ -1,10 +1,18 @@
 package entity;
 import java.util.List;
 
+//From Pauline: Please add the following attributes and methods:
+//IsStarred, not a final attribute is set by the user by clicking a button (aka I believe this should be a public attribute) 
+    //1. Any quest regardless of its progress level can be starred and can be unstarred at any time. 
+    //2. The default for any side quest will be unstarred. 
+//ProgressLevel, not a final attribute is set by the user however these following business rules follow
+    // 1.  There are only 4 statuses: Not Started, In progress, Completed, Cancelled
+    // 2.  Once a side quest is completed or cancelled is cannot be undone by the user
+    // 3.  A "In progress" side quest will remain in progress until it is cancelled or completed
+
 public class SideQuest {
     private final String name;
     private final String description;
-    private final String photoUrl;
     private final String isIndoor;
     private final double budget;
     private final double expectedTime;
@@ -14,7 +22,6 @@ public class SideQuest {
 
     public SideQuest(String name,
                      String description,
-                     String photoUrl,
                      String isIndoor,
                      double budget,
                      double expectedTime,
@@ -24,13 +31,12 @@ public class SideQuest {
 
         this.name = name;
         this.description = description;
-        this.photoUrl = photoUrl;
         this.budget = budget;
         this.isIndoor = isIndoor;
         this.expectedTime = expectedTime;
         this.exp = exp;
         this.location = location;
-        this.interests = interests;
+        this.interests = List.copyOf(interests);;
     }
 
     public String getName() {
@@ -41,19 +47,15 @@ public class SideQuest {
         return description;
     }
 
-    public String getPhotoUrl() {
-        return photoUrl;
+    public String isIndoor() {
+        return isIndoor;
     }
 
     public double getBudget() {
         return budget;
     }
 
-    public boolean isIndoor() {
-        return isIndoor;
-    }
-
-    public float getExpectedTime() {
+    public double getExpectedTime() {
         return expectedTime;
     }
 

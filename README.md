@@ -3,35 +3,19 @@
 ## Table of Contents
 
 - [Team Information](#team-information)
-  - [Team Members](#team-members)
 - [Project Description](#project-description)
-  - [Domain](#domain)
 - [User Stories](#user-stories)
 - [Use Cases](#use-cases)
   - [Use Case 1: LogIn, SetUsername, SetProfilePicture, CheckLevel](#use-case-1-login-setusername-setprofilepicture-checklevel)
   - [Use Case 2: Progress](#use-case-2-progress)
-    - [2.1 Accept Quest](#21-accept-quest)
-    - [2.2 Complete Quest](#22-complete-quest)
-    - [2.3 Abandon Quest](#23-abandon-quest)
-    - [2.4 View Dashboard](#24-view-dashboard)
   - [Use Case 3: Create a Journal Entry](#use-case-3-create-a-journal-entry)
   - [Use Case 4: Find a Nearby Side Quest on the Map](#use-case-4-find-a-nearby-side-quest-on-the-map)
   - [Use Case 5: Recommendations Quests](#use-case-5-recommendations-quests)
   - [Use Case 6: Defaults/Adding Quests](#use-case-6-defaultsadding-quests)
 - [Minimal Viable Product (MVP)](#minimal-viable-product-mvp)
-  - [Pauline](#pauline)
-  - [Serena](#serena)
-  - [Daniel](#daniel)
 - [Entities](#entities)
-  - [Entity 1: Quest Entity](#entity-1-quest-entity)
-  - [Entity 2: User (Profile/Person Entity)](#entity-2-user-profileperson-entity)
-  - [Entity 3: UserQuest and QuestStatus](#entity-3-userquest-and-queststatus)
-  - [Entity 4: Location](#entity-4-location)
-  - [Entity 5: SearchArea](#entity-5-searcharea)
 - [API Usage](#api-usage)
 - [Design Diagrams](#design-diagrams)
-  - [UML Class Diagram](#uml-class-diagram)
-  - [Sequence Diagrams](#sequence-diagrams)
 - [How to Run](#how-to-run-complete-later-after-implementation)
 - [Notes](#notes)
 
@@ -43,7 +27,7 @@
 
 | Name | GitHub | Email | Message for Your Future Self |
 |------|--------|-------|------------------------------|
-| Pauline Nguyen | [papql](https://github.com/papql) | pauline.nguyen@mail.utoronto.ca | kinda want molly tea |
+| Pauline Nguyen | [papql (if you see meow has committed thats my laptop name) ](https://github.com/papql) | pauline.nguyen@mail.utoronto.ca | kinda want molly tea |
 | Lucy Liu | [NOVAx1216-coder](https://github.com/NOVAx1216-coder) | lucymeichen.liu@mail.utoronto.ca | Locked in and Linked Out! |
 | Joon Park | [kdaster](https://github.com/kdaster) | jooner.park@mail.utoronto.ca | |
 | Serena Ganbaatar | [serena-gb](https://github.com/serena-gb) | saruul.ganbaatar@mail.utoronto.ca | This too shall pass. |
@@ -259,9 +243,56 @@ In every alternative flow, nothing is saved and no XP is given.
 
 </details>
 
-### Use Case 5: Recommendations Quests
 
-### Use Case 6: Defaults/Adding Quests
+### Use Case 5: <Recommendations Quests>
+**1. Take the Questionnaire** <br>
+The user answers a list of questions about interests, activity type, allocated budget, etc. and the system saves the user’s preferences. <br>
+User can retake the questionnaire later to update their preferences if their interests or budget changes. <br>
+**2. Recommend Sidequests** <br>
+The system recommends a list of sidequests based on the user’s preference from the questionnaire. <br>
+The system displays the sidequest that ‘fits’ the user’s preference the most by assessing how close the sidequest is to user’s preference. <br>
+User can view the activity type, budget, and location of the sidequest and decide to accept or decline. <br>
+
+
+### Use Case 6: <Defaults/Adding Quests>
+**Lead:** Isaac Wan <br>
+**Primary actor:** App user <br>
+**Goal:** Allow the user to add Side Quests they have completed to the system, along with the Side Quests' corresponding information such as quest name, description, estimated completion time, xp earned etc. Moreover, users should be allowed to view a catalogue of default side quests to complete.
+
+<details>
+<summary>Full use case</summary>
+
+**Preconditions:**
+
+1. The user is logged in.
+2. The user fills in all the mandatory fields when adding their quest.
+3. The user is on the "Add Quest" page.
+
+**Trigger:** The user opens the Add Quest tab.
+
+**Main success scenario:**
+
+1. The user clicks on the Add Quest page in the app.
+2. The user fills in all mandatory text field forms, such as name, description and location details
+3. The user clicks the "Add Quest" button at the bottom.
+4. The quest is added to the App's system
+
+**Alternative flows and exceptions:**
+
+* 2a. The user can click on other pages, in which the data filled in will be held temporarily in the Add Quest Page, and will be there when they return
+* 3a. The user clicks on "Add Quest" without filling out all relevant fields, resulting in the application prompting the user to fill in all fields, returning the user to step 2.
+* 3b. The user enters an invalid input in any of the fields, leading to a prompt of which field was passed in incorrectly.
+
+**Success postcondition:** The notification "Saved quest successfully" shows up on the user's UI. The user's Side Quest entity is saved into the system, as that is the main goal of this use case. <br>
+**Failure postcondition:** The user stays on the Add Quest tab, and no data is changed.
+
+**Features that can be added later:**
+
+1. The ability for the quest to be dynamic instead of static: It can be cancelled halfway through.
+2. A progress bar for the dynamic quest.
+3. The option to invite other users to complete a quest together when adding a quest.
+
+</details>
 
 [Back to top](#linked-out)
 
@@ -272,10 +303,10 @@ In every alternative flow, nothing is saved and no XP is given.
 | Team Member | MVP Use Case |
 |-------------|--------------|
 | Pauline | [Create a Text Journal Entry](#pauline) |
-| Lucy | Use Case 1: LogIn, SetUsername |
-| Joon | Use Case |
-| Serena | [Use Case 4: Find a Nearby Side Quest on the Map](#serena) |
-| Issac | Use Case 6: Create Side Quests |
+| Lucy | LogIn, SetUsername |
+| Joon | **Recommend Quest** <br> **Precondition** <br> The user has completed the questionnaire, and their preference has been logged into the system. <br> **Trigger** <br> The user opens up the quest recommendation page. <br> **Main Scenario** <br> 1. The user opens up the system, and navigates to the quest recommendation page. <br> 2. The system displays a list of sidequests based on the user’s preference, from the sidequest that is closest to a certain limit. <br> 3. The user accepts certain sidequests, and the system logs the quest into the current quests. <br> **Alternate Scenario** <br> The user declines certain sidequests, and the recommendation engine removes the sidequest from the list and the UI. |
+| Serena | [Find a Nearby Side Quest on the Map](#serena) |
+| Issac | Create Side Quests |
 | Daniel | [Use Case 2.1: Accept Quest, Use Case 2.2: Complete Quest, Use Case 2.3: Abandon Quest, Use Case 2.4: View Dashboard](#daniel) |
 
 ### Pauline
@@ -520,7 +551,22 @@ In every alternative flow, nothing is saved and no XP is given.
 
 ## Entities
 
-### Entity 1: Quest Entity
+### Entity 1: SideQuest Entity
+<details>
+<summary>Entity details</summary>
+
+**SideQuest** (Isaac): represents a side quest that can be created by a user or provided as a default quest.
+
+**Instance variables:** name: String, description: String, photoUrl: String, isIndoor: boolean, budget: double, expectedTime: double, exp: int, location: Location, interests: List<String>
+
+**Methods:** getters for all instance variables, including getName(), getDescription(), getPhotoUrl(), isIndoor(), getBudget(), getExpectedTime(), getExp(), getLocation(), and getInterests().
+
+**Location**: represents the location associated with a side quest. The location is selected through the map functionality and stored using the application's own `Location` entity rather than a map-API-specific object.
+
+The `SideQuest` entity is used by the Add Side Quest use case. User-provided values are passed through `AddSideQuestInputData`, validated and processed by the use case interactor, and then used to create a `SideQuest` object.
+
+</details>
+
 
 ### Entity 2: User (Profile/Person Entity)
 
@@ -602,8 +648,6 @@ A circle on the map: a centre and a radius. It holds the rule for what counts as
 ---
 
 ## How to Run (Complete Later After Implementation)
-
-[Instructions for running the program.]
 
 [Back to top](#linked-out)
 
