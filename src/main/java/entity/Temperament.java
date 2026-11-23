@@ -17,5 +17,7 @@ public enum Temperament {
     /** Comfortable around children. */
     GOOD_WITH_KIDS,
     /** Happy to be left alone for a while. */
-    INDEPENDENT
+    INDEPENDENT,
+    /** Gets along with other pets in the home. */
+    GOOD_WITH_OTHER_PETS
 }
