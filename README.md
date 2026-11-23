@@ -208,11 +208,13 @@ This API will be used in addition to a JSON dataset containing popular cities lo
 
 ---
 ## How to Run
-[Instructions for running the program.]
+1. Open the project in IntelliJ as a Maven project.
+2. Optional: set the `MAPBOX_ACCESS_TOKEN` environment variable to a Mapbox token (never commit it). Without it, a placeholder picture is shown instead of the satellite image.
+3. Run `app.Main`.
 
 ---
 ## Notes
-[Any additional project information.]
+See [ARCHITECTURE.md](ARCHITECTURE.md) for the package layout, file naming, data access interfaces and team decisions.
 
 ---
 ## Project Updates
