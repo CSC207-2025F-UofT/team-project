@@ -2,61 +2,92 @@ package entity;
 
 import java.time.LocalDate;
 
-/**
- * Represents a Student's Task.
- * <p>
- * Class Invariants:
- *   The owning user's ID is nonzero.
- *   The deadline is non-null and may be in the past.
- *   The estimated hours are finite and greater than zero.
- *   The completion progress is between 0 and 100, inclusive.
- *   The title is not null. An empty title is allowed.
- *
- */
-public class StudentTask extends Task{
+/** Represents a student's task. */
+public class StudentTask extends Task {
+    public static final double DEFAULT_ESTIMATED_HOURS = 10.0;
+    public static final DifficultyLevel DEFAULT_DIFFICULTY_LEVEL = DifficultyLevel.AVERAGE;
 
     private String title;
     private String description;
     private LocalDate deadline;
     private double estimatedHoursToCompleteTask;
     private byte completionProgress;
-    private byte difficultyLevel;
+    private DifficultyLevel difficultyLevel;
 
-    /*
-    ** Creates a StudentTask object with all the required arguments filled in.
-     */
-    public StudentTask(int uniqueTaskId, int uniqueUserId, String title, String description, LocalDate deadline, double estimatedHoursToCompleteTask, byte completionProgress, byte difficultyLevel) {
+    public StudentTask(int uniqueTaskId, int uniqueUserId, String title,
+                       String description, LocalDate deadline) {
+        this(uniqueTaskId, uniqueUserId, title, description, deadline,
+                DEFAULT_ESTIMATED_HOURS, (byte) 0, DEFAULT_DIFFICULTY_LEVEL);
+    }
+
+    public StudentTask(int uniqueTaskId, int uniqueUserId, String title,
+                       String description, LocalDate deadline,
+                       double estimatedHoursToCompleteTask, byte completionProgress,
+                       DifficultyLevel difficultyLevel) {
         super(uniqueTaskId, uniqueUserId);
-        this.title = title == null ? "" : title;
+        this.title = title;
         this.description = description;
         this.deadline = deadline;
         this.estimatedHoursToCompleteTask = estimatedHoursToCompleteTask;
         this.completionProgress = completionProgress;
         this.difficultyLevel = difficultyLevel;
-        boolean valid = fieldsValidation();
-        if (!valid) {
+
+        if (!fieldsValidation()) {
             throw new IllegalArgumentException("The StudentTask has invalid fields.");
         }
     }
 
+    public boolean fieldsValidation() {
+        return getUniqueUserId() != 0
+                && title != null
+                && description != null
+                && difficultyLevel != null
+                && inputValidation(deadline, estimatedHoursToCompleteTask, completionProgress);
+    }
+
+    public boolean inputValidation(LocalDate deadline, double estimatedHours, byte progress) {
+        return deadline != null
+                && Double.isFinite(estimatedHours)
+                && estimatedHours > 0
+                && progress >= 0
+                && progress <= 100;
+    }
+
     public void setTitle(String newTitle) {
-        this.title = newTitle == null ? "" : newTitle;
+        if (!fieldsValidation()) {
+            throw new IllegalStateException("The task has invalid fields.");
+        }
+        String previousTitle = this.title;
+        this.title = newTitle;
+
+        if (!fieldsValidation()) {
+            this.title = previousTitle;
+            throw new IllegalArgumentException("The new title cannot be null.");
+        }
     }
 
     public void setDescription(String newDescription) {
+        if (!fieldsValidation()) {
+            throw new IllegalStateException("The task has invalid fields.");
+        }
+        String previousDescription = this.description;
         this.description = newDescription;
+
+        if (!fieldsValidation()) {
+            this.description = previousDescription;
+            throw new IllegalArgumentException("The new description cannot be null.");
+        }
     }
 
-    /**
-     * Update the deadline. Past dates are allowed for this.
-     *
-     * @param newDeadline is the new deadline for this task, newDeadline should not be null.
-     * @throws IllegalArgumentException if the new deadline is null.
-     */
+    /** Past deadlines are allowed, but null deadlines are not. */
     public void setDeadline(LocalDate newDeadline) {
         if (!fieldsValidation()) {
             throw new IllegalStateException("The task has invalid fields.");
         }
+        if (!inputValidation(newDeadline, estimatedHoursToCompleteTask, completionProgress)) {
+            throw new IllegalArgumentException("The new deadline is not valid.");
+        }
+
         LocalDate previousDeadline = this.deadline;
         this.deadline = newDeadline;
 
@@ -64,96 +95,76 @@ public class StudentTask extends Task{
             this.deadline = previousDeadline;
             throw new IllegalArgumentException("The new deadline is not valid.");
         }
-
     }
 
-    /**
-     * Update the estimated hours to complete this task.
-     *
-     * @param newEstimatedHoursToCompleteTask is the new estimated hour. This is a double that must be finite and positive.
-     * @throws IllegalArgumentException if the new estimated hour is not finite or is not positive.
-     */
-    public void setEstimatedHoursToCompleteTask(double newEstimatedHoursToCompleteTask) {
+    public void setEstimatedHoursToCompleteTask(double newEstimatedHours) {
         if (!fieldsValidation()) {
             throw new IllegalStateException("The task has invalid fields.");
         }
+        if (!inputValidation(deadline, newEstimatedHours, completionProgress)) {
+            throw new IllegalArgumentException("Estimated hours must be finite and greater than 0.");
+        }
+
         double previousEstimatedHours = this.estimatedHoursToCompleteTask;
-        this.estimatedHoursToCompleteTask = newEstimatedHoursToCompleteTask;
+        this.estimatedHoursToCompleteTask = newEstimatedHours;
 
         if (!fieldsValidation()) {
             this.estimatedHoursToCompleteTask = previousEstimatedHours;
-            throw new IllegalArgumentException("The new estimated hours to complete task is not valid, it should be a double greater than 0.");
+            throw new IllegalArgumentException("Estimated hours must be finite and greater than 0.");
         }
     }
 
-    /**
-     * Update the completion progress of this task.
-     *
-     * @param newCompletionProgress is the new completion progress for this task. This should be between 0 and 100, inclusively.
-     * @throws IllegalArgumentException if the updated information is less than 0 or greater than 100.
-     */
     public void setCompletionProgress(byte newCompletionProgress) {
         if (!fieldsValidation()) {
             throw new IllegalStateException("The task has invalid fields.");
         }
+        if (!inputValidation(deadline, estimatedHoursToCompleteTask, newCompletionProgress)) {
+            throw new IllegalArgumentException("Completion progress must be between 0 and 100.");
+        }
+
         byte previousCompletionProgress = this.completionProgress;
         this.completionProgress = newCompletionProgress;
 
         if (!fieldsValidation()) {
             this.completionProgress = previousCompletionProgress;
-            throw new IllegalArgumentException("The new completion progress is not valid, it should be between 0-100.");
+            throw new IllegalArgumentException("Completion progress must be between 0 and 100.");
         }
     }
 
-    public void setDifficultyLevel(byte newDifficultyLevel){
+    public void setDifficultyLevel(DifficultyLevel newDifficultyLevel) {
+        if (!fieldsValidation()) {
+            throw new IllegalStateException("The task has invalid fields.");
+        }
+        DifficultyLevel previousDifficultyLevel = this.difficultyLevel;
         this.difficultyLevel = newDifficultyLevel;
+
+        if (!fieldsValidation()) {
+            this.difficultyLevel = previousDifficultyLevel;
+            throw new IllegalArgumentException("The difficulty level cannot be null.");
+        }
     }
 
-    /**
-     * Check if all fields entered are valid, if not, throw an error.
-     */
-    public boolean fieldsValidation() {
-        return inputValidation(
-                getUniqueUserId(),
-                this.deadline,
-                this.estimatedHoursToCompleteTask,
-                this.completionProgress
-        );
+    public String getTitle() {
+        return title;
     }
 
-    /*
-     * Checks if the input provided by the user is valid.
-     */
-    public static boolean inputValidation(int userId, LocalDate deadline, double estimatedHours, int progress) {
-        return userId != 0
-                && deadline != null
-                && Double.isFinite(estimatedHours)
-                && estimatedHours > 0
-                && progress >= 0
-                && progress <= 100;
+    public String getDescription() {
+        return description;
     }
 
-    public String getTitle(){
-        return this.title;
+    public LocalDate getDeadline() {
+        return deadline;
     }
 
-    public String getDescription(){
-        return this.description;
+    public double getEstimatedHoursToCompleteTask() {
+        return estimatedHoursToCompleteTask;
     }
 
-    public LocalDate getDeadline(){
-        return this.deadline;
+    public byte getCompletionProgress() {
+        return completionProgress;
     }
 
-    public double getEstimatedHoursToCompleteTask(){
-        return this.estimatedHoursToCompleteTask;
-    }
-
-    public byte getCompletionProgress(){
-        return this.completionProgress;
-    }
-
-    public byte getDifficultyLevel(){
-        return this.difficultyLevel;
+    public DifficultyLevel getDifficultyLevel() {
+        return difficultyLevel;
     }
 }
