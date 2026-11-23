@@ -181,7 +181,7 @@ Each use case below is led by one member. A lead owns every View listed under th
 | Yilin Hou | 2a View, 2b Add, 2c Update/remove fridge items; ingredient name catalog | Filter by expiring soon |
 | Shuyin Hu | 3a View week and a planned meal, 3b Remove/move | Switch to previous/next week; copy last week |
 | Shaoheng Fan | 4a Generate, 4b Tick off | Bought items go straight into the fridge; export as text |
-| TBD | 5a Cook a planned meal, 5b History | 5c Stats; undo a completion |
+| Jesse Zeng | 5a Cook a planned meal, 5b History | 5c Stats; undo a completion |
 
 Use cases 1 and 2 don't depend on any other use case, so they are the first end-to-end prototype for Milestone 2.
 
