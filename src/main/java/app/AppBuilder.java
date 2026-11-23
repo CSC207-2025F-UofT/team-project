@@ -1,92 +1,160 @@
 package app;
 
-import data_access.InMemoryDeckRepository;
-import entity.Card;
-import entity.Deck;
+import data_access.FileUserDataAccessObject;
+import entity.UserFactory;
+import interface_adapter.ViewManagerModel;
+import interface_adapter.accounts.AccountsViewModel;
+import interface_adapter.home.HomeViewModel;
+import interface_adapter.logged_in.ChangePasswordController;
+import interface_adapter.logged_in.ChangePasswordPresenter;
+import interface_adapter.logged_in.LoggedInViewModel;
+import interface_adapter.login.LoginController;
+import interface_adapter.login.LoginPresenter;
+import interface_adapter.login.LoginViewModel;
+import interface_adapter.logout.LogoutController;
+import interface_adapter.logout.LogoutPresenter;
+import interface_adapter.signup.SignupController;
+import interface_adapter.signup.SignupPresenter;
+import interface_adapter.signup.SignupViewModel;
+import use_case.change_password.ChangePasswordInputBoundary;
+import use_case.change_password.ChangePasswordInteractor;
+import use_case.change_password.ChangePasswordOutputBoundary;
+import use_case.login.LoginInputBoundary;
+import use_case.login.LoginInteractor;
+import use_case.login.LoginOutputBoundary;
+import use_case.logout.LogoutInputBoundary;
+import use_case.logout.LogoutInteractor;
+import use_case.logout.LogoutOutputBoundary;
+import use_case.signup.SignupInputBoundary;
+import use_case.signup.SignupInteractor;
+import use_case.signup.SignupOutputBoundary;
+import view.LoggedInView;
+import view.AccountsView;
+import view.HomeView;
+import view.LoginView;
+import view.SignupView;
+import view.ViewManager;
 
-import interface_adapter.edit_card.EditCardController;
-import interface_adapter.edit_card.EditCardPresenter;
-import interface_adapter.edit_card.EditCardViewModel;
-
-import interface_adapter.add_card.AddCardController;
-import interface_adapter.add_card.AddCardPresenter;
-import interface_adapter.add_card.AddCardViewModel;
-
-import use_case.add_card.AddCardInputBoundary;
-import use_case.add_card.AddCardDataAccessInterface;
-import use_case.add_card.AddCardInteractor;
-import use_case.edit_card.EditCardInteractor;
-
-import view.EditCardView;
-
-import java.util.List;
+import javax.swing.*;
+import java.awt.*;
 
 public class AppBuilder {
-    private final InMemoryDeckRepository repository;
+    private final JPanel cardPanel = new JPanel();
+    private final CardLayout cardLayout = new CardLayout();
+    final UserFactory userFactory = new UserFactory();
+    final ViewManagerModel viewManagerModel = new ViewManagerModel();
+    ViewManager viewManager = new ViewManager(cardPanel, cardLayout, viewManagerModel);
 
-    private final AddCardViewModel addCardViewModel;
-    private final AddCardController addCardController;
+    // set which data access implementation to use, can be any
+    // of the classes from the data_access package
+
+    // DAO version using local file storage
+    final FileUserDataAccessObject userDataAccessObject = new FileUserDataAccessObject("users.csv", userFactory);
+
+    private SignupView signupView;
+    private SignupViewModel signupViewModel;
+    private LoginView loginView;
+    private LoginViewModel loginViewModel;
+    private LoggedInView loggedInView;
+    private LoggedInViewModel loggedInViewModel;
+    private HomeView homeView;
+    private AccountsView accountsView;
 
     public AppBuilder() {
-        // Temporary demo data, not a signed-in user.
-        Deck demoDeck = new Deck(1, "Java test1", "Kobi owner");
-
-        demoDeck.add_card(new Card(
-                1,
-                "What does JVM stand for?",
-                "Java Virtual Machine"
-        ));
-
-        repository = new InMemoryDeckRepository(
-                List.of(demoDeck)
-        );
-
-        addCardViewModel = new AddCardViewModel();
-
-        AddCardPresenter addPresenter =
-                new AddCardPresenter(addCardViewModel);
-
-        AddCardInteractor addInteractor =
-                new AddCardInteractor(repository, addPresenter);
-
-        addCardController = new AddCardController(addInteractor);
+        cardPanel.setLayout(cardLayout);
     }
 
-    public AddCardController getAddCardController() {
-        return addCardController;
+    public AppBuilder addHomeView() {
+        homeView = new HomeView(viewManagerModel, loggedInViewModel);
+        cardPanel.add(homeView, HomeViewModel.VIEW_NAME);
+        return this;
     }
 
-    public AddCardViewModel getAddCardViewModel() {
-        return addCardViewModel;
+    public AppBuilder addAccountsView() {
+        accountsView = new AccountsView(viewManagerModel);
+        cardPanel.add(accountsView, AccountsViewModel.VIEW_NAME);
+        return this;
     }
 
-    public EditCardView buildEditCardView(int deckId, int cardId) {
-        Card selectedCard = repository.findCard(deckId, cardId)
-                .orElseThrow(() -> new IllegalArgumentException(
-                        "Selected card does not exist."
-                ));
+    public AppBuilder addSignupView() {
+        signupViewModel = new SignupViewModel();
+        signupView = new SignupView(signupViewModel);
+        cardPanel.add(signupView, SignupViewModel.VIEW_NAME);
+        return this;
+    }
 
-        EditCardViewModel editViewModel = new EditCardViewModel();
+    public AppBuilder addLoginView() {
+        loginViewModel = new LoginViewModel();
+        loginView = new LoginView(loginViewModel);
+        cardPanel.add(loginView, LoginViewModel.VIEW_NAME);
+        return this;
+    }
 
-        EditCardPresenter editPresenter =
-                new EditCardPresenter(editViewModel);
+    public AppBuilder addLoggedInView() {
+        loggedInViewModel = new LoggedInViewModel();
+        loggedInView = new LoggedInView(loggedInViewModel, viewManagerModel);
+        cardPanel.add(loggedInView, LoggedInViewModel.VIEW_NAME);
+        return this;
+    }
 
-        EditCardInteractor editInteractor =
-                new EditCardInteractor(
-                        repository,
-                        editPresenter
-                );
+    public AppBuilder addSignupUseCase() {
+        final SignupOutputBoundary signupOutputBoundary = new SignupPresenter(viewManagerModel,
+                signupViewModel, loginViewModel);
+        final SignupInputBoundary userSignupInteractor = new SignupInteractor(
+                userDataAccessObject, signupOutputBoundary, userFactory);
 
-        EditCardController editController =
-                new EditCardController(editInteractor);
+        SignupController controller = new SignupController(userSignupInteractor);
+        signupView.setSignupController(controller);
+        return this;
+    }
 
-        return new EditCardView(
-                editController,
-                editViewModel,
-                deckId,
-                cardId,
-                selectedCard.getQuestion(),
-                selectedCard.getAnswer()
-        );
+    public AppBuilder addLoginUseCase() {
+        final LoginOutputBoundary loginOutputBoundary = new LoginPresenter(viewManagerModel,
+                loggedInViewModel, loginViewModel);
+        final LoginInputBoundary loginInteractor = new LoginInteractor(
+                userDataAccessObject, loginOutputBoundary);
+
+        LoginController loginController = new LoginController(loginInteractor);
+        loginView.setLoginController(loginController);
+        return this;
+    }
+
+    public AppBuilder addChangePasswordUseCase() {
+        final ChangePasswordOutputBoundary changePasswordOutputBoundary = new ChangePasswordPresenter(loggedInViewModel);
+
+        final ChangePasswordInputBoundary changePasswordInteractor =
+                new ChangePasswordInteractor(userDataAccessObject, changePasswordOutputBoundary, userFactory);
+
+        ChangePasswordController changePasswordController = new ChangePasswordController(changePasswordInteractor);
+        loggedInView.setChangePasswordController(changePasswordController);
+        return this;
+    }
+
+    /**
+     * Adds the Logout Use Case to the application.
+     * @return this builder
+     */
+    public AppBuilder addLogoutUseCase() {
+        final LogoutOutputBoundary logoutOutputBoundary = new LogoutPresenter(viewManagerModel,
+                loggedInViewModel, loginViewModel);
+
+        final LogoutInputBoundary logoutInteractor =
+                new LogoutInteractor(userDataAccessObject, logoutOutputBoundary);
+
+        final LogoutController logoutController = new LogoutController(logoutInteractor);
+        loggedInView.setLogoutController(logoutController);
+        return this;
+    }
+
+    public JFrame build() {
+        final JFrame application = new JFrame("User Login Example");
+        application.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+
+        application.add(cardPanel);
+
+        viewManagerModel.setState(HomeViewModel.VIEW_NAME);
+        viewManagerModel.notifyViewChanged();
+
+        return application;
     }
 }
