@@ -1,12 +1,13 @@
 package use_case.submit_guess;
 
 import entity.City;
+import entity.Round;
 
-/** City dataset, as seen by Submit Guess. */
 public interface SubmitGuessDataAccessInterface {
-    /**
-     * Looks up a guessable city, ignoring capitalization and extra spaces. Aliases like "NYC" work.
-     * @return the city, or null if the name isn't a known city
-     */
-    City findCityByName(String name);
+
+  City findCityByName(String name);
+
+  Round getCurrentRound();
+
+  void saveRound(Round round);
 }

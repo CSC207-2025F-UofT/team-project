@@ -40,6 +40,7 @@ just be nice!
 * How will decisions about your team project be made? (Examples: By majority vote, by unanimous vote, etc.)
 Majority vote and discussion
 ---
+
 ## Conflict resolution
 
 * How will your team resolve conflicts? (Example: by listening to each other's side of the issue and attempting to reach a compromise. By consulting a TA or instructor as a team, if a resolution has not yet been reached.)

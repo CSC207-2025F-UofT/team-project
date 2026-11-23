@@ -1,4 +1,5 @@
 package entity;
+// TODO: do we need to include distance and direction to AnswerCity in this class?
 
 public class City {
     private final String name;
