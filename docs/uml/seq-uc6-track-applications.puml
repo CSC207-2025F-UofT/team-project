@@ -5,15 +5,20 @@ skinparam sequenceMessageAlign left
 autonumber
 
 actor Adopter
+participant "Menu\n(AppBuilder)" as Menu
+participant "ApplicationNavigator" as Nav
 participant "MyApplicationsView" as View
 participant "TrackApplicationsController" as Controller
 participant "TrackApplicationsInteractor\n<<TrackApplicationsInputBoundary>>" as Interactor
 participant "FileApplicationDataAccessObject\n<<TrackApplicationsDataAccessInterface>>" as AppDAO
-participant "pet data access\n<<TrackApplicationsPetDataAccessInterface>>" as PetDAO
+participant "FilePetDataAccessObject\n<<TrackApplicationsPetDataAccessInterface>>" as PetDAO
 participant "TrackApplicationsPresenter\n<<TrackApplicationsOutputBoundary>>" as Presenter
 participant "TrackApplicationsViewModel" as VM
 
-Adopter -> View : opens My Applications\n(or clicks Refresh)
+Adopter -> Menu : Go to > My Applications
+Menu -> Nav : showMyApplications()
+Nav -> View : show the screen\n(through ViewManagerModel)
+View -> View : screen shown: refresh()
 View -> Controller : execute(adopterId)
 Controller -> Interactor : execute(new TrackApplicationsInputData(adopterId))
 
@@ -37,8 +42,8 @@ Adopter -> View : selects a row
 View --> Adopter : shows the shelter's note\n(read from the view model, no use case call)
 
 note over Interactor, Presenter
-  If the adopter is not logged in or the applications
-  cannot be loaded, the interactor calls prepareFailView(message).
+  Not logged in or the applications cannot be loaded:
+  the interactor calls prepareFailView(message).
 end note
 
 @enduml
