@@ -1,5 +1,7 @@
 package entity;
 
+import java.util.UUID;
+
 /**
  * Everything about one game in progress. apply(Outcome) is the single place
  * where an action changes the game, so every rule (clamping, losing, and
@@ -10,16 +12,22 @@ public class GameState {
     public static final int TOTAL_DAYS = 7;
     public static final String START_LOCATION_ID = "residence";
 
+    private final UUID runId;
     private int day;
     private final Player player;
     private String currentLocationId;
     private GameStatus status;
 
     public GameState(int day, Player player, String currentLocationId) {
+        this(UUID.randomUUID(), day, player, currentLocationId, GameStatus.IN_PROGRESS);
+    }
+
+    public GameState(UUID runId, int day, Player player, String currentLocationId, GameStatus status) {
+        this.runId = runId;
         this.day = day;
         this.player = player;
         this.currentLocationId = currentLocationId;
-        this.status = GameStatus.IN_PROGRESS;
+        this.status = status;
     }
 
     /** A new game: Day 1, starting stats, at the Residence. */
@@ -48,6 +56,10 @@ public class GameState {
 
     public int getDay() {
         return day;
+    }
+
+    public UUID getRunId() {
+        return runId;
     }
 
     public Player getPlayer() {

@@ -8,8 +8,7 @@ import entity.GameState;
  * so it sits in the use_case package rather than in one use case's folder.
  *
  * The use case layer owns this interface and data_access implements it
- * (Dependency Inversion): interactors never know whether the game is held
- * in memory, in SQLite, or in a test fake.
+ * (Dependency Inversion). Saved snapshots use SaveGameDataAccessInterface.
  */
 public interface GameStateDataAccessInterface {
 

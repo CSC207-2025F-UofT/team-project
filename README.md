@@ -531,18 +531,28 @@ view/              LoginView, SignupView, TitleView, MapView, LocationView, Dial
 app/               Main, AppBuilder (dependency injection)
 ```
 
+### Story 3 — Save Management Enhancements
+
+Story 3 stores one SQLite snapshot per run in `data/uofteart.db`. A new playthrough has its own run ID, and saving a loaded playthrough updates that same run. The first save accepts an optional name. Later saves keep the name and refresh the last-saved time.
+
+**Load Game** opens **Saved Games**, ordered newest first. Select a run to preview its day and four stats, then load it or delete its snapshot with confirmation. Deletion retains the underlying run record. List, load, and delete queries are scoped to the current username. The current build uses Story 3's temporary profile while Story 1 is on its own branch.
+
+`SaveGameDataAccessInterface` exposes save, list, selected load, and delete operations. The existing Save and Load interactors handle gameplay snapshots. `ManageSavesInteractor` handles the list and deletion. The schema upgrade adds `save_name` and `saved_at` to `game_saves` and preserves existing snapshots.
+
+Run `app.Main` in VS Code and use the existing Save and Load buttons. Run `mvn clean test` from the repository root. See the [persistence guide](docs/story-3-persistence.md) for the full demo and account integration details.
+
 ### Database (SQLite)
 
 | Table | Key columns | Arrives in |
 |---|---|---|
 | `users` | `username` PK, `password_hash`, `salt` | Story 1 / 3 |
 | `runs` | `run_id` PK, `username`, `status`, `days_survived`, final stats, `grade_letter`, `started_at`, `finished_at` | Story 3 (finished-run fields: Story 10) |
-| `game_saves` | `run_id` PK, `day`, `time_blocks_left`, 4 stats, `current_location_id`, `forecast_json`, `buffs_json`, `unlocked_json`, `picked_up_today_json` | Story 3 (more columns in Stories 5, 6, 8, 9, 12) |
+| `game_saves` | `run_id` PK, `day`, 4 stats, `current_location_id`, `saved_order`, `save_name`, `saved_at`. Later columns include `time_blocks_left`, `forecast_json`, `buffs_json`, `unlocked_json`, `picked_up_today_json`. | Story 3 (more columns in Stories 5, 6, 8, 9, 12) |
 | `inventory_items` | `run_id`, `slot`, `item_id` | Story 6 |
 | `event_log` | `id`, `run_id`, `day`, `source`, `message`, 4 stat deltas | Story 10 |
 | `day_summaries` | `run_id`, `day`, `weather`, end-of-day stats | Story 10 |
 
-`GameState` keeps the event log and day summaries in memory; the save use case writes the whole state in one transaction. Tests run against `jdbc:sqlite::memory:`.
+Story 3 writes the run and snapshot in one transaction. SQLite tests use temporary database files so they can verify reopening the database. See [Story 3 persistence and account integration](docs/story-3-persistence.md) for the shared schema and startup wiring.
 
 ### Sequence Diagrams
 
@@ -615,7 +625,7 @@ This README is the single source of truth for scope, stories and ownership. When
 1. Requires JDK 17 or newer and Maven. `pom.xml` compiles with `release 17` and uses JUnit 5 (Surefire 3.2.5). Java 17 is still to be confirmed with the TA.
 2. Clone the repository and open it in IntelliJ (or run `mvn compile`).
 3. Weather needs no key. For LLM-written NPC replies (Story 11 onwards), set `LLM_API_KEY` (environment variable or a git-ignored `.env`); without it the game uses scripted dialogue.
-4. Run `app.Main`. It currently opens a New Game button that leads to the Day 1 stats screen. From Story 3 onwards, the database file `data/uofteart.db` is created automatically on first run.
+4. Run `app.Main`. Choose **New Game** to see the Day 1 stats, or **Load Game** to resume. The game screen has **Save Game**, **Load Game**, and the conversation button. The database file `data/uofteart.db` is created automatically on first run.
 5. Run tests with `mvn test` (no network or key needed).
 
 ---
