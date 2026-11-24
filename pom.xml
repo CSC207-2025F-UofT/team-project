@@ -28,6 +28,12 @@
             <version>5.11.3</version>
             <scope>test</scope>
         </dependency>
-    </dependencies>
 
+<dependency>
+    <groupId>io.github.cdimascio</groupId>
+    <artifactId>dotenv-java</artifactId>
+    <version>3.0.2</version>
+</dependency>
+
+</dependencies>
 </project>
