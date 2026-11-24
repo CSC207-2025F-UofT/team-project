@@ -69,6 +69,7 @@ public class AnalyticsUseCase implements DashboardInputBoundary {
         Map<String, List<LocationInfo>> locationsByPlace = trips.stream()
                 .flatMap(trip -> photoAccess.getPhotosByTripId(trip.getId()).stream())
                 .map(photo -> photo.getLocation().getInfo())
+                .distinct()
                 .filter(Objects::nonNull)
                 .collect(Collectors.groupingBy(locationSelector));
 
@@ -82,11 +83,13 @@ public class AnalyticsUseCase implements DashboardInputBoundary {
                     List<String> landmarks = locations.stream()
                             .map(LocationInfo::getLandmark)
                             .filter(Objects::nonNull)
+                            .distinct()
                             .toList();
                     List<LocalDate> dates = trips.stream()
                             .filter(trip -> getPlacesByTrip(trip, locationSelector).contains(place))
                             .map(Trip::getStartTime)
                             .filter(Objects::nonNull)
+                            .distinct()
                             .map(LocalDateTime::toLocalDate)
                             .toList();
                     return new DashboardOutputDataCatalog.Visit(place, numberOfTimesVisited, dates, landmarks);
