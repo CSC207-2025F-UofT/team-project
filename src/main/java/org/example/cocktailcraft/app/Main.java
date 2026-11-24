@@ -8,6 +8,8 @@ public class Main {
         JFrame application = appBuilder
                 .addSearchView()
                 .addSearchUseCase()
+                .addClickUseCase()
+                .addCustomizeUseCase(() -> null)
                 .addMainPageView()
                 .build();
 

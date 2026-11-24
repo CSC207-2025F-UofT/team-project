@@ -63,6 +63,9 @@ public class CocktailJsonReader implements ClickDataAccessInterface {
             JsonObject json = JsonParser.parseReader(reader).getAsJsonObject();
             String id = json.get("_id").getAsString();
             String name = json.get("name").getAsString();
+            JsonElement instructionsValue = json.get("instructions");
+            String instructions = instructionsValue == null || instructionsValue.isJsonNull()
+                    ? "" : instructionsValue.getAsString();
             List<RecipeIngredient> ingredients = new ArrayList<>();
             Set<BaseSpirit> baseSpirits = EnumSet.noneOf(BaseSpirit.class);
 
@@ -77,7 +80,7 @@ public class CocktailJsonReader implements ClickDataAccessInterface {
                 ));
             }
 
-            return new Cocktail(id, name, ingredients, new Tags(baseSpirits));
+            return new Cocktail(id, name, ingredients, new Tags(baseSpirits), instructions);
         } catch (JsonParseException | IllegalStateException | NullPointerException
                  | UnsupportedOperationException exception) {
             throw new IOException("Invalid cocktail JSON: " + resourcePath, exception);
@@ -140,7 +143,7 @@ public class CocktailJsonReader implements ClickDataAccessInterface {
     }
 
     @Override
-    public Cocktail get(String cocktailId){
+    public Cocktail get(String cocktailId) {
         try {
             for (Cocktail cocktail : readAll()) {
                 if (cocktail.getId().equals(cocktailId)) {
@@ -155,7 +158,7 @@ public class CocktailJsonReader implements ClickDataAccessInterface {
     }
 
     @Override
-    public boolean existsByID(String cocktailId){
+    public boolean existsByID(String cocktailId) {
         return get(cocktailId) != null;
     }
 }

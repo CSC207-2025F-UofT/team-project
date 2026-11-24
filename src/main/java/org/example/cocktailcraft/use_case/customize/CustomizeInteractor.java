@@ -56,7 +56,8 @@ public class CustomizeInteractor implements CustomizeInputBoundary {
                     inputData.getOwnerId(),
                     originalId,
                     inputData.getName().trim(),
-                    inputData.getIngredients()
+                    inputData.getIngredients(),
+                    inputData.getInstructions()
             );
             dataAccess.save(recipe);
         } catch (IOException exception) {
@@ -69,7 +70,8 @@ public class CustomizeInteractor implements CustomizeInputBoundary {
         CustomizeOutputData outputData = new CustomizeOutputData(
                 recipe.getId(),
                 recipe.getName(),
-                recipe.getIngredients()
+                recipe.getIngredients(),
+                recipe.getInstructions()
         );
         presenter.prepareSuccessView(outputData);
     }

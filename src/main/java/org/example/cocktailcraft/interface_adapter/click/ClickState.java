@@ -1,24 +1,43 @@
 package org.example.cocktailcraft.interface_adapter.click;
 
-import org.example.cocktailcraft.entity.Cocktail;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ClickState {
     private String cocktailId = "";
+    private List<String> ingredients = new ArrayList<>();
     private String cocktailError;
+    private String instructions = "";
 
-    public String getCocktailId(){
+    public String getCocktailId() {
         return cocktailId;
     }
 
-    public String getCocktailError(){
+    public String getCocktailError() {
         return cocktailError;
     }
 
-    public void setCocktailId(String cocktailId){
+    public void setCocktailId(String cocktailId) {
         this.cocktailId = cocktailId;
     }
 
-    public void setCocktailError(String cocktailError){
+    public void setCocktailError(String cocktailError) {
         this.cocktailError = cocktailError;
+    }
+
+    public List<String> getIngredients() {
+        return ingredients;
+    }
+
+    public void setIngredients(List<String> ingredients) {
+        this.ingredients = ingredients;
+    }
+
+    public String getInstructions() {
+        return instructions;
+    }
+
+    public void setInstructions(String instructions) {
+        this.instructions = instructions == null ? "" : instructions;
     }
 }
