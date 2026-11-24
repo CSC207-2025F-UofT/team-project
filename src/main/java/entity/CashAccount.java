@@ -9,7 +9,9 @@ public final class CashAccount extends Account {
         this(id, ownerId, name, balance, currency, "Wallet", LocalDateTime.now());
     }
     public CashAccount(int id, int ownerId, String name, BigDecimal balance, String currency, String location, LocalDateTime createdAt) {
-        super(id, ownerId, name, balance, currency, createdAt); setStorageLocation(location);
+        super(id, ownerId, name, balance, currency, createdAt);
+        if (balance.signum() < 0) throw new IllegalArgumentException("Cash balance cannot be negative.");
+        setStorageLocation(location);
     }
     @Override public AccountType getAccountType() { return AccountType.CASH; }
     @Override protected boolean canWithdraw(BigDecimal amount) { return getBalance().compareTo(amount) >= 0; }

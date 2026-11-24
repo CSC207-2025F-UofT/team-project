@@ -13,7 +13,7 @@
           "type": "CHEQUING",
           "balance": "2430.00",
           "currency": "CAD",
-          "overdraftLimit": "0.00",
+          "overdraftLimit": "720.00",
           "createdAt": "2026-11-23T00:00:00",
           "income": [
             {
@@ -51,7 +51,7 @@
           "type": "CHEQUING",
           "balance": "2735.75",
           "currency": "CAD",
-          "overdraftLimit": "0.00",
+          "overdraftLimit": "956.25",
           "createdAt": "2026-11-23T00:00:00",
           "income": [
             {
@@ -107,7 +107,7 @@
           "type": "CHEQUING",
           "balance": "1625.00",
           "currency": "CAD",
-          "overdraftLimit": "0.00",
+          "overdraftLimit": "900.00",
           "createdAt": "2026-11-23T00:00:00",
           "income": [
             {
@@ -143,9 +143,9 @@
           "id": 4,
           "name": "Main Chequing",
           "type": "CHEQUING",
-          "balance": "0.00",
+          "balance": "-87555.50",
           "currency": "CAD",
-          "overdraftLimit": "87555.50",
+          "overdraftLimit": "91305.50",
           "createdAt": "2026-11-23T00:00:00",
           "income": [
             {

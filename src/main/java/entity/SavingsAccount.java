@@ -10,7 +10,9 @@ public final class SavingsAccount extends Account {
         this(id, ownerId, name, balance, currency, BigDecimal.ZERO, LocalDateTime.now());
     }
     public SavingsAccount(int id, int ownerId, String name, BigDecimal balance, String currency, BigDecimal rate, LocalDateTime createdAt) {
-        super(id, ownerId, name, balance, currency, createdAt); setAnnualInterestRate(rate);
+        super(id, ownerId, name, balance, currency, createdAt);
+        if (balance.signum() < 0) throw new IllegalArgumentException("Savings balance cannot be negative.");
+        setAnnualInterestRate(rate);
     }
     @Override public AccountType getAccountType() { return AccountType.SAVINGS; }
     @Override protected boolean canWithdraw(BigDecimal amount) { return getBalance().compareTo(amount) >= 0; }

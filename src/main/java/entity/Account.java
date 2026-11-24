@@ -19,7 +19,7 @@ public abstract class Account {
     protected Account(int id, int ownerId, String name, BigDecimal balance, String currency, LocalDateTime createdAt) {
         if (id < 0 || ownerId < 0) throw new IllegalArgumentException("IDs cannot be negative.");
         if (name == null || name.isBlank()) throw new IllegalArgumentException("Account name cannot be empty.");
-        if (balance == null || balance.signum() < 0) throw new IllegalArgumentException("Initial balance cannot be negative.");
+        if (balance == null) throw new IllegalArgumentException("Initial balance is required.");
         if (currency == null || !currency.matches("[A-Z]{3}")) throw new IllegalArgumentException("Currency must be a three-letter ISO code.");
         this.accountID = id; this.ownerProfileId = ownerId; this.accountName = name.trim();
         this.balance = balance; this.currency = currency; this.createdAt = Objects.requireNonNull(createdAt);
