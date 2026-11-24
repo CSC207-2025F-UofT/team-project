@@ -38,9 +38,14 @@ public class InteractWithPetPresenter
     public void prepareInteractionView(
             InteractWithPetOutputData outputData) {
         InteractWithPetState state = new InteractWithPetState();
+
         state.setPetName(outputData.getPetName());
         state.setSpecies(outputData.getSpecies());
         state.setImageUrl(outputData.getImageUrl());
+
+        state.setHunger(outputData.getHunger());
+        state.setHappiness(outputData.getHappiness());
+        state.setHealth(outputData.getHealth());
 
         interactWithPetViewModel.setState(state);
         interactWithPetViewModel.notifyStateChanged();

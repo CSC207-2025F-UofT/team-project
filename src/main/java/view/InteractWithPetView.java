@@ -24,6 +24,9 @@ public class InteractWithPetView extends JPanel
     private final JLabel imageLabel =
             new JLabel("Pet picture will appear here.");
     private String displayedImageUrl = "";
+    private final JLabel hungerLabel = new JLabel();
+    private final JLabel happinessLabel = new JLabel();
+    private final JLabel healthLabel = new JLabel();
 
     public InteractWithPetView(InteractWithPetViewModel viewModel) {
         this.viewModel = viewModel;
@@ -45,6 +48,14 @@ public class InteractWithPetView extends JPanel
         add(nameLabel);
         add(speciesLabel);
         add(imagePanel);
+
+        JPanel conditionPanel = new JPanel(new GridLayout(3, 1));
+
+        conditionPanel.add(hungerLabel);
+        conditionPanel.add(happinessLabel);
+        conditionPanel.add(healthLabel);
+
+        add(conditionPanel);
 
         stateChanged();
     }
@@ -124,6 +135,9 @@ public class InteractWithPetView extends JPanel
 
         nameLabel.setText("Name: " + state.getPetName());
         speciesLabel.setText("Species: " + state.getSpecies());
+        hungerLabel.setText("Hunger: " + state.getHunger() + "/10");
+        happinessLabel.setText("Happiness: " + state.getHappiness() + "/10");
+        healthLabel.setText("Health: " + state.getHealth() + "/10");
 
         String imageUrl = state.getImageUrl();
 

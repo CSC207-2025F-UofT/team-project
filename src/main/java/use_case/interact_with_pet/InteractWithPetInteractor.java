@@ -26,7 +26,10 @@ public class InteractWithPetInteractor implements InteractWithPetInputBoundary {
                 new InteractWithPetOutputData(
                         pet.getName(),
                         pet.getSpecies().name(),
-                        pet.getImageUrl()
+                        pet.getImageUrl(),
+                        pet.getHunger(),
+                        pet.getHappiness(),
+                        pet.getHealth()
                 );
         presenter.prepareInteractionView(outputData);
     }

@@ -60,7 +60,10 @@ public class AdoptPetInteractor implements AdoptPetInputBoundary {
         AdoptPetOutputData outputData = new AdoptPetOutputData(
                 pet.getName(),
                 pet.getSpecies().name(),
-                pet.getImageUrl()
+                pet.getImageUrl(),
+                pet.getHunger(),
+                pet.getHappiness(),
+                pet.getHealth()
         );
 
         presenter.prepareSuccessView(outputData);
