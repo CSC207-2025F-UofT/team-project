@@ -19,17 +19,26 @@ public final class SimulationState {
     }
 
     public static SimulationState from(SceneViewData scene, String status) {
-        List<Ball> balls = new ArrayList<>();
-        for (SceneViewData.BallData ball : scene.getBalls()) {
-            balls.add(new Ball(ball));
-        }
         HeightGrid terrain = scene.getTerrain();
         String text = status.isEmpty() && terrain != null ? terrain.getName() : status;
-        return new SimulationState(terrain, List.copyOf(balls), text);
+        return new SimulationState(terrain, toBalls(scene.getBalls()), text);
     }
 
     SimulationState withFileStatus(String status) {
         return new SimulationState(terrain, balls, status);
+    }
+
+    /** Same terrain with the balls moved, so the camera is not re-centred. */
+    SimulationState withBalls(List<SceneViewData.BallData> newBalls, String status) {
+        return new SimulationState(terrain, toBalls(newBalls), status);
+    }
+
+    private static List<Ball> toBalls(List<SceneViewData.BallData> data) {
+        List<Ball> balls = new ArrayList<>();
+        for (SceneViewData.BallData ball : data) {
+            balls.add(new Ball(ball));
+        }
+        return List.copyOf(balls);
     }
 
     public String getStatusText() {

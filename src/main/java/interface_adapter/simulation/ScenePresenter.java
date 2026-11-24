@@ -6,17 +6,21 @@ import use_case.load_scene.LoadSceneOutputBoundary;
 import use_case.load_scene.LoadSceneOutputData;
 import use_case.save_scene.SaveSceneOutputBoundary;
 import use_case.save_scene.SaveSceneOutputData;
+import use_case.simulation.SimulationOutputBoundary;
+import use_case.simulation.SimulationOutputData;
 
 import java.nio.file.Path;
 import java.util.Locale;
 
-/** Handles user input and receives the save/load model's callbacks through its output boundaries. */
+/** Handles user input and receives the use cases' callbacks through their output boundaries. */
 public final class ScenePresenter implements SaveSceneOutputBoundary, LoadSceneOutputBoundary,
-        SimulationViewModel.Listener {
+        SimulationOutputBoundary, SimulationViewModel.Listener {
     private final SimulationViewModel viewModel;
     private SceneView view;
     private SaveSceneController save;
     private LoadSceneController load;
+    private SimulationController simulation;
+    private boolean playing;
     private int previousMouseX;
 
     public ScenePresenter(SimulationViewModel viewModel) {
@@ -24,11 +28,39 @@ public final class ScenePresenter implements SaveSceneOutputBoundary, LoadSceneO
     }
 
     /** Completes the two-way connections before the Swing window opens. */
-    public void start(SceneView view, SaveSceneController save, LoadSceneController load) {
+    public void start(SceneView view, SaveSceneController save, LoadSceneController load,
+                      SimulationController simulation) {
         this.view = view;
         this.save = save;
         this.load = load;
+        this.simulation = simulation;
         viewModel.setListener(this);
+    }
+
+    public void playRequested() {
+        if (!playing) {
+            simulation.play();
+        }
+    }
+
+    public void pauseRequested() {
+        if (playing) {
+            playing = false;
+            view.stopClock();
+            viewModel.setFileStatus("Paused");
+        }
+    }
+
+    public void stopRequested() {
+        playing = false;
+        view.stopClock();
+        simulation.stop();
+    }
+
+    public void clockTicked(double seconds) {
+        if (playing) {
+            simulation.step(seconds);
+        }
     }
 
     public void saveRequested() {
@@ -81,7 +113,26 @@ public final class ScenePresenter implements SaveSceneOutputBoundary, LoadSceneO
 
     @Override
     public void prepareSuccessView(LoadSceneOutputData output) {
+        playing = false;
+        view.stopClock();
         viewModel.setState(SimulationState.from(output.getScene(), "Loaded " + output.getFileName()));
+    }
+
+    @Override
+    public void preparePlayingView() {
+        playing = true;
+        view.startClock();
+        viewModel.setFileStatus("Playing");
+    }
+
+    @Override
+    public void prepareStepView(SimulationOutputData output) {
+        viewModel.setState(viewModel.getState().withBalls(output.getBalls(), "Playing"));
+    }
+
+    @Override
+    public void prepareStoppedView(SimulationOutputData output) {
+        viewModel.setState(viewModel.getState().withBalls(output.getBalls(), "Stopped"));
     }
 
     @Override

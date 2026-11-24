@@ -11,4 +11,9 @@ public interface SceneView {
     boolean confirmOverwrite(String fileName);
 
     void display(SimulationState state, CameraPose camera);
+
+    /** Starts calling the presenter's clockTicked about 60 times a second. */
+    void startClock();
+
+    void stopClock();
 }
