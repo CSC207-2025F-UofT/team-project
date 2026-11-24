@@ -65,21 +65,16 @@ public class CandleGame {
         return List.copyOf(guesses);
     }
 
-    public static String secretCode() {
-        return secretCode();
-    }
-
     public int getAttemptsRemaining() {
         return maxTries-guesses.size();
     }
 
     public void addGuess(Guess guess) {
-        if (gameCondition != GameCondition.ON_GOING ){
-            throw new IllegalStateException("Game is over."); }
-        if (getAttemptsRemaining() <= 0) {
+        if (gameCondition != GameCondition.ON_GOING || getAttemptsRemaining() <= 0) {
             throw new IllegalStateException("Game is over.");
         }
         guesses.add(guess);
+        updateGameCondition();
     }
 
     public void updateGameCondition() {
