@@ -11,7 +11,6 @@ import javax.swing.*;
 import interface_adapters.candle_game.EvaluateGuessController;
 import interface_adapters.candle_game.EvaluateGuessPresenter;
 import use_case.use_case_EvaluateGuess.EvaluateGuessInteractor;
-
 import java.util.List;
 import java.io.File;
 import java.io.IOException;
@@ -23,6 +22,7 @@ import java.awt.event.ActionListener;
 
 public class CandleGameView extends JPanel implements ActionListener, CandleGameViewModelListener {
 
+    // TODO add home view model
     private final CandleGameViewModel candleGameViewModel;
     private final EvaluateGuessController controller;
     private final CandleGame game;
@@ -53,28 +53,21 @@ public class CandleGameView extends JPanel implements ActionListener, CandleGame
 
         this.setLayout(null);
 
-        // Font
-        Font winkle = null;
-        try {
-            winkle = Font.createFont(Font.TRUETYPE_FONT, new File("src/font/Winkle-Regular.ttf"));
-        } catch (FontFormatException e) {
-            throw new RuntimeException(e);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        // TODO call
+//        FontManager.getWinkle(48f)
 
 
         //Attempts Remaining Tracker
         attemptsRemaining = new JLabel("10");
-        attemptsRemaining.setBounds(700, 20, 500, 35);
-        attemptsRemaining.setFont(winkle.deriveFont(48f));
+        attemptsRemaining.setBounds(75, 80, 500, 35);
+        attemptsRemaining.setFont(FontManager.getWinkle(48f));
         this.add(attemptsRemaining);
 
 
         // Quit Button
         quitButton = new JButton("QUIT");
         quitButton.setBounds(10, 10, 100, 50);
-        quitButton.setFont(winkle.deriveFont(30f));
+        quitButton.setFont(FontManager.getWinkle(30f));
         quitButton.setBackground(Color.decode("#362514"));
         quitButton.setForeground(Color.WHITE);
         quitButton.addActionListener(this);
@@ -83,7 +76,7 @@ public class CandleGameView extends JPanel implements ActionListener, CandleGame
         // Instructions Button
         instructionsButton = new JButton("?");
         instructionsButton.setBounds(10, 70, 50, 50);
-        instructionsButton.setFont(winkle.deriveFont(30f));
+        instructionsButton.setFont(FontManager.getWinkle(30f));
         instructionsButton.setBackground(Color.decode("#362514"));
         instructionsButton.setForeground(Color.WHITE);
         instructionsButton.addActionListener(this);
@@ -92,7 +85,7 @@ public class CandleGameView extends JPanel implements ActionListener, CandleGame
         // Submit Button
         submitButton = new JButton("SUBMIT");
         submitButton.setBounds(340, 460, 120, 50);
-        submitButton.setFont(winkle.deriveFont(30f));
+        submitButton.setFont(FontManager.getWinkle(30f));
         submitButton.setBackground(Color.decode("#362514"));
         submitButton.setForeground(Color.WHITE);
         submitButton.addActionListener(this);
@@ -110,7 +103,7 @@ public class CandleGameView extends JPanel implements ActionListener, CandleGame
         for (int i = 0; i < numberBoxes.length; i++) {
             numberBoxes[i] = new JTextField();
             numberBoxes[i].setBounds(70 + (i * 150), 370, 60, 30);
-            numberBoxes[i].setFont(winkle.deriveFont(30f));
+            numberBoxes[i].setFont(FontManager.getWinkle(30f));
             numberBoxes[i].setHorizontalAlignment(JTextField.CENTER);
             this.add(numberBoxes[i]);
         }
@@ -129,8 +122,8 @@ public class CandleGameView extends JPanel implements ActionListener, CandleGame
         for (int i = 0; i < attempts.length; i++) {
             for (int c = 0; c < attempts[i].length; c++) {
                 attempts[i][c] = new JLabel();
-                attempts[i][c].setBounds(620 + (c * 10), 60 + (i * 20), 200, 20);
-                attempts[i][c].setFont(winkle.deriveFont(30f));
+                attempts[i][c].setBounds(720 + (c * 10), 20 + (i * 20), 200, 20);
+                attempts[i][c].setFont(FontManager.getWinkle(30f));
                 this.add(attempts[i][c]);
             }
         }
@@ -161,17 +154,10 @@ public class CandleGameView extends JPanel implements ActionListener, CandleGame
         JFrame instructionsFrame = new JFrame("Instructions for Light it Up!");
         instructionsFrame.setMinimumSize(new java.awt.Dimension(400, 300));
 
-        Font winkle;
-        try {
-            winkle = Font.createFont(Font.TRUETYPE_FONT, new File("src/font/Winkle-Regular.ttf"));
-        } catch (FontFormatException | IOException e) {
-            throw new RuntimeException(e);
-        }
-
         JLabel instructionsTitle = new JLabel("How to Play Light it Up");
         JLabel instructions = new JLabel("These are where the instructions will go");
-        instructionsTitle.setFont(winkle.deriveFont(20f));
-        instructions.setFont(winkle.deriveFont(10f));
+        instructionsTitle.setFont(FontManager.getWinkle(20f));
+        instructions.setFont(FontManager.getWinkle(10f));
         instructionsTitle.setBounds(100, 10, 200, 20);
         instructions.setBounds(10, 0, 100, 20);
 
@@ -239,10 +225,12 @@ public class CandleGameView extends JPanel implements ActionListener, CandleGame
 //    }
 
     public static void main(String[] args) {
+        FontManager.loadFonts();
         SwingUtilities.invokeLater(() -> {
 
             // Temporary game for testing 12345
-            CandleGame game = new CandleGame("12345", 10);
+            // Temporary game 69875
+            CandleGame game = new CandleGame("69875", 10);
 
             CandleGameViewModel viewModel = new CandleGameViewModel();
             EvaluateGuessPresenter presenter =
