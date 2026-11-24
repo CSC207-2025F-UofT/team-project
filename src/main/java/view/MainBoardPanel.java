@@ -29,7 +29,7 @@ public class MainBoardPanel extends JPanel {
 
         // pictogram grid (placeholder text buttons)
         JPanel grid = new JPanel(new GridLayout(2, 3, 8, 8));
-        for (String label : new String[]{"Water", "Food", "Play", "Toilet", "Sleep", "Break"}) {
+        for (String label : new String[]{"Water", "Food", "Play", "Toilet", "Sleep", "More"}) {
             JButton b = new JButton(label);
             b.addActionListener(e -> messageBar.setText(messageBar.getText() + label + " "));
             grid.add(b);
@@ -45,7 +45,7 @@ public class MainBoardPanel extends JPanel {
 
         // bottom: Help / Stop / Break show in the message bar
         JPanel bottom = new JPanel(new GridLayout(1, 3, 8, 8));
-        for (String s : new String[]{"Help", "Stop", "More"}) {
+        for (String s : new String[]{"Help", "Stop", "Break"}) {
             JButton b = new JButton(s);
             // TODO core message use case: build and save the message
             b.addActionListener(e -> messageBar.setText(s));
