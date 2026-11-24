@@ -11,7 +11,7 @@
 ### Domain
 The team is building a Java Swing desktop application for finding internships, recording the resume used for each application, and tracking progress and deadlines.
 
-On `feature/finder`, `app.Main` opens Finder (UC4). Students can search public Greenhouse boards or find internships across employers through Jooble Canada. On `main`, students can also create and update a qualification profile and use it to get personalized recommendations (UC5–UC7). [Profile and recommendations on main](https://github.com/emilykim-rendered/team-project/blob/main/docs/design/profile.md)
+Finder (UC4) searches public Greenhouse boards and Jooble Canada. Students can also create and update a qualification profile (UC5–UC6) and get personalized recommendations from the configured Greenhouse boards (UC7).
 
 ---
 ## User Stories
@@ -35,6 +35,17 @@ so that I can evaluate my application progress.
 As a user, I want to create a profile with all my qualifications so that I would be recommended internships without 
 having to search
 
+### User Story 6
+As a user, I want to save job applications that I may apply to into a shortlist so that I can easily find them and 
+work on them later.
+
+### User Story 7
+As a user, I want to sort my shortlist of applications by due date so that I can identify which applications have 
+the earliest deadlines and prioritize them accordingly.
+
+### User Story 8
+As a user, I want to sort my shortlist of applications by relevancy so that I can identify which applications are 
+most useful to my career development and prioritize them accordingly.
 
 ---
 ## Use Cases
@@ -182,7 +193,102 @@ Extensions
 - 5a. No postings match: The system explains that no matches were found and offers the option to update the profile or preferences.
 Limits: Suggestions indicate keyword relevance, not verified eligibility. Unspecified requirements stay unknown. An empty result is a valid result. The MVP does not automatically submit applications.
 
-The team also specifies how to save a listing to a shortlist and sort it by due date or relevance in UC8–UC10. [Shortlist use cases on main](https://github.com/emilykim-rendered/team-project/blob/main/README.md#use-case-8-add-an-application-to-the-shortlist)
+### Use Case 8: Add an Application to the Shortlist
+Owner: Rui Zhou
+Primary actor: User
+Preconditions:
+- The application is running and the user is logged in.
+- The user is viewing the job display page for a specific job.
+Trigger: The user clicks the “Save to Shortlist” button for the currently displayed job.
+Success outcome: 
+- The selected job application is added to the user's shortlist and can be viewed later from the home page or shortlist 
+page.
+Main Success Scenario: 
+1. The user requests to add the currently displayed job application to the shortlist.
+2. The system identifies the currently displayed job application.
+3. The system checks whether the application is already in the user's shortlist.
+4. The system adds the application to the user's shortlist.
+5. The system saves the updated shortlist.
+6. The system confirms that the application was successfully added.
+7. The user can later view the saved application from the shortlist on the home page.
+Extensions:
+3a. The application is already in the shortlist.
+- The system does not add a duplicate application.
+- The system informs the user that the application has already been saved.
+4a. The application can no longer be saved or does not exist.
+- The system does not modify the shortlist.
+- The system informs the user that the application could not be added.
+5a. The shortlist cannot be saved because of a system or data-storage error.
+- The system informs the user that the application could not be saved.
+- The user's existing shortlist remains unchanged.
+
+### Use Case 9: Sort Shortlist by Due Date
+Owner: Rui Zhou
+Primary actor: User
+Preconditions:
+- The application is running and the user is logged in.
+- The user is viewing their shortlist.
+- The user has access to their shortlist.
+Trigger: The user clicks the button to sort the shortlist by due date.
+Success outcome:
+- The applications in the shortlist are displayed in order according to their due dates, allowing the user to identify 
+the applications with the closest deadlines.
+Main Success Scenario:
+1. The user requests to sort the shortlist by due date.
+2. The system retrieves the applications currently saved in the user's shortlist.
+3. The system retrieves the due date associated with each application.
+4. The system orders the applications by due date, with the earliest due dates appearing first.
+5. The system displays the newly sorted shortlist to the user.
+Extensions:
+2a. The shortlist is empty.
+- The system informs the user that there are no applications to sort.
+- The shortlist remains unchanged.
+3a. One or more applications do not have a due date.
+- The system still sorts all applications that have known due dates.
+- Applications without a due date are displayed after applications with known due dates.
+3b. Due-date information cannot be retrieved for one or more applications.
+- The system sorts applications with available due-date information and places applications with 
+unavailable due dates at the bottom of the shortlist.
+4a. Multiple applications have the same due date.
+- Applications with the same due date are grouped together.
+- The system preserves their existing relative order.
+
+### Use Case 10: Sort Shortlist by Relevancy
+Owner: Rui Zhou 
+Primary actor: User
+Preconditions:
+- The application is running and the user is logged in.
+- The user is viewing their shortlist.
+Trigger: The user clicks the button to sort their shortlist by relevancy.
+Success outcome: 
+- The applications in the shortlist are displayed in descending order of relevancy based on the user's 
+preferred career fields, allowing the user to identify applications that best match their career interests.
+Main Success Scenario:
+1. The user selects the option to sort by relevancy.
+2. The system retrieves the user's preferred career fields from their profile.
+3. The system retrieves the user’s shortlist.
+4. The system identifies keywords in each shortlisted application's job title that match the user's preferred fields or their associated synonyms.
+5. The system calculates a relevancy score for each application based on the number of distinct preferred fields matched.
+6. The system sorts the applications in descending order of relevancy score.
+7. The system displays the sorted shortlist to the user.
+Extensions:
+2a. The shortlist is empty.
+- The system informs the user that there are no applications to sort.
+- The shortlist remains unchanged.
+2b. The user has not specified any preferred career fields.
+- The system informs the user that preferred career fields must be specified to sort applications by relevancy.
+- The shortlist remains in its existing order.
+4a. No keywords match any of the user's preferred fields.
+- The system assigns a relevancy score of zero to every application.
+- The system preserves the existing order of the shortlist.
+5a. Multiple applications have the same relevancy score.
+- The system preserves their existing relative order.
+Postconditions:
+- The shortlisted applications are displayed in descending order of relevancy based on the user's preferred career 
+fields.
+- Applications with equal relevancy scores retain their existing relative order.
+- No applications are added to or removed from the shortlist.
+- The user's saved applications remain unchanged; only their displayed order is affected.
 
 ---
 ## Minimal Viable Product (MVP)
@@ -200,8 +306,7 @@ The team also specifies how to save a listing to a shortlist and sort it by due 
 - **`User`** represents a student and has fields for their user ID, name, and email.
 - **`Resume`** represents one version of a student's resume, identified by an ID and described by a name and date.
 - **`Application`** represents a student's application to a specific `JobPosting`. Its fields link that posting to the `Resume` version used and hold the application's status and priority.
-
-On `main`, `QualificationProfile` stores the student's program, expected graduation year, skills, and internship preferences for UC5–UC7. [Profile design](https://github.com/emilykim-rendered/team-project/blob/main/docs/design/profile.md)
+- **`QualificationProfile`** stores the student’s program, expected graduation year, skills, and internship preferences for UC5–UC7. [Profile design](docs/design/profile.md)
 
 A `JobPosting` can appear in many searches. An `Application` records a student’s application to one such posting with a particular resume. The Finder screen only retrieves and opens listings.
 
@@ -215,6 +320,8 @@ A `JobPosting` can appear in many searches. An `Application` records a student�
 ### Greenhouse Job Board API
 
 Finder sends `GET https://boards-api.greenhouse.io/v1/boards/{board_token}/jobs?content=true`. The response supplies the full posting description in `content` and the employer’s posting URL in `absolute_url`. The default boards are Cloudflare and Figma. A student can also search another public Greenhouse board directly, even if its postings do not appear in Jooble’s results. A live check of the packaged app retrieved postings from both default boards. [Greenhouse Job Board API](https://docs.greenhouse.io/job-board.html#list-jobs) · [Verification](docs/design/finder.md#verified-on-2026-11-16)
+
+Recommendations match postings from the configured Greenhouse boards to saved qualifications on the student’s device. The packaged app retrieved both default boards during the profile integration check on 2026-11-22.
 
 ### Jooble REST API
 
@@ -235,18 +342,40 @@ A live Finder search for `software intern` returned Canadian internship listings
 ---
 
 ## Design Diagrams
+### Profile — Class Diagrams
+
+![UC5 Create Profile class diagram](profile-uml/svg/03_createprofile_classes.svg)
+
+![UC6 Update Profile class diagram](profile-uml/svg/04_updateprofile_classes.svg)
+
+![UC7 Recommendations class diagram](profile-uml/svg/05_recommendation_classes.svg)
+
+### Profile — Sequence Diagrams
+
+![UC5 Create Profile sequence](profile-uml/svg/09_create_core.svg)
+
+![UC6 Load Profile sequence](profile-uml/svg/10_update_load.svg)
+
+![UC6 Save Profile Changes sequence](profile-uml/svg/11_update_save.svg)
+
+![UC7 Recommendations sequence](profile-uml/svg/12_recommendation_core.svg)
+
 ### UML Class Diagram
 
 [UC4 class diagram and Clean Architecture dependencies](docs/design/finder.md#architecture-and-source-dependencies)
+
+[UC5 and UC6 profile persistence](docs/design/profile.md#class-diagram-for-profile-persistence)
 
 ### Sequence Diagrams
 
 [UC4 search, pagination, and result display](docs/design/finder.md#runtime-sequence)
 
+[UC7 personalized recommendations](docs/design/profile.md#sequence-diagram-for-recommendations)
+
 ---
 
 ## How to Run
-Use **JDK 11** and Maven. Build and launch Finder from the directory containing `pom.xml`.
+Use **JDK 11** and Maven. Build and launch the app from the directory containing `pom.xml`. It opens with three tabs: **Finder**, **Profile**, and **Recommendations**. In live mode, open **Finder** to choose **Company boards** or **Jooble Canada**.
 
 ```bash
 mvn verify
@@ -265,6 +394,12 @@ java -jar target/TeamProject-1.0-SNAPSHOT.jar --demo
 ```
 
 Try `python` for two sample matches, `java` for one, or `unmatched` for zero.
+
+For profile-based recommendations, open **Profile**, enter a program and the skills
+`Java, Python`, save, and choose **View recommendations**. The sample Software
+Engineering Intern matches both skills. Change the saved skills to `SQL` to see
+the Data Science Co-op instead. Profiles persist in `~/.intern-finder/profile.json`.
+See the [profile demo and architecture](docs/design/profile.md) for details.
 
 To configure company boards, create a properties file containing `boardToken=Company Name`
 entries and supply its path:

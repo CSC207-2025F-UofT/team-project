@@ -1,0 +1,55 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName DejaVu Sans
+skinparam defaultFontSize 14
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam ArrowColor #42566D
+skinparam classAttributeIconSize 0
+skinparam classBackgroundColor #F5F8FC
+skinparam classBorderColor #46617C
+skinparam interfaceBackgroundColor #E8F4F1
+skinparam interfaceBorderColor #237D70
+skinparam enumBackgroundColor #FFF4DE
+skinparam sequenceParticipantBackgroundColor #EAF0F8
+skinparam sequenceParticipantBorderColor #46617C
+skinparam sequenceLifeLineBorderColor #A5B3C2
+skinparam sequenceGroupBackgroundColor #F6F8FB
+skinparam NoteBackgroundColor #FFF5DC
+skinparam NoteBorderColor #C8A555
+skinparam maxMessageSize 65
+hide footbox
+title UC5 sequence | Validate, create and save
+participant "controller :\nCreateProfileController" as C
+participant "interactor :\nCreateProfileInteractor" as I
+participant "validator :\nProfileValidator" as V
+participant "profiles : ProfileRepository\n(FileProfileDataAccess)" as R
+participant "output : CreateProfileOutputBoundary\n(CreateProfilePresenter)" as P
+C -> I : execute(inputData)
+note over C,I : Controller submits execution to the background executor.
+I -> V : createValidatedUser(newId, inputData)
+alt Invalid input
+ V --> I : ProfileValidationException(fieldErrors)
+ I -> P : presentError(VALIDATION, fieldErrors)
+else Valid candidate User
+ V --> I : candidate
+ I -> R : load()
+ alt Read fails
+  R --> I : ProfileStorageException
+  I -> P : presentError(STORAGE)
+ else Profile already exists
+  R --> I : Optional.of(existingUser)
+  I -> P : presentError(PROFILE_EXISTS)
+ else No profile exists
+  R --> I : Optional.empty()
+  I -> R : save(candidate)
+  alt Write fails
+   R --> I : ProfileStorageException
+   I -> P : presentError(STORAGE)
+  else Write succeeds
+   R --> I : completed
+   I -> P : presentSaved(toOutput(candidate))
+  end
+ end
+end
+@enduml

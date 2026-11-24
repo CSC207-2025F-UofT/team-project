@@ -1,6 +1,7 @@
 package app;
 
 import data_access.DemoJobSource;
+import data_access.FileProfileDataAccess;
 import data_access.GreenhouseJobSource;
 import data_access.JobBoard;
 import data_access.JoobleJobSearch;
@@ -114,22 +115,28 @@ public final class Main {
             });
     JFrame window = new JFrame("Internship Finder and Tracker");
     window.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+    Path defaultProfile =
+        Path.of(System.getProperty("user.home"), ".intern-finder", "profile.json");
+    Path profilePath =
+        Path.of(System.getProperty("internfinder.profile", defaultProfile.toString()));
+    FileProfileDataAccess profiles = new FileProfileDataAccess(profilePath);
     DesktopLinkOpener links = new DesktopLinkOpener();
     if (offline) {
       window.add(
-          FinderApplication.createView(
-              source, worker, SwingUtilities::invokeLater, links, sourceLabel));
+          ProfileApplication.createTabs(
+              source, profiles, worker, SwingUtilities::invokeLater, links, sourceLabel));
     } else {
       window.add(
-          FinderApplication.createLiveView(
+          ProfileApplication.createLiveTabs(
               source,
-              Optional.ofNullable(System.getenv("JOOBLE_API_KEY"))
-                  .filter(key -> !key.isBlank())
-                  .map(JoobleJobSearch::new),
+              profiles,
               worker,
               SwingUtilities::invokeLater,
               links,
-              sourceLabel));
+              sourceLabel,
+              Optional.ofNullable(System.getenv("JOOBLE_API_KEY"))
+                  .filter(key -> !key.isBlank())
+                  .map(JoobleJobSearch::new)));
     }
     window.addWindowListener(
         new WindowAdapter() {
