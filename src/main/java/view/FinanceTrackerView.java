@@ -25,11 +25,19 @@ public final class FinanceTrackerView extends JFrame {
     private final JLabel expenseTotal = new JLabel();
     private final JLabel balance = new JLabel();
     private boolean updatingUsers;
+    private final Runnable signupAction;
 
     public FinanceTrackerView(TransactionDashboardController controller,
                               TransactionDashboardViewModel viewModel) {
+        this(controller, viewModel, () -> { });
+    }
+
+    public FinanceTrackerView(TransactionDashboardController controller,
+                              TransactionDashboardViewModel viewModel,
+                              Runnable signupAction) {
         this.controller = controller;
         this.viewModel = viewModel;
+        this.signupAction = signupAction;
         buildWindow();
         controller.loadUsers();
         refresh();
@@ -74,6 +82,9 @@ public final class FinanceTrackerView extends JFrame {
         JButton add = new JButton("Add Transaction");
         add.addActionListener(event -> showAddDialog());
         actions.add(add);
+        JButton signUp = new JButton("Sign Up");
+        signUp.addActionListener(event -> signupAction.run());
+        actions.add(signUp);
         top.add(titles, BorderLayout.WEST);
         top.add(actions, BorderLayout.EAST);
         root.add(top, BorderLayout.NORTH);
