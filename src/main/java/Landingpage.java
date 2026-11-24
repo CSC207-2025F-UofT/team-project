@@ -8,8 +8,8 @@ public class Landingpage extends JFrame {
 
     public static void main(String[] args) {
         //giant frame
-        //JFrame page = new JFrame();
-        //page.setSize(1000,1000);
+        JFrame page = new JFrame();
+        page.setSize(1000,1000);
 
         // frame
         JFrame frame = new JFrame();

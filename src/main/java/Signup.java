@@ -1,5 +1,9 @@
+import profilesetup.privateinfo;
+
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 public class Signup extends JFrame {
     public Signup() {
@@ -33,8 +37,18 @@ public class Signup extends JFrame {
 
         //login or signup button
         JPanel buttons = new JPanel();
-        buttons.add(new JButton("Sign Up"));
+        JButton signup_button = new JButton("Sign Up");
+        buttons.add(signup_button);
         signup.add(buttons);
+
+        signup_button.addActionListener(e ->{
+            privateinfo privinfo = new privateinfo();
+        });
+
+
+        ImageIcon logo = new ImageIcon("src/main/java/templogo.png");
+        //JPanel panel = new JPanel(logo);
+       // frame.add(panel);
 
         frame.setVisible(true);
     }
