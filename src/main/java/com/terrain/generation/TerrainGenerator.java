@@ -20,6 +20,8 @@ public class TerrainGenerator {
         int h = settings.world.mapHeight();
         double seaLevel = settings.world.seaLevel.getValue();
         double landLevel = settings.world.landLevel.getValue();
+        double noiseScale = settings.world.noiseScale.getValue();
+        double noiseAmplitude = settings.world.noiseAmplitude.getValue();
         boolean islandMode = settings.world.islandMode.getValue();
 
         // adds some default noise to the map, so that it isn't just a flat plane.
@@ -36,15 +38,24 @@ public class TerrainGenerator {
                 Tile tile = map.getTile(x, y);
 
                 // generate noise value for this tile
-                double scale = 0.05; // higher scale -> more noisy (scale = 1 is bad)
+                double scale = 1 / noiseScale;
                 double noiseValue = noise.evaluateNoise(x * scale, y * scale);
-                double elevation = 10 * noiseValue + landLevel;
+                double elevation = noiseAmplitude * noiseValue + landLevel;
 
+                if(islandMode) {
+                    double radius = settings.world.islandRadius.getValue();
+                    double slope = settings.world.islandSlope.getValue();
+                    double roundness = settings.world.islandCornerRoundness.getValue();
+                    double height = settings.world.islandHeight.getValue();
+
+                    double elevationChange = squareParabola(x, y, radius, slope, roundness,
+                            height, w / 2.0, h / 2.0);
+                    elevation = Math.clamp(elevation + elevationChange, 0, Double.MAX_VALUE);
+                }
 
                 tile.setElevation(elevation);
-
                 // PLACEHOLDER CODE to make things interesting; should really just be all grass.
-                if (x < w / 2) {
+                if (elevation > seaLevel) {
                     tile.setType(TileType.GRASS); // Default type, can be changed by features later.
                 } else {
                     tile.setType(TileType.WATER);
@@ -63,8 +74,15 @@ public class TerrainGenerator {
             feature.apply(map, new Random(settings.seed * 31 + i));
         }
 
-        // TODO: apply world settings (sea level, island mode, etc.) to the map
-
         return map;
+    }
+
+    public double squareParabola(double x, double y, double radius, double slope, double roundness,
+                                 double height, double centerX, double centerY) {
+        // creates a parabolic-pyramid-thing where every z-slice is a rounded square
+        double dx = x - centerX;
+        double dy = y - centerY;
+        double numerator = Math.pow(Math.pow(Math.abs(dx), roundness) + Math.pow(Math.abs(dy), roundness), 1.0 / roundness);
+        return height * (1 - Math.pow(numerator / radius, slope));
     }
 }

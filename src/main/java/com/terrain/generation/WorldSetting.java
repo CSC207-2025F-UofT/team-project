@@ -9,10 +9,15 @@ import com.terrain.entity.model.feature.parameter.ParameterSet;
 public class WorldSetting extends ParameterSet {
     public final NumberParameter height = number("Height", 256, 1, 4096);
     public final NumberParameter width = number("Width", 256, 1, 4096);
-    public final NumberParameter seaLevel = number("Sea level", 0, 0, 1000);
+    public final NumberParameter seaLevel = number("Sea level", 50, 0, 1000);
     public final NumberParameter landLevel = number("Land level", 100, 0, 1000);
-    public final NumberParameter defaultNoise = number("Default Noise", 20, 0, 100);
-    public final BooleanParameter islandMode = bool("Island mode", false);
+    public final NumberParameter noiseAmplitude = number("Noise Amplitude", 40, 0, 100);
+    public final NumberParameter noiseScale = number("Noise Scale", 30, 0.01, 100);
+    public final BooleanParameter islandMode = bool("Island mode", true);
+    public final NumberParameter islandRadius = number("Island radius", 80, 1, 1000);
+    public final NumberParameter islandCornerRoundness = number("Island corner roundness", 4, 1, 10);
+    public final NumberParameter islandSlope = number("Island slope", 3, 0, 10);
+    public final NumberParameter islandHeight = number("Island height", 50, 0, 1000);
     // Island mode would be a setting that makes the map generate as an island, with water around the edges.
 
     // Whole-tile dimensions for building the map.

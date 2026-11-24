@@ -65,8 +65,9 @@ public class MapView extends StackPane {
 
         // get the elevation bounds for color mapping
         map.getElevationBounds();
-        int maxElevation = map.getMaxElevation();
-        int minElevation = map.getMinElevation();
+        double maxElevation = map.getMaxElevation();
+        double minElevation = map.getMinElevation();
+
 
         // draw the terrain map on the canvas
         for (int x = 0; x < width; x++) {
