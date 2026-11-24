@@ -1,4 +1,4 @@
-package interface_adapter.calogin;
+package interface_adapter;
 
 import java.util.ArrayList;
 import java.util.List;

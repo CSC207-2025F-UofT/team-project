@@ -4,9 +4,9 @@ import entity.Direction;
 import entity.Dungeon;
 import entity.Item;
 import entity.ItemType;
-import entity.Monster;
+import entity.characters.Monster;
 import entity.Room;
-import entity.Stats;
+import entity.characters.Stats;
 
 import java.util.Arrays;
 

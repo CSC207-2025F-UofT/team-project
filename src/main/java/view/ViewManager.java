@@ -1,8 +1,8 @@
-package view.calogin;
+package view;
 
-import interface_adapter.calogin.ViewManagerModel;
+import interface_adapter.ViewManagerModel;
 
-import interface_adapter.calogin.ViewManagerModelListener;
+import interface_adapter.ViewManagerModelListener;
 import javax.swing.*;
 import java.awt.*;
 

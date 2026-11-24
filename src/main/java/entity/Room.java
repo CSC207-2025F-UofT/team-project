@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
+import entity.characters.Monster;
 
 /**
  * A single room of a dungeon floor. A room has a description, exits to

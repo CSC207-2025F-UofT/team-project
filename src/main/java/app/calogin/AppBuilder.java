@@ -2,7 +2,7 @@ package app.calogin;
 
 import data_access.calogin.FileUserDataAccessObject;
 import entity.calogin.UserFactory;
-import interface_adapter.calogin.ViewManagerModel;
+import interface_adapter.ViewManagerModel;
 import interface_adapter.calogin.logged_in.ChangePasswordController;
 import interface_adapter.calogin.logged_in.ChangePasswordPresenter;
 import interface_adapter.calogin.logged_in.LoggedInViewModel;
@@ -29,7 +29,7 @@ import use_case.calogin.signup.SignupOutputBoundary;
 import view.calogin.LoggedInView;
 import view.calogin.LoginView;
 import view.calogin.SignupView;
-import view.calogin.ViewManager;
+import view.ViewManager;
 
 import javax.swing.*;
 import java.awt.*;
