@@ -1,6 +1,7 @@
 package use_case.change_password;
 
 import entity.User;
+import use_case.account.AccountPassword;
 import use_case.account.CurrentUserReader;
 
 import java.util.Optional;
@@ -62,6 +63,11 @@ public class ChangePasswordInteractor implements ChangePasswordInputBoundary {
     private String findProblem(String currentPassword, String newPassword, String confirmPassword) {
         if (currentPassword == null || currentPassword.isEmpty()) {
             return "Password inputted is empty.";
+        }
+
+        // Supabase needs at least 8, so catch it here with a clearer message
+        if (!AccountPassword.isLongEnough(newPassword)) {
+            return "New password must be at least " + AccountPassword.MIN_LENGTH + " characters.";
         }
 
         if (!newPassword.equals(confirmPassword)) {
