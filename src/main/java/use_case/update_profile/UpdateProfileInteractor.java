@@ -31,7 +31,7 @@ public final class UpdateProfileInteractor implements UpdateProfileInputBoundary
     SavedProfile saved;
     try {
       QualificationProfile edited = input.toProfile(baseline.getProfile().getOwner());
-      saved = profiles.update(edited, baseline.getRevision());
+      saved = profiles.update(edited, baseline);
     } catch (IllegalArgumentException | ProfileStorageException exception) {
       output.presentError(exception.getMessage());
       return;

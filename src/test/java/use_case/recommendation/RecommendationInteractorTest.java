@@ -62,7 +62,7 @@ class RecommendationInteractorTest {
         new RecommendationInteractor(profiles, jobs, matcher, output);
     interactor.execute();
     assertEquals(List.of("Java"), output.results.getMatches().get(0).getMatchedSkills());
-    profiles.update(profile("SQL"), saved.getRevision());
+    profiles.update(profile("SQL"), saved);
     interactor.execute();
     assertEquals(List.of("SQL"), output.results.getMatches().get(0).getMatchedSkills());
     assertEquals(List.of("unavailable"), output.results.getFailedBoards());
@@ -88,8 +88,8 @@ class RecommendationInteractorTest {
     }
 
     @Override
-    public SavedProfile update(QualificationProfile profile, UUID expectedRevision) {
-      assertEquals(expectedRevision, value.getRevision());
+    public SavedProfile update(QualificationProfile profile, SavedProfile baseline) {
+      assertSame(value, baseline);
       return create(profile);
     }
   }

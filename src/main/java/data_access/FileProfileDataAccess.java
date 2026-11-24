@@ -72,12 +72,12 @@ public final class FileProfileDataAccess implements ProfileRepository {
   }
 
   @Override
-  public SavedProfile update(QualificationProfile profile, UUID expectedRevision)
+  public SavedProfile update(QualificationProfile edited, SavedProfile baseline)
       throws ProfileStorageException {
-    return write(profile, Optional.of(expectedRevision));
+    return write(edited, Optional.of(baseline));
   }
 
-  private SavedProfile write(QualificationProfile profile, Optional<UUID> expectedRevision)
+  private SavedProfile write(QualificationProfile profile, Optional<SavedProfile> baseline)
       throws ProfileStorageException {
     try {
       Files.createDirectories(path.getParent());
@@ -89,23 +89,18 @@ public final class FileProfileDataAccess implements ProfileRepository {
           throw new ProfileStorageException("Another copy of the app is saving. Try again.");
         }
         Optional<SavedProfile> existing = loadSnapshot();
-        if (expectedRevision.isEmpty() && existing.isPresent()) {
-          throw new ProfileStorageException("A profile already exists. Reload it to edit it.");
-        }
-        if (expectedRevision.isPresent()) {
+        QualificationProfile toSave = profile;
+        if (baseline.isPresent()) {
           SavedProfile current =
               existing.orElseThrow(
                   () ->
                       new ProfileStorageException(
                           "The saved profile is missing. Click Reload profile."));
-          String currentOwnerId = current.getProfile().getOwner().getUserId();
-          if (!current.getRevision().equals(expectedRevision.get())
-              || !currentOwnerId.equals(profile.getOwner().getUserId())) {
-            throw new ProfileStorageException(
-                "The saved profile has changed. Click Reload profile, then reapply your edits.");
-          }
+          toSave = current.applyEdits(baseline.get(), profile);
+        } else if (existing.isPresent()) {
+          throw new ProfileStorageException("A profile already exists. Reload it to edit it.");
         }
-        SavedProfile saved = new SavedProfile(profile, UUID.randomUUID());
+        SavedProfile saved = new SavedProfile(toSave, UUID.randomUUID());
         replaceFile(saved);
         return saved;
       }

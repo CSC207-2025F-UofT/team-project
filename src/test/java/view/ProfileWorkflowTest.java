@@ -112,7 +112,7 @@ class ProfileWorkflowTest {
   }
 
   @Test
-  void staleWindowMustReloadBeforeItsProgramEditCanBeSaved() throws Exception {
+  void twoWindowsCanSaveDifferentFieldsWithoutReloading() throws Exception {
     Path file = directory.resolve("profile.json");
     FileProfileDataAccess store = new FileProfileDataAccess(file);
     onEdt(
@@ -127,23 +127,34 @@ class ProfileWorkflowTest {
           field(first, "Skills").setText("SQL");
           button(first, "Save changes").doClick();
           assertTrue(shows(first, "Changes saved."));
-          final String newerFile = Files.readString(file);
-          field(second, "Program of study").setText("Statistics");
-          button(second, "Save changes").doClick();
-          assertTrue(shows(second, "Click Reload profile"));
-          assertEquals("Statistics", field(second, "Program of study").getText());
-          assertEquals(newerFile, Files.readString(file));
-          button(second, "Save changes").doClick();
-          assertEquals(newerFile, Files.readString(file));
-
-          button(second, "Reload profile").doClick();
-          assertEquals("Math", field(second, "Program of study").getText());
-          assertEquals("SQL", field(second, "Skills").getText());
           field(second, "Program of study").setText("Statistics");
           button(second, "Save changes").doClick();
           assertTrue(shows(second, "Changes saved."));
+          assertEquals("Statistics", field(second, "Program of study").getText());
+          assertEquals("SQL", field(second, "Skills").getText());
           assertEquals("Statistics", store.load().orElseThrow().getProgram());
           assertEquals(List.of("SQL"), store.load().orElseThrow().getSkills());
+          return null;
+        });
+  }
+
+  @Test
+  void lastWindowToEditTheProgramWinsOnItsFirstSave() throws Exception {
+    Path file = directory.resolve("profile.json");
+    new FileProfileDataAccess(file)
+        .create(new ProfileData("Physics", "", "Java", "", "", "ANY").toProfile(new User()));
+    onEdt(
+        () -> {
+          Container first = show(tabs(file, new DemoJobSource(), url -> {}), "Profile");
+          Container second = show(tabs(file, new DemoJobSource(), url -> {}), "Profile");
+          field(first, "Program of study").setText("Math");
+          button(first, "Save changes").doClick();
+          assertTrue(shows(first, "Changes saved."));
+          field(second, "Program of study").setText("CS");
+          button(second, "Save changes").doClick();
+          assertTrue(shows(second, "Changes saved."));
+          button(first, "Reload profile").doClick();
+          assertEquals("CS", field(first, "Program of study").getText());
           return null;
         });
   }
