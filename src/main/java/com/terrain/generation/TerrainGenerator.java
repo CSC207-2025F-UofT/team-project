@@ -43,10 +43,10 @@ public class TerrainGenerator {
                 double elevation = noiseAmplitude * noiseValue + landLevel;
 
                 if(islandMode) {
-                    double radius = settings.world.islandRadius.getValue();
-                    double slope = settings.world.islandSlope.getValue();
-                    double roundness = settings.world.islandCornerRoundness.getValue();
-                    double height = settings.world.islandHeight.getValue();
+                    double radius = settings.world.island.radius.getValue();
+                    double slope = settings.world.island.slope.getValue();
+                    double roundness = settings.world.island.cornerRoundness.getValue();
+                    double height = settings.world.island.height.getValue();
 
                     double elevationChange = squareParabola(x, y, radius, slope, roundness,
                             height, w / 2.0, h / 2.0);
