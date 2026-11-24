@@ -59,4 +59,17 @@ public class Answer {
      * @return this Answer's associated score
      */
     public int getScore() { return this.score; }
+
+    /**
+     *
+     * @return the primary answer text
+     */
+    public String getPrimaryAnswer() { return this.primaryAnswer; }
+
+    /**
+     *
+     * @return the list of accepted variants
+     */
+    public List<String> getAcceptedVariants() { return this.acceptedVariants; }
+
 }

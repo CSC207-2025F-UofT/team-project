@@ -54,4 +54,10 @@ public class Question {
      * @return the number of correct answers for this Question
      */
     public int getAnswerCount() { return this.correctAnswers.size(); }
+
+    /**
+     *
+     * @return the lsit of correct answers
+     */
+    public List<Answer> getCorrectAnswers() { return this.correctAnswers; }
 }
