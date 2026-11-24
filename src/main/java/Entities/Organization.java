@@ -3,6 +3,7 @@ package Entities;
 public class Organization {
     private String name;
     private String logoURL = null;
+    private Department[] departments;
 
     private Organization(String name, String logoURL) {
         this.name = name;
@@ -23,6 +24,14 @@ public class Organization {
 
     public void setLogoURL(String logoURL) {
         this.logoURL = logoURL;
+    }
+
+    public Department[] getDepartments() {
+        return departments;
+    }
+
+    void setDepartments(Department[] departments) {
+        this.departments = departments;
     }
 
     public static Organization OrganizationFactory(String name, String logoURL) throws IllegalArgumentException {
