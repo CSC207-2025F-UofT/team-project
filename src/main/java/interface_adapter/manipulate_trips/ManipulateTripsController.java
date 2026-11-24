@@ -6,6 +6,7 @@ import use_case.manipulate_trips.ManipulateTripsInputBoundary;
 import use_case.manipulate_trips.MergeTripsInputData;
 import use_case.manipulate_trips.SplitTripInputData;
 import use_case.manipulate_trips.ViewTripInputData;
+import use_case.manipulate_trips.RenameTripInputData;
 
 public class ManipulateTripsController {
     private final ManipulateTripsInputBoundary interactor;
@@ -29,5 +30,9 @@ public class ManipulateTripsController {
 
     public void mergeTrips(List<String> tripIds) {
         interactor.mergeTrips(new MergeTripsInputData(tripIds));
+    }
+
+    public void renameTrip(String tripId, String newTripName) {
+        interactor.renameTrip(new RenameTripInputData(tripId, newTripName));
     }
 }
