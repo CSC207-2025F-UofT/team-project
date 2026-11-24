@@ -27,6 +27,7 @@ public class Battle {
 
     public final List<Fighter> players;
     public final List<Fighter> enemies;
+    public final Item.Bag bag = new Item.Bag();
 
     private final List<Fighter> order = new ArrayList<>();
     private int cursor;
@@ -39,6 +40,9 @@ public class Battle {
 
         order.addAll(players);
         order.addAll(enemies);
+        bag.add(new Item.Healing("Potion", 30), 3);
+        bag.add(new Item.Healing("Super Potion", 70), 1);
+        bag.add(new Item.Revive(), 1);
 
         Collections.shuffle(order);
 
@@ -113,6 +117,22 @@ public class Battle {
         return actor.name + " braces for the next hit.";
     }
 
+    public boolean canUse(Item item, Fighter target) {
+        return !ended && target != null
+                && bag.count(item) > 0
+                && target.player == item.targetsAllies()
+                && item.canUse(target);
+    }
+
+    public String useItem(Item item, Fighter target) {
+        if (!canUse(item, target)) {
+            throw new IllegalStateException("Can't use " + item.name());
+        }
+
+        bag.consume(item);
+        return item.use(current(), target);
+    }
+
     public void next() {
         ended = players.stream().noneMatch(Fighter::alive)
                 || enemies.stream().noneMatch(Fighter::alive);
@@ -133,6 +153,6 @@ public class Battle {
         Fighter f = current();
 
         return f.name + "'s turn."
-                + (f.player ? " Choose Attack or Defend." : "");
+                + (f.player ? " Choose Attack, Defend or Items." : "");
     }
 }
