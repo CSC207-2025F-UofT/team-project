@@ -5,14 +5,15 @@ import org.example.cocktailcraft.use_case.click.ClickOutputData;
 
 public class ClickPresenter implements ClickOutputBoundary {
     private final ClickViewModel clickViewModel;
-    public ClickPresenter(ClickViewModel clickViewModel){
+    public ClickPresenter(ClickViewModel clickViewModel) {
         this.clickViewModel = clickViewModel;
     }
 
-    public void prepareSuccessView(ClickOutputData outputData){
+    public void prepareSuccessView(ClickOutputData outputData) {
         ClickState state = clickViewModel.getState();
 
         state.setIngredients(outputData.getIngredients());
+        state.setInstructions(outputData.getInstructions());
         state.setCocktailError(null);
 
         clickViewModel.setState(state);
@@ -20,7 +21,7 @@ public class ClickPresenter implements ClickOutputBoundary {
 
     }
 
-    public void prepareFailView(String errorMessage){
+    public void prepareFailView(String errorMessage) {
         ClickState state = clickViewModel.getState();
 
         state.setCocktailError(errorMessage);

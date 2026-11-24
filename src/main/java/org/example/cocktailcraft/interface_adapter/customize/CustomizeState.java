@@ -7,11 +7,12 @@ public class CustomizeState {
     private String customRecipeId;
     private String originalCocktailId;
     private String name = "";
+    private String instructions = "";
     private List<RecipeIngredient> ingredients = List.of();
     private String errorMessage;
     private boolean saved;
 
-    public String getCustomRecipeId(){
+    public String getCustomRecipeId() {
         return customRecipeId;
     }
 
@@ -33,6 +34,14 @@ public class CustomizeState {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getInstructions() {
+        return instructions;
+    }
+
+    public void setInstructions(String instructions) {
+        this.instructions = instructions == null ? "" : instructions;
     }
 
     public List<RecipeIngredient> getIngredients() {

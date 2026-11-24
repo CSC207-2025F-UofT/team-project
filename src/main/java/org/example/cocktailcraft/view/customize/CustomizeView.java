@@ -12,6 +12,8 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.JTextArea;
+import javax.swing.JSplitPane;
 import javax.swing.JTextField;
 import javax.swing.table.DefaultTableModel;
 
@@ -20,7 +22,6 @@ import org.example.cocktailcraft.interface_adapter.customize.CustomizeState;
 import org.example.cocktailcraft.interface_adapter.customize.CustomizeViewModel;
 import org.example.cocktailcraft.interface_adapter.customize.CustomizeViewModelListener;
 import org.example.cocktailcraft.interface_adapter.customize.CustomizeController;
-import org.example.cocktailcraft.interface_adapter.customize.CustomizeState;
 
 public class CustomizeView extends JPanel implements CustomizeViewModelListener {
 
@@ -31,6 +32,7 @@ public class CustomizeView extends JPanel implements CustomizeViewModelListener 
     private final Supplier<String> currentUserId;
 
     private final JTextField nameInputField = new JTextField(25);
+    private final JTextArea instructionsInputArea = new JTextArea(6, 40);
 
     private final DefaultTableModel ingredientModel =
             new DefaultTableModel(
@@ -70,7 +72,23 @@ public class CustomizeView extends JPanel implements CustomizeViewModelListener 
         add(header, BorderLayout.NORTH);
 
         ingredientTable.setFillsViewportHeight(true);
-        add(new JScrollPane(ingredientTable), BorderLayout.CENTER);
+        instructionsInputArea.setLineWrap(true);
+        instructionsInputArea.setWrapStyleWord(true);
+        instructionsInputArea.getAccessibleContext().setAccessibleName("Instructions");
+
+        JPanel instructionsPanel = new JPanel(new BorderLayout(5, 5));
+        JLabel instructionsLabel = new JLabel("Instructions:");
+        instructionsLabel.setLabelFor(instructionsInputArea);
+        instructionsPanel.add(instructionsLabel, BorderLayout.NORTH);
+        instructionsPanel.add(new JScrollPane(instructionsInputArea), BorderLayout.CENTER);
+
+        JSplitPane recipeEditor = new JSplitPane(
+                JSplitPane.VERTICAL_SPLIT,
+                new JScrollPane(ingredientTable),
+                instructionsPanel
+        );
+        recipeEditor.setResizeWeight(0.65);
+        add(recipeEditor, BorderLayout.CENTER);
 
         JPanel buttons = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         buttons.add(addButton);
@@ -140,6 +158,7 @@ public class CustomizeView extends JPanel implements CustomizeViewModelListener 
         CustomizeState state = viewModel.getState();
         state.setName(nameInputField.getText());
         state.setIngredients(ingredients);
+        state.setInstructions(instructionsInputArea.getText());
         state.setErrorMessage(null);
         state.setSaved(false);
 
@@ -148,7 +167,8 @@ public class CustomizeView extends JPanel implements CustomizeViewModelListener 
                 currentUserId.get(),
                 state.getOriginalCocktailId(),
                 state.getName(),
-                state.getIngredients()
+                state.getIngredients(),
+                state.getInstructions()
         );
     }
 
@@ -171,6 +191,8 @@ public class CustomizeView extends JPanel implements CustomizeViewModelListener 
         }
 
         nameInputField.setText(state.getName());
+        instructionsInputArea.setText(state.getInstructions());
+        instructionsInputArea.setCaretPosition(0);
 
         ingredientModel.setRowCount(0);
 

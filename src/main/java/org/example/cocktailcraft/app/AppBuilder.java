@@ -55,11 +55,9 @@ public class AppBuilder {
     }
 
     public AppBuilder addSearchUseCase() {
-        final List<Cocktail> cocktails;
         try {
             this.cocktails = new CocktailJsonReader().readAll();
-        }
-        catch (IOException exception) {
+        } catch (IOException exception) {
             throw new UncheckedIOException(exception);
         }
 
@@ -147,6 +145,7 @@ public class AppBuilder {
             state.setOriginalCocktailId(cocktail.getId());
             state.setName(cocktail.getName());
             state.setIngredients(cocktail.getIngredients());
+            state.setInstructions(cocktail.getInstructions());
 
             customizeViewModel.setState(state);
             customizeViewModel.notifyStateChanged();

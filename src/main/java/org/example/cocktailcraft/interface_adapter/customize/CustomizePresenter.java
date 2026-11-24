@@ -6,7 +6,7 @@ import org.example.cocktailcraft.use_case.customize.CustomizeOutputData;
 public class CustomizePresenter implements CustomizeOutputBoundary {
     private final CustomizeViewModel viewModel;
 
-    public CustomizePresenter(CustomizeViewModel viewModel){
+    public CustomizePresenter(CustomizeViewModel viewModel) {
         this.viewModel = viewModel;
     }
 
@@ -17,6 +17,7 @@ public class CustomizePresenter implements CustomizeOutputBoundary {
         state.setCustomRecipeId(outputData.getCustomRecipeId());
         state.setName(outputData.getName());
         state.setIngredients(outputData.getIngredients());
+        state.setInstructions(outputData.getInstructions());
         state.setErrorMessage(null);
         state.setSaved(true);
 

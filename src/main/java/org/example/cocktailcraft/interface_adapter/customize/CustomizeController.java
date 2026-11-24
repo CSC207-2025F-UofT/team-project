@@ -19,12 +19,24 @@ public class CustomizeController {
             String name,
             List<RecipeIngredient> ingredients) {
 
+        execute(customRecipeId, ownerId, originalCocktailId, name, ingredients, "");
+    }
+
+    public void execute(
+            String customRecipeId,
+            String ownerId,
+            String originalCocktailId,
+            String name,
+            List<RecipeIngredient> ingredients,
+            String instructions) {
+
         CustomizeInputData inputData = new CustomizeInputData(
                 customRecipeId,
                 ownerId,
                 originalCocktailId,
                 name,
-                ingredients);
+                ingredients,
+                instructions);
 
         interactor.execute(inputData);
     }
