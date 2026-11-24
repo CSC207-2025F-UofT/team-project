@@ -1,7 +1,4 @@
-package use_case.combat;
-
-import entity.CombatEncounter;
-import entity.PlayerCharacter;
+package usecase.combat;
 
 public class CombatInteractor implements CombatInputBoundary {
     private final CombatDataAccessInterface dataAccess;

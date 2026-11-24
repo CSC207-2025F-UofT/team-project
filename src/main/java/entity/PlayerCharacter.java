@@ -10,10 +10,9 @@ public class PlayerCharacter {
     private String name;
     private int health;
     private int maxHealth;
-
-  private final Race race;
-  private final CharacterClass characterClass;
-  private final Stats stats;
+    private final Race race;
+    private final CharacterClass characterClass;
+    private final Stats stats;
 
   /**
    * Creates a player character.
@@ -21,26 +20,19 @@ public class PlayerCharacter {
    * @param race the race of the character
    * @param characterClass the character class of the character
    */
-  public PlayerCharacter(Race race, CharacterClass characterClass, String name, int health, int maxHealth) {
-    this.race = race;
-    this.characterClass = characterClass;
-    this.stats = characterClass.getBaseStats().plus(race.getBonuses());
-    this.name = name;
-    this.health = health;
-    this.maxHealth = maxHealth;
+  public PlayerCharacter(Race race, CharacterClass characterClass) {
+      this.race = race;
+      this.characterClass = characterClass;
+      this.stats = characterClass.getBaseStats().plus(race.getBonuses());
+      this.maxHealth = this.stats.getConstitution() * 3;
+      this.health = this.maxHealth;
   }
 
-    public void takeDamage(int damage) {
-        health = max(0, health - damage);
-    }
+    public void takeDamage(int damage) { health = max(0, health - damage);}
 
-    public boolean isAlive() {
-        return health > 0;
-    }
+    public boolean isAlive() { return health > 0;}
 
-    public int getHealth() {
-        return health;
-    }
+    public int getHealth() {return health;}
   /**
    * Returns the player character's saved stats.
    *

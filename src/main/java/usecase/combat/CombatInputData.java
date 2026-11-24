@@ -1,4 +1,4 @@
-package use_case.combat;
+package usecase.combat;
 
 public class CombatInputData {
     private final String characterID;
