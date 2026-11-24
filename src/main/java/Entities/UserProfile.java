@@ -8,9 +8,10 @@ public class UserProfile {
     private String occupation = null;
     private String biography = null;
     private String contactUrl;
+    private String profilePictureUrl;
 
     private UserProfile(String firstName, String lastName, int age, String gender, String occupation, 
-    String biography, String contactUrl) {
+    String biography, String contactUrl, String profilePictureUrl) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.age = age;
@@ -18,6 +19,7 @@ public class UserProfile {
         this.occupation = occupation;
         this.biography = biography;
         this.contactUrl = contactUrl;
+        this.profilePictureUrl = profilePictureUrl;
     }
 
     public String getFirstName() {
@@ -76,8 +78,17 @@ public class UserProfile {
         this.contactUrl = contactUrl;
     }
 
+    public String getProfilePictureUrl() {
+        return profilePictureUrl;
+    }
+
+    public void setProfilePictureUrl(String profilePictureUrl) {
+        this.profilePictureUrl = profilePictureUrl;
+    }
+
     public static UserProfile UserProfileFactory(String firstName, String lastName, Integer age, String gender,
-                                                 String occupation, String biography, String contactUrl) {
-        return new UserProfile(firstName, lastName, age, gender, occupation, biography, contactUrl);
+                                                 String occupation, String biography, String contactUrl,
+                                                 String profilePictureUrl) {
+        return new UserProfile(firstName, lastName, age, gender, occupation, biography, contactUrl, profilePictureUrl);
     }
 }
