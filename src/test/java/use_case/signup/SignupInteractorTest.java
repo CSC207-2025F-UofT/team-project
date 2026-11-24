@@ -1,9 +1,10 @@
 package use_case.signup;
 
-import data_access.InMemoryUserDataAccessObject;
-import entity.UserFactory;
-import entity.User;
+import data_access.calogin.InMemoryUserDataAccessObject;
+import entity.calogin.UserFactory;
+import entity.calogin.User;
 import org.junit.jupiter.api.Test;
+import use_case.calogin.signup.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 

@@ -1,0 +1,9 @@
+package interface_adapter.calogin;
+
+public interface ViewManagerModelListener {
+
+  /**
+   * Update which view is currently being displayed.
+   */
+  void viewChanged();
+}
