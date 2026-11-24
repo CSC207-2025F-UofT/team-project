@@ -1,10 +1,10 @@
 package use_case.update_profile;
 
 import entity.QualificationProfile;
-import java.util.Optional;
 import use_case.profile.ProfileData;
 import use_case.profile.ProfileRepository;
 import use_case.profile.ProfileStorageException;
+import use_case.profile.SavedProfile;
 
 /** Loads and replaces a student's saved qualifications while preserving their identity. */
 public final class UpdateProfileInteractor implements UpdateProfileInputBoundary {
@@ -20,30 +20,22 @@ public final class UpdateProfileInteractor implements UpdateProfileInputBoundary
   @Override
   public void loadProfile() {
     try {
-      profiles
-          .load()
-          .ifPresentOrElse(
-              profile -> output.presentLoaded(ProfileData.from(profile)), output::presentMissing);
+      profiles.loadSnapshot().ifPresentOrElse(output::presentLoaded, output::presentMissing);
     } catch (ProfileStorageException exception) {
       output.presentLoadError(exception.getMessage());
     }
   }
 
   @Override
-  public void execute(ProfileData input) {
-    QualificationProfile edited;
+  public void execute(ProfileData input, SavedProfile baseline) {
+    SavedProfile saved;
     try {
-      Optional<QualificationProfile> saved = profiles.load();
-      if (saved.isEmpty()) {
-        output.presentError("The saved profile is missing. Reload the profile to create one.");
-        return;
-      }
-      edited = input.toProfile(saved.get().getOwner());
-      profiles.update(edited);
+      QualificationProfile edited = input.toProfile(baseline.getProfile().getOwner());
+      saved = profiles.update(edited, baseline.getRevision());
     } catch (IllegalArgumentException | ProfileStorageException exception) {
       output.presentError(exception.getMessage());
       return;
     }
-    output.presentSaved(ProfileData.from(edited));
+    output.presentSaved(saved);
   }
 }

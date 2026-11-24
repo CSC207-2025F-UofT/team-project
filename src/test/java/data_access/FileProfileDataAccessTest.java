@@ -15,10 +15,13 @@ import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
+import org.json.JSONObject;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import use_case.profile.ProfileData;
 import use_case.profile.ProfileStorageException;
+import use_case.profile.SavedProfile;
 
 class FileProfileDataAccessTest {
   @TempDir Path directory;
@@ -34,7 +37,8 @@ class FileProfileDataAccessTest {
         new ProfileData(
                 " Math ", "2028", "SQL, python, sql", " Data  science ", "Montréal", "hybrid")
             .toProfile(owner));
-    QualificationProfile loaded = new FileProfileDataAccess(path).load().orElseThrow();
+    SavedProfile snapshot = new FileProfileDataAccess(path).loadSnapshot().orElseThrow();
+    QualificationProfile loaded = snapshot.getProfile();
     assertEquals("student-123", loaded.getOwner().getUserId());
     assertEquals("student@example.org", loaded.getOwner().getEmail());
     assertEquals("Student", loaded.getOwner().getName());
@@ -44,7 +48,9 @@ class FileProfileDataAccessTest {
     assertEquals(List.of("Data science"), loaded.getPreferredRoles());
     assertEquals(List.of("Montréal"), loaded.getPreferredLocations());
     assertEquals(Optional.of(WorkArrangement.HYBRID), loaded.getPreferredArrangement());
-    first.update(new ProfileData("Math", "", "Go", "", "", "ANY").toProfile(loaded.getOwner()));
+    first.update(
+        new ProfileData("Math", "", "Go", "", "", "ANY").toProfile(loaded.getOwner()),
+        snapshot.getRevision());
     assertEquals("", ProfileData.from(first.load().orElseThrow()).getYear());
     assertEquals(Optional.empty(), first.load().orElseThrow().getPreferredArrangement());
   }
@@ -55,16 +61,16 @@ class FileProfileDataAccessTest {
     FileProfileDataAccess store = new FileProfileDataAccess(path);
     QualificationProfile original = profile();
     QualificationProfile foreign = profile();
-    assertThrows(ProfileStorageException.class, () -> store.update(original));
-    store.create(original);
+    assertThrows(ProfileStorageException.class, () -> store.update(original, UUID.randomUUID()));
+    UUID revision = store.create(original).getRevision();
     final String before = Files.readString(path);
     assertThrows(ProfileStorageException.class, () -> store.create(foreign));
-    assertThrows(ProfileStorageException.class, () -> store.update(foreign));
+    assertThrows(ProfileStorageException.class, () -> store.update(foreign, revision));
     try (FileChannel channel =
             FileChannel.open(directory.resolve("profile.json.lock"), StandardOpenOption.WRITE);
         FileLock held = channel.lock()) {
       assertTrue(held.isValid());
-      assertThrows(ProfileStorageException.class, () -> store.update(original));
+      assertThrows(ProfileStorageException.class, () -> store.update(original, revision));
     }
     assertEquals(before, Files.readString(path));
   }
@@ -76,8 +82,34 @@ class FileProfileDataAccessTest {
     FileProfileDataAccess store = new FileProfileDataAccess(path);
     assertThrows(ProfileStorageException.class, store::load);
     assertThrows(ProfileStorageException.class, () -> store.create(profile()));
-    assertThrows(ProfileStorageException.class, () -> store.update(profile()));
+    assertThrows(ProfileStorageException.class, () -> store.update(profile(), UUID.randomUUID()));
     assertEquals("{broken profile", Files.readString(path));
+  }
+
+  @Test
+  void firstSaveOfLegacyFileInvalidatesOtherReadersEvenIfValuesAreIdentical() throws Exception {
+    Path path = directory.resolve("profile.json");
+    FileProfileDataAccess store = new FileProfileDataAccess(path);
+    store.create(profile());
+    JSONObject legacy = new JSONObject(Files.readString(path));
+    legacy.remove("revision");
+    String contents = legacy.toString();
+    Files.writeString(path, contents);
+
+    SavedProfile first = store.loadSnapshot().orElseThrow();
+    FileProfileDataAccess other = new FileProfileDataAccess(path);
+    SavedProfile second = other.loadSnapshot().orElseThrow();
+    assertEquals(first.getRevision(), second.getRevision());
+    assertEquals(contents, Files.readString(path));
+
+    SavedProfile committed = store.update(first.getProfile(), first.getRevision());
+    String afterSave = Files.readString(path);
+    assertEquals(
+        committed.getRevision().toString(), new JSONObject(afterSave).getString("revision"));
+    assertThrows(
+        ProfileStorageException.class,
+        () -> other.update(second.getProfile(), second.getRevision()));
+    assertEquals(afterSave, Files.readString(path));
   }
 
   private static QualificationProfile profile() {

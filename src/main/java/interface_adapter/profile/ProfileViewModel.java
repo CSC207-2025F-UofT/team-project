@@ -2,6 +2,7 @@ package interface_adapter.profile;
 
 import interface_adapter.ObservableViewModel;
 import use_case.profile.ProfileData;
+import use_case.profile.SavedProfile;
 
 /** Tracks the saved snapshot separately from the student's draft on the shared profile form. */
 public final class ProfileViewModel extends ObservableViewModel<ProfileViewModel.State> {
@@ -17,11 +18,11 @@ public final class ProfileViewModel extends ObservableViewModel<ProfileViewModel
   /** An immutable form update; a null saved snapshot means no successful load or save yet. */
   public static final class State {
     private final Mode mode;
-    private final ProfileData saved;
+    private final SavedProfile saved;
     private final ProfileData draft;
     private final String message;
 
-    private State(Mode mode, ProfileData saved, ProfileData draft, String message) {
+    private State(Mode mode, SavedProfile saved, ProfileData draft, String message) {
       this.mode = mode;
       this.saved = saved;
       this.draft = draft;
@@ -34,6 +35,10 @@ public final class ProfileViewModel extends ObservableViewModel<ProfileViewModel
 
     public ProfileData getDraft() {
       return draft;
+    }
+
+    SavedProfile getSaved() {
+      return saved;
     }
 
     public String getMessage() {
@@ -64,8 +69,8 @@ public final class ProfileViewModel extends ObservableViewModel<ProfileViewModel
   }
 
   /** Installs freshly persisted or loaded values as the new baseline for Cancel. */
-  public void saved(ProfileData data, String message) {
-    publish(new State(Mode.EDIT, data, data, message));
+  public void saved(SavedProfile saved, String message) {
+    publish(new State(Mode.EDIT, saved, ProfileData.from(saved.getProfile()), message));
   }
 
   /** Captures unsaved text before scheduling a write. */
@@ -93,7 +98,7 @@ public final class ProfileViewModel extends ObservableViewModel<ProfileViewModel
           new State(
               old.mode,
               old.saved,
-              old.saved == null ? ProfileData.blank() : old.saved,
+              old.saved == null ? ProfileData.blank() : ProfileData.from(old.saved.getProfile()),
               "Edits discarded."));
     }
   }

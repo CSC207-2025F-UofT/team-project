@@ -1,7 +1,7 @@
 package interface_adapter.profile;
 
 import java.util.concurrent.Executor;
-import use_case.profile.ProfileData;
+import use_case.profile.SavedProfile;
 import use_case.update_profile.UpdateProfileOutputBoundary;
 
 /** Presents saved, missing and unreadable profiles as distinct form states. */
@@ -16,12 +16,12 @@ public final class UpdateProfilePresenter implements UpdateProfileOutputBoundary
   }
 
   @Override
-  public void presentSaved(ProfileData saved) {
+  public void presentSaved(SavedProfile saved) {
     ui.execute(() -> model.saved(saved, "Changes saved."));
   }
 
   @Override
-  public void presentLoaded(ProfileData saved) {
+  public void presentLoaded(SavedProfile saved) {
     ui.execute(() -> model.saved(saved, "Showing your saved profile."));
   }
 

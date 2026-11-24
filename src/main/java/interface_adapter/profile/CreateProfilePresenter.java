@@ -1,8 +1,8 @@
 package interface_adapter.profile;
 
 import java.util.concurrent.Executor;
-import use_case.profile.ProfileData;
 import use_case.profile.ProfileSaveOutputBoundary;
+import use_case.profile.SavedProfile;
 
 /** Presents create outcomes on the UI thread. */
 public final class CreateProfilePresenter implements ProfileSaveOutputBoundary {
@@ -16,7 +16,7 @@ public final class CreateProfilePresenter implements ProfileSaveOutputBoundary {
   }
 
   @Override
-  public void presentSaved(ProfileData saved) {
+  public void presentSaved(SavedProfile saved) {
     ui.execute(
         () -> model.saved(saved, "Profile created. Your recommendations are ready to view."));
   }

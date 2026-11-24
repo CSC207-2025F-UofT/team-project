@@ -112,6 +112,43 @@ class ProfileWorkflowTest {
   }
 
   @Test
+  void staleWindowMustReloadBeforeItsProgramEditCanBeSaved() throws Exception {
+    Path file = directory.resolve("profile.json");
+    FileProfileDataAccess store = new FileProfileDataAccess(file);
+    onEdt(
+        () -> {
+          Container first = show(tabs(file, new DemoJobSource(), url -> {}), "Profile");
+          field(first, "Program of study").setText("Math");
+          field(first, "Skills").setText("Java");
+          button(first, "Save profile").doClick();
+          Container second = show(tabs(file, new DemoJobSource(), url -> {}), "Profile");
+          assertEquals("Java", field(second, "Skills").getText());
+
+          field(first, "Skills").setText("SQL");
+          button(first, "Save changes").doClick();
+          assertTrue(shows(first, "Changes saved."));
+          final String newerFile = Files.readString(file);
+          field(second, "Program of study").setText("Statistics");
+          button(second, "Save changes").doClick();
+          assertTrue(shows(second, "Click Reload profile"));
+          assertEquals("Statistics", field(second, "Program of study").getText());
+          assertEquals(newerFile, Files.readString(file));
+          button(second, "Save changes").doClick();
+          assertEquals(newerFile, Files.readString(file));
+
+          button(second, "Reload profile").doClick();
+          assertEquals("Math", field(second, "Program of study").getText());
+          assertEquals("SQL", field(second, "Skills").getText());
+          field(second, "Program of study").setText("Statistics");
+          button(second, "Save changes").doClick();
+          assertTrue(shows(second, "Changes saved."));
+          assertEquals("Statistics", store.load().orElseThrow().getProgram());
+          assertEquals(List.of("SQL"), store.load().orElseThrow().getSkills());
+          return null;
+        });
+  }
+
+  @Test
   void unreadableProfileIsRetryableAndNeverTriggersTheExternalSource() throws Exception {
     Path file = directory.resolve("profile.json");
     Files.writeString(file, "broken");

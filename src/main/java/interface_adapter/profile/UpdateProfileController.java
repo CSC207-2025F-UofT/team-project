@@ -2,6 +2,7 @@ package interface_adapter.profile;
 
 import interface_adapter.UiTasks;
 import use_case.profile.ProfileData;
+import use_case.profile.SavedProfile;
 import use_case.update_profile.UpdateProfileInputBoundary;
 
 /** Handles opening, retrying and editing an existing qualification profile. */
@@ -33,9 +34,10 @@ public final class UpdateProfileController implements ProfileFormController {
   @Override
   public void execute(ProfileData draft) {
     if (model.getState().getMode() == ProfileViewModel.Mode.EDIT) {
+      SavedProfile baseline = model.getState().getSaved();
       model.saving(draft);
       tasks.run(
-          () -> update.execute(draft),
+          () -> update.execute(draft, baseline),
           () -> model.saveFailed("Could not update the profile. Retry saving."));
     }
   }

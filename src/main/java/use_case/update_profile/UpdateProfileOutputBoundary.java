@@ -1,12 +1,12 @@
 package use_case.update_profile;
 
-import use_case.profile.ProfileData;
 import use_case.profile.ProfileSaveOutputBoundary;
+import use_case.profile.SavedProfile;
 
 /** Separates opening a form from reporting a save result. */
 public interface UpdateProfileOutputBoundary extends ProfileSaveOutputBoundary {
   /** Loads saved values into the editor. */
-  void presentLoaded(ProfileData saved);
+  void presentLoaded(SavedProfile saved);
 
   /** Offers creation when no profile exists yet. */
   void presentMissing();
