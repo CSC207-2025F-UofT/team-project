@@ -8,4 +8,7 @@ public interface RestOutputBoundary {
 
     /** @param saved whether the retried save succeeded */
     void prepareSaveRetryView(boolean saved);
+
+    /** The player could not rest; the day, energy and checkpoint are unchanged. */
+    void prepareFailView(String message);
 }

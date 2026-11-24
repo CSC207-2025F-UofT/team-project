@@ -29,4 +29,9 @@ public class RestPresenter implements RestOutputBoundary {
     public void prepareSaveRetryView(boolean saved) {
         viewModel.setSaveStatus(saved ? SAVED : NOT_SAVED, !saved);
     }
+
+    @Override
+    public void prepareFailView(String message) {
+        viewModel.setSaveStatus(message, false);
+    }
 }

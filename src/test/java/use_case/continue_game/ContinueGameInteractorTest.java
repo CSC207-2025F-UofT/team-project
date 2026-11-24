@@ -23,7 +23,10 @@ class ContinueGameInteractorTest {
 
         public boolean hasCheckpoint() { return exists; }
 
+        int loadCount;
+
         public void loadCheckpoint() throws InvalidCheckpointException {
+            loadCount++;
             if (damaged) {
                 throw new InvalidCheckpointException("bad file");
             }
@@ -94,5 +97,18 @@ class ContinueGameInteractorTest {
         assertNull(presenter.output);
         assertEquals(ContinueGameInteractor.INVALID_CHECKPOINT_MESSAGE, presenter.failMessage);
         assertEquals(1, save.getCurrentDay().getDayNumber());
+    }
+
+    @Test
+    void continueIsRefusedWhileAnActivityIsInProgress() {
+        FakeSave save = new FakeSave();
+        save.player.startActivity("attempt-1");
+        CapturingPresenter presenter = new CapturingPresenter();
+
+        new ContinueGameInteractor(save, presenter).execute();
+
+        assertEquals(ContinueGameInteractor.ACTIVITY_IN_PROGRESS_MESSAGE, presenter.failMessage);
+        assertNull(presenter.output);
+        assertEquals(0, save.loadCount);
     }
 }

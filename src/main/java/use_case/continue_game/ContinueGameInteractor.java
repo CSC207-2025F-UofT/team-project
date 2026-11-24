@@ -11,6 +11,8 @@ public class ContinueGameInteractor implements ContinueGameInputBoundary {
     static final String NO_CHECKPOINT_MESSAGE = "No saved game is available. Start a new game instead.";
     static final String INVALID_CHECKPOINT_MESSAGE = "The saved game cannot be loaded because it is damaged "
             + "or unsupported. The save file was left unchanged.";
+    static final String ACTIVITY_IN_PROGRESS_MESSAGE = "Finish or leave your challenge or exam before "
+            + "loading the saved game.";
 
     private final ContinueGameDataAccessInterface saveData;
     private final ContinueGameOutputBoundary presenter;
@@ -22,6 +24,10 @@ public class ContinueGameInteractor implements ContinueGameInputBoundary {
 
     @Override
     public void execute() {
+        if (saveData.getPlayer().hasActiveActivity()) {
+            presenter.prepareFailView(ACTIVITY_IN_PROGRESS_MESSAGE);
+            return;
+        }
         if (!saveData.hasCheckpoint()) {
             presenter.prepareFailView(NO_CHECKPOINT_MESSAGE);
             return;

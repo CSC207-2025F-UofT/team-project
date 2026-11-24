@@ -44,7 +44,9 @@ class RestInteractorTest {
     private static class CapturingPresenter implements RestOutputBoundary {
         RestOutputData output;
         Boolean retryResult;
+        String failMessage;
         public void prepareSuccessView(RestOutputData output) { this.output = output; }
+        public void prepareFailView(String message) { this.failMessage = message; }
         public void prepareSaveRetryView(boolean saved) { this.retryResult = saved; }
     }
 
@@ -119,5 +121,20 @@ class RestInteractorTest {
         interactor.retrySave();
         assertTrue(presenter.retryResult);
         assertEquals(2, state.savedDayNumber);
+    }
+
+    @Test
+    void restIsRefusedWhileAnActivityIsInProgress() {
+        FakeGameState state = new FakeGameState();
+        state.player.startActivity("attempt-1");
+        CapturingPresenter presenter = new CapturingPresenter();
+
+        new RestInteractor(state, weatherOf(WeatherCondition.CLEAR), presenter).execute();
+
+        assertEquals(RestInteractor.ACTIVITY_IN_PROGRESS_MESSAGE, presenter.failMessage);
+        assertNull(presenter.output);
+        assertEquals(1, state.getCurrentDay().getDayNumber());
+        assertEquals(20, state.getPlayer().getEnergy());
+        assertEquals(0, state.saveCount);
     }
 }
