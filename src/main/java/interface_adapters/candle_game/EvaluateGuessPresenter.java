@@ -26,6 +26,7 @@ public class EvaluateGuessPresenter implements EvaluateGuessOutputBoundary {
         candleGameViewModel.setPastGuesses(pastGuesses);
         candleGameViewModel.setAttemptsRemaining(attemptsRemaining);
         candleGameViewModel.setGameCondition(gameCondition);
+        candleGameViewModel.notifyStateChanged();
     }
 
 //    @Override

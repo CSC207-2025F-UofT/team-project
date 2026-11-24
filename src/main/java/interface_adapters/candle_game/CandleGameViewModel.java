@@ -25,7 +25,6 @@ public class CandleGameViewModel {
 
     public void setCandleFeedback(List<CandleType> candleFeedback) {
         this.candleFeedback = candleFeedback;
-        notifyStateChanged();
     }
 
     public List<Guess> getPastGuesses() {
@@ -33,7 +32,6 @@ public class CandleGameViewModel {
     }
     public void setPastGuesses(List<Guess> pastGuesses) {
         this.pastGuesses = pastGuesses;
-        notifyStateChanged();
     }
 
     public int getAttemptsRemaining(){
@@ -41,7 +39,6 @@ public class CandleGameViewModel {
     }
     public void setAttemptsRemaining(int attemptsRemaining) {
         this.attemptsRemaining = attemptsRemaining;
-        notifyStateChanged();
     }
 
     public GameCondition getGameCondition() {
@@ -50,7 +47,6 @@ public class CandleGameViewModel {
 
     public void setGameCondition(GameCondition gameCondition) {
         this.gameCondition = gameCondition;
-        notifyStateChanged();
     }
 
     /**
@@ -62,7 +58,7 @@ public class CandleGameViewModel {
         listeners.add(listener);
     }
 
-    private void notifyStateChanged() {
+    void notifyStateChanged() {
         for (CandleGameViewModelListener listener : listeners) {
             listener.candleGameStateChanged();
         }
