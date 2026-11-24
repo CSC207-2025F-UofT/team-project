@@ -23,8 +23,8 @@ import java.util.List;
 
 /**
  * Transaction gateway backed by the shared Profiles.json database.
- * The transaction use case remains username-based; this adapter stores each
- * transaction under the user's first account (their default account).
+ * The existing transaction use-case contract remains unchanged: its String
+ * selector now identifies an account as "Profile name — Account name".
  */
 public final class JsonTransactionDataAccess implements TransactionDataAccessInterface {
     private final Path filePath;
@@ -45,47 +45,42 @@ public final class JsonTransactionDataAccess implements TransactionDataAccessInt
     @Override
     public List<String> getUserNames() throws IOException {
         JSONArray profiles = read().getJSONArray("profiles");
-        List<String> names = new ArrayList<>();
-        for (int i = 0; i < profiles.length(); i++) names.add(profiles.getJSONObject(i).getString("name"));
-        names.sort(String.CASE_INSENSITIVE_ORDER);
-        return names;
+        List<String> accountChoices = new ArrayList<>();
+        for (int i = 0; i < profiles.length(); i++) {
+            JSONObject profile = profiles.getJSONObject(i);
+            JSONArray accounts = profile.optJSONArray("accounts");
+            if (accounts == null) continue;
+            for (int j = 0; j < accounts.length(); j++) {
+                JSONObject account = accounts.getJSONObject(j);
+                accountChoices.add(selectionLabel(profile, account));
+            }
+        }
+        accountChoices.sort(String.CASE_INSENSITIVE_ORDER);
+        return accountChoices;
     }
 
     @Override
-    public List<Transaction> getTransactions(String userName, TransactionType type) throws IOException {
-        JSONObject profile = findProfile(read(), userName);
-        JSONArray accounts = profile.optJSONArray("accounts");
+    public List<Transaction> getTransactions(String accountSelection, TransactionType type) throws IOException {
+        AccountSelection selected = findSelectedAccount(read(), accountSelection);
+        JSONArray rows = selected.account.optJSONArray(transactionKey(type));
         List<Transaction> result = new ArrayList<>();
-        if (accounts == null) return result;
-
-        String key = transactionKey(type);
-        for (int i = 0; i < accounts.length(); i++) {
-            JSONArray rows = accounts.getJSONObject(i).optJSONArray(key);
-            if (rows == null) continue;
-            for (int j = 0; j < rows.length(); j++) {
-                JSONObject row = rows.getJSONObject(j);
-                result.add(new Transaction(row.getInt("id"), type,
-                    new BigDecimal(row.get("amount").toString()), row.getString("description"),
-                    LocalDate.parse(row.getString("date"))));
-            }
+        if (rows == null) return result;
+        for (int i = 0; i < rows.length(); i++) {
+            JSONObject row = rows.getJSONObject(i);
+            result.add(new Transaction(row.getInt("id"), type,
+                new BigDecimal(row.get("amount").toString()), row.getString("description"),
+                LocalDate.parse(row.getString("date"))));
         }
         result.sort(Comparator.comparingInt(Transaction::getId));
         return result;
     }
 
     @Override
-    public void addTransaction(String userName, Transaction transaction) throws IOException {
+    public void addTransaction(String accountSelection, Transaction transaction) throws IOException {
         JSONObject data = read();
-        JSONObject profile = findProfile(data, userName);
-        JSONArray accounts = profile.optJSONArray("accounts");
-        if (accounts == null || accounts.length() == 0) {
-            throw new IllegalArgumentException("Create an account for this profile before adding transactions.");
-        }
-
-        // Keep the current transaction use case intact: its selected user maps
-        // to that user's first (default) account until account selection is added.
-        JSONObject accountRow = accounts.getJSONObject(0);
-        Account account = deserializeAccount(accountRow, profile.getInt("id"));
+        AccountSelection selected = findSelectedAccount(data, accountSelection);
+        JSONObject accountRow = selected.account;
+        Account account = deserializeAccount(accountRow, selected.profile.getInt("id"));
         if (transaction.getType() == TransactionType.INCOME) account.deposit(transaction.getAmount());
         else account.withdraw(transaction.getAmount());
 
@@ -94,13 +89,18 @@ public final class JsonTransactionDataAccess implements TransactionDataAccessInt
         if (rows == null) { rows = new JSONArray(); accountRow.put(key, rows); }
 
         int nextId = 1;
-        for (int i = 0; i < accounts.length(); i++) {
-            JSONObject candidate = accounts.getJSONObject(i);
-            for (String transactionKey : new String[]{"income", "expenses"}) {
-                JSONArray existing = candidate.optJSONArray(transactionKey);
-                if (existing == null) continue;
-                for (int j = 0; j < existing.length(); j++)
-                    nextId = Math.max(nextId, existing.getJSONObject(j).getInt("id") + 1);
+        JSONArray profiles = data.getJSONArray("profiles");
+        for (int i = 0; i < profiles.length(); i++) {
+            JSONArray accounts = profiles.getJSONObject(i).optJSONArray("accounts");
+            if (accounts == null) continue;
+            for (int j = 0; j < accounts.length(); j++) {
+                JSONObject candidate = accounts.getJSONObject(j);
+                for (String transactionKey : new String[]{"income", "expenses"}) {
+                    JSONArray existing = candidate.optJSONArray(transactionKey);
+                    if (existing == null) continue;
+                    for (int k = 0; k < existing.length(); k++)
+                        nextId = Math.max(nextId, existing.getJSONObject(k).getInt("id") + 1);
+                }
             }
         }
 
@@ -114,41 +114,47 @@ public final class JsonTransactionDataAccess implements TransactionDataAccessInt
     }
 
     @Override
-    public boolean deleteTransaction(String userName, TransactionType type, int id) throws IOException {
+    public boolean deleteTransaction(String accountSelection, TransactionType type, int id) throws IOException {
         JSONObject data = read();
-        JSONObject profile = findProfile(data, userName);
-        JSONArray accounts = profile.optJSONArray("accounts");
-        if (accounts == null) return false;
-        String key = transactionKey(type);
+        AccountSelection selected = findSelectedAccount(data, accountSelection);
+        JSONObject accountRow = selected.account;
+        JSONArray rows = accountRow.optJSONArray(transactionKey(type));
+        if (rows == null) return false;
 
-        for (int i = 0; i < accounts.length(); i++) {
-            JSONObject accountRow = accounts.getJSONObject(i);
-            JSONArray rows = accountRow.optJSONArray(key);
-            if (rows == null) continue;
-            for (int j = 0; j < rows.length(); j++) {
-                JSONObject row = rows.getJSONObject(j);
-                if (row.getInt("id") == id) {
-                    BigDecimal amount = new BigDecimal(row.get("amount").toString());
-                    Account account = deserializeAccount(accountRow, profile.getInt("id"));
-                    if (type == TransactionType.INCOME) account.withdraw(amount);
-                    else account.deposit(amount);
-                    rows.remove(j);
-                    accountRow.put("balance", account.getBalance().toPlainString());
-                    write(data);
-                    return true;
-                }
+        for (int i = 0; i < rows.length(); i++) {
+            JSONObject row = rows.getJSONObject(i);
+            if (row.getInt("id") == id) {
+                BigDecimal amount = new BigDecimal(row.get("amount").toString());
+                Account account = deserializeAccount(accountRow, selected.profile.getInt("id"));
+                if (type == TransactionType.INCOME) account.withdraw(amount);
+                else account.deposit(amount);
+                rows.remove(i);
+                accountRow.put("balance", account.getBalance().toPlainString());
+                write(data);
+                return true;
             }
         }
         return false;
     }
 
-    private JSONObject findProfile(JSONObject data, String userName) {
+    private String selectionLabel(JSONObject profile, JSONObject account) {
+        return profile.getString("name") + " — " + account.getString("name");
+    }
+
+    private AccountSelection findSelectedAccount(JSONObject data, String selection) {
         JSONArray profiles = data.getJSONArray("profiles");
         for (int i = 0; i < profiles.length(); i++) {
             JSONObject profile = profiles.getJSONObject(i);
-            if (profile.getString("name").equalsIgnoreCase(userName)) return profile;
+            JSONArray accounts = profile.optJSONArray("accounts");
+            if (accounts == null) continue;
+            for (int j = 0; j < accounts.length(); j++) {
+                JSONObject account = accounts.getJSONObject(j);
+                if (selectionLabel(profile, account).equals(selection)) {
+                    return new AccountSelection(profile, account);
+                }
+            }
         }
-        throw new IllegalArgumentException("User not found: " + userName);
+        throw new IllegalArgumentException("Account not found: " + selection);
     }
 
     private String transactionKey(TransactionType type) {
@@ -173,6 +179,15 @@ public final class JsonTransactionDataAccess implements TransactionDataAccessInt
                     row.optString("storageLocation", "Wallet"), createdAt);
             default:
                 throw new IllegalArgumentException("Unsupported account type.");
+        }
+    }
+
+    private static final class AccountSelection {
+        private final JSONObject profile;
+        private final JSONObject account;
+        private AccountSelection(JSONObject profile, JSONObject account) {
+            this.profile = profile;
+            this.account = account;
         }
     }
 }

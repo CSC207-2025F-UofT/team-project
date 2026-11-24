@@ -69,7 +69,7 @@ public final class FinanceTrackerView extends JFrame {
         users.addActionListener(event -> {
             if (!updatingUsers) loadSelectedUser();
         });
-        actions.add(new JLabel("User:"));
+        actions.add(new JLabel("Account:"));
         actions.add(users);
         JButton add = new JButton("Add Transaction");
         add.addActionListener(event -> showAddDialog());
