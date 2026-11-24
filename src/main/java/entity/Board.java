@@ -59,7 +59,9 @@ public class Board {
     }
 
     public void changeActiveTeam() {
-        if (this.activeTeam == 1) { this.activeTeam = 2; }
-        this.activeTeam = 1;
+        if (this.activeTeam == 1) {this.activeTeam = 2;}
+        else {
+            this.activeTeam = 1;
+        }
     }
 }
