@@ -79,7 +79,9 @@ public class UserDataAccessObject implements UserDataAccessInterface {
                 age,
                 null,
                 null,
-                null);
+                null,
+                "",
+                "");
         return User.UserFactory(result.getString("username"), result.getString("password"), profile);
     }
 
