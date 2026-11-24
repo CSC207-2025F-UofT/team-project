@@ -10,6 +10,8 @@ public class WorldSetting extends ParameterSet {
     public final NumberParameter height = number("Height", 256, 1, 4096);
     public final NumberParameter width = number("Width", 256, 1, 4096);
     public final NumberParameter seaLevel = number("Sea level", 0, 0, 1000);
+    public final NumberParameter landLevel = number("Land level", 100, 0, 1000);
+    public final NumberParameter defaultNoise = number("Default Noise", 20, 0, 100);
     public final BooleanParameter islandMode = bool("Island mode", false);
     // Island mode would be a setting that makes the map generate as an island, with water around the edges.
 
