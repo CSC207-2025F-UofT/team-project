@@ -3,6 +3,9 @@ package frameworks_and_drivers.persistence;
 import use_case.change_currency.CurrencyDataAccessInterface;
 import entity.Account;
 import entity.AccountType;
+import entity.SavingsAccount;
+import entity.ChequingAccount;
+import entity.CashAccount;
 import frameworks_and_drivers.currency.BankOfCanadaCurrencyClient;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -53,14 +56,38 @@ public final class JsonCurrencyDataAccess implements CurrencyDataAccessInterface
             for (int j = 0; j < accounts.length(); j++) {
                 JSONObject row = accounts.getJSONObject(j);
                 if (row.getInt("id") == accountId) {
-                    return new Account(accountId, profile.getInt("id"),
-                        row.getString("name"), AccountType.valueOf(row.getString("type")),
-                        new BigDecimal(row.getString("balance")), row.getString("currency"),
-                        LocalDateTime.parse(row.getString("createdAt")));
+                    return deserializeAccount(row, profile.getInt("id"));
                 }
             }
         }
         return null;
+    }
+
+    /**
+     * Reconstructs the concrete domain subtype so its account-specific rules
+     * (interest, overdraft limit, or cash location) are preserved.
+     */
+    private Account deserializeAccount(JSONObject row, int ownerProfileId) {
+        int id = row.getInt("id");
+        String name = row.getString("name");
+        BigDecimal balance = new BigDecimal(row.getString("balance"));
+        String currency = row.getString("currency");
+        LocalDateTime createdAt = LocalDateTime.parse(row.getString("createdAt"));
+
+        AccountType type = AccountType.valueOf(row.getString("type"));
+        switch (type) {
+            case SAVINGS:
+                return new SavingsAccount(id, ownerProfileId, name, balance, currency,
+                    new BigDecimal(row.optString("annualInterestRate", "0")), createdAt);
+            case CHEQUING:
+                return new ChequingAccount(id, ownerProfileId, name, balance, currency,
+                    new BigDecimal(row.optString("overdraftLimit", "0")), createdAt);
+            case CASH:
+                return new CashAccount(id, ownerProfileId, name, balance, currency,
+                    row.optString("storageLocation", "Wallet"), createdAt);
+            default:
+                throw new IllegalArgumentException("Unsupported account type: " + type);
+        }
     }
 
     @Override
