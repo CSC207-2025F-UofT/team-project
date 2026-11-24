@@ -6,10 +6,17 @@ import interface_adapter.ViewManagerModel;
 import interface_adapter.hud.HudViewModel;
 import interface_adapter.new_game.NewGameController;
 import interface_adapter.new_game.NewGamePresenter;
+import interface_adapter.persistence.PersistenceController;
+import interface_adapter.persistence.PersistencePresenter;
+import interface_adapter.persistence.PersistenceViewModel;
 import interface_adapter.talk_to_npc.DialogueViewModel;
 import interface_adapter.talk_to_npc.TalkToNpcController;
 import interface_adapter.talk_to_npc.TalkToNpcPresenter;
 import use_case.GameStateDataAccessInterface;
+import use_case.ManageSavesInteractor;
+import use_case.SaveGameDataAccessInterface;
+import use_case.load_game.LoadGameInteractor;
+import use_case.save_game.SaveGameInteractor;
 import use_case.new_game.NewGameInputBoundary;
 import use_case.new_game.NewGameInteractor;
 import use_case.new_game.NewGameOutputBoundary;
@@ -19,10 +26,12 @@ import use_case.talk_to_npc.TalkToNpcInteractor;
 import use_case.talk_to_npc.TalkToNpcOutputBoundary;
 import view.DialogueView;
 import view.GameView;
+import view.SavedGamesDialog;
 import view.StartView;
 import view.ViewManager;
 
 import java.awt.CardLayout;
+import java.util.function.Supplier;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.WindowConstants;
@@ -97,6 +106,21 @@ public class AppBuilder {
 
         gameView.setTalkToNpcController(controller);
         dialogueView.setTalkToNpcController(controller);
+        return this;
+    }
+
+    /** Requires addGameView() and addNewGameUseCase(). */
+    public AppBuilder addPersistenceUseCases(SaveGameDataAccessInterface saves, Supplier<String> username) {
+        PersistenceViewModel feedback = new PersistenceViewModel();
+        PersistencePresenter presenter = new PersistencePresenter(
+                feedback, hudViewModel, viewManagerModel, gameView.getViewName());
+        PersistenceController controller = new PersistenceController(
+                new SaveGameInteractor(gameStateDataAccessObject, saves, presenter),
+                new LoadGameInteractor(gameStateDataAccessObject, saves, presenter),
+                new ManageSavesInteractor(saves, presenter), username, feedback);
+        new SavedGamesDialog(cardPanel, controller, feedback);
+        startView.addLoadGame(controller, feedback);
+        gameView.addSaveGame(controller, feedback);
         return this;
     }
 

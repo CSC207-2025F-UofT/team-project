@@ -1,6 +1,8 @@
 package view;
 
 import interface_adapter.hud.HudViewModel;
+import interface_adapter.persistence.PersistenceController;
+import interface_adapter.persistence.PersistenceViewModel;
 import interface_adapter.talk_to_npc.TalkToNpcController;
 
 import java.awt.BorderLayout;
@@ -29,13 +31,15 @@ public class GameView extends JPanel {
     public static final String SHAWARMA_LADY_ID = "shawarma_lady";
 
     private TalkToNpcController talkToNpcController;
+    private final JPanel footer = new JPanel(new BorderLayout());
+    private final JPanel actionPanel = new JPanel(new FlowLayout());
+    private final JButton talkButton = new JButton("Talk to the Shawarma Lady");
 
     public GameView(HudViewModel hudViewModel) {
         setLayout(new BorderLayout());
         add(new StatsPanel(hudViewModel), BorderLayout.NORTH);
         add(new JLabel("Your week at UofT begins.", SwingConstants.CENTER), BorderLayout.CENTER);
 
-        JButton talkButton = new JButton("Talk to the Shawarma Lady");
         talkButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent evt) {
@@ -47,9 +51,27 @@ public class GameView extends JPanel {
             }
         });
 
-        JPanel actionPanel = new JPanel(new FlowLayout());
         actionPanel.add(talkButton);
-        add(actionPanel, BorderLayout.SOUTH);
+        footer.add(actionPanel, BorderLayout.NORTH);
+        add(footer, BorderLayout.SOUTH);
+    }
+
+    public void addSaveGame(PersistenceController controller, PersistenceViewModel feedback) {
+        JButton saveButton = new JButton("Save Game");
+        JButton loadButton = new JButton("Load Game");
+        JLabel message = new JLabel(" ", SwingConstants.CENTER);
+        footer.add(message, BorderLayout.SOUTH);
+        saveButton.addActionListener(e -> controller.save());
+        loadButton.addActionListener(e -> controller.load());
+        actionPanel.add(saveButton);
+        actionPanel.add(loadButton);
+        feedback.addPropertyChangeListener(event -> {
+            var state = feedback.getState();
+            talkButton.setEnabled(!state.busy());
+            saveButton.setEnabled(!state.busy());
+            loadButton.setEnabled(!state.busy());
+            message.setText(state.message());
+        });
     }
 
     /** Given by AppBuilder once the talk use case has been built. */
