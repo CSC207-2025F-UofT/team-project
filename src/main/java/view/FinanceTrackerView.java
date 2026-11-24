@@ -25,19 +25,11 @@ public final class FinanceTrackerView extends JFrame {
     private final JLabel expenseTotal = new JLabel();
     private final JLabel balance = new JLabel();
     private boolean updatingUsers;
-    private final Runnable signupAction;
 
     public FinanceTrackerView(TransactionDashboardController controller,
                               TransactionDashboardViewModel viewModel) {
-        this(controller, viewModel, () -> { });
-    }
-
-    public FinanceTrackerView(TransactionDashboardController controller,
-                              TransactionDashboardViewModel viewModel,
-                              Runnable signupAction) {
         this.controller = controller;
         this.viewModel = viewModel;
-        this.signupAction = signupAction;
         buildWindow();
         controller.loadUsers();
         refresh();
@@ -51,7 +43,7 @@ public final class FinanceTrackerView extends JFrame {
 
     private void buildWindow() {
         setTitle("Finance Tracker");
-        setSize(1100, 700);
+        setSize(1200, 700);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
@@ -72,7 +64,7 @@ public final class FinanceTrackerView extends JFrame {
         titles.add(heading);
         titles.add(subtitle);
 
-        JPanel actions = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        JPanel actions = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 4));
         actions.setOpaque(false);
         users.addActionListener(event -> {
             if (!updatingUsers) loadSelectedUser();
@@ -82,9 +74,10 @@ public final class FinanceTrackerView extends JFrame {
         JButton add = new JButton("Add Transaction");
         add.addActionListener(event -> showAddDialog());
         actions.add(add);
-        JButton signUp = new JButton("Sign Up");
-        signUp.addActionListener(event -> signupAction.run());
-        actions.add(signUp);
+        addPlaceholderButton(actions, "Login");
+        addPlaceholderButton(actions, "Sign Up");
+        addPlaceholderButton(actions, "Change Currency");
+        addPlaceholderButton(actions, "Upload Receipt");
         top.add(titles, BorderLayout.WEST);
         top.add(actions, BorderLayout.EAST);
         root.add(top, BorderLayout.NORTH);
@@ -108,6 +101,14 @@ public final class FinanceTrackerView extends JFrame {
         totals.add(balance);
         root.add(totals, BorderLayout.SOUTH);
         setContentPane(root);
+    }
+
+    private void addPlaceholderButton(JPanel actions, String feature) {
+        JButton button = new JButton(feature);
+        button.addActionListener(event -> JOptionPane.showMessageDialog(this,
+            feature + " is a placeholder for now. The team can implement this feature later.",
+            "Coming Soon", JOptionPane.INFORMATION_MESSAGE));
+        actions.add(button);
     }
 
     private void styleTotal(JLabel label, Color color) {

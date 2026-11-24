@@ -1,5 +1,194 @@
 {
-  "nextUserId": 1,
-  "nextAccountId": 1,
-  "profiles": []
+  "nextUserId": 5,
+  "nextAccountId": 5,
+  "profiles": [
+    {
+      "id": 1,
+      "name": "Gary",
+      "createdAt": "2026-11-23T00:00:00",
+      "accounts": [
+        {
+          "id": 1,
+          "name": "Main Chequing",
+          "type": "CHEQUING",
+          "balance": "2430.00",
+          "currency": "CAD",
+          "overdraftLimit": "0",
+          "createdAt": "2026-11-23T00:00:00",
+          "income": [
+            {
+              "date": "2026-11-01",
+              "amount": 2800,
+              "description": "Part-time job",
+              "id": 1
+            },
+            {
+              "date": "2026-11-12",
+              "amount": 350,
+              "description": "Freelance design",
+              "id": 2
+            }
+          ],
+          "expenses": [
+            {
+              "date": "2026-11-03",
+              "amount": 720,
+              "description": "Rent",
+              "id": 3
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "name": "Binweng",
+      "createdAt": "2026-11-23T00:00:00",
+      "accounts": [
+        {
+          "id": 2,
+          "name": "Main Chequing",
+          "type": "CHEQUING",
+          "balance": "2735.75",
+          "currency": "CAD",
+          "overdraftLimit": "0",
+          "createdAt": "2026-11-23T00:00:00",
+          "income": [
+            {
+              "date": "2026-11-01",
+              "amount": 3200,
+              "description": "Monthly salary",
+              "id": 1
+            },
+            {
+              "date": "2026-11-08",
+              "amount": 180,
+              "description": "Tutoring",
+              "id": 2
+            },
+            {
+              "date": "2026-11-22",
+              "amount": 312,
+              "description": "Tutoring",
+              "id": 3
+            }
+          ],
+          "expenses": [
+            {
+              "date": "2026-11-02",
+              "amount": 850,
+              "description": "Rent",
+              "id": 3
+            },
+            {
+              "date": "2026-11-05",
+              "amount": 64.25,
+              "description": "Groceries",
+              "id": 4
+            },
+            {
+              "date": "2026-11-10",
+              "amount": 42,
+              "description": "Transit pass",
+              "id": 5
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "name": "Meshac",
+      "createdAt": "2026-11-23T00:00:00",
+      "accounts": [
+        {
+          "id": 3,
+          "name": "Main Chequing",
+          "type": "CHEQUING",
+          "balance": "1625.00",
+          "currency": "CAD",
+          "overdraftLimit": "0",
+          "createdAt": "2026-11-23T00:00:00",
+          "income": [
+            {
+              "date": "2026-11-01",
+              "amount": 2400,
+              "description": "Employment income",
+              "id": 1
+            },
+            {
+              "date": "2026-11-09",
+              "amount": 125,
+              "description": "Side project",
+              "id": 2
+            }
+          ],
+          "expenses": [
+            {
+              "date": "2026-11-02",
+              "amount": 900,
+              "description": "Rent",
+              "id": 3
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "name": "Will",
+      "createdAt": "2026-11-23T00:00:00",
+      "accounts": [
+        {
+          "id": 4,
+          "name": "Main Chequing",
+          "type": "CHEQUING",
+          "balance": "0.00",
+          "currency": "CAD",
+          "overdraftLimit": "0",
+          "createdAt": "2026-11-23T00:00:00",
+          "income": [
+            {
+              "date": "2026-11-01",
+              "amount": 3500,
+              "description": "Full-time salary",
+              "id": 1
+            },
+            {
+              "date": "2026-11-10",
+              "amount": 250,
+              "description": "Freelance work",
+              "id": 2
+            }
+          ],
+          "expenses": [
+            {
+              "date": "2026-11-02",
+              "amount": 1100,
+              "description": "Rent",
+              "id": 1
+            },
+            {
+              "date": "2026-11-06",
+              "amount": 120.5,
+              "description": "Groceries",
+              "id": 2
+            },
+            {
+              "date": "2026-11-12",
+              "amount": 85,
+              "description": "Internet bill",
+              "id": 3
+            },
+            {
+              "date": "2026-11-17",
+              "amount": 90000,
+              "description": "Big Booty Bitches Inc.",
+              "id": 4
+            }
+          ]
+        }
+      ]
+    }
+  ]
 }
