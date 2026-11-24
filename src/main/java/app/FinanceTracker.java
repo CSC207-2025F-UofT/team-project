@@ -25,7 +25,7 @@ public final class FinanceTracker {
 
     private static void launch() {
         TransactionDashboardViewModel dashboardModel=new TransactionDashboardViewModel();
-        TransactionDataAccessInterface transactionData=new JsonTransactionDataAccess(Path.of("data/UserTransactions.json"));
+        TransactionDataAccessInterface transactionData=new JsonTransactionDataAccess(Path.of("data/UserProfiles.json"));
         TransactionDashboardOutputBoundary dashboardPresenter=new TransactionDashboardPresenter(dashboardModel);
         TransactionDashboardInputBoundary dashboardInteractor=new TransactionDashboardInteractor(transactionData,dashboardPresenter);
         TransactionDashboardController dashboardController=new TransactionDashboardController(dashboardInteractor);

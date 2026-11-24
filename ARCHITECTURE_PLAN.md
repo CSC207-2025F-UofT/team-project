@@ -23,7 +23,7 @@ Run `app.FinanceTracker`. It schedules application construction on the Swing eve
 
 The Interactor calculates totals and creates Transaction entities. The Presenter maps Output Data to the View Model. The Swing View renders state and forwards actions; it does not call HTTP or JSON directly.
 
-The currently usable transaction data store is `data/UserTransactions.json`. The local HTTP server, HTTP client, API-specific transaction DTO, and username-based `TransactionControl_App` were removed because they duplicated the direct JSON transaction path without adding useful application behaviour.
+The currently usable transaction data store is `data/UserProfiles.json`. The local HTTP server, HTTP client, API-specific transaction DTO, and username-based `TransactionControl_App` were removed because they duplicated the direct JSON transaction path without adding useful application behaviour.
 
 ## Domain model
 
@@ -47,7 +47,7 @@ Each use case owns its own vertical flow. Entities and appropriately focused Dat
 
 ## Data storage
 
-- `data/UserTransactions.json` is the current dashboard's preserved working JSON data.
+- `data/UserProfiles.json` is the current dashboard's preserved working JSON data.
 - `data/Profiles.json` is the new canonical profile/account data schema used by `JsonAccountDataAccess`. It starts empty; profile registration/login must populate it.
 - The previous parallel `AccountData.json`, `UserData.json`, and `Currencies.json` stores were removed from the refactor branch. They were not connected to the working dashboard flow; the old user file also contained plaintext credentials.
 - The empty `Expenditures.json` and `Revenues.json` files and their transaction-control implementation were removed.
