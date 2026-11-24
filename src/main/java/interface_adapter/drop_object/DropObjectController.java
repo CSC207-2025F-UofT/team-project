@@ -1,8 +1,8 @@
-package interface_adapter;
+package interface_adapter.drop_object;
 
 import entity.ObjectPreset;
-import use_case.DropObjectInputBoundary;
-import use_case.DropObjectInputData;
+import use_case.drop_object.DropObjectInputBoundary;
+import use_case.drop_object.DropObjectInputData;
 
 public class DropObjectController {
     private final DropObjectInputBoundary dropObjectUseCase;

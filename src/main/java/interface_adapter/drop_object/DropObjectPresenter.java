@@ -1,9 +1,9 @@
-package interface_adapter;
+package interface_adapter.drop_object;
 
 import java.util.Objects;
 
-import use_case.DropObjectOutputBoundary;
-import use_case.DropObjectOutputData;
+import use_case.drop_object.DropObjectOutputBoundary;
+import use_case.drop_object.DropObjectOutputData;
 
 public final class DropObjectPresenter implements DropObjectOutputBoundary {
 
