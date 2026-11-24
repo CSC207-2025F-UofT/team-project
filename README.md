@@ -26,8 +26,9 @@ spirit, view recipe details and available images, save favourites, and create
 personal recipe variations. A personal profile will provide access to each user's
 favourites and customized recipes across application sessions.
 
-The project currently provides a shared scaffold. The user stories below describe
-planned behaviour; they are not claims that the features have been implemented.
+Search & Filter is implemented over the bundled catalog. See the Search demo and
+verification steps below. Some scaffold descriptions later in this document are
+historical; other feature owners maintain their implementation status.
 
 ### Domain
 
@@ -228,7 +229,7 @@ Updated favourite status
 
 | Team Member | MVP Use Case |
 |-------------|--------------|
-| Qinli | The user enters a cocktail name and/or selects one or more base spirits, then clicks Search. The system displays matching cocktail names or a message indicating missing input, no matches, or an API failure. |
+| Qinli | The user enters a cocktail name and/or selects one or more base spirits, then clicks Search. The system displays matching cocktail names or a message indicating missing input, no matches, or a catalog failure. |
 | Enhao | The user customizes an existing cocktail recipe by changing its name, ingredients, and quantities, then saves it as a separate Custom Recipe linked to their account. Through My Custom Cocktails, the user can list, reopen, and edit their own recipes. Saved recipes remain available after restarting the application and logging in again. |
 | Jiaqi | The users register a new account, log in with their username and password, and access their personal profile to access saved cocktails. The system saves user account information so that users can log in again after restarting the application.|
 | Wenqian | The user clicks a cocktail, the system display the ingredients of it. The user click 'Favourite' button, then save this cocktail to home page.|
@@ -328,7 +329,8 @@ sequenceDiagram
     EDT->>Window: setVisible(true)
 ```
 
-Search, Profile, Browse, and Customize sequences remain owner work.
+The Search sequence is documented in [Search architecture](docs/ARCHITECTURE.md#search--filter).
+Other feature sequences remain owner-maintained.
 
 ---
 
@@ -344,10 +346,43 @@ Search, Profile, Browse, and Customize sequences remain owner work.
 
 Run `org.example.cocktailcraft.app.Main`.
 
-The application opens Home with a title, name input, disabled Search/base-spirit/
-Clear controls, a disabled Profile button, and a catalog placeholder.
-No other pages or navigation are implemented. Feature owners will add their own
-Views and connect their use cases. The GUI does not load the dataset at startup.
+Home loads the bundled cocktail catalog through the Search use case. Enter a
+partial name, select one or more base spirits, or combine both, then click Search
+or press Enter. Matching is case-insensitive; every selected spirit must match.
+Results use the same list as Home. Select a result to pass its ID to Details.
+Clear resets the input and spirit selections and restores the full catalog.
+
+An empty query requests a name or spirit. No matches displays "No cocktails found."
+If catalog loading fails, Home stays open with an error. Retry Search with criteria,
+or click Clear to retry loading the full catalog. Successful reads are cached for
+the application session; failed reads are retried on the next request.
+
+### Search demo and verification
+
+1. Search for `  dAiQuIrI  ` with Rum selected; check that Daiquiri appears.
+2. Clear, enter `long island`, and select Gin, Vodka, Rum, and Tequila. Check that
+   Long Island Ice Tea appears. Selecting multiple spirits requires all of them.
+3. Select a result and verify its Details, then Clear and verify catalog browsing.
+4. Search for `no-such-cocktail-xyz`; expect "No cocktails found."
+5. Clear, then Search with no criteria; expect the missing-input message.
+
+Search runs offline against the 663 bundled recipes. Its data-access failure is a
+catalog failure, not a network/API failure. Runtime API integration belongs to the
+other feature owners.
+
+Run the focused Search tests and Checkstyle checks:
+
+```bash
+mvn test -Djava.awt.headless=true -Dtest='Search*Test' \
+  -Dcheckstyle.includes='**/search/*.java,**/SearchCocktailDataAccessObject.java'
+```
+
+Tests cover matching, collection isolation, state transitions, Enter and Clear,
+correct Details/Customize selection after filtering, startup failure and retry,
+DAO caching, and searches against the actual bundled catalog. The focused command
+limits Checkstyle to Search; normal project checks below still apply. See the
+[Search architecture](docs/ARCHITECTURE.md#search--filter) for dependency and
+sequence diagrams.
 
 ### Verify dataset loading
 
@@ -365,8 +400,8 @@ Simple Syrup: 22.5 ml
 ```
 
 The check loads the full dataset once, then prints Daiquiri as a known sample.
-It is not the application's Search functionality. GUI startup currently does not
-load the catalog or make network requests.
+It is a separate dataset smoke check. Home also loads this catalog through the
+Search use case, without making network requests.
 
 ### Run shared checks
 
@@ -422,7 +457,7 @@ data access implementation, and tests.
 
 | Owner | Feature | Packages and Views |
 |---|---|---|
-| Qinli | Search & Filter | `use_case/search/`, `interface_adapter/search/`, `view/search/`. `SearchView.java` currently contains only inactive controls for the opening Home layout. |
+| Qinli | Search & Filter | `use_case/search/`, `interface_adapter/search/`, `view/search/`. `SearchView.java` supports name/spirit input, Search, Enter, and Clear; see the Search documentation above. |
 | Enhao | Customize | `use_case/customize/`, `interface_adapter/customize/`, `view/customize/`. The View folder is empty, tracked with `.gitkeep`. |
 | Jiaqi | Profile and Account | `use_case/profile/`, `interface_adapter/profile/`, `view/profile/`. The View folder is empty, tracked with `.gitkeep`. |
 | Wenqian | Browse, Details, and Favourites | `use_case/browse/`, `interface_adapter/browse/`, `view/browse/`. `MainPageView.java` currently contains only the opening Home layout. Other Views are not created yet. |
@@ -455,7 +490,7 @@ same starting filenames. These declarations do not define final contracts.
 | `app/Main.java` | Starts the application on the Swing EDT. |
 | `app/AppBuilder.java` | Creates the JFrame and opening Home layout. Add completed feature wiring here later. |
 | `view/browse/MainPageView.java` | Displays the Home title, search area, inactive Profile button, and catalog placeholder. No catalog behaviour. |
-| `view/search/SearchView.java` | Displays name input and disabled search controls. No matching or event handling. |
+| `view/search/SearchView.java` | Collects name and spirit selections and calls the Search controller; Clear restores browsing. |
 | `entity/Cocktail.java` | Stores ID, name, and ingredients. |
 | `entity/RecipeIngredient.java` | Stores ingredient name, amount (currently String), and unit. |
 | `data_access/CocktailJsonReader.java` | Reads one recipe or the indexed dataset into shared Entities; no searching, caching, or saving. |

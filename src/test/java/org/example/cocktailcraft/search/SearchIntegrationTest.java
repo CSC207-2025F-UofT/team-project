@@ -173,6 +173,45 @@ class SearchIntegrationTest {
         });
     }
 
+    @Test
+    void startupFailureCanRecoverAndClearRestoresTheRecoveredCatalog() throws Exception {
+        SwingUtilities.invokeAndWait(() -> {
+            AtomicInteger attempts = new AtomicInteger();
+            Fixture fixture = new Fixture(() -> {
+                if (attempts.getAndIncrement() == 0) {
+                    throw new IOException("Startup failure");
+                }
+                return catalog;
+            }, true);
+            assertTrue(fixture.hasLabel("Unable to load the cocktail catalog. Please try again."));
+            assertEquals(0, fixture.results().getModel().getSize());
+            fixture.name().setText("daiquiri");
+            fixture.button("Search").doClick();
+            assertEquals(1, fixture.results().getModel().getSize());
+            fixture.button("Clear").doClick();
+            assertTrue(fixture.hasLabel("Explore Cocktails"));
+            assertEquals(2, fixture.results().getModel().getSize());
+            assertEquals("Gin Fizz", fixture.results().getModel().getElementAt(0));
+        });
+    }
+
+    @Test
+    void clearCanRetryAStartupFailureWithoutEnteringCriteria() throws Exception {
+        SwingUtilities.invokeAndWait(() -> {
+            AtomicInteger attempts = new AtomicInteger();
+            Fixture fixture = new Fixture(() -> {
+                if (attempts.getAndIncrement() == 0) {
+                    throw new IOException("Startup failure");
+                }
+                return catalog;
+            }, true);
+            fixture.button("Clear").doClick();
+            assertTrue(fixture.hasLabel("Explore Cocktails"));
+            assertEquals(2, fixture.results().getModel().getSize());
+            assertFalse(fixture.model.getState().isSearchPerformed());
+        });
+    }
+
     private final class Fixture {
         private final SearchViewModel model = new SearchViewModel();
         private final SearchView search = new SearchView(model);
@@ -180,13 +219,23 @@ class SearchIntegrationTest {
         private final MainPageView home;
 
         Fixture(SearchDataAccessInterface dao) {
-            search.setSearchController(new SearchController(new SearchInteractor(dao, new SearchPresenter(model))));
+            this(dao, false);
+        }
+
+        Fixture(SearchDataAccessInterface dao, boolean loadOnStartup) {
+            SearchController controller = new SearchController(new SearchInteractor(dao, new SearchPresenter(model)));
+            search.setSearchController(controller);
             ClickController details = new ClickController(input -> { }) {
                 @Override
                 public void execute(String cocktailId) {
                     selectedId.set(cocktailId);
                 }
             };
+            if (loadOnStartup) {
+                controller.clear();
+            } else {
+                model.getState().setResults(catalog);
+            }
             home = new MainPageView(search, catalog, details, new ClickView(new ClickViewModel()), model);
         }
 

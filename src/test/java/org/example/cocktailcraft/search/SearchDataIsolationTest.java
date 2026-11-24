@@ -47,7 +47,7 @@ class SearchDataIsolationTest {
     }
 
     @Test
-    void callerCannotChangeTheStoredCatalog() {
+    void callerCannotChangeTheStoredCatalog() throws Exception {
         List<Cocktail> source = new ArrayList<>(List.of(gin, rum));
         SearchCocktailDataAccessObject dao = new SearchCocktailDataAccessObject(source);
         source.clear();

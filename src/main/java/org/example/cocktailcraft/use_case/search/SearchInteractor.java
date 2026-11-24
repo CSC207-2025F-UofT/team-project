@@ -22,6 +22,16 @@ public class SearchInteractor implements SearchInputBoundary {
     }
 
     @Override
+    public void clear() {
+        try {
+            final List<Cocktail> catalog = searchDataAccessObject.getAllCocktails();
+            searchPresenter.prepareSuccessView(new SearchOutputData(catalog, false));
+        } catch (IOException | UncheckedIOException exception) {
+            searchPresenter.prepareFailureView("Unable to load the cocktail catalog. Please try again.");
+        }
+    }
+
+    @Override
     public void execute(SearchInputData searchInputData) {
         final String name = searchInputData.getName().toLowerCase(Locale.ROOT);
         final Set<Tags.BaseSpirit> baseSpirits = searchInputData.getBaseSpirits();

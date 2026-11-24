@@ -28,8 +28,6 @@ import org.example.cocktailcraft.use_case.customize.CustomizeInteractor;
 import org.example.cocktailcraft.view.customize.CustomizeView;
 import org.example.cocktailcraft.interface_adapter.customize.CustomizeState;
 
-import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.util.List;
 import java.nio.file.Path;
 import java.util.function.Supplier;
@@ -55,15 +53,10 @@ public class AppBuilder {
     }
 
     public AppBuilder addSearchUseCase() {
-        try {
-            this.cocktails = new CocktailJsonReader().readAll();
-        } catch (IOException exception) {
-            throw new UncheckedIOException(exception);
-        }
+        return addSearchUseCase(new SearchCocktailDataAccessObject(new CocktailJsonReader()));
+    }
 
-        final SearchDataAccessInterface searchDataAccessObject =
-                new SearchCocktailDataAccessObject(this.cocktails);
-
+    public AppBuilder addSearchUseCase(SearchDataAccessInterface searchDataAccessObject) {
         final SearchOutputBoundary searchOutputBoundary =
                 new SearchPresenter(searchViewModel);
 
@@ -74,6 +67,8 @@ public class AppBuilder {
                 new SearchController(searchInteractor);
 
         searchView.setSearchController(searchController);
+        searchController.clear();
+        cocktails = searchViewModel.getState().getResults();
         return this;
     }
 

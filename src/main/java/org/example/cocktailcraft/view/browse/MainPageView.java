@@ -75,7 +75,7 @@ public class MainPageView extends JPanel {
         if (searchViewModel != null) {
             Runnable displaySearchState = () -> {
                 SearchState state = searchViewModel.getState();
-                displayedCocktails = state.isSearchPerformed() ? state.getResults() : cocktails;
+                displayedCocktails = state.getResults();
                 model.clear();
                 for (Cocktail cocktail : displayedCocktails) {
                     model.addElement(cocktail.getName());

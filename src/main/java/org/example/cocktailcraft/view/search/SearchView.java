@@ -60,8 +60,12 @@ public class SearchView extends JPanel {
             nameInputField.setText("");
             spiritOptions.values().forEach(option -> option.setSelected(false));
             selector.setText("Base spirits");
-            searchViewModel.setState(new SearchState());
-            searchViewModel.notifyStateChanged();
+            if (searchController != null) {
+                searchController.clear();
+            } else {
+                searchViewModel.setState(new SearchState());
+                searchViewModel.notifyStateChanged();
+            }
         });
         add(clearButton);
     }
