@@ -27,17 +27,12 @@ public class DesertFeature extends Feature {
         
         for (int mapX = 0; mapX < width; mapX++) {
             for (int mapY = 0; mapY < height; mapY++) {
-                double distanceFromCenter = getDistance(x, y, mapX, mapY);
+                double distanceFromCenter = Feature.getDistance(x, y, mapX, mapY);
 
                 if (distanceFromCenter < r) {
                     map.getTile(mapX, mapY).setType(TileType.SAND);
                 }
             }
         }
-    }
-
-    private static double getDistance(double x1, double y1, double x2, double y2) {
-        double distance = Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2));
-        return distance;
     }
 }
