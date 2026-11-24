@@ -1,0 +1,42 @@
+{
+  "npcs": [
+    {
+      "id": "test_npc",
+      "name": "Test Person",
+      "startNodeId": "hello",
+      "nodes": [
+        {
+          "id": "hello",
+          "text": "Hello there.",
+          "options": [
+            {
+              "id": "all_stats",
+              "text": "Change every stat",
+              "message": "Everything changed.",
+              "energy": -5,
+              "sanity": 10,
+              "academic": 3,
+              "money": -2
+            },
+            {
+              "id": "no_stats",
+              "text": "Change nothing"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "second_npc",
+      "name": "Second Person",
+      "startNodeId": "hi",
+      "nodes": [
+        {
+          "id": "hi",
+          "text": "Hi.",
+          "options": []
+        }
+      ]
+    }
+  ]
+}
