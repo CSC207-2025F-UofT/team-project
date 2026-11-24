@@ -136,6 +136,10 @@ public class CandleGameView extends JPanel implements ActionListener, CandleGame
             instructionsOpen();
         }
         else if (e.getSource() == quitButton) {
+            if (controller != null){
+                controller.quitGame();
+
+            }
             // Needs to bring back to home view but will implement later
             System.out.println("Quit button clicked!");
         }
