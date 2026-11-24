@@ -4,8 +4,17 @@ import org.example.cocktailcraft.entity.Tags;
 import org.example.cocktailcraft.interface_adapter.search.SearchController;
 import org.example.cocktailcraft.interface_adapter.search.SearchViewModel;
 
-import javax.swing.*;
-import java.util.*;
+import javax.swing.JPanel;
+import javax.swing.JLabel;
+import javax.swing.JTextField;
+import javax.swing.JButton;
+import javax.swing.JPopupMenu;
+import javax.swing.JCheckBox;
+import java.util.Map;
+import java.util.EnumMap;
+import java.util.Locale;
+import java.util.Set;
+import java.util.EnumSet;
 
 public class SearchView extends JPanel {
     private final Map<Tags.BaseSpirit, JCheckBox> spiritOptions = new EnumMap<>(Tags.BaseSpirit.class);

@@ -9,7 +9,7 @@ public class SearchCocktailDataAccessObject implements SearchDataAccessInterface
     private final List<Cocktail> cocktails;
 
     public SearchCocktailDataAccessObject(List<Cocktail> cocktails) {
-        this.cocktails = cocktails;
+        this.cocktails = List.copyOf(cocktails);
     }
 
     @Override

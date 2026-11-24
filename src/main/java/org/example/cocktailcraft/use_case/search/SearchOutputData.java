@@ -8,8 +8,8 @@ public class SearchOutputData {
 
     private final List<Cocktail> results;
 
-    public SearchOutputData(List<Cocktail>  results) {
-        this.results = results;
+    public SearchOutputData(List<Cocktail> results) {
+        this.results = List.copyOf(results);
     }
 
     public List<Cocktail> getResults() {

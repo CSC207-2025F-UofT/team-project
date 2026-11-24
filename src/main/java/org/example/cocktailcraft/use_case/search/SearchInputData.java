@@ -9,8 +9,8 @@ public class SearchInputData {
     private final Set<Tags.BaseSpirit> baseSpirits;
 
     public SearchInputData(String name, Set<Tags.BaseSpirit> baseSpirits) {
-        this.name = name;
-        this.baseSpirits = baseSpirits;
+        this.name = name == null ? "" : name.strip();
+        this.baseSpirits = baseSpirits == null ? Set.of() : Set.copyOf(baseSpirits);
     }
 
     String getName() {
