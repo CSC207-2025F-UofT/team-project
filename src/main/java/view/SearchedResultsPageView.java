@@ -16,6 +16,7 @@ import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.net.URL;
+import java.util.function.IntFunction;
 
 /**
  * The View for when the user is logging into the program.
@@ -35,7 +36,12 @@ public class SearchedResultsPageView extends JPanel implements ActionListener, S
     private SearchController searchController = null;
     private ReviewsController reviewsController = null;
 
-    public SearchedResultsPageView(SearchedViewModel searchedViewModel){
+    public SearchedResultsPageView(SearchedViewModel searchedViewModel) {
+        this(searchedViewModel, null);
+    }
+
+    /** The favourite action saves the selected movie and returns the presenter's feedback. */
+    public SearchedResultsPageView(SearchedViewModel searchedViewModel, IntFunction<String> addFavorite) {
 
         this.searchedViewModel = searchedViewModel;
         this.searchedViewModel.addListener(this);
@@ -140,6 +146,18 @@ public class SearchedResultsPageView extends JPanel implements ActionListener, S
             reviews.setFont(new Font("Serif", Font.PLAIN, 14));
             button.add(reviews);
 
+            JLabel favoriteFeedback = new JLabel();
+            JButton favoriteButton = new JButton("Add to Favorites");
+            favoriteButton.setFont(reviews.getFont());
+            favoriteButton.setEnabled(addFavorite != null && movieId > 0);
+            favoriteButton.addActionListener(event -> favoriteFeedback.setText(addFavorite.apply(movieId)));
+            button.add(favoriteButton);
+
+            JButton watchlistButton = new JButton("Add to Watchlist");
+            watchlistButton.setFont(reviews.getFont());
+            watchlistButton.setEnabled(false);
+            button.add(watchlistButton);
+
             viewDetails.addActionListener(
                     new ActionListener() {
                         @Override
@@ -164,6 +182,7 @@ public class SearchedResultsPageView extends JPanel implements ActionListener, S
 
 
             details.add(button);
+            details.add(favoriteFeedback);
             movieData.add(details);
             searchResults.add(movieData);
 
