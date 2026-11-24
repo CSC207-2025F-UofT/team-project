@@ -105,39 +105,52 @@ public class MapView extends StackPane {
 
     // zooms the canvas based on the scroll event
     private void zoom(ScrollEvent event) {
+        // event.getDeltaY() just returns how much the user scrolled
+        // don't zoom if still fitting, or if canvas not displayed, or if no scroll happened
         if (fitPending || fitScale == 0 || event.getDeltaY() == 0) {
             return;
         }
 
         double oldScale = canvas.getScaleX();
+        // calculate the new scale based on the scroll event
         double scale = Math.max(fitScale * MIN_ZOOM,
                 Math.min(fitScale * MAX_ZOOM, oldScale * Math.exp(event.getDeltaY() * ZOOM_RATE)));
         double ratio = scale / oldScale;
+
+        // finding where mouse is on canvas so scrolling zooms in on that point as opposed to the center
         Point2D cursor = sceneToLocal(event.getSceneX(), event.getSceneY());
         Point2D center = canvas.localToParent(canvas.getWidth() / 2, canvas.getHeight() / 2);
+
+        // translation of canvas to mouse pos
         canvas.setTranslateX(canvas.getTranslateX() + (1 - ratio) * (cursor.getX() - center.getX()));
         canvas.setTranslateY(canvas.getTranslateY() + (1 - ratio) * (cursor.getY() - center.getY()));
+
+        // actually apply the scale to the canvas
         canvas.setScaleX(scale);
         canvas.setScaleY(scale);
-        event.consume();
+        event.consume(); // stop event from propagating
     }
 
     // starts dragging the canvas
     private void startDrag(MouseEvent event) {
         if (!fitPending && fitScale > 0 && event.getButton() == MouseButton.PRIMARY) {
             dragPosition = sceneToLocal(event.getSceneX(), event.getSceneY());
-            event.consume();
+            event.consume(); // stop event from propagating
         }
     }
 
     // drags the canvas
     private void drag(MouseEvent event) {
+        // only drag if the left mouse button is down, and we have an initial drag position
         if (dragPosition != null && event.isPrimaryButtonDown()) {
+            // new pos of mouse
             Point2D position = sceneToLocal(event.getSceneX(), event.getSceneY());
+
+            // move canvas to new pos
             canvas.setTranslateX(canvas.getTranslateX() + position.getX() - dragPosition.getX());
             canvas.setTranslateY(canvas.getTranslateY() + position.getY() - dragPosition.getY());
-            dragPosition = position;
-            event.consume();
+            dragPosition = position; // update drag position for next event
+            event.consume(); // stop event from propagating
         }
     }
 
@@ -145,6 +158,7 @@ public class MapView extends StackPane {
     private void endDrag(MouseEvent event) {
         if (event.getButton() == MouseButton.PRIMARY) {
             dragPosition = null;
+            event.consume(); // stop event from propagating
         }
     }
 
@@ -153,9 +167,11 @@ public class MapView extends StackPane {
     @Override
     protected void layoutChildren() {
         fitCanvas();
-        Insets insets = getInsets();
+        Insets insets = getInsets(); // insets are like padding
         double availableWidth = getWidth() - insets.getLeft() - insets.getRight();
         double availableHeight = getHeight() - insets.getTop() - insets.getBottom();
+
+        // move the canvas to the center of the designated space
         canvas.relocate(insets.getLeft() + (availableWidth - canvas.getWidth()) / 2,
                 insets.getTop() + (availableHeight - canvas.getHeight()) / 2);
     }

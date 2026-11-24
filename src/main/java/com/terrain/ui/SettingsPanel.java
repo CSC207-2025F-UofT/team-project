@@ -21,6 +21,7 @@ public class SettingsPanel extends VBox {
     private final VBox worldHolder = new VBox();
     private final VBox featureList = new VBox(8);
     private final ComboBox<FeatureType> typeDropdown = new ComboBox<>();
+    private ParameterSection islandSettingsSection;
 
     // a consumer is a function that takes one argument and returns nothing. used to pass the controller's onAddFeature
     // and onRemoveFeature methods such that they can be called whenever.
@@ -28,6 +29,9 @@ public class SettingsPanel extends VBox {
     };
     private Consumer<Feature> onRemoveFeature = feature -> {
     };
+
+    // a runnable is a function that takes no arguments and returns nothing
+    // these are empty now but will be defined by the controller when the SettingsPanel is created
     private Runnable onGenerate = () -> {
     };
     private Runnable onWorldChanged = () -> {
@@ -90,8 +94,23 @@ public class SettingsPanel extends VBox {
 
     // Shows the always-present, non-removable world section above the features.
     public void setWorldSettings(WorldSetting world) {
-        worldHolder.getChildren().setAll(
-                new ParameterSection("World", world, () -> onWorldChanged.run()));
+        // main block for the world settings section
+        ParameterSection worldSection = new ParameterSection("World settings", world, () -> {
+            onWorldChanged.run();
+            updateIslandSettingsVisibility(world);
+        });
+
+        // island settings section is a subset of the world settings, and is only visible when island mode is on
+        islandSettingsSection = new ParameterSection("Island settings", world.island, onWorldChanged);
+        updateIslandSettingsVisibility(world);
+        worldHolder.getChildren().setAll(worldSection, islandSettingsSection);
+    }
+
+    // toggles the visibility of the island settings section
+    private void updateIslandSettingsVisibility(WorldSetting world) {
+        boolean visible = world.islandMode.getValue();
+        islandSettingsSection.setVisible(visible); // whether is drawn
+        islandSettingsSection.setManaged(visible); // whether is included in layout calculations
     }
 
     public void addFeatureSection(Feature feature) {
@@ -104,4 +123,3 @@ public class SettingsPanel extends VBox {
 
     // TODO: reordering of features (important)
 }
-
