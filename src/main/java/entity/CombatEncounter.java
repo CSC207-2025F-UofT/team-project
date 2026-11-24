@@ -5,7 +5,7 @@ public class CombatEncounter {
     private Monster monster;
     private boolean isDone;
 
-    public CombatEncounter(PlayerCharacter  character, Monster monster) {
+    public CombatEncounter(PlayerCharacter character, Monster monster) {
         this.character = character;
         this.monster = monster;
         this.isDone = false;
