@@ -9,6 +9,7 @@ public class Main {
                 .addSearchView()
                 .addSearchUseCase()
                 .addClickUseCase()
+                .addCustomizeUseCase(() -> null)
                 .addMainPageView()
                 .build();
 

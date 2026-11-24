@@ -1,5 +1,6 @@
 package org.example.cocktailcraft.search;
 
+import org.example.cocktailcraft.interface_adapter.search.SearchViewModel;
 import org.example.cocktailcraft.entity.Tags.BaseSpirit;
 import org.example.cocktailcraft.view.search.SearchView;
 import org.junit.jupiter.api.Test;
@@ -17,7 +18,7 @@ class SearchViewTest {
     @Test
     void supportsMultipleSelectionsAndIndependentDeselection() throws Exception {
         SwingUtilities.invokeAndWait(() -> {
-            SearchView view = new SearchView();
+            SearchView view = new SearchView(new SearchViewModel());
             JButton selector = null;
             for (Component component : view.getComponents()) {
                 if (component instanceof JButton && ((JButton) component).getText().equals("Base spirits")) {
