@@ -43,23 +43,25 @@ public class ImportPhotosInteractor implements ImportPhotosInputBoundary {
             String commonInfo = null;
 
             for (LocationInfo locationInfo : infoList) {
+                if (locationInfo == null) {
+                    commonInfo = null;
+                    break;
+                }
+
                 String info = locationInfo.getType(infoType);
 
                 if (info == null) {
                     commonInfo = null;
-
                     break;
                 }
 
                 if (commonInfo == null) {
                     commonInfo = info;
-
                     continue;
                 }
 
                 if (!commonInfo.equals(info)) {
                     commonInfo = null;
-
                     break;
                 }
             }
@@ -156,7 +158,7 @@ public class ImportPhotosInteractor implements ImportPhotosInputBoundary {
 
         if (exLocation != null) {
             includedPhotoStream = includedPhotoStream
-                .filter(p -> p.getLocation().getDistanceFrom(exLocation) <= exDistance);
+                .filter(p -> p.getLocation().getDistanceFrom(exLocation) > exDistance);
         }
 
         return includedPhotoStream.sorted().toList();

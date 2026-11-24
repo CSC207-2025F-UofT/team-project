@@ -1,13 +1,11 @@
-package data_access;
+package data_access.api;
 
 import java.io.IOException;
 import java.net.URI;
 import java.net.URLEncoder;
-import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
-import java.time.Duration;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -23,13 +21,12 @@ import use_case.import_photos.ReverseGeocoderInterface;
 public class NominatimGeocoder implements GeocoderInterface, ReverseGeocoderInterface {
     private static final String SEARCH_BASE_URL = "https://nominatim.openstreetmap.org/search";
     private static final String REVERSE_BASE_URL = "https://nominatim.openstreetmap.org/reverse";
+    private static final long RATE_LIMIT = 1100;
 
-    private final HttpClient httpClient;
+    private final RateLimitedHttpClient httpClient;
 
     public NominatimGeocoder() {
-        httpClient = HttpClient.newBuilder()
-            .connectTimeout(Duration.ofSeconds(10))
-            .build();
+        httpClient = new RateLimitedHttpClient("nominatim-api-worker", RATE_LIMIT);
     }
 
     private static String getContinent(String countryCode, double latitude, double longitude) {
@@ -91,7 +88,7 @@ public class NominatimGeocoder implements GeocoderInterface, ReverseGeocoderInte
             .build();
 
         try {
-            HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+            HttpResponse<String> response = httpClient.sendRateLimited(request, HttpResponse.BodyHandlers.ofString());
 
             if (response.statusCode() != 200) {
                 throw new GeocodeException("OSM Nominatim search API failed [Status " + response.statusCode() + "]: " + response.body());
@@ -132,7 +129,7 @@ public class NominatimGeocoder implements GeocoderInterface, ReverseGeocoderInte
             .build();
 
         try {
-            HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+            HttpResponse<String> response = httpClient.sendRateLimited(request, HttpResponse.BodyHandlers.ofString());
 
             if (response.statusCode() != 200) {
                 throw new ReverseGeocodeException("OSM Nominatim API failed [Status " + response.statusCode() + "]: " + response.body());
@@ -142,11 +139,11 @@ public class NominatimGeocoder implements GeocoderInterface, ReverseGeocoderInte
             JSONObject address = body.getJSONObject("address");
 
             return new LocationInfo(
-                address.optString("city"),
-                address.optString("county"),
-                address.optString("state"),
-                address.optString("country"),
-                getContinent(address.optString("country_code"), latitude, longitude)
+                address.optString("city", null),
+                address.optString("county", null),
+                address.optString("state", null),
+                address.optString("country", null),
+                getContinent(address.optString("country_code", null), latitude, longitude)
             );
 
         } catch (IOException | JSONException e) {
