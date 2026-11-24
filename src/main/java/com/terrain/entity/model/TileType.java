@@ -34,7 +34,7 @@ public enum TileType {
     FOREST {
         @Override
         Rgb colorAtPercent(double t) {
-            return new Rgb(0.0, 0.5 + 0.5 * t, 0.0);
+            return new Rgb(0.0, 0.2 + 0.5 * t, 0.0);
         }
     },
     SWAMP {

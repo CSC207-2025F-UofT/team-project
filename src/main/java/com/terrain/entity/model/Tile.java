@@ -25,6 +25,14 @@ public class Tile {
         this.type = type;
     }
 
+    public TileType getFinalType() {
+        return finalType;
+    }
+
+    public void setFinalType(TileType finalType) {
+        this.finalType = finalType;
+    }
+
     // TODO: MAYBE: Add other properties like moisture, temperature, etc. depending on the needs of the terrain
     //  generation. or, Tile.type could use an enum that includes different types of terrain (e.g., water, grass,
     //  stone, etc.)
