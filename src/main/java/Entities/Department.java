@@ -1,7 +1,7 @@
 package Entities;
 
 public class Department {
-    public String name;
+    private String name;
 
     public String getName() {
         return name;
