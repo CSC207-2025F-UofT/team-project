@@ -1,10 +1,18 @@
 package view;
 
+import entities.Game.CandleGame;
+import entities.Game.CandleType;
+import entities.Game.GameCondition;
+import entities.Game.Guess;
 import interface_adapters.candle_game.CandleGameViewModel;
 import interface_adapters.candle_game.CandleGameViewModelListener;
 import javax.swing.*;
-import interface_adapters.candle_game.CandleGameController;
+//import interface_adapters.candle_game.CandleGameController;
+import interface_adapters.candle_game.EvaluateGuessController;
+import interface_adapters.candle_game.EvaluateGuessPresenter;
+import use_case.use_case_EvaluateGuess.EvaluateGuessInteractor;
 
+import java.util.List;
 import java.io.File;
 import java.io.IOException;
 
@@ -13,15 +21,19 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-public class CandleGameView extends JPanel implements ActionListener {
+public class CandleGameView extends JPanel implements ActionListener, CandleGameViewModelListener {
 
-//    private final CandleGameViewModel candleGameViewModel;
+    private final CandleGameViewModel candleGameViewModel;
+    private final EvaluateGuessController controller;
+    private final CandleGame game;
 
-    private final JLabel attempts;
+    private final JLabel[][] attempts;
     private final JLabel attemptsRemaining;
     private final JLabel background;
+    private final JLabel[] candleFlames;
     private final JTextField[] numberBoxes;
-    private final CandleGameController controller;
+    private final ImageIcon brightCandle = new ImageIcon("src/images/ORANGE_FLAME.png");
+    private final ImageIcon dimCandle = new ImageIcon("src/images/RED_FLAME.png");
 
     private final JButton quitButton;
     private final JButton instructionsButton;
@@ -33,10 +45,11 @@ public class CandleGameView extends JPanel implements ActionListener {
      *
      * @param controller the Controller for CandleGame
      */
-    public CandleGameView(CandleGameController controller) {
+    public CandleGameView(EvaluateGuessController controller, CandleGameViewModel candleGameViewModel, CandleGame game) {
         this.controller = controller;
-//        this.candleGameViewModel = candleGameViewModel;
-//        this.candleGameViewModel.addListener(this);
+        this.candleGameViewModel = candleGameViewModel;
+        this.game = game;
+        this.candleGameViewModel.addListener(this);
 
         this.setLayout(null);
 
@@ -50,14 +63,9 @@ public class CandleGameView extends JPanel implements ActionListener {
             throw new RuntimeException(e);
         }
 
-        //Attempts Recorded
-        attempts = new JLabel("12345");
-        attempts.setBounds(700, 60, 500, 20);
-        attempts.setFont(winkle.deriveFont(30f));
-        this.add(attempts);
 
         //Attempts Remaining Tracker
-        attemptsRemaining = new JLabel("110");
+        attemptsRemaining = new JLabel("10");
         attemptsRemaining.setBounds(700, 20, 500, 35);
         attemptsRemaining.setFont(winkle.deriveFont(48f));
         this.add(attemptsRemaining);
@@ -92,7 +100,7 @@ public class CandleGameView extends JPanel implements ActionListener {
 
         // Background
         background = new JLabel(new ImageIcon("src/images/CANDLE_GAME_BG.png"));
-        background.setBounds(0,0,800, 600);
+        background.setBounds(0, 0, 800, 600);
         this.add(background);
         // Make sure it is the bottom Layer
         this.setComponentZOrder(background, this.getComponentCount() - 1);
@@ -101,12 +109,32 @@ public class CandleGameView extends JPanel implements ActionListener {
         numberBoxes = new JTextField[5];
         for (int i = 0; i < numberBoxes.length; i++) {
             numberBoxes[i] = new JTextField();
-            numberBoxes[i].setBounds(70 + (i*150), 370, 60,30);
+            numberBoxes[i].setBounds(70 + (i * 150), 370, 60, 30);
             numberBoxes[i].setFont(winkle.deriveFont(30f));
             numberBoxes[i].setHorizontalAlignment(JTextField.CENTER);
             this.add(numberBoxes[i]);
         }
 
+        // Candle Flames
+        candleFlames = new JLabel[5];
+        for (int i = 0; i < candleFlames.length; i++) {
+            candleFlames[i] = new JLabel();
+            candleFlames[i].setBounds(3 + (i * 150), 250, 150, 100);
+            this.add(candleFlames[i]);
+            this.setComponentZOrder(background, this.getComponentCount() - 1);
+        }
+
+        //Attempts Recorded
+        attempts = new JLabel[10][5];
+        for (int i = 0; i < attempts.length; i++) {
+            for (int c = 0; c < attempts[i].length; c++) {
+                attempts[i][c] = new JLabel();
+                attempts[i][c].setBounds(620 + (c * 10), 60 + (i * 20), 200, 20);
+                attempts[i][c].setFont(winkle.deriveFont(30f));
+                this.add(attempts[i][c]);
+            }
+        }
+        this.setComponentZOrder(background, this.getComponentCount() - 1);
     }
 
     @Override
@@ -128,7 +156,7 @@ public class CandleGameView extends JPanel implements ActionListener {
                 guess.append(box.getText());
             }
             // Needs to keep submission
-            System.out.println("Submit button clicked!");
+            controller.execute(guess.toString(), game);
         }
     }
 
@@ -157,24 +185,86 @@ public class CandleGameView extends JPanel implements ActionListener {
         instructionsFrame.setLocationRelativeTo(this);
         instructionsFrame.setVisible(true);
     }
-//    @Override
-//    public void candleGameStateChanged() {
-//        // Update the displayed information using the ViewModel
-//        attemptsRemaining.setText(
-//                String.valueOf(candleGameViewModel.getAttemptsRemaining()));
+
+    @Override
+    public void candleGameStateChanged() {
+        updateCandles(candleGameViewModel.getCandleFeedback());
+        attemptsRemaining.setText(String.valueOf(candleGameViewModel.getAttemptsRemaining()));
+        if (game.getGameCondition() != GameCondition.WON) {
+            printPastGuesses(candleGameViewModel.getPastGuesses());
+        }
+    }
+
+    private void updateCandles(List<CandleType> feedback) {
+        for (int i = 0; i < feedback.size(); i++) {
+            if (feedback.get(i) == CandleType.BRIGHT) {
+                candleFlames[i].setIcon(brightCandle);
+                System.out.println("Setting candle " + i + " to orange");
+            } else if (feedback.get(i) == CandleType.DIM) {
+                candleFlames[i].setIcon(dimCandle);
+                System.out.println("Setting candle " + i + " to red");
+            } else {
+                candleFlames[i].setIcon(null);
+                System.out.println("Setting candle " + i + " to snuff");
+            }
+        }
+        System.out.println(feedback);
+    }
+
+    private void printPastGuesses(List<Guess> guesses) {
+        for (int i = 0; i < guesses.size(); i++) {
+            String guess = guesses.get(i).getGuessedCode();
+            List<CandleType> feedback = guesses.get(i).getFeedback();
+            for (int c = 0; c < guess.length(); c++) {
+                String character = String.valueOf(guess.charAt(c));
+                if (feedback.get(c) == CandleType.BRIGHT) {
+                    attempts[i][c].setForeground(new Color(255, 117, 24));
+                } else if (feedback.get(c) == CandleType.DIM) {
+                    attempts[i][c].setForeground(new Color(179, 27, 27));
+                } else {
+                    attempts[i][c].setForeground(Color.DARK_GRAY);
+                }
+                attempts[i][c].setText(character);
+            }
+        }
+
+    }
+
+//    public static void main(String[] args) {
+//        JFrame frame = new JFrame("Light it Up!");
+//
+//        CandleGameView view = new CandleGameView(null, null, null);
+//
+//        frame.setContentPane(view);
+//        frame.setSize(800, 600);
+//        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+//        frame.setLocationRelativeTo(null);
+//        frame.setVisible(true);
 //    }
 
-
     public static void main(String[] args) {
-        JFrame frame = new JFrame("Light it Up!");
+        SwingUtilities.invokeLater(() -> {
 
-        CandleGameView view = new CandleGameView(null);
+            // Temporary game for testing 12345
+            CandleGame game = new CandleGame("12345", 10);
 
-        frame.setContentPane(view);
-        frame.setSize(800, 600);
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setLocationRelativeTo(null);
-        frame.setVisible(true);
+            CandleGameViewModel viewModel = new CandleGameViewModel();
+            EvaluateGuessPresenter presenter =
+                    new EvaluateGuessPresenter(viewModel);
+            EvaluateGuessInteractor interactor =
+                    new EvaluateGuessInteractor(presenter);
+            EvaluateGuessController controller =
+                    new EvaluateGuessController(interactor);
+            CandleGameView view =
+                    new CandleGameView(controller, viewModel, game);
+
+            JFrame frame = new JFrame("Light it Up!");
+            frame.setContentPane(view);
+            frame.setSize(800, 600);
+            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+            frame.setLocationRelativeTo(null);
+            frame.setVisible(true);
+        });
     }
 
 }

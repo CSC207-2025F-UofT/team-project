@@ -5,7 +5,7 @@ package interface_adapters.update_timer_settings;
  */
 public interface TimerSettingsViewModelListener {
     /**
-     * The logged-in state was updated.
+     * The Timer Settings state was updated.
      */
     void stateChanged();
 }
