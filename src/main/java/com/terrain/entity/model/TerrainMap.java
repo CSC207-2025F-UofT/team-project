@@ -3,8 +3,8 @@ package com.terrain.entity.model;
 public class TerrainMap {
     private final int width;
     private final int height;
-    private static int maxElevation;
-    private static int minElevation;
+    private double maxElevation;
+    private double minElevation;
     private final Tile[][] tiles;
 
     public TerrainMap(int width, int height) {
@@ -42,24 +42,30 @@ public class TerrainMap {
 
     // finds the min and max elevation values in the map, for use in color mapping
     public void getElevationBounds() {
+        maxElevation = 0;
+        minElevation = 0;
         for(int x = 0; x < width; x++) {
             for(int y = 0; y < height; y++) {
                 double elevation = tiles[x][y].getElevation();
+                if (x == 0 && y == 0) {
+                    maxElevation = elevation;
+                    minElevation = elevation;
+                }
                 if(elevation > maxElevation) {
-                    maxElevation = (int) elevation;
+                    maxElevation = elevation;
                 }
                 if(elevation < minElevation) {
-                    minElevation = (int) elevation;
+                    minElevation = elevation;
                 }
             }
         }
     }
 
-    public int getMaxElevation() {
+    public double getMaxElevation() {
         return maxElevation;
     }
 
-    public int getMinElevation() {
+    public double getMinElevation() {
         return minElevation;
     }
 }
