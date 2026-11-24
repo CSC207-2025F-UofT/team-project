@@ -54,7 +54,7 @@ public class APIDataAccessObject implements ItemPricingDataAccessInterface{
         this.ApplicationAccessToken = response.getAccessToken();
         if (this.ApplicationAccessToken.isEmpty()) {
             // If it's empty, log the error description from the response
-            System.err.println("Failed to get access token. Response errors: " + response.getErrors());
+            System.err.println("Failed to get access token. Response errors: " + response.getErrorMessage());
         }
     }
 
