@@ -7,9 +7,9 @@ import static java.lang.Math.max;
  * race, character class, and stats.
  */
 public class PlayerCharacter {
-    private String name;
     private int health;
     private int maxHealth;
+    private int armourClass;
     private final Race race;
     private final CharacterClass characterClass;
     private final Stats stats;
@@ -26,6 +26,7 @@ public class PlayerCharacter {
       this.stats = characterClass.getBaseStats().plus(race.getBonuses());
       this.maxHealth = this.stats.getConstitution() * 3;
       this.health = this.maxHealth;
+      this.armourClass = 10 + (this.stats.getDexterity() / 2);
   }
 
     public void takeDamage(int damage) { health = max(0, health - damage);}
@@ -33,7 +34,10 @@ public class PlayerCharacter {
     public boolean isAlive() { return health > 0;}
 
     public int getHealth() {return health;}
-  /**
+
+    public int getArmourClass() { return armourClass;}
+
+    /**
    * Returns the player character's saved stats.
    *
    * @return the stats of the player character

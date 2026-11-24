@@ -1,19 +1,22 @@
 package usecase.combat;
 
+import entity.Monster;
+import entity.PlayerCharacter;
+
 public class CombatInputData {
-    private final String characterID;
-    private final String monsterID;
+    private final PlayerCharacter character;
+    private final Monster monster;
 
-    public CombatInputData(String characterID, String monsterID) {
-        this.characterID = characterID;
-        this.monsterID = monsterID;
+    public CombatInputData(PlayerCharacter character, Monster monster) {
+        this.character = character;
+        this.monster = monster;
     }
 
-    public String getCharacterID() {
-        return characterID;
+    public PlayerCharacter getCharacter() {
+        return character;
     }
 
-    public String getMonsterID() {
-        return monsterID;
+    public Monster getMonster() {
+        return monster;
     }
 }

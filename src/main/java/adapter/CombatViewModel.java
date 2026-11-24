@@ -1,4 +1,4 @@
-package view;
+package adapter;
 
 public class CombatViewModel {
 }

@@ -1,5 +1,9 @@
 package usecase.combat;
 
+import entity.CombatEncounter;
+import entity.Monster;
+import entity.PlayerCharacter;
+
 public class CombatInteractor implements CombatInputBoundary {
     private final CombatDataAccessInterface dataAccess;
     private final CombatOutputBoundary presenter;
@@ -14,10 +18,10 @@ public class CombatInteractor implements CombatInputBoundary {
 
     @Override
     public void startCombat(CombatInputData inputData) {
-        String characterID = inputData.getCharacterID();
-        String monsterID = inputData.getMonsterID();
+        PlayerCharacter character = inputData.getCharacter();
+        Monster monster = inputData.getMonster();
 
-        //CombatEncounter combat = new CombatEncounter();
+        CombatEncounter combat = new CombatEncounter(character, monster);
     }
 
     @Override
