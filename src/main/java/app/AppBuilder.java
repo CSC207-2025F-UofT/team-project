@@ -8,8 +8,10 @@ import javax.swing.JFrame;
 
 
 import data_access.InMemoryDataAccessObject;
+import data_access.NominatimGeocoder;
 import data_access.SampleData;
 import data_access.StorageResolver;
+import data_access.image.ImageImporter;
 import data_access.image.ImageReader;
 import data_access.image.ImageResolver;
 import interface_adapter.ViewManagerModel;
@@ -17,6 +19,9 @@ import interface_adapter.ViewNames;
 import interface_adapter.dashboard.DashboardController;
 import interface_adapter.dashboard.DashboardPresenter;
 import interface_adapter.dashboard.DashboardViewModel;
+import interface_adapter.import_photos.ImportPhotosController;
+import interface_adapter.import_photos.ImportPhotosPresenter;
+import interface_adapter.import_photos.ImportPhotosViewModel;
 import interface_adapter.manipulate_trips.ManipulateTripsController;
 import interface_adapter.manipulate_trips.ManipulateTripsPresenter;
 import interface_adapter.manipulate_trips.TripDetailsViewModel;
@@ -26,12 +31,17 @@ import interface_adapter.load_photos.LoadPhotoPresenter;
 import interface_adapter.load_photos.PhotoImageViewModel;
 import use_case.ImageReaderInterface;
 import use_case.dashboard.AnalyticsUseCase;
+import use_case.import_photos.GeocoderInterface;
+import use_case.import_photos.ImageImporterInterface;
+import use_case.import_photos.ImportPhotosInteractor;
+import use_case.import_photos.ReverseGeocoderInterface;
 import use_case.manipulate_trips.ManipulateTripsInputBoundary;
 import use_case.manipulate_trips.ManipulateTripsInteractor;
 import use_case.manipulate_trips.ManipulateTripsOutputBoundary;
 import use_case.load_photos.LoadPhotoInputBoundary;
 import use_case.load_photos.LoadPhotoInteractor;
 import use_case.load_photos.LoadPhotoOutputBoundary;
+import view.ImportPhotosView;
 import view.NavigationBar;
 import view.PlaceholderView;
 import view.TripListView;
@@ -49,11 +59,12 @@ public class AppBuilder {
     private final ViewManager viewManager = new ViewManager(viewManagerModel);
     private final NavigationBar navigationBar = new NavigationBar(viewManagerModel);
 
-
     // Storage. Replace with SQLite implementation later.
     private final InMemoryDataAccessObject dataAccess = new InMemoryDataAccessObject();
     private final ImageResolver imageResolver = new ImageResolver(new StorageResolver());
-    private final ImageReaderInterface imageReader = new ImageReader(imageResolver);
+    private final ImageImporter imageImporter = new ImageImporter(imageResolver);
+    private final ImageReader imageReader = new ImageReader(imageResolver);
+    private final NominatimGeocoder geocoder = new NominatimGeocoder();
 
     // Photo loading, shared by every view that shows photos.
     private final PhotoImageViewModel photoImageViewModel = new PhotoImageViewModel();
@@ -64,7 +75,6 @@ public class AppBuilder {
     private TripDetailsViewModel tripDetailsViewModel;
     private TripDetailsView tripDetailsView;
 
-
     public AppBuilder() {
         SampleData.populate(dataAccess, dataAccess, imageResolver);
     }
@@ -73,6 +83,18 @@ public class AppBuilder {
         LoadPhotoOutputBoundary presenter = new LoadPhotoPresenter(photoImageViewModel);
         LoadPhotoInputBoundary interactor = new LoadPhotoInteractor(dataAccess, imageReader, presenter);
         return new ThumbnailCache(96, 300, photoImageViewModel, new LoadPhotoController(interactor));
+    }
+
+    public AppBuilder addImportPhotosView() {
+        ImportPhotosViewModel viewModel = new ImportPhotosViewModel();
+        ImportPhotosPresenter presenter = new ImportPhotosPresenter(viewModel);
+        ImportPhotosInteractor interactor = new ImportPhotosInteractor(
+            imageImporter, geocoder, geocoder, dataAccess, dataAccess, presenter
+        );
+        ImportPhotosController controller = new ImportPhotosController(interactor);
+        ImportPhotosView view = new ImportPhotosView(viewModel, controller);
+
+        return addScreen("Import Photos", ViewNames.IMPORT_PHOTOS, view);
     }
 
     public AppBuilder addTripListView() {
