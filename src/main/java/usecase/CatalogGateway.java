@@ -2,6 +2,7 @@ package usecase;
 
 import entity.CharacterClass;
 import entity.Race;
+import entity.Monster;
 import java.util.List;
 
 /**
@@ -14,4 +15,10 @@ public interface CatalogGateway {
 
   /** Returns the available character classes and their base stats. */
   List<CharacterClass> getClasses();
+
+  /** Returns list of available monsters and their stats. */
+  List<Monster> getMonsters();
+
+  /** Retreive individual monster using API index. */
+  Monster getMonster(String index);
 }

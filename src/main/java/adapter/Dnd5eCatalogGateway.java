@@ -3,6 +3,7 @@ package adapter;
 import entity.CharacterClass;
 import entity.Race;
 import entity.Stats;
+import entity.Monster;
 import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
@@ -27,6 +28,7 @@ public final class Dnd5eCatalogGateway implements CatalogGateway {
   private final URI apiBaseUri;
   private List<Race> racesCache;
   private List<CharacterClass> classesCache;
+  private List<Monster> monstersCache;
 
   /** Creates a gateway using the public D&D 5e 2014 API. */
   public Dnd5eCatalogGateway() {
@@ -77,6 +79,36 @@ public final class Dnd5eCatalogGateway implements CatalogGateway {
     }
     classesCache = Collections.unmodifiableList(classes);
     return new ArrayList<>(classesCache);
+  }
+
+
+  /** Loads monsters and their combat info, reusing cache when available**/
+  @Override
+  public synchronized List<Monster> getMonsters() {
+    if (monstersCache != null) {
+      return new ArrayList<>(monstersCache);
+    }
+    JSONArray references = requiredArray(fetchJson("monsters"), "results", "monsters catalog");
+    List<Monster> monsters = new ArrayList<>();
+
+    for (Object reference : references) {
+      JSONObject monsterReference = requireObject(reference, "monster reference");
+      String index = requiredString(monsterReference, "index", "monster reference");
+      JSONObject details = fetchJson("monsters/" + index);
+      monsters.add(parseMonster(details));
+    }
+    monstersCache = Collections.unmodifiableList(monsters);
+    return new ArrayList<>(monstersCache);
+  }
+
+  /** Retrieves one monster by its API index. */
+  @Override
+  public synchronized Monster getMonster(String index) {
+    if (index == null || index.isBlank()) {
+      throw new IllegalArgumentException("Monster index cannot be empty");
+    }
+    JSONObject details = fetchJson("monsters/" + index);
+    return parseMonster(details);
   }
 
   /** Fetches and validates one JSON object from the D&D API. */
@@ -144,6 +176,26 @@ public final class Dnd5eCatalogGateway implements CatalogGateway {
     return new Stats(strength, dexterity, constitution, intelligence, wisdom, charisma);
   }
 
+  /**Converts a monster API response into a Monster entity.**/
+  private Monster parseMonster(JSONObject monster) {
+    String name = requiredString(monster, "name", "monster details");
+    String index = requiredString(monster, "index", "monster details");
+    int maxHealth = requiredInt(monster, "hit_points", "monster details");
+    int armourClass = parseArmourClass(monster);
+
+    int strength = requiredInt(monster, "strength", "monster details");
+    int dexterity = requiredInt(monster, "dexterity", "monster details");
+    int constitution = requiredInt(monster, "constitution", "monster details");
+    int intelligence = requiredInt(monster, "intelligence", "monster details");
+    int wisdom = requiredInt(monster, "wisdom", "monster details");
+    int charisma = requiredInt(monster, "charisma", "monster details");
+
+    Stats stats = new Stats(strength, dexterity, constitution,
+            intelligence, wisdom, charisma);
+    return new Monster(name, index, maxHealth, armourClass, stats);
+  }
+
+
   /** Returns the named JSON array or reports a missing or malformed API field. */
   private static JSONArray requiredArray(JSONObject object, String field, String context) {
     if (!object.has(field) || object.isNull(field) || !(object.get(field) instanceof JSONArray)) {
@@ -178,5 +230,27 @@ public final class Dnd5eCatalogGateway implements CatalogGateway {
     } catch (JSONException e) {
       throw new IllegalStateException("Missing or invalid bonus in race ability bonus", e);
     }
+  }
+
+  /** Overloaded method, returns a required integer field from an API object.*/
+  private static int requiredInt(JSONObject object, String field, String context) {
+    if (!object.has(field) || object.isNull(field)) {
+      throw new IllegalStateException("Missing or invalid " + field + " in " + context);
+    }
+    try {
+      return object.getInt(field);
+    } catch (JSONException e) {
+      throw new IllegalStateException("Missing or invalid " + field + " in " + context, e);
+    }
+  }
+
+  /** Extracts the first armour class value from a monster response.**/
+  private int parseArmourClass(JSONObject monster) {
+    JSONArray armourClasses = requiredArray(monster, "armour_class", "monster details");
+    if (armourClasses.isEmpty()) {
+      throw new IllegalStateException("Monster has no armour class info");
+    }
+    JSONObject armourClass = requireObject(armourClasses.get(0), "monster armour class");
+    return requiredInt(armourClass, "value", "monster armour class");
   }
 }

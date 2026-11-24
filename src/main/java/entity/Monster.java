@@ -4,18 +4,23 @@ import static java.lang.Math.max;
 
 public class Monster {
     private String name;
-    private String description;
+    private String index;
     private int health;
     private int maxHealth;
     private int armourClass;
-    //private final Stats stats;
+    private final Stats stats;
 
-    public Monster(String name, String description, int maxHealth) {
+    public Monster(String name, String index, int maxHealth, int armourClass, Stats stats) {
         this.name = name;
-        this.description = description;
+        this.index = index;
         this.maxHealth = maxHealth;
         this.health = maxHealth;
+        this.armourClass = armourClass;
+        this.stats = stats;
     }
+
+    @Override
+    public String toString() {return name;}
 
     public void takeDamage(int damage) {
         health = max(0, health - damage);
@@ -33,4 +38,7 @@ public class Monster {
         return health;
     }
 
+    public int getArmourClass() {return armourClass;}
+
+    public Stats getStats() {return stats;}
 }
