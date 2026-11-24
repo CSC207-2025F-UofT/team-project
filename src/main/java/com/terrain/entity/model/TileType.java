@@ -46,7 +46,7 @@ public enum TileType {
 
     // returns the color of this tile type at a given elevation, normalized for elevation range
     public Rgb colorAt(double elevation, double minElevation, double maxElevation) {
-        double t = (elevation - minElevation) / (maxElevation - minElevation);
+        double t = maxElevation == minElevation ? 0.0 : (elevation - minElevation) / (maxElevation - minElevation);
         return colorAtPercent(Math.clamp(t, 0.0, 1.0));
     }
 
