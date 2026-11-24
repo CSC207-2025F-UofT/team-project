@@ -129,6 +129,7 @@ public class SearchedResultsPageView extends JPanel implements ActionListener, S
 
 
 
+
             JPanel button = new JPanel();
             button.setOpaque(false);
             JButton viewDetails = new JButton("View Details");
