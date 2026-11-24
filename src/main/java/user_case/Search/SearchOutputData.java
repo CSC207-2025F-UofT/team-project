@@ -13,14 +13,17 @@ public class SearchOutputData {
 
     private final String[][] outputList;
 
+    //results returned in the form of {name, description, poster path}
+    //TODO: make this into a javadoc
     public SearchOutputData(List<Movie> movies) {
         outputList = new String[movies.size()][];
         int index = 0;
         for(Movie movie: movies){
-            outputList[index] = new String[] {movie.getName(), movie.getDescription(), movie.getPosterPath()};
+            outputList[index] = new String[] {movie.getName(), movie.getDescription(), movie.getPosterPath(), String.valueOf(movie.getMovieID())};
             index++;
         }
     }
+
 
     public String[][] getOutputList(){return outputList;}
 

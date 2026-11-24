@@ -23,7 +23,7 @@ public class SearchInteractor implements SearchInputBoundary {
 
     @Override
     public void execute(SearchInputData searchInputData) {
-        if ("".equals(searchInputData.getTitle())) {
+        if ("".equals(searchInputData.getTitle()) || searchInputData.getTitle().isBlank()) {
             searchPresenter.prepareFailView("Please enter a valid movie title");
         }
         else {
@@ -31,6 +31,7 @@ public class SearchInteractor implements SearchInputBoundary {
 
 
             final SearchOutputData searchOutputData = new SearchOutputData(movies);
+            //results returned in the form of {name, description, poster path, movie id}
             searchPresenter.prepareSuccessView(searchOutputData);
         }
     }

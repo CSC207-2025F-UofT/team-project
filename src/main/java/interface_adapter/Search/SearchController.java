@@ -19,8 +19,19 @@ public class SearchController {
      * @param title the title of the movie to be searched
      */
     public void execute(String title) {
-        final SearchInputData searchInputData = new SearchInputData(title);
+//        final SearchInputData searchInputData = new SearchInputData(title);
+//
+//        searchInteractor.execute(searchInputData);
+
+        System.out.println("Controller called");
+        System.out.println("Searching for: " + title);
+
+        final SearchInputData searchInputData =
+                new SearchInputData(title);
 
         searchInteractor.execute(searchInputData);
+
+        System.out.println("Interactor finished");
+
     }
 }

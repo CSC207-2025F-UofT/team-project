@@ -22,11 +22,13 @@ public class SearchPageView extends JPanel implements ActionListener, SearchView
 
     private final SearchBarViewModel searchBarViewModel;
 
-    private final JTextField searchInputField = new JTextField(25);
+    private final JTextField searchInputField = new JTextField(30);
     private final JLabel searchErrorField = new JLabel(" ");
 
 
     private final JButton search;
+    private final JButton favourites;
+    private final JButton watchlist;
     private SearchController searchController = null;
 
     public SearchPageView(SearchBarViewModel searchBarViewModel) {
@@ -37,17 +39,28 @@ public class SearchPageView extends JPanel implements ActionListener, SearchView
         this.setBackground(new Color(240, 249, 250));
 
         final JLabel title = new JLabel("Flicksy Search");
-        title.setFont(new Font("Serif", Font.BOLD, 24));
+        title.setFont(new Font("SansSerif", Font.BOLD, 100));
         title.setAlignmentX(Component.CENTER_ALIGNMENT);
 
         final LabelTextPanel searchInfo = new LabelTextPanel(
                 new JLabel("Search"), searchInputField);
+        searchInfo.setFont(new Font("SansSerif", Font.PLAIN, 16));
+        searchInfo.setOpaque(false);
 
 
         final JPanel buttons = new JPanel();
+        buttons.setOpaque(false);
         search = new JButton("Search");
-        search.setFont(new Font("Serif", Font.PLAIN, 16));
+        search.setFont(new Font("SansSerif", Font.PLAIN, 16));
         buttons.add(search);
+
+        favourites = new JButton("Favourites");
+        favourites.setFont(new Font("SansSerif", Font.PLAIN, 16));
+        buttons.add(favourites);
+
+        watchlist = new JButton("Watchlist");
+        watchlist.setFont(new Font("SansSerif", Font.PLAIN, 16));
+        buttons.add(watchlist);
 
         search.addActionListener(
                 new ActionListener() {
@@ -59,6 +72,25 @@ public class SearchPageView extends JPanel implements ActionListener, SearchView
                                     currentState.getTitle()
                             );
                         }
+
+                        if (evt.getSource().equals(favourites)) {
+//                            final SearchState currentState = searchBarViewModel.getState();
+//
+//                            searchController.execute(
+//                                    currentState.getTitle()
+//                            ); SHOULD CHANGE BASED ON THE FAVOURITES PAGE VIEW
+
+                        }
+
+                        if (evt.getSource().equals(watchlist)) {
+//                            final SearchState currentState = searchBarViewModel.getState();
+//
+//                            searchController.execute(
+//                                    currentState.getTitle()
+//                            ); SHOULD CHANGE BASED ON THE WATCHLIST PAGE VIEW
+
+                        }
+
                     }
                 }
         );
@@ -115,7 +147,7 @@ public class SearchPageView extends JPanel implements ActionListener, SearchView
         searchInputField.setText(state.getTitle());
     }
 
-    public void setLoginController(SearchController loginController) {
-        this.searchController = loginController;
+    public void setSearchController(SearchController searchController) {
+        this.searchController = searchController;
     }
 }
