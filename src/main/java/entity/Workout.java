@@ -19,7 +19,8 @@ public class Workout {
     private final List<LoggedExercise> exercises;
 
     /**
-     * Creates a workout.
+     * Creates a workout. The list of exercises is copied, so changing the caller's list
+     * afterwards does not change the workout.
      *
      * @param workoutID   the unique ID of the workout
      * @param userOwnerID the ID of the user who did the workout
@@ -27,6 +28,7 @@ public class Workout {
      * @param planName    the plan's name at the time of the workout
      * @param date        the day the workout was done
      * @param exercises   the exercises that were done, in order
+     * @throws NullPointerException if the list of exercises is null or contains null
      */
     public Workout(UUID workoutID, UUID userOwnerID, UUID planID, String planName,
                    LocalDate date, List<LoggedExercise> exercises) {
@@ -35,7 +37,7 @@ public class Workout {
         this.planID = planID;
         this.planName = planName;
         this.date = date;
-        this.exercises = exercises;
+        this.exercises = List.copyOf(exercises);
     }
 
     public UUID getWorkoutID() { return workoutID; }
@@ -43,5 +45,6 @@ public class Workout {
     public UUID getPlanID() { return planID; }
     public String getPlanName() { return planName; }
     public LocalDate getDate() { return date; }
+    /** Returns the exercises in order; the list cannot be modified. */
     public List<LoggedExercise> getExercises() { return exercises; }
 }
