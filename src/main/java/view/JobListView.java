@@ -12,6 +12,7 @@ import javax.swing.DefaultListCellRenderer;
 import javax.swing.DefaultListModel;
 import javax.swing.JLabel;
 import javax.swing.JList;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
@@ -20,9 +21,16 @@ import javax.swing.ListSelectionModel;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Cursor;
+import java.awt.Desktop;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Insets;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 
 /**
@@ -46,6 +54,7 @@ public class JobListView extends JPanel implements JobListViewModelListener {
     private final JLabel detailSkills = new JLabel(" ");
     private final JTextArea detailDescription = new JTextArea();
     private final JLabel detailUrl = new JLabel(" ");
+    private String currentJobUrl;
 
     private boolean updatingJobs;
     private JobListController jobListController;
@@ -157,6 +166,12 @@ public class JobListView extends JPanel implements JobListViewModelListener {
         final JLabel linkHeading = sectionHeading("Job link");
         detailUrl.setForeground(LINKEDIN_BLUE);
         detailUrl.setAlignmentX(Component.LEFT_ALIGNMENT);
+        detailUrl.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent event) {
+                openCurrentJobUrl();
+            }
+        });
 
         details.add(detailTitle);
         details.add(javax.swing.Box.createVerticalStrut(8));
@@ -236,7 +251,7 @@ public class JobListView extends JPanel implements JobListViewModelListener {
             detailSalary.setText(" ");
             detailSkills.setText(" ");
             detailDescription.setText("");
-            detailUrl.setText(" ");
+            setJobLink(null);
             return;
         }
 
@@ -248,7 +263,51 @@ public class JobListView extends JPanel implements JobListViewModelListener {
         detailSkills.setText("Skills: " + formatSkills(job.getSkillsNeeded()));
         detailDescription.setText(displayValue(job.getDescription()));
         detailDescription.setCaretPosition(0);
-        detailUrl.setText(displayValue(job.getUrl()));
+        setJobLink(job.getUrl());
+    }
+
+    /**
+     * Shows the job link as underlined, clickable text, or "Not specified" if there is no link.
+     */
+    private void setJobLink(String url) {
+        if (url == null || url.isBlank()) {
+            currentJobUrl = null;
+            detailUrl.setText(url == null ? " " : "Not specified");
+            detailUrl.setForeground(MUTED_COLOR);
+            detailUrl.setCursor(Cursor.getDefaultCursor());
+            detailUrl.setToolTipText(null);
+            return;
+        }
+        currentJobUrl = url;
+        detailUrl.setText("<html><u>View job posting</u></html>");
+        detailUrl.setForeground(LINKEDIN_BLUE);
+        detailUrl.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        detailUrl.setToolTipText(url);
+    }
+
+    /**
+     * Opens the selected job's link in the default web browser.
+     */
+    private void openCurrentJobUrl() {
+        if (currentJobUrl == null) {
+            return;
+        }
+        try {
+            final URI uri = new URI(currentJobUrl);
+            final String scheme = uri.getScheme();
+            if (!"http".equalsIgnoreCase(scheme) && !"https".equalsIgnoreCase(scheme)) {
+                throw new URISyntaxException(currentJobUrl, "Not a web link");
+            }
+            if (!Desktop.isDesktopSupported() || !Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
+                throw new UnsupportedOperationException("Opening a browser is not supported");
+            }
+            Desktop.getDesktop().browse(uri);
+        }
+        catch (IOException | URISyntaxException | UnsupportedOperationException exception) {
+            JOptionPane.showMessageDialog(this,
+                    "Could not open the link in your browser. You can copy it from here:\n" + currentJobUrl,
+                    "Job link", JOptionPane.WARNING_MESSAGE);
+        }
     }
 
     private String formatSkills(ArrayList<String> skills) {
