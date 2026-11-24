@@ -8,7 +8,6 @@ classDiagram
         UUID userID
         String username
         String displayName
-        String password
     }
     class WorkoutPlan {
         UUID workoutPlanID
