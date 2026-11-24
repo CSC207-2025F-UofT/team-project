@@ -2,6 +2,7 @@ package use_case.support;
 
 import entity.Location;
 import entity.SideQuest;
+import use_case.accept_quest.AcceptQuestSideQuestDataAccessInterface;
 import use_case.complete_quest.CompleteQuestSideQuestDataAccessInterface;
 
 import java.util.HashMap;
@@ -13,6 +14,7 @@ import java.util.Map;
  * only, so it never competes with his real DAO.
  */
 public class FakeSideQuestDataAccess implements
+        AcceptQuestSideQuestDataAccessInterface,
         CompleteQuestSideQuestDataAccessInterface {
 
     private final Map<String, SideQuest> quests = new HashMap<>();
