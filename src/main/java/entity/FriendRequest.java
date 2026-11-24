@@ -3,6 +3,10 @@ package entity;
 import java.time.Instant;
 import java.util.UUID;
 
+/**
+ * A request from one user to become friends with another. Its status changes
+ * as the request is answered; when it is accepted, a {@link Friendship} is created.
+ */
 public class FriendRequest {
     private final UUID friendReqID;
     private final UUID senderID;
@@ -10,6 +14,15 @@ public class FriendRequest {
     private String status; // PENDING, ACCEPTED, DECLINED or CANCELLED
     private final Instant createdAt;
 
+    /**
+     * Creates a friend request.
+     *
+     * @param friendReqID the unique ID of the request
+     * @param senderID    the ID of the user who sent the request
+     * @param targetID    the ID of the user who received the request
+     * @param status      one of PENDING, ACCEPTED, DECLINED or CANCELLED
+     * @param createdAt   when the request was sent
+     */
     public FriendRequest(UUID friendReqID, UUID senderID, UUID targetID, String status, Instant createdAt) {
         this.friendReqID = friendReqID;
         this.senderID = senderID;

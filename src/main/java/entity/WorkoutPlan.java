@@ -3,6 +3,11 @@ package entity;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * A user's plan for a workout: an ordered list of exercises with their
+ * targets. A plan can be a preset offered by the app, and it can be copied
+ * from another user's plan.
+ */
 public class WorkoutPlan {
     private final UUID workoutPlanID;
     private String name;
@@ -12,6 +17,17 @@ public class WorkoutPlan {
     private final boolean isPreset;
     private final UUID copiedFromUserID; // optional, may be null
 
+    /**
+     * Creates a workout plan.
+     *
+     * @param workoutPlanID    the unique ID of the plan
+     * @param name             the plan's name, such as "Push Day"
+     * @param userOwnerID      the ID of the user who owns the plan
+     * @param exercises        the exercises to do, in order
+     * @param workoutCompleted whether the plan's workout has been completed
+     * @param isPreset         whether the plan is a preset offered by the app
+     * @param copiedFromUserID the ID of the user the plan was copied from, or {@code null} if it was not copied
+     */
     public WorkoutPlan(UUID workoutPlanID, String name, UUID userOwnerID, List<PlannedExercise> exercises,
                        boolean workoutCompleted, boolean isPreset, UUID copiedFromUserID) {
         this.workoutPlanID = workoutPlanID;
