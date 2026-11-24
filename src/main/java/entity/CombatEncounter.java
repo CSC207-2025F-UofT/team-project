@@ -1,5 +1,8 @@
 package entity;
 
+import entity.characters.Monster;
+import entity.characters.PlayerCharacter;
+
 public class CombatEncounter {
     private PlayerCharacter character;
     private Monster monster;

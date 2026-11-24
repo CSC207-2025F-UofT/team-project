@@ -1,9 +1,13 @@
 package use_case.logout;
 
-import data_access.InMemoryUserDataAccessObject;
-import entity.UserFactory;
-import entity.User;
+import data_access.calogin.InMemoryUserDataAccessObject;
+import entity.calogin.UserFactory;
+import entity.calogin.User;
 import org.junit.jupiter.api.Test;
+import use_case.calogin.logout.LogoutInputBoundary;
+import use_case.calogin.logout.LogoutInteractor;
+import use_case.calogin.logout.LogoutOutputBoundary;
+import use_case.calogin.logout.LogoutOutputData;
 
 import static org.junit.jupiter.api.Assertions.*;
 

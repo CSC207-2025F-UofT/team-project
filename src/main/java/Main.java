@@ -1,9 +1,9 @@
-import adapter.CreateCharacterController;
-import adapter.Dnd5eCatalogGateway;
-import adapter.SwingCreateCharacterPresenter;
+import interface_adapter.create_character.CreateCharacterController;
+import interface_adapter.Dnd5eCatalogGateway;
+import interface_adapter.create_character.SwingCreateCharacterPresenter;
 import javax.swing.SwingUtilities;
-import usecase.CreateCharacterInteractor;
-import view.SwingCharacterCreatorView;
+import use_case.create_character.CreateCharacterInteractor;
+import view.create_character.SwingCharacterCreatorView;
 
 /** Starts the Swing character creator application. */
 public class Main {
