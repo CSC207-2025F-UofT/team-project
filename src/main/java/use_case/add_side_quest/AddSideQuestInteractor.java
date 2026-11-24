@@ -14,7 +14,7 @@ public class AddSideQuestInteractor implements AddSideQuestInputBoundary {
         if (inputData.getName() == null || inputData.getName().trim().isEmpty()){
             // outputBoundary.prepareFailView("Please enter a Side Quest name.")
             return;
-        } else if (inputData.getDescription() == null || inputData.getDescription().trim().isEmpty()) {
+        } else if (inputData.getQuestDescription() == null || inputData.getQuestDescription().trim().isEmpty()) {
             // outputBoundary.prepareFailView("Please enter a description for your Side Quest.");
             return;
         } else if (inputData.getBudget() < 0) {
@@ -32,8 +32,8 @@ public class AddSideQuestInteractor implements AddSideQuestInputBoundary {
         } else if (inputData.getInterests() == null || inputData.getInterests().isEmpty()) {
             // outputBoundary.prepareFailView("Please select at least one interest.");
             return;
-        } else if (input
-        // make it so that it can't' exceed 10 items, so it doesn't become infinite.
+        } else if (inputData.getInterests().size() > 5) {
+            // Ensure that the tags for each side quest cannot exceed 5, so it doesn't become bloated with tags.
             // outputBoundary.prepareFailView("Please select at least one interest.");
             return;
         }
