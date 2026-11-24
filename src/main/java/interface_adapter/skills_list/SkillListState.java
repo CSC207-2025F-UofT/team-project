@@ -6,7 +6,7 @@ import java.util.ArrayList;
  */
 public class SkillListState {
 
-    private ArrayList<String> skills;
+    private ArrayList<String> skills = new ArrayList<>();
     private String skillsError;
 
     public String getSkillsError() {

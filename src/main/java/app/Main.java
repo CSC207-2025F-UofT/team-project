@@ -10,10 +10,16 @@ public class Main {
                 .addSignupView()
                 .addLoggedInView()
                 .addCreateJobGroupView()
+                .addAddCourseView()
+                .addSkillListView()
+                .addJobListView()
                 .addSignupUseCase()
                 .addLoginUseCase()
-                .addChangePasswordUseCase()
+                .addLogoutUseCase()
                 .addCreateJobGroupUseCase()
+                .addAddCourseUseCase()
+                .addCourseAnalysisUseCase()
+                .addJobMatchUseCase()
                 .build();
 
         application.pack();

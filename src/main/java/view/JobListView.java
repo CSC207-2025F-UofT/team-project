@@ -1,11 +1,13 @@
 package view;
 
 import entity.Job;
+import interface_adapter.job_list.JobListController;
 import interface_adapter.job_list.JobListState;
 import interface_adapter.job_list.JobListViewModel;
 import interface_adapter.job_list.JobListViewModelListener;
 
 import javax.swing.BorderFactory;
+import javax.swing.JButton;
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.DefaultListModel;
 import javax.swing.JLabel;
@@ -46,6 +48,7 @@ public class JobListView extends JPanel implements JobListViewModelListener {
     private final JLabel detailUrl = new JLabel(" ");
 
     private boolean updatingJobs;
+    private JobListController jobListController;
 
     public JobListView(JobListViewModel jobListViewModel) {
         this.jobListViewModel = jobListViewModel;
@@ -59,6 +62,17 @@ public class JobListView extends JPanel implements JobListViewModelListener {
         pageTitle.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 24));
         pageTitle.setForeground(TEXT_COLOR);
         add(pageTitle, BorderLayout.NORTH);
+
+        final JButton backButton = new JButton("Back");
+        backButton.addActionListener(event -> {
+            if (jobListController != null) {
+                jobListController.switchToLoggedInView();
+            }
+        });
+        final JPanel footer = new JPanel(new BorderLayout());
+        footer.setBackground(Color.WHITE);
+        footer.add(backButton, BorderLayout.WEST);
+        add(footer, BorderLayout.SOUTH);
 
         final JSplitPane jobSplitPane = new JSplitPane(
                 JSplitPane.HORIZONTAL_SPLIT, createJobsPanel(), createDetailsPanel());
@@ -207,6 +221,10 @@ public class JobListView extends JPanel implements JobListViewModelListener {
         final String error = state.getError();
         errorLabel.setText(error == null || error.isBlank() ? " " : error);
         showJobDetails(jobsList.getSelectedValue());
+    }
+
+    public void setJobListController(JobListController jobListController) {
+        this.jobListController = jobListController;
     }
 
     private void showJobDetails(Job job) {

@@ -1,16 +1,18 @@
 package use_case.course_analysis;
 
 /**
- * The Change Password Use Case.
+ * The input boundary for the Course Analysis Use Case.
  */
 public interface AnalysisInputBoundary {
 
     /**
-     * Execute the Change Password Use Case.
+     * Executes the Course Analysis Use Case.
      * @param analysisInputData the input data for this use case
      */
     void execute(AnalysisInputData analysisInputData);
 
-    void switchToSkillListView();
-
+    /**
+     * Executes the "switch to LoggedInView" Use Case.
+     */
+    void switchToLoggedInView();
 }

@@ -16,4 +16,14 @@ public interface AddCourseOutputBoundary {
      * @param errorMessage the explanation of the failure
      */
     void prepareFailView(String errorMessage);
+
+    /**
+     * Switches to the Add Course View.
+     */
+    void switchToAddCourseView();
+
+    /**
+     * Switches to the Logged In View.
+     */
+    void switchToLoggedInView();
 }

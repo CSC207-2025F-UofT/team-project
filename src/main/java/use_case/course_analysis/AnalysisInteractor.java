@@ -6,7 +6,7 @@ import entity.StudentFactory;
 import java.util.ArrayList;
 
 /**
- * The Change Password Interactor.
+ * The Course Analysis Interactor.
  */
 public class AnalysisInteractor implements AnalysisInputBoundary {
     private final AnalysisDataAccessInterface userDataAccessObject;
@@ -26,29 +26,32 @@ public class AnalysisInteractor implements AnalysisInputBoundary {
 
     @Override
     public void execute(AnalysisInputData analysisInputData) {
-        if (analysisInputData.getCourses().isEmpty()) {
+        final Student student = skillDataAccessObject.get(analysisInputData.getUsername());
+        if (student == null) {
+            userPresenter.prepareFailView("Please log in first.");
+        }
+        else if (student.getCourses().isEmpty()) {
             userPresenter.prepareFailView("Course list cannot be empty");
         }
         else {
             ArrayList<String> skills = new ArrayList<>();
-            for (String code : analysisInputData.getCourses()){
+            for (String code : student.getCourses()) {
                 String description = userDataAccessObject.getCourseDescription(code);
                 skills.add(userDataAccessObject.getSkill(description));
             }
 
-            final Student student = studentFactory.create(analysisInputData.getName(),
-                    analysisInputData.getPassword(), skills,
-                    analysisInputData.getCourses());
+            final Student updatedStudent = studentFactory.create(student.getName(),
+                    student.getPassword(), student.getCourses(), skills);
 
-            skillDataAccessObject.changeSkills(student);
+            skillDataAccessObject.changeSkills(updatedStudent);
 
-            final AnalysisOutputData analysisOutputData = new AnalysisOutputData(student.getSkills());
+            final AnalysisOutputData analysisOutputData = new AnalysisOutputData(updatedStudent.getSkills());
             userPresenter.prepareSuccessView(analysisOutputData);
         }
     }
 
     @Override
-    public void switchToSkillListView() {
-        return;
+    public void switchToLoggedInView() {
+        userPresenter.switchToLoggedInView();
     }
 }

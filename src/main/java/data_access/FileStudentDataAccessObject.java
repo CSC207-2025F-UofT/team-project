@@ -2,12 +2,13 @@ package data_access;
 
 import entity.Student;
 import entity.StudentFactory;
-import use_case.change_password.ChangePasswordUserDataAccessInterface;
+import use_case.add_course.AddCourseDataAccessInterface;
+import use_case.add_course.CourseValidator;
 import use_case.course_analysis.SkillDataAccessInterface;
+import use_case.job_match.JobMatchStudentDataAccessInterface;
 import use_case.login.LoginUserDataAccessInterface;
 import use_case.logout.LogoutUserDataAccessInterface;
 import use_case.signup.SignupUserDataAccessInterface;
-import use_case.course_analysis.AnalysisStudentDataAccessInterface;
 import use_case.job_grouping.CreateJobGroupDataAccessInterface;
 
 import java.io.*;
@@ -17,14 +18,16 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
- * DAO for user data implemented using a File to persist the data.
+ * DAO for student data implemented using a File to persist the data.
  */
-public class FileUserDataAccessObject implements SignupUserDataAccessInterface,
+public class FileStudentDataAccessObject implements SignupUserDataAccessInterface,
                                                  LoginUserDataAccessInterface,
-                                                 ChangePasswordUserDataAccessInterface,
                                                  LogoutUserDataAccessInterface,
-                                                 AnalysisStudentDataAccessInterface,
-                                                 CreateJobGroupDataAccessInterface {
+                                                 SkillDataAccessInterface,
+                                                 CreateJobGroupDataAccessInterface,
+                                                 AddCourseDataAccessInterface,
+                                                 CourseValidator,
+                                                 JobMatchStudentDataAccessInterface {
 
 
     private static final String HEADER = "username,password";
@@ -41,7 +44,7 @@ public class FileUserDataAccessObject implements SignupUserDataAccessInterface,
      * @param studentFactory factory for creating user objects
      * @throws RuntimeException if there is an IOException when accessing the file
      */
-    public FileUserDataAccessObject(String csvPath, StudentFactory studentFactory) {
+    public FileStudentDataAccessObject(String csvPath, StudentFactory studentFactory) {
 
         csvFile = new File(csvPath);
         headers.put("username", 0);
@@ -126,16 +129,18 @@ public class FileUserDataAccessObject implements SignupUserDataAccessInterface,
     }
 
     @Override
-    public void changePassword(Student student) {
-        // Replace the User object in the map
+    public void changeSkills(Student student) {
         accounts.put(student.getName(), student);
         save();
     }
 
+    /**
+     * Placeholder that accepts every correctly formatted course code.
+     * TODO: check the course against the UofT course API.
+     */
     @Override
-    public void changeSkills(Student student) {
-        accounts.put(student.getName(), student);
-        save();
+    public boolean courseExists(String courseCode) {
+        return true;
     }
 
 }

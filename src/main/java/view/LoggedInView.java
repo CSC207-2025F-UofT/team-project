@@ -1,10 +1,12 @@
 package view;
 
-import interface_adapter.logged_in.ChangePasswordController;
+import interface_adapter.add_course.AddCourseController;
+import interface_adapter.job_list.JobListController;
 import interface_adapter.logged_in.LoggedInState;
 import interface_adapter.logged_in.LoggedInViewModel;
 import interface_adapter.logged_in.LoggedInViewModelListener;
 import interface_adapter.logout.LogoutController;
+import interface_adapter.skills_list.SkillListController;
 
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
@@ -20,15 +22,16 @@ public class LoggedInView extends JPanel implements ActionListener, LoggedInView
 
     private final LoggedInViewModel loggedInViewModel;
     private final JLabel passwordErrorField = new JLabel();
-    private ChangePasswordController changePasswordController = null;
     private LogoutController logoutController;
+    private AddCourseController addCourseController;
+    private SkillListController skillListController;
+    private JobListController jobListController;
 
     private final JLabel username;
 
     private final JButton logOut;
 
     private final JTextField passwordInputField = new JTextField(15);
-    private final JButton changePassword;
 
     public LoggedInView(LoggedInViewModel loggedInViewModel) {
         this.loggedInViewModel = loggedInViewModel;
@@ -47,10 +50,31 @@ public class LoggedInView extends JPanel implements ActionListener, LoggedInView
         logOut = new JButton("Log Out");
         buttons.add(logOut);
 
-        changePassword = new JButton("Change Password");
-        buttons.add(changePassword);
-
         logOut.addActionListener(this);
+
+        final JPanel navigation = new JPanel();
+        final JButton addCourses = new JButton("Add Courses");
+        final JButton viewSkills = new JButton("View Skills");
+        final JButton viewJobs = new JButton("View Jobs");
+        navigation.add(addCourses);
+        navigation.add(viewSkills);
+        navigation.add(viewJobs);
+
+        addCourses.addActionListener(evt -> {
+            if (addCourseController != null) {
+                addCourseController.switchToAddCourseView();
+            }
+        });
+        viewSkills.addActionListener(evt -> {
+            if (skillListController != null) {
+                skillListController.execute(loggedInViewModel.getState().getUsername());
+            }
+        });
+        viewJobs.addActionListener(evt -> {
+            if (jobListController != null) {
+                jobListController.execute(loggedInViewModel.getState().getUsername());
+            }
+        });
 
         this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 
@@ -78,26 +102,13 @@ public class LoggedInView extends JPanel implements ActionListener, LoggedInView
             }
         });
 
-        changePassword.addActionListener(
-                // This creates an anonymous subclass of ActionListener and instantiates it.
-                evt -> {
-                    if (evt.getSource().equals(changePassword)) {
-                        final LoggedInState currentState = loggedInViewModel.getState();
-
-                        this.changePasswordController.execute(
-                                currentState.getUsername(),
-                                currentState.getPassword()
-                        );
-                    }
-                }
-        );
-
         this.add(title);
         this.add(usernameInfo);
         this.add(username);
 
         this.add(passwordInfo);
         this.add(passwordErrorField);
+        this.add(navigation);
         this.add(buttons);
     }
 
@@ -110,8 +121,16 @@ public class LoggedInView extends JPanel implements ActionListener, LoggedInView
         System.out.println("Click " + evt.getActionCommand());
     }
 
-    public void setChangePasswordController(ChangePasswordController changePasswordController) {
-        this.changePasswordController = changePasswordController;
+    public void setAddCourseController(AddCourseController addCourseController) {
+        this.addCourseController = addCourseController;
+    }
+
+    public void setSkillListController(SkillListController skillListController) {
+        this.skillListController = skillListController;
+    }
+
+    public void setJobListController(JobListController jobListController) {
+        this.jobListController = jobListController;
     }
 
     public void setLogoutController(LogoutController logoutController) {

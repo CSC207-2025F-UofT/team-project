@@ -15,4 +15,9 @@ public interface JobMatchOutputBoundary {
      * @param errorMessage the explanation of the failure
      */
     void prepareFailView(String errorMessage);
+
+    /**
+     * Switches to the Logged In View.
+     */
+    void switchToLoggedInView();
 }

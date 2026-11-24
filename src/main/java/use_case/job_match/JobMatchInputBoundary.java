@@ -11,4 +11,9 @@ public interface JobMatchInputBoundary {
      */
     void execute(JobMatchInputData jobMatchInputData);
 
+    /**
+     * Executes the "switch to LoggedInView" Use Case.
+     */
+    void switchToLoggedInView();
+
 }

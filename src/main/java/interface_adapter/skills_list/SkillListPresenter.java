@@ -1,13 +1,12 @@
 package interface_adapter.skills_list;
 
 import interface_adapter.ViewManagerModel;
-import interface_adapter.skills_list.SkillListState;
-import interface_adapter.skills_list.SkillListViewModel;
+import interface_adapter.logged_in.LoggedInViewModel;
 import use_case.course_analysis.AnalysisOutputBoundary;
 import use_case.course_analysis.AnalysisOutputData;
 
 /**
- * The Presenter for the Analysis Use Case.
+ * The Presenter for the Course Analysis Use Case.
  */
 public class SkillListPresenter implements AnalysisOutputBoundary {
 
@@ -22,9 +21,9 @@ public class SkillListPresenter implements AnalysisOutputBoundary {
 
     @Override
     public void prepareSuccessView(AnalysisOutputData response) {
-        // On success, switch to the skillList view.
         final SkillListState skillListState = skillListViewModel.getState();
         skillListState.setSkills(response.getSkills());
+        skillListState.setSkillsError(null);
         skillListViewModel.notifyStateChanged();
 
         viewManagerModel.setState(SkillListViewModel.VIEW_NAME);
@@ -33,14 +32,18 @@ public class SkillListPresenter implements AnalysisOutputBoundary {
 
     @Override
     public void prepareFailView(String error) {
+        // Still switch to the skill list so the student can see the error.
         final SkillListState skillListState = skillListViewModel.getState();
         skillListState.setSkillsError(error);
         skillListViewModel.notifyStateChanged();
+
+        viewManagerModel.setState(SkillListViewModel.VIEW_NAME);
+        viewManagerModel.notifyViewChanged();
     }
 
     @Override
-    public void switchToSkillListView() {
-        viewManagerModel.setState(SkillListViewModel.VIEW_NAME);
+    public void switchToLoggedInView() {
+        viewManagerModel.setState(LoggedInViewModel.VIEW_NAME);
         viewManagerModel.notifyViewChanged();
     }
 }

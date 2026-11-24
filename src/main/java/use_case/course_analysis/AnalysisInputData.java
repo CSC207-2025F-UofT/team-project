@@ -1,28 +1,17 @@
 package use_case.course_analysis;
 
-import entity.Student;
-
-import java.util.ArrayList;
-
 /**
- * The input data for the Change Password Use Case.
+ * The input data for the Course Analysis Use Case.
  */
 public class AnalysisInputData {
 
-    private final Student student;
+    private final String username;
 
-    public AnalysisInputData(Student student) {
-        this.student = student;
+    public AnalysisInputData(String username) {
+        this.username = username;
     }
 
-    String getName() {
-        return this.student.getName();
+    String getUsername() {
+        return username;
     }
-
-    String getPassword() {
-        return this.student.getPassword();
-    }
-
-    ArrayList<String> getCourses() { return new ArrayList<>(this.student.getCourses()); }
-
 }

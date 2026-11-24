@@ -1,6 +1,5 @@
 package interface_adapter.job_list;
 
-import entity.Student;
 import use_case.job_match.JobMatchInputBoundary;
 import use_case.job_match.JobMatchInputData;
 
@@ -17,10 +16,16 @@ public class JobListController {
 
     /**
      * Executes the Job Match Use Case.
-     * @param student the student whose profile is used for matching
+     * @param username the logged-in student whose profile is used for matching
      */
-    public void execute(Student student) {
-        final JobMatchInputData jobMatchInputData = new JobMatchInputData(student);
-        jobMatchUseCaseInteractor.execute(jobMatchInputData);
+    public void execute(String username) {
+        jobMatchUseCaseInteractor.execute(new JobMatchInputData(username));
+    }
+
+    /**
+     * Executes the "switch to LoggedInView" Use Case.
+     */
+    public void switchToLoggedInView() {
+        jobMatchUseCaseInteractor.switchToLoggedInView();
     }
 }

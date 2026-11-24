@@ -1,7 +1,6 @@
 package data_access;
 
 import entity.Student;
-import use_case.change_password.ChangePasswordUserDataAccessInterface;
 import use_case.login.LoginUserDataAccessInterface;
 import use_case.logout.LogoutUserDataAccessInterface;
 import use_case.signup.SignupUserDataAccessInterface;
@@ -35,9 +34,9 @@ import java.io.ByteArrayInputStream;
  */
 public class InMemoryUserDataAccessObject implements SignupUserDataAccessInterface,
                                                      LoginUserDataAccessInterface,
-                                                     ChangePasswordUserDataAccessInterface,
                                                      LogoutUserDataAccessInterface,
-                                                     CreateJobGroupDataAccessInterface {
+                                                     CreateJobGroupDataAccessInterface,
+                                                     AnalysisDataAccessInterface {
 
     private final Map<String, Student> users = new HashMap<>();
 
@@ -66,12 +65,6 @@ public class InMemoryUserDataAccessObject implements SignupUserDataAccessInterfa
     @Override
     public String getCurrentUsername() {
         return currentUsername;
-    }
-
-    @Override
-    public void changePassword(Student student) {
-        // Replace the old entry with the new password
-        users.put(student.getName(), student);
     }
 
     @Override
@@ -119,13 +112,13 @@ public class InMemoryUserDataAccessObject implements SignupUserDataAccessInterfa
                 .replace("\"", "\\\"")
                 .replace("\n", "\\n");
 
-        String jsonPayload = "{%n" +
-                             "  \"contents\": [{%n" +
-                             "    \"parts\": [{%n" +
-                             "      \"text\": \"%s\"%n" +
-                             "    }]%n" +
-                             "  }]%n" +
-                             "}%n".formatted(safePrompt);
+        String jsonPayload = String.format("{%n"
+                             + "  \"contents\": [{%n"
+                             + "    \"parts\": [{%n"
+                             + "      \"text\": \"%s\"%n"
+                             + "    }]%n"
+                             + "  }]%n"
+                             + "}%n", safePrompt);
 
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(BASE_URL))
