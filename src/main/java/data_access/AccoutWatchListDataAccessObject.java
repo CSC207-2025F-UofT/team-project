@@ -23,7 +23,7 @@ public class AccoutWatchListDataAccessObject implements WatchListDataAccessInter
         JSONObject info = user.optJSONObject(INFO_FIELD);
 
         Watchlist watchList = new Watchlist();
-        if(info !=null && info.optJSONObject(WATCHLIST_KEY) != null){
+        if(info !=null && info.optJSONArray(WATCHLIST_KEY) != null){
             JSONArray stockWatchers = info.getJSONArray(WATCHLIST_KEY);
             for (int i = 0; i< stockWatchers.length(); i++){
                 watchList.addStock(stockWatchers.getString(i));
