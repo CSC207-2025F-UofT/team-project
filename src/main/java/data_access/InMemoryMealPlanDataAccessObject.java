@@ -33,7 +33,7 @@ public class InMemoryMealPlanDataAccessObject
     @Override
     public List<FoodItem> findAllFoods() {
         return new ArrayList<>(
-                foodDataAccess.getAllFoods().values());
+                foodDataAccess.getAllFoods());
     }
     @Override
     public DailyMealPlan findPlanByDate(LocalDate date) {
