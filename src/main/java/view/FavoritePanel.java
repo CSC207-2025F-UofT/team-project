@@ -12,7 +12,7 @@ import java.util.function.Supplier;
 
 /** The add-to-favourites action for the currently displayed movie. */
 public final class FavoritePanel extends JPanel {
-    private final JButton addButton = new JButton("Add to Favourites");
+    private final JButton addButton = new JButton("Add to Favorites");
     private final JLabel feedback = new JLabel(" ");
     private final FavoriteViewModel viewModel;
     private final FavoriteViewModelListener listener = state -> feedback.setText(state.getMessage());
