@@ -18,14 +18,23 @@ public class AppFrame extends JFrame implements Navigator {
         root.add(new CaregiverMenuPanel(this), ScreenNames.CAREGIVER_MENU);
         root.add(new CustomizeBoardPanel(this), ScreenNames.CUSTOMIZE);
         root.add(new SearchPanel(this), ScreenNames.SEARCH);
-        root.add(new HistoryPanel(this), ScreenNames.HISTORY);
 
         add(root);
         show(ScreenNames.MAIN);
     }
 
+    /**
+     * Adds a screen that needs use cases connected to it.
+     * Screens like this are built in app.Main.
+     */
+    public void addScreen(JPanel screen, String screenName) {
+        root.add(screen, screenName);
+    }
+
     @Override
+
     public void show(String screenName) {
         cards.show(root, screenName);
     }
+
 }
