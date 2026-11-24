@@ -3,7 +3,9 @@ package use_case.dashboard;
 import entity.LocationInfo;
 import entity.LocationInfoType;
 import entity.Trip;
+import use_case.PhotoAccessException;
 import use_case.PhotoAccessInterface;
+import use_case.TripAccessException;
 import use_case.TripAccessInterface;
 
 import java.time.LocalDate;
@@ -31,9 +33,17 @@ public class AnalyticsUseCase implements DashboardInputBoundary {
     @Override
     public void execute(DashboardInputData dashboardInputData) {
         AnalyticsType analyticsType = dashboardInputData.getAnalyticsType();
-        switch (analyticsType) {
-            case MOST_VISITED: mostVisited(dashboardInputData);
+        try {
+            switch (analyticsType) {
+                case MOST_VISITED: mostVisited(dashboardInputData);
+            }
+        } catch (PhotoAccessException | TripAccessException e) {
+            presenter.prepareFailureView("Access to Photos or Trips Failed:\n" + e.getMessage());
+        } catch (RuntimeException e) {
+            presenter.prepareFailureView("Unexpected Failure:\n" + e.getMessage());
         }
+
+
     }
 
     private void mostVisited(DashboardInputData dashboardInputData) {

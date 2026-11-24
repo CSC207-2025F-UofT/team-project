@@ -71,11 +71,11 @@ public class DashboardPresenter implements DashboardOutputBoundary {
 
     private String resolveLocationTypeString(LocationInfoType locationInfoType) {
         Map<LocationInfoType, String> stringMap = Map.of(
-                LocationInfoType.COUNTRY, "Countries",
-                LocationInfoType.CITY, "Cities",
-                LocationInfoType.CONTINENT, "Continents",
-                LocationInfoType.STATE, "Provinces/States",
-                LocationInfoType.COUNTY, "Counties"
+                LocationInfoType.COUNTRY, "Country",
+                LocationInfoType.CITY, "City",
+                LocationInfoType.CONTINENT, "Continent",
+                LocationInfoType.STATE, "Province/State",
+                LocationInfoType.COUNTY, "County"
         );
         return stringMap.get(locationInfoType);
     }
