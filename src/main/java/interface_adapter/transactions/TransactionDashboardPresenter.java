@@ -1,7 +1,7 @@
 package interface_adapter.transactions;
 
-import application_business_rules.transactions.TransactionDashboardOutputBoundary;
-import application_business_rules.transactions.TransactionDashboardOutputData;
+import use_case.transactions.TransactionDashboardOutputBoundary;
+import use_case.transactions.TransactionDashboardOutputData;
 
 public final class TransactionDashboardPresenter implements TransactionDashboardOutputBoundary {
     private final TransactionDashboardViewModel viewModel;

@@ -1,7 +1,7 @@
 package interface_adapter.create_account;
 
-import application_business_rules.create_account.CreateAccountOutputBoundary;
-import application_business_rules.create_account.CreateAccountOutputData;
+import use_case.create_account.CreateAccountOutputBoundary;
+import use_case.create_account.CreateAccountOutputData;
 
 /** Converts use-case Output Data into values the View can display. */
 public final class CreateAccountPresenter implements CreateAccountOutputBoundary {

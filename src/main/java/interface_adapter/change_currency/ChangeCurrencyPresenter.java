@@ -1,7 +1,7 @@
 package interface_adapter.change_currency;
 
-import application_business_rules.change_currency.ChangeCurrencyOutputBoundary;
-import application_business_rules.change_currency.ChangeCurrencyOutputData;
+import use_case.change_currency.ChangeCurrencyOutputBoundary;
+import use_case.change_currency.ChangeCurrencyOutputData;
 
 public final class ChangeCurrencyPresenter implements ChangeCurrencyOutputBoundary {
     private final ChangeCurrencyViewModel viewModel;

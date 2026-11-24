@@ -1,7 +1,7 @@
 package interface_adapter.upload_receipt;
 
-import application_business_rules.upload_receipt.UploadReceiptOutputBoundary;
-import application_business_rules.upload_receipt.UploadReceiptOutputData;
+import use_case.upload_receipt.UploadReceiptOutputBoundary;
+import use_case.upload_receipt.UploadReceiptOutputData;
 
 public final class UploadReceiptPresenter implements UploadReceiptOutputBoundary {
     private final UploadReceiptViewModel viewModel;

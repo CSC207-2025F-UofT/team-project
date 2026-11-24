@@ -1,7 +1,7 @@
 package interface_adapter.login;
 
-import application_business_rules.login.LoginOutputBoundary;
-import application_business_rules.login.LoginOutputData;
+import use_case.login.LoginOutputBoundary;
+import use_case.login.LoginOutputData;
 
 public final class LoginPresenter implements LoginOutputBoundary {
     private final LoginViewModel viewModel;

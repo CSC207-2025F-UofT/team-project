@@ -1,7 +1,7 @@
 package interface_adapter.change_currency;
 
-import application_business_rules.change_currency.ChangeCurrencyInputBoundary;
-import application_business_rules.change_currency.ChangeCurrencyInputData;
+import use_case.change_currency.ChangeCurrencyInputBoundary;
+import use_case.change_currency.ChangeCurrencyInputData;
 import java.time.LocalDate;
 
 public final class ChangeCurrencyController {

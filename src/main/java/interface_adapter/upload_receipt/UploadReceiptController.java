@@ -1,7 +1,7 @@
 package interface_adapter.upload_receipt;
 
-import application_business_rules.upload_receipt.UploadReceiptInputBoundary;
-import application_business_rules.upload_receipt.UploadReceiptInputData;
+import use_case.upload_receipt.UploadReceiptInputBoundary;
+import use_case.upload_receipt.UploadReceiptInputData;
 
 public final class UploadReceiptController {
     private final UploadReceiptInputBoundary inputBoundary;

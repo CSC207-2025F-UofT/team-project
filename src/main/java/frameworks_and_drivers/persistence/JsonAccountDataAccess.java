@@ -1,6 +1,6 @@
 package frameworks_and_drivers.persistence;
 
-import application_business_rules.create_account.AccountDataAccessInterface;
+import use_case.create_account.AccountDataAccessInterface;
 import entity.Account;
 import entity.AccountType;
 import entity.UserProfile;

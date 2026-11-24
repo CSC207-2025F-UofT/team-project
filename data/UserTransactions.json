@@ -34,6 +34,12 @@
         "amount": 180,
         "description": "Tutoring",
         "id": 2
+      },
+      {
+        "date": "2026-11-22",
+        "amount": 312,
+        "description": "Tutoring",
+        "id": 3
       }
     ],
     "expenses": [

@@ -1,9 +1,9 @@
 package app;
 
-import application_business_rules.transactions.TransactionDashboardInteractor;
-import application_business_rules.transactions.TransactionDashboardInputBoundary;
-import application_business_rules.transactions.TransactionDashboardOutputBoundary;
-import application_business_rules.transactions.TransactionDataAccessInterface;
+import use_case.transactions.TransactionDashboardInteractor;
+import use_case.transactions.TransactionDashboardInputBoundary;
+import use_case.transactions.TransactionDashboardOutputBoundary;
+import use_case.transactions.TransactionDataAccessInterface;
 import frameworks_and_drivers.persistence.JsonTransactionDataAccess;
 import interface_adapter.transactions.TransactionDashboardController;
 import interface_adapter.transactions.TransactionDashboardPresenter;

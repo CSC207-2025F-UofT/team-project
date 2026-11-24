@@ -5,7 +5,7 @@ This branch is a working refactor of the application, not a parallel demo archit
 ## Current package responsibilities
 
 - `entity`: persistence-free business objects (`UserProfile`, `Account`, `Transaction`, `Category`, and enums).
-- `application_business_rules`: use cases, Input/Output Data, Input/Output Boundaries, and Data Access Interfaces.
+- `use_case`: use cases, Input/Output Data, Input/Output Boundaries, and Data Access Interfaces.
 - `interface_adapter`: Controllers, Presenters, and View Models.
 - `view`: Swing presentation only.
 - `frameworks_and_drivers.persistence`: concrete JSON data access implementations.

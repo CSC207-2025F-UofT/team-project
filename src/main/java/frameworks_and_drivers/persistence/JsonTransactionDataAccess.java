@@ -1,6 +1,6 @@
 package frameworks_and_drivers.persistence;
 
-import application_business_rules.transactions.TransactionDataAccessInterface;
+import use_case.transactions.TransactionDataAccessInterface;
 import entity.Transaction;
 import entity.TransactionType;
 import java.io.IOException;

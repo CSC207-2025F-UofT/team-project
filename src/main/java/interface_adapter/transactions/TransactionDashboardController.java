@@ -1,7 +1,7 @@
 package interface_adapter.transactions;
 
-import application_business_rules.transactions.TransactionDashboardInputBoundary;
-import application_business_rules.transactions.TransactionDashboardInputData;
+import use_case.transactions.TransactionDashboardInputBoundary;
+import use_case.transactions.TransactionDashboardInputData;
 import entity.TransactionType;
 import java.math.BigDecimal;
 import java.time.LocalDate;

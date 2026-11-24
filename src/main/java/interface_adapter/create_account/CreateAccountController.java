@@ -1,7 +1,7 @@
 package interface_adapter.create_account;
 
-import application_business_rules.create_account.CreateAccountInputBoundary;
-import application_business_rules.create_account.CreateAccountInputData;
+import use_case.create_account.CreateAccountInputBoundary;
+import use_case.create_account.CreateAccountInputData;
 import entity.AccountType;
 import java.math.BigDecimal;
 

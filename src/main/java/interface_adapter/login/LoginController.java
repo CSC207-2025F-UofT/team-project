@@ -1,7 +1,7 @@
 package interface_adapter.login;
 
-import application_business_rules.login.LoginInputBoundary;
-import application_business_rules.login.LoginInputData;
+import use_case.login.LoginInputBoundary;
+import use_case.login.LoginInputData;
 
 public final class LoginController {
     private final LoginInputBoundary inputBoundary;

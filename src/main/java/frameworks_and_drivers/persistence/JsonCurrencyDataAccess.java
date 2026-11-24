@@ -1,6 +1,6 @@
 package frameworks_and_drivers.persistence;
 
-import application_business_rules.change_currency.CurrencyDataAccessInterface;
+import use_case.change_currency.CurrencyDataAccessInterface;
 import entity.Account;
 import entity.AccountType;
 import frameworks_and_drivers.currency.BankOfCanadaCurrencyClient;
