@@ -6,7 +6,9 @@ import java.util.function.Supplier;
 public enum FeatureType {
     MOUNTAIN(MountainFeature::new),
     RIVER(RiverFeature::new),
-    FOREST(ForestFeature::new);
+    FOREST(ForestFeature::new),
+    DESERT(DesertFeature::new),
+    LAKE(LakeFeature::new);
     // `MountainFeature::new` is a shortcut for `() -> new MountainFeature()`, which just makes a new instance of the
     // feature. This is a "factory" that we can call to create new instances of the feature. We do this so that we can
     // have a kind of dropdown menu of features, and we can add new features without having to change the code that

@@ -1,8 +1,11 @@
 package com.terrain.entity.model.feature;
 
+import java.util.List;
 import java.util.Random;
 
+import com.terrain.entity.model.Path;
 import com.terrain.entity.model.TerrainMap;
+import com.terrain.entity.model.TileType;
 import com.terrain.entity.model.feature.parameter.CoordinateParameter;
 import com.terrain.entity.model.feature.parameter.NumberParameter;
 
@@ -10,11 +13,8 @@ public class RiverFeature extends Feature {
     private final CoordinateParameter start = coordinate("Start", 0, 0);
     private final CoordinateParameter end = coordinate("End", 100, 100);
     private final NumberParameter width = number("Width", 5, 1, 20);
-    private final NumberParameter meander = number("Meander", 5, 1, 20);
-    // Considering adding a "hit these points" parameter instead of meander, but that would require a list of
-    // coordinates, which is more complex than the current parameter types allow for. Perhaps if we get bored.
-    // Could also replace start and end with a list of coordinates? Like, user just chooses a bunch of points and the
-    // river goes through them?
+    private final NumberParameter pull = number("Pull", 0.5, 0, 1);
+    private final NumberParameter wobble = number("Wobble (radians)", 1.57, 0, 6.28);
 
     @Override
     public String getName() {
@@ -23,6 +23,20 @@ public class RiverFeature extends Feature {
 
     @Override
     public void apply(TerrainMap map, Random random) {
-        // TODO: carve a meandering path from start to end.
+        int startX = (int) start.getX();
+        int startY = (int) start.getY();
+        int endX = (int) end.getX();
+        int endY = (int) end.getY();
+        int wd = (int) width.getValue();
+        double p = pull.getValue();
+        double wb = wobble.getValue();
+        int[] start = {startX, startY};
+        int[] end = {endX, endY};
+        Path path = new Path(start, end, wd);
+        List<int[]> riverPath = path.generate(0, map, p, wb);
+
+        for (int[] coordinate : riverPath) {
+            map.getTile(coordinate[0], coordinate[1]).setType(TileType.WATER);
+        }
     }
 }
