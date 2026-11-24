@@ -93,7 +93,7 @@ class FileProfileDataAccessTest {
   }
 
   @Test
-  void olderWindowsCanMergeEditsAfterALegacyProfileGainsARevision() throws Exception {
+  void olderWindowsCanMergeEditsAfterLegacyProfileMigration() throws Exception {
     Path path = directory.resolve("profile.json");
     FileProfileDataAccess store = new FileProfileDataAccess(path);
     User owner = new User();

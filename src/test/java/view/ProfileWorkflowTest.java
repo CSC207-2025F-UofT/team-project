@@ -148,6 +148,7 @@ class ProfileWorkflowTest {
         () -> {
           Container first = show(tabs(file, new DemoJobSource(), url -> {}), "Profile");
           Container second = show(tabs(file, new DemoJobSource(), url -> {}), "Profile");
+          assertEquals("Physics", field(second, "Program of study").getText());
           field(first, "Program of study").setText("Math");
           button(first, "Save changes").doClick();
           assertTrue(shows(first, "Changes saved."));
