@@ -45,37 +45,65 @@ public final class Recipe {
         this.ingredients = List.copyOf(ingredients);
     }
 
-    /** @return the stable, source-qualified recipe identifier */
+    /**
+     * Returns the stable, source-qualified recipe identifier.
+     *
+     * @return the recipe identifier
+     */
     public String getId() {
         return id;
     }
 
-    /** @return the recipe name */
+    /**
+     * Returns the recipe name.
+     *
+     * @return the recipe name
+     */
     public String getName() {
         return name;
     }
 
-    /** @return the category, or null if unavailable */
+    /**
+     * Returns the recipe category.
+     *
+     * @return the category, or null if unavailable
+     */
     public String getCategory() {
         return category;
     }
 
-    /** @return the area, or null if unavailable */
+    /**
+     * Returns the recipe area.
+     *
+     * @return the area, or null if unavailable
+     */
     public String getArea() {
         return area;
     }
 
-    /** @return the preparation instructions, or null if unavailable */
+    /**
+     * Returns the preparation instructions.
+     *
+     * @return the preparation instructions, or null if unavailable
+     */
     public String getInstruction() {
         return instruction;
     }
 
-    /** @return the image location, or null if unavailable */
+    /**
+     * Returns the thumbnail location.
+     *
+     * @return the image location, or null if unavailable
+     */
     public URI getThumbnail() {
         return thumbnail;
     }
 
-    /** @return a mutable copy of the recipe's ingredient list */
+    /**
+     * Returns a copy of the recipe's ingredient list.
+     *
+     * @return a mutable, shallow copy of the ingredient list
+     */
     public List<RecipeIngredient> getIngredients() {
         return new ArrayList<>(ingredients);
     }
