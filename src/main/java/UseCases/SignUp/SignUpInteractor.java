@@ -26,29 +26,40 @@ public class SignUpInteractor implements SignUpInputBoundary {
         else if ("".equals(signUpInputData.getUsername())) {
             userPresenter.prepareFailView("Username is required");
         }
-        else if (!signUpInputData.getPassword().equals(signUpInputData.getPasswordConfirm())) {
+
+        if (!signUpInputData.getPassword().equals(signUpInputData.getPasswordConfirm())) {
             userPresenter.prepareFailView("Passwords don't match.");
         }
-        else if ("".equals(signUpInputData.getPassword())) {
+        if ("".equals(signUpInputData.getPassword())) {
             userPresenter.prepareFailView("Password is required.");
         }
-        else if ("".equals(signUpInputData.getFirstName())) {
+        if ("".equals(signUpInputData.getFirstName())) {
             userPresenter.prepareFailView("First name is required.");
         }
-        else if ("".equals(signUpInputData.getLastName())) {
+        if ("".equals(signUpInputData.getLastName())) {
             userPresenter.prepareFailView("Last name is required.");
         }
-        else {
-            this.profile = UserProfile.UserProfileFactory(signUpInputData.getFirstName(),
-            signUpInputData.getLastName(), signUpInputData.getAge(), signUpInputData.getGender(),
-            signUpInputData.getOccupation(), signUpInputData.getBiography());
-            this.user = User.UserFactory(signUpInputData.getUsername(),
-                                                 signUpInputData.getPassword(), profile);
-            userDataAccessObject.create(user);
 
-            final SignUpOutputData signUpOutputData = new SignUpOutputData(user.getUsername());
-            userPresenter.prepareSuccessView(signUpOutputData);
+        if (signUpInputData.getAge() == null) {
+            userPresenter.prepareFailView("Age is required.");
         }
+        else if (!(signUpInputData.getAge() instanceof Integer) || signUpInputData.getAge() < 0) {
+            userPresenter.prepareFailView("Enter a valid age.");
+        }
+
+        if ("".equals(signUpInputData.getOccupation())) {
+            userPresenter.prepareFailView("Occupation is required.");
+        }
+        
+        this.profile = UserProfile.UserProfileFactory(signUpInputData.getFirstName(),
+        signUpInputData.getLastName(), signUpInputData.getAge(), signUpInputData.getGender(),
+        signUpInputData.getOccupation(), signUpInputData.getBiography());
+        this.user = User.UserFactory(signUpInputData.getUsername(), signUpInputData.getPassword(), 
+        profile);
+        userDataAccessObject.create(user);
+
+        final SignUpOutputData signUpOutputData = new SignUpOutputData(user.getUsername());
+        userPresenter.prepareSuccessView(signUpOutputData);
     }
 
     @Override
