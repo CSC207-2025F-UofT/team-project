@@ -1,9 +1,11 @@
 package profilesetup;
 
+import questionaire.QuestionOne;
+
 import javax.swing.*;
 
-public class privateinfo {
-    public privateinfo() {
+public class PrivateInfo {
+    public PrivateInfo() {
         JFrame firstpage = new JFrame();
         JPanel panel = new JPanel();
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
@@ -39,6 +41,9 @@ public class privateinfo {
 
         JPanel next = new JPanel();
         JButton choose_next = new JButton("Next");
+        choose_next.addActionListener(e ->{
+            QuestionOne q1 = new QuestionOne();
+        });
         next.add(choose_next);
 
         panel.add(panel1);
