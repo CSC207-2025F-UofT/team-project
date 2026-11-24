@@ -27,7 +27,6 @@ public class NagerDateHolidayService implements HolidayService {
     public Optional<String> getHolidayName(LocalDate date, String countryCode) {
         String upperCaseCountry = countryCode.toUpperCase();
         String cacheCode = upperCaseCountry + "-" + date.getYear();
- 9
         try {
             Map<LocalDate, String> holidays = cache.get(cacheCode);
 

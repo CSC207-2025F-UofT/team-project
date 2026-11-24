@@ -99,8 +99,11 @@ abstract class TaskUser<T extends Task> {
   - tasks : List<T>
 }
 
+' When a new user is signed up, the constructor should set `nextTaskUniqueId` to 1 before any tasks are added.
+' The constructor should also include an additional `nextTaskUniqueId` parameter to be used when loading from
+'     persistent storage upon logging in.
 class StudentTaskUser {
-  - countryCode : String
+  - countryCode : Country
   + {final} studentTaskFactory : StudentTaskFactory
 }
 
@@ -116,7 +119,7 @@ class Holidays {
   - countryCodeToHolidays: Map<Country, Set<LocalDate>>
 }
 
-interface Comparator<Task>
+interface Comparator<StudentTask>
 
 Task <|-- StudentTask
 
@@ -146,7 +149,7 @@ hide empty members
 ' Factories
 ' ========
 
-abstract class TaskUser
+class StudentTaskUser
 
 abstract class UserFactory {
   - nextUniqueID : int
@@ -154,28 +157,34 @@ abstract class UserFactory {
 }
 
 class StudentUserFactory {
-  + createStudentUser(countryCode : String) : StudentTaskUser
+  + createStudentUser(username : String, password : String, countryCode : Country) : StudentTaskUser
 }
 
 UserFactory <|-- StudentUserFactory
 
+' `nextUniqueId` would be stored in persistent storage and loaded every time a user logs in.
+' The persistent storage should be updated whenever a new task is added.
+' The implementation of the persistent storage is not within the scope of the entities layer
 abstract class TaskFactory {
-  - nextUniqueId : int
-  # generateNextUniqueId() : int
+  - nextTaskUniqueId : int
+  # generateNextTaskUniqueId() : int
 }
 
+' The `uniqueUserId` here is an immutable copy of the `uniqueUserId` for the `StudentUser` that owns this factory
+' The `uniqueUserId` would be passed to the `StudentTaskFactory` in the constructor of `StudentUser`.
 class StudentTaskFactory {
-  + createStudentTask(uniqueUserId : int, title : String, description : String, deadline : LocalDate,
+  - {final} uniqueUserId : int
+  + createStudentTask(title : String, description : String, deadline : LocalDate,
   estimatedHoursToCompleteTask : double, completionProgress : byte, difficultyLevel : DifficultyLevel) : StudentTask
 }
 
 TaskFactory <|-- StudentTaskFactory
 
-' The following TaskUser is a continuation of the PlantUML diagram described above.
-TaskFactory <--o TaskUser
+' The following StudentTaskUser is a continuation of the PlantUML diagram described above.
+StudentTaskFactory <--o StudentTaskUser
 
 class StudentTaskSortingStrategyFactory {
-  + createStrategy(strategyName : SortingStrategy) : SortingByDueDateStrategy
+  + createStrategy(strategyName : SortingStrategy) : Comparator<StudentTask>
 }
 
 @enduml
