@@ -18,7 +18,7 @@ public interface ManipulateTripsOutputBoundary {
 
     void prepareMergeFailView(String errorMessage);
 
-    void prepareRenameSuccessView(RenameTripOutputData outputData);
+    void prepareRenameSuccessView(TripDetailsOutputData outputData);
 
     void prepareRenameFailView(String errorMessage);
 }
