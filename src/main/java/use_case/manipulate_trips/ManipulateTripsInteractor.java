@@ -116,19 +116,22 @@ public class ManipulateTripsInteractor implements ManipulateTripsInputBoundary {
     // Renaming Trips
     @Override 
     public void renameTrip(RenameTripInputData inputData) {
-        String newName = inputData.getNewTripName() == null ? "New Trip" : inputData.getNewTripName();
+        String newName = inputData.getNewTripName() == null ? "New Trip" : inputData.getNewTripName().strip();
         if (newName.isEmpty()) {
-            presenter.prepareRenameFailView(MISSING_NAME);
+            presenter.prepareRenameFailView(MISSING_RENAME);
+            return;
         }
         TripDetailsOutputData outputData;
         try {
             Trip trip = tripAccess.getTripById(inputData.getTripId());
+            trip.setName(newName);
             tripAccess.writeTrip(trip);
-            detailsOf(trip.getId());
+            outputData = detailsOf(trip.getId());
         } catch (TripAccessException | PhotoAccessException e) {
             presenter.prepareRenameFailView("Couldn't rename trip: " + e.getMessage());
             return;
         }
+        presenter.prepareRenameSuccessView(outputData);
     }
 
     /** Reads one trip for the details screen. Used by view, split & merge. */
