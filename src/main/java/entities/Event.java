@@ -1,5 +1,7 @@
 package entities;
 
+import java.util.Optional;
+
 public class Event {
     private String id;
     private String name;
@@ -36,7 +38,22 @@ public class Event {
         return this.courseID;
     }
     public boolean isGraded() { return this.grade != null; }
-    // TODO: how to get the info from GradeInfo? should it come here or not?
+    // In progress graded event
+    public boolean isIPRGraded() { return (isGraded() && !isCompleted()); }
+    // Returns Optional.grade if it's not null, if null then it's Optional.empty
+    public Optional<GradeInfo> getGrade() { return Optional.ofNullable(grade); }
+
+    // Setters
+    public void setGradeWeight(double newWeight) { this.grade.setWeight(newWeight); }
+    public void setGradeTotal(double newTotal) { this.grade.setTotal(newTotal); }
+    public void setGradeEarned(Double newEarned) {
+        this.grade.setEarned(newEarned);
+        // Adding a valid mark (should be valid if got to this point) marks event as completed
+        if (newEarned != null) {
+            this.completed = true;
+        }
+    }
+
 
     // Methods
     /*
@@ -49,8 +66,6 @@ public class Event {
         }
         this.completed = done;
     }
-
-    // TODO: Adding mark, also automatically marks task as complete
 
 
 }
