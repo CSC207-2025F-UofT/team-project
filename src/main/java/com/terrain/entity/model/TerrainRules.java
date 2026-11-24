@@ -10,8 +10,6 @@ package com.terrain.entity.model;
 public class TerrainRules {
     /** How far above sea level the sand extends. */
     public static final double SAND_HEIGHT = 2.0; // TODO decide if this should be a parameter instead (also need to make sure this stays adjacent to river)
-    /** Minimum tree density for a tile to count as forest rather than grass. */
-    public static final double FOREST_DENSITY = 0.3; // TODO decide whether density in relation to this decides tiletype probabilistically
 
     private final double seaLevel;
     private final double treeLine;
@@ -31,6 +29,11 @@ public class TerrainRules {
         return tile.getElevation() >= treeLine;
     }
 
+    /** A tile has trees if a feature (e.g. a forest) has marked it as FOREST. */
+    public boolean hasTrees(Tile tile) {
+        return tile.getType() == TileType.FOREST;
+    }
+
     /** Trees may only grow on dry land between the sand and the tree line. */
     public boolean allowsTrees(Tile tile) {
         double elevation = tile.getElevation();
@@ -38,7 +41,8 @@ public class TerrainRules {
     }
 
     /** 
-     * The single final type of a tile, given its elevation and tree density. 
+     * The single final type of a tile, given its elevation and whether a feature placed trees on it.
+     * Elevation bands take priority, so a FOREST tile outside the tree band is reclassified.
      * Subject to change
     */
     public TileType classify(Tile tile) {
@@ -55,7 +59,7 @@ public class TerrainRules {
         if (elevation < seaLevel + SAND_HEIGHT) {
             return TileType.SAND;
         }
-        if (tile.getTreeDensity() >= FOREST_DENSITY) {
+        if (hasTrees(tile)) {
             return TileType.FOREST;
         }
         return TileType.GRASS; // TODO Else, should return same? Potential that other default's can exist

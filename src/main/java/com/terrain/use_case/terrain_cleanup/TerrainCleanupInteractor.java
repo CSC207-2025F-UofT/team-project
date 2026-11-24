@@ -44,16 +44,17 @@ public class TerrainCleanupInteractor implements TerrainCleanupInputBoundary {
         for (int x = 0; x < map.getWidth(); x++) { // Most subject to change under new logic
             for (int y = 0; y < map.getHeight(); y++) {
                 Tile tile = map.getTile(x, y);
-                if (tile.getTreeDensity() > 0 && !rules.allowsTrees(tile)) {
+                TileType finalType = rules.classify(tile);
+                if (rules.hasTrees(tile) && !rules.allowsTrees(tile)) {
                     if (rules.isUnderwater(tile)) {
                         treesRemovedFromWater++;
                     } else if (rules.isAboveTreeLine(tile)) {
                         treesRemovedAboveTreeLine++;
                     }
-                    tile.setTreeDensity(0);
+                    // Removing the trees means replacing FOREST with the type the elevation calls for.
+                    tile.setType(finalType);
                 }
-                // Classify after removing trees, so the type matches what is actually on the tile.
-                finalTypes[x][y] = rules.classify(tile);
+                finalTypes[x][y] = finalType;
             }
         }
 
