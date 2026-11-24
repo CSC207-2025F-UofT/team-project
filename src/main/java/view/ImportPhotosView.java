@@ -5,7 +5,6 @@ import java.awt.CardLayout;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
-import java.util.EnumMap;
 import java.util.Map;
 
 import javax.swing.JButton;
@@ -71,9 +70,12 @@ public class ImportPhotosView extends JPanel implements PropertyChangeListener {
         this.viewModel = viewModel;
         this.controller = controller;
 
+        viewModel.addPropertyChangeListener(this);
+
         cardPanel.add(buildInputPanel(), CARD_INPUT);
         cardPanel.add(buildProgressPanel(), CARD_PROGRESS);
         cardLayout.show(cardPanel, CARD_INPUT);
+
 
         setLayout(new BorderLayout());
         add(cardPanel);
@@ -97,7 +99,7 @@ public class ImportPhotosView extends JPanel implements PropertyChangeListener {
         final JButton pickButton = new JButton("Choose Files/Folders");
         final JLabel filesLabel = new JLabel("No items selected");
 
-        final JTextField locationField = new JTextField();
+        final JTextField locationField = new JTextField(30);
         final JTextField distanceField = new JTextField(10);
 
         final JButton submitButton = new JButton("Start Import");
@@ -168,6 +170,7 @@ public class ImportPhotosView extends JPanel implements PropertyChangeListener {
         reportArea.setLineWrap(true);
         reportArea.setWrapStyleWord(true);
 
+        backButton.setVisible(false);
         backButton.addActionListener(e -> {
             cardLayout.show(cardPanel, CARD_INPUT);
         });
@@ -185,8 +188,8 @@ public class ImportPhotosView extends JPanel implements PropertyChangeListener {
     }
 
     private void updateProgressBar(int value, int maximum, String string) {
-        progressBar.setValue(value);
         progressBar.setMaximum(maximum);
+        progressBar.setValue(value);
         progressBar.setString(string);
         progressCardLayout.show(progressCardPanel, SUB_CARD_PROGRESS);
         backButton.setVisible(false);
