@@ -36,9 +36,10 @@ public class Ball {
         this.preset = preset;
     }
 
-    // needs to be implemented when terrain class is created
-    public void isOnGround() {
-        return;
+    /** True when the bottom of the ball touches or is below the ground under its centre. */
+    public boolean isOnGround(Terrain terrain) {
+        double ground = terrain.heightAt(position.getX(), position.getY());
+        return position.getZ() - preset.getRadius() <= ground + 1e-6;
     }
 
     @Override
