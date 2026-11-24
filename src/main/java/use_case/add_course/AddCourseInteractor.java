@@ -46,15 +46,17 @@ public class AddCourseInteractor implements AddCourseInputBoundary {
             }
             if (!CourseCodeFormat.isValidFormat(code)) {
                 rejectedCourses.add(code + " (invalid format)");
+                continue;
             }
-            else if (currentCourses.contains(code) || addedCourses.contains(code)) {
-                rejectedCourses.add(code + " (already added)");
+            final String fullCode = courseValidator.findFullCode(code);
+            if (fullCode == null) {
+                rejectedCourses.add(code + " (not found)");
             }
-            else if (courseValidator.courseExists(code)) {
-                addedCourses.add(code);
+            else if (currentCourses.contains(fullCode) || addedCourses.contains(fullCode)) {
+                rejectedCourses.add(fullCode + " (already added)");
             }
             else {
-                rejectedCourses.add(code + " (not found)");
+                addedCourses.add(fullCode);
             }
         }
 

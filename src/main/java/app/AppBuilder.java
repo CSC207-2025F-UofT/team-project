@@ -3,6 +3,7 @@ package app;
 import data_access.FileStudentDataAccessObject;
 import data_access.InMemoryUserDataAccessObject;
 import data_access.StubJobDataAccessObject;
+import data_access.TTBCourseValidator;
 import entity.StudentFactory;
 import interface_adapter.ViewManagerModel;
 import interface_adapter.add_course.AddCourseController;
@@ -234,7 +235,7 @@ public class AppBuilder {
         final AddCourseOutputBoundary addCourseOutputBoundary = new AddCoursePresenter(viewManagerModel, addCourseViewModel);
 
         final AddCourseInputBoundary addCourseInteractor = new AddCourseInteractor(
-                userDataAccessObject, userDataAccessObject, addCourseOutputBoundary, studentFactory);
+                userDataAccessObject, new TTBCourseValidator(), addCourseOutputBoundary, studentFactory);
 
         final AddCourseController addCourseController = new AddCourseController(addCourseInteractor);
         addCourseView.setAddCourseController(addCourseController);
