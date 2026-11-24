@@ -48,6 +48,20 @@ public class UserDataAccessObject implements UserDataAccessInterface {
         }
     }
 
+    @Override
+    public boolean doesUserExist(String username) throws SQLException {
+        validateUsername(username);
+        String sql = "SELECT username"
+                + "FROM public.users WHERE username = ?";
+        try (Connection connection = openConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setString(1, username);
+            try (ResultSet results = statement.executeQuery()) {
+                return results.next();
+            }
+        }
+    }
+
     private Connection openConnection() throws SQLException {
     return DriverManager.getConnection(
             "jdbc:postgresql://ep-lingering-voice-be3x9s30-pooler.c-9.us-east-2.aws.neon.tech/neondb?sslmode=require",
