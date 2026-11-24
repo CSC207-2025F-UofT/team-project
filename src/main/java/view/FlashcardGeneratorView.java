@@ -26,6 +26,9 @@ public class FlashcardGeneratorView extends JPanel implements ActionListener, Fl
     private final HomeViewModel homeViewModel;
 
     private Image backgroundImage;
+    private ImageIcon catBox;
+    private ImageIcon clock;
+    private ImageIcon tutorialBG;
 
    private final JLabel title;
    private final JLabel title2;
@@ -35,6 +38,7 @@ public class FlashcardGeneratorView extends JPanel implements ActionListener, Fl
    private final JScrollPane scrollPane;
    private final JButton generateButton;
    private final JButton boldButton;
+
 
     /**
      * Constructs the Flashcard Generator View
@@ -51,22 +55,33 @@ public class FlashcardGeneratorView extends JPanel implements ActionListener, Fl
         this.add(timerPanel);
 
         try{
-            backgroundImage = ImageIO.read(getClass().getResourceAsStream("/images/flash"));
+            backgroundImage = ImageIO.read(new java.io.File("src/images/flashcard_generator.png"));
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException("Cannot load image", e);
         }
+
+
 
         flashcardGeneratorViewModel.addListener(this); // register view as listener
 
         title = new JLabel("FLASHCARD");
-        title.setBounds(0,20,500,40);
+        title.setBounds(10, 20, 500, 40);
         title.setFont(FontManager.getWinkle(50f));
         this.add(title);
 
         title2 = new JLabel("GENERATOR!!!");
-        title2.setBounds(0,75,500,40);
+        title2.setBounds(10, 75, 500, 40);
         title2.setFont(FontManager.getWinkle(50f));
         this.add(title2);
+
+        tutorialBG = new ImageIcon("src/images/tutorial_background.png");
+        JLabel tutorialLabel = new JLabel(tutorialBG); // creates clock label
+        tutorialLabel.setBounds(-15, 150, 370, 300);
+
+        Image scaledTutorial = tutorialBG.getImage().getScaledInstance(370, 300, Image.SCALE_SMOOTH); // rescales the cat
+        tutorialLabel.setIcon(new ImageIcon(scaledTutorial));
+        this.add(tutorialLabel);
+
 
         tutorialTitle = new JLabel("TUTORIAL");
         tutorialTitle.setBounds(10,130,200,35);
@@ -87,19 +102,30 @@ public class FlashcardGeneratorView extends JPanel implements ActionListener, Fl
         tutorial.setWrapStyleWord(true);
         this.add(tutorial);
 
+        this.setComponentZOrder(tutorialLabel, 1); // makes the clock lael appear above timer panel
+        this.setComponentZOrder(tutorial, 0);
+
         textInput = new JTextPane();
         textInput.setEditable(true);
         textInput.setBounds(400,100, 375, 350);
         textInput.setFont(new Font("Arial", Font.PLAIN, 17));
 
+        catBox = new ImageIcon("src/images/cat_textbox.png");
+        JLabel catBoxLabel = new JLabel(catBox); // creeates cat label
+        Image scaledCat = catBox.getImage().getScaledInstance(540, 490, Image.SCALE_SMOOTH); // rescales the cat
+        catBoxLabel.setIcon(new ImageIcon(scaledCat));
+        catBoxLabel.setBounds(305, 55, 540, 490);
+        this.add(catBoxLabel);
+
+
         scrollPane = new JScrollPane(textInput);
-        scrollPane.setBounds(400,100,375,350);
+        scrollPane.setBounds(408, 140, 324, 297);
         scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
         scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
         this.add(scrollPane);
 
         generateButton = new JButton("Generate");
-        generateButton.setBounds(420,470, 200,60);
+        generateButton.setBounds(408, 475, 209, 40);
         generateButton.setFont(FontManager.getWinkle(30f));
         generateButton.setBackground(Color.LIGHT_GRAY);
         generateButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
@@ -107,11 +133,25 @@ public class FlashcardGeneratorView extends JPanel implements ActionListener, Fl
         this.add(generateButton);
 
         boldButton = new JButton("Bold");
-        boldButton.setBounds(630,470, 100,60);
+        boldButton.setBounds(632, 475, 100, 40);
         boldButton.setFont(FontManager.getWinkle(30f));        boldButton.setBackground(Color.LIGHT_GRAY);
         boldButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
         boldButton.addActionListener(this);
         this.add(boldButton);
+
+
+        clock = new ImageIcon("src/images/clock_design.png");
+        JLabel clockLabel = new JLabel(clock); // creeates clock label
+        clockLabel.setBounds(287, -7, 250, 100);
+
+        Image scaledClock = clock.getImage().getScaledInstance(250,100, Image.SCALE_SMOOTH); // rescales the cat
+        clockLabel.setIcon(new ImageIcon(scaledClock));
+        this.add(clockLabel);
+
+
+
+        this.setComponentZOrder(clockLabel, 0); // makes the clock lael appear above timer panel
+        this.setComponentZOrder(timerPanel, 1);
 
 
 
@@ -199,6 +239,15 @@ public class FlashcardGeneratorView extends JPanel implements ActionListener, Fl
         JOptionPane.showMessageDialog(this, state.getMessage(), "ERROR", JOptionPane.ERROR_MESSAGE);
         }
 
+    }
+
+    @Override
+    protected void paintComponent(Graphics g){
+        super.paintComponent(g);
+
+        if (backgroundImage != null){
+            g.drawImage(backgroundImage, 0, 0, getWidth(), getHeight(), this);
+        }
     }
 }
 

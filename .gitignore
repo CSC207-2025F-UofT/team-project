@@ -35,5 +35,4 @@ build/
 .vscode/
 
 ### Mac OS ###
-.DS_Storeout/
-out/
+.DS_Store
