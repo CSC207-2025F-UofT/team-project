@@ -2,7 +2,6 @@ package org.example.cocktailcraft.view.favourite;
 
 
 import org.example.cocktailcraft.entity.User;
-import org.example.cocktailcraft.interface_adapter.click.ClickViewModelListener;
 import org.example.cocktailcraft.interface_adapter.favourite.FavouriteController;
 import org.example.cocktailcraft.interface_adapter.favourite.FavouriteState;
 import org.example.cocktailcraft.interface_adapter.favourite.FavouriteViewModel;
@@ -64,11 +63,11 @@ public class FavouriteView extends JPanel implements FavouriteViewModelListener 
         }
     }
 
-    public void setFavouriteController (FavouriteController favouriteController){
-        this.favouriteController = favouriteController;
-    }
 
     public void setUser(User user){this.user = user;}
 
-    public void setCocktailID(String cocktailID){this.cocktailID = cocktailID;}
+    public void setCurrentCocktail(User user, String cocktailID) {
+        this.user = user;
+        this.cocktailID = cocktailID;
+    }
 }

@@ -54,7 +54,12 @@ public class MainPageView extends JPanel {
 
                 selectedCocktail = cocktails.get(index);
                 customizeButton.setEnabled(true);
-                favouriteController.execute(user, selectedCocktail.getId());
+                selectedCocktail = cocktails.get(index);
+                customizeButton.setEnabled(true);
+
+                favouriteView.setCurrentCocktail(user, selectedCocktail.getId());
+
+                clickController.execute(selectedCocktail.getId());
 
                 clickController.execute(selectedCocktail.getId());
             }
