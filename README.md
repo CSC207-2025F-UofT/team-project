@@ -41,10 +41,11 @@ Predict final averages and allow user to enter hypothetical grades and see the r
 #### Calendar view
 <img width="858" height="616" alt="image" src="https://github.com/user-attachments/assets/4d3c771a-1b12-4abd-bc5b-e45918bfaa05" />
 
-#### Table view
+#### Grade Breakdown view
 <img width="860" height="607" alt="image" src="https://github.com/user-attachments/assets/f47c696e-ddfc-4a49-9fd1-edca92efd808" />
+<img width="1092" height="706" alt="image" src="https://github.com/user-attachments/assets/f9db94a2-630a-444d-96b2-d65e5f641937" />
 
-#### Grade view 
+#### Grade Calculator view
 TBD
 
 <details>
