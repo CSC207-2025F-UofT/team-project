@@ -8,6 +8,7 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
 import javax.swing.table.TableCellRenderer;
 import java.awt.*;
+import java.awt.event.MouseEvent;
 import java.util.List;
 
 /**
@@ -34,7 +35,19 @@ public class TableRenderer implements DashboardRenderer<DashboardStateCatalog.Ta
         JLabel title = new JLabel(tableState.title());
         title.setFont(title.getFont().deriveFont(Font.BOLD, TITLE_SIZE));
         tablePanel.add(title);
-        JTable table = new JTable(model);
+        JTable table = new JTable(model) {
+            @Override
+            public String getToolTipText(MouseEvent event) {
+                Point point = event.getPoint();
+                int row = rowAtPoint(point);
+                int column = columnAtPoint(point);
+                if (row < 0 || column < 0) {
+                    return null;
+                }
+                Object value = getValueAt(row, column);
+                return value == null ? null : value.toString();
+            }
+        };
         tablePanel.add(new JScrollPane(table));
         return tablePanel;
     }
