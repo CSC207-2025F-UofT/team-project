@@ -1,13 +1,12 @@
 package interface_adapter.create_teams;
 
-import use_case.start_game.StartGameOutputBoundary;
 import use_case.start_game.StartGameInputBoundary;
 import use_case.start_game.StartGameInputData;
 
-public class startGameController {
+public class StartGameController {
     private final StartGameInputBoundary startGameUseCaseInteractor;
 
-    public startGameController(StartGameInputBoundary startGameUseCaseInteractor) {
+    public StartGameController(StartGameInputBoundary startGameUseCaseInteractor) {
         this.startGameUseCaseInteractor = startGameUseCaseInteractor;
     }
 

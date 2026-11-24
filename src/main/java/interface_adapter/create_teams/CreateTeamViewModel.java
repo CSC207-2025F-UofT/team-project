@@ -9,7 +9,7 @@ import java.util.List;
 public class CreateTeamViewModel {
     private final List<CreateTeamViewModelListener> listeners = new ArrayList<>();
 
-    public static final String VIEW_NAME = "main menu";
+    public static final String VIEW_NAME = "create teams";
 
     private CreateTeamState state = new CreateTeamState();
 

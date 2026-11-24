@@ -2,12 +2,14 @@ package data_access;
 
 import entity.Answer;
 import entity.Question;
+import entity.Team;
 import use_case.load_question.LoadQuestionDataAccessInterface;
+import use_case.start_game.StartGameDataAccessInterface;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class DataAccessObject implements LoadQuestionDataAccessInterface {
+public class DataAccessObject implements LoadQuestionDataAccessInterface, StartGameDataAccessInterface {
 
     // TEMPORARY IMPLEMENTATION FOR TESTING PURPOSES
     @Override
@@ -32,4 +34,16 @@ public class DataAccessObject implements LoadQuestionDataAccessInterface {
     public void setCurrentQuestion(Question question) {
         return;
     }
+
+    // TODO: Implement StartGame use case functions
+    @Override
+    public boolean teamExists(String teamName){
+        return false;
+    }
+
+    @Override
+    public Team getTeam(String teamName){
+        return new Team("TEMP.");
+    }
+
 }
