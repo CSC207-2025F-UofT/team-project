@@ -2,6 +2,7 @@ package data_access;
 
 import entity.QuestStatus;
 import entity.UserQuest;
+import use_case.accept_quest.AcceptQuestUserQuestDataAccessInterface;
 import use_case.complete_quest.CompleteQuestUserQuestDataAccessInterface;
 
 import java.time.LocalDate;
@@ -16,6 +17,7 @@ import java.util.Map;
  * methods it asked for, but all of them share the same data here.
  */
 public class InMemoryUserQuestDataAccessObject implements
+        AcceptQuestUserQuestDataAccessInterface,
         CompleteQuestUserQuestDataAccessInterface {
 
     // Java note: Map<K, V> is a dict. LinkedHashMap keeps insertion order.
