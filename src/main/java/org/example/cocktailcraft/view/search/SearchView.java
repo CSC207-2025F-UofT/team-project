@@ -2,15 +2,27 @@ package org.example.cocktailcraft.view.search;
 
 import org.example.cocktailcraft.entity.Tags;
 import org.example.cocktailcraft.interface_adapter.search.SearchController;
+import org.example.cocktailcraft.interface_adapter.search.SearchState;
 import org.example.cocktailcraft.interface_adapter.search.SearchViewModel;
 
-import javax.swing.*;
-import java.util.*;
+import javax.swing.JPanel;
+import javax.swing.JLabel;
+import javax.swing.JTextField;
+import javax.swing.JButton;
+import javax.swing.JPopupMenu;
+import javax.swing.JCheckBox;
+import java.util.Map;
+import java.util.EnumMap;
+import java.util.Locale;
+import java.util.Set;
+import java.util.EnumSet;
 
 public class SearchView extends JPanel {
     private final Map<Tags.BaseSpirit, JCheckBox> spiritOptions = new EnumMap<>(Tags.BaseSpirit.class);
     private final SearchViewModel searchViewModel;
     private final JTextField nameInputField = new JTextField(22);
+    private final JButton selector = new JButton("Base spirits");
+    private final JButton searchButton = new JButton("Search");
     private SearchController searchController;
 
     public SearchView(SearchViewModel searchViewModel) {
@@ -18,7 +30,6 @@ public class SearchView extends JPanel {
 
         add(new JLabel("Cocktail name:"));
         add(nameInputField);
-        JButton selector = new JButton("Base spirits");
         JPopupMenu dropdown = new JPopupMenu();
         for (Tags.BaseSpirit spirit : Tags.BaseSpirit.values()) {
             String name = spirit.name().toLowerCase(Locale.ROOT);
@@ -34,13 +45,28 @@ public class SearchView extends JPanel {
         selector.addActionListener(event -> dropdown.show(selector, 0, selector.getHeight()));
         add(selector);
 
-        JButton searchButton = new JButton("Search");
+        searchButton.setEnabled(false);
         searchButton.addActionListener(event ->
                 searchController.execute(nameInputField.getText(), getSelectedBaseSpirits()));
         add(searchButton);
+        nameInputField.addActionListener(event -> {
+            if (searchController != null) {
+                searchController.execute(nameInputField.getText(), getSelectedBaseSpirits());
+            }
+        });
 
         JButton clearButton = new JButton("Clear");
-        clearButton.setEnabled(false);
+        clearButton.addActionListener(event -> {
+            nameInputField.setText("");
+            spiritOptions.values().forEach(option -> option.setSelected(false));
+            selector.setText("Base spirits");
+            if (searchController != null) {
+                searchController.clear();
+            } else {
+                searchViewModel.setState(new SearchState());
+                searchViewModel.notifyStateChanged();
+            }
+        });
         add(clearButton);
     }
 
@@ -56,6 +82,7 @@ public class SearchView extends JPanel {
 
     public void setSearchController(SearchController searchController) {
         this.searchController = searchController;
+        searchButton.setEnabled(searchController != null);
     }
 
 }

@@ -3,8 +3,6 @@ package org.example.cocktailcraft.interface_adapter.search;
 import org.example.cocktailcraft.use_case.search.SearchOutputBoundary;
 import org.example.cocktailcraft.use_case.search.SearchOutputData;
 
-import java.util.List;
-
 public class SearchPresenter implements SearchOutputBoundary {
 
     private final SearchViewModel searchViewModel;
@@ -15,14 +13,19 @@ public class SearchPresenter implements SearchOutputBoundary {
 
     @Override
     public void prepareSuccessView(SearchOutputData searchOutputData) {
-        searchViewModel.setResults(searchOutputData.getResults());
-        searchViewModel.setErrorMessage("");
+        final SearchState state = new SearchState();
+        state.setResults(searchOutputData.getResults());
+        state.setSearchPerformed(searchOutputData.isSearchPerformed());
+        searchViewModel.setState(state);
         searchViewModel.notifyStateChanged();
     }
 
+    @Override
     public void prepareFailureView(String errorMessage) {
-        searchViewModel.setResults(List.of());
-        searchViewModel.setErrorMessage(errorMessage);
+        final SearchState state = new SearchState();
+        state.setErrorMessage(errorMessage);
+        state.setSearchPerformed(true);
+        searchViewModel.setState(state);
         searchViewModel.notifyStateChanged();
     }
 }

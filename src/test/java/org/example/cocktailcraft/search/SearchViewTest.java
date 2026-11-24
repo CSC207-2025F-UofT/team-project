@@ -2,6 +2,7 @@ package org.example.cocktailcraft.search;
 
 import org.example.cocktailcraft.interface_adapter.search.SearchViewModel;
 import org.example.cocktailcraft.entity.Tags.BaseSpirit;
+import org.example.cocktailcraft.interface_adapter.search.SearchViewModel;
 import org.example.cocktailcraft.view.search.SearchView;
 import org.junit.jupiter.api.Test;
 

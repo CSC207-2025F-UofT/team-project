@@ -39,6 +39,13 @@ class AppBuilderTest {
                 assertEquals("CocktailCraft", frame.getTitle());
                 MainPageView home = find(frame.getContentPane(), MainPageView.class, null);
                 CustomizeView customize = find(frame.getContentPane(), CustomizeView.class, null);
+                assertTrue(find(home, JButton.class, "Base spirits").isEnabled());
+                for (String label : new String[] {"Search", "Clear"}) {
+                    JButton searchButton = find(home, JButton.class, label);
+                    assertTrue(searchButton.isEnabled(), label);
+                    assertEquals(1, searchButton.getActionListeners().length, label);
+                }
+                assertFalse(find(home, JButton.class, "Profile").isEnabled());
                 assertTrue(home.isVisible());
                 assertFalse(customize.isVisible());
                 JButton button = find(home, JButton.class, "Customize");
