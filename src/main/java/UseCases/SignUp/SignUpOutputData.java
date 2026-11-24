@@ -1,4 +1,4 @@
-package UseCase.SignUp;
+package UseCases.SignUp;
 
 import BoundaryData.OutputData;
 

@@ -41,11 +41,11 @@ public class SignUpInputData extends InputData{
         return confirmPassword;
     }
 
-    String getfirstName() {
+    String getFirstName() {
         return firstName;
     }
 
-    String getlastName() {
+    String getLastName() {
         return lastName;
     }
 
