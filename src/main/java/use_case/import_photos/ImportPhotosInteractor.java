@@ -43,6 +43,10 @@ public class ImportPhotosInteractor implements ImportPhotosInputBoundary {
             String commonInfo = null;
 
             for (LocationInfo locationInfo : infoList) {
+                if (locationInfo == null) {
+                    continue;
+                }
+
                 String info = locationInfo.getType(infoType);
 
                 if (info == null) {
