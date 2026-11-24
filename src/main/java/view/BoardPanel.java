@@ -16,8 +16,6 @@ import java.awt.GridLayout;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.RenderingHints;
-import java.awt.event.FocusAdapter;
-import java.awt.event.FocusEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
@@ -143,7 +141,6 @@ final class BoardPanel extends JPanel {
             coordinate = String.valueOf((char) ('A' + position.x)) + (position.y + 1);
             fallback = (position.x + position.y) % 2 == 0 ? GameViewStyle.TILE_LIGHT : GameViewStyle.TILE_DARK;
             GameViewStyle.configureButton(this);
-            setBorderPainted(false);
             setName("tile-" + coordinate);
             MouseAdapter inspectCard = new MouseAdapter() {
                 @Override
@@ -164,14 +161,8 @@ final class BoardPanel extends JPanel {
             };
             addMouseListener(inspectCard);
             addMouseMotionListener(inspectCard);
-            addFocusListener(new FocusAdapter() {
-                @Override
-                public void focusGained(FocusEvent event) {
-                    showTile.accept(position, pointer == null ? NO_HOVERED_SPELL : spellAt(pointer));
-                }
-            });
             addActionListener(event -> {
-                // TODO: Forward the clicked column and row to the tile selection controller.
+                // TODO: Send the clicked tile and spell index to the placement, movement or cast controller.
             });
         }
 
@@ -217,17 +208,12 @@ final class BoardPanel extends JPanel {
                 graphics.setColor(GameViewStyle.RANGE_OUTLINE);
                 graphics.drawRect(2, 2, getWidth() - 5, getHeight() - 5);
             }
-            boolean highlighted = getModel().isRollover() || hasFocus();
-            if (highlighted) {
+            if (getModel().isRollover()) {
                 graphics.setColor(GameViewStyle.TILE_HIGHLIGHT);
                 graphics.fillRect(1, 1, getWidth() - 2, getHeight() - 2);
             }
             if (occupant != null || !spells.isEmpty()) {
                 paintCardStack(graphics);
-            }
-            if (highlighted) {
-                graphics.setColor(GameViewStyle.GOLD);
-                graphics.drawRect(1, 1, getWidth() - 3, getHeight() - 3);
             }
         }
 

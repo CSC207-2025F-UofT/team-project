@@ -11,6 +11,7 @@ import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Rectangle;
 import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
@@ -31,6 +32,20 @@ final class GameArtwork {
 
     static BufferedImage boardBackground() {
         return read("board/bg.png", "board/background.png");
+    }
+
+    static BufferedImage screenBackground(String name) {
+        return read("backgrounds/" + name + ".png");
+    }
+
+    static void paintBackground(Graphics graphics, BufferedImage image, Rectangle bounds) {
+        if (image == null) {
+            return;
+        }
+        Graphics2D painter = (Graphics2D) graphics.create();
+        painter.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+        painter.drawImage(image, bounds.x, bounds.y, bounds.width, bounds.height, null);
+        painter.dispose();
     }
 
     Portrait card(CardViewData card) {
@@ -156,7 +171,7 @@ final class GameArtwork {
                 font = font.deriveFont((float) (font.getSize2D() * maxWidth / textWidth));
             }
             painter.setFont(font);
-            painter.setColor(GameViewStyle.HP_TEXT);
+            painter.setColor(GameViewStyle.TEXT);
             FontMetrics metrics = painter.getFontMetrics();
             float x = left + width * 0.13f - metrics.stringWidth(hp) / 2f;
             float y = top + height * 0.063f + (metrics.getAscent() - metrics.getDescent()) / 2f;
