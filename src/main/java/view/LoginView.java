@@ -24,8 +24,6 @@ public class LoginView extends JPanel implements ActionListener, LoginViewModelL
 
     private final JPasswordField passwordInputField = new JPasswordField(15);
 
-    private final JButton logIn;
-    private final JButton cancel;
     private LoginController loginController = null;
 
     public LoginView(LoginViewModel loginViewModel) {
@@ -42,25 +40,15 @@ public class LoginView extends JPanel implements ActionListener, LoginViewModelL
                 new JLabel("Password"), passwordInputField);
 
         final JPanel buttons = new JPanel();
-        logIn = new JButton("log in");
+        final JButton logIn = new JButton("log in");
         buttons.add(logIn);
-        cancel = new JButton("cancel");
+        final JButton cancel = new JButton("cancel");
         buttons.add(cancel);
 
-        logIn.addActionListener(
-                new ActionListener() {
-                    public void actionPerformed(ActionEvent evt) {
-                        if (evt.getSource().equals(logIn)) {
-                            final LoginState currentState = loginViewModel.getState();
-
-                            loginController.execute(
-                                    currentState.getUsername(),
-                                    currentState.getPassword()
-                            );
-                        }
-                    }
-                }
-        );
+        logIn.addActionListener(evt -> {
+            final LoginState currentState = loginViewModel.getState();
+            loginController.execute(currentState.getUsername(), currentState.getPassword());
+        });
 
         cancel.addActionListener(this);
 
@@ -137,6 +125,7 @@ public class LoginView extends JPanel implements ActionListener, LoginViewModelL
 
     private void setFields(LoginState state) {
         usernameInputField.setText(state.getUsername());
+        passwordInputField.setText(state.getPassword());
     }
 
     public void setLoginController(LoginController loginController) {

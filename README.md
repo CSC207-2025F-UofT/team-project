@@ -267,7 +267,7 @@ MAIN SUCCESS SCENARIO:
 ### Use Case 5
 NAME: User Filter Tracked Jobs.
 
-PRIMARY ACTOR:  Jobs, Filter Options
+PRIMARY ACTOR: Student
 
 PRECONDITIONS:  The list of Jobs  is not Empty
 
