@@ -16,6 +16,7 @@ public class Main {
                 .addTimerSettingsView()
                 .addHomeView()
                 .addFSView()
+                .addFSUseCase()
                 .addNavigationBar()
                 .addUpdateTimerSettingsUseCase()
                 .addOpenSettingsUseCase()
