@@ -2,8 +2,13 @@ package use_case.add_side_quest;
 
 import entity.SideQuest;
 
-public class AddSideQuestInteractor implements AddSideQuestInputBoundary{
+public class AddSideQuestInteractor implements AddSideQuestInputBoundary {
 
+    private final AddSideQuestDataAccessInterface dataAccess;
+
+    public AddSideQuestInteractor(AddSideQuestDataAccessInterface dataAccess) {
+        this.dataAccess = dataAccess;
+    }
     @Override
     public void execute(AddSideQuestInputData inputData){
         if (inputData.getName() == null || inputData.getName().trim().isEmpty()){
@@ -18,7 +23,7 @@ public class AddSideQuestInteractor implements AddSideQuestInputBoundary{
         } else if (inputData.getExpectedTime() <= 0) {
             // outputBoundary.prepareFailView("Expected time (in hours) must be greater than 0.");
             return;
-        } else if (inputData.getExp() < 0) {
+        } else if (inputData.getExp() <= 0) {
             // outputBoundary.prepareFailView("Exp for the side quest cannot be negative.");
             return;
         } else if (inputData.getLocation() == null) {
@@ -27,12 +32,18 @@ public class AddSideQuestInteractor implements AddSideQuestInputBoundary{
         } else if (inputData.getInterests() == null || inputData.getInterests().isEmpty()) {
             // outputBoundary.prepareFailView("Please select at least one interest.");
             return;
+        } else if (input
+        // make it so that it can't' exceed 10 items, so it doesn't become infinite.
+            // outputBoundary.prepareFailView("Please select at least one interest.");
+            return;
         }
 
         SideQuest sideQuest = new SideQuest(inputData.getName(), inputData.getDescription(),
                 inputData.isIndoor(), inputData.getBudget(), inputData.getExpectedTime(), inputData.getExp(),
                 inputData.getLocation(), inputData.getInterests()
         );
+
+        dataAccess.save(sideQuest);
     }
 }
 
