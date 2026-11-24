@@ -37,6 +37,9 @@ import interface_adapter.login.LoginViewModel;
 import interface_adapter.manage_pet.ManagePetController;
 import interface_adapter.manage_pet.ManagePetPresenter;
 import interface_adapter.manage_pet.ManagePetViewModel;
+import interface_adapter.signup.SignupController;
+import interface_adapter.signup.SignupPresenter;
+import interface_adapter.signup.SignupViewModel;
 import interface_adapter.submit_application.SubmitApplicationController;
 import interface_adapter.submit_application.SubmitApplicationPresenter;
 import interface_adapter.submit_application.SubmitApplicationViewModel;
@@ -50,6 +53,7 @@ import use_case.login.LoginInteractor;
 import use_case.manage_pet.BreedLookupInteractor;
 import use_case.manage_pet.ManagePetDataAccessInterface;
 import use_case.manage_pet.ManagePetInteractor;
+import use_case.signup.SignupInteractor;
 import use_case.submit_application.SubmitApplicationInteractor;
 import use_case.track_applications.TrackApplicationsInteractor;
 import view.AdminSignupView;
@@ -57,6 +61,7 @@ import view.GalleryView;
 import view.LoginView;
 import view.ManagePetView;
 import view.MyApplicationsView;
+import view.SignupView;
 import view.SubmitApplicationView;
 import view.ViewManager;
 
@@ -129,20 +134,39 @@ public final class AppBuilder {
             viewManagerModel.setActiveView(GalleryView.VIEW_NAME);
         });
         loginView.setLoginController(new LoginController(new LoginInteractor(users, loginPresenter)));
+        final JButton signup = addSignupView(users, userFactory, loginViewModel);
         if (inviteCode == null || inviteCode.isBlank()) {
-            views.add(loginView, LoginViewModel.VIEW_NAME);
-        } else {
-            final AdminSignupViewModel signupViewModel = new AdminSignupViewModel();
-            final AdminSignupPresenter signupPresenter =
-                    new AdminSignupPresenter(viewManagerModel, signupViewModel, loginViewModel);
-            final AdminSignupView signupView = new AdminSignupView(signupViewModel);
-            final AdminSignupInteractor signupInteractor =
-                    new AdminSignupInteractor(users, signupPresenter, userFactory, inviteCode);
-            signupView.setSignupController(new AdminSignupController(signupInteractor));
-            views.add(signupView, AdminSignupViewModel.VIEW_NAME);
-            final JButton signup = navigationButton("Create shelter account", AdminSignupViewModel.VIEW_NAME);
             views.add(withNavigation(loginView, signup), LoginViewModel.VIEW_NAME);
+        } else {
+            final AdminSignupViewModel adminSignupViewModel = new AdminSignupViewModel();
+            final AdminSignupPresenter adminSignupPresenter =
+                    new AdminSignupPresenter(viewManagerModel, adminSignupViewModel, loginViewModel);
+            final AdminSignupView adminSignupView = new AdminSignupView(adminSignupViewModel);
+            final AdminSignupInteractor adminSignupInteractor =
+                    new AdminSignupInteractor(users, adminSignupPresenter, userFactory, inviteCode);
+            adminSignupView.setSignupController(new AdminSignupController(adminSignupInteractor));
+            views.add(adminSignupView, AdminSignupViewModel.VIEW_NAME);
+            final JButton adminSignup =
+                    navigationButton("Create shelter account", AdminSignupViewModel.VIEW_NAME);
+            views.add(withNavigation(loginView, signup, adminSignup), LoginViewModel.VIEW_NAME);
         }
+    }
+
+    /**
+     * Adds the adopter sign-up screen. A successful sign-up returns to login with the email filled in.
+     *
+     * @return a button that opens the sign-up screen
+     */
+    private JButton addSignupView(FileUserDataAccessObject users, UserFactory userFactory,
+                                  LoginViewModel loginViewModel) {
+        final SignupViewModel signupViewModel = new SignupViewModel();
+        final SignupPresenter signupPresenter =
+                new SignupPresenter(viewManagerModel, signupViewModel, loginViewModel);
+        final SignupView signupView = new SignupView(signupViewModel);
+        signupView.setSignupController(new SignupController(
+                new SignupInteractor(users, signupPresenter, userFactory)));
+        views.add(signupView, SignupViewModel.VIEW_NAME);
+        return navigationButton("Create account", SignupViewModel.VIEW_NAME);
     }
 
     private void addPetManagementView(ManagePetDataAccessInterface pets, FileUserDataAccessObject users) {
@@ -160,10 +184,12 @@ public final class AppBuilder {
         return button;
     }
 
-    private static JPanel withNavigation(JPanel screen, JButton button) {
+    private static JPanel withNavigation(JPanel screen, JButton... buttons) {
         final JPanel panel = new JPanel(new BorderLayout());
         final JPanel navigation = new JPanel();
-        navigation.add(button);
+        for (JButton button : buttons) {
+            navigation.add(button);
+        }
         panel.add(navigation, BorderLayout.NORTH);
         panel.add(screen, BorderLayout.CENTER);
         return panel;
@@ -244,6 +270,7 @@ public final class AppBuilder {
             final Object activeView = event.getNewValue();
             menu.setEnabled(!ManagePetViewModel.VIEW_NAME.equals(activeView)
                     && !AdminSignupViewModel.VIEW_NAME.equals(activeView)
+                    && !SignupViewModel.VIEW_NAME.equals(activeView)
                     && !LoginViewModel.VIEW_NAME.equals(activeView));
         });
         return menuBar;
