@@ -2,8 +2,8 @@ package questionaire;
 
 import javax.swing.*;
 
-public class Question4 {
-    public Question4() {
+public class QuestionFour {
+    public QuestionFour() {
         JFrame question = new JFrame();
         JPanel question_panel = new JPanel();
         question_panel.setLayout(new BoxLayout(question_panel, BoxLayout.Y_AXIS));

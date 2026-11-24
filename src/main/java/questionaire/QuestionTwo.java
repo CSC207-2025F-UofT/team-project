@@ -2,23 +2,23 @@ package questionaire;
 
 import javax.swing.*;
 
-public class Question3 {
-    public Question3() {
+public class QuestionTwo {
+    public QuestionTwo() {
         JFrame question = new JFrame();
         JPanel question_panel = new JPanel();
         question_panel.setLayout(new BoxLayout(question_panel, BoxLayout.Y_AXIS));
         JPanel add_question = new JPanel();
-        JLabel q3 = new JLabel("How do you like to spend your evening?");
-        String[] answers = {"Stay in", "Go out"};
+        JLabel q2 = new JLabel("Favourite Beverage?");
+        String[] answers = {"Coffee", "Tea", "Soda", "Water"};
         JComboBox<String> options = new JComboBox<>(answers);
-        add_question.add(q3);
+        add_question.add(q2);
         add_question.add(options);
 
         JPanel next = new JPanel();
         JButton choose_next = new JButton("Next");
         next.add(choose_next);
         choose_next.addActionListener(e ->{
-            Question4 q4 = new Question4();
+            QuestionThree q3 = new QuestionThree();
         });
 
         question_panel.add(add_question);
