@@ -24,15 +24,6 @@
 
 ## Project Details
 
-### Swing menus
-
-Run `view.GameViewDemo` from the test source tree to preview the menu flow with a simulated opponent.
-`ViewManager` handles local navigation and sends lobby requests through `MenuActions`.
-Publish the lobby code, player names, and host start permission with `lobbyState.setState(new LobbyViewModel(...))`.
-Call `showScreen(Screen.WAITING_TO_START)` once both players are in the lobby and `showScreen(Screen.GAME)`
-once the host's start is accepted. Use `showMenuError(screen, message)` for inline errors and pass an empty
-message to clear one.
-
 ### User Stories
 Yinghao \
 *"As a player, I want to start a match against another player, then be able to save it to a file and load them."*
