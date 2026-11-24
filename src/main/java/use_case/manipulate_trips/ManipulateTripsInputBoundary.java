@@ -9,6 +9,9 @@ public interface ManipulateTripsInputBoundary {
     /** One trip with its photos in chronological order. */
     void viewTrip(ViewTripInputData inputData);
 
+    /** Rename chosen trip.*/
+    void renameTrip(RenameTripInputData inputData);
+
     /**Moves a photo and every later photo of a trip into a new trip. */
     void splitTrip(SplitTripInputData inputData);
 
