@@ -139,11 +139,11 @@ public class NominatimGeocoder implements GeocoderInterface, ReverseGeocoderInte
             JSONObject address = body.getJSONObject("address");
 
             return new LocationInfo(
-                address.optString("city"),
-                address.optString("county"),
-                address.optString("state"),
-                address.optString("country"),
-                getContinent(address.optString("country_code"), latitude, longitude)
+                address.optString("city", null),
+                address.optString("county", null),
+                address.optString("state", null),
+                address.optString("country", null),
+                getContinent(address.optString("country_code", null), latitude, longitude)
             );
 
         } catch (IOException | JSONException e) {
