@@ -3,8 +3,7 @@ package app;
 
 import view.AddFoodView;
 
-import javax.swing.JFrame;
-import javax.swing.SwingUtilities;
+import javax.swing.*;
 
 /**
  * Entry point for the NutriTrack application.
@@ -27,17 +26,20 @@ public class Main {
             // Build the application's dependencies.
             AppBuilder appBuilder = new AppBuilder();
 
-            // Construct the Add Food view.
-            AddFoodView addFoodView = appBuilder.buildAddFoodView();
+            JTabbedPane tabs = new JTabbedPane();
+            tabs.addTab("Add Food", appBuilder.buildAddFoodView());
+            tabs.addTab("Create Plan", appBuilder.buildCreatePlanView());
+            tabs.addTab("Add Planned Meal", appBuilder.buildAddPlannedMealView());
+
 
             // Create the main application window.
-            JFrame frame = new JFrame("NutriTrack - Add Food");
+            JFrame frame = new JFrame("NutriTrack");
 
             // Close the application when the window is closed.
             frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
             // Add the Add Food panel to the window.
-            frame.setContentPane(addFoodView);
+            frame.setContentPane(tabs);
 
             // Set the initial window size.
             frame.setSize(500, 350);
