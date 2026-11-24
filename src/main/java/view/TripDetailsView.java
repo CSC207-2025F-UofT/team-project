@@ -190,7 +190,7 @@ public class TripDetailsView extends JPanel implements PropertyChangeListener {
         Object name = JOptionPane.showInputDialog(this, "New name for this trip:",
                 "Rename trip", JOptionPane.PLAIN_MESSAGE, null, null, state.getName());
         if (name != null && !name.toString().strip().equals(state.getName())) {
-            requestName(name.toString());
+            requestRename(name.toString());
         }
     }
 
@@ -207,7 +207,7 @@ public class TripDetailsView extends JPanel implements PropertyChangeListener {
         }
     }
 
-    void requestName(String newName) {
+    void requestRename(String newName) {
         if (controller != null) {
             controller.renameTrip(viewModel.getState().getTripId(), newName);
         }
