@@ -5,6 +5,6 @@
   <!-- Preserve the CSC207 starter's established underscore-separated architectural packages. -->
   <suppress files="[/\\\\](use_case|interface_adapter|data_access)[/\\\\]" checks="PackageName"/>
   <!-- Untouched starter files owned by other features. Remove when those features implement them. -->
-  <suppress files="[/\\]entity[/\\](Application|Resume|User)\.java$" checks=".*"/>
+  <suppress files="[/\\]entity[/\\](Application|Resume)\.java$" checks=".*"/>
   <suppress files="[/\\]place_holder[246]\.java$" checks=".*"/>
 </suppressions>

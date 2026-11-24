@@ -151,12 +151,12 @@ Main success scenario
 3. The student supplies the information and submits it.
 4. The system checks the required information and the format of any graduation year entered. Repeated skill entries are treated as one skill.
 5. The system saves the profile and shows the saved information.
-6. The system offers personalized suggestions through P3 without requiring a separate search query.
+6. The system offers personalized suggestions through UC7 without requiring a separate search query.
 Extensions
 - 3a. The student cancels before submission: No profile is created.
 - 4a. The program or skills are missing, or the graduation year is invalid: The system identifies the affected information and preserves the entered values. The student corrects them and returns to step 3.
 - 5a. Saving fails: The system explains that the profile was not saved and retains the entered values for another attempt.
-- 6a. Recommendations are unavailable: The created profile remains saved. P3 handles the recommendation failure.
+- 6a. Recommendations are unavailable: The created profile remains saved. UC7 handles the recommendation failure.
 
 ### Use Case 6: Update a Qualification Profile
 Lead: Lingnan Meng
@@ -172,7 +172,7 @@ Main success scenario
 3. The student changes their information and submits the changes.
 4. The system checks the same profile rules used during creation.
 5. The system saves and displays the updated profile.
-6. The student can view recommendations through P3 using the updated information.
+6. The student can view recommendations through UC7 using the updated information.
 Extensions
 - 2a. The saved profile cannot be loaded: The system explains the problem and offers another attempt; it does not present an empty profile as the saved one.
 - 3a. The student cancels: The previously saved profile remains unchanged.
@@ -307,11 +307,12 @@ fields.
 |Emily Kim| Use Case |
 |Jerry Zhou| Use Case |
 |Austin Wu|          |
-|Lingnan Meng| Use Case |
+|Lingnan Meng| UC7 View personalized internship recommendations, supported by UC5 Create profile and UC6 Update profile |
 |Yuheng Liu| UC4: Search Internship Opportunities |
 ---
 ## Entities
 - User
+- QualificationProfile (program, graduation year, skills and internship preferences for a student)
 - Resume
 - Application
 - JobPosting
@@ -340,6 +341,8 @@ to the original application pages. Searches will cover only the
 configured company job boards.
 The packaged Java client successfully retrieved both configured boards (Cloudflare and Figma)
 on 2026-11-16. Availability and posting counts can change; use `--check-api` to recheck.
+The profile integration check reached both boards again on 2026-11-22 using the packaged Java app.
+Recommendations use those postings and match them to saved qualifications on the student's device.
 ---
 ## Design Diagrams
 ### Profile — Class Diagrams
@@ -360,10 +363,17 @@ on 2026-11-16. Availability and posting counts can change; use `--check-api` to 
 
 ![UC7 Recommendations sequence](profile-uml/svg/12_recommendation_core.svg)
 ### UML Class Diagram
+
+[UC5 and UC6 profile persistence](docs/design/profile.md#class-diagram-for-profile-persistence)
+
 ### Sequence Diagrams
+
+[UC7 personalized recommendations using Finder's job source](docs/design/profile.md#sequence-diagram-for-recommendations)
+
 ---
 ## How to Run
-UC4 (Finder) is implemented on this branch. Other team features are still in progress.
+The Swing app includes **Finder** (UC4), **Profile** (UC5 and UC6), and
+**Recommendations** (UC7). Finder and recommendations share one job source.
 
 Prerequisites: **JDK 11** and Maven. In IntelliJ, import `pom.xml` and select an installed
 JDK 11 for both the project SDK and Maven runner. Check `mvn -version` before building.
@@ -390,6 +400,12 @@ java -jar target/TeamProject-1.0-SNAPSHOT.jar --demo
 ```
 
 Try `python` for two sample matches, `java` for one, or `unmatched` for zero.
+
+For profile-based recommendations, open **Profile**, enter a program and the skills
+`Java, Python`, save, and choose **View recommendations**. The sample Software
+Engineering Intern matches both skills. Change the saved skills to `SQL` to see
+the Data Science Co-op instead. Profiles persist in `~/.intern-finder/profile.json`.
+See the [profile demo and architecture](docs/design/profile.md) for details.
 
 To configure company boards, create a properties file containing `boardToken=Company Name`
 entries and supply its path:
