@@ -4,7 +4,10 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Clock;
+import java.time.Instant;
 import java.time.LocalDate;
+import java.time.ZoneOffset;
 
 import entity.IngredientName;
 import entity.Pantry;
@@ -12,6 +15,10 @@ import entity.PantryItem;
 import entity.StockLevel;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import use_case.add_pantry_item.AddPantryItemInputData;
+import use_case.add_pantry_item.AddPantryItemInteractor;
+import use_case.add_pantry_item.AddPantryItemOutputBoundary;
+import use_case.add_pantry_item.AddPantryItemOutputData;
 import use_case.update_stock_level.UpdateStockLevelInputData;
 import use_case.update_stock_level.UpdateStockLevelInteractor;
 import use_case.update_stock_level.UpdateStockLevelOutputBoundary;
@@ -24,6 +31,9 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class FilePantryDataAccessObjectTest {
+    private static final Clock FIXED_CLOCK = Clock.fixed(
+            Instant.parse("2026-11-23T12:00:00Z"), ZoneOffset.UTC);
+
     @TempDir
     private Path tempDirectory;
 
@@ -139,6 +149,27 @@ class FilePantryDataAccessObjectTest {
                 IngredientName.fromRawName("Milk")).orElseThrow().getStockLevel());
     }
 
+    @Test
+    void addPantryItemUseCasePersistsThroughFileDao() {
+        final Path filePath = tempDirectory.resolve("pantry.json");
+        final FilePantryDataAccessObject dataAccess =
+                new FilePantryDataAccessObject(filePath);
+        final AddRecordingPresenter presenter = new AddRecordingPresenter();
+        final AddPantryItemInteractor interactor =
+                new AddPantryItemInteractor(dataAccess, presenter, FIXED_CLOCK);
+        final LocalDate expiryDate = LocalDate.of(2026, 11, 30);
+
+        interactor.execute(new AddPantryItemInputData("Fresh Milk", expiryDate));
+
+        final Pantry reloaded = new FilePantryDataAccessObject(filePath).loadPantry();
+        final PantryItem savedItem = reloaded.find(
+                IngredientName.fromRawName("fresh milk")).orElseThrow();
+        assertFalse(presenter.outputData.isUseCaseFailed());
+        assertEquals("Fresh Milk", savedItem.getName().getDisplayName());
+        assertEquals(expiryDate, savedItem.getExpiryDate());
+        assertEquals(StockLevel.ENOUGH, savedItem.getStockLevel());
+    }
+
     private PantryItem item(String name, LocalDate expiryDate, StockLevel stockLevel) {
         return new PantryItem(IngredientName.fromRawName(name), expiryDate, stockLevel);
     }
@@ -153,6 +184,20 @@ class FilePantryDataAccessObjectTest {
 
         @Override
         public void prepareFailView(UpdateStockLevelOutputData outputData) {
+            this.outputData = outputData;
+        }
+    }
+
+    private static final class AddRecordingPresenter implements AddPantryItemOutputBoundary {
+        private AddPantryItemOutputData outputData;
+
+        @Override
+        public void prepareSuccessView(AddPantryItemOutputData outputData) {
+            this.outputData = outputData;
+        }
+
+        @Override
+        public void prepareFailView(AddPantryItemOutputData outputData) {
             this.outputData = outputData;
         }
     }
