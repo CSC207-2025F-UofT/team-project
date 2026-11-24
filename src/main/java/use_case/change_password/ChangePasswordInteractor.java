@@ -1,7 +1,6 @@
 package use_case.change_password;
 
 import entity.User;
-import use_case.account.AccountPassword;
 import use_case.account.CurrentUserReader;
 
 import java.util.Optional;
@@ -62,11 +61,7 @@ public class ChangePasswordInteractor implements ChangePasswordInputBoundary {
     /** Returns what's wrong with the typed passwords, or null if they're fine. */
     private String findProblem(String currentPassword, String newPassword, String confirmPassword) {
         if (currentPassword == null || currentPassword.isEmpty()) {
-            return "Enter your current password.";
-        }
-
-        if (!AccountPassword.isLongEnough(newPassword)) {
-            return "New password must be at least " + AccountPassword.MIN_LENGTH + " characters.";
+            return "Password inputted is empty.";
         }
 
         if (!newPassword.equals(confirmPassword)) {

@@ -39,10 +39,10 @@ public final class SettingsView extends AccountForm {
     /** Change Password button (or Enter in a field). */
     @Override
     protected void submit() {
-        // takePassword also clears the field, so passwords don't stay on screen
-        final String currentPassword = takePassword(currentPasswordField);
-        final String newPassword = takePassword(newPasswordField);
-        final String confirmPassword = takePassword(confirmPasswordField);
+        // Read without clearing, so a typo doesn't make you retype everything (cleared on success in render)
+        final String currentPassword = new String(currentPasswordField.getPassword());
+        final String newPassword = new String(newPasswordField.getPassword());
+        final String confirmPassword = new String(confirmPasswordField.getPassword());
 
         startAction("Changing password…");
 
@@ -67,6 +67,11 @@ public final class SettingsView extends AccountForm {
 
         } else if (state.getPasswordMessage() != null) {
             showNotice(state.getPasswordMessage());
+
+            // Changed, so the old typed passwords aren't needed anymore
+            currentPasswordField.setText("");
+            newPasswordField.setText("");
+            confirmPasswordField.setText("");
         }
     }
 }
