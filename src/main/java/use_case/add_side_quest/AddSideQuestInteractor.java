@@ -23,13 +23,17 @@ public class AddSideQuestInteractor implements AddSideQuestInputBoundary {
         } else if (inputData.getExpectedTime() <= 0) {
             // outputBoundary.prepareFailView("Expected time (in hours) must be greater than 0.");
             return;
-        } else if (inputData.getExp() < 0) {
+        } else if (inputData.getExp() <= 0) {
             // outputBoundary.prepareFailView("Exp for the side quest cannot be negative.");
             return;
         } else if (inputData.getLocation() == null) {
             // outputBoundary.prepareFailView("Please select a location in which your Side Quest occurred at.");
             return;
         } else if (inputData.getInterests() == null || inputData.getInterests().isEmpty()) {
+            // outputBoundary.prepareFailView("Please select at least one interest.");
+            return;
+        } else if (input
+        // make it so that it can't' exceed 10 items, so it doesn't become infinite.
             // outputBoundary.prepareFailView("Please select at least one interest.");
             return;
         }

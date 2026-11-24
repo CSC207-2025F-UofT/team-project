@@ -6,8 +6,8 @@ public class SideQuest {
     private final String description;
     private final String photoUrl;
     private final String isIndoor;
-    private final double budget;
-    private final double expectedTime;
+    private final String budget;    // Split into four categories (free, less_than_twenty, less_than_fifty, over_fifty)
+    private final String expectedTime; // under_10_minutes, under_30_minutes, under_60_minutes, over_60_minutes
     private final int exp;
     private final Location location;
     private final List<String> interests;
@@ -16,8 +16,8 @@ public class SideQuest {
                      String description,
                      String photoUrl,
                      String isIndoor,
-                     double budget,
-                     double expectedTime,
+                     String budget,
+                     String expectedTime,
                      int exp,
                      Location location,
                      List<String> interests) {
@@ -49,11 +49,11 @@ public class SideQuest {
         return isIndoor;
     }
 
-    public double getBudget() {
+    public String getBudget() {
         return budget;
     }
 
-    public double getExpectedTime() {
+    public String getExpectedTime() {
         return expectedTime;
     }
 
