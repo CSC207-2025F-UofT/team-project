@@ -5,13 +5,11 @@ import java.util.Random;
 import com.terrain.entity.model.TerrainMap;
 import com.terrain.entity.model.TileType;
 import com.terrain.entity.model.feature.parameter.CoordinateParameter;
-import com.terrain.entity.model.feature.parameter.NumberParameter;
+import de.articdive.jnoise.pipeline.JNoise;
 
-public class ForestFeature extends Feature {
-    private final NumberParameter radius = number("Radius", 50, 1, 500);
-    private final NumberParameter treeDensity = number("Tree Density", 0.5, 0.0, 1.0);
-    private final NumberParameter smoothness = number("Smoothness", 0.5, 0.0, 1.0);
-    private final CoordinateParameter location = coordinate("Location", 0, 0);
+public class ForestFeature extends Feature implements BlobShaped {
+    private final BlobParameters blobParameters = createBlobParameters(); // implements BlobShaped so needs these too
+    private final CoordinateParameter location = coordinate("Location", 128, 128);
 
     @Override
     public String getName() {
@@ -19,34 +17,21 @@ public class ForestFeature extends Feature {
     }
 
     @Override
+    public BlobParameters getBlobParameters() {
+        return blobParameters;
+    }
+
+    @Override
     public void apply(TerrainMap map, Random random) {
-        double r = radius.getValue();
-        double td = treeDensity.getValue();
-        double sm = smoothness.getValue();
-        double x = location.getX();
-        double y = location.getY();
-        int width = map.getWidth();
-        int height = map.getHeight();
+        double radius = blobParameters.radius.getValue();
+        double noiseAmplitude = blobParameters.noiseAmplitude.getValue();
+        double noiseScale = blobParameters.noiseScale.getValue();
+        JNoise noise = noise(random); // uses BlobShaped.noise() to create a perlin noise map
 
-        for (int mapX = 0; mapX < width; mapX++) {
-            for (int mapY = 0; mapY < height; mapY++) {
-                double distanceFromCenter = getDistance(x, y, mapX, mapY);
-
-                // if the distance from the center is greater than the radius, skip tile
-                if (distanceFromCenter > r) {
-                    continue;
-                }
-
-                // adjust tree density based on distance from center and smoothness
-                double tileTreeDensity = td; // start with base tree density
-                if (distanceFromCenter > r * sm) {
-                    // adjust per-tile density based on distance from center and smoothness
-                    tileTreeDensity *= (r - distanceFromCenter) / (r * (1 - sm));
-                }
-
-                // randomly decide whether to place a tree based on the adjusted tree density
-                if (tileTreeDensity > 0.5) {
-                    map.getTile(mapX, mapY).setType(TileType.FOREST); // set type to forest
+        for (int x = 0; x < map.getWidth(); x++) {
+            for (int y = 0; y < map.getHeight(); y++) {
+                if (isInBlob(x, y, location.getX(), location.getY(), radius, noiseAmplitude, noiseScale, noise)) {
+                    map.getTile(x, y).setType(TileType.FOREST);
                 }
             }
         }

@@ -26,7 +26,7 @@ public class TerrainGenerator {
 
         // adds some default noise to the map, so that it isn't just a flat plane.
         JNoise noise =JNoise.newBuilder()
-                .perlin(3301,
+                .perlin(3301, // TODO: make this seed based on the world seed (with random.nextInt() or something)
                         Interpolation.COSINE,
                         FadeFunction.QUINTIC_POLY
                 ).build();
