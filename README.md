@@ -42,7 +42,7 @@ improve.
 
 ### User Story 4
 
-As a player, I want to enter a specific situation and see my chance of winning
+As a player, I want to input a specific situation and see my chance of winning
 so that I can learn which hands are worth playing.
 
 ---
