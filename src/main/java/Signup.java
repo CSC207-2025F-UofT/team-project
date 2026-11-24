@@ -1,4 +1,4 @@
-import profilesetup.PrivateInfo;
+import View.ProfileSetup.PrivateInfo;
 
 import javax.swing.*;
 import java.awt.*;
@@ -40,7 +40,7 @@ public class Signup extends JFrame {
         signup.add(buttons);
 
         signup_button.addActionListener(e ->{
-            PrivateInfo privinfo = new PrivateInfo();
+            PrivateInfo privateInfo = new PrivateInfo();
         });
 
 

@@ -1,4 +1,4 @@
-package questionaire;
+package View.Questionaire;
 
 import javax.swing.*;
 
@@ -18,7 +18,7 @@ public class QuestionThree {
         JButton choose_next = new JButton("Next");
         next.add(choose_next);
         choose_next.addActionListener(e ->{
-            QuestionFour q4 = new QuestionFour();
+            View.Questionaire.QuestionFour q4 = new View.Questionaire.QuestionFour();
         });
 
         question_panel.add(add_question);
