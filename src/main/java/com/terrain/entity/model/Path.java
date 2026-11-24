@@ -28,8 +28,8 @@ public class Path {
             double chosen = normalize(angleTo - currentAngle);
             for (int tries = 0; tries < 50; tries++) {
                 double dangle = pull * normalize(angleTo - currentAngle) + random.nextGaussian() * wobble;
-                if (Math.abs(normalize(currentAngle+dangle-baseAngle)) <= Math.PI/2 &&
-                    endReachable(x + Math.cos(currentAngle+dangle), y + Math.sin(currentAngle+dangle), baseAngle, horizon)) {
+                if (Math.abs(normalize(currentAngle + dangle - baseAngle)) <= Math.PI / 2 &&
+                        endReachable(x + Math.cos(currentAngle + dangle), y + Math.sin(currentAngle + dangle), baseAngle, horizon)) {
                     chosen = dangle;
                     break;
                 }
@@ -39,10 +39,10 @@ public class Path {
             x += Math.cos(currentAngle);
             y += Math.sin(currentAngle);
 
-            int [] tile = {(int) Math.round(x), (int) Math.round(y)};
+            int[] tile = {(int) Math.round(x), (int) Math.round(y)};
             path.add(tile);
         }
-        return path;
+        return addWidth(path, width);
     }
 
     private static double normalize(double a) {
@@ -51,9 +51,19 @@ public class Path {
 
     private boolean endReachable(double px, double py, double baseAngle, double horizon) {
         double dx = end[0] - px, dy = end[1] - py;
-        double forward =  dx * Math.cos(baseAngle) + dy * Math.sin(baseAngle);
+        double forward = dx * Math.cos(baseAngle) + dy * Math.sin(baseAngle);
         double lateral = -dx * Math.sin(baseAngle) + dy * Math.cos(baseAngle);
         return forward > 0 && Math.abs(lateral) <= forward * Math.tan(horizon);
+    }
+
+    private List<int[]> addWidth(List<int[]> path, int width) {
+        List<int[]> newPath = new ArrayList<>();
+        for (int[] coord : path) {
+            for (int i = 1; i < width; i++) {
+                newPath.add(new int[]{coord[0], coord[1] + i});
+            }
+        }
+        return newPath;
     }
 }
 
