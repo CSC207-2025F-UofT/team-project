@@ -66,7 +66,7 @@ Andy Li: \
 
 ## API
 ### Java Websockets
-We will be using Java Websockets to host and join multiplayer (2 player) games. 
+We will be using Java Websockets to host and join multiplayer (2 player) games.
 
 ## AI Usage Disclosure
 Generative AI was used to generate part of the code for this project. In particular, the following things are entirely
@@ -74,7 +74,8 @@ generated or heavily co-opted by an LLM:
 - All JUnit Tests
 - All UI Code
 - TBA
-  No AI was used for any of the Artwork in this project.
+
+No AI was used for any of the Artwork in this project.
 
 ## Credits
 **Artwork & Original Design by** \
