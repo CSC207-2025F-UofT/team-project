@@ -12,7 +12,7 @@ public class DataAccessObject implements LoadQuestionDataAccessInterface {
     // TEMPORARY IMPLEMENTATION FOR TESTING PURPOSES
     @Override
     public boolean existsUnusedQuestion() {
-        return true;
+        return false;
     }
 
     // TEMPORARY IMPLEMENTATION FOR TESTING PURPOSES

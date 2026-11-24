@@ -22,6 +22,7 @@ public class AppBuilder {
 
     final DataAccessObject dataAccessObject = new DataAccessObject();
 
+    // add your stuff here :)
     private GameRunningView gameRunningView;
     private GameRunningViewModel gameRunningViewModel;
 
@@ -29,6 +30,7 @@ public class AppBuilder {
         cardPanel.setLayout(cardLayout);
     }
 
+    // add your view here
     public AppBuilder addGameRunningView() {
         gameRunningViewModel = new GameRunningViewModel();
         gameRunningView = new GameRunningView(gameRunningViewModel);
@@ -36,6 +38,7 @@ public class AppBuilder {
         return this;
     }
 
+    // ad your use case here >:)
     public AppBuilder addLoadQuestionUseCase() {
         final LoadQuestionOutputBoundary loadQuestionOutputBoundary = new LoadQuestionPresenter(viewManagerModel, gameRunningViewModel);
         final LoadQuestionInputBoundary loadQuestionInteractor = new LoadQuestionInteractor(dataAccessObject, loadQuestionOutputBoundary);
