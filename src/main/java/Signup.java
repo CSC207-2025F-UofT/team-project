@@ -1,3 +1,5 @@
+import profilesetup.PrivateInfo;
+
 import javax.swing.*;
 import java.awt.*;
 
@@ -33,8 +35,18 @@ public class Signup extends JFrame {
 
         //login or signup button
         JPanel buttons = new JPanel();
-        buttons.add(new JButton("Sign Up"));
+        JButton signup_button = new JButton("Sign Up");
+        buttons.add(signup_button);
         signup.add(buttons);
+
+        signup_button.addActionListener(e ->{
+            PrivateInfo privinfo = new PrivateInfo();
+        });
+
+
+        ImageIcon logo = new ImageIcon("src/main/java/templogo.png");
+        //JPanel panel = new JPanel(logo);
+       // frame.add(panel);
 
         frame.setVisible(true);
     }

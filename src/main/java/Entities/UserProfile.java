@@ -1,12 +1,12 @@
 package Entities;
 
 public class UserProfile {
-    private String firstName = null;
-    private String lastName = null;
-    private Integer age = null;
-    private String gender = null;
-    private String occupation = null;
-    private String biography = null;
+    private String firstName;
+    private String lastName;
+    private Integer age;
+    private String gender;
+    private String occupation;
+    private String biography;
     private String contactUrl;
     private String profilePictureUrl;
 
