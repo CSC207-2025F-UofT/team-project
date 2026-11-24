@@ -33,14 +33,14 @@ public class SearchPresenter implements SearchOutputBoundary {
         this.searchBarViewModel.notifyStateChanged();
 
         // switch to the logged in view
-        this.viewManagerModel.setState(searchedViewModel.VIEW_NAME);
+        this.viewManagerModel.setState(SearchedViewModel.VIEW_NAME);
         this.viewManagerModel.notifyViewChanged();
     }
 
     @Override
     public void prepareFailView(String error) {
         final SearchState loginState = searchBarViewModel.getState();
-        loginState.setTtileError(error);
+        loginState.setTitleError(error);
         searchBarViewModel.notifyStateChanged();
     }
 }

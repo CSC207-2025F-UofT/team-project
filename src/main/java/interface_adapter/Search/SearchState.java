@@ -7,7 +7,7 @@ public class SearchState {
     private String[][] outputMovieData;
     private String searchError;
     private String title = "";
-
+    //results returned in the form of {name, description, poster path, movie id}
     public String[][] getOutputMovieData() {
         return outputMovieData;
     }
@@ -17,7 +17,7 @@ public class SearchState {
     }
 
 
-    public void setTtileError(String titleError) {
+    public void setTitleError(String titleError) {
         this.searchError = titleError;
     }
 
