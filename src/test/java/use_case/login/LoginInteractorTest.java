@@ -33,7 +33,7 @@ public class LoginInteractorTest {
         LoginOutputData success = null;
         String error = null;
         int calls = 0;
-        boolean switchedToLogin = false;
+        boolean switchedToSignup = false;
 
         @Override
         public void prepareSuccessView(LoginOutputData outputData) {
@@ -48,8 +48,8 @@ public class LoginInteractorTest {
         }
 
         @Override
-        public void switchToLoginView() {
-            switchedToLogin = true;
+        public void switchToSignupView() {
+            switchedToSignup = true;
         }
     }
 
@@ -144,10 +144,10 @@ public class LoginInteractorTest {
     }
 
     @Test
-    void switchToLoginViewDelegatesToPresenter() {
-        interactor.switchToLoginView();
+    void switchToSignupDelegatesToPresenter() {
+        interactor.switchToSignupView();
 
-        assertTrue(presenter.switchedToLogin);
+        assertTrue(presenter.switchedToSignup);
         assertEquals(0, presenter.calls);
     }
 }
