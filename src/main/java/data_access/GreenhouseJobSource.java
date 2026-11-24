@@ -9,15 +9,18 @@ import java.net.http.HttpResponse;
 import java.net.http.HttpTimeoutException;
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import org.json.JSONException;
+import use_case.port.CompanyBoardSource;
 import use_case.port.JobFetchResult;
-import use_case.port.JobSource;
 import use_case.port.JobSourceException;
 import use_case.port.SourceFailure;
 
 /** Retrieves public Greenhouse boards without credentials; isolates failures per board. */
-public final class GreenhouseJobSource implements JobSource {
+public final class GreenhouseJobSource implements CompanyBoardSource {
   private final HttpClient client;
   private final URI baseUri;
   private final List<JobBoard> boards;
@@ -44,11 +47,34 @@ public final class GreenhouseJobSource implements JobSource {
   }
 
   @Override
+  public Map<String, String> getCompanies() {
+    Map<String, String> names = new LinkedHashMap<>();
+    boards.forEach(board -> names.put(board.getToken(), board.getCompany()));
+    return Collections.unmodifiableMap(names);
+  }
+
+  @Override
+  public JobFetchResult fetchCompany(String selection) throws JobSourceException {
+    final String token;
+    try {
+      token = JobBoard.tokenFrom(selection);
+    } catch (IllegalArgumentException exception) {
+      throw new JobSourceException("Enter a Greenhouse board token or a hosted board URL.");
+    }
+    String name = getCompanies().getOrDefault(token, token);
+    return fetchBoards(List.of(new JobBoard(token, name)));
+  }
+
+  @Override
   public JobFetchResult fetch() throws JobSourceException {
+    return fetchBoards(boards);
+  }
+
+  private JobFetchResult fetchBoards(List<JobBoard> selected) throws JobSourceException {
     List<JobPosting> jobs = new ArrayList<>();
     List<String> successes = new ArrayList<>();
     List<SourceFailure> failures = new ArrayList<>();
-    for (JobBoard board : boards) {
+    for (JobBoard board : selected) {
       HttpRequest request =
           HttpRequest.newBuilder(baseUri.resolve(board.getToken() + "/jobs?content=true"))
               .timeout(timeout)
@@ -77,6 +103,12 @@ public final class GreenhouseJobSource implements JobSource {
       }
     }
     if (successes.isEmpty()) {
+      if (selected.size() == 1) {
+        throw new JobSourceException(
+            "Could not retrieve the Greenhouse board "
+                + selected.get(0).getToken()
+                + ". Check the board token or try again later.");
+      }
       throw new JobSourceException("No configured job board could be retrieved.");
     }
     return new JobFetchResult(jobs, successes, failures);

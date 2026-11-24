@@ -38,10 +38,14 @@ public final class SearchJobsPresenter implements SearchJobsOutputBoundary {
         output.getFailures().stream()
             .map(failure -> failure.getSourceId() + " (" + failure.getReason().name() + ")")
             .collect(Collectors.joining(", "));
-    String warning =
-        unavailable.isEmpty() ? "" : "Results are incomplete. Unavailable: " + unavailable;
+    String detail =
+        (unavailable.isEmpty() ? "" : "Unavailable: " + unavailable + " ")
+            + output.getIncompleteReason();
+    String warning = detail.isBlank() ? "" : "Results are incomplete. " + detail.strip();
     uiExecutor.execute(
-        () -> viewModel.setState(new SearchJobsState(rows, message, warning, false, false)));
+        () ->
+            viewModel.setState(
+                new SearchJobsState(rows, message, warning, false, false, output.hasMore())));
   }
 
   @Override

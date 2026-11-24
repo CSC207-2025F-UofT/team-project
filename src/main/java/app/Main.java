@@ -3,6 +3,7 @@ package app;
 import data_access.DemoJobSource;
 import data_access.GreenhouseJobSource;
 import data_access.JobBoard;
+import data_access.JoobleJobSearch;
 import java.awt.GraphicsEnvironment;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
@@ -14,6 +15,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
@@ -79,7 +81,7 @@ public final class Main {
               boards,
               timeout);
       sourceLabel =
-          "Searching company boards: "
+          "Configured company boards: "
               + boards.stream().map(JobBoard::getCompany).collect(Collectors.joining(", "));
     }
     if (checkApi) {
@@ -98,10 +100,11 @@ public final class Main {
     if (GraphicsEnvironment.isHeadless()) {
       throw new IllegalArgumentException("A graphical desktop is required to open the Finder.");
     }
-    SwingUtilities.invokeLater(() -> showWindow(source, sourceLabel));
+    boolean offline = demo;
+    SwingUtilities.invokeLater(() -> showWindow(source, sourceLabel, offline));
   }
 
-  private static void showWindow(JobSource source, String sourceLabel) {
+  private static void showWindow(JobSource source, String sourceLabel, boolean offline) {
     ExecutorService worker =
         Executors.newSingleThreadExecutor(
             task -> {
@@ -111,9 +114,23 @@ public final class Main {
             });
     JFrame window = new JFrame("Internship Finder and Tracker");
     window.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-    window.add(
-        FinderApplication.createView(
-            source, worker, SwingUtilities::invokeLater, new DesktopLinkOpener(), sourceLabel));
+    DesktopLinkOpener links = new DesktopLinkOpener();
+    if (offline) {
+      window.add(
+          FinderApplication.createView(
+              source, worker, SwingUtilities::invokeLater, links, sourceLabel));
+    } else {
+      window.add(
+          FinderApplication.createLiveView(
+              source,
+              Optional.ofNullable(System.getenv("JOOBLE_API_KEY"))
+                  .filter(key -> !key.isBlank())
+                  .map(JoobleJobSearch::new),
+              worker,
+              SwingUtilities::invokeLater,
+              links,
+              sourceLabel));
+    }
     window.addWindowListener(
         new WindowAdapter() {
           @Override

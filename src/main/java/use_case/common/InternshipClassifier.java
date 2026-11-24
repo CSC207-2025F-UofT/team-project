@@ -11,8 +11,8 @@ public final class InternshipClassifier {
 
   private InternshipClassifier() {}
 
-  /** Returns whether a title contains an explicit intern, internship or co-op indicator. */
-  public static boolean isInternship(String title) {
-    return title != null && INDICATOR.matcher(title).find();
+  /** Returns whether a job title contains an explicit internship indicator. */
+  public static boolean isInternship(String text) {
+    return text != null && INDICATOR.matcher(text).find();
   }
 }
