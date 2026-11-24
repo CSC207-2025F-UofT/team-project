@@ -6,27 +6,27 @@ import java.util.List;
 /**
  * The View Model for the Game Running View.
  */
-public class MainMenuViewModel {
-    private final List<MainMenuViewModelListener> listeners = new ArrayList<>();
+public class CreateTeamViewModel {
+    private final List<CreateTeamViewModelListener> listeners = new ArrayList<>();
 
     public static final String VIEW_NAME = "main menu";
 
-    private MainMenuState state = new MainMenuState();
+    private CreateTeamState state = new CreateTeamState();
 
-    public MainMenuState getState() {
+    public CreateTeamState getState() {
         return state;
     }
 
-    public void setState(MainMenuState state) {
+    public void setState(CreateTeamState state) {
         this.state = state;
     }
 
-    public void addListener(MainMenuViewModelListener listener) {
+    public void addListener(CreateTeamViewModelListener listener) {
         listeners.add(listener);
     }
 
     public void notifyStateChanged() {
-        for (MainMenuViewModelListener listener : listeners) {
+        for (CreateTeamViewModelListener listener : listeners) {
             listener.stateChanged();
         }
     }

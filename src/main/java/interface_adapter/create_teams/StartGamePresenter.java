@@ -2,12 +2,14 @@ package interface_adapter.create_teams;
 
 import interface_adapter.ViewManagerModel;
 import use_case.start_game.StartGameOutputData;
+import use_case.start_game.StartGameOutputBoundary;
 
-public class CreateTeamPresenter {
+
+public class StartGamePresenter implements StartGameOutputBoundary {
     private final CreateTeamViewModel createTeamViewModel;
     private final ViewManagerModel viewManagerModel;
 
-    public CreateTeamPresenter(ViewManagerModel viewManagerModel, CreateTeamViewModel createTeamViewModel) {
+    public StartGamePresenter(ViewManagerModel viewManagerModel, CreateTeamViewModel createTeamViewModel) {
         this.viewManagerModel = viewManagerModel;
         this.createTeamViewModel = createTeamViewModel;
     }

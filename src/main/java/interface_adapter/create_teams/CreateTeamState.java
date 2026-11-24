@@ -3,7 +3,7 @@ package interface_adapter.create_teams;
 /**
  * The state information representing the main menu
  */
-public class MainMenuState {
+public class CreateTeamState {
     private String team1Name = "";
     private String team2Name = "";
     private String startGameError;
