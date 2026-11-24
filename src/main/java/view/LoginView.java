@@ -1,11 +1,20 @@
 package view;
 
-import javax.swing.*;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+
+import javax.swing.BoxLayout;
+import javax.swing.JButton;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JTextField;
+
+import interface_adapter.Login.LoginController;
+import interface_adapter.Login.LoginState;
+import interface_adapter.Login.LoginViewModel;
+import interface_adapter.Login.LoginViewModelListener;
 
 /**
  * The View for when the user is logging into the program.
@@ -15,16 +24,14 @@ public class LoginView extends JPanel implements ActionListener, LoginViewModelL
     private final LoginViewModel loginViewModel;
 
     private final JTextField usernameInputField = new JTextField(15);
+    private final JLabel welcomeField = new JLabel();
     private final JLabel loginErrorField = new JLabel();
 
-    private final JPasswordField passwordInputField = new JPasswordField(15);
-
     private final JButton logIn;
-    private final JButton cancel;
+    private final JButton signUp;
     private LoginController loginController = null;
 
     public LoginView(LoginViewModel loginViewModel) {
-
         this.loginViewModel = loginViewModel;
         this.loginViewModel.addListener(this);
 
@@ -33,86 +40,31 @@ public class LoginView extends JPanel implements ActionListener, LoginViewModelL
 
         final LabelTextPanel usernameInfo = new LabelTextPanel(
                 new JLabel("Username"), usernameInputField);
-        final LabelTextPanel passwordInfo = new LabelTextPanel(
-                new JLabel("Password"), passwordInputField);
+
+        welcomeField.setAlignmentX(Component.CENTER_ALIGNMENT);
+        loginErrorField.setAlignmentX(Component.CENTER_ALIGNMENT);
+        loginErrorField.setForeground(Color.RED);
 
         final JPanel buttons = new JPanel();
         logIn = new JButton("log in");
         buttons.add(logIn);
-        cancel = new JButton("cancel");
-        buttons.add(cancel);
+        signUp = new JButton("sign up");
+        buttons.add(signUp);
 
-        logIn.addActionListener(
-                new ActionListener() {
-                    public void actionPerformed(ActionEvent evt) {
-                        if (evt.getSource().equals(logIn)) {
-                            final LoginState currentState = loginViewModel.getState();
+        logIn.addActionListener(this);
+        signUp.addActionListener(this);
 
-                            loginController.execute(
-                                    currentState.getUsername(),
-                                    currentState.getPassword()
-                            );
-                        }
-                    }
-                }
-        );
-
-        cancel.addActionListener(this);
-
-        usernameInputField.getDocument().addDocumentListener(new DocumentListener() {
-
-            private void documentListenerHelper() {
-                final LoginState currentState = loginViewModel.getState();
-                currentState.setUsername(usernameInputField.getText());
-                loginViewModel.setState(currentState);
-            }
-
-            @Override
-            public void insertUpdate(DocumentEvent e) {
-                documentListenerHelper();
-            }
-
-            @Override
-            public void removeUpdate(DocumentEvent e) {
-                documentListenerHelper();
-            }
-
-            @Override
-            public void changedUpdate(DocumentEvent e) {
-                documentListenerHelper();
-            }
-        });
+        usernameInputField.getDocument().addDocumentListener(new SimpleDocumentListener(() -> {
+            final LoginState currentState = loginViewModel.getState();
+            currentState.setUsername(usernameInputField.getText());
+            loginViewModel.setState(currentState);
+        }));
 
         this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
-
-        passwordInputField.getDocument().addDocumentListener(new DocumentListener() {
-
-            private void documentListenerHelper() {
-                final LoginState currentState = loginViewModel.getState();
-                currentState.setPassword(new String(passwordInputField.getPassword()));
-                loginViewModel.setState(currentState);
-            }
-
-            @Override
-            public void insertUpdate(DocumentEvent e) {
-                documentListenerHelper();
-            }
-
-            @Override
-            public void removeUpdate(DocumentEvent e) {
-                documentListenerHelper();
-            }
-
-            @Override
-            public void changedUpdate(DocumentEvent e) {
-                documentListenerHelper();
-            }
-        });
-
         this.add(title);
+        this.add(welcomeField);
         this.add(usernameInfo);
         this.add(loginErrorField);
-        this.add(passwordInfo);
         this.add(buttons);
     }
 
@@ -120,18 +72,24 @@ public class LoginView extends JPanel implements ActionListener, LoginViewModelL
      * React to a button click that results in evt.
      * @param evt the ActionEvent to react to
      */
+    @Override
     public void actionPerformed(ActionEvent evt) {
-        System.out.println("Click " + evt.getActionCommand());
+        if (evt.getSource().equals(logIn)) {
+            loginController.execute(loginViewModel.getState().getUsername());
+        }
+        else if (evt.getSource().equals(signUp)) {
+            loginController.switchToSignupView();
+        }
     }
 
     @Override
     public void stateChanged() {
-        setFields(loginViewModel.getState());
-        loginErrorField.setText(loginViewModel.getState().getLoginError());
-    }
-
-    private void setFields(LoginState state) {
-        usernameInputField.setText(state.getUsername());
+        final LoginState state = loginViewModel.getState();
+        if (!usernameInputField.getText().equals(state.getUsername())) {
+            usernameInputField.setText(state.getUsername());
+        }
+        welcomeField.setText(state.getWelcomeMessage());
+        loginErrorField.setText(state.getLoginError());
     }
 
     public void setLoginController(LoginController loginController) {

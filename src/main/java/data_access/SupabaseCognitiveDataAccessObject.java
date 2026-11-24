@@ -21,8 +21,11 @@ import use_case.get_data.get_dataDataAccessInterface;
 public class SupabaseCognitiveDataAccessObject implements get_dataDataAccessInterface {
     private static final String BASE_URL =
             "https://lycetkmgbgkdgcbxhezw.supabase.co/rest/v1/CogSci";
-    // TODO change this for 2 tests idk how to do this
-    private static final String TEST_TYPE = "";
+    /** The two cognitive test types a row can hold. */
+    public static final String ATTENTION = "Attention";
+    public static final String MEMORY = "Memory";
+    /** Name of the CogSci column that says which test the score belongs to. */
+    private static final String TEST_TYPE_COLUMN = "test_type";
     private final OkHttpClient client = new OkHttpClient();
     private static final String API_KEY = "sb_publishable_0dPA21pu1aHGE195Aw8YVw_lm45wA_b";
 
@@ -68,18 +71,38 @@ public class SupabaseCognitiveDataAccessObject implements get_dataDataAccessInte
             return result;
         }
         catch (IOException | JSONException ex) {
-            throw new RuntimeException("Failed to fetch cognitive data", ex);
+            throw new RuntimeException("Failed to fetch cognitive data: " + ex.getMessage(), ex);
         }
     }
 
     private CognitiveData toEntity(JSONObject row) throws JSONException {
-        final Date date = Date.from(LocalDate.parse(row.getString("date"))
+        // Tolerate both "2026-11-24" and "2026-11-24T00:00:00" style values.
+        final String rawDate = row.getString("date");
+        final Date date = Date.from(LocalDate.parse(rawDate.substring(0, 10))
                 .atStartOfDay(ZoneId.systemDefault()).toInstant());
 
         return new CognitiveData.CogBuilder(date)
-                .mood(row.getString("mood"))
-                .productivityRating(row.getDouble("productivity"))
-                .cogTest(TEST_TYPE, row.getDouble("score"))
+                .mood(row.optString("mood", "none"))
+                .productivityRating(row.optDouble("productivity", 0.0))
+                .cogTest(toTestType(row.optString(TEST_TYPE_COLUMN, "")), row.optDouble("score", 0.0))
                 .build();
+    }
+
+    /**
+     * Converts the stored test type to "Attention" or "Memory" (case-insensitive).
+     * @param raw the value stored in the table
+     * @return {@link #ATTENTION} or {@link #MEMORY}
+     * @throws JSONException if the value is neither
+     */
+    static String toTestType(String raw) throws JSONException {
+        final String cleaned = raw.trim();
+        if (cleaned.equalsIgnoreCase(ATTENTION)) {
+            return ATTENTION;
+        }
+        if (cleaned.equalsIgnoreCase(MEMORY)) {
+            return MEMORY;
+        }
+        throw new JSONException("Unknown test type '" + raw + "' in column '" + TEST_TYPE_COLUMN
+                + "' (expected " + ATTENTION + " or " + MEMORY + ")");
     }
 }
