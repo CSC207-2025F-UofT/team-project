@@ -28,7 +28,14 @@ public class JobMatchInteractor implements JobMatchInputBoundary {
             userPresenter.prepareFailView("Please log in first.");
             return;
         }
-        final ArrayList<Job> jobs = jobDataAccessObject.getJobs(student);
+        final ArrayList<Job> jobs;
+        try {
+            jobs = jobDataAccessObject.getJobs(student);
+        }
+        catch (JobFetchException exception) {
+            userPresenter.prepareFailView(exception.getMessage());
+            return;
+        }
         if (jobs.isEmpty()) {
             userPresenter.prepareFailView("No matching jobs found.");
             return;

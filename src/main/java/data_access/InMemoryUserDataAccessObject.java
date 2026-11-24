@@ -122,7 +122,7 @@ public class InMemoryUserDataAccessObject implements SignupUserDataAccessInterfa
 
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(BASE_URL))
-                .header("x-goog-api-key", System.getenv("API_KEY"))
+                .header("x-goog-api-key", EnvConfig.get("API_KEY"))
                 .header("Content-Type", "application/json")
                 .timeout(Duration.ofSeconds(10))
                 .POST(HttpRequest.BodyPublishers.ofString(jsonPayload))

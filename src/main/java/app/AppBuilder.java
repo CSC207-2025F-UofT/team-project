@@ -9,7 +9,7 @@ import view.JobFilterView;
 
 import data_access.FileStudentDataAccessObject;
 import data_access.InMemoryUserDataAccessObject;
-import data_access.StubJobDataAccessObject;
+import data_access.JobDataAccessObject;
 import entity.StudentFactory;
 import interface_adapter.ViewManagerModel;
 import interface_adapter.add_course.AddCourseController;
@@ -83,8 +83,8 @@ public class AppBuilder {
     // DAO that calls the UofT course API and Gemini for course analysis
     final InMemoryUserDataAccessObject courseApiDataAccessObject = new InMemoryUserDataAccessObject();
 
-    // TODO: replace this stub with a real implementation
-    final StubJobDataAccessObject jobDataAccessObject = new StubJobDataAccessObject();
+    // DAO that fetches jobs from the Careerjet API and caches them in memory
+    final JobDataAccessObject jobDataAccessObject = new JobDataAccessObject();
 
     private SignupView signupView;
     private SignupViewModel signupViewModel;
