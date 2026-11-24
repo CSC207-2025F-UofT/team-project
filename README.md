@@ -511,3 +511,35 @@ Nager.Holidays
 - The program uses the Nager.Date Public Holiday API to retrieve public holiday information. 
 - It checks whether academic task deadlines fall on public holidays and displays holiday warnings beside affected tasks in the Monitoring View. 
 - The API results are cached to avoid repeated requests.
+
+## User Manual
+
+### Main UI flow chart
+- This is a high-level flow chart, and it might not capture all of the detailed flow.
+
+```mermaid
+graph TD
+  welcome["Welcome"]
+  login["Login"]
+  signup["Signup"]
+  main["Main"]
+  createTask["Create Task"]
+  editTask["Edit Task"]
+  monitoring["Task Planning Report"]
+
+  welcome --> signup
+  signup --> login
+
+  welcome --> login
+  login --> main
+  main --> welcome
+
+  main --> createTask
+  createTask --> main
+
+  main --> editTask
+  editTask --> main
+
+  main --> monitoring
+  monitoring --> main
+```
