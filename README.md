@@ -218,6 +218,7 @@ three answers and final confirmation. Completed results can be viewed without ch
 8. The system shows the new day: day number, weather, and restored energy.
 
 **Extensions:**
+- **1a — A class challenge or exam is in progress:** The system asks the player to finish or leave it first. The day, energy, and checkpoint are unchanged.
 - **3a — The player cancels:** Nothing changes.
 - **5a — The weather source is unavailable:** The system uses its bundled copy of the same historical weather data and continues at step 6.
 - **6a — Energy is already above the weather-based level:** The system keeps the current energy and continues to save the checkpoint.
@@ -225,7 +226,9 @@ three answers and final confirmation. Completed results can be viewed without ch
 
 **MVP boundary:** Rest is immediate, with no real-time waiting. The day number and weather only affect energy restored at Residence; they do not affect other buildings. There is no term calendar, exam date, or class schedule. Residence is always accessible at zero energy.
 
-**Rule to finalize:** The real start date matched to day 1, and the energy restored for each condition (proposed: clear 100%, cloudy 95%, rain 85%, snow 80% of maximum).
+**Rules:** Day 1 is matched to 2025-09-02. Energy is restored to a percentage of the maximum by weather: clear 100%, cloudy 95%, rain 85%, snow 80%.
+
+**Current status:** All steps and extensions are implemented. Step 7 currently saves energy, the current day and the day's weather only; the major, courses, challenge results, preparation points and exam results will be added to the checkpoint once the UC1–UC3 academic entities are merged.
 
 ---
 
@@ -250,10 +253,13 @@ three answers and final confirmation. Completed results can be viewed without ch
 5. The system displays Residence with the restored day, weather, and progress.
 
 **Extensions:**
+- **1a — A class challenge or exam is in progress:** The system asks the player to finish or leave it first and does not load the checkpoint.
 - **2a — No checkpoint exists:** The system explains that no saved game is available and offers a new game.
 - **3a — The checkpoint is damaged or unsupported:** The system explains that it cannot be loaded and leaves the saved file unchanged.
 
 **MVP boundary:** Only completed progress saved at Residence is restored. Unfinished challenges and exams are not saved.
+
+**Current status:** Implemented, including extensions 1a, 2a and 3a. Step 4 currently restores energy, the current day and the day's weather; academic progress follows the UC4 checkpoint.
 
 ---
 
@@ -280,6 +286,9 @@ Navigation does not consume energy, and Residence remains accessible at zero ene
 
 ### Player
 Represents the student character, their energy, and their academic record.
+- **Instance variables:** `energy: int`, `maxEnergy: int`, `activeAttemptId: String` (the challenge or exam in progress, if any)
+- **Methods:** `restoreEnergyToPercent(percent)`, `spendEnergy(amount)` (rejects negative amounts and insufficient energy without changing anything), `startActivity(attemptId)`, `finishActivity(attemptId)` (releases only the matching attempt; repeating it is harmless), `hasActiveActivity()`
+- The academic record is not part of `Player` yet.
 
 ### Major
 Represents a predefined major and its attached courses. Selecting a major automatically assigns those courses to the player.
@@ -343,14 +352,16 @@ text or answers and cannot be used offline. Practice and exam IDs are disjoint f
 (48 questions across 12 requests: three practice and five exam questions per course, no API key).
 Normal automated tests use test-only fixtures, without network.
 
-**Planned US4 API:** [Open-Meteo Historical Weather API](https://open-meteo.com/en/docs/historical-weather-api)
+**US4 API:** [Open-Meteo Historical Weather API](https://open-meteo.com/en/docs/historical-weather-api)
 
-**How it will be used:** Each game day is matched to a real date, and that day's Toronto weather (clear, cloudy, rain,
-or snow) is shown when the player wakes up and decides how much energy is restored. A bundled copy of the same data is
-used if the API is unavailable.
+**How it is used:** Each game day is matched to a real date, starting from 2025-09-02. When the player rests,
+`OpenMeteoWeatherDataAccessObject` requests that date's daily weather code and high/low temperatures for the St. George
+campus from `https://archive-api.open-meteo.com/v1/archive` (`java.net.http.HttpClient`, no API key). The WMO weather
+code is converted into clear, cloudy, rain, or snow, which decides how much energy is restored.
 
-**Status:** Successfully called from a standalone Java test (`java.net.http.HttpClient`, no API key needed). Not yet
-integrated into the game.
+**Fallback:** If the request fails or times out (5 s to connect, 10 s per request), `BundledWeatherDataAccessObject`
+reads the same Open-Meteo data saved in `src/main/resources/weather/toronto-weather.json`, covering 2025-09-02 to
+2025-12-31.
 
 ---
 ## Design Diagrams
