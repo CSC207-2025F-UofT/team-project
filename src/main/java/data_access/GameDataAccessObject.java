@@ -14,25 +14,28 @@ public class GameDataAccessObject implements SubmitGuessDataAccessInterface, Sta
         this.cityData = cityData;
     }
 
-//    @Override
-//    public Round getCurrentRound() {
-//        return currentRound;
-//    }
-//
-//    @Override
-//    public City findCityByName(String name) {
-//        return cityData.findCityByName(name);
-//    }
-
     @Override
     public AnswerCity getRandomAnswerCity() {
         return cityData.getRandomAnswerCity();
     }
 
     @Override
+    public City findCityByName(String name) {
+        return cityData.findCityByName(name);
+    }
+
+    @Override
+    public boolean isAlreadyGuessed() {
+        return false;
+    }
+
+    @Override
+    public Round getCurrentRound() {
+        return currentRound;
+    }
+
+    @Override
     public void saveRound(Round round) {
         currentRound = round;
     }
-
-
 }
