@@ -86,6 +86,13 @@ public final class SupabaseClient {
                 .POST(HttpRequest.BodyPublishers.ofString(body.toString())).build());
     }
 
+    /** Same as post, but PUT. Change Password (#22) uses it to update the user. */
+    HttpResponse<String> put(String path, JsonObject body, String accessToken)
+            throws IOException, InterruptedException {
+        return send(request(path, accessToken).header("Content-Type", "application/json")
+                .PUT(HttpRequest.BodyPublishers.ofString(body.toString())).build());
+    }
+
     private HttpRequest.Builder request(String path, String accessToken) {
         final HttpRequest.Builder request = HttpRequest.newBuilder(projectUrl.resolve(path))
                 .header("apikey", publishableKey)
