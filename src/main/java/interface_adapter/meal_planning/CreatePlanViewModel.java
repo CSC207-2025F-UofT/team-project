@@ -2,25 +2,35 @@ package interface_adapter.meal_planning;
 
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
-import java.util.Objects;
+import java.time.LocalDate;
 
 public class CreatePlanViewModel {
 
-    private CreatePlanState state = new CreatePlanState();
+    private String planId;
+    private LocalDate date;
+    private String errorMessage = "";
 
     private final PropertyChangeSupport support =
             new PropertyChangeSupport(this);
 
-    public CreatePlanState getState() {
-        return state;
+    public String getPlanId() {
+        return planId;
     }
 
-    public void setState(CreatePlanState state) {
-        this.state = Objects.requireNonNull(state);
+    public LocalDate getDate() {
+        return date;
     }
 
-    public void firePropertyChanged() {
-        support.firePropertyChange("state", null, state);
+    public String getErrorMessage() {
+        return errorMessage;
+    }
+
+    public void update(String planId, LocalDate date, String errorMessage) {
+        this.planId = planId;
+        this.date = date;
+        this.errorMessage = errorMessage;
+
+        support.firePropertyChange("createPlan", null, this);
     }
 
     public void addPropertyChangeListener(

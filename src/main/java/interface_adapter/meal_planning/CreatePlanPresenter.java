@@ -15,20 +15,14 @@ public class CreatePlanPresenter implements CreatePlanOutputBoundary {
 
     @Override
     public void prepareSuccessView(CreatePlanOutputData outputData) {
-        CreatePlanState state = new CreatePlanState();
-        state.setPlanId(outputData.getPlanId());
-        state.setDate(outputData.getDate());
-
-        viewModel.setState(state);
-        viewModel.firePropertyChanged();
+        viewModel.update(
+                outputData.getPlanId(),
+                outputData.getDate(),
+                "");
     }
 
     @Override
     public void prepareFailView(String errorMessage) {
-        CreatePlanState state = new CreatePlanState();
-        state.setErrorMessage(errorMessage);
-
-        viewModel.setState(state);
-        viewModel.firePropertyChanged();
+        viewModel.update(null, null, errorMessage);
     }
 }

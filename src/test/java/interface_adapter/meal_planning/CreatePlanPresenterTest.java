@@ -28,15 +28,15 @@ class CreatePlanPresenterTest {
         presenter.prepareSuccessView(
                 new CreatePlanOutputData("plan-1", date));
 
-        CreatePlanState state = viewModel.getState();
 
-        assertEquals("plan-1", state.getPlanId());
-        assertEquals(date, state.getDate());
-        assertEquals("", state.getErrorMessage());
+
+        assertEquals("plan-1", viewModel.getPlanId());
+        assertEquals(date, viewModel.getDate());
+        assertEquals("", viewModel.getErrorMessage());
 
         assertEquals(2, events.size());
-        assertEquals("state", events.get(1).getPropertyName());
-        assertSame(state, events.get(1).getNewValue());
+        assertEquals("createPlan", events.get(1).getPropertyName());
+        assertSame(viewModel, events.get(1).getNewValue());
     }
 
     @Test
@@ -56,16 +56,16 @@ class CreatePlanPresenterTest {
         presenter.prepareFailView(
                 "A meal plan already exists for this date.");
 
-        CreatePlanState state = viewModel.getState();
 
-        assertNull(state.getPlanId());
-        assertNull(state.getDate());
+
+        assertNull(viewModel.getPlanId());
+        assertNull(viewModel.getDate());
         assertEquals(
                 "A meal plan already exists for this date.",
-                state.getErrorMessage());
+                viewModel.getErrorMessage());
 
         assertEquals(2, events.size());
-        assertEquals("state", events.get(1).getPropertyName());
-        assertSame(state, events.get(1).getNewValue());
+        assertEquals("createPlan", events.get(1).getPropertyName());
+        assertSame(viewModel, events.get(1).getNewValue());
     }
 }
