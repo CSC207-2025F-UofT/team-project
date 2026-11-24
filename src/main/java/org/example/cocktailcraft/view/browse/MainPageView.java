@@ -6,6 +6,7 @@ import org.example.cocktailcraft.interface_adapter.search.SearchState;
 import org.example.cocktailcraft.interface_adapter.search.SearchViewModel;
 import org.example.cocktailcraft.view.click.ClickView;
 import org.example.cocktailcraft.view.search.SearchView;
+import java.util.function.Consumer;
 
 import java.awt.BorderLayout;
 import java.util.List;
@@ -20,6 +21,8 @@ import javax.swing.JSplitPane;
 
 public class MainPageView extends JPanel {
     private List<Cocktail> displayedCocktails;
+    private Cocktail selectedCocktail;
+    private final JButton customizeButton = new JButton("Customize");
 
     public MainPageView(SearchView search, List<Cocktail> cocktails,
                         ClickController clickController, ClickView clickView) {
@@ -52,14 +55,20 @@ public class MainPageView extends JPanel {
 
         JList<String> cocktailList = new JList<>(model);
 
-        cocktailList.addListSelectionListener(e -> {
-            if (!e.getValueIsAdjusting()) {
+        cocktailList.addListSelectionListener(event -> {
+            if (!event.getValueIsAdjusting()) {
                 int index = cocktailList.getSelectedIndex();
 
-                if (index != -1) {
-                    Cocktail selectedCocktail = displayedCocktails.get(index);
-                    clickController.execute(selectedCocktail.getId());
+                if (index == -1) {
+                    selectedCocktail = null;
+                    customizeButton.setEnabled(false);
+                    return;
                 }
+
+                selectedCocktail = displayedCocktails.get(index);
+                customizeButton.setEnabled(true);
+
+                clickController.execute(selectedCocktail.getId());
             }
         });
 
@@ -87,15 +96,26 @@ public class MainPageView extends JPanel {
 
         catalog.add(new JScrollPane(cocktailList), BorderLayout.CENTER);
 
-        add(catalog, BorderLayout.CENTER);
+        customizeButton.setEnabled(false);
+
+        JPanel detailsPanel = new JPanel(new BorderLayout(10, 10));
+        detailsPanel.add(clickView, BorderLayout.CENTER);
+        detailsPanel.add(customizeButton, BorderLayout.SOUTH);
 
         JSplitPane splitPane = new JSplitPane(
                 JSplitPane.HORIZONTAL_SPLIT,
                 catalog,
-                clickView
+                detailsPanel
         );
 
         add(splitPane, BorderLayout.CENTER);
     }
 
+    public void setCustomizeAction(Consumer<Cocktail> action) {
+        customizeButton.addActionListener(event -> {
+            if (selectedCocktail != null) {
+                action.accept(selectedCocktail);
+            }
+        });
+    }
 }

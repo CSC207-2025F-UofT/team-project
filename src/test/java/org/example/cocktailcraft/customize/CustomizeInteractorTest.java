@@ -34,7 +34,8 @@ public class CustomizeInteractorTest {
                 "user-001",
                 "mojito",
                 "My Mojito",
-                ingredients
+                ingredients,
+                "1. Add sugar.\n2. Stir with ice."
         );
 
         interactor.execute(inputData);
@@ -44,12 +45,14 @@ public class CustomizeInteractorTest {
         assertEquals("mojito", dataAccess.savedRecipe.getOriginalCocktailId());
         assertEquals("My Mojito", dataAccess.savedRecipe.getName());
         assertEquals(ingredients, dataAccess.savedRecipe.getIngredients());
+        assertEquals(inputData.getInstructions(), dataAccess.savedRecipe.getInstructions());
 
         assertNull(presenter.errorMessage);
         assertNotNull(presenter.outputData);
         assertEquals(dataAccess.savedRecipe.getId(), presenter.outputData.getCustomRecipeId());
         assertEquals("My Mojito", presenter.outputData.getName());
         assertEquals(ingredients, presenter.outputData.getIngredients());
+        assertEquals(inputData.getInstructions(), presenter.outputData.getInstructions());
     }
 
     @Test
@@ -83,7 +86,8 @@ public class CustomizeInteractorTest {
                 "user-001",
                 "mojito",
                 "My Mojito",
-                List.of(new RecipeIngredient("Sugar", "2", "tsp"))
+                List.of(new RecipeIngredient("Sugar", "2", "tsp")),
+                "Add two teaspoons of sugar."
         );
 
         CustomizeInteractor interactor =
@@ -94,7 +98,8 @@ public class CustomizeInteractorTest {
                 "user-001",
                 "mojito",
                 "Less Sweet Mojito",
-                List.of(new RecipeIngredient("Sugar", "1", "tsp"))
+                List.of(new RecipeIngredient("Sugar", "1", "tsp")),
+                "Add one teaspoon of sugar, then stir."
         );
 
         interactor.execute(inputData);
@@ -107,6 +112,8 @@ public class CustomizeInteractorTest {
         assertEquals("Less Sweet Mojito", dataAccess.savedRecipe.getName());
         assertEquals("1", dataAccess.savedRecipe.getIngredients().get(0).getAmount());
         assertEquals("custom-001", presenter.outputData.getCustomRecipeId());
+        assertEquals(inputData.getInstructions(), dataAccess.savedRecipe.getInstructions());
+        assertEquals(inputData.getInstructions(), presenter.outputData.getInstructions());
     }
 
     @Test
@@ -119,7 +126,8 @@ public class CustomizeInteractorTest {
                 "user-001",
                 "mojito",
                 "My Mojito",
-                List.of(new RecipeIngredient("Sugar", "2", "tsp"))
+                List.of(new RecipeIngredient("Sugar", "2", "tsp")),
+                "Add two teaspoons of sugar."
         );
         dataAccess.savedRecipe = original;
 
@@ -131,7 +139,8 @@ public class CustomizeInteractorTest {
                 "user-002",
                 "mojito",
                 "Changed Recipe",
-                List.of(new RecipeIngredient("Sugar", "1", "tsp"))
+                List.of(new RecipeIngredient("Sugar", "1", "tsp")),
+                "Add one teaspoon of sugar, then stir."
         );
 
         interactor.execute(inputData);
@@ -139,6 +148,7 @@ public class CustomizeInteractorTest {
         assertEquals("You can only edit your own recipes.", presenter.errorMessage);
         assertNull(presenter.outputData);
         assertSame(original, dataAccess.savedRecipe);
+        assertEquals("Add two teaspoons of sugar.", dataAccess.savedRecipe.getInstructions());
     }
 
     @Test
@@ -155,7 +165,8 @@ public class CustomizeInteractorTest {
                 "user-001",
                 "mojito",
                 "My Mojito",
-                List.of(new RecipeIngredient("Sugar", "1", "tsp"))
+                List.of(new RecipeIngredient("Sugar", "1", "tsp")),
+                "Add one teaspoon of sugar, then stir."
         );
 
         interactor.execute(inputData);

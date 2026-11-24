@@ -150,6 +150,29 @@ class SearchIntegrationTest {
         });
     }
 
+    @Test
+    void filteredSelectionPassesTheSameRecipeToDetailsAndExistingCustomizeAction() throws Exception {
+        SwingUtilities.invokeAndWait(() -> {
+            Fixture fixture = new Fixture(() -> List.of(gin, rum));
+            AtomicReference<Cocktail> customized = new AtomicReference<>();
+            fixture.home.setCustomizeAction(customized::set);
+            JButton customize = find(fixture.home, JButton.class, "Customize");
+            assertFalse(customize.isEnabled());
+            fixture.name().setText("daiquiri");
+            fixture.button("Search").doClick();
+            fixture.results().setSelectedIndex(0);
+            assertEquals("daiquiri", fixture.selectedId.get());
+            assertTrue(customize.isEnabled());
+            customize.doClick();
+            assertEquals(rum, customized.get());
+            fixture.button("Clear").doClick();
+            assertFalse(customize.isEnabled());
+            customized.set(null);
+            customize.doClick();
+            assertEquals(null, customized.get());
+        });
+    }
+
     private final class Fixture {
         private final SearchViewModel model = new SearchViewModel();
         private final SearchView search = new SearchView(model);
