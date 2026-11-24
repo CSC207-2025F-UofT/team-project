@@ -1,5 +1,12 @@
 package app;
 
+import entity.Student;
+import interface_adapter.job_filter.JobFilterController;
+import interface_adapter.job_filter.JobFilterPresenter;
+import interface_adapter.job_filter.JobFilterViewModel;
+import use_case.job_filter.JobFilterInteractor;
+import view.JobFilterView;
+
 import data_access.FileStudentDataAccessObject;
 import data_access.InMemoryUserDataAccessObject;
 import data_access.StubJobDataAccessObject;
@@ -116,6 +123,19 @@ public class AppBuilder {
     public AppBuilder addLoggedInView() {
         loggedInViewModel = new LoggedInViewModel();
         loggedInView = new LoggedInView(loggedInViewModel);
+        loggedInView.addFilterJobsListener(event -> {
+            Student student = userDataAccessObject.get(loggedInViewModel.getState().getUsername());
+            JobFilterViewModel model = new JobFilterViewModel();
+            JobFilterController controller = new JobFilterController(
+                    new JobFilterInteractor(new JobFilterPresenter(model)));
+            JDialog dialog = new JDialog(SwingUtilities.getWindowAncestor(loggedInView),
+                    "Filter Jobs", java.awt.Dialog.ModalityType.APPLICATION_MODAL);
+            dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+            dialog.setContentPane(new JobFilterView(controller, model, student));
+            dialog.pack();
+            dialog.setLocationRelativeTo(loggedInView);
+            dialog.setVisible(true);
+        });
         cardPanel.add(loggedInView, LoggedInViewModel.VIEW_NAME);
         return this;
     }
