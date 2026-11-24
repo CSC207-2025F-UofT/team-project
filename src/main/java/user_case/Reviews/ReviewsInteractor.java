@@ -22,5 +22,4 @@ public class ReviewsInteractor implements ReviewsInputBoundary{
             outputBoundary.prepareFailView("Failed to retrieve reviews");
         }
     }
-
 }

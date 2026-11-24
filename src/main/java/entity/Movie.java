@@ -32,6 +32,19 @@ public class Movie {
         this.posterPath = "https://image.tmdb.org/t/p/w500" + posterPath;
     }
 
+    public Movie(String name, String description, String releaseDate, int movieID, String posterPath) {
+        if ("".equals(name)) {
+            throw new IllegalArgumentException("Name cannot be empty");
+        }
+
+        this.name = name;
+        this.rating = 0; // set the default rating to 0
+        this.description = description;
+        this.releaseDate = releaseDate;
+        this.movieID = movieID;
+        this.posterPath = "https://image.tmdb.org/t/p/w500" + posterPath;
+    }
+
     public String getName() {
         return name;
     }

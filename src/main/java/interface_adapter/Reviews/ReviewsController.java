@@ -2,7 +2,6 @@ package interface_adapter.Reviews;
 
 import user_case.Reviews.ReviewsInputBoundary;
 import user_case.Reviews.ReviewsInputData;
-import user_case.Reviews.ReviewsInputBoundary;
 
 public class ReviewsController {
     private final ReviewsInputBoundary inputBoundary;

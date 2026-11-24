@@ -1,26 +1,25 @@
 package interface_adapter.Reviews;
 
-import entity.MovieReview;
 import java.util.ArrayList;
 import java.util.List;
 
 public class ReviewsViewModel {
-    private List<MovieReview> reviews = new ArrayList<>();
-    private String errorMessage = "";
+    private List<ReviewsViewModelListener> listeners = new ArrayList<>();
+    public static final String VIEW_MODEL = "reviews";
+    private ReviewsState state = new ReviewsState();
 
-    public List<MovieReview> getReviews() {
-        return reviews;
+    public ReviewsState getState(){
+        return this.state;
     }
-
-    public void setReviews(List<MovieReview> reviews) {
-        this.reviews = reviews;
+    public void setState(ReviewsState state){
+        this.state = state;
     }
-
-    public String getErrorMessage() {
-        return errorMessage;
+    public void addListener(ReviewsViewModelListener listener){
+        listeners.add(listener);
     }
-
-    public void setErrorMessage(String errorMessage) {
-        this.errorMessage = errorMessage;
+    public void notifyStateChanged(){
+        for(ReviewsViewModelListener listener: listeners){
+            listener.stateChanged();
+        }
     }
 }
