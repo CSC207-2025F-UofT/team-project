@@ -7,6 +7,7 @@ import static java.lang.Math.max;
  * race, character class, and stats.
  */
 public class PlayerCharacter {
+    private String name;
     private int health;
     private int maxHealth;
     private int armourClass;
@@ -36,6 +37,8 @@ public class PlayerCharacter {
     public int getHealth() {return health;}
 
     public int getArmourClass() { return armourClass;}
+
+    public String getName() {return name;}
 
     /**
    * Returns the player character's saved stats.

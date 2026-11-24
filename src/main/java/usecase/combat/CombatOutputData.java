@@ -3,9 +3,12 @@ package usecase.combat;
 public class CombatOutputData {
     private final String characterName;
     private final String monsterName;
+
     private final int characterHealth;
     private final int monsterHealth;
+
     private final String combatMessage;
+
     private final boolean combatFinished;
     private final boolean characterWon;
 
