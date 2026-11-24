@@ -22,6 +22,7 @@ public class LoadQuestionPresenter implements LoadQuestionOutputBoundary {
         // On success, update the GameRunningViewModel's state
         final GameRunningState state = gameRunningViewModel.getState();
         state.setQuestionText(response.getQuestionText());
+        state.setAnswerCount(response.getAnswerCount());
         gameRunningViewModel.notifyStateChanged();
     }
 

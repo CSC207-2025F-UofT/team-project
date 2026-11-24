@@ -6,7 +6,6 @@ import interface_adapter.game_running.GameRunningViewModelListener;
 import interface_adapter.game_running.LoadQuestionController;
 
 import javax.swing.*;
-import java.awt.event.ActionListener;
 import java.awt.*;
 
 public class GameRunningView extends JPanel implements GameRunningViewModelListener {
@@ -14,42 +13,81 @@ public class GameRunningView extends JPanel implements GameRunningViewModelListe
     private final GameRunningViewModel gameRunningViewModel;
     private LoadQuestionController loadQuestionController = null;
 
-    private final JLabel question;
-
-    private final JButton loadQuestion; // TODO: should prob also have an end game button, among others
+    private final JLabel questionLabel;
+    private final JLabel[] answerLabels;
+    private final JTextField answerInput;
 
     public GameRunningView(GameRunningViewModel gameRunningViewModel) {
         this.gameRunningViewModel = gameRunningViewModel;
+        gameRunningViewModel.addListener(this);
 
-        final JLabel title = new JLabel(GameRunningViewModel.VIEW_NAME);
-        title.setAlignmentX(Component.CENTER_ALIGNMENT);
-
-        final JLabel questionInfo = new JLabel("Question: ");
-        question = new JLabel();
-        question.setAlignmentX(Component.CENTER_ALIGNMENT);
-
-        final JPanel buttons = new JPanel();
-        loadQuestion = new JButton("New Question");
-        buttons.add(loadQuestion);
-
+        this.setSize(1000, 600);
         this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 
-        loadQuestion.addActionListener(
+        final JLabel title = new JLabel("Family Feud");
+        title.setFont(new Font("Bernard MT Condensed", Font.PLAIN, 48));
+        title.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        JPanel questionPanel = new JPanel();
+        questionLabel = new JLabel("Question: ___________________");
+        questionLabel.setFont(new Font("Franklin Gothic Demi", Font.PLAIN, 24));
+        questionPanel.add(questionLabel);
+        questionPanel.setMaximumSize(new Dimension(1000, 50));
+
+        final JPanel answers = new JPanel();
+        answers.setLayout(new BoxLayout(answers, BoxLayout.X_AXIS));
+
+        final JPanel answersLeft = new JPanel();
+        answersLeft.setLayout(new BoxLayout(answersLeft, BoxLayout.Y_AXIS));
+        final JPanel answersRight = new JPanel();
+        answersRight.setLayout(new BoxLayout(answersRight, BoxLayout.Y_AXIS));
+
+        answerLabels = new JLabel[8];
+        for (int i = 0; i < answerLabels.length; i++){
+            answerLabels[i] = new JLabel("_");
+            answerLabels[i].setFont(new Font("Franklin Gothic Demi", Font.PLAIN, 28));
+            answerLabels[i].setPreferredSize(new Dimension(100, 50));
+            answerLabels[i].setHorizontalAlignment(SwingConstants.CENTER);
+            if (i < answerLabels.length / 2) answersLeft.add(answerLabels[i]);
+            else                             answersRight.add(answerLabels[i]);
+        }
+
+        answers.add(answersLeft);
+        answers.add(Box.createRigidArea(new Dimension(200, 0))); // gap separating answers
+        answers.add(answersRight);
+
+        final JPanel inputPanel = new JPanel();
+        answerInput = new JTextField(20);
+        JButton submitAnswerButton = new JButton("Submit");
+        inputPanel.add(answerInput);
+        inputPanel.add(submitAnswerButton);
+
+        final JPanel loadQuestionButtonPanel = new JPanel();
+        JButton loadQuestionButton = new JButton("Load Question");
+        loadQuestionButton.addActionListener(
                 evt -> {
-                    if (evt.getSource().equals(loadQuestion)) { // TODO: what is this line for...
-                        this.loadQuestionController.execute();
-                    }
+                    this.loadQuestionController.execute();
                 }
         );
+        loadQuestionButtonPanel.add(loadQuestionButton);
 
         this.add(title);
-        this.add(buttons);
+        this.add(Box.createRigidArea(new Dimension(0, 40)));
+        this.add(questionPanel);
+        this.add(Box.createRigidArea(new Dimension(0, 40)));
+        this.add(answers);
+        this.add(inputPanel);
+        this.add(loadQuestionButtonPanel);
+
     }
 
     @Override
     public void stateChanged() {
         GameRunningState state = gameRunningViewModel.getState();
-        this.question.setText(state.getQuestionText());
+        this.questionLabel.setText(state.getQuestionText());
+        for (int i = 0; i < state.getAnswerCount(); i++){
+            answerLabels[i].setText("[ " + (i + 1) + " ]");
+        }
 
         if (gameRunningViewModel.getState().getLoadQuestionError() != null) {
             JOptionPane.showMessageDialog(this, gameRunningViewModel.getState().getLoadQuestionError());
