@@ -1,4 +1,4 @@
-package data_access;
+package data_access.api;
 
 import java.io.IOException;
 import java.net.http.HttpClient;

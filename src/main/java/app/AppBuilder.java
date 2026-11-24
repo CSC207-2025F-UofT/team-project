@@ -8,12 +8,12 @@ import javax.swing.JFrame;
 
 
 import data_access.InMemoryDataAccessObject;
-import data_access.NominatimGeocoder;
 import data_access.SampleData;
 import data_access.StorageResolver;
 import data_access.image.ImageImporter;
 import data_access.image.ImageReader;
 import data_access.image.ImageResolver;
+import data_access.api.NominatimGeocoder;
 import interface_adapter.ViewManagerModel;
 import interface_adapter.ViewNames;
 import interface_adapter.dashboard.DashboardController;
@@ -29,12 +29,8 @@ import interface_adapter.manipulate_trips.TripListViewModel;
 import interface_adapter.load_photos.LoadPhotoController;
 import interface_adapter.load_photos.LoadPhotoPresenter;
 import interface_adapter.load_photos.PhotoImageViewModel;
-import use_case.ImageReaderInterface;
 import use_case.dashboard.AnalyticsUseCase;
-import use_case.import_photos.GeocoderInterface;
-import use_case.import_photos.ImageImporterInterface;
 import use_case.import_photos.ImportPhotosInteractor;
-import use_case.import_photos.ReverseGeocoderInterface;
 import use_case.manipulate_trips.ManipulateTripsInputBoundary;
 import use_case.manipulate_trips.ManipulateTripsInteractor;
 import use_case.manipulate_trips.ManipulateTripsOutputBoundary;
