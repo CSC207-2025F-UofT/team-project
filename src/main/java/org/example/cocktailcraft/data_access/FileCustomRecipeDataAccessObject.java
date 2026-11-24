@@ -86,7 +86,8 @@ public class FileCustomRecipeDataAccessObject
                         recipe.getOwnerId(),
                         recipe.getOriginalCocktailId(),
                         recipe.getName(),
-                        recipe.getIngredients()
+                        recipe.getIngredients(),
+                        recipe.getInstructions()
                 ));
             }
 

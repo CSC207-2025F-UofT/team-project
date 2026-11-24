@@ -35,7 +35,8 @@ class CustomizePresenterTest {
         CustomizeOutputData outputData = new CustomizeOutputData(
                 "custom-001",
                 "My Mojito",
-                ingredients
+                ingredients,
+                "1. Add sugar.\n2. Stir with ice."
         );
 
         presenter.prepareSuccessView(outputData);
@@ -46,6 +47,7 @@ class CustomizePresenterTest {
         assertEquals("My Mojito", state.getName());
         assertEquals(ingredients, state.getIngredients());
         assertEquals("mojito", state.getOriginalCocktailId());
+        assertEquals(outputData.getInstructions(), state.getInstructions());
         assertNull(state.getErrorMessage());
         assertTrue(state.isSaved());
         assertEquals(List.of("custom-001"), notifiedIds);
@@ -64,6 +66,7 @@ class CustomizePresenterTest {
         state.setName("My Mojito");
         state.setIngredients(ingredients);
         state.setSaved(true);
+        state.setInstructions("Keep my edited instructions.\nDo not clear them.");
 
         List<String> notifiedErrors = new ArrayList<>();
         viewModel.addListener(() ->
@@ -82,6 +85,7 @@ class CustomizePresenterTest {
         assertEquals("My Mojito", state.getName());
         assertEquals(ingredients, state.getIngredients());
 
+        assertEquals("Keep my edited instructions.\nDo not clear them.", state.getInstructions());
         assertEquals(List.of(message), notifiedErrors);
     }
 }
