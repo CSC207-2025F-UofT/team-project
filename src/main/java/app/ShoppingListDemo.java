@@ -37,8 +37,8 @@ import java.util.List;
 /**
  * Standalone demo for the shopping list use case.
  * Reads the meal plan from {@code data/mealplans.json} and the fridge from
- * {@code data/pantry.json}. On the first run, when those files have nothing in them,
- * it saves a sample plan and a sample fridge so there is something to show.
+ * {@code data/pantry.json}. On the first run, when those files are empty, it
+ * saves a sample plan and a sample fridge so there is something to show.
  * Tick items, close the window, run again, and the ticks are still there.
  */
 public class ShoppingListDemo {
@@ -56,7 +56,8 @@ public class ShoppingListDemo {
         LocalDate today = LocalDate.now();
         LocalDate weekStart = today.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
 
-        FileMealPlanDataAccessObject mealPlanDao = new FileMealPlanDataAccessObject();
+        FileMealPlanDataAccessObject mealPlanDao =
+                new FileMealPlanDataAccessObject();
         if (mealPlanDao.getMealPlan(weekStart) == null) {
             mealPlanDao.saveMealPlan(sampleMealPlan(weekStart));
         }

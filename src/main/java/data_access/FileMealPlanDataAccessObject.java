@@ -28,9 +28,9 @@ import use_case.remove_planned_meal.RemovePlannedMealDataAccessInterface;
 /**
  * Persists every week's meal plan in one JSON file.
  *
- * <p>The file holds a {@code weeks} object whose keys are the Monday of each week
- * (ISO date, e.g. {@code 2026-11-23}). Each value is the list of meals planned
- * for that week:</p>
+ * <p>The file holds a {@code weeks} object whose keys are the Monday of each
+ * week (ISO date, e.g. {@code 2026-11-23}). Each value is the list of meals
+ * planned for that week:</p>
  * <pre>
  * {"weeks": {"2026-11-23": [
  *   {"day": "MONDAY", "mealType": "DINNER", "recipeId": "52771",
@@ -40,8 +40,10 @@ import use_case.remove_planned_meal.RemovePlannedMealDataAccessInterface;
  * </pre>
  */
 public class FileMealPlanDataAccessObject
-        implements LoadMealPlanDataAccessInterface, RemovePlannedMealDataAccessInterface,
-        MovePlannedMealDataAccessInterface, MealPlanReader {
+        implements LoadMealPlanDataAccessInterface,
+        RemovePlannedMealDataAccessInterface,
+        MovePlannedMealDataAccessInterface,
+        MealPlanReader {
     private static final String KEY_WEEKS = "weeks";
     private static final String KEY_DAY = "day";
     private static final String KEY_MEAL_TYPE = "mealType";
@@ -62,7 +64,8 @@ public class FileMealPlanDataAccessObject
      * @param filePath the JSON file path
      */
     public FileMealPlanDataAccessObject(Path filePath) {
-        this.filePath = Objects.requireNonNull(filePath, "file path cannot be null");
+        this.filePath =
+                Objects.requireNonNull(filePath, "file path cannot be null");
         ensureFileExists();
     }
 
@@ -74,7 +77,8 @@ public class FileMealPlanDataAccessObject
     }
 
     /**
-     * Returns the saved meal plan for the given week, or null if that week has no plan.
+     * Returns the saved meal plan for the given week, or null if that week
+     * has no plan.
      *
      * @param weekStart the Monday that starts the week
      * @return a new MealPlan built from the file, or null
@@ -91,8 +95,10 @@ public class FileMealPlanDataAccessObject
         try {
             return fromJson(weekStart, weeks.getJSONArray(weekKey));
         }
-        catch (JSONException | IllegalArgumentException | IllegalStateException exception) {
-            throw new IllegalStateException("Could not parse meal plan file", exception);
+        catch (JSONException | IllegalArgumentException
+                | IllegalStateException exception) {
+            throw new IllegalStateException(
+                    "Could not parse meal plan file", exception);
         }
     }
 
@@ -126,13 +132,15 @@ public class FileMealPlanDataAccessObject
             }
         }
         catch (IOException exception) {
-            throw new IllegalStateException("Could not create meal plan file", exception);
+            throw new IllegalStateException(
+                    "Could not create meal plan file", exception);
         }
     }
 
     private JSONObject readWeeks() {
         try {
-            final String content = Files.readString(filePath, StandardCharsets.UTF_8);
+            final String content =
+                    Files.readString(filePath, StandardCharsets.UTF_8);
             if (content.isBlank()) {
                 return new JSONObject();
             }
@@ -143,16 +151,19 @@ public class FileMealPlanDataAccessObject
             return root.getJSONObject(KEY_WEEKS);
         }
         catch (IOException | JSONException exception) {
-            throw new IllegalStateException("Could not read meal plan file", exception);
+            throw new IllegalStateException(
+                    "Could not read meal plan file", exception);
         }
     }
 
     private void writeRoot(JSONObject root) {
         try {
-            Files.writeString(filePath, root.toString(JSON_INDENT), StandardCharsets.UTF_8);
+            Files.writeString(filePath, root.toString(JSON_INDENT),
+                    StandardCharsets.UTF_8);
         }
         catch (IOException exception) {
-            throw new IllegalStateException("Could not write meal plan file", exception);
+            throw new IllegalStateException(
+                    "Could not write meal plan file", exception);
         }
     }
 
@@ -163,10 +174,12 @@ public class FileMealPlanDataAccessObject
             final MealSlot slot = new MealSlot(
                     DayOfWeek.valueOf(mealJson.getString(KEY_DAY)),
                     MealType.valueOf(mealJson.getString(KEY_MEAL_TYPE)));
+            final List<RecipeIngredient> ingredients =
+                    ingredientsFromJson(mealJson.getJSONArray(KEY_INGREDIENTS));
             final PlannedMeal meal = new PlannedMeal(
                     mealJson.getString(KEY_RECIPE_ID),
                     mealJson.getString(KEY_RECIPE_NAME),
-                    ingredientsFromJson(mealJson.getJSONArray(KEY_INGREDIENTS)));
+                    ingredients);
             if (mealJson.getBoolean(KEY_COOKED)) {
                 meal.markCooked();
             }
@@ -175,10 +188,12 @@ public class FileMealPlanDataAccessObject
         return plan;
     }
 
-    private List<RecipeIngredient> ingredientsFromJson(JSONArray ingredientsJson) {
+    private List<RecipeIngredient> ingredientsFromJson(
+            JSONArray ingredientsJson) {
         final List<RecipeIngredient> ingredients = new ArrayList<>();
         for (int index = 0; index < ingredientsJson.length(); index++) {
-            final JSONObject ingredientJson = ingredientsJson.getJSONObject(index);
+            final JSONObject ingredientJson =
+                    ingredientsJson.getJSONObject(index);
             final IngredientName name = IngredientName.fromRawName(
                     ingredientJson.getString(KEY_NAME));
             final String measure;
@@ -195,7 +210,8 @@ public class FileMealPlanDataAccessObject
 
     private JSONArray toJson(MealPlan mealPlan) {
         final JSONArray mealsJson = new JSONArray();
-        for (Map.Entry<MealSlot, PlannedMeal> entry : mealPlan.getMeals().entrySet()) {
+        for (Map.Entry<MealSlot, PlannedMeal> entry
+                : mealPlan.getMeals().entrySet()) {
             final MealSlot slot = entry.getKey();
             final PlannedMeal meal = entry.getValue();
             final JSONObject mealJson = new JSONObject();
@@ -204,7 +220,8 @@ public class FileMealPlanDataAccessObject
             mealJson.put(KEY_RECIPE_ID, meal.getRecipeId());
             mealJson.put(KEY_RECIPE_NAME, meal.getRecipeName());
             mealJson.put(KEY_COOKED, meal.isCooked());
-            mealJson.put(KEY_INGREDIENTS, ingredientsToJson(meal.getIngredients()));
+            mealJson.put(KEY_INGREDIENTS,
+                    ingredientsToJson(meal.getIngredients()));
             mealsJson.put(mealJson);
         }
         return mealsJson;
@@ -215,8 +232,9 @@ public class FileMealPlanDataAccessObject
         for (RecipeIngredient ingredient : ingredients) {
             final JSONObject ingredientJson = new JSONObject();
             ingredientJson.put(KEY_NAME, ingredient.getDisplayName());
-            ingredientJson.put(KEY_MEASURE, ingredient.getMeasureDescription() == null
-                    ? JSONObject.NULL : ingredient.getMeasureDescription());
+            final String measure = ingredient.getMeasureDescription();
+            ingredientJson.put(KEY_MEASURE,
+                    measure == null ? JSONObject.NULL : measure);
             ingredientsJson.put(ingredientJson);
         }
         return ingredientsJson;
