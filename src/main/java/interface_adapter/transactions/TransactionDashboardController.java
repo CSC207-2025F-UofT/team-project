@@ -11,13 +11,13 @@ public final class TransactionDashboardController {
     public TransactionDashboardController(TransactionDashboardInputBoundary inputBoundary) {
         this.inputBoundary = inputBoundary;
     }
-    public void loadUsers() { inputBoundary.execute(TransactionDashboardInputData.loadUsers()); }
-    public void loadUser(String name) { inputBoundary.execute(TransactionDashboardInputData.loadUser(name)); }
-    public void addTransaction(String name, TransactionType type, BigDecimal amount,
+    public void loadAccounts() { inputBoundary.execute(TransactionDashboardInputData.loadAccounts()); }
+    public void loadAccount(int accountId) { inputBoundary.execute(TransactionDashboardInputData.loadAccount(accountId)); }
+    public void addTransaction(int accountId, TransactionType type, BigDecimal amount,
                                String description, LocalDate date) {
-        inputBoundary.execute(TransactionDashboardInputData.add(name, type, amount, description, date));
+        inputBoundary.execute(TransactionDashboardInputData.add(accountId, type, amount, description, date));
     }
-    public void deleteTransaction(String name, TransactionType type, int id) {
-        inputBoundary.execute(TransactionDashboardInputData.delete(name, type, id));
+    public void deleteTransaction(int accountId, TransactionType type, int id) {
+        inputBoundary.execute(TransactionDashboardInputData.delete(accountId, type, id));
     }
 }

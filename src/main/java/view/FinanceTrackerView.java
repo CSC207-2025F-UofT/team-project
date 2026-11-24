@@ -1,5 +1,6 @@
 package view;
 
+import entity.Account;
 import entity.Transaction;
 import entity.TransactionType;
 import interface_adapter.transactions.TransactionDashboardController;
@@ -12,11 +13,11 @@ import java.awt.*;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
-/** Swing-only presentation. It renders View Model state and forwards user actions to the Controller. */
+/** Swing-only presentation. It renders View Model state and forwards actions to the Controller. */
 public final class FinanceTrackerView extends JFrame {
     private final TransactionDashboardController controller;
     private final TransactionDashboardViewModel viewModel;
-    private final JComboBox<String> users = new JComboBox<>();
+    private final JComboBox<Account> accounts = new JComboBox<>();
     private final DefaultListModel<Transaction> incomeRows = new DefaultListModel<>();
     private final DefaultListModel<Transaction> expenseRows = new DefaultListModel<>();
     private final JList<Transaction> incomeList = new JList<>(incomeRows);
@@ -24,27 +25,19 @@ public final class FinanceTrackerView extends JFrame {
     private final JLabel incomeTotal = new JLabel();
     private final JLabel expenseTotal = new JLabel();
     private final JLabel balance = new JLabel();
-    private boolean updatingUsers;
-    private final Runnable signupAction;
+    private boolean updatingAccounts;
 
     public FinanceTrackerView(TransactionDashboardController controller,
                               TransactionDashboardViewModel viewModel) {
-        this(controller, viewModel, () -> { });
-    }
-
-    public FinanceTrackerView(TransactionDashboardController controller,
-                              TransactionDashboardViewModel viewModel,
-                              Runnable signupAction) {
         this.controller = controller;
         this.viewModel = viewModel;
-        this.signupAction = signupAction;
         buildWindow();
-        controller.loadUsers();
+        controller.loadAccounts();
         refresh();
         if (viewModel.isError()) showMessage();
-        if (users.getItemCount() > 0) {
-            users.setSelectedIndex(0);
-            loadSelectedUser();
+        if (accounts.getItemCount() > 0) {
+            accounts.setSelectedIndex(0);
+            loadSelectedAccount();
         }
         setVisible(true);
     }
@@ -74,17 +67,28 @@ public final class FinanceTrackerView extends JFrame {
 
         JPanel actions = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         actions.setOpaque(false);
-        users.addActionListener(event -> {
-            if (!updatingUsers) loadSelectedUser();
+        accounts.addActionListener(event -> {
+            if (!updatingAccounts) loadSelectedAccount();
         });
-        actions.add(new JLabel("User:"));
-        actions.add(users);
+        actions.add(new JLabel("Account:"));
+        actions.add(accounts);
+
         JButton add = new JButton("Add Transaction");
         add.addActionListener(event -> showAddDialog());
         actions.add(add);
+
+        JButton currency = new JButton("Change Currency");
+        currency.addActionListener(event -> showPlaceholder("Currency changing is not available yet."));
+        actions.add(currency);
+
+        JButton receipt = new JButton("Upload Receipt");
+        receipt.addActionListener(event -> showPlaceholder("Receipt uploading is not available yet."));
+        actions.add(receipt);
+
         JButton signUp = new JButton("Sign Up");
-        signUp.addActionListener(event -> signupAction.run());
+        signUp.addActionListener(event -> showPlaceholder("Sign up is not connected yet."));
         actions.add(signUp);
+
         top.add(titles, BorderLayout.WEST);
         top.add(actions, BorderLayout.EAST);
         root.add(top, BorderLayout.NORTH);
@@ -145,15 +149,19 @@ public final class FinanceTrackerView extends JFrame {
         };
     }
 
-    private void loadSelectedUser() {
-        Object selected = users.getSelectedItem();
+    private void loadSelectedAccount() {
+        Account selected = (Account) accounts.getSelectedItem();
         if (selected == null) return;
-        controller.loadUser(selected.toString());
+        controller.loadAccount(selected.getAccountID());
         refresh();
         if (viewModel.isError()) showMessage();
     }
 
     private void showAddDialog() {
+        if (accounts.getSelectedItem() == null) {
+            showError("There are no accounts to add a transaction to.");
+            return;
+        }
         JComboBox<String> type = new JComboBox<>(new String[]{"Income", "Expense"});
         JTextField amount = new JTextField();
         JTextField description = new JTextField();
@@ -170,7 +178,7 @@ public final class FinanceTrackerView extends JFrame {
         try {
             TransactionType transactionType = type.getSelectedIndex() == 0
                 ? TransactionType.INCOME : TransactionType.EXPENSE;
-            controller.addTransaction(selectedUser(), transactionType,
+            controller.addTransaction(selectedAccountId(), transactionType,
                 new BigDecimal(amount.getText().trim()), description.getText().trim(),
                 LocalDate.parse(date.getText().trim()));
             refresh();
@@ -192,24 +200,32 @@ public final class FinanceTrackerView extends JFrame {
             "Delete " + selected.getDescription() + "?", "Confirm deletion",
             JOptionPane.YES_NO_OPTION);
         if (answer != JOptionPane.YES_OPTION) return;
-        controller.deleteTransaction(selectedUser(), type, selected.getId());
+        controller.deleteTransaction(selectedAccountId(), type, selected.getId());
         refresh();
         showMessage();
     }
 
-    private String selectedUser() {
-        Object selected = users.getSelectedItem();
-        if (selected == null) throw new IllegalStateException("Select a user profile.");
-        return selected.toString();
+    private int selectedAccountId() {
+        Account selected = (Account) accounts.getSelectedItem();
+        if (selected == null) throw new IllegalStateException("Select an account.");
+        return selected.getAccountID();
     }
 
     private void refresh() {
-        String selected = (String) users.getSelectedItem();
-        updatingUsers = true;
-        users.removeAllItems();
-        for (String user : viewModel.getUsers()) users.addItem(user);
-        if (selected != null) users.setSelectedItem(selected);
-        updatingUsers = false;
+        Account selected = (Account) accounts.getSelectedItem();
+        Integer selectedId = selected == null ? null : selected.getAccountID();
+        updatingAccounts = true;
+        accounts.removeAllItems();
+        for (Account account : viewModel.getAccounts()) accounts.addItem(account);
+        if (selectedId != null) {
+            for (int i = 0; i < accounts.getItemCount(); i++) {
+                if (accounts.getItemAt(i).getAccountID() == selectedId) {
+                    accounts.setSelectedIndex(i);
+                    break;
+                }
+            }
+        }
+        updatingAccounts = false;
 
         incomeRows.clear();
         for (Transaction transaction : viewModel.getIncome()) incomeRows.addElement(transaction);
@@ -232,5 +248,10 @@ public final class FinanceTrackerView extends JFrame {
     private void showError(String message) {
         JOptionPane.showMessageDialog(this, message, "Finance Tracker",
             JOptionPane.ERROR_MESSAGE);
+    }
+
+    private void showPlaceholder(String message) {
+        JOptionPane.showMessageDialog(this, message, "Coming soon",
+            JOptionPane.INFORMATION_MESSAGE);
     }
 }

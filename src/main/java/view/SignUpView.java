@@ -1,37 +1,42 @@
 package view;
-import interface_adapter.signup.SignUpController;
-import interface_adapter.signup.SignUpViewModel;
+
 import javax.swing.*;
 import java.awt.*;
 
-/** Swing registration boundary. Validation and registration rules live in the use case. */
-public final class SignUpView extends JFrame {
-    private final SignUpController controller;
-    private final SignUpViewModel viewModel;
-    private final JTextField nameField=new JTextField(20), emailField=new JTextField(20);
-    private final JPasswordField passwordField=new JPasswordField(20), confirmField=new JPasswordField(20);
-    private final JLabel messageLabel=new JLabel(" ");
-    public SignUpView(SignUpController controller,SignUpViewModel viewModel){
-        super("Finance Tracker - Sign Up"); this.controller=controller; this.viewModel=viewModel;
+/** Original team signup screen. It remains separate until its controller/presenter wiring is ready. */
+public class SignUpView extends JFrame {
+    private JTextField usernameField;
+    private JPasswordField passwordField;
+    private JPasswordField confirmpasswordField;
+    private JButton signUpButton;
+    private JButton backToLogInButton;
+
+    public SignUpView() {
+        setTitle("Sign up");
+        setSize(400, 150);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        JPanel panel=new JPanel(new GridBagLayout()); panel.setBorder(BorderFactory.createEmptyBorder(24,28,24,28));
-        GridBagConstraints c=new GridBagConstraints(); c.insets=new Insets(6,6,6,6); c.fill=GridBagConstraints.HORIZONTAL;
-        c.gridx=0;c.gridy=0;c.gridwidth=2;
-        JLabel heading=new JLabel("Create your account",SwingConstants.CENTER); heading.setFont(heading.getFont().deriveFont(Font.BOLD,20f)); panel.add(heading,c);
-        addRow(panel,c,1,"Name",nameField); addRow(panel,c,2,"Email",emailField);
-        addRow(panel,c,3,"Password",passwordField); addRow(panel,c,4,"Confirm password",confirmField);
-        c.gridx=0;c.gridy=5;c.gridwidth=2;panel.add(messageLabel,c);
-        JButton submit=new JButton("Sign Up");submit.addActionListener(e->submit());c.gridy=6;panel.add(submit,c);
-        setContentPane(panel);pack();setLocationRelativeTo(null);setResizable(false);
+        JPanel panel = new JPanel();
+        panel.setLayout(new GridLayout(3, 2, 5, 5));
+        usernameField = new JTextField();
+        passwordField = new JPasswordField();
+        confirmpasswordField = new JPasswordField();
+        signUpButton = new JButton("Sign up");
+        backToLogInButton = new JButton("Back to Log in");
+        panel.add(new JLabel("Set a Username:"));
+        panel.add(usernameField);
+        panel.add(new JLabel("Set a Password"));
+        panel.add(passwordField);
+        panel.add(new JLabel("Repeat the Password"));
+        panel.add(confirmpasswordField);
+        JPanel buttonPanel = new JPanel();
+        buttonPanel.setLayout(new GridLayout(1, 2, 10, 10));
+        buttonPanel.add(signUpButton);
+        buttonPanel.add(backToLogInButton);
+        add(panel, BorderLayout.CENTER);
+        add(buttonPanel, BorderLayout.SOUTH);
     }
-    private void addRow(JPanel panel,GridBagConstraints c,int row,String label,JComponent field){
-        c.gridy=row;c.gridx=0;c.gridwidth=1;c.weightx=0;panel.add(new JLabel(label),c);
-        c.gridx=1;c.weightx=1;panel.add(field,c);
-    }
-    private void submit(){
-        controller.signUp(nameField.getText(),emailField.getText(),new String(passwordField.getPassword()),new String(confirmField.getPassword()));
-        messageLabel.setText(viewModel.getMessage());
-        messageLabel.setForeground(viewModel.isSuccess()?new Color(30,125,60):new Color(170,40,40));
-        if(viewModel.isSuccess()){passwordField.setText("");confirmField.setText("");}
+
+    public static void main(String[] args) {
+        new SignUpView().setVisible(true);
     }
 }
