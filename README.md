@@ -87,28 +87,29 @@
   i. The system does not reward any points.
   ii. If the contestants now have 3 wrong answers the team swaps.
 
-### Use Case 4: Track Team Score and History
-Primary Actor:
+### Use Case 4: Save and Display Team Scores
+#### Primary Actor:
 - Player
 
-Preconditions:
+#### Preconditions:
 - The game is currently running
 - A team already exists
 
-Trigger:
+#### Trigger:
 - The player is added in the game session
 
-Main success scenario:
-1. The system displays the teams current score.
-2. The system updates the score when a correct answer is guessed while game is running.
-3. The system displays the updated team scores.
-4. The system saves the teams final score when game ends.
+#### Main success scenario:
+1. The system retrieves teams current scores.
+2. The system displays teams current scores on the game board.
+3. After each guess is made the system retrieves the teams updated scores and updates the display.
+4. When the game ends the system saves both teams final scores.
+5. The system displays the final scores.
 
-Extensions:
+#### Extensions:
 
 2a. The team guesses an incorrect answer
 
-i. The system does not update score
+i. The system does not update score 
 
 ii. The teams score remains unchanged
 ### Use Case 5: Start a New Game
