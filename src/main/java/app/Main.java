@@ -16,7 +16,7 @@ public class Main {
                 .addTimerSettingsView()
                 .addHomeView()
                 .addFSView()
-                .addFSUseCase()
+                // TODO add game view
                 .addNavigationBar()
                 .addUpdateTimerSettingsUseCase()
                 .addOpenSettingsUseCase()

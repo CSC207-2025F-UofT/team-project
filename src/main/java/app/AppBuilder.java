@@ -116,28 +116,7 @@ public class AppBuilder {
         return this;
     }
 
-    /**
-     * Adds flashcard studying use case to AppBuilder
-     * @return
-     */
-    public AppBuilder addFSUseCase(){
-        // Initialize presenter and DAO
-        final FlashcardStudyingOutputBoundary presenter = new FlashcardStudyingPresenter(
-                flashcardStudyingViewModel);
-
-        FlashcardDataAccessInterface DAO = new FlashcardDAO();
-
-        // Initialize Interactor
-        final FlashcardStudyingInputBoundary interactor = new FlashcardStudyingInteractor(presenter, DAO);
-
-        // Initialize controller
-        final FlashcardStudyingController controller = new FlashcardStudyingController(interactor);
-
-        // Set Controller for View
-        flashcardStudyingView.setController(controller);
-
-        return this;
-    }
+    // TODO add game view
 
     public AppBuilder addNavigationBar() {
         navigationBarViewModel = new NavigationBarViewModel();
