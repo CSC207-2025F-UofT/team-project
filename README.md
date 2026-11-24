@@ -22,13 +22,9 @@
 
 CocktailCraft is a Java Swing desktop application for discovering, customizing,
 and managing cocktail recipes. Users will browse recipes, search by name and base
-spirit, view recipe details and available images, save favourites, and create
+spirit, view recipe details, save favourites, and create
 personal recipe variations. A personal profile will provide access to each user's
 favourites and customized recipes across application sessions.
-
-Search & Filter is implemented over the bundled catalog. See the Search demo and
-verification steps below. Some scaffold descriptions later in this document are
-historical; other feature owners maintain their implementation status.
 
 ### Domain
 
@@ -233,7 +229,7 @@ Updated favourite status
 | Qinli | The user enters a cocktail name and/or selects one or more base spirits, then clicks Search. The system displays matching cocktail names or a message indicating missing input, no matches, or a catalog failure. |
 | Enhao | The user customizes an existing cocktail recipe by changing its name, ingredients, and quantities, then saves it as a separate Custom Recipe linked to their account. Through My Custom Cocktails, the user can list, reopen, and edit their own recipes. Saved recipes remain available after restarting the application and logging in again. |
 | Jiaqi | The users register a new account, log in with their username and password, and access their personal profile to access saved cocktails. The system saves user account information so that users can log in again after restarting the application.|
-| Wenqian | The user clicks a cocktail, the system display the ingredients of it. The user click 'Favourite' button, then save this cocktail to home page.|
+| Wenqian | The user clicks a cocktail, the system display the ingredients and instructions of it. The user click 'Favourite' button, then save this cocktail to home page.|
 ---
 
 ## Entities
@@ -248,22 +244,15 @@ and contracts require team agreement before implementation.
 - `id`
 - `name`
 - `ingredients`: a list of `RecipeIngredient`
-- Planned additions: `instructions` and optional `description`.
-- Base-spirit classification and image metadata representation are not finalized.
+- `tags`
+- `instructions` 
 
 ### Entity 2
-
-**Ingredient — under discussion; no separate Class currently exists**
-
-- A stable ingredient ID and name may be needed.
-- Classification/category fields should follow the agreed Search requirements.
-
-### Entity 3
 RecipeIngredient
 - ingredient
 - unit
-- quantity
-### Entity 4
+- amount
+### Entity 3
 User
 - userId
 - userName
