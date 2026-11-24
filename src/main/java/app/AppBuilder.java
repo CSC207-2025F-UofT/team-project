@@ -2,6 +2,7 @@ package app;
 
 import data_access.FileUserDataAccessObject;
 import data_access.GoogleDesktopIdentityGateway;
+import data_access.FileBudgetDataAccessObject;
 import entity.UserFactory;
 import interface_adapter.ViewManagerModel;
 import interface_adapter.google_login.GoogleLoginController;
@@ -16,6 +17,10 @@ import interface_adapter.logout.LogoutPresenter;
 import interface_adapter.signup.SignupController;
 import interface_adapter.signup.SignupPresenter;
 import interface_adapter.signup.SignupViewModel;
+import interface_adapter.set_budget.SetBudgetController;   
+import interface_adapter.set_budget.SetBudgetPresenter;
+import interface_adapter.set_budget.SetBudgetState;
+import interface_adapter.set_budget.SetBudgetViewModel;
 import use_case.change_password.ChangePasswordInputBoundary;
 import use_case.change_password.ChangePasswordInteractor;
 import use_case.change_password.ChangePasswordOutputBoundary;
@@ -30,10 +35,14 @@ import use_case.logout.LogoutOutputBoundary;
 import use_case.signup.SignupInputBoundary;
 import use_case.signup.SignupInteractor;
 import use_case.signup.SignupOutputBoundary;
+import use_case.set_budget.SetBudgetInputBoundary; 
+import use_case.set_budget.SetBudgetInteractor;  
+import use_case.set_budget.SetBudgetOutputBoundary;
 import view.LoggedInView;
 import view.LoginView;
 import view.SignupView;
 import view.ViewManager;
+import view.SetBudgetView;  
 
 import javax.swing.*;
 import java.awt.*;
@@ -51,6 +60,7 @@ public class AppBuilder {
 
     // DAO version using local file storage
     final FileUserDataAccessObject userDataAccessObject = new FileUserDataAccessObject("users.csv", userFactory);
+    final FileBudgetDataAccessObject budgetDataAccessObject = new FileBudgetDataAccessObject("budgets.json");
 
     private SignupView signupView;
     private SignupViewModel signupViewModel;
@@ -58,6 +68,8 @@ public class AppBuilder {
     private LoggedInViewModel loggedInViewModel;
     private LoggedInView loggedInView;
     private LoginView loginView;
+    private SetBudgetViewModel setBudgetViewModel;
+    private SetBudgetView setBudgetView;
 
     public AppBuilder() {
         cardPanel.setLayout(cardLayout);
@@ -186,6 +198,41 @@ public class AppBuilder {
         return this;
     }
 
+
+    public AppBuilder addSetBudgetView() {
+        setBudgetViewModel = new SetBudgetViewModel();
+        setBudgetView = new SetBudgetView(setBudgetViewModel);
+        cardPanel.add(setBudgetView, SetBudgetViewModel.VIEW_NAME);
+        return this;
+    }
+
+    public AppBuilder addSetBudgetUseCase() {
+        final SetBudgetOutputBoundary setBudgetOutputBoundary = new SetBudgetPresenter(
+                viewManagerModel, setBudgetViewModel, loggedInViewModel);
+        final SetBudgetInputBoundary setBudgetInteractor = new SetBudgetInteractor(
+                budgetDataAccessObject, setBudgetOutputBoundary);
+
+        final SetBudgetController controller = new SetBudgetController(setBudgetInteractor);
+        setBudgetView.setSetBudgetController(controller);
+
+        // LoggedInView -> SetBudgetView (copy the username across first)
+        loggedInView.setShowSetBudget(() -> {
+            final SetBudgetState state = new SetBudgetState();
+            state.setUsername(loggedInViewModel.getState().getUsername());
+            setBudgetViewModel.setState(state);
+            setBudgetViewModel.notifyStateChanged();
+            viewManagerModel.setState(SetBudgetViewModel.VIEW_NAME);
+            viewManagerModel.notifyViewChanged();
+        });
+
+        // SetBudgetView -> back to LoggedInView
+        setBudgetView.setShowLoggedIn(() -> {
+            viewManagerModel.setState(LoggedInViewModel.VIEW_NAME);
+            viewManagerModel.notifyViewChanged();
+        });
+        return this;
+    }
+    
     public JFrame build() {
         final JFrame application = new JFrame("My Virtual Pet");
         application.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);

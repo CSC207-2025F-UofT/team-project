@@ -13,10 +13,12 @@ public class Main {
                 .addLoginView()
                 .addSignupView()
                 .addLoggedInView()
+                .addSetBudgetView()
                 .addSignupUseCase()
                 .addLoginUseCase()
                 .addChangePasswordUseCase()
                 .addLogoutUseCase()
+                .addSetBudgetUseCase()
                 .addGoogleLoginUseCase()
                 .build();
 

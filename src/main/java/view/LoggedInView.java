@@ -23,12 +23,16 @@ public class LoggedInView extends JPanel implements ActionListener, LoggedInView
     private ChangePasswordController changePasswordController = null;
     private LogoutController logoutController;
 
+    private Runnable showSetBudget;
+
     private final JLabel username;
 
     private final JButton logOut;
 
     private final JPasswordField passwordInputField = new JPasswordField(15);
     private final JButton changePassword;
+
+    private final JButton setBudget;
 
     public LoggedInView(LoggedInViewModel loggedInViewModel) {
         this.loggedInViewModel = loggedInViewModel;
@@ -50,9 +54,18 @@ public class LoggedInView extends JPanel implements ActionListener, LoggedInView
         changePassword = new JButton("Change Password");
         buttons.add(changePassword);
 
+        setBudget = new JButton("Set Budget");
+        buttons.add(setBudget);
+
         logOut.addActionListener(this);
 
         this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+
+        setBudget.addActionListener(evt -> {
+            if (showSetBudget != null) {
+                showSetBudget.run();
+            }
+        });
 
         passwordInputField.getDocument().addDocumentListener(new DocumentListener() {
 
@@ -115,6 +128,10 @@ public class LoggedInView extends JPanel implements ActionListener, LoggedInView
 
     public void setLogoutController(LogoutController logoutController) {
         this.logoutController = logoutController;
+    }
+
+    public void setShowSetBudget(Runnable showSetBudget) {
+        this.showSetBudget = showSetBudget;
     }
 
     /**
