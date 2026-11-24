@@ -53,6 +53,7 @@ public class WatchlistView extends JPanel implements PropertyChangeListener {
         JButton refreshButton = new JButton("Refresh prices");
         buttonPanel.add(removeButton);
         buttonPanel.add(refreshButton);
+        buttonPanel.add(explorerButton);
         buttonPanel.add(backButton);
         bottomPanek.add(buttonPanel);
         bottomPanek.add(messageLabel);

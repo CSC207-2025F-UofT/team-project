@@ -9,14 +9,14 @@ import java.util.Locale;
 
 public class WatchListInteractor implements WatchlistInputBoundary {
 
-    private final WatchListDataAccessInterface watchListDataAccessObject;
+    private final WatchListDataAccessInterface watchListDataAccess;
     private final WatchlistStockDataAccessInterface watchListStockDataAccessObject;
     private final WatchlistOutputBoundary watchlistPresenter;
 
     public WatchListInteractor(
-            WatchListDataAccessInterface watchListDataAccessObject, WatchlistStockDataAccessInterface watchlistStockDataAccessObject,
+            WatchListDataAccessInterface watchListDataAccess, WatchlistStockDataAccessInterface watchlistStockDataAccessObject,
             WatchlistOutputBoundary watchlistPresenter){
-        this.watchListDataAccessObject = watchListDataAccessObject;
+        this.watchListDataAccess = watchListDataAccess;
         this.watchListStockDataAccessObject = watchlistStockDataAccessObject;
         this. watchlistPresenter = watchlistPresenter;
 
@@ -24,9 +24,15 @@ public class WatchListInteractor implements WatchlistInputBoundary {
 
     @Override
     public void showWatchlist(WatchlistInputData inputData){
-        Watchlist watchlist = watchListDataAccessObject.get(inputData.getUsername());
+        Watchlist watchlist;
+        try{
+            watchlist = watchListDataAccess.get(inputData.getUsername());
+        }   catch (RuntimeException error){
+            watchlistPresenter.prepareFailView(error.getMessage());
+            return;
+        }
 
-        watchlistPresenter.prepareSuccessView(new WatchListOutputdata(watchlist.getStocks(), new ArrayList<>()));
+        watchlistPresenter.prepareSuccessView((new WatchListOutputdata(watchlist.getStocks(), new ArrayList<>())));
     }
 
     @Override
@@ -45,14 +51,20 @@ public class WatchListInteractor implements WatchlistInputBoundary {
             return;
         }
 
-        Watchlist watchlist = watchListDataAccessObject.get(userName);
-        if (watchlist.getStocks().contains(stock)){
-            watchlistPresenter.prepareFailView(stock + " is already on your list");
+        Watchlist watchlist;
+        try{
+            watchlist = watchListDataAccess.get(userName);
+
+            if (watchlist.getStocks().contains(stock)){
+                watchlistPresenter.prepareFailView(stock + " is already on the watchlist");
+                return;
+            }
+            watchlist.addStock(stock);
+            watchListDataAccess.save(userName, watchlist);
+        } catch (RuntimeException error){
+            watchlistPresenter.prepareFailView(error.getMessage());
             return;
         }
-
-        watchlist.addStock(stock);
-        watchListDataAccessObject.save(userName, watchlist);
 
         watchlistPresenter.prepareSuccessView(new WatchListOutputdata(watchlist.getStocks(), new ArrayList<>()));
     }
@@ -60,10 +72,31 @@ public class WatchListInteractor implements WatchlistInputBoundary {
     @Override
     public void removeStock (WatchlistInputData inputData){
         String username = inputData.getUsername();
+        String stockWatcher = inputData.getStockWatcher();
 
-        Watchlist watchlist = watchListDataAccessObject.get(username);
-        watchlist.removeStock(inputData.getStockWatcher());
-        watchListDataAccessObject.save(username, watchlist);
+        if (stockWatcher == null || stockWatcher.isBlank()){
+            watchlistPresenter.prepareFailView("No stock selected");
+            return;
+        }
+
+        String stock = stockWatcher.trim().toUpperCase();
+
+        Watchlist watchlist;
+        try{
+            watchlist = watchListDataAccess.get(username);
+
+            if(!watchlist.getStocks().contains(stock)){
+                watchlistPresenter.prepareFailView(stock + " is not on the watchlist");
+                return;
+            }
+
+            watchlist.removeStock(stock);
+            watchListDataAccess.save(username, watchlist);
+        }
+        catch (RuntimeException error){
+            watchlistPresenter.prepareFailView(error.getMessage());
+            return;
+        }
 
         watchlistPresenter.prepareSuccessView(new WatchListOutputdata(watchlist.getStocks(), new ArrayList<>()));
     }
@@ -72,31 +105,50 @@ public class WatchListInteractor implements WatchlistInputBoundary {
         try {
             List<Double> closes = watchListStockDataAccessObject.getStockPrice(stockWatcher, 2);
 
-            if (closes.size() < 2 || closes.get(0) == 0){
+            if (closes == null || closes.size() < 2){
                 return WatchListOutputdata.Change.failure(stockWatcher,0, 0,
                         "Not enough data available from API");
             }
 
-            double previous = closes.get(0);
-            double latest = closes.get(1);
+            Double previous = closes.get(0);
+            Double latest = closes.get(1);
+
+            if (!isValidPrice(previous) || !isValidPrice(latest)){
+                return WatchListOutputdata.Change.failure(stockWatcher, 0, 0,"invalid price data");
+            }
+
             double percent = (latest - previous) / previous * 100;
 
-            return WatchListOutputdata.Change.success(stockWatcher, latest, percent, "");
+            return WatchListOutputdata.Change.success(stockWatcher, latest, percent);
         }
-        catch (IOException e){
-            return WatchListOutputdata.Change.failure(stockWatcher, 0, 0, e.getMessage());
+        catch (IOException | RuntimeException error){
+            return WatchListOutputdata.Change.failure(stockWatcher, 0, 0, error.getMessage());
         }
+    }
+
+    private boolean isValidPrice (Double price){
+
+        return price != null && Double.isFinite(price) && price > 0;
     }
 
     @Override
     public void refreshChange(WatchlistInputData inputData){
-        String username = inputData.getUsername();
 
-        Watchlist watchlist = watchListDataAccessObject.get(username);
+        Watchlist watchlist;
+
+        try{
+            watchlist = watchListDataAccess.get(inputData.getUsername());
+        }
+        catch (RuntimeException error){
+            watchlistPresenter.prepareFailView(error.getMessage());
+            return;
+        }
 
         List<WatchListOutputdata.Change> changes = new ArrayList<>();
         for (String stockWatcher : watchlist.getStocks()){
             changes.add(findChange(stockWatcher));
         }
+
+        watchlistPresenter.prepareSuccessView(new WatchListOutputdata(watchlist.getStocks(), changes));
     }
 }

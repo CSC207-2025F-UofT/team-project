@@ -11,8 +11,8 @@ public class WatchListController {
         this.interactor = interactor;
     }
 
-    public void showWatchList(String username, String stockWatcher){
-        interactor.showWatchlist(new WatchlistInputData(username, stockWatcher));
+    public void showWatchList(String username){
+        interactor.showWatchlist(new WatchlistInputData(username));
     }
 
     public void addStock(String username, String stockWatcher){

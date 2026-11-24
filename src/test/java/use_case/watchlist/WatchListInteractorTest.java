@@ -133,7 +133,7 @@ public class WatchListInteractorTest {
 
         WatchListOutputdata.Change change = presenter.outputData.getChanges().get(0);
         assertEquals("IBM", change.getStockWatcher());
-        assertEquals(110.0, change.getLastestPrice());
+        assertEquals(110.0, change.getLatestPrice());
         assertEquals(10.0, change.getPercentChange(), 0.0001);
     }
 

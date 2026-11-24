@@ -1,7 +1,6 @@
 package interface_adapter.watchlist;
 
 import use_case.watchlist.WatchListOutputdata;
-import use_case.watchlist.WatchlistInputData;
 import use_case.watchlist.WatchlistOutputBoundary;
 
 public class WatchlistPresenter implements WatchlistOutputBoundary {
@@ -41,8 +40,8 @@ public class WatchlistPresenter implements WatchlistOutputBoundary {
                 message.append(change.getStockWatcher()).append(": ").append(change.getErrorMessage());
             }
             else{
-                message.append(String.format("%s: %.2f (%+.2f%",change.getStockWatcher(),
-                        change.getLastestPrice(),change.getPercentChange()));
+                message.append(String.format("%s: %.2f (%+.2f%%)",change.getStockWatcher(),
+                        change.getLatestPrice(),change.getPercentChange()));
             }
             message.append("\n");
         }

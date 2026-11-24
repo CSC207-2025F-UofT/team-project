@@ -23,18 +23,18 @@ public class WatchListOutputdata {
     public static class Change {
 
         private final String stockWatcher;
-        private  final double lastestPrice;
+        private  final double latestPrice;
         private final double percentChange;
         private final String errorMessage;
 
-        private Change(String stockWatcher, double lastestPrice, double percentChange, String errorMessage){
+        private Change(String stockWatcher, double latestPrice, double percentChange, String errorMessage){
             this.stockWatcher = stockWatcher;
-            this.lastestPrice = lastestPrice;
+            this.latestPrice = latestPrice;
             this. percentChange = percentChange;
             this.errorMessage = errorMessage;
         }
 
-        public static Change success(String stockWatcher, double lastestPrice, double percentChange, String errorMessage){
+        public static Change success(String stockWatcher, double lastestPrice, double percentChange){
             return new Change(stockWatcher, lastestPrice, percentChange, null);
         }
 
@@ -47,12 +47,16 @@ public class WatchListOutputdata {
             return stockWatcher;
         }
 
-        public double getLastestPrice(){
-            return lastestPrice;
+        public double getLatestPrice(){
+            return latestPrice;
         }
 
         public double getPercentChange(){
             return percentChange;
+        }
+
+        public String getErrorMessage(){
+            return errorMessage;
         }
 
         public boolean hasError(){
