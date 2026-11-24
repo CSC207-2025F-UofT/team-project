@@ -1,13 +1,10 @@
 package use_case.signup;
-
-public class SignUpOutputData {
-    private String userName;
-    private String password;
-
-    public SignUpOutputData(String userName, String password) {
-        this.userName = userName;
-        this.password = password;
-    }
-    public String getUserName() { return userName; }
-    public String getPassword() { return password; }
+public final class SignUpOutputData {
+    private final int userId;
+    private final String name;
+    private final String message;
+    public SignUpOutputData(int userId,String name,String message){this.userId=userId;this.name=name;this.message=message;}
+    public int getUserId(){return userId;}
+    public String getName(){return name;}
+    public String getMessage(){return message;}
 }

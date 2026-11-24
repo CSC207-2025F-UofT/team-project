@@ -10,7 +10,7 @@ public final class TransactionDashboardPresenter implements TransactionDashboard
     }
     @Override
     public void present(TransactionDashboardOutputData output) {
-        if (output.getAccounts() != null) viewModel.setAccounts(output.getAccounts());
+        if (output.getUsers() != null) viewModel.setUsers(output.getUsers());
         viewModel.setIncome(output.getIncome());
         viewModel.setExpenses(output.getExpenses());
         viewModel.setTotals(output.getTotalIncome(), output.getTotalExpenses());

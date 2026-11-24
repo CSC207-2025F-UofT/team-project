@@ -52,8 +52,4 @@ public abstract class Account {
     protected final void requirePositive(BigDecimal amount) {
         if (amount == null || amount.signum() <= 0) throw new IllegalArgumentException("Amount must be positive.");
     }
-    @Override public String toString() {
-        return accountName + " (" + getAccountType().name().toLowerCase()
-            + ", profile " + ownerProfileId + ", #" + accountID + ")";
-    }
 }
