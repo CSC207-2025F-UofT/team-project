@@ -1,7 +1,6 @@
 package com.terrain.use_case.terrain_cleanup;
 
 import com.terrain.entity.model.TerrainMap;
-import com.terrain.entity.model.TileType;
 
 /**
  * What the terrain cleanup use case needs from storage. Implemented in data_access.
@@ -15,11 +14,9 @@ public interface TerrainCleanupDataAccessInterface {
     TerrainMap getTerrain();
 
     /**
-     * Saves the cleaned terrain together with the final type of each tile.
-     * This may be edited to only give a new map (since finalTypes is technically redundant) though this is tbd
-     * 
-     * @param map        the terrain, after conflicting features have been removed
-     * @param finalTypes the final type of each tile, indexed [x][y]
+     * Saves the cleaned terrain. Each tile keeps its original type and now also has a final type.
+     *
+     * @param map the terrain, with every tile's final type set
      */
-    void saveCleanedTerrain(TerrainMap map, TileType[][] finalTypes);
+    void saveCleanedTerrain(TerrainMap map);
 }

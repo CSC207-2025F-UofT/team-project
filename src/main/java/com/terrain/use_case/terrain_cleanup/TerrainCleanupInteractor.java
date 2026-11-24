@@ -51,14 +51,14 @@ public class TerrainCleanupInteractor implements TerrainCleanupInputBoundary {
                     } else if (rules.isAboveTreeLine(tile)) {
                         treesRemovedAboveTreeLine++;
                     }
-                    // Removing the trees means replacing FOREST with the type the elevation calls for.
-                    tile.setType(finalType);
                 }
+                // The original type is preserved; the rules' decision is recorded separately.
+                tile.setFinalType(finalType);
                 finalTypes[x][y] = finalType;
             }
         }
 
-        dataAccess.saveCleanedTerrain(map, finalTypes);
+        dataAccess.saveCleanedTerrain(map);
         presenter.prepareSuccessView(
                 new TerrainCleanupOutputData(finalTypes, treesRemovedFromWater, treesRemovedAboveTreeLine));
     }
