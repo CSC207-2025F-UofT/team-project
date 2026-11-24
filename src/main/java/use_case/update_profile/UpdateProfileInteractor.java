@@ -1,6 +1,7 @@
 package use_case.update_profile;
 
 import entity.QualificationProfile;
+import java.util.Optional;
 import use_case.profile.ProfileData;
 import use_case.profile.ProfileRepository;
 import use_case.profile.ProfileStorageException;
@@ -20,10 +21,15 @@ public final class UpdateProfileInteractor implements UpdateProfileInputBoundary
   @Override
   public void loadProfile() {
     try {
-      profiles.loadSnapshot().ifPresentOrElse(output::presentLoaded, output::presentMissing);
+      readSnapshot().ifPresentOrElse(output::presentLoaded, output::presentMissing);
     } catch (ProfileStorageException exception) {
       output.presentLoadError(exception.getMessage());
     }
+  }
+
+  @Override
+  public Optional<SavedProfile> readSnapshot() throws ProfileStorageException {
+    return profiles.loadSnapshot();
   }
 
   @Override

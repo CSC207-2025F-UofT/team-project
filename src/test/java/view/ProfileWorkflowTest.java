@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Deque;
 import java.util.List;
 import java.util.concurrent.Callable;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -157,6 +158,72 @@ class ProfileWorkflowTest {
           assertEquals("CS", field(first, "Program of study").getText());
           return null;
         });
+  }
+
+  @Test
+  void visibleProfileRefreshesAfterAnotherWindowSavesAndKeepsAnUnfinishedEdit() throws Exception {
+    Path file = directory.resolve("profile.json");
+    new FileProfileDataAccess(file)
+        .create(new ProfileData("Math", "", "Java", "", "", "ANY").toProfile(new User()));
+    CountDownLatch refreshed = new CountDownLatch(1);
+    CountDownLatch draftNotice = new CountDownLatch(1);
+    JTabbedPane first = onEdt(() -> tabs(file, new DemoJobSource(), url -> {}));
+    Container second = onEdt(() -> show(tabs(file, new DemoJobSource(), url -> {}), "Profile"));
+    try {
+      Container profile =
+          onEdt(
+              () -> {
+                Container view = show(first, "Profile");
+                children(view, JLabel.class)
+                    .forEach(
+                        label ->
+                            label.addPropertyChangeListener(
+                                "text",
+                                event -> {
+                                  String message = (String) event.getNewValue();
+                                  if (message.startsWith("Profile refreshed")) {
+                                    refreshed.countDown();
+                                  } else if (message.contains("Your unsaved edits")) {
+                                    draftNotice.countDown();
+                                  }
+                                }));
+                first.addNotify();
+                field(second, "Program of study").setText("CS");
+                button(second, "Save changes").doClick();
+                return view;
+              });
+      assertTrue(refreshed.await(5, TimeUnit.SECONDS), "An idle window should refresh itself");
+      onEdt(
+          () -> {
+            assertEquals("CS", field(profile, "Program of study").getText());
+            JTextField major = field(profile, "Program of study");
+            major.setText("Statistics");
+            major.setCaretPosition(3);
+            field(second, "Skills").setText("SQL");
+            button(second, "Save changes").doClick();
+            return null;
+          });
+      assertTrue(
+          draftNotice.await(5, TimeUnit.SECONDS), "A window with edits should show a notice");
+      onEdt(
+          () -> {
+            assertTrue(shows(profile, "Your unsaved edits"));
+            assertEquals("Statistics", field(profile, "Program of study").getText());
+            assertEquals(3, field(profile, "Program of study").getCaretPosition());
+            button(profile, "Save changes").doClick();
+            assertTrue(shows(profile, "Changes saved."));
+            assertFalse(shows(profile, "Your unsaved edits"));
+            assertEquals("SQL", field(profile, "Skills").getText());
+            assertEquals("Statistics", field(profile, "Program of study").getText());
+            return null;
+          });
+    } finally {
+      onEdt(
+          () -> {
+            first.removeNotify();
+            return null;
+          });
+    }
   }
 
   @Test

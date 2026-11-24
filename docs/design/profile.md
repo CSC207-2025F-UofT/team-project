@@ -12,7 +12,7 @@ Lingnan Meng leads UC5 (create a profile), UC6 (edit it) and UC7 (view personali
 
 The default file is `~/.intern-finder/profile.json`, with one student per file. For a classroom demo in a separate file, start the JAR with `java -Dinternfinder.profile=demo-profile.json -jar target/TeamProject-1.0-SNAPSHOT.jar --demo`. The demo source supplies fictional listings. The default launch uses the configured Greenhouse boards. Both modes run the same use cases and matcher.
 
-Each window remembers the profile it loaded. When a student saves, the app checks the student ID and revision under the file lock and applies the fields that changed in that window to the latest saved profile. If both windows edit the program, the last successful save sets the program. If one edits the program and the other edits skills, both changes are saved. The saving window shows the combined result immediately. Other windows can use **Reload profile** to see it.
+Each window remembers the profile it loaded. When a student saves, the app checks the student ID and revision under the file lock and applies the fields that changed in that window to the latest saved profile. If both windows edit the program, the last successful save sets the program. If one edits the program and the other edits skills, both changes are saved. Other windows refresh automatically while their Profile tab is visible. If a window has unsaved edits, it displays a notice and keeps the draft. The student can save those edits or choose **Reload profile** to discard them and see the latest saved values.
 
 ## Clean Architecture
 
