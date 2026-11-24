@@ -3,7 +3,6 @@ package org.example.cocktailcraft.view.browse;
 import org.example.cocktailcraft.entity.Cocktail;
 import org.example.cocktailcraft.entity.User;
 import org.example.cocktailcraft.interface_adapter.click.ClickController;
-import org.example.cocktailcraft.interface_adapter.favourite.FavouriteController;
 import org.example.cocktailcraft.interface_adapter.search.SearchState;
 import org.example.cocktailcraft.interface_adapter.search.SearchViewModel;
 import org.example.cocktailcraft.view.click.ClickView;
@@ -34,7 +33,6 @@ public class MainPageView extends JPanel {
         displayedCocktails = List.copyOf(cocktails);
         setBorder(BorderFactory.createEmptyBorder(12, 12, 12, 12));
         JPanel header = new JPanel(new BorderLayout());
-        header.add(new JLabel("CocktailCraft"), BorderLayout.WEST);
         header.add(search, BorderLayout.CENTER);
         JButton profile = new JButton("Profile");
         profile.setEnabled(false);
