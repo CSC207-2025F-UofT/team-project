@@ -1,14 +1,14 @@
 package view;
 
+import interface_adapter.ViewManagerModel;
+import interface_adapter.ViewManagerModelListener;
+
 import java.awt.CardLayout;
 import java.util.HashMap;
 import java.util.Map;
 
 import javax.swing.JDialog;
 import javax.swing.JPanel;
-
-import interface_adapter.ViewManagerModel;
-import interface_adapter.ViewManagerModelListener;
 
 /**
  * The View Manager for the program. It listens for changes in the ViewManagerModel

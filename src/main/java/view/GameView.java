@@ -2,59 +2,139 @@ package view;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.Insets;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.net.MalformedURLException;
+import java.net.URI;
 
-import javax.swing.BoxLayout;
+import javax.swing.BorderFactory;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
+import javax.swing.JToggleButton;
 import javax.swing.SwingConstants;
 
-import interface_adapter.ViewManagerModel;
+import interface_adapter.game.GameState;
+import interface_adapter.game.GameViewModel;
+import interface_adapter.submit_guess.SubmitGuessController;
+import interface_adapter.start_round.StartRoundController;
 
-/**
- * Game screen: satellite image, guess box, attempts remaining and past guesses (Use Cases 2 and 3).
- * When the Submit Guess view model says the round is won or lost, this view calls the Finish Round controller.
- * Rule: views only call controllers and only read from view models.
- */
-public class GameView extends JPanel {
-    public static final String VIEW_NAME = "game";
+public class GameView extends JPanel implements PropertyChangeListener {
+    private final GameViewModel viewModel;
+    private final SubmitGuessController submitGuessController;
 
-    // TODO (Felix/Elliot): show the image bytes from the view model, e.g. new ImageIcon(bytes)
-    private final JLabel imageLabel = new JLabel("[satellite image]", SwingConstants.CENTER);
-    private final JLabel attemptsLabel = new JLabel("Attempts remaining: 5");
-    private final JLabel feedbackLabel = new JLabel(" ");
+    private final JLabel imageLabel = new JLabel("", SwingConstants.CENTER);
+    private final JPanel imageButtons = new JPanel(new FlowLayout(FlowLayout.LEFT, 4, 0));
+    private final JLabel messageLabel = new JLabel(" ", SwingConstants.CENTER);
+    private final JLabel attemptsLabel = new JLabel(" ");
+    private final JLabel scoreLabel = new JLabel(" ");
     private final JTextField guessField = new JTextField(20);
+    private final JButton guessButton = new JButton("Guess");
+    private final JButton playAgainButton = new JButton("Play again");
 
-    public GameView(ViewManagerModel viewManagerModel) {
-        imageLabel.setPreferredSize(new Dimension(640, 640));
+    private String currentImageURL = "";
 
-        JPanel guessPanel = new JPanel();
-        guessPanel.add(new JLabel("City:"));
-        guessPanel.add(guessField);
-        JButton guess = new JButton("Guess");
-        guessPanel.add(guess);
+    public GameView(
+            GameViewModel viewModel,
+            StartRoundController startRoundController,
+            SubmitGuessController submitGuessController,
+            int imageSize
+    ) {
+        this.viewModel = viewModel;
+        this.submitGuessController = submitGuessController;
 
-        // TODO (Elliot): replace with submitGuessController.execute(guessField.getText())
-        guess.addActionListener(e -> feedbackLabel.setText("Guessed: " + guessField.getText() + " (dummy)"));
 
-        // Dummy button so the flow can be clicked through. Remove once Submit Guess ends rounds.
-        // TODO (Ingrid): the real flow calls finishRoundController.execute() when the round is over
-        JButton endRound = new JButton("End round (dummy)");
-        endRound.addActionListener(e -> {
-            viewManagerModel.setState(ResultView.VIEW_NAME);
-            viewManagerModel.notifyViewChanged();
-        });
+        this.setLayout(new BorderLayout(10, 10));
+        this.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
-        JPanel infoPanel = new JPanel();
-        infoPanel.setLayout(new BoxLayout(infoPanel, BoxLayout.Y_AXIS));
-        infoPanel.add(attemptsLabel);
-        infoPanel.add(feedbackLabel);
-        infoPanel.add(guessPanel);
-        infoPanel.add(endRound);
+        JPanel top = new JPanel(new BorderLayout());
+        top.add(attemptsLabel, BorderLayout.WEST);
+        top.add(scoreLabel, BorderLayout.EAST);
+        top.add(messageLabel, BorderLayout.SOUTH);
 
-        setLayout(new BorderLayout());
-        add(imageLabel, BorderLayout.CENTER);
-        add(infoPanel, BorderLayout.SOUTH);
+        imageLabel.setPreferredSize(new Dimension(imageSize, imageSize));
+        imageLabel.setLayout(new FlowLayout(FlowLayout.LEFT, 8, 8));
+        imageButtons.setOpaque(false);
+        imageLabel.add(imageButtons);
+
+        JPanel bottom = new JPanel();
+        bottom.add(guessField);
+        bottom.add(guessButton);
+        bottom.add(playAgainButton);
+
+        this.add(top, BorderLayout.NORTH);
+        this.add(imageLabel, BorderLayout.CENTER);
+        this.add(bottom, BorderLayout.SOUTH);
+
+        guessButton.addActionListener(e -> submitGuess());
+        guessField.addActionListener(e -> submitGuess());
+//        playAgainButton.addActionListener(e -> startRoundController.execute());
+
+
+        viewModel.addPropertyChangeListener(this);
     }
+
+    private void submitGuess() {
+//        submitGuessController.execute(guessField.getText());
+        guessField.setText("");
+    }
+
+    @Override
+    public void propertyChange(PropertyChangeEvent evt) {
+        GameState state = viewModel.getState();
+
+        messageLabel.setText(state.getMessage());
+        attemptsLabel.setText("Attempts left: " + state.getAttemptsLeft());
+        scoreLabel.setText(state.isRoundOver() ? "Score: " + state.getScore() : " ");
+
+        if (!currentImageURL.equals(state.getImageURL())) {
+            currentImageURL = state.getImageURL();
+            showImage(currentImageURL);
+        }
+
+        updateImageButtons(state);
+
+        guessField.setEnabled(!state.isRoundOver());
+        guessButton.setEnabled(!state.isRoundOver());
+        playAgainButton.setVisible(state.isRoundOver());
+    }
+
+    private void updateImageButtons(GameState state) {
+        imageButtons.removeAll();
+
+        for (int i = 0; i < state.getImageCount(); i++) {
+            int index = i;
+            JToggleButton button = new JToggleButton(String.valueOf(i + 1));
+            button.setPreferredSize(new Dimension(32, 24));
+            button.setMargin(new Insets(0, 0, 0, 0));
+            button.setSelected(i == state.getSelectedImage());
+            button.setFocusable(false);
+            button.addActionListener(e -> {
+                viewModel.getState().selectImage(index);
+                viewModel.firePropertyChanged();
+            });
+            imageButtons.add(button);
+        }
+
+        imageButtons.revalidate();
+        imageButtons.repaint();
+    }
+
+    private void showImage(String imageURL) {
+        try {
+            imageLabel.setIcon(
+                    new ImageIcon(
+                            URI.create(imageURL).toURL()
+                    )
+            );
+        } catch (MalformedURLException | IllegalArgumentException e) {
+            imageLabel.setIcon(null);
+            imageLabel.setText("Could not load image");
+        }
+    }
+
 }

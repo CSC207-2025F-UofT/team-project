@@ -7,12 +7,12 @@ import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 
+import interface_adapter.ViewManagerModel;
 import view.NewPlayerView;
 import view.ViewManager;
 import view.WelcomeView;
 import data_access.PlayerDataAccessObject;
 import entity.PlayerFactory;
-import interface_adapter.ViewManagerModel;
 import interface_adapter.makeNewPlayer.NewPlayerController;
 import interface_adapter.makeNewPlayer.NewPlayerPresenter;
 import interface_adapter.makeNewPlayer.NewPlayerViewModel;
