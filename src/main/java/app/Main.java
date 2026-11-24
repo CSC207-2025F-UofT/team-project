@@ -3,6 +3,7 @@ package app;
 import data_access.SceneTerrainMapper;
 import entity.Ball;
 import entity.ObjectPreset;
+import entity.SampleTerrains;
 import entity.Scene;
 import entity.Terrain;
 import entity.Vector3D;
@@ -19,18 +20,31 @@ public final class Main {
         SwingUtilities.invokeLater(() -> {
             JFrame window = new JFrame("Terrain Physics Simulator");
             window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-            window.setContentPane(createPreview());
+            window.setContentPane(createPreview(hillsPreviewScene()));
             window.pack();
             window.setLocationRelativeTo(null);
             window.setVisible(true);
         });
     }
 
-    static JPanel createPreview() {
-        return new AppBuilder(flatPreviewScene(), new SceneTerrainMapper())
+    static JPanel createPreview(Scene scene) {
+        return new AppBuilder(scene, new SceneTerrainMapper())
                 .addSimulationView()
                 .addSaveSceneUseCase()
+                .addSimulationControlUseCases()
                 .build();
+    }
+
+    static Scene hillsPreviewScene() {
+        Terrain terrain = SampleTerrains.hills();
+        Scene scene = new Scene(terrain);
+        ObjectPreset preset = new ObjectPreset("Bowling ball", 1.4, 6, 0.28, 0.4, 0xb64732);
+        // On the east side of the first hill, so it rolls down toward the valley when played.
+        double x = 36;
+        double y = 32;
+        scene.addBall(new Ball(new Vector3D(x, y, terrain.heightAt(x, y) + preset.getRadius()),
+                Vector3D.ZERO, preset));
+        return scene;
     }
 
     static Scene flatPreviewScene() {

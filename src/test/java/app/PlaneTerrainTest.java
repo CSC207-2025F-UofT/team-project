@@ -4,11 +4,14 @@ import data_access.FileSceneDataAccess;
 import data_access.InMemorySceneDataAccess;
 import data_access.SceneTerrainMapper;
 import entity.Scene;
+import entity.SimplePhysicsEngine;
+import entity.Vector3D;
 import interface_adapter.load_scene.LoadSceneController;
 import interface_adapter.save_scene.SaveSceneController;
 import interface_adapter.simulation.CameraPose;
 import interface_adapter.simulation.ScenePresenter;
 import interface_adapter.simulation.SceneView;
+import interface_adapter.simulation.SimulationController;
 import interface_adapter.simulation.SimulationState;
 import interface_adapter.simulation.SimulationViewModel;
 import org.junit.jupiter.api.BeforeEach;
@@ -17,6 +20,9 @@ import org.junit.jupiter.api.io.TempDir;
 import use_case.load_scene.LoadSceneInteractor;
 import use_case.save_scene.SaveSceneInteractor;
 import use_case.scene.SceneViewData;
+import use_case.simulation.PlayInteractor;
+import use_case.simulation.StepInteractor;
+import use_case.simulation.StopInteractor;
 
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
@@ -27,6 +33,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertSame;
@@ -44,17 +51,63 @@ class PlaneTerrainTest {
     void openFlatPreview() {
         SceneTerrainMapper mapper = new SceneTerrainMapper();
         initialScene = Main.flatPreviewScene();
-        files = new FileSceneDataAccess(new InMemorySceneDataAccess(initialScene), mapper);
+        InMemorySceneDataAccess scenes = new InMemorySceneDataAccess(initialScene);
+        files = new FileSceneDataAccess(scenes, mapper);
         SceneViewData data = SceneViewData.from(initialScene, mapper.toHeightGrid(initialScene.getTerrain()));
         presenter = new ScenePresenter(new SimulationViewModel(SimulationState.from(data, "")));
+        SimulationController simulation = new SimulationController(new PlayInteractor(scenes, presenter),
+                new StepInteractor(scenes, presenter, new SimplePhysicsEngine()),
+                new StopInteractor(scenes, presenter));
         presenter.start(view, new SaveSceneController(new SaveSceneInteractor(files, presenter)),
-                new LoadSceneController(new LoadSceneInteractor(files, presenter)));
+                new LoadSceneController(new LoadSceneInteractor(files, presenter)), simulation);
+    }
+
+    @Test
+    void playPauseAndStopDriveTheClockAndBalls() {
+        CameraPose camera = view.camera;
+        // Give the ball a push so it visibly moves on the flat plane.
+        initialScene.getBalls().get(0).setVelocity(new Vector3D(3, 0, 0));
+
+        presenter.clockTicked(0.1);
+        assertEquals(15.0, view.state.getBalls().get(0).x, "ticks before Play are ignored");
+
+        presenter.playRequested();
+        assertTrue(view.clockRunning);
+        assertEquals("Playing", view.state.getStatusText());
+        presenter.clockTicked(0.5);
+        assertTrue(view.state.getBalls().get(0).x > 15.0);
+        assertSame(camera, view.camera, "moving balls does not re-centre the camera");
+
+        presenter.pauseRequested();
+        assertFalse(view.clockRunning);
+        assertEquals("Paused", view.state.getStatusText());
+        double pausedX = view.state.getBalls().get(0).x;
+        presenter.clockTicked(0.5);
+        assertEquals(pausedX, view.state.getBalls().get(0).x);
+
+        presenter.playRequested();
+        presenter.clockTicked(0.5);
+        presenter.stopRequested();
+        assertFalse(view.clockRunning);
+        assertEquals("Stopped", view.state.getStatusText());
+        assertPlaneWithBall(view.state);
+    }
+
+    @Test
+    void loadingStopsTheClock() throws Exception {
+        view.savePath = directory.resolve("plane.json");
+        presenter.saveRequested();
+        presenter.playRequested();
+        view.loadPath = view.savePath;
+        presenter.loadRequested();
+        assertFalse(view.clockRunning);
+        assertPlaneWithBall(view.state);
     }
 
     @Test
     void swingPreviewDrawsThePlaneAndItsBall() throws Exception {
         SwingUtilities.invokeAndWait(() -> {
-            JPanel screen = Main.createPreview();
+            JPanel screen = Main.createPreview(Main.flatPreviewScene());
             BorderLayout layout = (BorderLayout) screen.getLayout();
             JPanel canvas = (JPanel) layout.getLayoutComponent(BorderLayout.CENTER);
             int width = 360;
@@ -158,6 +211,17 @@ class PlaneTerrainTest {
         private boolean allowOverwrite;
         private SimulationState state;
         private CameraPose camera;
+        private boolean clockRunning;
+
+        @Override
+        public void startClock() {
+            clockRunning = true;
+        }
+
+        @Override
+        public void stopClock() {
+            clockRunning = false;
+        }
 
         @Override
         public Path chooseSaveFile() {
