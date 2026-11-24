@@ -202,7 +202,7 @@ Install JDK 25 (LTS) and open `pom.xml` as a Maven project. The Maven wrapper do
 - `./mvnw verify`: also build the JAR and generate coverage at `target/site/jacoco/index.html`.
 
 On Windows PowerShell, use `.\mvnw.cmd` instead of `./mvnw`.
-Tests belong in `src/test/java`. GitHub Actions runs the checks on pushes and pull requests.
+Tests belong in `src/test/java`. GitHub Actions runs the checks on pull requests and pushes to `main`.
 
 ## How to Run
 
