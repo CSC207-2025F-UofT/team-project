@@ -13,13 +13,22 @@ public class Main {
                 .addLoginView()
                 .addSignupView()
                 .addLoggedInView()
+                .addRecordTransactionView()
+                .addViewBudgetProgressView()
                 .addSetBudgetView()
                 .addSignupUseCase()
                 .addLoginUseCase()
                 .addChangePasswordUseCase()
                 .addLogoutUseCase()
-                .addSetBudgetUseCase()
                 .addGoogleLoginUseCase()
+                .addRecordTransactionUseCase()
+                .addViewBudgetProgressUseCase()
+                .addSetBudgetUseCase()
+                .addAdoptPetView()
+                .addInteractWithPetView()
+                .addInteractWithPetUseCase()
+                .addGetPetPictureUseCase()
+                .addAdoptPetUseCase()
                 .build();
 
         application.pack();

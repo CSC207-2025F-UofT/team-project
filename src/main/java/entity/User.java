@@ -7,6 +7,7 @@ public class User {
 
     private final String name;
     private final String password;
+    private Pet pet;
 
     /**
      * Creates a new user with the given non-empty name and non-empty password.

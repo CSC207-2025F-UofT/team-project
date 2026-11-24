@@ -27,6 +27,7 @@ public class LoginView extends JPanel implements ActionListener, LoginViewModelL
     private final JButton logIn;
     private final JButton signUp;
     private final JButton googleLogin = new JButton("Continue with Google");
+    private final JButton cancelGoogleLogin = new JButton("Cancel Google Sign-In");
     private LoginController loginController = null;
     private Runnable showSignup;
 
@@ -44,12 +45,14 @@ public class LoginView extends JPanel implements ActionListener, LoginViewModelL
                 new JLabel("Password"), passwordInputField);
 
         final JPanel buttons = new JPanel();
-        logIn = new JButton("log in");
+        logIn = new JButton("Log In");
         buttons.add(logIn);
         signUp = new JButton("Sign Up");
         buttons.add(signUp);
         googleLogin.setVisible(false);
         buttons.add(googleLogin);
+        cancelGoogleLogin.setVisible(false);
+        buttons.add(cancelGoogleLogin);
 
         logIn.addActionListener(
                 new ActionListener() {
@@ -155,13 +158,22 @@ public class LoginView extends JPanel implements ActionListener, LoginViewModelL
         googleLogin.addActionListener(event -> googleLoginAction.run());
     }
 
+    public void setGoogleLoginCancelAction(Runnable action) {
+        cancelGoogleLogin.addActionListener(event -> action.run());
+    }
+
     public void setGoogleLoginPending(boolean pending) {
+        cancelGoogleLogin.setVisible(pending);
         googleLogin.setEnabled(!pending);
         logIn.setEnabled(!pending);
         signUp.setEnabled(!pending);
         if (pending) {
-            loginErrorField.setText("Finish signing in with Google in your browser.");
+            loginErrorField.setText("Finish signing in in your browser, or cancel here.");
+        } else {
+            loginErrorField.setText("");
         }
+        revalidate();
+        repaint();
     }
 
     public void setLoginController(LoginController loginController) {

@@ -5,6 +5,7 @@ import interface_adapter.logged_in.LoggedInState;
 import interface_adapter.logged_in.LoggedInViewModel;
 import interface_adapter.logged_in.LoggedInViewModelListener;
 import interface_adapter.logout.LogoutController;
+import interface_adapter.interact_with_pet.InteractWithPetController;
 
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
@@ -22,8 +23,7 @@ public class LoggedInView extends JPanel implements ActionListener, LoggedInView
     private final JLabel passwordErrorField = new JLabel();
     private ChangePasswordController changePasswordController = null;
     private LogoutController logoutController;
-
-    private Runnable showSetBudget;
+    private InteractWithPetController interactWithPetController;
 
     private final JLabel username;
 
@@ -32,7 +32,11 @@ public class LoggedInView extends JPanel implements ActionListener, LoggedInView
     private final JPasswordField passwordInputField = new JPasswordField(15);
     private final JButton changePassword;
 
-    private final JButton setBudget;
+    private final JButton recordTransaction = new JButton("Record Transaction");
+
+    private final JButton viewBudgetProgress = new JButton("View Budget Progress");
+
+    private final JButton setBudget = new JButton("Set Budget");
 
     public LoggedInView(LoggedInViewModel loggedInViewModel) {
         this.loggedInViewModel = loggedInViewModel;
@@ -53,19 +57,13 @@ public class LoggedInView extends JPanel implements ActionListener, LoggedInView
 
         changePassword = new JButton("Change Password");
         buttons.add(changePassword);
-
-        setBudget = new JButton("Set Budget");
+        buttons.add(recordTransaction);
+        buttons.add(viewBudgetProgress);
         buttons.add(setBudget);
 
         logOut.addActionListener(this);
 
         this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
-
-        setBudget.addActionListener(evt -> {
-            if (showSetBudget != null) {
-                showSetBudget.run();
-            }
-        });
 
         passwordInputField.getDocument().addDocumentListener(new DocumentListener() {
 
@@ -112,6 +110,24 @@ public class LoggedInView extends JPanel implements ActionListener, LoggedInView
         this.add(passwordInfo);
         this.add(passwordErrorField);
         this.add(buttons);
+
+        final JPanel petMenu = new JPanel();
+        final JButton interactPet = new JButton("Interact with pet!");
+        final JButton petShop = new JButton("Enter pet item shop!");
+
+        interactPet.addActionListener(evt -> {
+            String currentUsername =
+                    loggedInViewModel.getState().getUsername();
+
+            interactWithPetController.execute(currentUsername);
+        });
+
+        petMenu.add(interactPet);
+        petMenu.add(petShop);
+
+        this.add(petMenu);
+
+
     }
 
     /**
@@ -130,8 +146,21 @@ public class LoggedInView extends JPanel implements ActionListener, LoggedInView
         this.logoutController = logoutController;
     }
 
-    public void setShowSetBudget(Runnable showSetBudget) {
-        this.showSetBudget = showSetBudget;
+    public void setShowRecordTransaction(Runnable action) {
+        recordTransaction.addActionListener(event -> action.run());
+    }
+
+    public void setShowBudgetProgress(Runnable action) {
+        viewBudgetProgress.addActionListener(event -> action.run());
+    }
+
+    public void setShowSetBudget(Runnable action) {                 
+        setBudget.addActionListener(event -> action.run());
+    }
+
+    public void setInteractWithPetController(
+            InteractWithPetController interactWithPetController) {
+        this.interactWithPetController = interactWithPetController;
     }
 
     /**

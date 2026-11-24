@@ -2,7 +2,7 @@ package use_case.set_budget;
 
 import java.math.BigDecimal;
 
-import data_access.InMemoryBudgetDataAccessObject;
+import data_access.InMemorySetBudgetDataAccessObject;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -11,7 +11,7 @@ class SetBudgetInteractorTest {
 
     @Test
     void successTest() {
-        InMemoryBudgetDataAccessObject dataAccess = new InMemoryBudgetDataAccessObject();
+        InMemorySetBudgetDataAccessObject dataAccess = new InMemorySetBudgetDataAccessObject();
         SetBudgetInputData inputData = new SetBudgetInputData("Paul", "50", "200");
 
         SetBudgetOutputBoundary successPresenter = new SetBudgetOutputBoundary() {

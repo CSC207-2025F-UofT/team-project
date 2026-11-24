@@ -13,12 +13,13 @@ import entity.Budget;
 import entity.Wallet;
 import org.json.JSONObject;
 import use_case.set_budget.SetBudgetDataAccessInterface;
+import use_case.view_budget_progress.ViewBudgetProgressBudgetDataAccessInterface;
 
 /**
  * DAO for budgets and wallets, stored in a local JSON file.
  * The file looks like: {"Paul": {"dailyLimit": "50", "balance": "200"}}
  */
-public class FileBudgetDataAccessObject implements SetBudgetDataAccessInterface {
+public class FileBudgetDataAccessObject implements SetBudgetDataAccessInterface, ViewBudgetProgressBudgetDataAccessInterface {
 
     private final Path file;
     private final Map<String, Budget> budgets = new HashMap<>();
@@ -79,6 +80,12 @@ public class FileBudgetDataAccessObject implements SetBudgetDataAccessInterface 
     public void saveWallet(String username, Wallet wallet) {
         wallets.put(username, wallet);
         save();
+    }
+
+    @Override
+    public BigDecimal getDailyLimit(String username) {
+        final Budget budget = budgets.get(username);
+        return budget == null ? null : budget.getLimit();
     }
 
     private void save() {
