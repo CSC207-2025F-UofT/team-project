@@ -1,5 +1,6 @@
 package org.example.cocktailcraft.signup;
 
+import org.example.cocktailcraft.data_access.CocktailJsonReader;
 import org.example.cocktailcraft.data_access.InMemoryUserDataAccessObject;
 import org.example.cocktailcraft.use_case.signup.*;
 import org.junit.jupiter.api.Test;
@@ -11,7 +12,7 @@ public class SignupInteractorTest {
     @Test
     void successTest() {
         InMemoryUserDataAccessObject userDAO =
-                new InMemoryUserDataAccessObject();
+                new InMemoryUserDataAccessObject(new CocktailJsonReader());
 
         SignupInputData inputData =
                 new SignupInputData("alice", "password123", "password123");

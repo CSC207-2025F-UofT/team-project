@@ -4,21 +4,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ClickState {
-    private String cocktailId = "";
     private List<String> ingredients = new ArrayList<>();
     private String cocktailError;
     private String instructions = "";
 
-    public String getCocktailId() {
-        return cocktailId;
-    }
-
     public String getCocktailError() {
         return cocktailError;
-    }
-
-    public void setCocktailId(String cocktailId) {
-        this.cocktailId = cocktailId;
     }
 
     public void setCocktailError(String cocktailError) {

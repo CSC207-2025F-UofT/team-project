@@ -1,8 +1,11 @@
 package org.example.cocktailcraft.view.browse;
 
 import org.example.cocktailcraft.entity.Cocktail;
+import org.example.cocktailcraft.entity.User;
 import org.example.cocktailcraft.interface_adapter.click.ClickController;
+import org.example.cocktailcraft.interface_adapter.favourite.FavouriteController;
 import org.example.cocktailcraft.view.click.ClickView;
+import org.example.cocktailcraft.view.favourite.FavouriteView;
 import org.example.cocktailcraft.view.search.SearchView;
 import java.util.function.Consumer;
 
@@ -15,7 +18,9 @@ public class MainPageView extends JPanel {
     private final JButton customizeButton = new JButton("Customize");
 
     public MainPageView(SearchView search, List<Cocktail> cocktails,
-                        ClickController clickController, ClickView clickView) {
+                        ClickController clickController, ClickView clickView,
+                        User user, FavouriteController favouriteController,
+                        FavouriteView favouriteView) {
         super(new BorderLayout(12, 12));
         setBorder(BorderFactory.createEmptyBorder(12, 12, 12, 12));
         JPanel header = new JPanel(new BorderLayout());
@@ -49,6 +54,7 @@ public class MainPageView extends JPanel {
 
                 selectedCocktail = cocktails.get(index);
                 customizeButton.setEnabled(true);
+                favouriteController.execute(user, selectedCocktail.getId());
 
                 clickController.execute(selectedCocktail.getId());
             }
@@ -60,6 +66,7 @@ public class MainPageView extends JPanel {
 
         JPanel detailsPanel = new JPanel(new BorderLayout(10, 10));
         detailsPanel.add(clickView, BorderLayout.CENTER);
+        detailsPanel.add(favouriteView, BorderLayout.NORTH);
         detailsPanel.add(customizeButton, BorderLayout.SOUTH);
 
         JSplitPane splitPane = new JSplitPane(
