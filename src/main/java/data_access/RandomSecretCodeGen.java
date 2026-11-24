@@ -7,7 +7,7 @@ public class RandomSecretCodeGen implements SecretCodeGenerator {
     private final String AlphaNumericString;
     private final int length;
 
-    public RandomSecretCodeGen(StringBuilder secretCode) {
+    public RandomSecretCodeGen() {
         this.AlphaNumericString = "0123456789";
         this.length = 5;
     }
