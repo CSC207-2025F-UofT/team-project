@@ -1,8 +1,15 @@
 package app;
 
+import entity.Student;
+import interface_adapter.job_filter.JobFilterController;
+import interface_adapter.job_filter.JobFilterPresenter;
+import interface_adapter.job_filter.JobFilterViewModel;
+import use_case.job_filter.JobFilterInteractor;
+import view.JobFilterView;
+
 import data_access.FileStudentDataAccessObject;
 import data_access.InMemoryUserDataAccessObject;
-import data_access.StubJobDataAccessObject;
+import data_access.JobDataAccessObject;
 import data_access.TTBCourseValidator;
 import entity.StudentFactory;
 import interface_adapter.ViewManagerModel;
@@ -67,7 +74,6 @@ public class AppBuilder {
     private final CardLayout cardLayout = new CardLayout();
     final StudentFactory studentFactory = new StudentFactory();
     final ViewManagerModel viewManagerModel = new ViewManagerModel();
-    ViewManager viewManager = new ViewManager(cardPanel, cardLayout, viewManagerModel);
 
     // set which data access implementation to use, can be any
     // of the classes from the data_access package
@@ -78,8 +84,8 @@ public class AppBuilder {
     // DAO that calls the UofT course API and Gemini for course analysis
     final InMemoryUserDataAccessObject courseApiDataAccessObject = new InMemoryUserDataAccessObject();
 
-    // TODO: replace this stub with a real implementation
-    final StubJobDataAccessObject jobDataAccessObject = new StubJobDataAccessObject();
+    // DAO that fetches jobs from the Careerjet API and caches them in memory
+    final JobDataAccessObject jobDataAccessObject = new JobDataAccessObject();
 
     private SignupView signupView;
     private SignupViewModel signupViewModel;
@@ -98,6 +104,7 @@ public class AppBuilder {
 
     public AppBuilder() {
         cardPanel.setLayout(cardLayout);
+        new ViewManager(cardPanel, cardLayout, viewManagerModel);
     }
 
     public AppBuilder addSignupView() {
@@ -117,6 +124,19 @@ public class AppBuilder {
     public AppBuilder addLoggedInView() {
         loggedInViewModel = new LoggedInViewModel();
         loggedInView = new LoggedInView(loggedInViewModel);
+        loggedInView.addFilterJobsListener(event -> {
+            Student student = userDataAccessObject.get(loggedInViewModel.getState().getUsername());
+            JobFilterViewModel model = new JobFilterViewModel();
+            JobFilterController controller = new JobFilterController(
+                    new JobFilterInteractor(new JobFilterPresenter(model)));
+            JDialog dialog = new JDialog(SwingUtilities.getWindowAncestor(loggedInView),
+                    "Filter Jobs", java.awt.Dialog.ModalityType.APPLICATION_MODAL);
+            dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+            dialog.setContentPane(new JobFilterView(controller, model, student));
+            dialog.pack();
+            dialog.setLocationRelativeTo(loggedInView);
+            dialog.setVisible(true);
+        });
         cardPanel.add(loggedInView, LoggedInViewModel.VIEW_NAME);
         return this;
     }

@@ -24,6 +24,8 @@ public class LoggedInView extends JPanel implements ActionListener, LoggedInView
     private SkillListController skillListController;
     private JobListController jobListController;
 
+    private final JButton filterJobs = new JButton("Filter Jobs");
+
     private final JLabel username;
 
     private final JButton logOut;
@@ -51,6 +53,7 @@ public class LoggedInView extends JPanel implements ActionListener, LoggedInView
         navigation.add(addCourses);
         navigation.add(viewSkills);
         navigation.add(viewJobs);
+        navigation.add(filterJobs);
 
         addCourses.addActionListener(evt -> {
             if (addCourseController != null) {
@@ -98,6 +101,10 @@ public class LoggedInView extends JPanel implements ActionListener, LoggedInView
 
     public void setJobListController(JobListController jobListController) {
         this.jobListController = jobListController;
+    }
+
+    public void addFilterJobsListener(ActionListener listener) {
+        filterJobs.addActionListener(listener);
     }
 
     public void setLogoutController(LogoutController logoutController) {
