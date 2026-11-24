@@ -1,4 +1,8 @@
 package org.example.cocktailcraft.use_case.login;
 
-public class LoginOutputBoundary {
+public interface LoginOutputBoundary {
+    void prepareSuccessView(LoginOutputData outputData);
+
+    void prepareFailView(String errorMessage);
 }
+
