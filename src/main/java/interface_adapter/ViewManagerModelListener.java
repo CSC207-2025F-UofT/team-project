@@ -1,4 +1,4 @@
-package interface_adapter.calogin;
+package interface_adapter;
 
 public interface ViewManagerModelListener {
 

@@ -1,6 +1,6 @@
 package interface_adapter.calogin.login;
 
-import interface_adapter.calogin.ViewManagerModel;
+import interface_adapter.ViewManagerModel;
 import interface_adapter.calogin.logged_in.LoggedInState;
 import interface_adapter.calogin.logged_in.LoggedInViewModel;
 import use_case.calogin.login.LoginOutputBoundary;

@@ -1,6 +1,6 @@
 package interface_adapter.calogin.signup;
 
-import interface_adapter.calogin.ViewManagerModel;
+import interface_adapter.ViewManagerModel;
 import interface_adapter.calogin.login.LoginState;
 import interface_adapter.calogin.login.LoginViewModel;
 import use_case.calogin.signup.SignupOutputBoundary;
