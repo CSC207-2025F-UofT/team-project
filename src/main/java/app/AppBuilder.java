@@ -73,7 +73,6 @@ public class AppBuilder {
     private final CardLayout cardLayout = new CardLayout();
     final StudentFactory studentFactory = new StudentFactory();
     final ViewManagerModel viewManagerModel = new ViewManagerModel();
-    ViewManager viewManager = new ViewManager(cardPanel, cardLayout, viewManagerModel);
 
     // set which data access implementation to use, can be any
     // of the classes from the data_access package
@@ -104,6 +103,7 @@ public class AppBuilder {
 
     public AppBuilder() {
         cardPanel.setLayout(cardLayout);
+        new ViewManager(cardPanel, cardLayout, viewManagerModel);
     }
 
     public AppBuilder addSignupView() {

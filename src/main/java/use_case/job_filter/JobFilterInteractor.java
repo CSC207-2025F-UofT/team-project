@@ -3,7 +3,6 @@ package use_case.job_filter;
 import entity.Job;
 import entity.JobGroup;
 import entity.Student;
-import entity.StudentFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,28 +12,18 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * The Change Password Interactor.
+ * Filters jobs in the student’s job groups.
  */
 public class JobFilterInteractor implements JobFilterInputBoundary {
-    private final JobFilterUserDataAccessInterface userDataAccessObject;
     private final JobFilterOutputBoundary userPresenter;
-    private final StudentFactory studentFactory;
 
     public JobFilterInteractor(JobFilterOutputBoundary presenter) {
-        this(null, presenter, null);
-    }
-
-    public JobFilterInteractor(JobFilterUserDataAccessInterface jobFilterDataAccessInterface,
-                               JobFilterOutputBoundary jobFilterOutputBoundary,
-                               StudentFactory studentFactory) {
-        this.userDataAccessObject = jobFilterDataAccessInterface;
-        this.userPresenter = jobFilterOutputBoundary;
-        this.studentFactory = studentFactory;
+        this.userPresenter = presenter;
     }
 
     @Override
-    public void execute(JobFilterInputData jobFilterInputData) {
-        Student student = jobFilterInputData.getStudent();
+    public void execute(JobFilterInputData input) {
+        Student student = input.getStudent();
         List<JobGroup> jobGroups = student.getJobGroups();
         List<Job> jobs = new ArrayList<>();
 
@@ -47,7 +36,6 @@ public class JobFilterInteractor implements JobFilterInputBoundary {
         }
         List<Job> result = new ArrayList<>();
 
-        JobFilterInputData input = jobFilterInputData;
         try {
             LocalDate start = dateBound(input.get_start_Date_Y(), input.get_start_Date_M(), input.get_start_Date_D());
             LocalDate end = dateBound(input.get_end_Date_Y(), input.get_end_Date_M(), input.get_end_Date_D());
