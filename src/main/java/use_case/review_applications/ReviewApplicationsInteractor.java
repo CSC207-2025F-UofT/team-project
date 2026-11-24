@@ -1,5 +1,6 @@
 package use_case.review_applications;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -11,23 +12,6 @@ import entity.ApplicationStatus;
  * and shows one chosen application with the adopter's answers.
  */
 public class ReviewApplicationsInteractor implements ReviewApplicationsInputBoundary {
-
-    /** Shown when there are no applications at all. */
-    static final String NO_APPLICATIONS = "There are no applications.";
-    /** Shown when there are applications, but none match the filters. */
-    static final String NO_MATCHES = "No applications match the filter.";
-    /** Shown when the applications cannot be read. */
-    static final String LOAD_FAILED = "Applications could not be loaded. Please try again.";
-    /** Shown when the admin opens an application without choosing one. */
-    static final String NO_APPLICATION_CHOSEN = "Please choose an application.";
-    /** Shown when the chosen application cannot be read. */
-    static final String DETAIL_LOAD_FAILED = "Application could not be loaded. Please try again.";
-    /** Shown when the chosen application no longer exists. */
-    static final String APPLICATION_NOT_FOUND = "This application no longer exists.";
-    /** Shown when the pet of an application can no longer be found, for example after it was removed. */
-    static final String UNKNOWN_PET = "(pet no longer listed)";
-    /** Shown when the adopter of an application can no longer be found. */
-    static final String UNKNOWN_ADOPTER = "(unknown adopter)";
 
     private final ReviewApplicationsDataAccessInterface applicationDataAccess;
     private final ReviewApplicationsPetDataAccessInterface petDataAccess;
@@ -58,36 +42,43 @@ public class ReviewApplicationsInteractor implements ReviewApplicationsInputBoun
             applications = applicationDataAccess.getAllApplications();
         }
         catch (RuntimeException ex) {
-            presenter.prepareFailView(LOAD_FAILED);
+            presenter.prepareFailView("Applications could not be loaded. Please try again.");
             return;
         }
         if (applications.isEmpty()) {
-            presenter.prepareFailView(NO_APPLICATIONS);
+            presenter.prepareFailView("There are no applications.");
             return;
         }
 
         final String petId = inputData.getPetId();
         final ApplicationStatus status = inputData.getStatus();
-        final List<ReviewApplicationSummary> summaries = new ArrayList<>();
+        final List<String> applicationIds = new ArrayList<>();
+        final List<String> petNames = new ArrayList<>();
+        final List<String> adopterNames = new ArrayList<>();
+        final List<LocalDate> submittedDates = new ArrayList<>();
+        final List<String> statuses = new ArrayList<>();
         for (Application application : applications) {
             if (matches(application, petId, status)) {
-                summaries.add(new ReviewApplicationSummary(application.getId(), application.getPetId(),
-                        findPetName(application.getPetId()), findAdopterName(application.getAdopterId()),
-                        application.getSubmittedAt(), application.getStatus().name()));
+                applicationIds.add(application.getId());
+                petNames.add(findPetName(application.getPetId()));
+                adopterNames.add(findAdopterName(application.getAdopterId()));
+                submittedDates.add(application.getSubmittedAt());
+                statuses.add(application.getStatus().name());
             }
         }
 
-        if (summaries.isEmpty()) {
-            presenter.prepareFailView(NO_MATCHES);
+        if (applicationIds.isEmpty()) {
+            presenter.prepareFailView("No applications match the filter.");
             return;
         }
-        presenter.prepareSuccessView(new ReviewApplicationsOutputData(summaries));
+        presenter.prepareSuccessView(new ReviewApplicationsOutputData(applicationIds, petNames, adopterNames,
+                submittedDates, statuses));
     }
 
     @Override
     public void viewApplication(String applicationId) {
         if (applicationId == null || applicationId.isEmpty()) {
-            presenter.prepareFailView(NO_APPLICATION_CHOSEN);
+            presenter.prepareDetailFailView("Please choose an application.");
             return;
         }
 
@@ -96,11 +87,11 @@ public class ReviewApplicationsInteractor implements ReviewApplicationsInputBoun
             application = applicationDataAccess.getApplicationById(applicationId);
         }
         catch (RuntimeException ex) {
-            presenter.prepareFailView(DETAIL_LOAD_FAILED);
+            presenter.prepareDetailFailView("Application could not be loaded. Please try again.");
             return;
         }
         if (application == null) {
-            presenter.prepareFailView(APPLICATION_NOT_FOUND);
+            presenter.prepareDetailFailView("This application no longer exists.");
             return;
         }
 
@@ -135,7 +126,7 @@ public class ReviewApplicationsInteractor implements ReviewApplicationsInputBoun
             return petDataAccess.getPetName(petId);
         }
         catch (RuntimeException ex) {
-            return UNKNOWN_PET;
+            return "(pet no longer listed)";
         }
     }
 
@@ -147,7 +138,7 @@ public class ReviewApplicationsInteractor implements ReviewApplicationsInputBoun
     private String findAdopterName(String adopterId) {
         final String name = userDataAccess.getUserName(adopterId);
         if (name == null) {
-            return UNKNOWN_ADOPTER;
+            return "(unknown adopter)";
         }
         return name;
     }

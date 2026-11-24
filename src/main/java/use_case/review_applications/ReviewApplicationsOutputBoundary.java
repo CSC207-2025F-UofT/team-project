@@ -18,8 +18,14 @@ public interface ReviewApplicationsOutputBoundary {
     void prepareDetailView(ApplicationDetailsOutputData applicationDetailsOutputData);
 
     /**
-     * Tells the admin why the applications, or the chosen application, cannot be shown.
+     * Tells the admin why no applications are listed.
      * @param errorMessage the message to show
      */
     void prepareFailView(String errorMessage);
+
+    /**
+     * Tells the admin why the chosen application cannot be shown. The list stays as it is.
+     * @param errorMessage the message to show
+     */
+    void prepareDetailFailView(String errorMessage);
 }
