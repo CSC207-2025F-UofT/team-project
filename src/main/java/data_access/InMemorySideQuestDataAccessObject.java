@@ -59,7 +59,7 @@ public class InMemorySideQuestDataAccessObject implements QuestLocationDataAcces
     public List<SideQuest> getQuestsWithLocation() {
         List<SideQuest> result = new ArrayList<>();
         for (SideQuest quest : quests) {
-            if (quest.getLocation() != null) {
+            if (quest.getCoordinates() != null) {
                 result.add(quest);
             }
         }

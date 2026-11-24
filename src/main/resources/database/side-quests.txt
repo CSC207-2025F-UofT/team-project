@@ -1,0 +1,11 @@
+name description isIndoor budget expectedTime exp location interests
+
+
+    private final String name;
+    private final String description;
+    private final String isIndoor;
+    private final String budget;    // Split into four categories (free, less_than_twenty, less_than_fifty, over_fifty)
+    private final String expectedTime; // under_10_minutes, under_30_minutes, under_60_minutes, over_60_minutes
+    private final int exp;
+    private final Location location;
+    private final List<String> interests;

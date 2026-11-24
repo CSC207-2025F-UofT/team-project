@@ -4,9 +4,7 @@ import java.util.List;
 import java.util.ArrayList;
 
 public class AddSideQuestInputData {
-    private final String id;    // A unique ID for quests
-    private final String name;
-    private final String description;
+    private final String questDescription;
     private final String photoUrl;
     private final String isIndoor;
     private final double budget;
@@ -15,12 +13,12 @@ public class AddSideQuestInputData {
     private final Location location;
     private final List<String> interests;
 
-    public AddSideQuestInputData(String id, String name, String description, String photoUrl, String isIndoor,
+    public AddSideQuestInputData(String id, String name, String questDescription, String photoUrl, String isIndoor,
                                  double budget, double expectedTime, int exp, Location location,
                                  List<String> interests) {
         this.id = id;
         this.name = name;
-        this.description = description;
+        this.questDescription = questDescription;
         this.photoUrl = photoUrl;
         this.isIndoor = isIndoor;
         this.budget = budget;
@@ -38,8 +36,8 @@ public class AddSideQuestInputData {
         return name;
     }
 
-    public String getDescription() {
-        return description;
+    public String getQuestDescription() {
+        return questDescription;
     }
 
     public String getPhotoUrl() {
