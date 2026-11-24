@@ -1,4 +1,4 @@
-package questionaire;
+package View.Questionaire;
 
 import javax.swing.*;
 

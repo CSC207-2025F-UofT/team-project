@@ -1,6 +1,6 @@
-package profilesetup;
+package View.ProfileSetup;
 
-import questionaire.QuestionOne;
+import View.Questionaire.QuestionOne;
 
 import javax.swing.*;
 
@@ -42,7 +42,7 @@ public class PrivateInfo {
         JPanel next = new JPanel();
         JButton choose_next = new JButton("Next");
         choose_next.addActionListener(e ->{
-            QuestionOne q1 = new QuestionOne();
+            QuestionOne q1 = new View.Questionaire.QuestionOne();
         });
         next.add(choose_next);
 
