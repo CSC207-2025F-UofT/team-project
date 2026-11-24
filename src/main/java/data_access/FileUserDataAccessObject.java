@@ -20,6 +20,7 @@ import entity.User.Role;
 import entity.UserFactory;
 import use_case.admin_signup.AdminSignupUserDataAccessInterface;
 import use_case.login.LoginUserDataAccessInterface;
+import use_case.review_applications.ReviewApplicationsUserDataAccessInterface;
 import use_case.signup.SignupUserDataAccessInterface;
 
 /**
@@ -29,7 +30,8 @@ import use_case.signup.SignupUserDataAccessInterface;
  */
 public class FileUserDataAccessObject implements SignupUserDataAccessInterface,
                                                  AdminSignupUserDataAccessInterface,
-                                                 LoginUserDataAccessInterface {
+                                                 LoginUserDataAccessInterface,
+                                                 ReviewApplicationsUserDataAccessInterface {
 
     private static final String PREFERENCE = "preference";
     private static final String PREFERRED_SPECIES = "preferredSpecies";
@@ -204,6 +206,15 @@ public class FileUserDataAccessObject implements SignupUserDataAccessInterface,
     public synchronized User getByEmail(String email) {
         final String id = idByEmail.get(email);
         return id == null ? null : usersById.get(id);
+    }
+
+    @Override
+    public synchronized String getUserName(String userId) {
+        final User user = usersById.get(userId);
+        if (user == null) {
+            return null;
+        }
+        return user.getName();
     }
 
     @Override

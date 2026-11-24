@@ -19,6 +19,7 @@ import org.json.JSONObject;
 
 import entity.Application;
 import entity.ApplicationStatus;
+import use_case.review_applications.ReviewApplicationsDataAccessInterface;
 import use_case.submit_application.SubmitApplicationDataAccessInterface;
 import use_case.track_applications.TrackApplicationsDataAccessInterface;
 
@@ -28,7 +29,7 @@ import use_case.track_applications.TrackApplicationsDataAccessInterface;
  * are stored only when it is saved.
  */
 public class FileApplicationDataAccessObject implements SubmitApplicationDataAccessInterface,
-        TrackApplicationsDataAccessInterface {
+        TrackApplicationsDataAccessInterface, ReviewApplicationsDataAccessInterface {
 
     private final Path jsonPath;
     private final Map<String, Application> applications = new LinkedHashMap<>();
@@ -145,6 +146,24 @@ public class FileApplicationDataAccessObject implements SubmitApplicationDataAcc
             if (application.getAdopterId().equals(adopterId)) {
                 result.add(application.copy());
             }
+        }
+        return result;
+    }
+
+    @Override
+    public Application getApplicationById(String applicationId) {
+        final Application application = applications.get(applicationId);
+        if (application == null) {
+            return null;
+        }
+        return application.copy();
+    }
+
+    @Override
+    public List<Application> getAllApplications() {
+        final List<Application> result = new ArrayList<>();
+        for (Application application : applications.values()) {
+            result.add(application.copy());
         }
         return result;
     }

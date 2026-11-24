@@ -21,6 +21,7 @@ import entity.Species;
 import entity.Temperament;
 import use_case.browse_pets.BrowsePetsDataAccessInterface;
 import use_case.manage_pet.ManagePetDataAccessInterface;
+import use_case.review_applications.ReviewApplicationsPetDataAccessInterface;
 import use_case.submit_application.SubmitApplicationPetDataAccessInterface;
 import use_case.track_applications.TrackApplicationsPetDataAccessInterface;
 
@@ -28,7 +29,8 @@ import use_case.track_applications.TrackApplicationsPetDataAccessInterface;
  * Stores pet profiles in a local JSON file and supplies pet details to application submission.
  */
 public class FilePetDataAccessObject implements ManagePetDataAccessInterface, BrowsePetsDataAccessInterface,
-        SubmitApplicationPetDataAccessInterface, TrackApplicationsPetDataAccessInterface {
+        SubmitApplicationPetDataAccessInterface, TrackApplicationsPetDataAccessInterface,
+        ReviewApplicationsPetDataAccessInterface {
 
     private final Path jsonPath;
     private Map<String, Pet> pets;

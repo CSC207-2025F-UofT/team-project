@@ -1,17 +1,23 @@
 package use_case.review_applications;
 
-import entity.Application;
-import use_case.track_applications.ApplicationSummary;
-
 import java.util.List;
 
+/**
+ * The applications the admin asked to see.
+ */
 public class ReviewApplicationsOutputData {
 
-    private final List<ApplicationSummary> applications;
+    private final List<ReviewApplicationSummary> applications;
 
-    public ReviewApplicationsOutputData(List<ApplicationSummary> applications) {
-        this.applications = applications;
+    /**
+     * Creates the output.
+     * @param applications the matching applications
+     */
+    public ReviewApplicationsOutputData(List<ReviewApplicationSummary> applications) {
+        this.applications = List.copyOf(applications);
     }
 
-    public List<ApplicationSummary> getApplications() {return applications;}
+    public List<ReviewApplicationSummary> getApplications() {
+        return applications;
+    }
 }

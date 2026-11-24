@@ -1,5 +1,6 @@
 package interface_adapter.review_applications;
 
+import use_case.review_applications.ApplicationDetailsOutputData;
 import use_case.review_applications.ReviewApplicationsOutputBoundary;
 import use_case.review_applications.ReviewApplicationsOutputData;
 
@@ -12,6 +13,11 @@ public class ReviewApplicationsPresenter implements ReviewApplicationsOutputBoun
 
     @Override
     public void prepareSuccessView(ReviewApplicationsOutputData reviewApplicationsOutputData) {
+
+    }
+
+    @Override
+    public void prepareDetailView(ApplicationDetailsOutputData applicationDetailsOutputData) {
 
     }
 
