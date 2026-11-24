@@ -127,8 +127,8 @@ public class AppBuilder {
                 cocktails,
                 clickController,
                 clickView,
+                searchViewModel,
                 user,
-                favouriteController,
                 favouriteView);
         return this;
     }

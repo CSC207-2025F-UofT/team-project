@@ -28,9 +28,8 @@ public class MainPageView extends JPanel {
     private final JButton customizeButton = new JButton("Customize");
 
     public MainPageView(SearchView search, List<Cocktail> cocktails,
-                        ClickController clickController, ClickView clickView,
-                        User user, FavouriteController favouriteController,
-                        FavouriteView favouriteView) {
+                        ClickController clickController, ClickView clickView,SearchViewModel searchViewModel,
+                        User user, FavouriteView favouriteView) {
         super(new BorderLayout(12, 12));
         displayedCocktails = List.copyOf(cocktails);
         setBorder(BorderFactory.createEmptyBorder(12, 12, 12, 12));
