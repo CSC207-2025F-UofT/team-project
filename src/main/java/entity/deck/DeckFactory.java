@@ -23,7 +23,7 @@ public class DeckFactory {
     }
 
     private static void addCopies(Deck deck, CardFactory cardFactory, Player owner, String name, int amount) {
-        for (int i = 0; i <= amount; i++) {
+        for (int i = 0; i < amount; i++) {
             Card card = cardFactory.create(owner, name);
             deck.addCard(card);
         }

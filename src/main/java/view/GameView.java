@@ -3,6 +3,7 @@ package view;
 import adapters.viewmodel.GameViewModel;
 import adapters.viewmodel.GameViewModel.CardViewData;
 import adapters.viewmodel.GameViewModel.TileViewData;
+import adapters.viewmodel.ViewState;
 import view.GameArtwork.Portrait;
 
 import javax.swing.BorderFactory;
@@ -15,13 +16,17 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Graphics;
 import java.awt.Point;
+import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -29,13 +34,14 @@ import java.util.Locale;
 import java.util.Objects;
 
 /** Swing match screen. Create and update it on the Swing event dispatch thread. */
-public final class GameView extends JPanel {
+public final class GameView extends JPanel implements PropertyChangeListener {
     private static final int CARD_BUTTON_PADDING = 12;
     private static final int SCROLLBAR_SPACE = 16;
 
     private final GameArtwork artwork = new GameArtwork();
-    private final JLabel gameStatus = GameViewStyle.label("", GameViewStyle.TURN_FONT, GameViewStyle.TEXT);
-    private final JLabel timer = GameViewStyle.label("", GameViewStyle.TIMER_FONT, GameViewStyle.GOLD);
+    private final BufferedImage background = GameArtwork.screenBackground("Game");
+    private final JLabel gameStatus = GameViewStyle.label("");
+    private final JLabel timer = GameViewStyle.label("");
     private final BoardPanel boardPanel = new BoardPanel((position, spellIndex) ->
             inspect(new TileInspection(position, spellIndex)));
     private Portrait previewPortrait;
@@ -54,8 +60,8 @@ public final class GameView extends JPanel {
     private final JScrollPane handScroll = horizontalScroll(handCards);
     private final JButton drawPile = cardButton();
     private final JButton discardPile = cardButton();
-    private final JLabel drawTotal = GameViewStyle.label("", GameViewStyle.COUNT_FONT, GameViewStyle.MUTED);
-    private final JLabel discardTotal = GameViewStyle.label("", GameViewStyle.COUNT_FONT, GameViewStyle.MUTED);
+    private final JLabel drawTotal = GameViewStyle.label("");
+    private final JLabel discardTotal = GameViewStyle.label("");
     private GameViewModel model;
     private Inspection inspection;
 
@@ -68,6 +74,24 @@ public final class GameView extends JPanel {
         add(createPlayArea(), BorderLayout.CENTER);
         add(createFooter(), BorderLayout.SOUTH);
         render(GameViewModel.empty());
+    }
+
+    @Override
+    protected void paintComponent(Graphics graphics) {
+        super.paintComponent(graphics);
+        GameArtwork.paintBackground(graphics, background, new Rectangle(0, 0, getWidth(), getHeight()));
+    }
+
+    //TODO: Update this and the method below to implement other GameView state change responses. (Also disable buttons when it's not your turn etc.)
+    @Override
+    public void propertyChange(PropertyChangeEvent event) {
+        if (ViewState.STATE_PROPERTY.equals(event.getPropertyName()) && event.getNewValue() instanceof GameViewModel snapshot) {
+            if (SwingUtilities.isEventDispatchThread()) {
+                render(snapshot);
+            } else {
+                SwingUtilities.invokeLater(() -> render(snapshot));
+            }
+        }
     }
 
     /** Renders a presentation snapshot on the Swing event dispatch thread. */
@@ -196,7 +220,7 @@ public final class GameView extends JPanel {
         cards.add(piles, BorderLayout.EAST);
         footer.add(cards, BorderLayout.CENTER);
 
-        JButton pass = GameViewStyle.button("Pass", true);
+        JButton pass = GameViewStyle.passButton();
         pass.setPreferredSize(new Dimension(88, 36));
         pass.addActionListener(event -> {
             // TODO: Forward Pass to the end-turn or cast-response controller for the current phase.
@@ -353,7 +377,7 @@ public final class GameView extends JPanel {
     }
 
     private static JButton cardButton() {
-        JButton button = GameViewStyle.button("", false);
+        JButton button = GameViewStyle.button("");
         button.setAlignmentY(Component.TOP_ALIGNMENT);
         int height = GameViewStyle.HAND_CARD_HEIGHT;
         Dimension size = new Dimension(Portrait.cardWidth(height) + CARD_BUTTON_PADDING, height + CARD_BUTTON_PADDING);

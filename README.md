@@ -23,6 +23,7 @@
 - Online Multiplayer (we're trying)
 
 ## Project Details
+
 ### User Stories
 Yinghao \
 *"As a player, I want to start a match against another player, then be able to save it to a file and load them."*
