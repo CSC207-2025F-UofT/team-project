@@ -123,7 +123,7 @@ class AccountViewsTest {
         onEdt(() -> {
             logIn = new LogInView(logInViewModel, new LogInController(logInUseCase), viewManagerModel);
             register = new RegisterView(registerViewModel, new RegisterController(registerUseCase), viewManagerModel);
-            home = new HomeView(homeViewModel, new LogOutController(logOutPresenter::signedOut));
+            home = new HomeView(homeViewModel, new LogOutController(logOutPresenter::signedOut), viewManagerModel);
             final ViewManager views = new ViewManager(viewManagerModel);
             views.addView(LogInViewModel.VIEW_NAME, logIn);
             views.addView(RegisterViewModel.VIEW_NAME, register);
