@@ -3,6 +3,7 @@ package data_access;
 import entity.QuestStatus;
 import entity.UserQuest;
 import use_case.accept_quest.AcceptQuestUserQuestDataAccessInterface;
+import use_case.cancel_quest.CancelQuestUserQuestDataAccessInterface;
 import use_case.complete_quest.CompleteQuestUserQuestDataAccessInterface;
 
 import java.time.LocalDate;
@@ -18,7 +19,8 @@ import java.util.Map;
  */
 public class InMemoryUserQuestDataAccessObject implements
         AcceptQuestUserQuestDataAccessInterface,
-        CompleteQuestUserQuestDataAccessInterface {
+        CompleteQuestUserQuestDataAccessInterface,
+        CancelQuestUserQuestDataAccessInterface {
 
     // Java note: Map<K, V> is a dict. LinkedHashMap keeps insertion order.
     private final Map<String, UserQuest> userQuests = new LinkedHashMap<>();
