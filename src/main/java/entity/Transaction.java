@@ -16,7 +16,6 @@ public class Transaction {
     private final LocalDate date;
     private final Account account;
     private final String transactionCurrency;
-    private final String note;
 
     /** Constructor used by the existing income/expense dashboard data. */
     public Transaction(int id, TransactionType type, BigDecimal amount,
@@ -43,7 +42,6 @@ public class Transaction {
         this.date = Objects.requireNonNull(date, "Date is required.");
         this.account = account;
         this.transactionCurrency = transactionCurrency;
-        this.note = note;
         if (account != null && (transactionCurrency == null || transactionCurrency.isBlank())) {
             throw new IllegalArgumentException("Currency is required for account transactions.");
         }
@@ -57,7 +55,6 @@ public class Transaction {
     public String getDescription() { return description; }
     public Account getAccount() { return account; }
     public String getCurrency() { return transactionCurrency; }
-    public String getNote() { return note; }
 
     /** Applies an already-converted amount to the linked account balance. */
     public void applyToAccount(BigDecimal amountInAccountCurrency) {
