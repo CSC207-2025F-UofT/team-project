@@ -119,12 +119,12 @@ As a user, I want be able to change my currency type so I could keep using this 
 **Preconditions:**
 - The user is logged in.
 
-**Trigger:** 
+**Trigger:**
 
-**Success outcome:** 
+**Success outcome:**
 
 **Main success scenario:**
-1. 
+1.
 **Extensions:**
 - 
 
@@ -164,7 +164,7 @@ As a user, I want be able to change my currency type so I could keep using this 
 - **5a.** The system cannot retrieve the user's financial information.
     1. The system informs the user that the financial statistics cannot currently be generated.
     2. The use case ends.
-(Add additional use cases as needed.)
+       (Add additional use cases as needed.)
 
 ---
 
