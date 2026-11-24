@@ -9,8 +9,6 @@ import interface_adapter.logout.LogoutController;
 import interface_adapter.skills_list.SkillListController;
 
 import javax.swing.*;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -21,7 +19,6 @@ import java.awt.event.ActionListener;
 public class LoggedInView extends JPanel implements ActionListener, LoggedInViewModelListener {
 
     private final LoggedInViewModel loggedInViewModel;
-    private final JLabel passwordErrorField = new JLabel();
     private LogoutController logoutController;
     private AddCourseController addCourseController;
     private SkillListController skillListController;
@@ -31,17 +28,12 @@ public class LoggedInView extends JPanel implements ActionListener, LoggedInView
 
     private final JButton logOut;
 
-    private final JTextField passwordInputField = new JTextField(15);
-
     public LoggedInView(LoggedInViewModel loggedInViewModel) {
         this.loggedInViewModel = loggedInViewModel;
         this.loggedInViewModel.addListener(this);
 
         final JLabel title = new JLabel("Logged In Screen");
         title.setAlignmentX(Component.CENTER_ALIGNMENT);
-
-        final LabelTextPanel passwordInfo = new LabelTextPanel(
-                new JLabel("Password"), passwordInputField);
 
         final JLabel usernameInfo = new JLabel("Currently logged in: ");
         username = new JLabel();
@@ -78,36 +70,10 @@ public class LoggedInView extends JPanel implements ActionListener, LoggedInView
 
         this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 
-        passwordInputField.getDocument().addDocumentListener(new DocumentListener() {
-
-            private void documentListenerHelper() {
-                final LoggedInState currentState = loggedInViewModel.getState();
-                currentState.setPassword(passwordInputField.getText());
-                loggedInViewModel.setState(currentState);
-            }
-
-            @Override
-            public void insertUpdate(DocumentEvent e) {
-                documentListenerHelper();
-            }
-
-            @Override
-            public void removeUpdate(DocumentEvent e) {
-                documentListenerHelper();
-            }
-
-            @Override
-            public void changedUpdate(DocumentEvent e) {
-                documentListenerHelper();
-            }
-        });
-
         this.add(title);
         this.add(usernameInfo);
         this.add(username);
 
-        this.add(passwordInfo);
-        this.add(passwordErrorField);
         this.add(navigation);
         this.add(buttons);
     }
@@ -117,8 +83,9 @@ public class LoggedInView extends JPanel implements ActionListener, LoggedInView
      * @param evt the ActionEvent to react to
      */
     public void actionPerformed(ActionEvent evt) {
-        // TODO: execute the logout use case through the Controller
-        System.out.println("Click " + evt.getActionCommand());
+        if (evt.getSource() == logOut) {
+            logoutController.execute();
+        }
     }
 
     public void setAddCourseController(AddCourseController addCourseController) {
@@ -134,7 +101,7 @@ public class LoggedInView extends JPanel implements ActionListener, LoggedInView
     }
 
     public void setLogoutController(LogoutController logoutController) {
-        // TODO: save the logout controller in the instance variable.
+        this.logoutController = logoutController;
     }
 
     /**
@@ -154,7 +121,6 @@ public class LoggedInView extends JPanel implements ActionListener, LoggedInView
         LoggedInState state = loggedInViewModel.getState();
         if (state.getPasswordError() == null) {
             JOptionPane.showMessageDialog(this, "password updated for " + state.getUsername());
-            passwordInputField.setText("");
         }
         else {
             JOptionPane.showMessageDialog(this, state.getPasswordError());
