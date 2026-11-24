@@ -93,6 +93,19 @@ class SearchCatalogTest {
     }
 
     @Test
+    void findsGinAndTonicWithSeparatedKeywordsInTheBundledCatalog() {
+        SearchViewModel model = new SearchViewModel();
+        SearchController controller = new SearchController(new SearchInteractor(
+                new SearchCocktailDataAccessObject(new CocktailJsonReader()), new SearchPresenter(model)));
+        controller.execute("gin tonic", Set.of(BaseSpirit.GIN));
+        Set<String> ids = model.getState().getResults().stream()
+                .map(Cocktail::getId).collect(java.util.stream.Collectors.toSet());
+        assertTrue(ids.contains("gin-tonic"));
+        assertTrue(ids.contains("bright-orchard-gin-and-tonic"));
+        assertTrue(ids.contains("insanely-good-gin-tonic"));
+    }
+
+    @Test
     void searchWiringDoesNotAbortStartupWhenCatalogIsUnavailable() throws Exception {
         SwingUtilities.invokeAndWait(() -> assertDoesNotThrow(() -> new AppBuilder()
                 .addSearchView()

@@ -50,11 +50,22 @@ public class SearchInteractor implements SearchInputBoundary {
 
         final List<Cocktail> results = new ArrayList<>();
         for (Cocktail cocktail : candidates) {
-            if (cocktail.getName().toLowerCase(Locale.ROOT).contains(name)
+            if (matchesName(cocktail, name)
                     && cocktail.getTags().getBaseSpirits().containsAll(baseSpirits)) {
                 results.add(cocktail);
             }
         }
         searchPresenter.prepareSuccessView(new SearchOutputData(results));
     }
+
+    private boolean matchesName(Cocktail cocktail, String query) {
+        final String cocktailName = cocktail.getName().toLowerCase(Locale.ROOT);
+        for (String keyword : query.split("\\s+")) {
+            if (!cocktailName.contains(keyword)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
 }

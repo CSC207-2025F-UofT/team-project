@@ -122,6 +122,29 @@ class SearchInteractorTest {
         }
     }
 
+    @Test
+    void matchesAllKeywordsAcrossConnectingWordsAndSymbols() {
+        Cocktail symbol = cocktail("symbol", "Gin & Tonic", BaseSpirit.GIN);
+        Cocktail word = cocktail("word", "Bright Orchard Gin and Tonic", BaseSpirit.GIN);
+        Cocktail tonicOnly = cocktail("tonic", "Vodka Tonic", BaseSpirit.VODKA);
+        List<Cocktail> recipes = List.of(symbol, word, tonicOnly, gin);
+        SearchInteractor interactor = new SearchInteractor(() -> recipes, presenter);
+        for (String query : List.of("gin tonic", "  GIN   TONIC  ", "tonic\tgin")) {
+            interactor.execute(new SearchInputData(query, Set.of()));
+            assertEquals(List.of(symbol, word), presenter.results.getResults(), query);
+        }
+    }
+
+    @Test
+    void keywordMatchingStillRequiresTheSelectedSpirit() {
+        Cocktail ginTonic = cocktail("gin-tonic", "Gin & Tonic", BaseSpirit.GIN);
+        SearchInteractor interactor = new SearchInteractor(() -> List.of(ginTonic), presenter);
+        interactor.execute(new SearchInputData("gin tonic", Set.of(BaseSpirit.RUM)));
+        assertTrue(presenter.results.getResults().isEmpty());
+        interactor.execute(new SearchInputData("gin tonic", Set.of(BaseSpirit.GIN)));
+        assertEquals(List.of(ginTonic), presenter.results.getResults());
+    }
+
     private void search(String name, Set<BaseSpirit> spirits) {
         new SearchInteractor(() -> catalog, presenter).execute(new SearchInputData(name, spirits));
     }

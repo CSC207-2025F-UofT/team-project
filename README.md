@@ -76,7 +76,8 @@ The user must enter a name, select at least one base spirit, or both.
 1. The user enters a name and/or selects base spirits in the Home search area.
 2. The user clicks Search.
 3. The system finds matching cocktails. Name matching is case-insensitive and
-   supports partial matches. A cocktail must match every selected spirit; when both
+   supports partial matches. Space-separated keywords must all occur in the name,
+   in any order (for example, `gin tonic` matches `Gin & Tonic`). A cocktail must match every selected spirit; when both
    name and spirit criteria are provided, both must be satisfied.
 4. The system displays matching cocktails using the same card layout as Home.
 5. The user selects a card to open Cocktail Details.
@@ -348,7 +349,8 @@ Run `org.example.cocktailcraft.app.Main`.
 
 Home loads the bundled cocktail catalog through the Search use case. Enter a
 partial name, select one or more base spirits, or combine both, then click Search
-or press Enter. Matching is case-insensitive; every selected spirit must match.
+or press Enter. Matching is case-insensitive; every name keyword and every selected spirit must match.
+Keywords do not have to be adjacent: `gin tonic` finds `Gin & Tonic` and `Gin and Tonic`.
 Results use the same list as Home. Select a result to pass its ID to Details.
 Clear resets the input and spirit selections and restores the full catalog.
 

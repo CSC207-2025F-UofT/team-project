@@ -65,7 +65,9 @@ classDiagram
     MainPageView --> ClickController : selected result ID
 ```
 
-The Interactor owns matching rules and missing-input validation. It has no Swing,
+The Interactor owns matching rules and missing-input validation. It splits the
+name query on whitespace and requires every keyword to occur in the cocktail
+name, ignoring case and word order; this allows `gin tonic` to match `Gin & Tonic`. It has no Swing,
 JSON, filesystem, or concrete DAO imports. The DAO owns lazy loading and caches an
 immutable snapshot only after a successful read. The AppBuilder accepts a
 SearchDataAccessInterface for wiring tests or another catalog implementation;
@@ -93,7 +95,7 @@ sequenceDiagram
         Interactor->>DAO: getAllCocktails()
         alt Catalog available
             DAO-->>Interactor: Immutable catalog
-            Interactor->>Interactor: Partial name AND every spirit
+            Interactor->>Interactor: Every name keyword AND every spirit
             Interactor->>Presenter: prepareSuccessView(results)
         else Read failure
             Interactor->>Presenter: prepareFailureView(retry message)
