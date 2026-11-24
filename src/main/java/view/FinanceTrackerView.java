@@ -1,5 +1,6 @@
 package view;
 
+import app.SignUpApp;
 import entity.Transaction;
 import entity.TransactionType;
 import interface_adapter.transactions.TransactionDashboardController;
@@ -75,7 +76,9 @@ public final class FinanceTrackerView extends JFrame {
         add.addActionListener(event -> showAddDialog());
         actions.add(add);
         addPlaceholderButton(actions, "Login");
-        addPlaceholderButton(actions, "Sign Up");
+        JButton signUp = new JButton("Sign Up");
+        signUp.addActionListener(event -> SignUpApp.open());
+        actions.add(signUp);
         addPlaceholderButton(actions, "Change Currency");
         addPlaceholderButton(actions, "Upload Receipt");
         top.add(titles, BorderLayout.WEST);
