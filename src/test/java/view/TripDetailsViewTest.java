@@ -109,4 +109,16 @@ class TripDetailsViewTest {
 
         assertEquals(List.of("t1", "t2"), interactor.merged.getTripIds());
     }
+
+    @Test
+    void renameSendsCurrentTripAndNewName() throws Exception {
+        publish(trip());
+        RecordingTripsInteractor interactor = new RecordingTripsInteractor();
+        view.setManipulateTripsController(new ManipulateTripsController(interactor));
+
+        view.requestRename("Road Trip");
+
+        assertEquals("t1", interactor.renamed.getTripId());
+        assertEquals("Road Trip", interactor.renamed.getNewTripName());
+    }
 }

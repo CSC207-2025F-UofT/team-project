@@ -217,4 +217,29 @@ class ManipulateTripsPresenterTest {
         assertEquals("Couldn't merge trips: boom", detailsViewModel.getState().getErrorMessage());
         assertNull(listViewModel.getState().getErrorMessage());
     }
+
+    @Test
+    void renameSuccessShowsNewNameAndNotice() {
+        detailsViewModel.getState().setErrorMessage("old error");
+        LocalDateTime day = time(5, 16, 10);
+        TripDetailsOutputData renamed = new TripDetailsOutputData("t1", "Road Trip", day, day, List.of(), List.of());
+
+        presenterFor(new TripListViewModel()).prepareRenameSuccessView(renamed);
+
+        assertEquals("Road Trip", detailsViewModel.getState().getName());
+        assertEquals("Road Trip (2)", detailsViewModel.getState().getSuggestedSplitName());
+        assertEquals("Renamed to \u201cRoad Trip\u201d.", detailsViewModel.getState().getNoticeMessage());
+        assertNull(detailsViewModel.getState().getErrorMessage());
+    }
+
+    @Test
+    void renameFailKeepsTripAndShowsError() {
+        detailsViewModel.getState().setTripId("t1");
+        detailsViewModel.getState().setName("Old Name");
+
+        presenterFor(new TripListViewModel()).prepareRenameFailView("Enter a name for the trip.");
+
+        assertEquals("Old Name", detailsViewModel.getState().getName());
+        assertEquals("Enter a name for the trip.", detailsViewModel.getState().getErrorMessage());
+    }
 }
