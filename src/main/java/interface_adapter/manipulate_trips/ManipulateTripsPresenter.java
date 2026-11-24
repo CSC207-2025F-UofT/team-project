@@ -12,6 +12,7 @@ import use_case.manipulate_trips.ListTripsOutputData;
 import use_case.manipulate_trips.ManipulateTripsOutputBoundary;
 import use_case.manipulate_trips.MergeTripsOutputData;
 import use_case.manipulate_trips.PhotoDetails;
+import use_case.manipulate_trips.RenameTripOutputData;
 import use_case.manipulate_trips.SplitTripOutputData;
 import use_case.manipulate_trips.TripDetailsOutputData;
 import use_case.manipulate_trips.TripReference;
@@ -107,6 +108,23 @@ public class ManipulateTripsPresenter implements ManipulateTripsOutputBoundary {
         } else {
             showDetailsError(errorMessage);
         }
+    }
+
+    /**Stays on the trip, showing its new name */
+    @Override
+    public void prepareRenameSuccessView(TripDetailsOutputData outputData) {
+        TripDetailsState state = detailsViewModel.getState();
+        fillDetails(state, outputData);
+        state.setErrorMessage(null);
+        state.setNoticeMessage("Renamed to \u201c" + outputData.getName() + "\u201d.");
+        detailsViewModel.setState(state);
+        detailsViewModel.firePropertyChanged();
+    }
+
+ 
+    @Override 
+    public void prepareRenameFailView(String errorMessage) {
+        showDetailsError(errorMessage);
     }
 
     private void showDetails(TripDetailsState state) {

@@ -10,6 +10,8 @@ class CapturingPresenter implements ManipulateTripsOutputBoundary {
     String splitFailure;
     MergeTripsOutputData merge;
     String mergeFailure;
+    TripDetailsOutputData rename;
+    String renameFailure;
 
     @Override public void prepareTripListView(ListTripsOutputData outputData) { tripList = outputData; }
     @Override public void prepareTripListFailView(String errorMessage) { tripListFailure = errorMessage; }
@@ -19,4 +21,6 @@ class CapturingPresenter implements ManipulateTripsOutputBoundary {
     @Override public void prepareSplitFailView(String errorMessage) { splitFailure = errorMessage; }
     @Override public void prepareMergeSuccessView(MergeTripsOutputData outputData) { merge = outputData; }
     @Override public void prepareMergeFailView(String errorMessage) { mergeFailure = errorMessage; }
+    @Override public void prepareRenameSuccessView(TripDetailsOutputData outputData) {rename = outputData; }
+    @Override public void prepareRenameFailView(String errorMessage) { renameFailure = errorMessage; }
 }

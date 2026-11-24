@@ -25,6 +25,7 @@ import use_case.PhotoAccessException;
 /** Browsing and editing trips: list, view one, split, merge. */
 public class ManipulateTripsInteractor implements ManipulateTripsInputBoundary {
     static final String MISSING_NAME = "Enter a name for the new trip.";
+    static final String MISSING_RENAME = "Enter a name for the trip";
     static final String PHOTO_NOT_IN_TRIP = "That photo isn't in this trip.";
     static final String SPLIT_AT_FIRST = 
             "Pick a photo after the first one. Splitting at the first photo would leave an empty trip.";
@@ -110,6 +111,27 @@ public class ManipulateTripsInteractor implements ManipulateTripsInputBoundary {
             return;
         }
         presenter.prepareTripDetailsView(details);
+    }
+
+    // Renaming Trips
+    @Override 
+    public void renameTrip(RenameTripInputData inputData) {
+        String newName = inputData.getNewTripName() == null ? "New Trip" : inputData.getNewTripName().strip();
+        if (newName.isEmpty()) {
+            presenter.prepareRenameFailView(MISSING_RENAME);
+            return;
+        }
+        TripDetailsOutputData outputData;
+        try {
+            Trip trip = tripAccess.getTripById(inputData.getTripId());
+            trip.setName(newName);
+            tripAccess.writeTrip(trip);
+            outputData = detailsOf(trip.getId());
+        } catch (TripAccessException | PhotoAccessException e) {
+            presenter.prepareRenameFailView("Couldn't rename trip: " + e.getMessage());
+            return;
+        }
+        presenter.prepareRenameSuccessView(outputData);
     }
 
     /** Reads one trip for the details screen. Used by view, split & merge. */

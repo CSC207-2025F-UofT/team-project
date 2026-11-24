@@ -2,8 +2,11 @@ package view;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Cursor;
 import java.awt.FlowLayout;
 import java.awt.Font;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.List;
@@ -39,6 +42,7 @@ public class TripDetailsView extends JPanel implements PropertyChangeListener {
     static final String EMPTY_MESSAGE = "This trip has no photos.";
     static final String SELECT_PHOTO_FIRST = "Select the photo where the new trip should start.";
     static final String NO_OTHER_TRIPS = "There are no other trips to merge with.";
+    static final String RENAME_HINT = "Double-click to rename";
     private static final Color ERROR_COLOR = new Color(0xB3261E);
     private static final Color NOTICE_COLOR = new Color(0x1E7B34);
 
@@ -70,6 +74,16 @@ public class TripDetailsView extends JPanel implements PropertyChangeListener {
         photoList.setFixedCellHeight(thumbnails.getSize() + 40);
 
         nameLabel.setFont(nameLabel.getFont().deriveFont(Font.BOLD, 20f));
+        nameLabel.setToolTipText(RENAME_HINT);
+        nameLabel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        nameLabel.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (e.getClickCount() == 2) {
+                    onNameDoubleClicked();
+                }
+            }
+        });
         messageLabel.setVisible(false);
 
         backButton.addActionListener(e -> viewManagerModel.setActiveView(ViewNames.TRIPS));
@@ -167,6 +181,19 @@ public class TripDetailsView extends JPanel implements PropertyChangeListener {
         }
     }
 
+    /** Asks for a new name, prefilled with the current name. */
+    private void onNameDoubleClicked() {
+        TripDetailsState state = viewModel.getState();
+        if (state.getTripId() == null) {
+            return;
+        }
+        Object name = JOptionPane.showInputDialog(this, "New name for this trip:",
+                "Rename trip", JOptionPane.PLAIN_MESSAGE, null, null, state.getName());
+        if (name != null && !name.toString().strip().equals(state.getName())) {
+            requestRename(name.toString());
+        }
+    }
+
     // Split out from the click handlers so tests don't need to open dialogs.
     void requestSplit(String firstPhotoId, String newTripName) {
         if (controller != null) {
@@ -177,6 +204,12 @@ public class TripDetailsView extends JPanel implements PropertyChangeListener {
     void requestMerge(String otherTripId) {
         if (controller != null) {
             controller.mergeTrips(List.of(viewModel.getState().getTripId(), otherTripId));
+        }
+    }
+
+    void requestRename(String newName) {
+        if (controller != null) {
+            controller.renameTrip(viewModel.getState().getTripId(), newName);
         }
     }
 
