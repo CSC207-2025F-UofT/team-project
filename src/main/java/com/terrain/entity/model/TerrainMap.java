@@ -3,6 +3,8 @@ package com.terrain.entity.model;
 public class TerrainMap {
     private final int width;
     private final int height;
+    private static int maxElevation;
+    private static int minElevation;
     private final Tile[][] tiles;
 
     public TerrainMap(int width, int height) {
@@ -19,9 +21,14 @@ public class TerrainMap {
         }
     }
 
-    // This can totally return null, if a feature requests a tile out of bounds; Need to decide if we want to handle
-    // that here or in the feature.
+    public boolean tileInBounds(int x, int y) {
+        return x >= 0 && x < width && y >= 0 && y < height;
+    }
+
     public Tile getTile(int x, int y) {
+        if(!tileInBounds(x, y)) {
+            throw new IndexOutOfBoundsException("Tile coordinates out of bounds: (" + x + ", " + y + ")");
+        }
         return tiles[x][y];
     }
 
@@ -31,6 +38,29 @@ public class TerrainMap {
 
     public int getHeight() {
         return height;
+    }
+
+    // finds the min and max elevation values in the map, for use in color mapping
+    public void getElevationBounds() {
+        for(int x = 0; x < width; x++) {
+            for(int y = 0; y < height; y++) {
+                double elevation = tiles[x][y].getElevation();
+                if(elevation > maxElevation) {
+                    maxElevation = (int) elevation;
+                }
+                if(elevation < minElevation) {
+                    minElevation = (int) elevation;
+                }
+            }
+        }
+    }
+
+    public int getMaxElevation() {
+        return maxElevation;
+    }
+
+    public int getMinElevation() {
+        return minElevation;
     }
 }
 
