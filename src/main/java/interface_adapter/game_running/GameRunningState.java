@@ -4,15 +4,9 @@ package interface_adapter.game_running;
  * The state information representing the current game that is running.
  */
 public class GameRunningState {
-    private String questionText;
-    private int answerCount;
-    private String loadQuestionError;
-
-    public GameRunningState() {
-        this.questionText = "";
-        this.answerCount = 0;
-        this.loadQuestionError = null;
-    }
+    private String questionText = "";
+    private int answerCount = 0;
+    private String loadQuestionError = null;
 
     public String getQuestionText() {
         return questionText;

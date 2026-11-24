@@ -11,8 +11,7 @@ public class LoadQuestionPresenter implements LoadQuestionOutputBoundary {
     private final GameRunningViewModel gameRunningViewModel;
     private final ViewManagerModel viewManagerModel;
 
-    public LoadQuestionPresenter(ViewManagerModel viewManagerModel,
-                                 GameRunningViewModel gameRunningViewModel) {
+    public LoadQuestionPresenter(ViewManagerModel viewManagerModel, GameRunningViewModel gameRunningViewModel) {
         this.viewManagerModel = viewManagerModel;
         this.gameRunningViewModel = gameRunningViewModel;
     }

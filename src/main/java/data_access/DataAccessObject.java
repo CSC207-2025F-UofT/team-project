@@ -8,9 +8,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class DataAccessObject implements LoadQuestionDataAccessInterface {
-    public DataAccessObject() {
-
-    }
 
     // TEMPORARY IMPLEMENTATION FOR TESTING PURPOSES
     @Override
@@ -22,12 +19,12 @@ public class DataAccessObject implements LoadQuestionDataAccessInterface {
     @Override
     public Question getNextQuestion() {
         List<Answer> answers = new ArrayList<>();
-        answers.add(new Answer("Answer 1", null, 10));
-        answers.add(new Answer("Answer 2", null, 10));
-        answers.add(new Answer("Answer 3", null, 10));
-        answers.add(new Answer("Answer 4", null, 10));
-        answers.add(new Answer("Answer 5", null, 10));
-        return new Question("Test Question", answers);
+        answers.add(new Answer("Balloon", null, 44));
+        answers.add(new Answer("Tire", null, 25));
+        answers.add(new Answer("Beach ball", null, 10));
+        answers.add(new Answer("Ego", null, 7));
+        answers.add(new Answer("Raft", null, 5));
+        return new Question("Name something that can be inflated or deflated", answers);
     }
 
     // TEMPORARY IMPLEMENTATION FOR TESTING PURPOSES

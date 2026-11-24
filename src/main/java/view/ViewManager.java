@@ -23,7 +23,6 @@ public class ViewManager implements ViewManagerModelListener {
         this.viewManagerModel.addListener(this);
     }
 
-
     @Override
     public void viewChanged() {
         cardLayout.show(views, viewManagerModel.getCurrentViewName());

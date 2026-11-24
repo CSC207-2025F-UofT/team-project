@@ -13,14 +13,18 @@ public class GameRunningView extends JPanel implements GameRunningViewModelListe
     private final GameRunningViewModel gameRunningViewModel;
     private LoadQuestionController loadQuestionController = null;
 
-    private final JLabel questionLabel;
-    private final JLabel[] answerLabels;
-    private final JTextField answerInput;
+    private final JLabel questionLabel = new JLabel("[Question Box]");
+    private final JLabel[] answerLabels = new JLabel[8];
+    private final JTextField answerInput = new JTextField(20);
 
     public GameRunningView(GameRunningViewModel gameRunningViewModel) {
         this.gameRunningViewModel = gameRunningViewModel;
         gameRunningViewModel.addListener(this);
 
+        this.setUpDisplay();
+    }
+
+    private void setUpDisplay() {
         this.setSize(1000, 600);
         this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 
@@ -29,7 +33,6 @@ public class GameRunningView extends JPanel implements GameRunningViewModelListe
         title.setAlignmentX(Component.CENTER_ALIGNMENT);
 
         JPanel questionPanel = new JPanel();
-        questionLabel = new JLabel("Question: ___________________");
         questionLabel.setFont(new Font("Franklin Gothic Demi", Font.PLAIN, 24));
         questionPanel.add(questionLabel);
         questionPanel.setMaximumSize(new Dimension(1000, 50));
@@ -42,7 +45,6 @@ public class GameRunningView extends JPanel implements GameRunningViewModelListe
         final JPanel answersRight = new JPanel();
         answersRight.setLayout(new BoxLayout(answersRight, BoxLayout.Y_AXIS));
 
-        answerLabels = new JLabel[8];
         for (int i = 0; i < answerLabels.length; i++){
             answerLabels[i] = new JLabel("_");
             answerLabels[i].setFont(new Font("Franklin Gothic Demi", Font.PLAIN, 28));
@@ -57,7 +59,6 @@ public class GameRunningView extends JPanel implements GameRunningViewModelListe
         answers.add(answersRight);
 
         final JPanel inputPanel = new JPanel();
-        answerInput = new JTextField(20);
         JButton submitAnswerButton = new JButton("Submit");
         inputPanel.add(answerInput);
         inputPanel.add(submitAnswerButton);
@@ -78,7 +79,6 @@ public class GameRunningView extends JPanel implements GameRunningViewModelListe
         this.add(answers);
         this.add(inputPanel);
         this.add(loadQuestionButtonPanel);
-
     }
 
     @Override
@@ -88,6 +88,7 @@ public class GameRunningView extends JPanel implements GameRunningViewModelListe
         for (int i = 0; i < state.getAnswerCount(); i++){
             answerLabels[i].setText("[ " + (i + 1) + " ]");
         }
+        // TODO: When player gets answer correct, show correct answer (use case 3?)
 
         if (gameRunningViewModel.getState().getLoadQuestionError() != null) {
             JOptionPane.showMessageDialog(this, gameRunningViewModel.getState().getLoadQuestionError());
