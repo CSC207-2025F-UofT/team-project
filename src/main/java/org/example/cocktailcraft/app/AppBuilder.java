@@ -88,7 +88,8 @@ public class AppBuilder {
         mainPageView = new MainPageView(searchView,
                 cocktails,
                 clickController,
-                clickView);
+                clickView,
+                searchViewModel);
         return this;
     }
 
