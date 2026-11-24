@@ -19,6 +19,11 @@ public class ImportPhotosController {
             Arrays.stream(paths).map(File::getAbsolutePath).toList()
         );
 
-        interactor.execute(inputData);
+        Thread worker = new Thread(
+            () -> interactor.execute(inputData),
+            "photo-import-worker"
+        );
+        worker.setDaemon(true);
+        worker.start();
     }
 }
