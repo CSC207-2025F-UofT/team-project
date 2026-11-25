@@ -1,0 +1,14 @@
+{
+  "_id": "search-fixture",
+  "name": "Classification fixture",
+  "ingredients": [],
+  "abv": 0,
+  "tags": [
+    "Summer",
+    "Virgin",
+    "IBA Cocktail",
+    "Negroni",
+    "Refreshing",
+    "unknown-tag"
+  ]
+}

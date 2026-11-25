@@ -117,3 +117,41 @@ Search results reuse Home's current list presentation; Search does not implement
 a separate card design or change Details/Customize business rules. Home passes
 the ID from the displayed results to the existing Details controller and passes
 the same selected entity to the existing Customize action.
+
+### Search metadata: flavor families and alcohol ranges
+
+The Reader now retains optional source `abv` as a `Double` on Cocktail and maps
+explicit source flavor tags into `Tags.Flavor`. These fields are data-layer
+preparation for additional filters; the current Search UI has not yet connected
+them. Existing Cocktail and Tags constructors still work, with unknown ABV and
+an empty flavor set. Existing ingredient, base-spirit and instruction loading
+remains unchanged.
+
+| Flavor family | Source tags (case-insensitive) |
+|---|---|
+| Sweet | Sweet, Dessert |
+| Sour / Citrus | Sour, Citrusy |
+| Fruity / Tropical | Fruity, Tropical |
+| Bitter | Bitter |
+| Herbal / Floral | Herbal, Herbacious, Herbaceous, Floral, Minty |
+| Smoky / Spicy | Smokey, Smoky, Spicy |
+| Coffee / Nutty | Coffee, Nutty |
+| Savory | Savory, Savoury, Briny |
+| Dry | Dry |
+
+Each recipe can belong to multiple families. Missing or null tags produce an
+empty flavor set. Season, IBA status, recipe family and unrecognized tags do not
+imply flavor. Original bundled JSON is not edited.
+
+`Tags.AlcoholRange` classifies the recorded ABV percentage: ZERO is exactly 0,
+LOW is greater than 0 and less than 10, MEDIUM is at least 10 and less than 20,
+and HIGH is at least 20 (up to 100). UNKNOWN represents a missing or null value,
+not zero. These are application-defined intervals, not source categories.
+Non-numeric, non-finite and out-of-range percentages are rejected as catalog
+read failures. The pinned dataset yields 12 ZERO, 79 LOW, 287 MEDIUM, 283 HIGH,
+and 2 UNKNOWN recipes.
+
+Reader and domain tests cover boundaries, aliases, immutable sets, legacy
+constructors, missing metadata, malformed metadata and the full 663-recipe
+snapshot. Flavor metadata remains unknown when a source recipe has no explicit
+flavor labels; it is not inferred from its ingredients.
