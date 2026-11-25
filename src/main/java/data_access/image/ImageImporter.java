@@ -78,10 +78,7 @@ public class ImageImporter implements ImageImporterInterface {
                 }
             }
 
-            String id = UUID.randomUUID().toString();
-            Photo photo = new Photo(id, type.get(), location, time);
-
-            return Optional.of(photo);
+            return Optional.of(Photo.createNew(type.get(), location, time));
 
         } catch (Exception e) {
             return Optional.empty();
