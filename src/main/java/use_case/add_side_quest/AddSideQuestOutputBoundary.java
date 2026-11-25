@@ -1,6 +1,6 @@
 package use_case.add_side_quest;
 
-public class AddSideQuestOutputBoundary {
+public interface AddSideQuestOutputBoundary {
 
 //    void prepareSuccessView(/* output data */);
 //

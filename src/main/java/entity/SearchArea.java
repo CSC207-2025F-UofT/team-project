@@ -56,6 +56,24 @@ public class SearchArea {
     }
 
     /**
+     * Returns the point on the circle's edge straight north of the centre.
+     *
+     * @return the north edge point
+     */
+    public Location northEdge() {
+        return centre.offsetBy(radiusKm, 0);
+    }
+
+    /**
+     * Returns the point on the circle's edge straight east of the centre.
+     *
+     * @return the east edge point
+     */
+    public Location eastEdge() {
+        return centre.offsetBy(0, radiusKm);
+    }
+
+    /**
      * Returns the distance from the centre to a point.
      *
      * @param point the point

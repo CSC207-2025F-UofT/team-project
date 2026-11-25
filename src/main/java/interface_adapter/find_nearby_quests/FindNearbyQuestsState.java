@@ -12,6 +12,9 @@ public class FindNearbyQuestsState {
     private double centreLongitude;
     private boolean hasCentre;
     private double radiusKm;
+    private boolean hasCircle;
+    private double circleNorthLatitude;
+    private double circleEastLongitude;
     private List<PinState> pins = new ArrayList<>();
     private String infoMessage;
     private String errorMessage;
@@ -168,6 +171,50 @@ public class FindNearbyQuestsState {
      */
     public void setRadiusKm(double radiusKm) {
         this.radiusKm = radiusKm;
+    }
+
+    /**
+     * Returns whether the search circle should be drawn.
+     *
+     * @return true after a successful search
+     */
+    public boolean hasCircle() {
+        return hasCircle;
+    }
+
+    /**
+     * Returns the latitude of the circle's north edge.
+     *
+     * @return the latitude
+     */
+    public double getCircleNorthLatitude() {
+        return circleNorthLatitude;
+    }
+
+    /**
+     * Returns the longitude of the circle's east edge.
+     *
+     * @return the longitude
+     */
+    public double getCircleEastLongitude() {
+        return circleEastLongitude;
+    }
+
+    /**
+     * Sets the search circle around the centre, given two points on its edge.
+     *
+     * @param northLatitude latitude of the edge straight north of the centre
+     * @param eastLongitude longitude of the edge straight east of the centre
+     */
+    public void setCircle(double northLatitude, double eastLongitude) {
+        this.circleNorthLatitude = northLatitude;
+        this.circleEastLongitude = eastLongitude;
+        this.hasCircle = true;
+    }
+
+    /** Removes the search circle, e.g. when quests could not be loaded. */
+    public void clearCircle() {
+        this.hasCircle = false;
     }
 
     /**

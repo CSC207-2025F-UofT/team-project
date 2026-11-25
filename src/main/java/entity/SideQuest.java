@@ -18,7 +18,7 @@ public class SideQuest {
     // 2.  Once a side quest is completed or cancelled is cannot be undone by the user
     // 3.  A "In progress" side quest will remain in progress until it is cancelled or completed
     private int progressLevel;
-    private final Location location;
+    private final Location location; // latitude and longitude, validated by Location
     private final List<String> interests;
     private boolean isStarred;
 

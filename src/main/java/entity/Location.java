@@ -15,6 +15,7 @@ public class Location {
     private static final double MAX_LATITUDE = 90.0;
     private static final double MIN_LONGITUDE = -180.0;
     private static final double MAX_LONGITUDE = 180.0;
+    private static final double FULL_TURN_DEGREES = 360.0;
 
     private final double latitude;
     private final double longitude;
@@ -72,6 +73,25 @@ public class Location {
                 + Math.cos(lat1) * Math.cos(lat2) * Math.pow(Math.sin(deltaLon / 2), 2);
 
         return 2 * EARTH_RADIUS_KM * Math.asin(Math.min(1.0, Math.sqrt(a)));
+    }
+
+    /**
+     * Returns the location reached by moving the given distances north and east.
+     * Accurate for the short distances the map uses (up to tens of kilometres).
+     * Latitude stops at the poles and longitude wraps around at 180 degrees.
+     *
+     * @param northKm kilometres to move north (negative moves south)
+     * @param eastKm kilometres to move east (negative moves west)
+     * @return the new location
+     */
+    public Location offsetBy(double northKm, double eastKm) {
+        double newLatitude = latitude + Math.toDegrees(northKm / EARTH_RADIUS_KM);
+        newLatitude = Math.max(MIN_LATITUDE, Math.min(MAX_LATITUDE, newLatitude));
+        double kmPerRadianEast = EARTH_RADIUS_KM * Math.cos(Math.toRadians(latitude));
+        double newLongitude = longitude + Math.toDegrees(eastKm / kmPerRadianEast);
+        newLongitude = ((newLongitude - MIN_LONGITUDE) % FULL_TURN_DEGREES + FULL_TURN_DEGREES)
+                % FULL_TURN_DEGREES + MIN_LONGITUDE;
+        return new Location(newLatitude, newLongitude);
     }
 
     @Override

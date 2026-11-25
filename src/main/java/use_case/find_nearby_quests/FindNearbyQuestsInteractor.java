@@ -58,22 +58,22 @@ public class FindNearbyQuestsInteractor implements FindNearbyQuestsInputBoundary
         // Step 2: keep the ones inside the radius, nearest first.
         List<NearbyQuest> nearby = new ArrayList<>();
         for (SideQuest quest : quests) {
-            Location where = quest.getCoordinates();
+            Location where = quest.getLocation();
             if (where != null && area.contains(where)) {
                 nearby.add(toNearbyQuest(quest, area.distanceFromCentre(where)));
             }
         }
         nearby.sort(Comparator.comparingDouble(NearbyQuest::getDistanceKm));
 
-        // Step 3 (and 3a when nearby is empty).
+        // Step 3 (and 3a when nearby is empty). The edge points let the view draw the circle.
         presenter.prepareSuccessView(new FindNearbyQuestsOutputData(
-                centre.getLatitude(), centre.getLongitude(), area.getRadiusKm(), nearby));
+                centre.getLatitude(), centre.getLongitude(), area.getRadiusKm(),
+                area.northEdge().getLatitude(), area.eastEdge().getLongitude(), nearby));
     }
 
     private static NearbyQuest toNearbyQuest(SideQuest quest, double distanceKm) {
-        Location where = quest.getCoordinates();
-        // TODO: use quest.getId() once SideQuest has an id. The name is a temporary id.
-        return new NearbyQuest(quest.getName(), quest.getName(), quest.getInterests(),
+        Location where = quest.getLocation();
+        return new NearbyQuest(quest.getId(), quest.getName(), quest.getInterests(),
                 quest.getExp(), distanceKm, where.getLatitude(), where.getLongitude());
     }
 }

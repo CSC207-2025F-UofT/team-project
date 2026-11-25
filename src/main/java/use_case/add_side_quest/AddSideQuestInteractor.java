@@ -15,7 +15,7 @@ public class AddSideQuestInteractor implements AddSideQuestInputBoundary {
         String expectedTime;
 
         if (inputData.getQuestDescription() == null || inputData.getQuestDescription().trim().isEmpty()){
-            // outputBoundary.prepareFailView("Please enter a Side Quest name.")
+            // outputBoundary.prepareFailView("Please enter a description for your Side Quest."))
             return;
         } else if (inputData.getBudget() < 0) {
             // outputBoundary.prepareFailView("Budget cannot be a negative value.");
