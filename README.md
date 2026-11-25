@@ -214,7 +214,6 @@ This API will be used in addition to a JSON dataset containing popular cities lo
 
 ---
 ## Notes
-See [ARCHITECTURE.md](ARCHITECTURE.md) for the package layout, file naming, data access interfaces and team decisions.
 
 ---
 ## Project Updates
