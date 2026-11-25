@@ -17,11 +17,11 @@ public class AddSideQuestInteractor implements AddSideQuestInputBoundary {
         } else if (inputData.getQuestDescription() == null || inputData.getQuestDescription().trim().isEmpty()) {
             // outputBoundary.prepareFailView("Please enter a description for your Side Quest.");
             return;
-        } else if (inputData.getBudget() == null || inputData.getBudget().trim().isEmpty()) {
-            // outputBoundary.prepareFailView("Please choose a budget.");
+        } else if (inputData.getBudget() < 0) {
+            // outputBoundary.prepareFailView("Budget cannot be a negative value.");
             return;
-        } else if (inputData.getExpectedTime() == null || inputData.getExpectedTime().trim().isEmpty()) {
-            // outputBoundary.prepareFailView("Please choose an expected time.");
+        } else if (inputData.getExpectedTime() <= 0) {
+            // outputBoundary.prepareFailView("Expected time (in hours) must be greater than 0.");
             return;
         } else if (inputData.getExp() <= 0) {
             // outputBoundary.prepareFailView("Exp for the side quest cannot be negative.");
@@ -38,8 +38,11 @@ public class AddSideQuestInteractor implements AddSideQuestInputBoundary {
             return;
         }
 
+        // TODO (Isaac): SideQuest now stores budget and time as categories ("free", "under_60_minutes", ...),
+        // but the input data still has numbers. String.valueOf only makes it compile until you choose a mapping.
         SideQuest sideQuest = new SideQuest(inputData.getId(), inputData.getName(),
-                inputData.isIndoor(), inputData.getBudget(), inputData.getExpectedTime(), inputData.getExp(),
+                inputData.isIndoor(), String.valueOf(inputData.getBudget()),
+                String.valueOf(inputData.getExpectedTime()), inputData.getExp(),
                 inputData.getLocation(), inputData.getInterests()
         );
 

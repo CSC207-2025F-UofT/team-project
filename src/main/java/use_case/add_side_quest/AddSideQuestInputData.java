@@ -9,14 +9,14 @@ public class AddSideQuestInputData {
     private final String questDescription;
     private final String photoUrl;
     private final String isIndoor;
-    private final String budget;       // same categories as SideQuest.budget
-    private final String expectedTime; // same categories as SideQuest.expectedTime
+    private final double budget;
+    private final double expectedTime;
     private final int exp;
     private final Location location;
     private final List<String> interests;
 
     public AddSideQuestInputData(String id, String name, String questDescription, String photoUrl, String isIndoor,
-                                 String budget, String expectedTime, int exp, Location location,
+                                 double budget, double expectedTime, int exp, Location location,
                                  List<String> interests) {
         this.id = id;
         this.name = name;
@@ -50,11 +50,11 @@ public class AddSideQuestInputData {
         return isIndoor;
     }
 
-    public String getBudget() {
+    public double getBudget() {
         return budget;
     }
 
-    public String getExpectedTime() {
+    public double getExpectedTime() {
         return expectedTime;
     }
 
