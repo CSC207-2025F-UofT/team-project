@@ -164,63 +164,129 @@ The planned MVP is a playable text-choice escape story with stateful objects, au
 
 ### Work Split
 
-The five proposed packages below are unassigned. Each package includes its behavior tests and integration with the shared Swing controls. The team will agree on stable IDs, immutable template definitions, and typed input/output contracts before implementation.
+The five packages below are unassigned and available for team members to claim. They aim for a similar total workload across implementation, shared infrastructure, testing, and integration; the estimate is based on complexity rather than class count. Reassess remaining work after the first playable flow. Each package includes its own focused input boundaries, behavior tests, error handling, and documentation.
 
-#### Option 1: Story Templates and New-Game Setup
+| Package | Main Feature | Shared Code Included |
+|---------|--------------|----------------------|
+| 1 | Story templates and new-game setup | Application assembly, build configuration, and serial command dispatch |
+| 2 | World state, inventory, and movement | Current-game context, output assembly, response DTOs, and common domain results |
+| 3 | Object interactions and actions | Complete Swing view and controller |
+| 4 | Item locks and Trivia | Presenter, view model, and Swing EDT updates |
+| 5 | Saving and validated restoration | Snapshot types, aggregate state conversion, and shared data-access errors |
 
-**Selected by:** TBD
-
-- Define and validate the single room chain, descriptions, item placement/initial visibility, action appearance IDs, item-lock requirements, questions, and generated values.
-- Implement `StoryTemplateDataAccessInterface`, its JSON adapter, `StartGameInteractor`, and new-world creation in `GameFactory`.
-- Validate unique IDs, a finite room chain covering every room once, compatible lock definitions, and item/puzzle availability that permits either gate to finish first. Appearance IDs must identify items configured to the action's own room. Required items must be obtainable in the current or an earlier room; review the authored room design so necessary earlier items are not missed.
-- Test independent sessions, starting-room acquisition before publication, invalid templates, and consistency between generated clues and authored answers.
-
-**Completion example:** Selecting a valid story starts a fresh world with independent object/lock state, its starting visible items in the inventory, and their names in the first output.
-
-#### Option 2: Rooms, Inventory, and Exploration
+#### Package 1: Story Templates, New-Game Setup, and Application Assembly
 
 **Selected by:** TBD
 
-- Implement `Game`, `GameContext`, `Room`, `Inventory`, and `Collectable`, with `Room.nextRoomId: Optional<String>` for navigation.
-- Implement parameterless `MoveInteractor.execute()` and the private `Game.enterRoom()` domain operation, including prevalidated room-entry acquisition, both departure checks, and final-room escape.
-- Keep each item in exactly one room or the inventory, transfer its existing instance automatically, prevent duplicate IDs, and expose read-only queries for display and saving.
-- Test initial/new-room visible-item acquisition, items retained in later rooms until entry, either incomplete departure condition, atomic failed entry, and final-room completion.
+**Feature scope:**
 
-**Completion example:** Moving forward requires both room locks, automatically obtains the next room's visible items, and presents their names with its first description.
+- Implement `StoryTemplate`, its immutable definition types, `RandomizationRule`, `StoryTemplateDataAccessInterface`, and `JsonStoryTemplateDataAccessObject`. Use the Trivia configuration types owned by Package 4.
+- Implement `StartGameInputBoundary`, `StartGameInteractor`, and `GameFactory.create()`, including story listing and replacement of the current game only after successful creation.
+- Validate unique IDs, references, object/action definitions, own-room appearance IDs, nonempty door-item requirements, and a finite successor chain covering every room exactly once. Required items must be obtainable in the current or an earlier room without passing either current-room gate; review authored puzzles for missed or inaccessible prerequisites.
+- Generate configured values once and resolve descriptions, results, and authored answers consistently. Construct independent runtime worlds through Package 2's new-game entry path, then announce the new starting inventory once.
 
-#### Option 3: Text Choices and Object Actions
+**Shared code and integration:**
 
-**Selected by:** TBD
+- Own `AppBuilder`, the application entry point, and Maven dependency/build configuration. Assemble and inject all five packages, including the same context and save adapter for the relevant interactors.
+- Implement `CommandDispatcher` and `SwingCommandDispatcher` with one serial worker for gameplay, HTTP, and file commands. Set busy and the admission guard before scheduling; queue their release together on the EDT after the presenter update/render, including on failures. Coordinate the EDT contract with Package 4.
+- Own final dependency assembly and the application launch check. Each feature package remains responsible for its own integration behavior.
 
-- Implement `Interactable`, `Action`, `InteractInteractor`, and the narrow `Condition`/`Effect` contracts.
-- Complete descriptions by mode, object state, optional held-tool requirements, `appearingItemIds`, action results, and nonrepeatable completion tracking.
-- Use `SetObjectStateEffect` for the supported state changes. Carry appearing IDs in an immutable `ActionPlan`; `Game` validates all effects and item transfers before committing the whole command.
-- Test unavailable actions, wrong tools, multiple appearing items, repeated appearances with no duplicate item/notice, further effects on repeatable actions, and failures that preserve all state.
+**Tests and completion:** Reject invalid templates; verify independent sessions, consistent generated clues/answers, and starting-room acquisition before publication. Verify serial execution, repeated-click rejection, responsive UI behavior, and guard release after result rendering. A valid story can be selected and started through the assembled application.
 
-**Completion example:** Opening a valid drawer changes its description, places its card in the inventory, and displays “Obtained: Laboratory access card” in the same result.
-
-#### Option 4: Item Locks and Trivia
+#### Package 2: World State, Inventory, Movement, and Output Assembly
 
 **Selected by:** TBD
 
-- Implement `Lock`, `ItemLock`, `TriviaLock`, `Trivia`, `UseItemInteractor`, and `TriviaInteractor` with their focused input boundaries.
-- Check every required item ID against the actual inventory and keep all items held after unlocking.
-- Implement `TriviaDataAccessInterface` and its HTTP adapter, with retained questions and retry after failed retrieval.
-- Test partial/wrong item sets, unchanged inventory after success, already-unlocked no-ops, correct/wrong answers, uninitialized questions, API failures, and either departure-completion order. Every outcome refreshes feedback, inventory, and movement flags.
+**Feature scope:**
 
-**Completion example:** Hold both specified items, open the item door, and pass exit Trivia; answering the question first is equally valid.
+- Implement the core structure and queries of `Game` and `Room`, plus `Inventory`, `Collectable`, and `GameContext`. Use `Room.nextRoomId: Optional<String>` and derive final-room status from an empty successor.
+- Implement `MoveInputBoundary`, `MoveInteractor`, `Game.canMove()`, `Game.move()`, and private room-entry/acquisition helpers. Require active status and both current-room gates before moving or escaping.
+- Maintain exactly one location per item. Preflight every transfer before mutation, transfer the same item instance, skip already-held IDs, and return only newly obtained items for result messages. Expose read-only queries for the other packages.
+- Acquire starting-room and newly entered room visible items before presentation; keep later-room items in their rooms until entry. Provide the acquisition helpers used by Package 3's atomic interaction command.
 
-#### Option 5: Save/Load and Shared Swing Integration
+**Shared code and integration:**
+
+- Implement `GameOutputBoundary` and `GameOutputAssembler`, including `fromGame()`, `fromStories()`, and `fromNoGame()`.
+- Own all immutable response types: `GameOutputData`, `ItemData`, `ActionData`, `LockData`, `TriviaData`, and `StorySummary`.
+- Own `DomainResult`, `ResultCode`, `DomainException`, `GameStatus`, and `ActionOption`.
+- Assemble fresh descriptions, inventory, actions, item requirements, held required IDs, gate states, active questions, messages, and movement flags for every success, error, and no-op. Read domain queries without exposing expected answers or answer-bearing snapshots. Menu/no-game output sets both movement flags to false.
+
+**Tests and completion:** Verify unique item ownership, duplicate-free acquisition, unchanged state after failed entry, either incomplete gate blocking movement, final-room completion, and queries that never mutate state. Verify output labels and flags after every outcome. A permitted move acquires the next room's visible items and presents their names with its first description.
+
+#### Package 3: Object Actions, Swing View, and Controller
 
 **Selected by:** TBD
 
-- Implement schema-4 `GameSnapshot`, the JSON save adapter, `SaveGameInteractor`, `LoadGameInteractor`, and validated restoration in `GameFactory`.
-- Build `GameView`, `GameController`, seven focused input interfaces, `GameOutputBoundary`, `GamePresenter`, `GameViewModel`, and the shared output assembler.
-- Present the text area, object-action buttons, and answer field, including current-command obtained names in `message`, inventory, required-item labels, held IDs, and one movement control driven by `canMove` and `finalRoom`.
-- Run gameplay and file/API work on one serial worker; marshal view-model updates to Swing's event-dispatch thread.
-- Test restart-and-load without new entry/acquisition or obtained-item notices, complete state coverage, retained questions, both gate orders, rejected saves, and failed writes. Verify every success/error/no-op refresh path and coordinate the end-to-end game check.
+**Feature scope:**
 
-**Completion example:** Save after an action obtains a card, restart, and resume the same inventory and question without acquiring or announcing that card again.
+- Implement `Interactable`, `Action`, `ActionPlan`, `Condition`, `ObjectStateCondition`, `AllOfCondition`, `Effect`, and `SetObjectStateEffect`.
+- Implement `RoomReadState`, `RoomMutation`, private `Room.StateAccess`, and the room interaction prepare/validate/apply methods.
+- Implement `InteractInputBoundary`, `InteractInteractor`, and `Game.interact()`. Resolve tools from the actual inventory, prepare the exact action plan, preflight all effects and acquisitions, then commit state/completion changes and Package 2's transfers as one command.
+- Support descriptions by mode, optional required tools, immutable `appearingItemIds`, one-shot completion, and repeatable actions. Effects change object state only. Implement object-level `snapshot()` production for Package 5.
+
+**Shared code and integration:**
+
+- Own the complete `GameView`: story selection, narrative and object descriptions, inventory, action choices, door requirements, Trivia prompt/answer entry, movement, save/load controls, and feedback.
+- Own `GameController`, inject all seven input boundaries, and route every command through Package 1's `CommandDispatcher`.
+- Render only `GameViewState` and immutable output. Rebuild controls after each result, send stable IDs, respect busy state, clear old selections after loading, and label the single movement button Next room or Escape using the output flags.
+- Keep display/event binding in this package; consume output calculations from Package 2 and model updates from Package 4.
+
+**Tests and completion:** Cover unmet conditions, wrong tools, invalid targets, multiple appearing items, repeated one-shot actions, duplicate-free repeated appearances, and repeatable state effects. Failures must preserve all affected state. Verify each control invokes the correct boundary and refreshes after results. Opening a valid drawer changes its description and displays its newly acquired card immediately.
+
+#### Package 4: Item Locks, Trivia, and Presentation State
+
+**Selected by:** TBD
+
+**Feature scope:**
+
+- Implement `Lock`, `ItemLock`, `TriviaLock`, `Trivia`, `LockKind`, `TriviaSpec`, and `TriviaSource`.
+- Implement `UseItemInputBoundary` / `UseItemInteractor` and `TriviaInputBoundary` / `TriviaInteractor`, plus `Game.useItems()` and the domain Trivia entry points.
+- Implement `TriviaDataAccessInterface` and `HttpTriviaDataAccessObject`. Fetch an uninitialized API question on open, retain it for retries, and permit retry after retrieval failure. Submitting an answer never fetches a question.
+- Check every exact required item ID against the actual inventory and retain items after unlocking. Keep the two gates independent, and return an unchanged result for an already-unlocked gate before checking its inputs.
+- Compare trimmed answers case-insensitively while preserving leading zeroes and internal characters. Produce lock/question snapshots for Package 5.
+
+**Shared code and integration:**
+
+- Implement `GamePresenter`, `GameViewModel`, `GameViewState`, `UiDispatcher`, and `SwingUiDispatcher`.
+- Construct presentation state inside the EDT callback using the model's current busy value, update the model, and notify Package 3's view. Coordinate render-before-release ordering with Package 1's dispatcher.
+- Ensure every Trivia outcome reaches the output/render path: wrong answers retain the initialized prompt; uninitialized submissions and API failures have no active prompt. Keep expected answers out of UI data.
+
+**Tests and completion:** Cover partial/wrong item sets, retained inventory, unlocked no-ops, correct/wrong answers, uninitialized submit, cached questions, API failure/retry, and either gate-completion order. Verify EDT model updates and busy-state preservation. Completing the second gate immediately enables movement through the shared output and view path.
+
+#### Package 5: Saving, Snapshots, and Validated Restoration
+
+**Selected by:** TBD
+
+**Feature scope:**
+
+- Implement `GameSaveDataAccessInterface`, `JsonGameSaveDataAccessObject`, `SaveGameInputBoundary` / `SaveGameInteractor`, and `LoadGameInputBoundary` / `LoadGameInteractor`.
+- Implement `GameFactory.restore()` and the saved-state construction path. Reuse pure template construction/validation helpers from Package 1 and consume component state contracts from Packages 2-4.
+- Capture and restore every room, item location/revealed flag, object value/completed action, both gates, retained question, generated value, current room, and game status.
+- Validate schema 4, compatible template ID/version, complete unique IDs, item ownership, object/action values, lock/question compatibility, and generated values. Every predecessor of the saved current room must have both gates passed; an escaped save must identify the final room with both gates passed. Preserve either gate order in the current room.
+- Restore an independent candidate using exact saved locations and questions, without room entry/acquisition, action replay, new randomness, or HTTP. Replace context only after all checks succeed.
+- Save to one configured slot through a closed temporary file followed by atomic replacement. Preserve the previous save and clean up temporary files on failure; report unsupported atomic replacement as a failure.
+
+**Shared code and integration:**
+
+- Own `GameSnapshot`, `ItemState`, `ItemLocation`, `ObjectState`, `LockState`, and `TriviaState`, plus shared `DataAccessException`.
+- Own `Game.snapshot()` aggregate conversion and the restoration-state contract, using the object/lock snapshot producers from Packages 3 and 4.
+- Integrate the save/load flow with Package 1's shared dependencies, Package 2's output, and Package 3's controls. Save/load failures preserve the current context and always produce feedback, including from the menu.
+
+**Tests and completion:** Verify complete snapshot coverage, both gate orders, missing/corrupt/incompatible saves, invalid locations or room progress, and failed writes preserving the old save. Save, restart, and load the same inventory, values, actions, and question without new acquisition or obtained-item notices. Check restoration performs no HTTP or random generation.
+
+#### Shared-File Ownership and Delivery
+
+Method ownership below defines implementation and testing responsibility. The file coordinator keeps changes compatible and does not take over the other packages' methods.
+
+| Shared File | Method Ownership | File Coordinator |
+|-------------|------------------|------------------|
+| `Game` | Package 2: core construction, queries, active-state checks, acquisition, and movement. Package 3: `interact()`. Package 4: `useItems()` and Trivia methods. Package 5: aggregate `snapshot()` and saved-state construction. | Package 2 |
+| `Room` | Package 2: construction, storage, queries, item lookup/removal, navigation, and `canLeave()`. Package 3: interaction preparation/application, plan validation, and private `StateAccess`. | Package 2 |
+| `GameFactory` | Package 1: construction, `create()`, random generation, and reusable pure template-building helpers. Package 5: `restore()` and saved-state validation, reusing those helpers with saved values. | Package 1 |
+
+- Before parallel implementation, agree on stable IDs, all seven input boundaries, output/configuration/snapshot types, constructor signatures, and component snapshot/restoration contracts. Define shared types early so other packages can use fakes while implementation continues.
+- Keep each package's behavior tests, error paths, documentation, and feature integration with its owner. Package 1 assembles the application; Package 3 connects the controls; each package verifies its own end-to-end flow.
+- Follow the review expectations in [TeamContract.md](TeamContract.md). Track remaining implementation and integration work together, and rebalance tasks after the first playable flow if the initial complexity estimates differ from actual effort.
 
 ---
 
