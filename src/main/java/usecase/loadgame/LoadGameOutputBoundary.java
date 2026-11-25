@@ -1,4 +1,4 @@
-package yinghaousecase.loadgame;
+package usecase.loadgame;
 
 import entity.GameResult;
 

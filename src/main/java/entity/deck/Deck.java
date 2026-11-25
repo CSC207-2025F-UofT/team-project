@@ -25,4 +25,8 @@ public class Deck {
     public Card drawCard(){
         return this.deck.pop();
     }
+
+    public boolean isEmpty() { return this.deck.isEmpty(); }
+
+    public int size()        { return this.deck.size(); }
 }
