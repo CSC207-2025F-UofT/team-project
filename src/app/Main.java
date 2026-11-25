@@ -48,10 +48,17 @@ public class Main {
                                 presenter
                         );
 
+                Combat.Action skill =
+                        new Combat.Skill(
+                                battle,
+                                presenter
+                        );
+
                 Combat.InputBoundary interactor =
                         new Combat.Interactor(
                                 attack,
-                                defend
+                                defend,
+                                skill
                         );
 
                 Combat.Controller controller =

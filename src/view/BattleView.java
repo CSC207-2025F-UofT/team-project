@@ -59,7 +59,7 @@ public class BattleView extends JPanel {
     };
 
     private static final double[] ENEMY_SIZES = {
-            1.15, 1.15, 1.15
+            .75, .75, .75
     };
 
     // ---------- COLOURS ----------
@@ -80,7 +80,7 @@ public class BattleView extends JPanel {
             new Color(13, 36, 51, 185);
 
     private static final String[] ACTIONS = {
-            "Attack", "Defend", "Items", "Run"
+            "Attack", "Defend", "Skill", "Items"
     };
 
     // ---------- DEPENDENCIES ----------
@@ -96,6 +96,7 @@ public class BattleView extends JPanel {
     private boolean choosing;
     private boolean items;
     private boolean hitApplied;
+    private boolean usingSkill;
 
     private Point mouse = new Point(-1, -1);
     private int pressed = -1;
@@ -277,11 +278,12 @@ public class BattleView extends JPanel {
             choosing = false;
             items = false;
 
+            // Attack
             if (action == 0) {
+                usingSkill = false;
 
                 if (target != null && target.alive()) {
                     startAttack(target);
-
                 } else {
                     choosing = true;
 
@@ -291,28 +293,37 @@ public class BattleView extends JPanel {
                     );
                 }
 
+                // Defend
             } else if (action == 1) {
-
                 target = null;
+                usingSkill = false;
 
-                // Goes through Clean Architecture.
                 combatController.defend();
-
                 finishTurn();
 
+                // Skill
             } else if (action == 2) {
+                usingSkill = true;
 
+                if (target != null && target.alive()) {
+                    startAttack(target);
+                } else {
+                    choosing = true;
+
+                    viewModel.setMessage(
+                            battle.current().name
+                                    + ": click an enemy to use Skill."
+                    );
+                }
+
+                // Items
+            } else if (action == 3) {
                 items = true;
+                usingSkill = false;
 
                 viewModel.setMessage(
                         "Inventory placeholder"
                                 + " — no items connected yet."
-                );
-
-            } else {
-
-                viewModel.setMessage(
-                        "Run is a placeholder for now."
                 );
             }
 
@@ -326,14 +337,13 @@ public class BattleView extends JPanel {
 
             if (choosing) {
                 startAttack(selected);
-
             } else {
                 items = false;
 
                 viewModel.setMessage(
                         "Target: "
                                 + target.name
-                                + ". Click Attack."
+                                + ". Choose Attack or Skill."
                 );
             }
         }
@@ -431,12 +441,21 @@ public class BattleView extends JPanel {
         phaseStart =
                 System.currentTimeMillis();
 
-        viewModel.setMessage(
-                actor.name
-                        + " attacks "
-                        + victim.name
-                        + "!"
-        );
+        if (usingSkill) {
+            viewModel.setMessage(
+                    actor.name
+                            + " uses Skill on "
+                            + victim.name
+                            + "!"
+            );
+        } else {
+            viewModel.setMessage(
+                    actor.name
+                            + " attacks "
+                            + victim.name
+                            + "!"
+            );
+        }
     }
 
     private void update() {
@@ -458,25 +477,23 @@ public class BattleView extends JPanel {
             phase = 2;
             phaseStart = now;
 
-            // Attack animation.
+            // Attack/skill animation.
         } else if (phase == 2) {
 
             long duration =
                     attackDuration();
 
-            /*
-             * Preserve original behaviour:
-             * damage occurs 35% through animation.
-             */
+            // Damage occurs 35% through animation.
             if (!hitApplied
-                    && elapsed
-                    >= duration * HIT_POINT) {
+                    && elapsed >= duration * HIT_POINT) {
 
                 hitApplied = true;
 
-                // Clean Architecture:
-                // View -> Controller -> Interactor
-                combatController.attack(victim);
+                if (usingSkill) {
+                    combatController.skill(victim);
+                } else {
+                    combatController.attack(victim);
+                }
 
                 hitAt = now;
 
@@ -503,15 +520,12 @@ public class BattleView extends JPanel {
         } else if (phase == 0
                 && battle.current() != null
                 && !battle.current().player
-                && now - readyAt
-                >= ENEMY_WAIT_MS) {
+                && now - readyAt >= ENEMY_WAIT_MS) {
 
             List<Fighter> living =
                     new ArrayList<>();
 
-            for (Fighter fighter :
-                    battle.players) {
-
+            for (Fighter fighter : battle.players) {
                 if (fighter.alive()) {
                     living.add(fighter);
                 }
@@ -523,9 +537,10 @@ public class BattleView extends JPanel {
                         java.util.concurrent
                                 .ThreadLocalRandom
                                 .current()
-                                .nextInt(
-                                        living.size()
-                                );
+                                .nextInt(living.size());
+
+                // Enemy attacks should never inherit player skill state.
+                usingSkill = false;
 
                 startAttack(
                         living.get(index)
@@ -555,6 +570,7 @@ public class BattleView extends JPanel {
         target = null;
         choosing = false;
         items = false;
+        usingSkill = false;
 
         viewModel.setMessage(
                 viewModel.getMessage()
@@ -863,8 +879,9 @@ public class BattleView extends JPanel {
 
             boolean selected =
                     enabled
-                            && i == 0
-                            && choosing;
+                            && choosing
+                            && ((i == 0 && !usingSkill)
+                            || (i == 2 && usingSkill));
 
             Color top =
                     new Color(
@@ -1478,10 +1495,6 @@ public class BattleView extends JPanel {
         );
     }
 
-    /*
-     * This "message" is only a local parameter.
-     * It is NOT battle message state, so this is fine.
-     */
     private void wrap(
             Graphics2D graphics,
             String message,

@@ -16,6 +16,7 @@ public class Combat {
     public interface InputBoundary {
         void attack(Fighter target);
         void defend();
+        void skill(Fighter target);
     }
 
 
@@ -104,6 +105,20 @@ public class Combat {
         }
     }
 
+    public static class Skill extends Action {
+
+        public Skill(Battle battle,
+                     OutputBoundary presenter) {
+            super(battle, presenter);
+        }
+
+        @Override
+        public void execute(Fighter target) {
+            // skill logic
+            presenter.success("Skill used!");
+        }
+    }
+
 
     // ---------------- INTERACTOR ----------------
 
@@ -112,13 +127,16 @@ public class Combat {
 
         private final Action attack;
         private final Action defend;
+        private final Action skill;
 
         public Interactor(
                 Action attack,
-                Action defend) {
+                Action defend,
+                Action skill) {
 
             this.attack = attack;
             this.defend = defend;
+            this.skill = skill;
         }
 
         @Override
@@ -129,6 +147,11 @@ public class Combat {
         @Override
         public void defend() {
             defend.execute(null);
+        }
+
+        @Override
+        public void skill(Fighter target) {
+            skill.execute(target);
         }
     }
 
@@ -149,6 +172,10 @@ public class Combat {
 
         public void defend() {
             inputBoundary.defend();
+        }
+
+        public void skill(Fighter target) {
+            inputBoundary.skill(target);
         }
     }
 
