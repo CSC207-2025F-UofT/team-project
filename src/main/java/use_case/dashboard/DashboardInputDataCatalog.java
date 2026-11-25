@@ -14,4 +14,16 @@ public class DashboardInputDataCatalog {
             return AnalyticsType.MOST_VISITED;
         }
     }
+
+    public record PhotoActivityInputData(Optional<AnalyticsOptions.TimeGrouping> grouping) implements DashboardInputData {
+        @Override
+        public AnalyticsType getAnalyticsType() {
+            return  AnalyticsType.PHOTO_ACTIVITY;
+        }
+    }
+
+    public record GenericInputData(AnalyticsType type) implements DashboardInputData {
+        @Override
+        public AnalyticsType getAnalyticsType() { return type;}
+    }
 }

@@ -13,16 +13,17 @@ import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 public class DashboardView extends JPanel implements PropertyChangeListener {
+
+    private static final Map<String, AnalyticsType> TYPES = Map.of(
+            "Most Visited Places", AnalyticsType.MOST_VISITED,
+            "Your Photo Taking Activity", AnalyticsType.PHOTO_ACTIVITY
+    );
 
     private final DashboardViewModel dashboardViewModel;
     private final DashboardController controller;
     private final DashboardRendererRegistry dashboardRendererRegistry;
-    private static final Map<String, AnalyticsType> TYPES = Map.of(
-            "Most Visited Places", AnalyticsType.MOST_VISITED
-    );
     private final JPanel optionPanel = new JPanel();
     private final JPanel analyticsPanel = new JPanel();
     private final List<JComponent> analytics = new ArrayList<>();
@@ -60,6 +61,7 @@ public class DashboardView extends JPanel implements PropertyChangeListener {
     private void initOptionPanel() {
         optionPanel.setLayout(new BoxLayout(optionPanel, BoxLayout.Y_AXIS));
         JLabel prompt = new JLabel("What kind of analytics do you want to view?");
+        prompt.setFont(prompt.getFont().deriveFont(Font.BOLD, 30f));
         JComboBox<String> dropdown = new JComboBox<>(TYPES.keySet().toArray(new String[0]));
         JButton button = new JButton("Generate Analytics");
         button.addActionListener(e -> {

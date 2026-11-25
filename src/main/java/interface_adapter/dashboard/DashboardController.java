@@ -1,6 +1,7 @@
 package interface_adapter.dashboard;
 
 import entity.LocationInfoType;
+import use_case.dashboard.AnalyticsOptions;
 import use_case.dashboard.AnalyticsType;
 import use_case.dashboard.DashboardInputBoundary;
 import use_case.dashboard.DashboardInputDataCatalog;
@@ -19,9 +20,20 @@ public class DashboardController {
     }
 
     public void requestAnalytics(AnalyticsType analyticsType) {
-        analyticsUseCase.execute(new DashboardInputDataCatalog.MostVisitedInputData(Optional.empty()));
+        switch (analyticsType) {
+            case MOST_VISITED: requestMostVisitedAnalytics(Optional.empty());
+            break;
+            case PHOTO_ACTIVITY: requestPhotoActivityAnalytics(Optional.empty());
+            break;
+            default: analyticsUseCase.execute(new DashboardInputDataCatalog.GenericInputData(analyticsType));
+        }
+
     }
-    public void requestMostVisitedAnalytics(LocationInfoType locationInfoType) {
-        analyticsUseCase.execute(new DashboardInputDataCatalog.MostVisitedInputData(Optional.ofNullable(locationInfoType)));
+    public void requestMostVisitedAnalytics(Optional<LocationInfoType> locationInfoType) {
+        analyticsUseCase.execute(new DashboardInputDataCatalog.MostVisitedInputData(locationInfoType));
+    }
+
+    public void requestPhotoActivityAnalytics(Optional<AnalyticsOptions.TimeGrouping> timeGrouping) {
+        analyticsUseCase.execute(new DashboardInputDataCatalog.PhotoActivityInputData(timeGrouping));
     }
 }

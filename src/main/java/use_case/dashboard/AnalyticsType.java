@@ -1,5 +1,5 @@
 package use_case.dashboard;
 
 public enum AnalyticsType {
-    MOST_VISITED,
+    MOST_VISITED, PHOTO_ACTIVITY
 }
