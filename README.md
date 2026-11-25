@@ -26,7 +26,7 @@
 
 ### User Stories
 Yinghao \
-*"As a player, I want to start a match against another player, then be able to save it to a file and load them."*
+*"As a player, I want to start a match against another player (either start as a host or join the game that another player created), then be able to save it to a file and load them."*
 
 Shuai Shao: \
 *"As a player, I want to play and move my characters around the board."*
@@ -42,7 +42,7 @@ Andy Li: \
 
 | Name | Primary Actor | Precondition | Trigger | Extension | Success Outcome |
 | --- | --- | --- | --- | --- | --- |
-| Start Game | Player | Previous games have finished by the user and no other games are running | Game is Started by Player | ~ | Players and Board are initialized and cards drawn. |
+| Start Game | Player | Previous games have finished by the user and no other games are running | Game is Started by Player | ~ | Players and Board are initialized and cards drawn.|
 | Save Game | Player | Game must have Started | Game is Saved by Player | ~ | Game is saved successfully |
 | Load Game | Player | Saved Game exists | Game is Loaded by Player | ~ | Game is loaded successfully |
 | End Turn | Player | Game must have Started | Turn End Declared by Player | ~ | Win condition is checked. Card(s) (is/are) Drawn, and the next player begins their turn. |
