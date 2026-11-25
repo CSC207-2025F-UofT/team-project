@@ -102,7 +102,7 @@ public class FlashcardGeneratorView extends JPanel implements ActionListener, Fl
         tutorial.setWrapStyleWord(true);
         this.add(tutorial);
 
-        this.setComponentZOrder(tutorialLabel, 1); // makes the clock lael appear above timer panel
+        this.setComponentZOrder(tutorialLabel, 1); // makes the clock label appear above timer panel
         this.setComponentZOrder(tutorial, 0);
 
         textInput = new JTextPane();
@@ -150,7 +150,7 @@ public class FlashcardGeneratorView extends JPanel implements ActionListener, Fl
 
 
 
-        this.setComponentZOrder(clockLabel, 0); // makes the clock lael appear above timer panel
+        this.setComponentZOrder(clockLabel, 0); // makes the clock label appear above timer panel
         this.setComponentZOrder(timerPanel, 1);
 
 

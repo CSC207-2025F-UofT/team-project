@@ -23,6 +23,7 @@ public class Main {
                 .addCancelTimerUseCase()
                 .addSwitchViewUseCase()
                 .addFlashcardGenerator()
+                .addFSUseCase()
                 .addFlashcardGeneratorUseCase()
                 .build();
 
