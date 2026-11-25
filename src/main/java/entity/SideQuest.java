@@ -12,25 +12,25 @@ import java.util.List;
 
 public class SideQuest {
     private final String name;
-    private final String description;
+    private final String id; // A unique ID for quests
     private final String isIndoor;
-    private final double budget;
-    private final double expectedTime;
+    private final String budget;    // Split into four categories (free, less_than_twenty, less_than_fifty, over_fifty)
+    private final String expectedTime; // under_10_minutes, under_30_minutes, under_60_minutes, over_60_minutes
     private final int exp;
-    private final Location location;
+    private final Location location; // latitude and longitude, validated by Location
     private final List<String> interests;
 
-    public SideQuest(String name,
-                     String description,
+    public SideQuest(String id,
+                     String name,
                      String isIndoor,
-                     double budget,
-                     double expectedTime,
+                     String budget,
+                     String expectedTime,
                      int exp,
                      Location location,
                      List<String> interests) {
 
+        this.id = id;
         this.name = name;
-        this.description = description;
         this.budget = budget;
         this.isIndoor = isIndoor;
         this.expectedTime = expectedTime;
@@ -39,23 +39,22 @@ public class SideQuest {
         this.interests = List.copyOf(interests);;
     }
 
+    public String getId() {
+        return id;
+    }
     public String getName() {
         return name;
-    }
-
-    public String getDescription() {
-        return description;
     }
 
     public String isIndoor() {
         return isIndoor;
     }
 
-    public double getBudget() {
+    public String getBudget() {
         return budget;
     }
 
-    public double getExpectedTime() {
+    public String getExpectedTime() {
         return expectedTime;
     }
 

@@ -20,16 +20,16 @@ import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 import javax.swing.plaf.basic.BasicButtonUI;
 
-final class JournalStyle {
-    static final int WIDTH = 414;
-    static final int HEIGHT = 896;
-    static final Color PAPER = new Color(0xfcfcfc);
-    static final Color GREEN = new Color(0xdceedf);
-    static final Color CARD_GREEN = new Color(0xe2efe3);
-    static final Color PHOTO_BUTTON = new Color(0xdff0e2);
-    static final Color INK = new Color(0x202624);
-    static final Font UI_FONT = loadFont("DM-Sans");
-    static final Font HANDWRITING = loadFont("Gochi-Hand");
+public final class JournalStyle {
+    public static final int WIDTH = 414;
+    public static final int HEIGHT = 896;
+    public static final Color PAPER = new Color(0xfcfcfc);
+    public static final Color GREEN = new Color(0xdceedf);
+    public static final Color CARD_GREEN = new Color(0xe2efe3);
+    public static final Color PHOTO_BUTTON = new Color(0xdff0e2);
+    public static final Color INK = new Color(0x202624);
+    public static final Font UI_FONT = loadFont("DM-Sans");
+    public static final Font HANDWRITING = loadFont("Gochi-Hand");
 
     private JournalStyle() {
     }
@@ -43,7 +43,7 @@ final class JournalStyle {
         }
     }
 
-    static JLabel label(String text, Font font) {
+    public static JLabel label(String text, Font font) {
         JLabel label = new JLabel(text, SwingConstants.CENTER);
         label.putClientProperty("html.disable", true);
         label.setFont(font);
@@ -51,13 +51,13 @@ final class JournalStyle {
         return label;
     }
 
-    static ImageIcon loadScaledIcon(String assetName, int iconWidth, int iconHeight) {
+    public static ImageIcon loadScaledIcon(String assetName, int iconWidth, int iconHeight) {
         ImageIcon sourceIcon = new ImageIcon(Objects.requireNonNull(
                 JournalStyle.class.getResource("/journal/assets/" + assetName + ".png"), assetName));
         return new ImageIcon(sourceIcon.getImage().getScaledInstance(iconWidth, iconHeight, Image.SCALE_SMOOTH));
     }
 
-    static JButton iconButton(String label, ImageIcon icon, Runnable onClick) {
+    public static JButton iconButton(String label, ImageIcon icon, Runnable onClick) {
         JButton button = new JButton(icon);
         button.getAccessibleContext().setAccessibleName(label);
         button.setToolTipText(label);
@@ -69,7 +69,7 @@ final class JournalStyle {
         return button;
     }
 
-    static JButton roundedButton(String label, Color fill, Runnable onClick) {
+    public static JButton roundedButton(String label, Color fill, Runnable onClick) {
         JButton button = new JButton(label) {
             @Override
             protected void paintComponent(Graphics graphics) {
@@ -90,7 +90,7 @@ final class JournalStyle {
         return button;
     }
 
-    static void paintRounded(Graphics graphics, Color fill, int width, int height, int cornerDiameter) {
+    public static void paintRounded(Graphics graphics, Color fill, int width, int height, int cornerDiameter) {
         Graphics2D roundedShapeGraphics = (Graphics2D) graphics.create();
         roundedShapeGraphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         roundedShapeGraphics.setColor(fill);
@@ -98,7 +98,7 @@ final class JournalStyle {
         roundedShapeGraphics.dispose();
     }
 
-    static void addPageHeader(JPanel panel, String title, Runnable onBack) {
+    public static void addPageHeader(JPanel panel, String title, Runnable onBack) {
         JButton backButton = iconButton("Back", loadScaledIcon("back", 32, 32), onBack);
         backButton.setBounds(17, 22, 36, 36);
         panel.add(backButton);
