@@ -67,6 +67,9 @@ class FindNearbyQuestsInteractorTest {
         assertTrue(nearby.get(0).getDistanceKm() < nearby.get(1).getDistanceKm());
         assertEquals(2, presenter.success.getRadiusKm());
         assertEquals(UOFT.getLatitude(), presenter.success.getCentreLatitude());
+        Location northEdge = new Location(presenter.success.getNorthEdgeLatitude(),
+                UOFT.getLongitude());
+        assertEquals(2.0, UOFT.distanceTo(northEdge), 0.001);
     }
 
     @Test

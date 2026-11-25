@@ -40,6 +40,7 @@ public class FindNearbyQuestsPresenter implements FindNearbyQuestsOutputBoundary
         FindNearbyQuestsState state = viewModel.getState();
         state.setCentre(outputData.getCentreLatitude(), outputData.getCentreLongitude());
         state.setRadiusKm(outputData.getRadiusKm());
+        state.setCircle(outputData.getNorthEdgeLatitude(), outputData.getEastEdgeLongitude());
         state.setPins(pins);
         state.setErrorMessage(null);
         state.setRetryAvailable(false);
@@ -57,6 +58,7 @@ public class FindNearbyQuestsPresenter implements FindNearbyQuestsOutputBoundary
                                     String errorMessage) {
         FindNearbyQuestsState state = viewModel.getState();
         state.setCentre(centreLatitude, centreLongitude);
+        state.clearCircle();
         state.setPins(List.of());
         state.setInfoMessage(null);
         state.setErrorMessage("Couldn't load side quests. " + errorMessage);

@@ -2,6 +2,7 @@ package entity;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
 
@@ -54,6 +55,22 @@ class LocationTest {
     @Test
     void distanceMatchesKnownPair() {
         assertEquals(2.36, UOFT.distanceTo(CN_TOWER), TOLERANCE_KM);
+    }
+
+    @Test
+    void offsetNorthAndEastMovesTheGivenDistance() {
+        Location north = UOFT.offsetBy(2, 0);
+        Location east = UOFT.offsetBy(0, 2);
+        assertEquals(2.0, UOFT.distanceTo(north), 0.001);
+        assertEquals(2.0, UOFT.distanceTo(east), 0.001);
+        assertTrue(north.getLatitude() > UOFT.getLatitude());
+        assertTrue(east.getLongitude() > UOFT.getLongitude());
+    }
+
+    @Test
+    void offsetStopsAtPoleAndWrapsLongitude() {
+        assertEquals(90.0, new Location(89.99, 0).offsetBy(100, 0).getLatitude());
+        assertTrue(new Location(0, 179.99).offsetBy(0, 10).getLongitude() < 0);
     }
 
     @Test

@@ -65,9 +65,10 @@ public class FindNearbyQuestsInteractor implements FindNearbyQuestsInputBoundary
         }
         nearby.sort(Comparator.comparingDouble(NearbyQuest::getDistanceKm));
 
-        // Step 3 (and 3a when nearby is empty).
+        // Step 3 (and 3a when nearby is empty). The edge points let the view draw the circle.
         presenter.prepareSuccessView(new FindNearbyQuestsOutputData(
-                centre.getLatitude(), centre.getLongitude(), area.getRadiusKm(), nearby));
+                centre.getLatitude(), centre.getLongitude(), area.getRadiusKm(),
+                area.northEdge().getLatitude(), area.eastEdge().getLongitude(), nearby));
     }
 
     private static NearbyQuest toNearbyQuest(SideQuest quest, double distanceKm) {

@@ -1,5 +1,6 @@
 package entity;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -36,6 +37,13 @@ class SearchAreaTest {
     @Test
     void doesNotContainPointOutsideRadius() {
         assertFalse(new SearchArea(UOFT, 1).contains(CN_TOWER));
+    }
+
+    @Test
+    void edgePointsAreOneRadiusFromCentre() {
+        SearchArea area = new SearchArea(UOFT, 5);
+        assertEquals(5.0, area.distanceFromCentre(area.northEdge()), 0.001);
+        assertEquals(5.0, area.distanceFromCentre(area.eastEdge()), 0.001);
     }
 
     @Test
