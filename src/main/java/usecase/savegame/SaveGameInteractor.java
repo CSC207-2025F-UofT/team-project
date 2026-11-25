@@ -1,4 +1,4 @@
-package yinghaousecase.savegame;
+package usecase.savegame;
 
 import entity.Game;
 import entity.GameResult;

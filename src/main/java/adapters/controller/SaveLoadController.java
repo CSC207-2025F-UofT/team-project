@@ -1,8 +1,8 @@
 package adapters.controller;
 
 import entity.Game;
-import yinghaousecase.loadgame.LoadGameInputBoundary;
-import yinghaousecase.savegame.SaveGameInputBoundary;
+import usecase.loadgame.LoadGameInputBoundary;
+import usecase.savegame.SaveGameInputBoundary;
 
 public class SaveLoadController {
     private final SaveGameInputBoundary saveInput;

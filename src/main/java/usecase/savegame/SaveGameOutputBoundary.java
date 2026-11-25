@@ -1,4 +1,4 @@
-package yinghaousecase.savegame;
+package usecase.savegame;
 
 public interface SaveGameOutputBoundary {
     void presentSaveSuccess(String slotName);
