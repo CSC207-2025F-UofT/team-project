@@ -16,6 +16,7 @@ import use_case.find_nearby_quests.QuestLocationDataAccessInterface;
  * depends on the interface, not on this class.
  */
 public class InMemorySideQuestDataAccessObject implements QuestLocationDataAccessInterface {
+    // TODO for Serena: Sorry for meddling with your OUTDOOR and INDOOR constants, but the intention of the isIndoor string could also be "BOTH"
     private static final String OUTDOOR = "false";
     private static final String INDOOR = "true";
     private static final String SAMPLE_BUDGET = "free";
@@ -60,8 +61,8 @@ public class InMemorySideQuestDataAccessObject implements QuestLocationDataAcces
 
     private static SideQuest sample(String id, String name, String isIndoor, int exp,
                                     double latitude, double longitude, List<String> interests) {
-        return new SideQuest(id, name, isIndoor, SAMPLE_BUDGET, SAMPLE_EXPECTED_TIME, exp,
-                new Location(latitude, longitude), interests);
+        return new SideQuest(name, id, isIndoor, SAMPLE_BUDGET, SAMPLE_EXPECTED_TIME, exp, 0,
+                new Location(latitude, longitude), interests, false);
     }
 
     @Override
