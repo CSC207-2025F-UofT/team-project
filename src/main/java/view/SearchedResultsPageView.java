@@ -1,5 +1,7 @@
 package view;
 
+import interface_adapter.AddToWatchlist.AddToWatchlistController;
+import interface_adapter.MovieDetail.MovieDetailController;
 import interface_adapter.Reviews.ReviewsController;
 import interface_adapter.Search.*;
 //import interface_adapter.login.LoginState;
@@ -35,6 +37,8 @@ public class SearchedResultsPageView extends JPanel implements ActionListener, S
 //    private final JButton home;
     private SearchController searchController = null;
     private ReviewsController reviewsController = null;
+    private MovieDetailController movieDetailController = null;
+    private AddToWatchlistController addToWatchlistController = null;
 
     public SearchedResultsPageView(SearchedViewModel searchedViewModel) {
         this(searchedViewModel, null);
@@ -49,7 +53,7 @@ public class SearchedResultsPageView extends JPanel implements ActionListener, S
         this.setBackground(new Color(240, 249, 250));
 
         final JLabel title = new JLabel("Flicksy Search");
-        title.setFont(new Font("Serif", Font.BOLD, 24));
+        title.setFont(new Font("Verdana", Font.BOLD, 40));
         title.setAlignmentX(Component.CENTER_ALIGNMENT);
 
         final LabelTextPanel searchInfo = new LabelTextPanel(
@@ -60,15 +64,15 @@ public class SearchedResultsPageView extends JPanel implements ActionListener, S
         buttons.setOpaque(false);
 
         search = new JButton("Search");
-        search.setFont(new Font("Serif", Font.PLAIN, 16));
+        search.setFont(new Font("SansSerif", Font.PLAIN, 16));
         buttons.add(search);
 
         favourites = new JButton("Favorites");
-        favourites.setFont(new Font("Serif", Font.PLAIN, 16));
+        favourites.setFont(new Font("SansSerif", Font.PLAIN, 16));
         buttons.add(favourites);
 
         watchlist = new JButton("Watchlist");
-        watchlist.setFont(new Font("Serif", Font.PLAIN, 16));
+        watchlist.setFont(new Font("SansSerif", Font.PLAIN, 16));
         buttons.add(watchlist);
 
 //        home = new JButton("Home");
@@ -90,10 +94,15 @@ public class SearchedResultsPageView extends JPanel implements ActionListener, S
 
         for(String[] data: results){
             int movieId = Integer.parseInt(data[3]);
-            JPanel movieData = new JPanel();
+            String movieTitleValue = data[0];
+            String posterURL = data[2];
+
+            JPanel movieData = new JPanel(new BorderLayout(20, 5));
+            movieData.setAlignmentX(Component.LEFT_ALIGNMENT);
+            movieData.setBorder(BorderFactory.createEmptyBorder(15, 20, 15, 20));
             movieData.setOpaque(false);
             try{
-                URL url = new URL(data[2]);
+                URL url = new URL(posterURL);
                 BufferedImage poster = ImageIO.read(url);
                 int targetWidth = 200;
                 int targetHeight = 300;
@@ -104,49 +113,50 @@ public class SearchedResultsPageView extends JPanel implements ActionListener, S
 
                 ImageIcon icon = new ImageIcon(scaledImage);
 
-                movieData.add(new JLabel(icon));
+                movieData.add(new JLabel(icon), BorderLayout.WEST);
 //                movieData.add(new JLabel(new ImageIcon(poster)));
             } catch (Exception e) {
-                movieData.add(new JLabel("No Poster Available"));
+                JLabel noPoster = new JLabel("No Poster Available");
+                noPoster.setPreferredSize(new Dimension(150, 225));
+                movieData.add(noPoster, BorderLayout.WEST);
             }
-//            JLabel description = new JLabel(data[1]);
-//            movieData.add(description);
-
-//            JTextArea description = new JTextArea(data[1]);
-//            description.setWrapStyleWord(true);      // Wrap at word boundaries, not mid-word
-//            description.setLineWrap(true);           // Enable line wrapping
-//            description.setOpaque(false);            // Make background transparent like JLabel
-//            description.setEditable(false);          // Prevent user editing
-//            description.setFocusable(false);         // Remove focus border/cursor
-//            description.setFont(new Font("Serif", Font.PLAIN, 14));
-//            movieData.add(description);
 
             JPanel details = new JPanel();
+            details.setOpaque(false);
             details.setLayout(new BoxLayout(details, BoxLayout.Y_AXIS));
 
-            JLabel movieTitle = new JLabel(data[0]);
-            movieTitle.setFont(new Font("Serif", Font.PLAIN, 14));
-            movieTitle.setAlignmentX(Component.LEFT_ALIGNMENT);
+            JLabel movieTitle = new JLabel(movieTitleValue);
+            movieTitle.setFont(new Font("SansSerif", Font.BOLD, 22));
+            movieTitle.setAlignmentX(Component.CENTER_ALIGNMENT);
             details.add(movieTitle);
 
             JLabel releaseDate = new JLabel("Release Date: " + data[1]);
-            releaseDate.setFont(new Font("Serif", Font.PLAIN, 14));
+            releaseDate.setFont(new Font("SansSerif", Font.PLAIN, 16));
+            releaseDate.setAlignmentX(Component.CENTER_ALIGNMENT);
             details.add(releaseDate);
 
+//            details.add(Box.createRigidArea(new Dimension(0, 15)));
 
 
 
-            JPanel button = new JPanel();
+            JPanel button = new JPanel(new FlowLayout(FlowLayout.CENTER, 5, 0));
+            button.setMaximumSize(new Dimension(
+                    Integer.MAX_VALUE,
+                    button.getPreferredSize().height
+            ));
+            button.setAlignmentX(Component.CENTER_ALIGNMENT);
+
             button.setOpaque(false);
             JButton viewDetails = new JButton("View Details");
-            viewDetails.setFont(new Font("Serif", Font.PLAIN, 14));
+            viewDetails.setFont(new Font("SansSerif", Font.PLAIN, 14));
             button.add(viewDetails);
 
             JButton reviews = new JButton("Reviews");
-            reviews.setFont(new Font("Serif", Font.PLAIN, 14));
+            reviews.setFont(new Font("SansSerif", Font.PLAIN, 14));
             button.add(reviews);
 
             JLabel favoriteFeedback = new JLabel();
+            favoriteFeedback.setAlignmentX(Component.CENTER_ALIGNMENT);
             JButton favoriteButton = new JButton("Add to Favorites");
             favoriteButton.setFont(reviews.getFont());
             favoriteButton.setEnabled(addFavorite != null && movieId > 0);
@@ -155,7 +165,7 @@ public class SearchedResultsPageView extends JPanel implements ActionListener, S
 
             JButton watchlistButton = new JButton("Add to Watchlist");
             watchlistButton.setFont(reviews.getFont());
-            watchlistButton.setEnabled(false);
+//            watchlistButton.setEnabled(false);
             button.add(watchlistButton);
 
             viewDetails.addActionListener(
@@ -163,7 +173,21 @@ public class SearchedResultsPageView extends JPanel implements ActionListener, S
                         @Override
                         public void actionPerformed(ActionEvent e) {
                             if(e.getSource().equals(viewDetails)){
-                                // TODO: the controller for the details controller
+                                movieDetailController.execute(movieId);
+                            }
+                        }
+                    }
+            );
+
+            watchlistButton.addActionListener(
+                    new ActionListener() {
+                        @Override
+                        public void actionPerformed(ActionEvent e) {
+                            if(e.getSource().equals(watchlistButton)){
+                                addToWatchlistController.execute(
+                                        "STILL NEED TO ADD USERNAME",
+                                        String.valueOf(movieId),
+                                        movieTitleValue, posterURL);
                             }
                         }
                     }
@@ -182,9 +206,27 @@ public class SearchedResultsPageView extends JPanel implements ActionListener, S
 
 
             details.add(button);
+            details.add(Box.createRigidArea(new Dimension(0, 5)));
             details.add(favoriteFeedback);
-            movieData.add(details);
+            details.add(Box.createVerticalGlue());
+            movieData.add(details, BorderLayout.CENTER);
+
             searchResults.add(movieData);
+
+//            details.add(button);
+//            details.add(Box.createRigidArea(new Dimension(0, 5)));
+//            details.add(favoriteFeedback);
+//            details.add(Box.createVerticalGlue());
+//
+//            movieData.add(details, BorderLayout.CENTER);
+//
+//            movieData.setMaximumSize(new Dimension(
+//                    Integer.MAX_VALUE,
+//                    movieData.getPreferredSize().height
+//            ));
+//
+//            searchResults.add(movieData);
+//            searchResults.add(new JSeparator(SwingConstants.HORIZONTAL));
 
         }
         JScrollPane scrollPane = new JScrollPane(searchResults);
@@ -200,28 +242,36 @@ public class SearchedResultsPageView extends JPanel implements ActionListener, S
                                     currentState.getTitle()
                             );
                         }
-
-                        if (evt.getSource().equals(favourites)) {
-//                            final SearchState currentState = searchBarViewModel.getState();
-//
-//                            searchController.execute(
-//                                    currentState.getTitle()
-//                            ); SHOULD CHANGE BASED ON THE FAVOURITES PAGE VIEW
-
-                        }
-
-                        if (evt.getSource().equals(watchlist)) {
-//                            final SearchState currentState = searchBarViewModel.getState();
-//
-//                            searchController.execute(
-//                                    currentState.getTitle()
-//                            ); SHOULD CHANGE BASED ON THE WATCHLIST PAGE VIEW
-
-                        }
-
                     }
                 }
         );
+        //        favourites.addActionListener(
+//                new ActionListener() {
+//                    public void actionPerformed(ActionEvent evt) {
+//                        if (evt.getSource().equals(favourites)) {
+//                            final SearchState currentState = searchBarViewModel.getState();
+//
+//                            favouriteController.execute(
+//                                    currentState.getTitle()
+//                            );
+//                        }
+//                    }
+//                }
+//        );
+
+//        watchlist.addActionListener(
+//                new ActionListener() {
+//                    public void actionPerformed(ActionEvent evt) {
+//                        if (evt.getSource().equals(watchlist)) {
+//                            final SearchState currentState = searchBarViewModel.getState();
+//
+//                            watchlistController.execute(
+//                                    "Still need to add user",
+//                            );
+//                        }
+//                    }
+//                }
+//        );
 //        home.addActionListener(
 //                new ActionListener() {
 //                    public void actionPerformed(ActionEvent evt) {
@@ -296,5 +346,13 @@ public class SearchedResultsPageView extends JPanel implements ActionListener, S
 
     public void setReviewsController(ReviewsController reviewsController) {
         this.reviewsController = reviewsController;
+    }
+
+    public void setMovieDetailController(MovieDetailController movieDetailController) {
+        this.movieDetailController = movieDetailController;
+    }
+
+    public void setAddToWatchlistController(AddToWatchlistController addToWatchlistController){
+        this.addToWatchlistController = addToWatchlistController;
     }
 }
