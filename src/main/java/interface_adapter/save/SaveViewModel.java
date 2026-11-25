@@ -21,6 +21,10 @@ public class SaveViewModel {
         return VIEW_NAME;
     }
 
+    public void addListener(SaveViewModelListener listener) {
+        listeners.add(listener);
+    }
+
     public void notifyStateChanged() {
         for (SaveViewModelListener listener : listeners) {
             listener.stateChanged();
