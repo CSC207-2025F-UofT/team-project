@@ -140,6 +140,36 @@ AACorn's mascot is an original acorn-inspired character designed by Ruoshui Deng
 
 ---
 
+---
+
+### UC6 - Linked Vocabulary (Actions → Related Things)
+
+**Actors:** Caregiver (setup), Child (use)
+
+**Goal:** Each action on the board leads to a short list of related things (e.g. *play → ball, toy, park*), so the child can build requests like "I want to play ball."
+
+**Caregiver scenario:**
+
+1. The caregiver searches ARASAAC and adds an action (at most 6).
+2. The system suggests related things for that action (from a built-in starter list, an ARASAAC search, and the child's history).
+3. The caregiver chooses which suggestions to add (at most 6 per action).
+4. The caregiver can also add any thing, choosing which action(s) it belongs to.
+5. The updated board is saved.
+
+**Child scenario:**
+
+1. The child taps an action; it is spoken and added to the message.
+2. If the action has related things, the system shows them; otherwise the screen stays the same.
+3. The child taps a thing; it is spoken and added to the message.
+4. The child taps Speak; the message is spoken and saved to history.
+
+**Extensions:**
+
+- No actions on the board: the caregiver must add an action before adding things.
+- Back on the related-things screen returns to the actions and removes that action from the message.
+- Help, Stop and Break are always visible, send immediately, and do not change the screen or the message being built.
+- Suggestions never change the board automatically; the caregiver always decides.
+
 ## Minimal Viable Product (MVP)
 
 Each team member will take the lead on one MVP use case.
@@ -167,6 +197,7 @@ Represents one selectable AAC symbol.
 int id
 String label
 String imageLocation
+WordType type        // ACTION (verb) or THING (noun)
 ```
 
 **Relevant Methods**
@@ -175,7 +206,13 @@ String imageLocation
 getId()
 getLabel()
 getImageLocation()
+getType()
+isAction()
+isThing()
 ```
+
+`WordType` is an enum with two values: `ACTION` (e.g. *play*, *eat*) and `THING` (e.g. *ball*, *apple*).
+The older 3-argument constructor is kept for compatibility and creates a `THING`.
 
 ---
 
@@ -230,32 +267,44 @@ A completed `CommunicationMessage` is immutable and is kept separate from the ch
 
 ### `CommunicationBoard`
 
-Represents the vocabulary currently available to the child.
-A caregiver can add or remove pictograms.
+Represents the vocabulary available to the child, organized as **actions** and their **related things**.
+The main screen shows the actions; tapping an action shows its related things.
+
+```
+play  →  ball, toy, park
+eat   →  apple, cookie
+drink →  water, apple
+```
 
 **Instance Variables**
 
 ```java
-int capacity                  // default 20
-List<Pictogram> pictograms
+Map<Pictogram, List<Pictogram>> actions   // each action → its related things, in caregiver order
 ```
 
 **Relevant Methods**
 
 ```java
-addPictogram(...)
-removePictogram(...)
-contains(...)
+addAction(...)
+removeAction(...)
+addThing(action, thing)
+removeThing(action, thing)
+containsAction(...)
 isFull()
-getPictograms()
+getActions()
+getThings(action)
+hasThings(action)
 ```
 
 **Business Rules**
 
-- The same pictogram cannot appear twice on the board (the child can still select it more than once in a draft).
-- The board holds at most 6 pictograms by default.
-- Removing a pictogram that is not on the board is an error.
-- Pictograms keep the order chosen by the caregiver.
+- The main board holds at most **6 actions**, in the order chosen by the caregiver.
+- Each action has at most **6 related things**.
+- Only `ACTION` pictograms go on the main board; only `THING` pictograms can be linked to an action.
+- A thing can only be added to an action that is already on the board.
+- The same thing can be linked to several actions (e.g. *apple* under *eat* and *drink*).
+- Removing an action also removes its links to things.
+- Help, Stop and Break are fixed core messages and are **not** part of the board.
 
 ---
 
@@ -289,10 +338,11 @@ hasHistory()
 
 ```
 ChildProfile
- ├── CommunicationBoard ── contains many Pictograms
+ ├── CommunicationBoard ── up to 6 actions, each linked to up to 6 things (all Pictograms)
  └── history: many CommunicationMessages ── each contains the Pictograms the child selected
 
 CommunicationDraft ── builds ──> CommunicationMessage
+Pictogram ── has a ──> WordType (ACTION / THING)
 ```
 
 ---
@@ -337,15 +387,20 @@ AACorn stores all of the child's data in one local JSON file: `data/profile.json
 ```json
 {
   "board": [
-    { "id": 2248, "label": "water", "imageLocation": "https://.../2248.png" },
-    { "id": 2462, "label": "apple", "imageLocation": "https://.../2462.png" }
+    {
+      "action": { "id": 6527, "label": "play", "imageLocation": "https://.../6527.png", "type": "ACTION" },
+      "things": [
+        { "id": 3241, "label": "ball", "imageLocation": "https://.../3241.png", "type": "THING" }
+      ]
+    }
   ],
   "history": [
     {
-      "text": "I want water.",
-      "timestamp": "2026-10-26T10:00:00",
+      "text": "I want to play ball.",
+      "timestamp": "2026-11-24T10:00:00",
       "pictograms": [
-        { "id": 2248, "label": "water", "imageLocation": "https://.../2248.png" }
+        { "id": 6527, "label": "play", "imageLocation": "https://.../6527.png", "type": "ACTION" },
+        { "id": 3241, "label": "ball", "imageLocation": "https://.../3241.png", "type": "THING" }
       ]
     }
   ]
@@ -357,6 +412,7 @@ AACorn stores all of the child's data in one local JSON file: `data/profile.json
 - `board` keeps the caregiver's order; `history` is oldest first.
 - Each history message stores a **full copy** of its pictograms, not just their IDs. History is a record of what was said, so it must still display correctly after a pictogram is removed from the board or when the ARASAAC API is offline.
 - Timestamps use ISO-8601 format so they can be read back with `LocalDateTime.parse()`.
+- `board` is a list of actions, each with its linked `things`. Every pictogram stores its `type` so it can be rebuilt exactly.
 
 **Data access interfaces**
 
@@ -396,23 +452,36 @@ The caregiver can then choose between:
 
 ```mermaid
 classDiagram
+    class WordType {
+        <<enumeration>>
+        ACTION
+        THING
+    }
     class Pictogram {
         -int id
         -String label
         -String imageLocation
+        -WordType type
         +getId() int
         +getLabel() String
         +getImageLocation() String
+        +getType() WordType
+        +isAction() boolean
+        +isThing() boolean
     }
     class CommunicationBoard {
-        +int DEFAULT_CAPACITY$
-        -int capacity
-        -List~Pictogram~ pictograms
-        +addPictogram(Pictogram) void
-        +removePictogram(Pictogram) void
-        +contains(Pictogram) boolean
+        +int MAX_ACTIONS$
+        +int MAX_THINGS_PER_ACTION$
+        -Map~Pictogram, List~ actions
+        +addAction(Pictogram) void
+        +removeAction(Pictogram) void
+        +addThing(Pictogram action, Pictogram thing) void
+        +removeThing(Pictogram action, Pictogram thing) void
+        +containsAction(Pictogram) boolean
         +isFull() boolean
-        +getPictograms() List~Pictogram~
+        +getActions() List~Pictogram~
+        +getThings(Pictogram action) List~Pictogram~
+        +hasThings(Pictogram action) boolean
     }
     class CommunicationDraft {
         -String sentenceStarter
@@ -443,7 +512,9 @@ classDiagram
     }
     ChildProfile "1" *-- "1" CommunicationBoard : board
     ChildProfile "1" *-- "0..*" CommunicationMessage : history
-    CommunicationBoard "1" o-- "0..6" Pictogram : pictograms
+    CommunicationBoard "1" o-- "0..6" Pictogram : actions
+    CommunicationBoard "1" o-- "0..*" Pictogram : things (max 6 per action)
+    Pictogram --> WordType : type
     CommunicationMessage "1" o-- "1..*" Pictogram : selectedPictograms
     CommunicationDraft "1" o-- "0..*" Pictogram : selectedPictograms
     CommunicationDraft ..> CommunicationMessage : builds
@@ -451,6 +522,10 @@ classDiagram
 
 - A `ChildProfile` owns one `CommunicationBoard` and the message history (composition).
 - Boards, drafts and messages refer to `Pictogram`s, which can appear in several places (aggregation).
+- A `CommunicationDraft` builds an immutable `CommunicationMessage`.
+- A `ChildProfile` owns one `CommunicationBoard` and the message history (composition).
+- The board maps each action to its related things; boards, drafts and messages all refer to `Pictogram`s, which can appear in several places (aggregation).
+- Each `Pictogram` has a `WordType` (`ACTION` or `THING`).
 - A `CommunicationDraft` builds an immutable `CommunicationMessage`.
 
 #### Data Access
@@ -536,7 +611,6 @@ AACorn is currently in **Phase 1: Framework**.
 
 - ARASAAC integration
 - Swing GUI
-- UML and Clean Architecture design
 - JSON persistence implementation
 - communication history
 
