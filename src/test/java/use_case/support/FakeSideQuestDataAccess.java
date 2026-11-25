@@ -32,7 +32,7 @@ public class FakeSideQuestDataAccess implements
 
     /** A valid side quest with the given name and EXP. */
     public static SideQuest quest(String name, int exp) {
-        return new SideQuest(name, "description", "indoor", 0, 1, exp,
+        return new SideQuest(name, name, "indoor", "free", "under_30_minutes", exp,
                 new Location(43.66, -79.39), List.of("food"));
     }
 }
