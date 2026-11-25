@@ -3,73 +3,72 @@
 
 autonumber
 
-participant "TaskFormView" as View
-participant "TaskController" as Controller
-participant "TaskValidator" as Validator
-participant "TaskService" as Service
-participant "TaskRepository" as Repo
-database "Local Storage\n(JSON / SQLite)" as Storage
-participant "MonitoringView" as Monitor
+participant "CreateTaskView" as View
+participant "CreateTaskController" as Controller
+participant "CreateTaskInteractor" as Interactor
+participant "CreateTaskValidator" as Validator
+participant "CreateTaskDataAccessInterface" as DAO
+database "Local Storage\n(JSON)" as Storage
+participant "CreateTaskOutputBoundary" as OutputBoundary
+participant "CreateTaskPresenter" as Presenter
+participant "CreateTaskViewModel" as ViewModel
 
 == Input Data ==
 
-View -> Controller: createTask(TaskInput)
-note right of View
-  **TaskInput**
-  userId (from active session)
-  title, description, deadline
-  estimatedHours (optional)
-  difficultyLevel (optional enum)
-end note
+View -> Controller: execute(userId, title, description,\ndeadline, estimatedHours, difficultyLevel)
+Controller -> Controller: inputData = new CreateTaskInputData(...)
+Controller -> Interactor: execute(inputData)
 
 == Apply Defaults ==
 
-Controller -> Service: createTask(TaskInput)
 opt estimatedHours not provided
-    Service -> Service: estimatedHours = 10
+    Interactor -> Interactor: estimatedHours = 10
 end
 opt difficultyLevel not provided
-    Service -> Service: difficultyLevel = AVERAGE
+    Interactor -> Interactor: difficultyLevel = AVERAGE
 end
 
 == Validation ==
 
-Service -> Validator: validate(TaskInput)
-Validator --> Service: ValidationResult
+Interactor -> Validator: validate(inputData)
+Validator --> Interactor: ValidationResult
 
 alt estimatedHours is not a positive number
-    Service --> Controller: ValidationError("Hours must be positive")
-    Controller --> View: Show error, request valid value
+    Interactor -> OutputBoundary: prepareFailView("Hours must be positive")
+    OutputBoundary -> Presenter: prepareFailView("Hours must be positive")
+    Presenter -> ViewModel: setError("Hours must be positive")
+    Presenter -> ViewModel: firePropertyChanged()
+    ViewModel --> View: propertyChange(evt) [displays error]
+
 else deadline is missing or invalid
-    Service --> Controller: ValidationError("Invalid or missing deadline")
-    Controller --> View: Show error, task not saved
+    Interactor -> OutputBoundary: prepareFailView("Invalid or missing deadline")
+    OutputBoundary -> Presenter: prepareFailView("Invalid or missing deadline")
+    Presenter -> ViewModel: setError("Invalid or missing deadline")
+    Presenter -> ViewModel: firePropertyChanged()
+    ViewModel --> View: propertyChange(evt) [displays error]
+
 else input is valid
 
     == Create Entity ==
 
-    Service -> Service: taskId = generateUniqueId()
-    Service -> Service: new AcademicTask(taskId, userId, title,\ndescription, deadline, estimatedHours,\ndifficultyLevel, completionProgress = 0%)
+    Interactor -> Interactor: taskId = generateUniqueId()
+    Interactor -> Interactor: task = new StudentTask(taskId, userId, title,\ndescription, deadline, estimatedHours,\ndifficultyLevel, completionProgress = 0%)
 
     == Persist ==
 
-    Service -> Repo: save(AcademicTask)
-    Repo -> Storage: write AcademicTask record
-    Storage --> Repo: write successful
-    Repo --> Service: saved AcademicTask
+    Interactor -> DAO: save(task)
+    DAO -> Storage: write StudentTask record
+    Storage --> DAO: write successful
+    DAO --> Interactor: saved StudentTask
 
-    == Output Data ==
+    == Output Data (Success Path) ==
 
-    Service --> Controller: TaskCreatedResult(AcademicTask)
-    Controller --> View: Confirmation: task successfully created
-    Controller -> Monitor: refresh(userId)
-    Monitor -> Repo: findByUserId(userId)
-    Repo -> Storage: read tasks
-    Storage --> Repo: AcademicTask list
-    Repo --> Monitor: AcademicTask list
-    note right of Monitor
-      Saved tasks are also restored from
-      storage when the app restarts.
-    end note
+    Interactor -> Interactor: outputData = new CreateTaskOutputData(task)
+    Interactor -> OutputBoundary: prepareSuccessView(outputData)
+    OutputBoundary -> Presenter: prepareSuccessView(outputData)
+    Presenter -> ViewModel: setState(updatedTaskState)
+    Presenter -> ViewModel: firePropertyChanged()
+    ViewModel --> View: propertyChange(evt) [displays confirmation & updates list]
 end
 
 == Cancel Task Creation ==
@@ -77,8 +76,11 @@ end
 View -> Controller: cancelCreation()
 Controller --> View: Request cancellation confirmation
 View -> Controller: confirmCancellation()
-Controller -> Service: discardDraft(TaskInput)
-Service --> Controller: Draft discarded (nothing persisted)
-Controller --> View: Task not saved, use case ends
+Controller -> Interactor: discardDraft(inputData)
+Interactor -> OutputBoundary: prepareCancelView()
+OutputBoundary -> Presenter: prepareCancelView()
+Presenter -> ViewModel: clearDraftState()
+Presenter -> ViewModel: firePropertyChanged()
+ViewModel --> View: propertyChange(evt) [closes form, nothing persisted]
 
 @enduml

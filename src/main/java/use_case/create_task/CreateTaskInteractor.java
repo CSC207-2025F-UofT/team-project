@@ -31,11 +31,6 @@ public class CreateTaskInteractor implements CreateTaskInputBoundary {
         String description = inputData.getDescription() == null ? "" : inputData.getDescription().trim();
         LocalDate deadline = inputData.getDeadline();
 
-        if (title.isEmpty()) {
-            presenter.prepareFailView("Task title cannot be empty.");
-            return;
-        }
-
         if (deadline == null) {
             presenter.prepareFailView("Task deadline is missing or invalid.");
             return;
