@@ -8,8 +8,7 @@ import use_case.PhotoAccessInterface;
 import use_case.TripAccessException;
 import use_case.TripAccessInterface;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.time.*;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -36,6 +35,9 @@ public class AnalyticsUseCase implements DashboardInputBoundary {
         try {
             switch (analyticsType) {
                 case MOST_VISITED: mostVisited(dashboardInputData);
+                break;
+                case PHOTO_ACTIVITY: photoActivity(dashboardInputData);
+                break;
             }
         } catch (PhotoAccessException | TripAccessException e) {
             presenter.prepareFailureView("Access to Photos or Trips Failed:\n" + e.getMessage());
@@ -52,6 +54,35 @@ public class AnalyticsUseCase implements DashboardInputBoundary {
         LocationInfoType locationType = locationInfoType.orElse(LocationInfoType.COUNTRY); // default location type
         data.addDashboardItem(computeMostVisited(locationType));
         presenter.prepareSuccessView(data);
+    }
+
+    private void photoActivity(DashboardInputData dashboardInputData) {
+        AnalyticsOptions.TimeGrouping grouping = ((DashboardInputDataCatalog.PhotoActivityInputData) dashboardInputData)
+                .grouping()
+                .orElse(AnalyticsOptions.TimeGrouping.MONTH);
+        Map<LocalDateTime, Integer> dateToCount = photoAccess.getPhotos().stream()
+                .collect(
+                        Collectors.groupingBy(
+                                photo -> smoothenDate(photo.getTime(), grouping),
+                                Collectors.summingInt(photo -> 1))
+                );
+        DashboardItem item = (DashboardItem) (new DashboardOutputDataCatalog.PhotoActivity(grouping, dateToCount));
+        DashboardOutputData data = new DashboardOutputData(AnalyticsType.PHOTO_ACTIVITY);
+        data.addDashboardItem(item);
+        presenter.prepareSuccessView(data);
+    }
+
+    private LocalDateTime smoothenDate(LocalDateTime localDateTime, AnalyticsOptions.TimeGrouping grouping) {
+        switch (grouping) {
+            case MONTH: return YearMonth.from(localDateTime)
+                    .atDay(1)
+                    .atStartOfDay();
+            case YEAR: return Year.from(localDateTime)
+                    .atMonth(1)
+                    .atDay(1)
+                    .atStartOfDay();
+            default: throw new IllegalArgumentException("Unknown grouping: " + grouping);
+        }
     }
 
     private DashboardOutputDataCatalog.MostVisited computeMostVisited(LocationInfoType locationInfoType) {

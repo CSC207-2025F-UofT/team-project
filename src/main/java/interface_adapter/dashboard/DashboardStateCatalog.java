@@ -24,4 +24,16 @@ public class DashboardStateCatalog {
             String label,
             List<String> optionLabels
     ) implements DashboardItemState {}
+
+    public record LinePlotState(
+            List<Integer> x_vals,
+            List<Integer> y_vals,
+            List<String> dates,
+            List<Integer> counts
+    ) implements DashboardItemState {}
+
+    public record HeadingState(
+            String text,
+            float size
+    ) implements DashboardItemState {}
 }

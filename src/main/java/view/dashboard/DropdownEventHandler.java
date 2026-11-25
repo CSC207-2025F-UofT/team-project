@@ -5,6 +5,7 @@ import entity.LocationInfoType;
 import interface_adapter.dashboard.DashboardController;
 
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * Handle a dropdown selection.
@@ -30,6 +31,6 @@ public class DropdownEventHandler implements EventHandler<DropdownEventPacket> {
                 "City", LocationInfoType.CITY,
                 "Continent", LocationInfoType.CONTINENT
         );
-        controller.requestMostVisitedAnalytics(typeMap.get(eventPacket.selected()));
+        controller.requestMostVisitedAnalytics(Optional.of(typeMap.get(eventPacket.selected())));
     }
 }

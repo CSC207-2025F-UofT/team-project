@@ -1,12 +1,15 @@
 package interface_adapter.dashboard;
 
 import entity.LocationInfoType;
-import use_case.dashboard.DashboardOutputDataCatalog;
-import use_case.dashboard.AnalyticsType;
-import use_case.dashboard.DashboardOutputBoundary;
-import use_case.dashboard.DashboardOutputData;
+import use_case.dashboard.*;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.Year;
+import java.time.YearMonth;
+import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
@@ -21,6 +24,7 @@ public class DashboardPresenter implements DashboardOutputBoundary {
         AnalyticsType analyticsType = dashboardOutputData.getAnalyticsType();
         switch (analyticsType) {
             case MOST_VISITED -> mostVisited(dashboardOutputData);
+            case PHOTO_ACTIVITY -> photoActivity(dashboardOutputData);
         }
     }
     public void prepareFailureView(String msg) {
@@ -42,6 +46,48 @@ public class DashboardPresenter implements DashboardOutputBoundary {
         DashboardState currentState = buildMostVisitedState(typeOfPlace, renderedEntries);
         dashboardViewModel.setState(currentState);
         dashboardViewModel.firePropertyChanged();
+    }
+
+    private void photoActivity(DashboardOutputData dashboardOutputData) {
+        DashboardOutputDataCatalog.PhotoActivity data = (DashboardOutputDataCatalog.PhotoActivity) dashboardOutputData.getDashboardItems().getFirst();
+        Map<LocalDateTime, Integer> dateToCount = data.dateToCount();
+        AnalyticsOptions.TimeGrouping grouping = data.grouping();
+        LocalDateTime earliest = dateToCount.keySet().stream()
+                .sorted().toList().getFirst();
+        List<Integer> x_vals = new ArrayList<>();
+        List<Integer> y_vals = new ArrayList<>();
+        List<String> dates = new ArrayList<>();
+        List<Integer> counts = new ArrayList<>();
+
+        dateToCount.entrySet().stream()
+                .sorted(Comparator.comparing(Map.Entry::getKey))
+                .forEach(entry -> {
+                    LocalDateTime date = entry.getKey();
+                    x_vals.add(dateToIndex(date, grouping, earliest));
+                    y_vals.add(entry.getValue());
+                    dates.add(date.toString());
+                    counts.add(entry.getValue());
+                });
+
+        DashboardStateCatalog.LinePlotState linePlotState = new DashboardStateCatalog.LinePlotState(x_vals, y_vals, dates, counts);
+        DashboardStateCatalog.NestedState nestedState = new DashboardStateCatalog.NestedState(
+                List.of(
+                        new DashboardStateCatalog.HeadingState("Your photo activity (counts) by " + resolveGroupingString(grouping), 15f),
+                        linePlotState
+                )
+        );
+        DashboardState state =  new DashboardState();
+        state.addItemState(nestedState);
+        dashboardViewModel.setState(state);
+        dashboardViewModel.firePropertyChanged();
+    }
+
+    private int dateToIndex(LocalDateTime date, AnalyticsOptions.TimeGrouping timeGrouping, LocalDateTime start) {
+        switch (timeGrouping) {
+            case YEAR: return Math.toIntExact(ChronoUnit.YEARS.between(Year.from(start), Year.from(date)));
+            case MONTH: return Math.toIntExact(ChronoUnit.MONTHS.between(YearMonth.from(start), YearMonth.from(date)));
+            default: throw new IllegalArgumentException("Unsupported Time Grouping.");
+        }
     }
 
     private DashboardState buildMostVisitedState(String typeOfPlace, List<List<String>> renderedEntries) {
@@ -78,5 +124,13 @@ public class DashboardPresenter implements DashboardOutputBoundary {
                 LocationInfoType.COUNTY, "County"
         );
         return stringMap.get(locationInfoType);
+    }
+
+    private String resolveGroupingString(AnalyticsOptions.TimeGrouping timeGrouping) {
+        Map<AnalyticsOptions.TimeGrouping, String> stringMap = Map.of(
+                AnalyticsOptions.TimeGrouping.YEAR, "year",
+                AnalyticsOptions.TimeGrouping.MONTH, "month"
+        );
+        return stringMap.get(timeGrouping);
     }
 }
