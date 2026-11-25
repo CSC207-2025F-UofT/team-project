@@ -4,8 +4,6 @@ import java.util.List;
 import java.util.ArrayList;
 
 public class AddSideQuestInputData {
-    private final String id;
-    private final String name;
     private final String questDescription;
     private final String isIndoor;
     private final double budget;

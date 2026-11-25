@@ -10,19 +10,19 @@ import use_case.find_nearby_quests.QuestLocationDataAccessInterface;
  * Lets the map (Use Case 4) read quests from the CSV quest storage without that
  * storage class knowing about the map (Adapter pattern).
  *
- * <p>It adapts {@link FileSideQuestDataAccessObject#getAllQuests()} to the one
+ * <p>It adapts {@link SideQuestDataAccessObject#getAllQuests()} to the one
  * operation the map needs. If the map's interface changes, only this class changes;
  * if the storage class changes, only this class has to follow.
  */
 public class FileQuestLocationDataAccess implements QuestLocationDataAccessInterface {
-    private final FileSideQuestDataAccessObject storage;
+    private final SideQuestDataAccessObject storage;
 
     /**
      * Creates the adapter.
      *
      * @param storage the CSV quest storage to read from
      */
-    public FileQuestLocationDataAccess(FileSideQuestDataAccessObject storage) {
+    public FileQuestLocationDataAccess(SideQuestDataAccessObject storage) {
         this.storage = storage;
     }
 
