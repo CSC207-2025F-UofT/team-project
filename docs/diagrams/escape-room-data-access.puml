@@ -1,0 +1,319 @@
+@startuml
+!pragma layout smetana
+title Escape Room Adventure | Templates and complete save state
+left to right direction
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam packageStyle rectangle
+skinparam classAttributeIconSize 0
+skinparam nodesep 30
+skinparam ranksep 40
+hide empty members
+
+package "use_case" #EDF7EC {
+  class StartGameInteractor {
+    - context: GameContext
+    - factory: GameFactory
+    - templates: StoryTemplateDataAccessInterface
+    - assembler: GameOutputAssembler
+    - output: GameOutputBoundary
+    + listStories(): void
+    + start(templateId: String): void
+  }
+  class TriviaInteractor {
+    - context: GameContext
+    - triviaSource: TriviaDataAccessInterface
+    - assembler: GameOutputAssembler
+    - output: GameOutputBoundary
+    + open(lockId: String): void
+    + submit(lockId: String, answer: String): void
+  }
+  class SaveGameInteractor {
+    - context: GameContext
+    - saves: GameSaveDataAccessInterface
+    - assembler: GameOutputAssembler
+    - output: GameOutputBoundary
+    + save(): void
+  }
+  class LoadGameInteractor {
+    - context: GameContext
+    - factory: GameFactory
+    - templates: StoryTemplateDataAccessInterface
+    - saves: GameSaveDataAccessInterface
+    - assembler: GameOutputAssembler
+    - output: GameOutputBoundary
+    + load(): void
+  }
+  class GameContext {
+    - currentGame: Optional<Game>
+    + current(): Optional<Game>
+    + requireCurrent(): Game
+    + replace(validatedCandidate: Game): void
+  }
+  class GameFactory {
+    - random: Random
+    + create(template: StoryTemplate): Game
+    + restore(template: StoryTemplate, saved: GameSnapshot): Game
+  }
+  interface StoryTemplateDataAccessInterface {
+    + listTemplates(): List<StorySummary>
+    + load(templateId: String): StoryTemplate
+  }
+  interface TriviaDataAccessInterface {
+    + fetchQuestion(spec: TriviaSpec): Trivia
+  }
+  interface GameSaveDataAccessInterface {
+    + save(snapshot: GameSnapshot): void
+    + load(): Optional<GameSnapshot>
+  }
+  class DataAccessException {
+    + DataAccessException(message: String, cause: Throwable)
+  }
+}
+
+package "entity" #FFF4DB {
+  class Game <<reference>> {
+    + snapshot(): GameSnapshot
+  }
+  class StoryTemplate <<immutable configuration>> {
+    + id: String
+    + version: int
+    + title: String
+    + background: String
+    + rooms: List<RoomDefinition>
+    + items: List<CollectableDefinition>
+    + startingRoomId: String
+    + randomizationRules: Map<String, RandomizationRule>
+  }
+  class RoomDefinition <<immutable configuration>> {
+    + id: String
+    + name: String
+    + description: String
+    + interactables: List<InteractableDefinition>
+    + nextRoomId: Optional<String>
+    + doorLock: ItemLockDefinition
+    + exitChallenge: TriviaLockDefinition
+  }
+  class CollectableDefinition <<immutable configuration>> {
+    + id: String
+    + name: String
+    + description: String
+    + roomId: String
+    + initiallyRevealed: boolean
+  }
+  class ItemLockDefinition <<immutable configuration>> {
+    + id: String
+    + description: String
+    + successText: String
+    + requiredItemIds: Set<String>
+  }
+  class TriviaLockDefinition <<immutable configuration>> {
+    + id: String
+    + description: String
+    + successText: String
+    + spec: TriviaSpec
+    + initialTrivia: Optional<Trivia>
+  }
+  class TriviaSpec <<immutable>> {
+    + source: TriviaSource
+    + category: Optional<String>
+    + difficulty: Optional<String>
+  }
+  enum TriviaSource {
+    TEMPLATE
+    API
+  }
+  class Trivia <<reference>> {
+    - prompt: String
+    - choices: List<String>
+    - expectedAnswer: String
+    + prompt(): String
+    + choices(): List<String>
+    + isCorrect(answer: String): boolean
+    ~ snapshot(): TriviaState
+  }
+  package "state" #FFF9EB {
+    class GameSnapshot <<immutable>> {
+      + schemaVersion: int = 4
+      + templateId: String
+      + templateVersion: int
+      + currentRoomId: String
+      + status: GameStatus
+      + generatedValues: Map<String, String>
+      + items: List<ItemState>
+      + objects: List<ObjectState>
+      + locks: List<LockState>
+    }
+    class ItemState <<immutable>> {
+      + collectableId: String
+      + location: ItemLocation
+      + roomId: Optional<String>
+      + revealed: boolean
+    }
+    enum ItemLocation {
+      ROOM
+      INVENTORY
+    }
+    class ObjectState <<immutable>> {
+      + objectId: String
+      + values: Map<String, String>
+      + completedActionIds: Set<String>
+    }
+    class LockState <<immutable>> {
+      + lockId: String
+      + unlocked: boolean
+      + trivia: Optional<TriviaState>
+    }
+    class TriviaState <<immutable>> {
+      + prompt: String
+      + choices: List<String>
+      + expectedAnswer: String
+    }
+    enum GameStatus {
+      ACTIVE
+      ESCAPED
+    }
+  }
+}
+
+package "data_access" #F7ECF7 {
+  class JsonStoryTemplateDataAccessObject {
+    - templateDirectory: Path
+    + listTemplates(): List<StorySummary>
+    + load(templateId: String): StoryTemplate
+  }
+  class HttpTriviaDataAccessObject {
+    - httpClient: HttpClient
+    + fetchQuestion(spec: TriviaSpec): Trivia
+  }
+  class JsonGameSaveDataAccessObject {
+    - saveFile: Path
+    + save(snapshot: GameSnapshot): void
+    + load(): Optional<GameSnapshot>
+    - writeTemporary(snapshot: GameSnapshot): Path
+    - replaceSave(temporaryFile: Path): void
+    - readSnapshot(): GameSnapshot
+  }
+}
+
+StartGameInteractor --> StoryTemplateDataAccessInterface : templates
+StartGameInteractor --> GameFactory : factory
+StartGameInteractor --> GameContext : context
+TriviaInteractor --> TriviaDataAccessInterface : triviaSource
+SaveGameInteractor --> GameContext : context
+SaveGameInteractor --> GameSaveDataAccessInterface : saves
+LoadGameInteractor --> GameContext : context
+LoadGameInteractor --> GameSaveDataAccessInterface : saves
+LoadGameInteractor --> StoryTemplateDataAccessInterface : templates
+LoadGameInteractor --> GameFactory : factory
+GameContext --> Game : currentGame
+GameFactory ..> StoryTemplate : instantiates / validates
+GameFactory ..> GameSnapshot : restores candidate
+Game ..> GameSnapshot : captures all rooms and item containers
+StoryTemplate *-- RoomDefinition : rooms
+StoryTemplate *-- CollectableDefinition : items
+RoomDefinition *-- ItemLockDefinition : doorLock
+RoomDefinition *-- TriviaLockDefinition : exitChallenge
+TriviaLockDefinition --> TriviaSpec : spec
+TriviaLockDefinition --> Trivia : initialTrivia
+GameSnapshot *-- ItemState : items
+GameSnapshot *-- ObjectState : objects
+GameSnapshot *-- LockState : locks
+LockState --> TriviaState : trivia
+Trivia ..> TriviaState : snapshot
+note right of Trivia
+  Compare trimmed answers case-insensitively.
+  Leading zeroes and internal characters stay significant.
+end note
+TriviaSpec --> TriviaSource
+ItemState --> ItemLocation
+GameSnapshot --> GameStatus
+JsonStoryTemplateDataAccessObject ..|> StoryTemplateDataAccessInterface
+HttpTriviaDataAccessObject ..|> TriviaDataAccessInterface
+JsonGameSaveDataAccessObject ..|> GameSaveDataAccessInterface
+
+note right of StoryTemplate
+Each room defines its objects, actions, one optional successor and two gates.
+Starting at startingRoomId, successors visit EVERY room exactly once
+and end at an empty nextRoomId. No broken references, self-loops,
+cycles, branching, unreachable rooms or backward navigation are allowed.
+Item requirements must be obtainable here or earlier on that path,
+without passing either gate of the room that requires them.
+Room authors make required items appear before they can be left behind.
+Each Action.appearingItemIds set is immutable and names its own room's items.
+Objects have no lock field; they complete their own actions.
+ItemLockDefinition requires a nonempty set of configured item IDs.
+All items are instantiated in ROOM at their configured roomId.
+New-game construction enters only the starting room before publication,
+auto-acquiring its initiallyRevealed items; future-room visible items stay ROOM.
+Factory instantiates independent mutable runtime rooms/items/locks.
+New TEMPLATE Trivia requires an authored initial question;
+new API Trivia starts uninitialized and is fetched on demand.
+Restored API Trivia reuses the retained saved question.
+Conditions/effects and text configuration are immutable values.
+Remaining definition fields are specified in escape-room-class-diagram.md.
+end note
+
+note bottom of ItemState
+Every configured item has exactly one authoritative location:
+ROOM = its configured owning room; INVENTORY = Inventory.
+roomId exists exactly for ROOM and must match the configured owner.
+INVENTORY items have no roomId and must be revealed.
+Successful action appearances and first entry transfer the SAME items
+ROOM -> INVENTORY and set revealed=true. Already-held IDs are skipped.
+Hidden ROOM items may remain false; unentered visible ROOM items may be true.
+Actions and door checks leave held items in inventory.
+No separate inventory list duplicates these saved locations.
+end note
+
+note bottom of GameFactory
+create generates values once, resolving descriptions/results
+and authored answers consistently into independent worlds.
+The new-game Game constructor calls private enterRoom(startingRoomId),
+preflighting all visible-item transfers before publishing the world.
+Start names the resulting brand-new inventory once in its initial message.
+restore requires schema 4 and compatible template ID/version.
+Rebuild successor structure from that matching immutable template.
+Increment template.version whenever successors or appearance rules change;
+reject incompatible versions without migration.
+Reject previous schemas without migration. Validate complete global
+ID coverage, item locations, object values/one-shot action IDs,
+two room-owned locks per room and all generated values.
+An unlocked ItemLock requires ALL its requiredItemIds in INVENTORY.
+A locked door with every required item held remains valid:
+unlocking requires an explicit command, not automatic inference.
+Preserve both gates in either completion order.
+Validate lock subtype/question compatibility and current room/status.
+Every predecessor of the saved current room must have BOTH gates passed;
+current-room gates remain independent and may be incomplete.
+An unreachable saved position is invalid;
+ESCAPED requires currentRoom.nextRoomId empty and both gates passed.
+Reconstruct a separate candidate through validated constructors.
+Restore replays NO action and performs NO API call or RNG.
+The state constructor restores saved locations exactly: no enterRoom,
+automatic acquisition, duplicate item or replayed obtained notification.
+Only a completely validated candidate replaces the context.
+end note
+
+note bottom of LockState
+Save exactly every room's door ItemLock and exit TriviaLock.
+Retain the original question and expected answer for initialized Trivia.
+ItemLock has no question; an unlocked TriviaLock must retain one.
+TEMPLATE questions must match the template resolved with saved values.
+API questions retain their original saved content without fetching.
+Snapshot includes hidden items and state from unvisited rooms.
+Schema 4 values are unchanged: no successor list or final-room flag is saved.
+Appearance rules stay in the template; no acquisition ledger is saved.
+Description text is derived from restored object state and template.
+Expected answers never enter application display data.
+end note
+
+note bottom of JsonGameSaveDataAccessObject
+One manual save: injected Path, default data/savegame.json.
+Write and close a same-directory temp file, then atomically replace.
+On failure preserve the previous save; clean up the temporary file.
+Unsupported atomic replacement is a reported save failure.
+Missing file -> Optional.empty(); malformed/unreadable ->
+use-case-owned DataAccessException. JSON/HTTP/Path stay in adapters.
+end note
+@enduml

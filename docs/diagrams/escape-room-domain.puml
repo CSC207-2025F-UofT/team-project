@@ -1,0 +1,321 @@
+@startuml
+!pragma layout smetana
+title Escape Room Adventure | Unique items, automatic acquisition and room gates
+top to bottom direction
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam linetype polyline
+skinparam classAttributeIconSize 0
+skinparam classFontSize 15
+skinparam classAttributeFontSize 12
+skinparam ArrowColor #53657A
+skinparam classBorderColor #53657A
+skinparam classBackgroundColor #F3F7FC
+skinparam noteBackgroundColor #FFF8DD
+skinparam noteBorderColor #C4AD68
+skinparam nodesep 40
+skinparam ranksep 50
+hide empty members
+
+class Game <<aggregate root>> {
+  - templateId: String
+  - templateVersion: int
+  - name: String
+  - background: String
+  - rooms: Map<String, Room>
+  - inventory: Inventory
+  - currentRoomId: String
+  - status: GameStatus
+  - generatedValues: Map<String, String>
+  + name(): String
+  + background(): String
+  + status(): GameStatus
+  + currentRoom(): Room
+  + inventoryItems(): List<Collectable>
+  + itemDetails(itemIds: Set<String>): List<Collectable>
+  + interact(objectId: String, actionId: String,
+      itemId: Optional<String>): DomainResult
+  + useItems(lockId: String): DomainResult
+  + triviaFor(lockId: String): Optional<Trivia>
+  + triviaSpecFor(lockId: String): TriviaSpec
+  + installTrivia(lockId: String, trivia: Trivia): void
+  + submitAnswer(lockId: String, answer: String): DomainResult
+  + canMove(): boolean
+  + move(): DomainResult
+  + snapshot(): GameSnapshot
+  - preflightAcquisition(room: Room, itemIds: Set<String>): void
+  - acquireItems(room: Room, itemIds: Set<String>): List<Collectable>
+  - enterRoom(roomId: String): DomainResult
+}
+
+class Inventory {
+  - items: Map<String, Collectable>
+  + contains(itemId: String): boolean
+  + containsAll(itemIds: Set<String>): boolean
+  + require(itemId: String): Collectable
+  + items(): List<Collectable>
+  + itemIds(): Set<String>
+  ~ add(item: Collectable): void
+}
+
+class Collectable {
+  - id: String
+  - name: String
+  - description: String
+  - revealed: boolean
+  + id(): String
+  + name(): String
+  + description(): String
+  + isRevealed(): boolean
+  ~ reveal(): void
+}
+
+class Room {
+  - id: String
+  - name: String
+  - description: String
+  - collectables: Map<String, Collectable>
+  - interactables: Map<String, Interactable>
+  - nextRoomId: Optional<String>
+  - doorLock: ItemLock
+  - exitChallenge: TriviaLock
+  - stateAccess: Room.StateAccess
+  + id(): String
+  + name(): String
+  + describe(): String
+  + interactables(): List<Interactable>
+  + findInteractable(objectId: String): Optional<Interactable>
+  + nextRoomId(): Optional<String>
+  + isFinal(): boolean
+  + availableActions(itemIds: Set<String>): List<ActionOption>
+  + availableLocks(): List<Lock>
+  + doorLock(): ItemLock
+  + exitChallenge(): TriviaLock
+  + canLeave(): boolean
+  ~ requireLock(lockId: String): Lock
+  ~ findCollectable(itemId: String): Optional<Collectable>
+  ~ visibleCollectables(): List<Collectable>
+  ~ allCollectables(): List<Collectable>
+  ~ allLocks(): List<Lock>
+  ~ takeCollectable(itemId: String): Collectable
+  ~ prepareInteraction(objectId: String, actionId: String,
+      item: Optional<Collectable>): ActionPlan
+  ~ applyInteraction(plan: ActionPlan): DomainResult
+  - validatePlan(plan: ActionPlan): void
+}
+
+class Interactable {
+  - id: String
+  - name: String
+  - descriptionsByMode: Map<String, String>
+  - state: Map<String, String>
+  - completedActionIds: Set<String>
+  - actions: Map<String, Action>
+  + id(): String
+  + name(): String
+  + describe(): String
+  + actions(): List<Action>
+  + isActionCompleted(actionId: String): boolean
+  ~ stateValue(key: String): String
+  ~ acceptsStateValue(key: String, value: String): boolean
+  ~ setStateValue(key: String, value: String): void
+  ~ snapshot(): ObjectState
+  ~ prepare(actionId: String, item: Optional<Collectable>,
+      facts: RoomReadState): ActionPlan
+  ~ markCompleted(actionId: String): void
+}
+
+class Action {
+  - id: String
+  - label: String
+  - requiredItemId: Optional<String>
+  - appearingItemIds: Set<String> {readOnly}
+  - resultText: String
+  - repeatable: boolean
+  - preconditions: List<Condition>
+  - effects: List<Effect>
+  + id(): String
+  + label(): String
+  + requiresItem(): boolean
+  + appearingItemIds(): Set<String>
+  + resultText(): String
+  + isRepeatable(): boolean
+  + isAvailable(facts: RoomReadState,
+      itemIds: Set<String>): boolean
+  ~ prepare(objectId: String, facts: RoomReadState,
+      item: Optional<Collectable>): ActionPlan
+}
+
+abstract class Lock {
+  - id: String
+  - description: String
+  - successText: String
+  - unlocked: boolean
+  - kind: LockKind
+  + id(): String
+  + description(): String
+  + successText(): String
+  + isUnlocked(): boolean
+  + kind(): LockKind
+  {abstract} ~ snapshot(): LockState
+  # markUnlocked(): void
+}
+
+class ItemLock {
+  - requiredItemIds: Set<String>
+  + requiredItemIds(): Set<String>
+  ~ tryUnlock(inventory: Inventory): DomainResult
+  ~ snapshot(): LockState
+}
+
+class TriviaLock {
+  - spec: TriviaSpec
+  - trivia: Optional<Trivia>
+  + spec(): TriviaSpec
+  + needsTrivia(): boolean
+  + getTrivia(): Optional<Trivia>
+  ~ initializeTrivia(trivia: Trivia): void
+  ~ submitAnswer(answer: String): DomainResult
+  ~ snapshot(): LockState
+}
+
+class Trivia <<immutable value>> {
+  - prompt: String
+  - choices: List<String>
+  - expectedAnswer: String
+  + prompt(): String
+  + choices(): List<String>
+  + isCorrect(answer: String): boolean
+  ~ snapshot(): TriviaState
+}
+
+Game "1" *-- "1" Inventory : inventory
+Game "1" *-- "1..*" Room : rooms
+Inventory "0..1" o-- "0..*" Collectable : items
+Room "0..1" o-- "0..*" Collectable : collectables
+Room "1" *-- "0..*" Interactable : interactables
+Room "1" *-- "1" ItemLock : doorLock
+Room "1" *-- "1" TriviaLock : exitChallenge
+Interactable "1" *-- "0..*" Action : actions
+Lock <|-- ItemLock
+Lock <|-- TriviaLock
+ItemLock ..> Inventory : checks required IDs
+TriviaLock "1" *-- "0..1" Trivia : trivia
+
+note right of Inventory
+  Every configured item exists exactly once: in one ROOM
+  or in INVENTORY. Each configured item has one original room.
+  Actions and first room entry automatically transfer the SAME
+  appearing items into inventory and set revealed=true.
+  Preflight all IDs before any effects, completion or transfers.
+  Already-held IDs are skipped; no second copy is constructed.
+  Items remain in inventory when used by actions or the door.
+  Getters expose read-only copies, never mutable containers.
+end note
+
+note right of Lock
+  Each room owns exactly two independent gates:
+  its door ItemLock and its exit TriviaLock.
+  Interactables complete their own actions and own no locks.
+  Item and answer operations stay in the relevant subtype.
+  No public unconditional unlock() bypasses validation.
+  Already-unlocked is a no-op before item or answer checks.
+  ItemLock requires a nonempty set of configured item IDs.
+  tryUnlock checks inventory.containsAll(requiredItemIds)
+  against the actual inventory; passing a list of IDs is insufficient.
+end note
+
+note bottom of Room
+  One Room composes text-based objects, choices and gates.
+  canLeave = doorLock.isUnlocked AND exitChallenge.isUnlocked.
+  nextRoomId is the one configured successor; empty means final.
+  isFinal() derives from nextRoomId.isEmpty(), without a stored flag.
+  canMove() = ACTIVE AND currentRoom.canLeave().
+  The two gates may be completed in either order.
+  Neither gate's validation depends on the other gate's state.
+  allLocks includes exactly the door and exit Trivia;
+  availableActions excludes completed one-shot or inaccessible actions.
+  collectables contains only the remaining ROOM items.
+  findCollectable resolves those objects; visibleCollectables is internal.
+  takeCollectable may transfer a prevalidated previously hidden item.
+  Game.move() rechecks status and both gates, then preflights the
+  configured destination and its visible-item transfers before mutation.
+  A present nextRoomId calls enterRoom; empty sets ESCAPED.
+  Final completion cannot bypass either gate.
+  Escaped games reject mutations; no backward navigation is exposed.
+end note
+
+note bottom of Game
+  interact resolves any selected item from the actual inventory.
+  Prepare/validate the exact object/action plan, then preflight ALL
+  appearingItemIds: skip held IDs; otherwise require the current room's
+  remaining item. Missing targets abort before any mutation.
+  Commit applyInteraction then acquireItems as one serial command.
+  acquireItems uses takeCollectable / reveal / Inventory.add and returns
+  only newly transferred objects; other held items remain unchanged.
+  Append "Obtained: labels" to resultText only for these new transfers.
+  Repeatable appearances skip held IDs but may apply other effects;
+  changed records actual object/completion/location changes only.
+  itemDetails resolves requested IDs across all rooms and inventory;
+  it returns read-only metadata without exposing snapshot answers.
+  useItems resolves only the current room's door ItemLock
+  and delegates tryUnlock(inventory); no selected item list is trusted.
+  Trivia operations resolve only the current room's exit TriviaLock.
+  Wrong IDs, missing items, wrong answers and failed conditions
+  leave state unchanged. Commands run on the serial worker.
+end note
+
+note left of Game
+  New-game construction calls enterRoom(startingRoomId) before publication.
+  enterRoom preflights visibleCollectables, then commits room entry and
+  automatic acquisition. Future-room visible items stay ROOM until entry.
+  Start presents the brand-new inventory's obtained names once.
+  Final completion acquires no next-room items.
+  Restore uses a state constructor, never enterRoom or acquisition.
+  Rendering, getters, saving, loading and Trivia never grant or reannounce items.
+end note
+
+note bottom of Action
+  Interactable owns its actions and completedActionIds.
+  Only nonrepeatable actions record completion; repeatable actions may run again.
+  An optional requiredItemId must identify an item actually held.
+  appearingItemIds is immutable, may be empty and names own-room items.
+  Repeated references identify the same unique configured items.
+  Conditions and effects access object state only; effects never unlock gates.
+  Room validates state-effect targets; Game preflights appearance locations.
+  Validate the full plan and all transfers before effects/completion commit.
+  Descriptions and resultText carry story information.
+end note
+
+legend bottom left
+  + public   ~ domain-package operation   # protected   - private
+  GameStatus = ACTIVE | ESCAPED; LockKind = ITEM | TRIVIA.
+  DomainResult is immutable: { code: ResultCode, changed: boolean,
+    resultText: String }.
+  ActionOption is immutable: { objectId, actionId, label, requiresItem }.
+  ResultCode distinguishes missing/wrong items, wrong answers,
+  completed actions, unmet conditions and unmet exit gates.
+  Stored relationships are explicit fields; lines describe those SAME fields.
+  Entity/item/lock IDs are globally unique; action IDs are unique per object.
+  Trivia compares trimmed answers case-insensitively; leading zeroes remain significant.
+  Constructors validate references, nonempty ItemLock item sets,
+  exactly one original room per item, object/action pairs and local appearance IDs.
+  Successors form one finite path from startingRoomId through EVERY room
+  exactly once, ending with nextRoomId empty. Reject broken references,
+  self-loops, cycles, branching and unreachable rooms.
+  Required items are obtainable in this room or earlier on the path,
+  before either current-room gate; later-room dependencies are invalid.
+  Initial/restored state is complete before an aggregate becomes usable.
+  Save schema 4 stores ROOM | INVENTORY item locations, objects/actions,
+  locks/questions, generated values and game position/status.
+  Successors come from the matching immutable template, not the snapshot.
+  Every room preceding the restored current room must have both gates passed.
+  Change templateVersion whenever successors or appearance rules change.
+  Schema 4 adds no acquisition ledger; restore preserves saved locations exactly.
+  Previous schemas and invalid snapshots are rejected before publication.
+  Trivia.expectedAnswer stays private and is omitted from UI output.
+  Entities never import Swing, JSON, HTTP or application output models.
+  Behavior and data-access diagrams expand this same domain contract.
+endlegend
+@enduml

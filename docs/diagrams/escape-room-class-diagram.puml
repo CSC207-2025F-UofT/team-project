@@ -1,0 +1,286 @@
+@startuml
+!pragma layout smetana
+title Escape Room Adventure | Swing and application boundaries
+top to bottom direction
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam packageStyle rectangle
+skinparam classAttributeIconSize 0
+skinparam linetype ortho
+skinparam nodesep 25
+skinparam ranksep 30
+skinparam defaultFontName SansSerif
+hide empty members
+
+class GameView <<Swing>> #DDEBFF {
+  - controller: GameController
+  - viewModel: GameViewModel
+  - textArea: JTextArea
+  - optionsPanel: JPanel
+  - answerField: JTextField
+  + render(state: GameViewState): void
+}
+class AppBuilder <<composition root>> #DDEBFF {
+  + build(): GameView
+}
+class SwingCommandDispatcher #DDEBFF {
+  - worker: ExecutorService
+  - viewModel: GameViewModel
+  - uiDispatcher: UiDispatcher
+  - busy: AtomicBoolean
+  + dispatch(command: Runnable): void
+}
+class SwingUiDispatcher #DDEBFF {
+  + dispatch(update: Runnable): void
+}
+
+class GameController #EAF2FF {
+  - startGame: StartGameInputBoundary
+  - interactObject: InteractInputBoundary
+  - useItemOnLock: UseItemInputBoundary
+  - trivia: TriviaInputBoundary
+  - moveRoom: MoveInputBoundary
+  - saveGame: SaveGameInputBoundary
+  - loadGame: LoadGameInputBoundary
+  - commands: CommandDispatcher
+  + listStories(): void
+  + start(templateId: String): void
+  + interact(objectId: String, actionId: String,
+      itemId: Optional<String>): void
+  + useItems(lockId: String): void
+  + openTrivia(lockId: String): void
+  + submitAnswer(lockId: String, answer: String): void
+  + move(): void
+  + save(): void
+  + load(): void
+}
+interface CommandDispatcher #EAF2FF {
+  + dispatch(command: Runnable): void
+}
+interface UiDispatcher #EAF2FF {
+  + dispatch(update: Runnable): void
+}
+class GamePresenter #EAF2FF {
+  - viewModel: GameViewModel
+  - uiDispatcher: UiDispatcher
+  + present(output: GameOutputData): void
+}
+class GameViewModel #EAF2FF {
+  - state: GameViewState
+  - changes: PropertyChangeSupport
+  + getState(): GameViewState
+  + setState(state: GameViewState): void
+  + setBusy(busy: boolean): void
+  + addPropertyChangeListener(listener: PropertyChangeListener): void
+  + removePropertyChangeListener(listener: PropertyChangeListener): void
+}
+class GameViewState <<immutable UI data>> #EAF2FF {
+  + data: GameOutputData {readOnly}
+  + busy: boolean {readOnly}
+}
+
+interface UseItemInputBoundary #EDF7EC {
+  + execute(lockId: String): void
+}
+class UseItemInteractor #EDF7EC {
+  - context: GameContext
+  - assembler: GameOutputAssembler
+  - output: GameOutputBoundary
+  + execute(lockId: String): void
+}
+interface TriviaInputBoundary #EDF7EC {
+  + open(lockId: String): void
+  + submit(lockId: String, answer: String): void
+}
+class TriviaInteractor #EDF7EC {
+  - context: GameContext
+  - triviaSource: TriviaDataAccessInterface
+  - assembler: GameOutputAssembler
+  - output: GameOutputBoundary
+  + open(lockId: String): void
+  + submit(lockId: String, answer: String): void
+}
+interface GameOutputBoundary #EDF7EC {
+  + present(output: GameOutputData): void
+}
+class GameContext #EDF7EC {
+  - currentGame: Optional<Game>
+  + current(): Optional<Game>
+  + requireCurrent(): Game
+  + replace(validatedCandidate: Game): void
+}
+class GameOutputAssembler #EDF7EC {
+  + fromGame(game: Game, message: String,
+      activeLockId: Optional<String>): GameOutputData
+  + fromStories(stories: List<StorySummary>,
+      message: String): GameOutputData
+  + fromNoGame(message: String): GameOutputData
+}
+class GameOutputData <<immutable response>> #EDF7EC {
+  + roomId: Optional<String>
+  + roomTitle: String
+  + narrativeText: String
+  + objectDescriptions: List<String>
+  + inventory: List<ItemData>
+  + availableActions: List<ActionData>
+  + doorUnlocked: boolean
+  + exitTriviaPassed: boolean
+  + canMove: boolean
+  + finalRoom: boolean
+  + locks: List<LockData>
+  + activeTrivia: Optional<TriviaData>
+  + storyChoices: List<StorySummary>
+  + message: String
+  + escaped: boolean
+}
+class LockData <<immutable response>> #EDF7EC {
+  + lockId: String
+  + ownerId: String
+  + label: String
+  + kind: String
+  + unlocked: boolean
+  + requiredItems: List<ItemData>
+  + heldRequiredIds: Set<String>
+  + canUnlock: boolean
+}
+interface TriviaDataAccessInterface #EDF7EC {
+  + fetchQuestion(spec: TriviaSpec): Trivia
+}
+
+class Game <<domain reference>> #FFF4DB {
+  + currentRoom(): Room
+  + interact(objectId: String, actionId: String,
+      itemId: Optional<String>): DomainResult
+  + useItems(lockId: String): DomainResult
+  + itemDetails(itemIds: Set<String>): List<Collectable>
+  + triviaFor(lockId: String): Optional<Trivia>
+  + triviaSpecFor(lockId: String): TriviaSpec
+  + installTrivia(lockId: String, trivia: Trivia): void
+  + submitAnswer(lockId: String, answer: String): DomainResult
+  + canMove(): boolean
+  + move(): DomainResult
+}
+
+class HttpTriviaDataAccessObject #F7ECF7 {
+  - httpClient: HttpClient
+  + fetchQuestion(spec: TriviaSpec): Trivia
+}
+
+GameView -down-> GameController : controller
+GameView -down-> GameViewModel : viewModel
+GameController -down-> CommandDispatcher : commands
+SwingCommandDispatcher ..|> CommandDispatcher
+SwingUiDispatcher ..|> UiDispatcher
+GamePresenter --> UiDispatcher : uiDispatcher
+GamePresenter -down-> GameViewModel : viewModel
+GameViewModel *-- GameViewState : state
+GameController -down-> UseItemInputBoundary : useItemOnLock
+GameController -down-> TriviaInputBoundary : trivia
+UseItemInputBoundary <|.. UseItemInteractor
+TriviaInputBoundary <|.. TriviaInteractor
+UseItemInteractor --> GameContext : context
+TriviaInteractor --> GameContext : context
+UseItemInteractor --> GameOutputAssembler : assembler
+TriviaInteractor --> GameOutputAssembler : assembler
+UseItemInteractor --> GameOutputBoundary : output
+TriviaInteractor --> GameOutputBoundary : output
+GamePresenter ..|> GameOutputBoundary
+GameOutputAssembler ..> GameOutputData : creates
+GameOutputAssembler ..> LockData : creates
+GameOutputData ..> LockData : locks
+GameOutputAssembler ..> Game : reads
+GameContext -down-> Game : currentGame
+TriviaInteractor --> TriviaDataAccessInterface : triviaSource
+TriviaDataAccessInterface <|.. HttpTriviaDataAccessObject
+
+AppBuilder -[hidden]right-> GameView
+GameView -[hidden]down-> SwingCommandDispatcher
+SwingCommandDispatcher -[hidden]right-> SwingUiDispatcher
+GameController -[hidden]right-> GamePresenter
+UseItemInputBoundary -[hidden]right-> TriviaInputBoundary
+GameOutputAssembler -[hidden]down-> GameOutputData
+GameOutputData -[hidden]down-> LockData
+
+note bottom of GameController
+Seven input boundaries are constructor-injected.
+All seven pairs appear in escape-room-use-cases.puml.
+useItems(lockId) schedules useItemOnLock.execute(lockId).
+The domain checks the complete inventory.
+move() schedules moveRoom.execute(), with no destination input.
+Gate rules and automatic item transfers belong to Game.
+end note
+
+note bottom of LockData
+For ItemLock, requiredItems lists ALL exact IDs and labels.
+Game.itemDetails resolves labels across rooms + inventory;
+the assembler uses read-only metadata, never a snapshot.
+heldRequiredIds = required IDs intersect actual inventory.
+canUnlock = ACTIVE + accessible locked door + containsAll.
+Trivia: empty requiredItems / heldRequiredIds; canUnlock=false.
+end note
+
+note bottom of GameOutputData
+Java 11 immutable response types:
+ItemData(collectableId, label)
+ActionData(objectId, actionId, label, requiresItem)
+TriviaData(lockId, prompt, choices); no expected answer
+StorySummary(templateId, title, background)
+LockData describes the current Room's doorLock and exitChallenge.
+canMove = Game.canMove(); finalRoom = current Room.isFinal().
+Menu/no-game output sets canMove=false and finalRoom=false.
+The UI receives no successor ID or destination list.
+message displays action/result text plus only newly obtained item names.
+There is no available-item list or separate obtain command.
+end note
+
+note bottom of GameView
+Text + option buttons + answer field.
+Show required item names and which are held.
+Rebuild options after every result; send stable object/item/lock IDs.
+Options: inspect/actions, attempt door, Trivia,
+one movement button, save/load. Answers use the answer field.
+The movement button reads Next room or Escape from finalRoom,
+is enabled by canMove, and calls controller.move().
+end note
+
+note bottom of SwingCommandDispatcher
+One serial worker runs all game commands and HTTP/file work.
+SwingUiDispatcher posts model updates to the EDT.
+dispatch sets busy/guard before scheduling. finally posts an EDT
+completion callback AFTER the queued presenter output/render.
+That callback clears ViewModel busy and the atomic guard together;
+new commands remain rejected until the result has rendered.
+Presenter builds GameViewState INSIDE its EDT callback, preserving
+the model's CURRENT busy; worker-side busy is never captured.
+No Swing/executor types enter use_case or entity.
+end note
+
+note bottom of GameOutputAssembler
+Every command outcome produces fresh immutable output,
+including errors and changed=false, then presenter -> EDT
+model -> View render. Reads and rendering never acquire items.
+fromGame(game, message, activeLockId) keeps three arguments.
+Wrong answers retain the same active question; an uninitialized
+submit or API failure uses no active question.
+Load/refresh never repeat an Obtained notice for held items.
+end note
+
+legend bottom left
+  Dark blue = view / app: GameView, AppBuilder, SwingCommandDispatcher, SwingUiDispatcher.
+  Light blue = interface_adapter: GameController, GamePresenter, GameViewModel, GameViewState, CommandDispatcher, UiDispatcher.
+  Green = use_case; yellow = entity (full state in domain diagram); purple = data_access.
+  Repeated classes are focused views of the same types; constructors initialize all stored collaborators.
+  AppBuilder.build() injects the graph with local variables. GameView receives immutable UI data only.
+  Action.appearingItemIds names existing own-room items; Game preflights ALL acquisitions before applying effects.
+  Game automatically transfers new appearing items to inventory; already-held IDs are skipped without another notice.
+  New-game/first-entry visible items are acquired atomically before output; restore never replays room entry.
+  Effects change room object state only; inventory display and message are the existing acquisition output.
+  UseItem validates exact required IDs in the complete inventory; items remain held after success.
+  Trivia.open fetches and installs an API question once; submit reuses it. Errors permit retry.
+  Door ItemLock and room exit Trivia can complete in either order; actions do not unlock either gate.
+  Game.canMove() = ACTIVE AND Room.canLeave(); canLeave requires BOTH gates on the validated single path.
+  Game.move() preflights Room.nextRoomId before mutation: present -> next room; empty -> ESCAPED.
+  The immutable template defines one finite path covering every configured room once, with no revisits.
+  Game returns DomainResult(code, changed, resultText); interactors assemble fresh output.
+endlegend
+@enduml

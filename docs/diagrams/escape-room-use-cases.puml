@@ -1,0 +1,196 @@
+@startuml
+!pragma layout smetana
+title Escape Room Adventure | Seven focused use cases
+top to bottom direction
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam classAttributeIconSize 0
+skinparam classBackgroundColor #EDF7EC
+skinparam classBorderColor #53657A
+skinparam nodesep 25
+skinparam ranksep 30
+hide empty members
+
+class StartGameInteractor {
+  - context: GameContext
+  - factory: GameFactory
+  - templates: StoryTemplateDataAccessInterface
+  - assembler: GameOutputAssembler
+  - output: GameOutputBoundary
+  + listStories(): void
+  + start(templateId: String): void
+}
+class InteractInteractor {
+  - context: GameContext
+  - assembler: GameOutputAssembler
+  - output: GameOutputBoundary
+  + execute(objectId: String, actionId: String,
+      itemId: Optional<String>): void
+}
+class UseItemInteractor {
+  - context: GameContext
+  - assembler: GameOutputAssembler
+  - output: GameOutputBoundary
+  + execute(lockId: String): void
+}
+class TriviaInteractor {
+  - context: GameContext
+  - triviaSource: TriviaDataAccessInterface
+  - assembler: GameOutputAssembler
+  - output: GameOutputBoundary
+  + open(lockId: String): void
+  + submit(lockId: String, answer: String): void
+}
+class MoveInteractor {
+  - context: GameContext
+  - assembler: GameOutputAssembler
+  - output: GameOutputBoundary
+  + execute(): void
+}
+class SaveGameInteractor {
+  - context: GameContext
+  - saves: GameSaveDataAccessInterface
+  - assembler: GameOutputAssembler
+  - output: GameOutputBoundary
+  + save(): void
+}
+class LoadGameInteractor {
+  - context: GameContext
+  - factory: GameFactory
+  - templates: StoryTemplateDataAccessInterface
+  - saves: GameSaveDataAccessInterface
+  - assembler: GameOutputAssembler
+  - output: GameOutputBoundary
+  + load(): void
+}
+
+interface StartGameInputBoundary {
+  + listStories(): void
+  + start(templateId: String): void
+}
+interface InteractInputBoundary {
+  + execute(objectId: String, actionId: String,
+      itemId: Optional<String>): void
+}
+interface UseItemInputBoundary {
+  + execute(lockId: String): void
+}
+interface TriviaInputBoundary {
+  + open(lockId: String): void
+  + submit(lockId: String, answer: String): void
+}
+interface MoveInputBoundary {
+  + execute(): void
+}
+interface SaveGameInputBoundary {
+  + save(): void
+}
+interface LoadGameInputBoundary {
+  + load(): void
+}
+
+StartGameInteractor ..|> StartGameInputBoundary
+InteractInteractor ..|> InteractInputBoundary
+UseItemInteractor ..|> UseItemInputBoundary
+TriviaInteractor ..|> TriviaInputBoundary
+MoveInteractor ..|> MoveInputBoundary
+SaveGameInteractor ..|> SaveGameInputBoundary
+LoadGameInteractor ..|> LoadGameInputBoundary
+
+StartGameInteractor -[hidden]right-> InteractInteractor
+UseItemInteractor -[hidden]right-> TriviaInteractor
+TriviaInteractor -[hidden]right-> MoveInteractor
+SaveGameInteractor -[hidden]right-> LoadGameInteractor
+StartGameInputBoundary -[hidden]down-> UseItemInteractor
+StartGameInputBoundary -[hidden]down-> TriviaInteractor
+InteractInputBoundary -[hidden]down-> MoveInteractor
+UseItemInputBoundary -[hidden]down-> SaveGameInteractor
+TriviaInputBoundary -[hidden]down-> LoadGameInteractor
+
+note bottom of InteractInteractor
+Validate any supplied item against the real inventory.
+ActionPlan carries appearingItemIds for existing own-room items.
+Game preflights all new transfers before any state/completion change,
+then applies state effects and automatically acquires appearing items.
+Already-held IDs do not duplicate items or Obtained notices;
+legitimate repeatable state effects can still run.
+The action's requiredItemId is an exact ID, if present.
+Effects never unlock either departure gate; items stay held.
+end note
+
+note bottom of StartGameInteractor
+Factory.create constructs the new Game with starting-room entry
+and automatic visible-item acquisition before publishing it.
+Replace context only on success; the initial message names
+the brand-new game's inventory once. No getter acquires items.
+end note
+
+note bottom of UseItemInteractor
+execute(lockId) -> Game.useItems(lockId).
+Current Room.doorLock checks Inventory.containsAll(requiredItemIds).
+Enough items with wrong IDs still fail. Inventory stays unchanged.
+An already unlocked door is a no-op before requirement checks.
+Output lists all required item names and held required IDs.
+end note
+
+note bottom of TriviaInteractor
+Only current Room.exitChallenge is a TriviaLock.
+Open fetches once if needed and caches the question.
+Submit uses that question; API failure preserves state for retry.
+Trivia and ItemLock can complete in either order.
+Every open/submit outcome completes a fresh output/render cycle.
+Wrong answers retain the active prompt; uninitialized submit
+never fetches and has no prompt. API errors also have no prompt.
+end note
+
+note bottom of MoveInteractor
+execute() delegates to Game.move(), with no destination input.
+Game.canMove() = ACTIVE AND current Room.canLeave().
+canLeave requires doorLock unlocked AND exitChallenge passed.
+Preflight nextRoomId before mutation: present -> successor;
+empty -> ESCAPED. Invalid references preserve the current Game.
+Present successor: preflight visible-item acquisition, then enter
+and acquire atomically. Final completion acquires no extra items.
+Output canMove + finalRoom controls one Next room / Escape button.
+end note
+
+note bottom of SaveGameInteractor
+Capture the full snapshot, then persist through the save port.
+Report success only after persistence succeeds.
+Schema 4 stores ROOM / INVENTORY item locations,
+visibility, action progress, both gates and cached questions.
+Its physical shape is unchanged; topology is template-owned.
+No nextRoomId or duplicate final-room flag is saved.
+end note
+
+note bottom of LoadGameInteractor
+Read the save and matching template; restore and validate
+a candidate before context.replace(candidate).
+Missing/invalid saves preserve the current Game.
+Restore cached questions and either ordering of gate progress.
+The immutable template version changes with successor structure;
+appearance-item configuration must also be version-compatible.
+Every predecessor of the restored current Room must have both gates passed.
+Current-room gates may still be incomplete in either order.
+ESCAPED requires a final current Room and both gates passed.
+Restore uses state construction, never enterRoom/acquireItems.
+Loading and refresh do not reannounce items already held.
+end note
+
+legend bottom left
+  Seven focused input boundaries have seven implementations; every stored collaborator is shown and constructor-injected.
+  Gameplay/save fetch context.requireCurrent() on each call; no stale Game is cached after loading.
+  listStories / start / load also work before a game exists. Start/load replace only a validated candidate.
+  DomainResult(code, changed, resultText) / DomainException -> assembler -> output.present(GameOutputData).
+  EVERY outcome, including errors and changed=false, completes assembler -> presenter -> EDT model -> View render.
+  The final EDT completion clears UI busy and the admission guard together, after the result render.
+  No active game: assembler.fromNoGame(message). GameView receives response data only.
+  The assembler resolves required-item labels through Game.itemDetails(requiredItemIds), across rooms and inventory.
+  Story/API/save adapters implement use-case-owned interfaces. All commands run on the serial worker.
+  Fresh output includes descriptions, available actions, inventory, full door requirements and both gate states.
+  Movement output is canMove + finalRoom; menu/no-game output sets both false. No topology IDs enter UI output.
+  Start/load validates one finite path from the starting room covering every room once; reject cycles, invalid references and unreachable rooms.
+  Game owns automatic ROOM -> INVENTORY transfers; resultText appends only newly obtained item labels.
+  No independent acquisition command, acquisition ledger or new output field is introduced; schema 4 is unchanged.
+endlegend
+@enduml

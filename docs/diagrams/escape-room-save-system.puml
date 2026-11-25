@@ -1,0 +1,200 @@
+@startuml
+!pragma layout smetana
+title Escape Room Adventure | Manual save and load system
+left to right direction
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam packageStyle rectangle
+skinparam classAttributeIconSize 0
+skinparam nodesep 35
+skinparam ranksep 45
+hide empty members
+
+package "interface_adapter" #EAF2FF {
+  class GameController <<focused view>> {
+    - saveGame: SaveGameInputBoundary
+    - loadGame: LoadGameInputBoundary
+    - commands: CommandDispatcher
+    + save(): void
+    + load(): void
+  }
+  class GamePresenter <<implements GameOutputBoundary>> {
+    - viewModel: GameViewModel
+    - uiDispatcher: UiDispatcher
+    + present(output: GameOutputData): void
+  }
+}
+
+package "use_case" #EDF7EC {
+  interface SaveGameInputBoundary {
+    + save(): void
+  }
+  interface LoadGameInputBoundary {
+    + load(): void
+  }
+  class SaveGameInteractor {
+    - context: GameContext
+    - saves: GameSaveDataAccessInterface
+    - assembler: GameOutputAssembler
+    - output: GameOutputBoundary
+    + save(): void
+  }
+  class LoadGameInteractor {
+    - context: GameContext
+    - saves: GameSaveDataAccessInterface
+    - templates: StoryTemplateDataAccessInterface
+    - factory: GameFactory
+    - assembler: GameOutputAssembler
+    - output: GameOutputBoundary
+    + load(): void
+  }
+  interface GameSaveDataAccessInterface {
+    + save(snapshot: GameSnapshot): void
+    + load(): Optional<GameSnapshot>
+  }
+  interface StoryTemplateDataAccessInterface {
+    + listTemplates(): List<StorySummary>
+    + load(templateId: String): StoryTemplate
+  }
+  interface GameOutputBoundary {
+    + present(output: GameOutputData): void
+  }
+  class GameContext {
+    - currentGame: Optional<Game>
+    + current(): Optional<Game>
+    + requireCurrent(): Game
+    + replace(validatedCandidate: Game): void
+  }
+  class GameFactory {
+    - random: Random
+    + create(template: StoryTemplate): Game
+    + restore(template: StoryTemplate, saved: GameSnapshot): Game
+  }
+  class GameOutputAssembler {
+    + fromGame(game: Game, message: String,
+        activeLockId: Optional<String>): GameOutputData
+    + fromNoGame(message: String): GameOutputData
+  }
+  class DataAccessException <<application-owned error>>
+}
+
+package "entity / entity.state" as EntityStateLayer #FFF4DB {
+  class Game <<focused view>> {
+    + snapshot(): GameSnapshot
+  }
+  class GameSnapshot <<immutable>> {
+    + schemaVersion: int = 4
+    + templateId: String
+    + templateVersion: int
+    + currentRoomId: String
+    + status: GameStatus
+    + generatedValues: Map<String, String>
+    + items: List<ItemState>
+    + objects: List<ObjectState>
+    + locks: List<LockState>
+  }
+}
+
+package "data_access" #F7ECF7 {
+  class JsonGameSaveDataAccessObject {
+    - saveFile: Path
+    + save(snapshot: GameSnapshot): void
+    + load(): Optional<GameSnapshot>
+    - writeTemporary(snapshot: GameSnapshot): Path
+    - replaceSave(temporaryFile: Path): void
+    - readSnapshot(): GameSnapshot
+  }
+}
+
+GameController --> SaveGameInputBoundary : saveGame
+GameController --> LoadGameInputBoundary : loadGame
+SaveGameInteractor ..|> SaveGameInputBoundary
+LoadGameInteractor ..|> LoadGameInputBoundary
+SaveGameInteractor --> GameContext : context
+LoadGameInteractor --> GameContext : context
+SaveGameInteractor --> GameSaveDataAccessInterface : saves
+LoadGameInteractor --> GameSaveDataAccessInterface : saves
+LoadGameInteractor --> StoryTemplateDataAccessInterface : templates
+LoadGameInteractor --> GameFactory : factory
+SaveGameInteractor --> GameOutputAssembler : assembler
+LoadGameInteractor --> GameOutputAssembler : assembler
+SaveGameInteractor --> GameOutputBoundary : output
+LoadGameInteractor --> GameOutputBoundary : output
+GamePresenter ..|> GameOutputBoundary
+GameContext --> Game : currentGame
+Game ..> GameSnapshot : captures
+GameFactory ..> GameSnapshot : validates and restores
+JsonGameSaveDataAccessObject ..|> GameSaveDataAccessInterface
+JsonGameSaveDataAccessObject ..> GameSnapshot : JSON encode / decode
+
+note bottom of SaveGameInteractor
+  Require a current Game, then capture its immutable snapshot.
+  Both ACTIVE and ESCAPED games can be saved.
+  Call saves.save(snapshot); present success only after it returns.
+  No current Game or write failure -> explanatory output.
+  Saving never replaces or mutates the current Game.
+  Refresh feedback without reannouncing already-held items.
+end note
+
+note bottom of LoadGameInteractor
+  Loading is available before a Game exists, including the main menu.
+  Read snapshot -> load its template -> restore validated candidate.
+  Replace context ONLY after every restoration check succeeds.
+  Missing/corrupt/incompatible saves leave the old context intact.
+  Output uses fromNoGame if context is empty, otherwise fromGame.
+  Restore reuses saved values/questions without HTTP or new randomness.
+  Restore the linear successor structure from the matching template.
+  Template version changes whenever successors or appearance rules change;
+  incompatible template versions are rejected without migration.
+  Schema must equal 4; previous schemas are rejected without migration.
+  Validate every configured item/object and both gates in every room.
+  An unlocked ItemLock requires all configured IDs still in inventory.
+  A locked door with all IDs held is valid until explicitly unlocked.
+  Door unlocked AND exit Trivia passed is still the departure rule.
+  Either gate may already be passed independently of the other.
+  Every predecessor of the saved current room must have BOTH gates passed.
+  Current-room gates may remain incomplete in either order.
+  ESCAPED requires a current room with no successor and both gates passed.
+  Restore exact saved locations using the state constructor, never enterRoom.
+  Loading never acquires items or replays an obtained notification.
+end note
+
+note bottom of GameSnapshot
+  Capture EVERY room and EVERY configured item, including hidden items
+  and unvisited rooms. ItemState locations: ROOM / INVENTORY.
+  ROOM roomId matches its configured owner; INVENTORY has no roomId.
+  Held items are revealed and remain held after use.
+  Successful appearances transfer unique items automatically; already-held IDs
+  are skipped. Future initially-visible items stay ROOM until first entry.
+  ObjectState: values and completed one-shot action IDs.
+  LockState: exactly each room's door ItemLock and exit TriviaLock.
+  TriviaState: original prompt, choices and expected answer.
+  Save generated values, current room and ACTIVE/ESCAPED status.
+  TEMPLATE questions match the template resolved using saved values;
+  API questions keep their saved content. Answers never enter output.
+  Schema 4 keeps the same value shape; successors are immutable template data.
+  No duplicate inventory list, successor list, final-room or canLeave flag is saved.
+  No acquisition ledger or extra result/output field is introduced.
+  Restore never replays actions, requests API questions or calls RNG.
+end note
+
+note bottom of JsonGameSaveDataAccessObject
+  One configured manual save file; AppBuilder injects its Path.
+  Default: data/savegame.json, resolved from the launch directory.
+  Save replaces the same file only after writing and closing a
+  temporary file in the same directory and atomically replacing it.
+  On failure, retain the old save and clean up the temporary file.
+  Unsupported atomic replacement is a reported save failure.
+  Missing file -> Optional.empty(); malformed/unreadable file ->
+  use-case-owned DataAccessException. Path/JSON/IO stay in this layer.
+end note
+
+legend bottom left
+  Save and load have separate focused input interfaces and responsibilities.
+  AppBuilder injects the SAME save adapter and context into both interactors.
+  Serial CommandDispatcher orders gameplay, save and load; UI updates use EDT.
+  Every success/error/no-op refreshes output; only new transfers append obtained names.
+  This is a focused view; full application dependencies are in the application diagram.
+  State-class definitions remain in escape-room-data-access.puml.
+endlegend
+@enduml
