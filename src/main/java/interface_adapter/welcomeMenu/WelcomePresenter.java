@@ -30,7 +30,7 @@
 //        this.welcomeViewModel.setState(new WelcomeState());
 //        this.welcomeViewModel.notifyStateChanged();
 //
-//        // switch to the logged in view
+//        // switch to the in game view
 //        this.viewManagerModel.setState(StartRoundViewModel.VIEW_NAME);
 //        this.viewManagerModel.notifyViewChanged();
 //    }

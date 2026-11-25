@@ -38,7 +38,7 @@ public class WelcomeDemo {
             final NewPlayerPresenter presenter =
                     new NewPlayerPresenter(viewManagerModel, newPlayerViewModel, welcomeViewModel);
             final NewPlayerInteractor interactor =
-                    new NewPlayerInteractor(dao, presenter, playerFactory, dao);
+                    new NewPlayerInteractor(dao, presenter, playerFactory);
             newPlayerView.setNewPlayerController(new NewPlayerController(interactor));
 
             // Card layout holding both views
