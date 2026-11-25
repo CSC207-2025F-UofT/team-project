@@ -15,7 +15,7 @@ public class FlashcardGeneratorInputData {
     }
 
         public static class TextPiece {
-            private final String text;
+            private String text;
             private final boolean isBold;
 
             public TextPiece(String text, boolean isBold){
@@ -34,11 +34,13 @@ public class FlashcardGeneratorInputData {
             public boolean isBold(){
                 return this.isBold;
             }
+            public void setText(String text) {this.text = text;}
 
 
 
         }
         public List<TextPiece> getListTextPiece(){ return this.listTextPiece;}
+
 
     /**
      * Returns TextPiece at given index
