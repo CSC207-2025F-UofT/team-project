@@ -41,7 +41,7 @@ class FindNearbyQuestsInteractorTest {
     }
 
     private static SideQuest quest(String name, double latitude, double longitude) {
-        return new SideQuest(name, "desc", "false", 0, 1, 10,
+        return new SideQuest(name, name, "false", "free", "under_60_minutes", 10,
                 new Location(latitude, longitude), List.of("Food"));
     }
 
@@ -67,6 +67,19 @@ class FindNearbyQuestsInteractorTest {
         assertTrue(nearby.get(0).getDistanceKm() < nearby.get(1).getDistanceKm());
         assertEquals(2, presenter.success.getRadiusKm());
         assertEquals(UOFT.getLatitude(), presenter.success.getCentreLatitude());
+    }
+
+    @Test
+    void pinUsesTheQuestIdNotItsName() {
+        SideQuest park = new SideQuest("quest-42", "Read in Queen's Park", "false", "free",
+                "under_60_minutes", 10, new Location(43.6640, -79.3920), List.of("Reading"));
+
+        interactorWith(new InMemorySideQuestDataAccessObject(List.of(park)))
+                .execute(new FindNearbyQuestsInputData(2));
+
+        NearbyQuest pin = presenter.success.getQuests().get(0);
+        assertEquals("quest-42", pin.getQuestId());
+        assertEquals("Read in Queen's Park", pin.getTitle());
     }
 
     @Test

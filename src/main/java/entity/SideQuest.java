@@ -17,7 +17,7 @@ public class SideQuest {
     private final String budget;    // Split into four categories (free, less_than_twenty, less_than_fifty, over_fifty)
     private final String expectedTime; // under_10_minutes, under_30_minutes, under_60_minutes, over_60_minutes
     private final int exp;
-    private final List<double> coordinates;
+    private final Location location; // latitude and longitude, validated by Location
     private final List<String> interests;
 
     public SideQuest(String id,
@@ -26,7 +26,7 @@ public class SideQuest {
                      String budget,
                      String expectedTime,
                      int exp,
-                     List<double> coordinates,
+                     Location location,
                      List<String> interests) {
 
         this.id = id;
@@ -35,7 +35,7 @@ public class SideQuest {
         this.isIndoor = isIndoor;
         this.expectedTime = expectedTime;
         this.exp = exp;
-        this.coordinates = List.copyOf(coordinates);
+        this.location = location;
         this.interests = List.copyOf(interests);;
     }
 
@@ -62,8 +62,8 @@ public class SideQuest {
         return exp;
     }
 
-    public List<double> getCoordinates() {
-        return List.copyOf(coordinates);
+    public Location getLocation() {
+        return location;
     }
 
     public List<String> getInterests() {
