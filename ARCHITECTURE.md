@@ -21,7 +21,7 @@ How the code is laid out and the decisions everyone agreed to follow. Read this 
 `ArchitectureImportTest` fails if anything in `entity` or `use_case` imports Swing, AWT, SQL, JSON, HTTP, or an outer layer.
 
 ## File naming (same for all five use cases)
-Each use case has a subpackage in both `use_case` and `interface_adapter`: `enter_name`, `start_round`, `submit_guess`, `finish_round`, `view_stats`.
+Each use case has a subpackage in both `use_case` and `interface_adapter`: `enter_name`, `start_round`, `submit_guess`, `finish_round`, `check_stats`.
 
 Using Submit Guess as the example:
 - `use_case/submit_guess/`: `SubmitGuessInputBoundary`, `SubmitGuessInputData`, `SubmitGuessInteractor`, `SubmitGuessOutputBoundary`, `SubmitGuessOutputData`, `SubmitGuessDataAccessInterface`
