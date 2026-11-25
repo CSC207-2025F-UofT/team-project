@@ -7,12 +7,14 @@ import interface_adapter.find_nearby_quests.FindNearbyQuestsViewModel;
 import java.awt.BasicStroke;
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.GridLayout;
+import java.awt.Rectangle;
 import java.awt.RenderingHints;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
@@ -30,20 +32,21 @@ import java.io.File;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
-import javax.swing.ButtonGroup;
+import javax.swing.DefaultListCellRenderer;
+import javax.swing.Icon;
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JLabel;
+import javax.swing.JList;
 import javax.swing.JPanel;
-import javax.swing.JToggleButton;
 import javax.swing.SwingConstants;
 import javax.swing.event.MouseInputListener;
+import javax.swing.plaf.basic.BasicComboBoxUI;
 import org.jxmapviewer.JXMapViewer;
 import org.jxmapviewer.OSMTileFactoryInfo;
 import org.jxmapviewer.cache.FileBasedLocalCache;
@@ -56,14 +59,16 @@ import view.journal.JournalStyle;
 
 /**
  * The Map page (Use Case 4). Draws OpenStreetMap tiles, a "you are here" marker,
- * and one pin per nearby quest, and shows a preview card when a pin is clicked.
+ * a red circle showing the search radius, and one pin per nearby quest, and shows
+ * a preview card when a pin is clicked. The yellow bar holds the filters (for now
+ * only the radius drop-down), so later filters can be added next to it.
  *
  * <p>This view only displays the view model's state and forwards user actions to
  * the controller. It never filters quests or measures distances. It uses the same
  * page style as the Journal ({@link JournalStyle}) so the app looks like one app.
  */
 public class MapView extends JPanel implements PropertyChangeListener {
-    private static final double[] RADIUS_PRESETS_KM = {0.5, 1.0, 2.0, 5.0, 10.0};
+    private static final Double[] RADIUS_PRESETS_KM = {0.5, 1.0, 2.0, 5.0, 10.0};
     private static final String TILE_SERVER = "https://tile.openstreetmap.org";
     private static final String USER_AGENT = "LinkedOut-CSC207/1.0";
     private static final String ATTRIBUTION = "© OpenStreetMap contributors";
@@ -72,7 +77,7 @@ public class MapView extends JPanel implements PropertyChangeListener {
 
     private static final int DEFAULT_ZOOM = 4;
     private static final int CLOSEST_FIT_ZOOM = 3;
-    private static final double FIT_FRACTION = 0.7;
+    private static final double FIT_FRACTION = 0.8;
     private static final int PIN_HIT_RADIUS_PX = 14;
 
     // Page layout, matching the Journal pages (header ends at y = 58, strip at y = 72).
@@ -84,15 +89,20 @@ public class MapView extends JPanel implements PropertyChangeListener {
     private static final int MARGIN = 10;
     private static final int CORNER = 36;
     private static final int RETRY_WIDTH = 72;
+    private static final int FILTER_GAP = 8;
+    private static final int DROPDOWN_WIDTH = 92;
+    private static final int DROPDOWN_HEIGHT = 26;
 
     private static final Color PIN_COLOUR = new Color(0xE0, 0x4F, 0x3F);
     private static final Color SELECTED_PIN_COLOUR = new Color(0x8E, 0x24, 0xAA);
     private static final Color YOU_ARE_HERE_COLOUR = new Color(0x1A, 0x73, 0xE8);
+    private static final Color RADIUS_FILL = new Color(0xE0, 0x4F, 0x3F, 28);
+    private static final Color RADIUS_EDGE = new Color(0xE0, 0x4F, 0x3F, 200);
     private static final Color ERROR_COLOUR = new Color(0xB3, 0x26, 0x1E);
 
     private final FindNearbyQuestsController controller;
     private final JXMapViewer map = new JXMapViewer();
-    private final Map<Double, JToggleButton> radiusButtons = new LinkedHashMap<>();
+    private final JComboBox<Double> radiusBox = new JComboBox<>(RADIUS_PRESETS_KM);
     private final JLabel messageLabel =
             JournalStyle.label(" ", JournalStyle.UI_FONT.deriveFont(12f));
     private final JButton retryButton;
@@ -104,13 +114,12 @@ public class MapView extends JPanel implements PropertyChangeListener {
     private final JLabel previewDistance = previewLabel(Font.PLAIN, 13f);
 
     private FindNearbyQuestsState state;
-    private double selectedRadiusKm;
     private List<PinState> pins = new ArrayList<>();
     private PinState selectedPin;
+    private boolean updatingFromState;
     private boolean fitPending;
-    private boolean hasFitted;
+    private double fittedRadiusKm = -1;
     private Consumer<String> openQuestAction = questId -> {};
-    private Runnable backAction = () -> {};
 
     /**
      * Creates the map page and registers it with the view model.
@@ -121,24 +130,23 @@ public class MapView extends JPanel implements PropertyChangeListener {
     public MapView(FindNearbyQuestsViewModel viewModel, FindNearbyQuestsController controller) {
         this.controller = controller;
         this.state = viewModel.getState();
-        this.selectedRadiusKm = state.getRadiusKm();
         viewModel.addPropertyChangeListener(this);
 
         setLayout(null);
         setBackground(JournalStyle.PAPER);
         setPreferredSize(new Dimension(JournalStyle.WIDTH, JournalStyle.HEIGHT));
-        JournalStyle.addPageHeader(this, "Map", () -> backAction.run());
-        add(buildRadiusStrip());
+        add(buildTitle());
+        add(buildFilterBar());
 
         messageLabel.setHorizontalAlignment(SwingConstants.LEFT);
         add(messageLabel);
         retryButton = JournalStyle.roundedButton("Retry", JournalStyle.PHOTO_BUTTON,
-                () -> controller.execute(selectedRadiusKm));
+                () -> controller.execute(getSelectedRadiusKm()));
         retryButton.setVisible(false);
         add(retryButton);
 
         add(buildMap());
-        selectRadiusButton(selectedRadiusKm);
+        selectRadiusInBox(state.getRadiusKm());
     }
 
     /**
@@ -152,21 +160,12 @@ public class MapView extends JPanel implements PropertyChangeListener {
     }
 
     /**
-     * Sets what happens when the user clicks the back arrow in the page header.
-     *
-     * @param action usually returns to the home page
-     */
-    public void setBackAction(Runnable action) {
-        this.backAction = action;
-    }
-
-    /**
-     * Returns the radius currently selected in the radius strip.
+     * Returns the radius currently selected in the drop-down.
      *
      * @return the radius in kilometres
      */
     public double getSelectedRadiusKm() {
-        return selectedRadiusKm;
+        return (Double) radiusBox.getSelectedItem();
     }
 
     @Override
@@ -180,33 +179,83 @@ public class MapView extends JPanel implements PropertyChangeListener {
         map.setBounds(MARGIN, MAP_TOP, width - 2 * MARGIN, mapHeight);
     }
 
-    /** Same look as the Journal's status tabs: the yellow strip with one toggle per radius. */
-    private JLabel buildRadiusStrip() {
-        JLabel strip = new JLabel(
+    /**
+     * The page title, placed like the Journal's header. There is no back arrow yet
+     * because the app has no home page to go back to.
+     */
+    private JLabel buildTitle() {
+        JLabel title = JournalStyle.label("Map", JournalStyle.UI_FONT.deriveFont(Font.BOLD, 26f));
+        title.setBounds(65, 22, JournalStyle.WIDTH - 130, 36);
+        return title;
+    }
+
+    /**
+     * The yellow bar from the Journal, used here as the filter bar. It holds the
+     * radius drop-down; later filters (for example theme) go next to it.
+     */
+    private JLabel buildFilterBar() {
+        JLabel bar = new JLabel(
                 JournalStyle.loadScaledIcon("tabs", JournalStyle.WIDTH, STRIP_HEIGHT));
-        strip.setLayout(new GridLayout(1, RADIUS_PRESETS_KM.length));
-        strip.setBounds(0, STRIP_TOP, JournalStyle.WIDTH, STRIP_HEIGHT);
-        strip.getAccessibleContext().setAccessibleName("Search radius");
-        ButtonGroup group = new ButtonGroup();
-        for (double radiusKm : RADIUS_PRESETS_KM) {
-            JToggleButton button = new JToggleButton(formatKm(radiusKm));
-            button.setContentAreaFilled(false);
-            button.setBorderPainted(false);
-            button.setFocusPainted(false);
-            button.setForeground(JournalStyle.INK);
-            button.setFont(JournalStyle.UI_FONT.deriveFont(Font.PLAIN, 12f));
-            button.addItemListener(change -> button.setFont(button.getFont()
-                    .deriveFont(button.isSelected() ? Font.BOLD : Font.PLAIN)));
-            // Only a click reruns the use case; selecting the button from the state does not.
-            button.addActionListener(event -> {
-                selectedRadiusKm = radiusKm;
-                controller.execute(radiusKm);
-            });
-            group.add(button);
-            strip.add(button);
-            radiusButtons.put(radiusKm, button);
-        }
-        return strip;
+        int verticalGap = (STRIP_HEIGHT - DROPDOWN_HEIGHT) / 2;
+        bar.setLayout(new FlowLayout(FlowLayout.LEFT, FILTER_GAP, verticalGap));
+        bar.setBounds(0, STRIP_TOP, JournalStyle.WIDTH, STRIP_HEIGHT);
+
+        JLabel radiusLabel = JournalStyle.label("Radius", JournalStyle.UI_FONT.deriveFont(12f));
+        radiusLabel.setBorder(BorderFactory.createEmptyBorder(0, MARGIN, 0, 0));
+        radiusLabel.setLabelFor(radiusBox);
+        bar.add(radiusLabel);
+        bar.add(buildRadiusDropdown());
+        return bar;
+    }
+
+    /** A drop-down drawn as a white pill, like the Journal's buttons. */
+    private JPanel buildRadiusDropdown() {
+        radiusBox.setUI(new BasicComboBoxUI() {
+            @Override
+            protected JButton createArrowButton() {
+                JButton arrow = new JButton(new ChevronIcon());
+                arrow.setBorderPainted(false);
+                arrow.setContentAreaFilled(false);
+                arrow.setFocusPainted(false);
+                return arrow;
+            }
+
+            @Override
+            public void paintCurrentValueBackground(Graphics graphics, Rectangle bounds,
+                                                    boolean hasFocus) {
+                // The pill behind the drop-down is the background.
+            }
+        });
+        radiusBox.setOpaque(false);
+        radiusBox.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 4));
+        radiusBox.setFont(JournalStyle.UI_FONT.deriveFont(12f));
+        radiusBox.setForeground(JournalStyle.INK);
+        radiusBox.getAccessibleContext().setAccessibleName("Search radius");
+        radiusBox.setRenderer(new DefaultListCellRenderer() {
+            @Override
+            public Component getListCellRendererComponent(JList<?> list, Object value, int index,
+                                                          boolean selected, boolean focus) {
+                super.getListCellRendererComponent(
+                        list, formatKm((Double) value), index, selected, focus);
+                setFont(JournalStyle.UI_FONT.deriveFont(selected ? Font.BOLD : Font.PLAIN, 12f));
+                setForeground(JournalStyle.INK);
+                setBackground(selected && index >= 0 ? JournalStyle.GREEN : JournalStyle.PAPER);
+                setOpaque(index >= 0);
+                return this;
+            }
+        });
+        // Only a user's choice reruns the use case; showing the state's radius does not.
+        radiusBox.addActionListener(event -> {
+            if (!updatingFromState) {
+                controller.execute(getSelectedRadiusKm());
+            }
+        });
+
+        JPanel pill = new RoundedPanel(JournalStyle.PAPER);
+        pill.setLayout(new BorderLayout());
+        pill.setPreferredSize(new Dimension(DROPDOWN_WIDTH, DROPDOWN_HEIGHT));
+        pill.add(radiusBox);
+        return pill;
     }
 
     private JXMapViewer buildMap() {
@@ -235,7 +284,7 @@ public class MapView extends JPanel implements PropertyChangeListener {
             @Override
             public void componentResized(ComponentEvent event) {
                 if (fitPending) {
-                    fitMapToPins();
+                    fitMapToCircle();
                 }
             }
         });
@@ -307,7 +356,7 @@ public class MapView extends JPanel implements PropertyChangeListener {
     @Override
     public void propertyChange(PropertyChangeEvent event) {
         state = (FindNearbyQuestsState) event.getNewValue();
-        selectRadiusButton(state.getRadiusKm());
+        selectRadiusInBox(state.getRadiusKm());
         if (state.getErrorMessage() != null) {
             messageLabel.setForeground(ERROR_COLOUR);
             messageLabel.setText(state.getErrorMessage());
@@ -327,13 +376,14 @@ public class MapView extends JPanel implements PropertyChangeListener {
         if (pinsChanged) {
             hidePreview();
         }
-        if (pinsChanged || !hasFitted) {
-            fitMapToPins();
+        if (pinsChanged || state.getRadiusKm() != fittedRadiusKm) {
+            fitMapToCircle();
         }
         map.repaint();
     }
 
-    private void fitMapToPins() {
+    /** Zooms so the whole search circle is on screen, centred on "you are here". */
+    private void fitMapToCircle() {
         if (!state.hasCentre()) {
             return;
         }
@@ -343,35 +393,35 @@ public class MapView extends JPanel implements PropertyChangeListener {
             return;
         }
         fitPending = false;
-        GeoPosition centre = new GeoPosition(state.getCentreLatitude(), state.getCentreLongitude());
-        // Each pin is added with its mirror image across the centre, so the fitted
-        // area stays centred on "you are here" and every pin is on screen.
-        Set<GeoPosition> positions = new HashSet<>();
-        positions.add(centre);
-        for (PinState pin : pins) {
-            positions.add(new GeoPosition(pin.getLatitude(), pin.getLongitude()));
-            positions.add(new GeoPosition(2 * centre.getLatitude() - pin.getLatitude(),
-                    2 * centre.getLongitude() - pin.getLongitude()));
-        }
-        if (positions.size() == 1) {
-            map.setZoom(DEFAULT_ZOOM);
-        } else {
-            map.zoomToBestFit(positions, FIT_FRACTION);
+        double lat = state.getCentreLatitude();
+        double lon = state.getCentreLongitude();
+        if (state.hasCircle()) {
+            // The circle's four edge points; south and west mirror north and east.
+            double north = state.getCircleNorthLatitude();
+            double east = state.getCircleEastLongitude();
+            Set<GeoPosition> edges = new HashSet<>(List.of(
+                    new GeoPosition(north, lon), new GeoPosition(2 * lat - north, lon),
+                    new GeoPosition(lat, east), new GeoPosition(lat, 2 * lon - east)));
+            map.zoomToBestFit(edges, FIT_FRACTION);
             if (map.getZoom() < CLOSEST_FIT_ZOOM) {
                 map.setZoom(CLOSEST_FIT_ZOOM);
             }
+        } else {
+            map.setZoom(DEFAULT_ZOOM);
         }
-        map.setAddressLocation(centre);
-        hasFitted = true;
+        map.setAddressLocation(new GeoPosition(lat, lon));
+        fittedRadiusKm = state.getRadiusKm();
     }
 
-    /** Shows the state's radius as selected without rerunning the use case. */
-    private void selectRadiusButton(double radiusKm) {
-        JToggleButton button = radiusButtons.get(radiusKm);
-        if (button != null) {
-            selectedRadiusKm = radiusKm;
-            button.setSelected(true);
+    /** Shows the state's radius in the drop-down without rerunning the use case. */
+    private void selectRadiusInBox(double radiusKm) {
+        updatingFromState = true;
+        for (Double preset : RADIUS_PRESETS_KM) {
+            if (preset == radiusKm) {
+                radiusBox.setSelectedItem(preset);
+            }
         }
+        updatingFromState = false;
     }
 
     private PinState pinAt(java.awt.Point click) {
@@ -446,7 +496,37 @@ public class MapView extends JPanel implements PropertyChangeListener {
 
         @Override
         protected void paintComponent(Graphics graphics) {
-            JournalStyle.paintRounded(graphics, fill, getWidth(), getHeight(), CORNER);
+            int arc = Math.min(CORNER, getHeight());
+            JournalStyle.paintRounded(graphics, fill, getWidth(), getHeight(), arc);
+        }
+    }
+
+    /** A small downward chevron for the drop-down. */
+    private static final class ChevronIcon implements Icon {
+        private static final int SIZE = 10;
+
+        @Override
+        public void paintIcon(Component component, Graphics graphics, int x, int y) {
+            Graphics2D g = (Graphics2D) graphics.create();
+            g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            g.setColor(JournalStyle.INK);
+            g.setStroke(new BasicStroke(1.6f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+            Path2D chevron = new Path2D.Double();
+            chevron.moveTo(x + 1, y + 3);
+            chevron.lineTo(x + SIZE / 2.0, y + SIZE - 3);
+            chevron.lineTo(x + SIZE - 1, y + 3);
+            g.draw(chevron);
+            g.dispose();
+        }
+
+        @Override
+        public int getIconWidth() {
+            return SIZE;
+        }
+
+        @Override
+        public int getIconHeight() {
+            return SIZE;
         }
     }
 
@@ -469,6 +549,9 @@ public class MapView extends JPanel implements PropertyChangeListener {
         public void paint(Graphics2D original, JXMapViewer viewer, int width, int height) {
             Graphics2D g = (Graphics2D) original.create();
             g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            if (state.hasCentre() && state.hasCircle()) {
+                drawRadiusCircle(g);
+            }
             if (state.hasCentre()) {
                 drawYouAreHere(g, toScreen(state.getCentreLatitude(), state.getCentreLongitude()));
             }
@@ -491,6 +574,25 @@ public class MapView extends JPanel implements PropertyChangeListener {
                     new RoundRectangle2D.Double(0, 0, width, height, CORNER, CORNER)));
             g.setColor(JournalStyle.PAPER);
             g.fill(outside);
+        }
+
+        /**
+         * Draws the search circle. The edge points come from the use case, so the
+         * view only converts positions to pixels and never measures distances.
+         */
+        private void drawRadiusCircle(Graphics2D g) {
+            Point2D centre = toScreen(state.getCentreLatitude(), state.getCentreLongitude());
+            Point2D north = toScreen(state.getCircleNorthLatitude(), state.getCentreLongitude());
+            Point2D east = toScreen(state.getCentreLatitude(), state.getCircleEastLongitude());
+            double radiusY = Math.abs(centre.getY() - north.getY());
+            double radiusX = Math.abs(east.getX() - centre.getX());
+            Ellipse2D circle = new Ellipse2D.Double(centre.getX() - radiusX,
+                    centre.getY() - radiusY, 2 * radiusX, 2 * radiusY);
+            g.setColor(RADIUS_FILL);
+            g.fill(circle);
+            g.setColor(RADIUS_EDGE);
+            g.setStroke(new BasicStroke(2f));
+            g.draw(circle);
         }
 
         private void drawYouAreHere(Graphics2D g, Point2D p) {
