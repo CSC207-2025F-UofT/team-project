@@ -15,9 +15,9 @@ public class StartRoundPresenter implements StartRoundOutputBoundary {
     @Override
     public void prepareSuccessView(StartRoundOutputData data) {
         GameState state = new GameState();
-        state.addImageURL(data.imageURL());
+        state.addImageURL(data.getImageURL());
 
-        state.setAttemptsLeft(data.attemptsLeft());
+        state.setAttemptsLeft(data.getAttemptsLeft());
         state.setMessage("Guess the city!");
 
         viewModel.setState(state);
