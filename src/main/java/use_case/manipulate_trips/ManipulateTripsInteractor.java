@@ -10,16 +10,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Function;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import entity.LocationInfo;
 import entity.Photo;
 import entity.Trip;
+import entity.TripBuilder;
 import use_case.TripAccessInterface;
 import use_case.TripAccessException;
 import use_case.PhotoAccessInterface;
+import use_case.IdGeneratorInterface;
 import use_case.PhotoAccessException;
 
 /** Browsing and editing trips: list, view one, split, merge. */
@@ -41,15 +42,15 @@ public class ManipulateTripsInteractor implements ManipulateTripsInputBoundary {
     private final TripAccessInterface tripAccess;
     private final PhotoAccessInterface photoAccess;
     private final ManipulateTripsOutputBoundary presenter;
-    private final Supplier<String> newTripIds;
+    private final IdGeneratorInterface idGenerator;
 
-    /** @param newTripIds makes a fresh unique id for each trip created by a split*/
+    /** @param idGenerator makes a fresh unique id for each trip created by a split*/
     public ManipulateTripsInteractor(TripAccessInterface tripAccess, PhotoAccessInterface photoAccess,
-                               ManipulateTripsOutputBoundary presenter, Supplier<String> newTripIds) {
+                               ManipulateTripsOutputBoundary presenter, IdGeneratorInterface idGenerator) {
         this.tripAccess = tripAccess;
         this.photoAccess = photoAccess;
         this.presenter = presenter;
-        this.newTripIds = newTripIds;
+        this.idGenerator = idGenerator;
     }
 
     @Override 
@@ -178,11 +179,19 @@ public class ManipulateTripsInteractor implements ManipulateTripsInputBoundary {
             }
 
             // Rebuild both trips through addPhoto so start & end times are recomputed.
-            Trip before = new Trip(original.getId(), original.getName(), null, null);
-            photos.subList(0, splitIndex).forEach(before::addPhoto);
+            Trip before = new TripBuilder()
+                .setId(original.getId())
+                .setName(original.getName())
+                .setPhotos(photos.subList(0, splitIndex))
+                .generateTimeRange()
+                .build();
 
-            Trip after = new Trip(newTripIds.get(), newName, null, null);
-            photos.subList(splitIndex, photos.size()).forEach(after::addPhoto);
+            Trip after = new TripBuilder()
+                .setId(idGenerator.nextId())
+                .setName(newName)
+                .setPhotos(photos.subList(splitIndex, photos.size()))
+                .generateTimeRange()
+                .build();
 
             tripAccess.writeTrips(List.of(before, after));
             outputData = new SplitTripOutputData(detailsOf(before.getId()), after.getId(), after.getName());

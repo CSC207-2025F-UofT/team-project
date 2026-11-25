@@ -1,11 +1,9 @@
 package app;
 
 import java.awt.BorderLayout;
-import java.util.UUID;
 
 import javax.swing.JComponent;
 import javax.swing.JFrame;
-
 
 import data_access.InMemoryDataAccessObject;
 import data_access.SampleData;
@@ -29,7 +27,6 @@ import interface_adapter.manipulate_trips.TripListViewModel;
 import interface_adapter.load_photos.LoadPhotoController;
 import interface_adapter.load_photos.LoadPhotoPresenter;
 import interface_adapter.load_photos.PhotoImageViewModel;
-import use_case.IdGeneratorInterface;
 import use_case.UuidGenerator;
 import use_case.dashboard.AnalyticsUseCase;
 import use_case.import_photos.ImportPhotosInteractor;
@@ -81,6 +78,7 @@ public class AppBuilder {
     private ThumbnailCache buildThumbnailCache() {
         LoadPhotoOutputBoundary presenter = new LoadPhotoPresenter(photoImageViewModel);
         LoadPhotoInputBoundary interactor = new LoadPhotoInteractor(dataAccess, imageReader, presenter);
+
         return new ThumbnailCache(96, 300, photoImageViewModel, new LoadPhotoController(interactor));
     }
 
@@ -99,6 +97,7 @@ public class AppBuilder {
     public AppBuilder addTripListView() {
         tripListViewModel = new TripListViewModel();
         tripListView = new TripListView(tripListViewModel, thumbnailCache);
+
         return addScreen("Trips", ViewNames.TRIPS, tripListView);
     }
 
@@ -106,6 +105,7 @@ public class AppBuilder {
         tripDetailsViewModel = new TripDetailsViewModel();
         tripDetailsView = new TripDetailsView(tripDetailsViewModel, viewManagerModel, thumbnailCache);
         viewManager.addView(ViewNames.TRIP_DETAILS, tripDetailsView);
+
         return this;
     }
 
@@ -113,10 +113,11 @@ public class AppBuilder {
         ManipulateTripsOutputBoundary presenter = 
                 new ManipulateTripsPresenter(tripListViewModel, tripDetailsViewModel, viewManagerModel);
         ManipulateTripsInputBoundary interactor = new ManipulateTripsInteractor(dataAccess, dataAccess, presenter,
-                () -> "trip-" + UUID.randomUUID());
+                idGenerator);
         ManipulateTripsController controller = new ManipulateTripsController(interactor);
         tripListView.setManipulateTripsController(controller);
         tripDetailsView.setManipulateTripsController(controller);
+
         return this;
     }
 
@@ -129,12 +130,14 @@ public class AppBuilder {
         DashboardPresenter dashboardPresenter = new DashboardPresenter(dashboardViewModel);
         AnalyticsUseCase analyticsUseCase = new AnalyticsUseCase(dataAccess, dataAccess, dashboardPresenter);
         DashboardController dashboardController = new DashboardController(analyticsUseCase);
+
         return addScreen("Dashboard", ViewNames.DASHBOARD, new DashboardView(dashboardViewModel, dashboardController));
     }
 
     private AppBuilder addScreen(String label, String viewName, JComponent view) {
         viewManager.addView(viewName, view);
         navigationBar.addNavItem(label, viewName);
+
         return this;
     }
 
@@ -148,7 +151,7 @@ public class AppBuilder {
         frame.setLocationRelativeTo(null);
 
         viewManagerModel.setActiveView(ViewNames.TRIPS);
-        return frame;
 
+        return frame;
     }
 }
