@@ -301,7 +301,7 @@ CommunicationDraft ── builds ──> CommunicationMessage
 
 **API Name:** ARASAAC API
 
-**Documentation:** [ARASAAC API documentation](ADD_OFFICIAL_API_LINK_HERE)
+**Documentation:** [ARASAAC API documentation](https://developers.arasaac.org/data-api)
 
 **How it is used in the program:**
 
