@@ -25,6 +25,8 @@ import view.journal.JournalStyle;
  * the team adds navigation between them here (a home page or a tab bar).
  */
 public class AppBuilder {
+    // Sample quests until the CSV storage can load quests. Then switch to:
+    // new FileQuestLocationDataAccess(new FileSideQuestDataAccessObject(path))
     private QuestLocationDataAccessInterface questDataAccess =
             InMemorySideQuestDataAccessObject.withSampleQuests();
 
