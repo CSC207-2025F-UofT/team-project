@@ -17,6 +17,7 @@ import entity.Location;
 import entity.LocationInfo;
 import entity.LocationInfoType;
 import entity.Trip;
+import entity.TripBuilder;
 import use_case.PhotoAccessException;
 import use_case.PhotoAccessInterface;
 import use_case.TripAccessException;
@@ -32,47 +33,6 @@ public class ImportPhotosInteractor implements ImportPhotosInputBoundary {
     private final PhotoAccessInterface photoAccess;
     private final TripAccessInterface tripAccess;
     private final ImportPhotosOutputBoundary presenter;
-
-    private static final List<LocationInfoType> INFO_TYPE_ORDER = List.of(
-        LocationInfoType.CITY, LocationInfoType.COUNTY, LocationInfoType.STATE,
-        LocationInfoType.COUNTRY, LocationInfoType.CONTINENT
-    );
-
-    private static LocationInfoType getFirstCommonInfoType(List<LocationInfo> infoList) {
-        for (LocationInfoType infoType : INFO_TYPE_ORDER) {
-            String commonInfo = null;
-
-            for (LocationInfo locationInfo : infoList) {
-                if (locationInfo == null) {
-                    commonInfo = null;
-                    break;
-                }
-
-                String info = locationInfo.getType(infoType);
-
-                if (info == null) {
-                    commonInfo = null;
-                    break;
-                }
-
-                if (commonInfo == null) {
-                    commonInfo = info;
-                    continue;
-                }
-
-                if (!commonInfo.equals(info)) {
-                    commonInfo = null;
-                    break;
-                }
-            }
-
-            if (commonInfo != null) {
-                return infoType;
-            }
-        }
-
-        return null;
-    }
 
     public ImportPhotosInteractor(
         ImageImporterInterface imageImporter, GeocoderInterface geocoder,
@@ -164,52 +124,14 @@ public class ImportPhotosInteractor implements ImportPhotosInputBoundary {
         return includedPhotoStream.sorted().toList();
     }
 
-    private String getTripLocationLabel(List<Photo> tripPhotos) {
-        List<LocationInfo> tripLocationInfo = tripPhotos.stream()
-            .map(Photo::getLocation).map(Location::getInfo).toList();
-
-        LocationInfoType commonInfoType = getFirstCommonInfoType(tripLocationInfo);
-
-        return commonInfoType != null ? tripLocationInfo.getFirst().getType(commonInfoType) : null;
-    }
-
-    private String getTripTimeSpanLabel(List<Photo> tripPhotos) {
-        LocalDateTime start = tripPhotos.getFirst().getTime();
-        LocalDateTime end = tripPhotos.getLast().getTime();
-
-        if (start.getYear() == end.getYear()) {
-            String startMonth = start.getMonth().getDisplayName(TextStyle.SHORT, Locale.ENGLISH);
-            String endMonth = end.getMonth().getDisplayName(TextStyle.SHORT, Locale.ENGLISH);
-
-            return start.getMonth() == end.getMonth() ?
-                startMonth + " " + start.getYear() :
-                startMonth + " - " + endMonth + " " + start.getYear();
-        }
-
-        return start.getYear() + " - " + end.getYear();
-    }
-
-    private String generateTripName(List<Photo> tripPhotos) {
-        if (tripPhotos.isEmpty()) {
-            return "Trip";
-        }
-
-        String locationStr = getTripLocationLabel(tripPhotos);
-        String timeStr = getTripTimeSpanLabel(tripPhotos);
-
-        String base = locationStr != null ? "Trip to " + locationStr : "Trip";
-
-        return timeStr != null ? base + " " + timeStr : base;
-    }
 
     private Trip generateTrip(List<Photo> tripPhotos) {
-        return new Trip(
-            UUID.randomUUID().toString(),
-            generateTripName(tripPhotos),
-            tripPhotos.getFirst().getTime(),
-            tripPhotos.getLast().getTime(),
-            tripPhotos.stream().map(Photo::getId).toList()
-        );
+        return new TripBuilder()
+            .generateId()
+            .setPhotos(tripPhotos)
+            .generateTimeRange()
+            .generateName()
+            .build();
     }
 
     private List<Trip> generateTrips(List<Photo> orderedEligiblePhotos) {
