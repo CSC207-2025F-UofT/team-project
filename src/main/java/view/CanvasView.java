@@ -27,7 +27,7 @@ public class CanvasView extends JPanel implements ActionListener, CanvasViewMode
     private final JPanel canvasPanel = new JPanel();
 
     // Top bar
-    private final JButton exitButton = new JButton("Exit");
+    private final JButton homeButton = new JButton("Home");
     private final JLabel titleLabel = new JLabel();
     private final JButton undoButton = new JButton("Undo");
     private final JButton redoButton = new JButton("Redo");
@@ -77,23 +77,25 @@ public class CanvasView extends JPanel implements ActionListener, CanvasViewMode
     }
 
     private void createCenterPanel() {
-        canvasPanel.setBackground(canvasViewModel.getCanvasColour());
+        final CanvasState currentState = canvasViewModel.getState();
+        canvasPanel.setBackground(currentState.getCanvasColour());
         canvasPanel.setPreferredSize(new Dimension(
-                canvasViewModel.getCanvasWidth(),
-                canvasViewModel.getCanvasHeight()));
+                currentState.getCanvasWidth(),
+                currentState.getCanvasHeight()));
     }
 
     private void createTopPanel() {
         topPanel.setLayout(new BorderLayout());
 
         JPanel leftPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        leftPanel.add(exitButton);
+        leftPanel.add(homeButton);
 
         JPanel rightPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         rightPanel.add(undoButton);
         rightPanel.add(redoButton);
 
-        titleLabel.setText(canvasViewModel.getTitle());
+        final CanvasState currentState = canvasViewModel.getState();
+        titleLabel.setText(currentState.getTitle());
         titleLabel.setFont(titleLabel.getFont().deriveFont(Font.BOLD, 24f));
 
         topPanel.add(leftPanel, BorderLayout.WEST);
@@ -163,7 +165,7 @@ public class CanvasView extends JPanel implements ActionListener, CanvasViewMode
 
 
     private void initializeActionListeners() {
-        exitButton.addActionListener(this);
+        homeButton.addActionListener(this);
         undoButton.addActionListener(this);
         redoButton.addActionListener(this);
         importButton.addActionListener(this);
@@ -186,7 +188,7 @@ public class CanvasView extends JPanel implements ActionListener, CanvasViewMode
     @Override
     public void actionPerformed(ActionEvent e) {
         Object source = e.getSource();
-        if (source == exitButton) {
+        if (source == homeButton) {
             // Exit canvas, return to Home view
         } else if (source == undoButton) {
             // Undo last action
