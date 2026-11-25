@@ -54,7 +54,7 @@ public class SearchPageView extends JPanel implements ActionListener, SearchView
         search.setFont(new Font("SansSerif", Font.PLAIN, 16));
         buttons.add(search);
 
-        favourites = new JButton("Favourites");
+        favourites = new JButton("Favorites");
         favourites.setFont(new Font("SansSerif", Font.PLAIN, 16));
         buttons.add(favourites);
 
