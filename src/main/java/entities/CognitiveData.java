@@ -56,6 +56,17 @@ public class CognitiveData {
     }
 
     /**
+     * @return the productivity rating
+     */
+    public double getProductivity() { return this.productivityRating; }
+
+    /**
+     * @return the cognitive test (returns an array of: {cognitive test type, cognitive test score})
+     */
+    public Object[] getCognitiveTest() { return this.cogTest; }
+
+
+    /**
      * Returns a Hashtable, with nested arrays, representing this CognitiveData of the format:
      * {date : [mood, cogTest, productivityRating]}
      */
