@@ -10,14 +10,20 @@ public final class Room {
     private final String id;
     private final String name;
     private final String description;
-    private final Exit exit;
+    private final TriviaLock triviaLock;
+    private final ItemLock itemLock;
+    private final String nextRoom;
     private final Map<String, Interactable> interactables;
 
-    public Room(String id, String name, String description, Exit exit, Map<String, Interactable> interactables) {
+    /** A null nextRoom marks the final room. */
+    public Room(String id, String name, String description, TriviaLock triviaLock, ItemLock itemLock,
+                String nextRoom, Map<String, Interactable> interactables) {
         this.id = Objects.requireNonNull(id, "id");
         this.name = Objects.requireNonNull(name, "name");
         this.description = Objects.requireNonNull(description, "description");
-        this.exit = Objects.requireNonNull(exit, "exit");
+        this.triviaLock = Objects.requireNonNull(triviaLock, "triviaLock");
+        this.itemLock = Objects.requireNonNull(itemLock, "itemLock");
+        this.nextRoom = nextRoom;
 
         Map<String, Interactable> copy = new LinkedHashMap<>();
         Objects.requireNonNull(interactables, "interactables").forEach((key, interactable) ->
@@ -38,9 +44,9 @@ public final class Room {
         return description;
     }
 
-    /** Returns the ID of this room's exit. */
+    /** Returns the next room's ID, or null for the final room. */
     public String getExit() {
-        return exit.getId();
+        return nextRoom;
     }
 
     /** Returns the interactable keys in the order supplied to the constructor. */
@@ -49,14 +55,17 @@ public final class Room {
     }
 
     public Boolean canLeave() {
-        return exit.canLeave();
+        return Boolean.TRUE.equals(triviaLock.isUnlocked()) && Boolean.TRUE.equals(itemLock.isUnlocked());
     }
 
-    /** Runs the exit's departure behavior. Game owns the current-room transition. */
+    /** Checks departure before Game moves to the next room or ends the game. */
     public void exit() {
         if (!canLeave()) {
             throw new IllegalStateException("Cannot leave room " + id);
         }
-        exit.exit();
+    }
+
+    public Boolean isFinal() {
+        return nextRoom == null;
     }
 }
