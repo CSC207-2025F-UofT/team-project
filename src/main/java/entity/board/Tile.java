@@ -47,6 +47,9 @@ public class Tile {
     }
 
     public void addSpell(SpellCard spellCard) {
+        if (spells == null) {
+            spells = new ArrayList<>();
+        }
         this.spells.add(spellCard);
     }
     public void removeSpell(SpellCard spellCard) {

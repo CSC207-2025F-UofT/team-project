@@ -72,7 +72,7 @@ public class Board {
     /// @param y Explosion origin y
     /// @param spellCard Spell that has been cast
     private void checkExplosion(int x, int y, SpellCard spellCard) {
-
+        // TODO: Finish writing this.
     }
 
     /// Step the spell cast's movement (part of Resolve Cast)
@@ -82,6 +82,7 @@ public class Board {
     /// @param castDirection The direction the spell is being cast in
     /// @param traveled How far, in tiles this spell has traveled so far
     private void stepSpell(int x, int y, SpellCard spellCard, Direction castDirection, int traveled) {
+        // TODO: Finish writing/refactoring this.
         // Check if spell has reached the end of its flight
         if (traveled >= spellCard.getRange()-1 && Directions.isDiagonal(castDirection)) {
             // Diagonal flight goes 1 tile less far
