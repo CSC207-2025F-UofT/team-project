@@ -26,10 +26,4 @@ public class DataAccessObject implements LoadQuestionDataAccessInterface {
         answers.add(new Answer("Raft", null, 5));
         return new Question("Name something that can be inflated or deflated", answers);
     }
-
-    // TEMPORARY IMPLEMENTATION FOR TESTING PURPOSES
-    @Override
-    public void setCurrentQuestion(Question question) {
-        return;
-    }
 }
