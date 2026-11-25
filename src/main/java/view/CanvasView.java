@@ -1,6 +1,7 @@
 package view;
 
 import interface_adapter.CanvasController;
+import interface_adapter.CanvasState;
 import interface_adapter.CanvasViewModel;
 import interface_adapter.CanvasViewModelListener;
 
@@ -8,13 +9,15 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
 public class CanvasView extends JPanel implements ActionListener, CanvasViewModelListener {
 
     private final CanvasViewModel canvasViewModel;
-    private CanvasController controller = null;
+    private CanvasController canvasController = null;
+    // private
 
     // Main panels
     private final JPanel topPanel = new JPanel();
@@ -70,7 +73,7 @@ public class CanvasView extends JPanel implements ActionListener, CanvasViewMode
         add(sidebarPanel, BorderLayout.EAST);
         add(bottomPanel, BorderLayout.SOUTH);
 
-        // initializeActionListeners();
+        initializeActionListeners();
     }
 
     private void createCenterPanel() {
@@ -159,10 +162,73 @@ public class CanvasView extends JPanel implements ActionListener, CanvasViewMode
     }
 
 
+    private void initializeActionListeners() {
+        exitButton.addActionListener(this);
+        undoButton.addActionListener(this);
+        redoButton.addActionListener(this);
+        importButton.addActionListener(this);
+        searchButton.addActionListener(this);
+        selectButton.addActionListener(this);
+        drawButton.addActionListener(this);
+        shapeButton.addActionListener(this);
+        eraserButton.addActionListener(this);
+        exportButton.addActionListener(this);
+        saveButton.addActionListener(this);
+        publishButton.addActionListener(this);
+        createPaletteButton.addActionListener(this);
+
+        for (JButton colourButton : paletteButtons) {
+            colourButton.addActionListener(this);
+        }
+    }
+
 
     @Override
     public void actionPerformed(ActionEvent e) {
+        Object source = e.getSource();
+        if (source == exitButton) {
+            // Exit canvas, return to Home view
+        } else if (source == undoButton) {
+            // Undo last action
+        } else if (source == redoButton) {
+            // Redo last action
 
+        } else if (source == importButton) {
+            JFileChooser fileChooser = new JFileChooser();
+            int result = fileChooser.showOpenDialog(this);
+            if (result == JFileChooser.APPROVE_OPTION) {
+                File selectedFile = fileChooser.getSelectedFile();
+                final CanvasState currentState = canvasViewModel.getState();
+                canvasController.importImage(selectedFile, currentState.getProjectId());
+            }
+
+        } else if (source == searchButton) {
+            // Open image search
+        } else if (source == selectButton) {
+            // Switch to select tool
+        } else if (source == drawButton) {
+            // Switch to brush tool
+        } else if (source == shapeButton) {
+            // Switch to shape tool
+        } else if (source == eraserButton) {
+            // Switch to eraser tool
+        } else if (source == createPaletteButton) {
+            // Open colour palette dialog
+        } else if (source == saveButton) {
+            // Save project
+        } else if (source == exportButton) {
+            // Export project
+        } else if (source == publishButton) {
+            // Publish project
+        }
     }
 
+    public void setCanvasController(CanvasController canvasController) {
+        this.canvasController = canvasController;
+    }
+
+    @Override
+    public void stateChanged() {
+        // Add logic
+    }
 }
