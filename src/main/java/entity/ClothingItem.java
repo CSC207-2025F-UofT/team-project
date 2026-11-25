@@ -72,4 +72,8 @@ public class ClothingItem {
     public boolean isDress() {
         return category == Category.TOP && DRESS.equalsIgnoreCase(subCategory);
     }
+
+    public static int ratingToCelsius(int rating) {
+        return 10 + 2 * rating;
+    }
 }

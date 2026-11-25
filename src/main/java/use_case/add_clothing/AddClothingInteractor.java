@@ -7,7 +7,7 @@ import java.io.IOException;
 
 // check every required field, copy the picture into the app's folder, then save the item.
 
-public class AddClothingInteractor implements AddClothingInputBoundary {
+public class  AddClothingInteractor implements AddClothingInputBoundary {
     private final AddClothingDataAccessInterface dataAccess;
     private final ImageStorageInterface imageStorage;
     private final AddClothingOutputBoundary presenter;
@@ -90,6 +90,11 @@ public class AddClothingInteractor implements AddClothingInputBoundary {
         }
         if (isBlank(input.getImageSourcePath())) {
             return "Please choose a picture.";
+        }
+        if (input.getWeatherRating() < ClothingItem.MIN_WEATHER_RATING
+                || input.getWeatherRating() > ClothingItem.MAX_WEATHER_RATING) {
+            return "Weather must be between " + ClothingItem.MIN_WEATHER_RATING
+                    + " and " + ClothingItem.MAX_WEATHER_RATING + ".";
         }
         return null;
     }
