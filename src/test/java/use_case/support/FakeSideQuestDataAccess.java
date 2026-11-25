@@ -4,6 +4,7 @@ import entity.Location;
 import entity.SideQuest;
 import use_case.accept_quest.AcceptQuestSideQuestDataAccessInterface;
 import use_case.complete_quest.CompleteQuestSideQuestDataAccessInterface;
+import use_case.view_dashboard.ViewDashboardSideQuestDataAccessInterface;
 
 import java.util.HashMap;
 import java.util.List;
@@ -15,7 +16,8 @@ import java.util.Map;
  */
 public class FakeSideQuestDataAccess implements
         AcceptQuestSideQuestDataAccessInterface,
-        CompleteQuestSideQuestDataAccessInterface {
+        CompleteQuestSideQuestDataAccessInterface,
+        ViewDashboardSideQuestDataAccessInterface {
 
     private final Map<String, SideQuest> quests = new HashMap<>();
 
