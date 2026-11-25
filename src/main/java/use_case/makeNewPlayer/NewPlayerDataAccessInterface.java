@@ -11,6 +11,12 @@ public interface NewPlayerDataAccessInterface {
     boolean existsByName(String username);
 
     /**
+     * @param username the username to look for
+     * @return the player stored at username if the username exists
+     */
+    Player get(String username);
+
+    /**
      * Saves the user.
      * @param player the player to save
      */

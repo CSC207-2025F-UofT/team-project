@@ -2,7 +2,6 @@ package data_access;
 
 import entity.Player;
 import entity.PlayerFactory;
-import use_case.welcomeMenu.ReturningPlayerDataAccessInterface;
 import use_case.makeNewPlayer.NewPlayerDataAccessInterface;
 
 import java.io.*;
@@ -13,7 +12,7 @@ import java.util.Map;
 /**
  * DAO for player data implemented using a File to persist the data.
  */
-public class PlayerDataAccessObject implements NewPlayerDataAccessInterface, ReturningPlayerDataAccessInterface {
+public class PlayerDataAccessObject implements NewPlayerDataAccessInterface {
     private static final String HEADER = "username";
 
     private final File csvFile;
@@ -86,11 +85,6 @@ public class PlayerDataAccessObject implements NewPlayerDataAccessInterface, Ret
     public Player get(String username) {
         currentUsername = username;
         return accounts.get(username);
-    }
-
-    @Override
-    public String getCurrentUsername() {
-        return currentUsername;
     }
 
     @Override
