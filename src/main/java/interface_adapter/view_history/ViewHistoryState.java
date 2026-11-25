@@ -11,6 +11,7 @@ import java.util.List;
 public class ViewHistoryState {
 
     private List<HistoryRow> rows = new ArrayList<>();
+    private String emptyMessage;
     private String errorMessage;
 
     public List<HistoryRow> getRows() {
@@ -19,6 +20,15 @@ public class ViewHistoryState {
 
     public void setRows(List<HistoryRow> rows) {
         this.rows = new ArrayList<>(rows);
+    }
+
+    /** Shown when there are no messages yet, or null when there are rows. */
+    public String getEmptyMessage() {
+        return emptyMessage;
+    }
+
+    public void setEmptyMessage(String emptyMessage) {
+        this.emptyMessage = emptyMessage;
     }
 
     public String getErrorMessage() {

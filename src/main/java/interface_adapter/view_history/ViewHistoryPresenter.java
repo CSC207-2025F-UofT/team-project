@@ -21,6 +21,7 @@ public class ViewHistoryPresenter implements ViewHistoryOutputBoundary {
             DateTimeFormatter.ofPattern("h:mm a", Locale.ENGLISH);
     private static final DateTimeFormatter DATE_FORMAT =
             DateTimeFormatter.ofPattern("EEE, MMM d", Locale.ENGLISH);
+    static final String EMPTY_HISTORY_MESSAGE = "No messages yet.";
 
     private final ViewHistoryViewModel viewModel;
     private final Clock clock;
@@ -52,6 +53,7 @@ public class ViewHistoryPresenter implements ViewHistoryOutputBoundary {
 
         ViewHistoryState state = viewModel.getState();
         state.setRows(rows);
+        state.setEmptyMessage(rows.isEmpty() ? EMPTY_HISTORY_MESSAGE : null);
         state.setErrorMessage(null);
         viewModel.firePropertyChange();
     }
@@ -60,6 +62,7 @@ public class ViewHistoryPresenter implements ViewHistoryOutputBoundary {
     public void prepareFailView(String errorMessage) {
         ViewHistoryState state = viewModel.getState();
         state.setRows(new ArrayList<>());
+        state.setEmptyMessage(null);
         state.setErrorMessage(errorMessage);
         viewModel.firePropertyChange();
     }

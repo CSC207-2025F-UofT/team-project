@@ -55,6 +55,10 @@ public class HistoryPanel extends JPanel implements PropertyChangeListener {
             text.setText(state.getErrorMessage());
             return;
         }
+        if (state.getEmptyMessage() != null) {
+            text.setText(state.getEmptyMessage());
+            return;
+        }
 
         StringBuilder builder = new StringBuilder();
         String currentDay = null;

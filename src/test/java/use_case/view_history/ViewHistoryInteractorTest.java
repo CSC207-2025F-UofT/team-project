@@ -54,14 +54,33 @@ class ViewHistoryInteractorTest {
     }
 
     @Test
-    void failViewWhenHistoryIsEmpty() {
+    void sortsMessagesEvenIfDataAccessReturnsThemOutOfOrder() {
+        LocalDateTime nine = LocalDateTime.of(2026, 11, 22, 9, 0);
+        LocalDateTime ten = LocalDateTime.of(2026, 11, 22, 10, 0);
+        LocalDateTime yesterday = LocalDateTime.of(2026, 11, 21, 15, 0);
+        ViewHistoryDataAccessInterface dataAccess = () -> List.of(
+                new CommunicationMessage(List.of(water), "ten", ten),
+                new CommunicationMessage(List.of(apple), "yesterday", yesterday),
+                new CommunicationMessage(List.of(water), "nine", nine));
+        RecordingPresenter presenter = new RecordingPresenter();
+
+        new ViewHistoryInteractor(dataAccess, presenter).execute();
+
+        List<ViewHistoryOutputData.Entry> entries = presenter.successData.getEntries();
+        assertEquals("yesterday", entries.get(0).getText());
+        assertEquals("nine", entries.get(1).getText());
+        assertEquals("ten", entries.get(2).getText());
+    }
+
+    @Test
+    void emptyHistoryIsANormalEmptyResult() {
         ViewHistoryDataAccessInterface dataAccess = ArrayList::new;
         RecordingPresenter presenter = new RecordingPresenter();
 
         new ViewHistoryInteractor(dataAccess, presenter).execute();
 
-        assertNull(presenter.successData);
-        assertEquals("No messages yet.", presenter.errorMessage);
+        assertNull(presenter.errorMessage);
+        assertTrue(presenter.successData.getEntries().isEmpty());
     }
 
     @Test

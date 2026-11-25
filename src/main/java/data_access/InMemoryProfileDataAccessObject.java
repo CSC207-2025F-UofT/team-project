@@ -21,7 +21,7 @@ public class InMemoryProfileDataAccessObject implements
         CustomizeBoardDataAccessInterface,
         ViewHistoryDataAccessInterface {
 
-    private final ChildProfile profile;
+    private ChildProfile profile;
 
     public InMemoryProfileDataAccessObject(ChildProfile profile) {
         this.profile = Objects.requireNonNull(profile, "profile cannot be null");
@@ -34,7 +34,9 @@ public class InMemoryProfileDataAccessObject implements
 
     @Override
     public void saveBoard(CommunicationBoard board) {
-        // The profile already holds this board object, so there is nothing else to save.
+        Objects.requireNonNull(board, "board cannot be null");
+        // Keep the history and replace the board, so a different board is really saved.
+        profile = new ChildProfile(board, profile.getHistory());
     }
 
     @Override

@@ -59,15 +59,25 @@ class ViewHistoryPresenterTest {
     }
 
     @Test
+    void emptyHistoryShowsEmptyMessage() {
+        presenter.prepareSuccessView(new ViewHistoryOutputData(List.of()));
+
+        assertTrue(viewModel.getState().getRows().isEmpty());
+        assertEquals("No messages yet.", viewModel.getState().getEmptyMessage());
+        assertNull(viewModel.getState().getErrorMessage());
+    }
+
+    @Test
     void failViewShowsMessageAndClearsRows() {
         presenter.prepareSuccessView(new ViewHistoryOutputData(List.of(
                 new ViewHistoryOutputData.Entry("I want water.",
                         LocalDateTime.of(2026, 11, 23, 10, 0)))));
 
-        presenter.prepareFailView("No messages yet.");
+        presenter.prepareFailView("Could not load history.");
 
         assertTrue(viewModel.getState().getRows().isEmpty());
-        assertEquals("No messages yet.", viewModel.getState().getErrorMessage());
+        assertEquals("Could not load history.", viewModel.getState().getErrorMessage());
+        assertNull(viewModel.getState().getEmptyMessage());
         assertEquals(2, changeCount);
     }
 }

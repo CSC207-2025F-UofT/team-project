@@ -3,6 +3,7 @@ package use_case.view_history;
 import entity.CommunicationMessage;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 
@@ -11,8 +12,6 @@ import java.util.Objects;
  * in chronological order (oldest first).
  */
 public class ViewHistoryInteractor implements ViewHistoryInputBoundary {
-
-    static final String NO_HISTORY_MESSAGE = "No messages yet.";
 
     private final ViewHistoryDataAccessInterface dataAccess;
     private final ViewHistoryOutputBoundary presenter;
@@ -25,13 +24,11 @@ public class ViewHistoryInteractor implements ViewHistoryInputBoundary {
 
     @Override
     public void execute() {
-        List<CommunicationMessage> history = dataAccess.getHistory();
+        // Sort here so UC4 does not depend on the order the data access returns.
+        List<CommunicationMessage> history = new ArrayList<>(dataAccess.getHistory());
+        history.sort(Comparator.comparing(CommunicationMessage::getTimestamp));
 
-        if (history.isEmpty()) {
-            presenter.prepareFailView(NO_HISTORY_MESSAGE);
-            return;
-        }
-
+        // An empty history is a normal result (an empty list), not a failure.
         List<ViewHistoryOutputData.Entry> entries = new ArrayList<>();
         for (CommunicationMessage message : history) {
             entries.add(new ViewHistoryOutputData.Entry(
