@@ -19,7 +19,10 @@ public class GameAssets {
         public Clip idle;
         public Clip move;
         public Clip attack;
+        public Clip skill;
         public Clip dead;
+
+        public Clip skillEffect;
 
         public BufferedImage portrait;
         public boolean mirror;

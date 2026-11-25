@@ -4,31 +4,22 @@ import entity.Battle;
 import entity.Fighter;
 import view.BattleViewModel;
 
-
-// ======================================================
-// COMBAT USE CASE
-// ======================================================
-
 public class Combat {
 
-    // ---------------- INPUT BOUNDARY ----------------
-
     public interface InputBoundary {
-        void attack(Fighter target);
-        void defend();
-        void skill(Fighter target);
+        void execute(Action action, Fighter target);
     }
-
-
-    // ---------------- OUTPUT BOUNDARY ----------------
 
     public interface OutputBoundary {
         void success(String message);
         void fail(String message);
     }
 
-
-    // ---------------- ABSTRACT COMBAT ACTION ----------------
+    public enum AnimationType {
+        ATTACK,
+        SKILL,
+        DEFEND
+    }
 
     public static abstract class Action {
 
@@ -44,10 +35,9 @@ public class Combat {
         }
 
         public abstract void execute(Fighter target);
+
+        public abstract AnimationType animationType();
     }
-
-
-    // ---------------- ATTACK ACTION ----------------
 
     public static class Attack extends Action {
 
@@ -77,10 +67,47 @@ public class Combat {
 
             presenter.success(result);
         }
+
+        @Override
+        public AnimationType animationType() {
+            return AnimationType.ATTACK;
+        }
     }
 
+    public static class Skill extends Action {
 
-    // ---------------- DEFEND ACTION ----------------
+        public Skill(
+                Battle battle,
+                OutputBoundary presenter) {
+
+            super(battle, presenter);
+        }
+
+        @Override
+        public void execute(Fighter target) {
+
+            Fighter attacker = battle.current();
+
+            if (attacker == null) {
+                presenter.fail("No active fighter.");
+                return;
+            }
+
+            if (target == null || !target.alive()) {
+                presenter.fail("Choose a living target.");
+                return;
+            }
+
+            String result = battle.attack(target);
+
+            presenter.success(result);
+        }
+
+        @Override
+        public AnimationType animationType() {
+            return AnimationType.SKILL;
+        }
+    }
 
     public static class Defend extends Action {
 
@@ -103,60 +130,25 @@ public class Combat {
 
             presenter.success(result);
         }
-    }
-
-    public static class Skill extends Action {
-
-        public Skill(Battle battle,
-                     OutputBoundary presenter) {
-            super(battle, presenter);
-        }
-
         @Override
-        public void execute(Fighter target) {
-            // skill logic
-            presenter.success("Skill used!");
+        public AnimationType animationType() {
+            return AnimationType.DEFEND;
         }
     }
-
-
-    // ---------------- INTERACTOR ----------------
 
     public static class Interactor
             implements InputBoundary {
 
-        private final Action attack;
-        private final Action defend;
-        private final Action skill;
-
-        public Interactor(
-                Action attack,
-                Action defend,
-                Action skill) {
-
-            this.attack = attack;
-            this.defend = defend;
-            this.skill = skill;
-        }
-
         @Override
-        public void attack(Fighter target) {
-            attack.execute(target);
-        }
+        public void execute(
+                Action action,
+                Fighter target) {
 
-        @Override
-        public void defend() {
-            defend.execute(null);
-        }
-
-        @Override
-        public void skill(Fighter target) {
-            skill.execute(target);
+            if (action != null) {
+                action.execute(target);
+            }
         }
     }
-
-
-    // ---------------- CONTROLLER ----------------
 
     public static class Controller {
 
@@ -166,21 +158,13 @@ public class Combat {
             this.inputBoundary = inputBoundary;
         }
 
-        public void attack(Fighter target) {
-            inputBoundary.attack(target);
-        }
+        public void execute(
+                Action action,
+                Fighter target) {
 
-        public void defend() {
-            inputBoundary.defend();
-        }
-
-        public void skill(Fighter target) {
-            inputBoundary.skill(target);
+            inputBoundary.execute(action, target);
         }
     }
-
-
-    // ---------------- PRESENTER ----------------
 
     public static class Presenter
             implements OutputBoundary {

@@ -79,29 +79,22 @@ public class BattleView extends JPanel {
     private static final Color PANEL =
             new Color(13, 36, 51, 185);
 
-    private static final String[] ACTIONS = {
-            "Attack", "Defend", "Skill", "Items"
-    };
-
-    // ---------- DEPENDENCIES ----------
-
     private final GameAssets assets;
     private final Battle battle;
 
     private final Combat.Controller combatController;
     private final BattleViewModel viewModel;
 
-    // ---------- UI STATE ----------
+    private final Map<String, Combat.Action> actions;
 
     private boolean choosing;
     private boolean items;
     private boolean hitApplied;
-    private boolean usingSkill;
 
     private Point mouse = new Point(-1, -1);
     private int pressed = -1;
 
-    private final float[] hover = new float[4];
+    private final float[] hover;
 
     private final Map<Fighter, Rectangle> bodies =
             new HashMap<>();
@@ -112,6 +105,7 @@ public class BattleView extends JPanel {
     private Fighter target;
     private Fighter actor;
     private Fighter victim;
+    private String activeAction = "Attack";
 
     // 0 ready, 1 approach, 2 strike, 3 return.
     private int phase;
@@ -130,12 +124,15 @@ public class BattleView extends JPanel {
     public BattleView(
             GameAssets assets,
             Combat.Controller combatController,
-            BattleViewModel viewModel) {
+            BattleViewModel viewModel,
+            Map<String, Combat.Action> actions) {
 
         this.assets = assets;
         this.battle = assets.battle;
         this.combatController = combatController;
         this.viewModel = viewModel;
+        this.actions = actions;
+        this.hover = new float[actions.size()];
 
         setPreferredSize(new Dimension(WIDTH, HEIGHT));
         setBackground(new Color(10, 24, 34));
@@ -231,7 +228,7 @@ public class BattleView extends JPanel {
     }
 
     private int actionAt(Point point) {
-        for (int i = 0; i < ACTIONS.length; i++) {
+        for (int i = 0; i < actions.size(); i++) {
             if (actionBox(i).contains(point)) {
                 return i;
             }
@@ -265,8 +262,6 @@ public class BattleView extends JPanel {
         );
     }
 
-    // ---------- CLICK HANDLING ----------
-
     private void click(Point point) {
         if (!canAct()) {
             return;
@@ -278,53 +273,38 @@ public class BattleView extends JPanel {
             choosing = false;
             items = false;
 
-            // Attack
-            if (action == 0) {
-                usingSkill = false;
+            String actionName =
+                    new ArrayList<>(actions.keySet()).get(action);
+
+            if (actionName.equals("Attack")
+                    || actionName.equals("Skill")) {
+
+                activeAction = actionName;
 
                 if (target != null && target.alive()) {
-                    startAttack(target);
+                    startAttack(target, actionName);
+
                 } else {
                     choosing = true;
 
                     viewModel.setMessage(
                             battle.current().name
-                                    + ": click an enemy to attack."
+                                    + ": click an enemy to "
+                                    + actionName.toLowerCase()
+                                    + "."
                     );
                 }
 
-                // Defend
-            } else if (action == 1) {
+            } else if (actionName.equals("Defend")) {
+
                 target = null;
-                usingSkill = false;
 
-                combatController.defend();
-                finishTurn();
-
-                // Skill
-            } else if (action == 2) {
-                usingSkill = true;
-
-                if (target != null && target.alive()) {
-                    startAttack(target);
-                } else {
-                    choosing = true;
-
-                    viewModel.setMessage(
-                            battle.current().name
-                                    + ": click an enemy to use Skill."
-                    );
-                }
-
-                // Items
-            } else if (action == 3) {
-                items = true;
-                usingSkill = false;
-
-                viewModel.setMessage(
-                        "Inventory placeholder"
-                                + " — no items connected yet."
+                combatController.execute(
+                        actions.get("Defend"),
+                        null
                 );
+
+                finishTurn();
             }
 
             return;
@@ -336,20 +316,22 @@ public class BattleView extends JPanel {
             target = selected;
 
             if (choosing) {
-                startAttack(selected);
+                startAttack(
+                        selected,
+                        activeAction
+                );
+
             } else {
                 items = false;
 
                 viewModel.setMessage(
                         "Target: "
                                 + target.name
-                                + ". Choose Attack or Skill."
+                                + ". Choose an action."
                 );
             }
         }
     }
-
-    // ---------- TARGETING ----------
 
     private Rectangle targetBox(Fighter fighter) {
         Point foot = home(fighter);
@@ -427,7 +409,11 @@ public class BattleView extends JPanel {
 
     // ---------- COMBAT ANIMATION ----------
 
-    private void startAttack(Fighter chosen) {
+    private void startAttack(
+            Fighter chosen,
+            String actionName) {
+
+        activeAction = actionName;
 
         actor = battle.current();
         victim = chosen;
@@ -438,24 +424,16 @@ public class BattleView extends JPanel {
         hitApplied = false;
 
         phase = 1;
-        phaseStart =
-                System.currentTimeMillis();
+        phaseStart = System.currentTimeMillis();
 
-        if (usingSkill) {
-            viewModel.setMessage(
-                    actor.name
-                            + " uses Skill on "
-                            + victim.name
-                            + "!"
-            );
-        } else {
-            viewModel.setMessage(
-                    actor.name
-                            + " attacks "
-                            + victim.name
-                            + "!"
-            );
-        }
+        viewModel.setMessage(
+                actor.name
+                        + " uses "
+                        + actionName
+                        + " on "
+                        + victim.name
+                        + "!"
+        );
     }
 
     private void update() {
@@ -477,23 +455,28 @@ public class BattleView extends JPanel {
             phase = 2;
             phaseStart = now;
 
-            // Attack/skill animation.
+            // Attack animation.
         } else if (phase == 2) {
 
             long duration =
                     attackDuration();
 
-            // Damage occurs 35% through animation.
+            /*
+             * Preserve original behaviour:
+             * damage occurs 35% through animation.
+             */
             if (!hitApplied
-                    && elapsed >= duration * HIT_POINT) {
+                    && elapsed
+                    >= duration * HIT_POINT) {
 
                 hitApplied = true;
 
-                if (usingSkill) {
-                    combatController.skill(victim);
-                } else {
-                    combatController.attack(victim);
-                }
+                // Clean Architecture:
+                // View -> Controller -> Interactor
+                combatController.execute(
+                        actions.get(activeAction),
+                        victim
+                );
 
                 hitAt = now;
 
@@ -520,12 +503,15 @@ public class BattleView extends JPanel {
         } else if (phase == 0
                 && battle.current() != null
                 && !battle.current().player
-                && now - readyAt >= ENEMY_WAIT_MS) {
+                && now - readyAt
+                >= ENEMY_WAIT_MS) {
 
             List<Fighter> living =
                     new ArrayList<>();
 
-            for (Fighter fighter : battle.players) {
+            for (Fighter fighter :
+                    battle.players) {
+
                 if (fighter.alive()) {
                     living.add(fighter);
                 }
@@ -537,13 +523,13 @@ public class BattleView extends JPanel {
                         java.util.concurrent
                                 .ThreadLocalRandom
                                 .current()
-                                .nextInt(living.size());
-
-                // Enemy attacks should never inherit player skill state.
-                usingSkill = false;
+                                .nextInt(
+                                        living.size()
+                                );
 
                 startAttack(
-                        living.get(index)
+                        living.get(index),
+                        "Attack"
                 );
             }
         }
@@ -570,7 +556,6 @@ public class BattleView extends JPanel {
         target = null;
         choosing = false;
         items = false;
-        usingSkill = false;
 
         viewModel.setMessage(
                 viewModel.getMessage()
@@ -830,6 +815,16 @@ public class BattleView extends JPanel {
 
         drawActions(g);
 
+        if (phase == 2
+                && victim != null
+                && actions.get(activeAction).animationType()
+                == Combat.AnimationType.SKILL) {
+
+            drawSkillEffect(g);
+        }
+
+        drawTracker(g);
+
         Rectangle dialogue =
                 new Rectangle(
                         20,
@@ -867,8 +862,11 @@ public class BattleView extends JPanel {
         boolean enabled =
                 canAct();
 
+        List<String> actionNames =
+                new ArrayList<>(actions.keySet());
+
         for (int i = 0;
-             i < ACTIONS.length;
+             i < actionNames.size();
              i++) {
 
             Rectangle rectangle =
@@ -879,9 +877,8 @@ public class BattleView extends JPanel {
 
             boolean selected =
                     enabled
-                            && choosing
-                            && ((i == 0 && !usingSkill)
-                            || (i == 2 && usingSkill));
+                            && i == 0
+                            && choosing;
 
             Color top =
                     new Color(
@@ -983,7 +980,7 @@ public class BattleView extends JPanel {
                     g,
                     selected
                             ? "Choose target..."
-                            : ACTIONS[i],
+                            : actionNames.get(i),
 
                     rectangle.x
                             + 16
@@ -1004,7 +1001,34 @@ public class BattleView extends JPanel {
         }
     }
 
-    // ---------- FIGHTERS ----------
+    private void drawSkillEffect(Graphics2D g) {
+        GameAssets.Art art = assets.art.get(actor);
+
+        if (art == null || art.skillEffect == null) {
+            return;
+        }
+
+        GameAssets.Clip effect = art.skillEffect;
+
+        if (effect == null || victim == null) {
+            return;
+        }
+
+        Point point = position(victim);
+        long time = System.currentTimeMillis() - phaseStart;
+
+        double scale = 1.5;
+
+        effect.draw(
+                g,
+                point.x,
+                point.y,
+                scale,
+                false,
+                time,
+                false
+        );
+    }
 
     private void drawFighter(
             Graphics2D graphics,
@@ -1065,9 +1089,16 @@ public class BattleView extends JPanel {
                 fighter == actor
                         && phase > 0) {
 
-            clip = phase == 2
-                    ? art.attack
-                    : art.move;
+            if (phase == 2) {
+                Combat.Action action = actions.get(activeAction);
+
+                clip = action.animationType()
+                        == Combat.AnimationType.SKILL
+                        ? art.skill
+                        : art.attack;
+            } else {
+                clip = art.move;
+            }
 
             time =
                     now - phaseStart;
@@ -1495,6 +1526,10 @@ public class BattleView extends JPanel {
         );
     }
 
+    /*
+     * This "message" is only a local parameter.
+     * It is NOT battle message state, so this is fine.
+     */
     private void wrap(
             Graphics2D graphics,
             String message,

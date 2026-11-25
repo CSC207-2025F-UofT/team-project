@@ -128,13 +128,18 @@ public class GameDataAccessObject implements GameDataAccessInterface {
             );
 
             GameAssets.Art art = loadArt(
-                    "char/" + HERO_FOLDERS[i] + "/"
+                    "char/" + HERO_FOLDERS[i] + "/",
+                    i != 0
             );
 
             art.mirror = false;
 
             heroes.add(fighter);
             game.art.put(fighter, art);
+
+            art.skillEffect = gif(
+                    "fx/" + (i + 1) + ".gif"
+            );
         }
 
         for (int i = 0; i < ENEMY_FOLDERS.length; i++) {
@@ -146,7 +151,8 @@ public class GameDataAccessObject implements GameDataAccessInterface {
             );
 
             GameAssets.Art art = loadArt(
-                    "monster/" + ENEMY_FOLDERS[i] + "/"
+                    "monster/" + ENEMY_FOLDERS[i] + "/",
+                    false
             );
 
             art.mirror = false;
@@ -175,13 +181,18 @@ public class GameDataAccessObject implements GameDataAccessInterface {
         );
     }
 
-    private GameAssets.Art loadArt(String folder)
+    private GameAssets.Art loadArt(
+            String folder,
+            boolean hasSkillAnimation)
             throws Exception {
 
         GameAssets.Art art = new GameAssets.Art();
 
         art.idle = gif(folder + "idle.gif");
         art.attack = gif(folder + "attack.gif");
+        art.skill = hasSkillAnimation
+                ? gif(folder + "attack2.gif")
+                : art.attack;
 
         // Movement currently reuses the idle animation.
         art.move = art.idle;
