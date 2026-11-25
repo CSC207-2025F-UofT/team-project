@@ -4,12 +4,17 @@ import data_access.FileSaveDataAccessObject;
 import interface_adapter.ViewManagerModel;
 import interface_adapter.leaderboard.LeaderboardController;
 import interface_adapter.leaderboard.LeaderboardPresenter;
+import interface_adapter.load.LoadController;
+import interface_adapter.load.LoadPresenter;
 import interface_adapter.save.SaveController;
 import interface_adapter.save.SavePresenter;
 import interface_adapter.save.SaveViewModel;
 import use_case.leaderboard.LeaderboardInputBoundary;
 import use_case.leaderboard.LeaderboardInteractor;
 import use_case.leaderboard.LeaderboardOutputBoundary;
+import use_case.load.LoadInputBoundary;
+import use_case.load.LoadInteractor;
+import use_case.load.LoadOutputBoundary;
 import use_case.save.SaveInputBoundary;
 import use_case.save.SaveInteractor;
 import use_case.save.SaveOutputBoundary;
@@ -56,6 +61,13 @@ public class SaveAppBuilder {
         LeaderboardOutputBoundary presenter = new LeaderboardPresenter(saveViewModel);
         LeaderboardInputBoundary interactor = new LeaderboardInteractor(saveDataAccess, presenter);
         saveView.setLeaderboardController(new LeaderboardController(interactor));
+        return this;
+    }
+
+    public SaveAppBuilder addLoadUseCase() {
+        LoadOutputBoundary presenter = new LoadPresenter(saveViewModel);
+        LoadInputBoundary interactor = new LoadInteractor(saveDataAccess, presenter);
+        saveView.setLoadController(new LoadController(interactor));
         return this;
     }
 

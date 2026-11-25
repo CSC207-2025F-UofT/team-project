@@ -17,6 +17,7 @@ public class SaveMain {
                     .addSaveView()
                     .addSaveUseCase()
                     .addLeaderboardUseCase()
+                    .addLoadUseCase()
                     .build();
             frame.setVisible(true);
         });

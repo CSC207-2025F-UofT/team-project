@@ -2,7 +2,9 @@ package data_access;
 
 import entity.LeaderboardEntry;
 import use_case.leaderboard.LeaderboardDataAccessInterface;
+import use_case.load.LoadDataAccessInterface;
 import use_case.save.SaveDataAccessInterface;
+import use_case.load.LoadDataAccessInterface;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -19,7 +21,8 @@ import java.util.Map;
  * Stores each player's deepest floor in a CSV file, so saves survive closing the game.
  */
 public class FileSaveDataAccessObject implements SaveDataAccessInterface,
-                                                 LeaderboardDataAccessInterface {
+                                                 LeaderboardDataAccessInterface,
+                                                 LoadDataAccessInterface {
 
     private static final String HEADER = "username, deepestFloor";
 
