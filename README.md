@@ -223,7 +223,7 @@ In every alternative flow, nothing is saved and no XP is given.
 1. The user is logged in.
 2. The system has a location for the user. In the MVP this is a fixed default (U of T St. George campus).
 
-**Trigger:** The user opens the Map tab.
+**Trigger:** The user opens the Map page.
 
 **Main success scenario:**
 
@@ -246,7 +246,7 @@ In every alternative flow, nothing is saved and no XP is given.
 * 7a. The quest was deleted after the pins were drawn: The system shows "This quest no longer exists." and reloads the pins.
 
 **Success postcondition:** The selected quest's page is displayed. Nothing is saved or changed, because this use case only reads data. <br>
-**Failure postcondition:** The user stays on the Map tab and no data is changed.
+**Failure postcondition:** The user stays on the Map page and no data is changed.
 
 **Features that can be added later:**
 
@@ -381,7 +381,7 @@ User can view the activity type, budget, and location of the sidequest and decid
 
 1. The user is logged in.
 
-**Trigger:** The user opens the Map tab.
+**Trigger:** The user opens the Map page.
 
 **Main success scenario:**
 
@@ -403,7 +403,7 @@ User can view the activity type, budget, and location of the sidequest and decid
 
 **Success postcondition:** The selected quest's page is displayed. No data is changed.
 
-**Failure postcondition:** The user stays on the Map tab and no data is changed.
+**Failure postcondition:** The user stays on the Map page and no data is changed.
 
 </details>
 
@@ -657,7 +657,7 @@ A circle on the map: a centre and a radius. It holds the rule for what counts as
 
 * **API Name:** OpenStreetMap tile server (web API), drawn with the JXMapViewer2 library
 * **Documentation:** [OSM tile usage policy](https://operations.osmfoundation.org/policies/tiles/), [JXMapViewer2](https://github.com/msteiger/jxmapviewer2)
-* **How it is used in the program:** The Map tab downloads 256x256 map images from `https://tile.openstreetmap.org/{zoom}/{x}/{y}.png` for the area around the user. JXMapViewer2 (a Swing library, not a web API) requests those tiles, caches them on disk, and draws them. Only the `view` layer uses the library; the rest of the app works with its own `Location` entity. If tiles cannot be downloaded, the map shows a blank background and the "you are here" marker and pins are still drawn.
+* **How it is used in the program:** The Map page downloads 256x256 map images from `https://tile.openstreetmap.org/{zoom}/{x}/{y}.png` for the area around the user. JXMapViewer2 (a Swing library, not a web API) requests those tiles, caches them on disk, and draws them. Only the `view` layer uses the library; the rest of the app works with its own `Location` entity. If tiles cannot be downloaded, the map shows a blank background and the "you are here" marker and pins are still drawn.
 
 [Complete Later: Camera API]
 

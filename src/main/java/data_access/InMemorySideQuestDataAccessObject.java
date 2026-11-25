@@ -48,9 +48,11 @@ public class InMemorySideQuestDataAccessObject implements QuestLocationDataAcces
                         List.of("Food")),
                 sample("sample-4", "Sunset at the CN Tower", INDOOR, 60, 43.6426, -79.3871,
                         List.of("Sightseeing")),
-                sample("sample-5", "Explore the Distillery District", OUTDOOR, 50, 43.6503, -79.3596,
+                sample("sample-5", "Explore the Distillery District", OUTDOOR, 50,
+                        43.6503, -79.3596,
                         List.of("History", "Food")),
-                sample("sample-6", "Walk the Toronto Islands boardwalk", OUTDOOR, 80, 43.6163, -79.3740,
+                sample("sample-6", "Walk the Toronto Islands boardwalk", OUTDOOR, 80,
+                        43.6163, -79.3740,
                         List.of("Outdoors")),
                 sample("sample-7", "Hike the Scarborough Bluffs", OUTDOOR, 100, 43.7056, -79.2316,
                         List.of("Outdoors", "Fitness"))));
