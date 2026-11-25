@@ -1,0 +1,23 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+
+autonumber
+
+== Starting the Task Planning Report (Monitoring View) ==
+actor "Human Student User" as hsu
+boundary "View" as view
+control "Controller" as controller
+participant "Input Boundary" as ib
+control "Use Case Interactor" as uci
+participant "Output Boundary" as ob
+control "Presenter" as presenter
+
+hsu -> view: Start the Task Planning Report
+view -> controller: Start the Task Planning Report
+controller -> ib: Start the Task Planning Report
+ib -> uci: Start the Task Planning Report
+uci -> ob: Start the Task Planning Report
+ob -> presenter: Start the Task Planning Report
+view <-- presenter: Response to start the Task Planning Report
+
+@enduml
