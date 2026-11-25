@@ -103,6 +103,6 @@ public final class JsonUserDataAccess implements SignUpDataAccessInterface, Logi
 
     @Override
     public boolean passwordMatches(UserProfile userProfile, String rawPassword) {
-        return userProfile != null && PasswordUtils.verifyPassword(userProfile.getPasswordHash(), rawPassword);
+        return userProfile != null && PasswordUtils.verifyPassword(rawPassword, userProfile.getPasswordHash());
     }
 }

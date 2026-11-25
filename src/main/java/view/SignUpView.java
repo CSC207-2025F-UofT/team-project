@@ -30,8 +30,6 @@ public class SignUpView extends JDialog {
         add(new JLabel("Username:"));
         add(username);
 
-        add(new JLabel("Email:"));
-        add(email);
 
         add(new JLabel("Password:"));
         add(password);
