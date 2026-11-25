@@ -46,7 +46,9 @@ public class ViewBudgetProgressView extends JPanel {
         ViewBudgetProgressState state = viewModel.getState();
         summary.setText(state.getMessage());
         summary.setCaretPosition(0);
-        summary.setForeground(state.isError() ? Color.RED : Color.BLACK);
+        view.settings.ThemeManager.setMessageColor(
+                summary,
+                state.isError() ? "App.error" : "TextArea.foreground");
         progress.setValue(state.getPercentage());
         progress.setVisible(!state.isError());
     }

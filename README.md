@@ -52,7 +52,8 @@ Record Transaction
 	Interact With Pet
 ### Use case 7
 	Get Pet Pictures
-
+### Use case 8
+	Setting (extra feature, ex. dark mode, music)
 (Add additional use cases as needed.)
 ---
 ## Minimal Viable Product (MVP)
@@ -64,6 +65,7 @@ Record Transaction
 | Zhou Wai Hin Jacky | Earn Reward Coins |
 | Tang Yeh (Tom) | Purchase Pet Items (if time allows) |
 | Tang Yeh (Tom) | Interact with Pet |
+| Zhou Wai Hin Jacky | Setting |
 ---
 ## Entities
 ### Entity 1
