@@ -2,6 +2,7 @@ package data_access;
 
 import com.opencsv.CSVReader;
 import com.opencsv.CSVWriter;
+import com.opencsv.CSVWriterBuilder;
 
 import entity.SideQuest;
 import entity.Location;
@@ -18,19 +19,25 @@ class FileSideQuestDataAccessObject {
 
     public FileSideQuestDataAccessObject(String filePath) {
         this.csvFile = Path.of(filePath);
-        initializeFile();
-    }
-
-    private void initializeFile() {
-        // TODO: Create file if it does not exist
     }
 
     public void save(SideQuest sideQuest) {
-        // TODO: Use CSVWriter
+        CSVWriter writer = new CSVWriterBuilder(new FileWriter(csvFile))
+                .withSeparator('\t')
+                .build();
+        // feed in your array (or convert your data to an array)
+        ArrayList<String> unformattedInterests = sideQuest.getInterests();
+        String formattedInterests = '(' + String.join(',', unformattedInterests) + ')';
+
+
+        String[] entries = "first#second#third".split("#");
+        writer.writeNext(entries);
+        writer.close();
+
     }
 
     public List<SideQuest> getAllQuests() {
-        // TODO: Use CSVReader
+
         return new ArrayList<>();
     }
 
