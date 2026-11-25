@@ -3,7 +3,6 @@ package view;
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.awt.Dimension;
-import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -50,7 +49,6 @@ public class ImportPhotosView extends JPanel implements PropertyChangeListener {
 
     private static final Map<ImportPhotosStage, String> PROGRESS_MESSAGES = Map.of(
         ImportPhotosStage.PHOTO_SAVING, "Saving photos...",
-        ImportPhotosStage.PHOTO_SORTING, "Sorting photos...",
         ImportPhotosStage.TRIP_GENERATION, "Generating trips...",
         ImportPhotosStage.TRIP_SAVING, "Saving trips..."
     );
@@ -330,7 +328,7 @@ public class ImportPhotosView extends JPanel implements PropertyChangeListener {
 
         if (state.getStage() == ImportPhotosStage.TRIP_SAVE_FAILURE) {
             sb.append("Trips Generated: None\n");
-            sb.append("    (Failed to save trips)");
+            sb.append("    %s\n".formatted(state.getStageError()));
 
         } else if (tripData != null) {
             List<String> tripNames = tripData.getTripNames();
@@ -366,7 +364,7 @@ public class ImportPhotosView extends JPanel implements PropertyChangeListener {
                 progressCardLayout.show(progressCardPanel, SUB_CARD_ERROR);
                 setBackVisible(true);
             }
-            case PHOTO_SAVING, PHOTO_SORTING, TRIP_GENERATION, TRIP_SAVING -> {
+            case PHOTO_SAVING, TRIP_GENERATION, TRIP_SAVING -> {
                 progressLabel.setText(PROGRESS_MESSAGES.get(stage));
                 progressCardLayout.show(progressCardPanel, SUB_CARD_LABEL);
                 setBackVisible(false);

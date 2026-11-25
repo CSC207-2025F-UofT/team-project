@@ -201,6 +201,8 @@ public class ImportPhotosInteractor implements ImportPhotosInputBoundary {
                 return;
             }
 
+            presenter.prepareTripGenerationView();
+
             List<Photo> tripEligiblePhotos = getSortedTripEligiblePhotos(photos, exLocation, exDistance);
             List<Trip> generatedTrips = generateTrips(tripEligiblePhotos);
 
