@@ -20,6 +20,12 @@
 //
 package app;
 
+import data_access.FavoriteDataAccessObject;
+import interface_adapter.Favorite.FavoriteController;
+import interface_adapter.Favorite.FavoritePresenter;
+import interface_adapter.Favorite.FavoriteViewModel;
+import user_case.Favorite.FavoriteInteractor;
+import java.nio.file.Path;
 import data_access.MovieDataAccessObject;
 import data_access.ReviewDataAccess;
 import interface_adapter.Reviews.ReviewPresenter;
@@ -50,8 +56,12 @@ public class Main {
             CardLayout cardLayout = new CardLayout();
             JPanel views = new JPanel(cardLayout);
 
-            application.add(views);
+            application.add(views, BorderLayout.CENTER);
 
+            FavoriteViewModel favoriteModel = new FavoriteViewModel();
+            Path favoritesFile = Path.of(System.getProperty("user.home"), ".flicksy", "favorites.json");
+            FavoriteController favoriteController = new FavoriteController(new FavoriteInteractor(
+                    new FavoriteDataAccessObject(favoritesFile.toString()), new FavoritePresenter(favoriteModel)));
             // Create the ViewModels
             SearchBarViewModel searchBarViewModel =
                     new SearchBarViewModel();
@@ -119,7 +129,10 @@ public class Main {
 
                         // Create the results page using returned movie data
                         SearchedResultsPageView searchedResultsPageView =
-                                new SearchedResultsPageView(searchedViewModel);
+                                new SearchedResultsPageView(searchedViewModel, movieId -> {
+                                    favoriteController.addFavorite(System.getenv("FLICKSY_USERNAME"), movieId);
+                                    return favoriteModel.getState().getMessage();
+                                });
 
                         searchedResultsPageView.setSearchController(
                                 searchController

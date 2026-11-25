@@ -25,7 +25,14 @@
             <artifactId>json</artifactId>
             <version>20240303</version>
         </dependency>
+        <dependency>
+            <groupId>org.mindrot</groupId>
+            <artifactId>jbcrypt</artifactId>
+            <version>0.4</version>
+        </dependency>
     </dependencies>
+
+
 
 <!--    <dependencies>-->
 <!--        &lt;!&ndash; OkHttp for TMDB API requests &ndash;&gt;-->

@@ -31,7 +31,7 @@ public class SearchInteractor implements SearchInputBoundary {
 
 
             final SearchOutputData searchOutputData = new SearchOutputData(movies);
-            //results returned in the form of {name, description, poster path, movie id}
+            //results returned in the form of {name, release date, poster path, movie id}
             searchPresenter.prepareSuccessView(searchOutputData);
         }
     }

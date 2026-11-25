@@ -16,6 +16,7 @@ import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.net.URL;
+import java.util.function.IntFunction;
 
 /**
  * The View for when the user is logging into the program.
@@ -31,11 +32,16 @@ public class SearchedResultsPageView extends JPanel implements ActionListener, S
     private final JButton search;
     private final JButton favourites;
     private final JButton watchlist;
-    private final JButton home;
+//    private final JButton home;
     private SearchController searchController = null;
     private ReviewsController reviewsController = null;
 
-    public SearchedResultsPageView(SearchedViewModel searchedViewModel){
+    public SearchedResultsPageView(SearchedViewModel searchedViewModel) {
+        this(searchedViewModel, null);
+    }
+
+    /** The favourite action saves the selected movie and returns the presenter's feedback. */
+    public SearchedResultsPageView(SearchedViewModel searchedViewModel, IntFunction<String> addFavorite) {
 
         this.searchedViewModel = searchedViewModel;
         this.searchedViewModel.addListener(this);
@@ -48,14 +54,16 @@ public class SearchedResultsPageView extends JPanel implements ActionListener, S
 
         final LabelTextPanel searchInfo = new LabelTextPanel(
                 new JLabel("Search"), searchInputField);
-
+        searchInfo.setOpaque(false);
 
         final JPanel buttons = new JPanel();
+        buttons.setOpaque(false);
+
         search = new JButton("Search");
         search.setFont(new Font("Serif", Font.PLAIN, 16));
         buttons.add(search);
 
-        favourites = new JButton("Favourites");
+        favourites = new JButton("Favorites");
         favourites.setFont(new Font("Serif", Font.PLAIN, 16));
         buttons.add(favourites);
 
@@ -63,11 +71,13 @@ public class SearchedResultsPageView extends JPanel implements ActionListener, S
         watchlist.setFont(new Font("Serif", Font.PLAIN, 16));
         buttons.add(watchlist);
 
-        home = new JButton("Home");
-        home.setFont(new Font("Serif", Font.PLAIN, 16));
-        buttons.add(home);
+//        home = new JButton("Home");
+//        home.setFont(new Font("Serif", Font.PLAIN, 16));
+//        buttons.add(home);
 
         final JPanel searchResults = new JPanel();
+//        searchResults.setOpaque(false);
+        searchResults.setBackground(new Color(240, 249, 250));
         // helps each movie data be properly laid out
         searchResults.setLayout(new BoxLayout(searchResults, BoxLayout.Y_AXIS));
 
@@ -81,9 +91,7 @@ public class SearchedResultsPageView extends JPanel implements ActionListener, S
         for(String[] data: results){
             int movieId = Integer.parseInt(data[3]);
             JPanel movieData = new JPanel();
-            JLabel movieTitle = new JLabel(data[0]);
-            movieTitle.setFont(new Font("Serif", Font.PLAIN, 14));
-            movieData.add(movieTitle);
+            movieData.setOpaque(false);
             try{
                 URL url = new URL(data[2]);
                 BufferedImage poster = ImageIO.read(url);
@@ -104,17 +112,32 @@ public class SearchedResultsPageView extends JPanel implements ActionListener, S
 //            JLabel description = new JLabel(data[1]);
 //            movieData.add(description);
 
-            JTextArea description = new JTextArea(data[1]);
-            description.setWrapStyleWord(true);      // Wrap at word boundaries, not mid-word
-            description.setLineWrap(true);           // Enable line wrapping
-            description.setOpaque(false);            // Make background transparent like JLabel
-            description.setEditable(false);          // Prevent user editing
-            description.setFocusable(false);         // Remove focus border/cursor
-            description.setFont(new Font("Serif", Font.PLAIN, 14));
+//            JTextArea description = new JTextArea(data[1]);
+//            description.setWrapStyleWord(true);      // Wrap at word boundaries, not mid-word
+//            description.setLineWrap(true);           // Enable line wrapping
+//            description.setOpaque(false);            // Make background transparent like JLabel
+//            description.setEditable(false);          // Prevent user editing
+//            description.setFocusable(false);         // Remove focus border/cursor
+//            description.setFont(new Font("Serif", Font.PLAIN, 14));
+//            movieData.add(description);
 
-            movieData.add(description);
+            JPanel details = new JPanel();
+            details.setLayout(new BoxLayout(details, BoxLayout.Y_AXIS));
+
+            JLabel movieTitle = new JLabel(data[0]);
+            movieTitle.setFont(new Font("Serif", Font.PLAIN, 14));
+            movieTitle.setAlignmentX(Component.LEFT_ALIGNMENT);
+            details.add(movieTitle);
+
+            JLabel releaseDate = new JLabel("Release Date: " + data[1]);
+            releaseDate.setFont(new Font("Serif", Font.PLAIN, 14));
+            details.add(releaseDate);
+
+
+
 
             JPanel button = new JPanel();
+            button.setOpaque(false);
             JButton viewDetails = new JButton("View Details");
             viewDetails.setFont(new Font("Serif", Font.PLAIN, 14));
             button.add(viewDetails);
@@ -122,6 +145,18 @@ public class SearchedResultsPageView extends JPanel implements ActionListener, S
             JButton reviews = new JButton("Reviews");
             reviews.setFont(new Font("Serif", Font.PLAIN, 14));
             button.add(reviews);
+
+            JLabel favoriteFeedback = new JLabel();
+            JButton favoriteButton = new JButton("Add to Favorites");
+            favoriteButton.setFont(reviews.getFont());
+            favoriteButton.setEnabled(addFavorite != null && movieId > 0);
+            favoriteButton.addActionListener(event -> favoriteFeedback.setText(addFavorite.apply(movieId)));
+            button.add(favoriteButton);
+
+            JButton watchlistButton = new JButton("Add to Watchlist");
+            watchlistButton.setFont(reviews.getFont());
+            watchlistButton.setEnabled(false);
+            button.add(watchlistButton);
 
             viewDetails.addActionListener(
                     new ActionListener() {
@@ -146,7 +181,9 @@ public class SearchedResultsPageView extends JPanel implements ActionListener, S
             );
 
 
-            movieData.add(button);
+            details.add(button);
+            details.add(favoriteFeedback);
+            movieData.add(details);
             searchResults.add(movieData);
 
         }
@@ -185,6 +222,19 @@ public class SearchedResultsPageView extends JPanel implements ActionListener, S
                     }
                 }
         );
+//        home.addActionListener(
+//                new ActionListener() {
+//                    public void actionPerformed(ActionEvent evt) {
+//                        if (evt.getSource().equals(search)) {
+//                            final SearchState currentState = searchedViewModel.getState();
+//
+//                            searchController.execute(
+//                                    currentState.getTitle()
+//                            );
+//                        }
+//                    }
+//                }
+//        );
 
 
         searchInputField.getDocument().addDocumentListener(new DocumentListener() {

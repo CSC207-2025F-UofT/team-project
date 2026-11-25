@@ -19,7 +19,7 @@ public class SearchOutputData {
         outputList = new String[movies.size()][];
         int index = 0;
         for(Movie movie: movies){
-            outputList[index] = new String[] {movie.getName(), movie.getDescription(), movie.getPosterPath(), String.valueOf(movie.getMovieID())};
+            outputList[index] = new String[] {movie.getName(), movie.getReleaseDate(), movie.getPosterPath(), String.valueOf(movie.getMovieID())};
             index++;
         }
     }
