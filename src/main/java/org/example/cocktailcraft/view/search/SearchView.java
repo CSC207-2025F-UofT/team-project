@@ -11,6 +11,11 @@ import javax.swing.JTextField;
 import javax.swing.JButton;
 import javax.swing.JPopupMenu;
 import javax.swing.JCheckBox;
+import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
 import java.util.Map;
 import java.util.EnumMap;
 import java.util.Locale;
@@ -31,11 +36,13 @@ public class SearchView extends JPanel {
     private SearchController searchController;
 
     public SearchView(SearchViewModel searchViewModel) {
+        super(new GridBagLayout());
         this.searchViewModel = searchViewModel;
         JLabel nameLabel = new JLabel("Cocktail name:");
         nameLabel.setLabelFor(nameInputField);
-        add(nameLabel);
-        add(nameInputField);
+        addControl(nameLabel, false);
+        nameInputField.setMinimumSize(new Dimension(0, nameInputField.getPreferredSize().height));
+        addControl(nameInputField, true);
         spiritSelector = addSelector("Base spirits", Tags.BaseSpirit.class, spiritOptions, spirit -> {
             String name = spirit.name().toLowerCase(Locale.ROOT);
             return Character.toUpperCase(name.charAt(0)) + name.substring(1);
@@ -50,7 +57,7 @@ public class SearchView extends JPanel {
         searchButton.setEnabled(false);
         searchButton.addActionListener(event -> search());
         nameInputField.addActionListener(event -> search());
-        add(searchButton);
+        addControl(searchButton, false);
 
         JButton clearButton = new JButton("Clear");
         clearButton.addActionListener(event -> {
@@ -68,7 +75,16 @@ public class SearchView extends JPanel {
                 searchViewModel.notifyStateChanged();
             }
         });
-        add(clearButton);
+        addControl(clearButton, false);
+    }
+
+    private void addControl(Component control, boolean expandable) {
+        GridBagConstraints constraints = new GridBagConstraints();
+        constraints.gridy = 0;
+        constraints.insets = new Insets(4, 4, 4, 4);
+        constraints.weightx = expandable ? 1 : 0;
+        constraints.fill = expandable ? GridBagConstraints.HORIZONTAL : GridBagConstraints.NONE;
+        add(control, constraints);
     }
 
     private void search() {
@@ -80,7 +96,12 @@ public class SearchView extends JPanel {
 
     private <T extends Enum<T>> JButton addSelector(String title, Class<T> type,
                                                    Map<T, JCheckBox> options, Function<T, String> label) {
-        JButton selector = new JButton(title);
+        JButton selector = new JButton(title + " (" + type.getEnumConstants().length + ")");
+        // Reserve space for the largest count so selecting options cannot grow the row.
+        Dimension selectorSize = selector.getPreferredSize();
+        selector.setPreferredSize(selectorSize);
+        selector.setMinimumSize(selectorSize);
+        selector.setText(title);
         JPopupMenu dropdown = new JPopupMenu();
         for (T value : type.getEnumConstants()) {
             JCheckBox option = new JCheckBox(label.apply(value));
@@ -93,7 +114,7 @@ public class SearchView extends JPanel {
         }
         selector.setComponentPopupMenu(dropdown);
         selector.addActionListener(event -> dropdown.show(selector, 0, selector.getHeight()));
-        add(selector);
+        addControl(selector, false);
         return selector;
     }
 

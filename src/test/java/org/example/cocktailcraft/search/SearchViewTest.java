@@ -8,6 +8,8 @@ import org.example.cocktailcraft.view.search.SearchView;
 import org.junit.jupiter.api.Test;
 
 import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.Rectangle;
 import java.util.Set;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -15,6 +17,8 @@ import javax.swing.JPopupMenu;
 import javax.swing.SwingUtilities;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 class SearchViewTest {
     @Test
@@ -80,6 +84,47 @@ class SearchViewTest {
             assertEquals(Set.of(), view.getSelectedAlcoholRanges());
             assertEquals("Alcohol content", selector.getText());
         });
+    }
+
+    @Test
+    void clearRemainsInsideSearchBarAfterCountsGrowAndWindowNarrows() throws Exception {
+        SwingUtilities.invokeAndWait(() -> {
+            SearchView view = new SearchView(new SearchViewModel());
+            Dimension initialSize = view.getPreferredSize();
+            view.setSize(initialSize);
+            view.doLayout();
+            for (String title : new String[] {"Base spirits", "Flavors", "Alcohol content"}) {
+                JPopupMenu dropdown = selector(view, title).getComponentPopupMenu();
+                for (Component component : dropdown.getComponents()) {
+                    ((JCheckBox) component).doClick(0);
+                }
+            }
+            view.doLayout();
+            assertControlsFit(view);
+            view.setSize(initialSize.width - 100, initialSize.height);
+            view.doLayout();
+            assertControlsFit(view);
+            selector(view, "Clear").doClick(0);
+            assertTrue(view.getSelectedBaseSpirits().isEmpty());
+            assertTrue(view.getSelectedFlavors().isEmpty());
+            assertTrue(view.getSelectedAlcoholRanges().isEmpty());
+            view.doLayout();
+            assertControlsFit(view);
+        });
+    }
+
+    private static void assertControlsFit(SearchView view) {
+        Rectangle visibleArea = new Rectangle(0, 0, view.getWidth(), view.getHeight());
+        Component[] controls = view.getComponents();
+        for (int index = 0; index < controls.length; index++) {
+            Component control = controls[index];
+            assertTrue(control.getWidth() > 0 && control.getHeight() > 0);
+            assertTrue(visibleArea.contains(control.getBounds()),
+                    control.getClass().getSimpleName() + " clipped: " + control.getBounds());
+            for (int other = index + 1; other < controls.length; other++) {
+                assertFalse(control.getBounds().intersects(controls[other].getBounds()), "Controls overlap");
+            }
+        }
     }
 
     private static JButton selector(SearchView view, String text) {
