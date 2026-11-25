@@ -5,9 +5,12 @@ import entity.UserQuest;
 import use_case.accept_quest.AcceptQuestUserQuestDataAccessInterface;
 import use_case.cancel_quest.CancelQuestUserQuestDataAccessInterface;
 import use_case.complete_quest.CompleteQuestUserQuestDataAccessInterface;
+import use_case.view_dashboard.ViewDashboardUserQuestDataAccessInterface;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -20,7 +23,8 @@ import java.util.Map;
 public class InMemoryUserQuestDataAccessObject implements
         AcceptQuestUserQuestDataAccessInterface,
         CompleteQuestUserQuestDataAccessInterface,
-        CancelQuestUserQuestDataAccessInterface {
+        CancelQuestUserQuestDataAccessInterface,
+        ViewDashboardUserQuestDataAccessInterface {
 
     // Java note: Map<K, V> is a dict. LinkedHashMap keeps insertion order.
     private final Map<String, UserQuest> userQuests = new LinkedHashMap<>();
@@ -52,4 +56,14 @@ public class InMemoryUserQuestDataAccessObject implements
         return count;
     }
 
+    @Override
+    public List<UserQuest> getUserQuests(String username) {
+        List<UserQuest> result = new ArrayList<>();
+        for (UserQuest uq : userQuests.values()) {
+            if (uq.getUsername().equals(username)) {
+                result.add(uq);
+            }
+        }
+        return result;
+    }
 }
