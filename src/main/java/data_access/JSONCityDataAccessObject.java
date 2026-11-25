@@ -66,6 +66,11 @@ public class JSONCityDataAccessObject implements CityDataAccessInterface {
         return answerCities.get(random.nextInt(answerCities.size()));
     }
 
+    @Override
+    public City findCityByName(String name) {
+        return guessableCities.get(key(name));
+    }
+
     private static JSONArray readJsonArray(String filePath) {
         try {
             return new JSONArray(Files.readString(Path.of(filePath)));
