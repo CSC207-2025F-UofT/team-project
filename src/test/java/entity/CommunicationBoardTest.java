@@ -9,80 +9,175 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class CommunicationBoardTest {
 
-    private Pictogram water;
+    private Pictogram play;
+    private Pictogram eat;
+    private Pictogram ball;
     private Pictogram apple;
     private CommunicationBoard board;
 
     @BeforeEach
     void setUp() {
-        water = new Pictogram(1, "water", "water.png");
-        apple = new Pictogram(2, "apple", "apple.png");
+        play = new Pictogram(1, "play", "play.png", WordType.ACTION);
+        eat = new Pictogram(2, "eat", "eat.png", WordType.ACTION);
+        ball = new Pictogram(3, "ball", "ball.png", WordType.THING);
+        apple = new Pictogram(4, "apple", "apple.png", WordType.THING);
         board = new CommunicationBoard();
     }
 
+    private static Pictogram action(int id) {
+        return new Pictogram(id, "action" + id, id + ".png", WordType.ACTION);
+    }
+
+    private static Pictogram thing(int id) {
+        return new Pictogram(id, "thing" + id, id + ".png", WordType.THING);
+    }
+
+    // ----- actions -----
+
     @Test
-    void newBoardIsEmptyWithDefaultCapacity() {
+    void newBoardIsEmpty() {
         assertTrue(board.isEmpty());
-        assertEquals(0, board.size());
-        assertEquals(6, board.getCapacity());
+        assertTrue(board.getActions().isEmpty());
     }
 
     @Test
-    void addPictogramKeepsOrder() {
-        board.addPictogram(water);
-        board.addPictogram(apple);
+    void addActionKeepsCaregiverOrder() {
+        board.addAction(play);
+        board.addAction(eat);
 
-        assertEquals(List.of(water, apple), board.getPictograms());
+        assertEquals(List.of(play, eat), board.getActions());
     }
 
     @Test
-    void cannotAddSamePictogramTwice() {
-        board.addPictogram(water);
+    void cannotAddSameActionTwice() {
+        board.addAction(play);
 
-        assertThrows(IllegalArgumentException.class,
-                () -> board.addPictogram(water));
-        assertEquals(1, board.size());
+        assertThrows(IllegalArgumentException.class, () -> board.addAction(play));
     }
 
     @Test
-    void cannotAddWhenFull() {
-        CommunicationBoard small = new CommunicationBoard(1);
-        small.addPictogram(water);
-
-        assertTrue(small.isFull());
-        assertThrows(IllegalStateException.class,
-                () -> small.addPictogram(apple));
+    void cannotPutThingOnMainBoard() {
+        assertThrows(IllegalArgumentException.class, () -> board.addAction(ball));
     }
 
     @Test
-    void removePictogramRemovesIt() {
-        board.addPictogram(water);
-        board.addPictogram(apple);
+    void boardHoldsAtMostSixActions() {
+        for (int id = 100; id < 100 + CommunicationBoard.MAX_ACTIONS; id++) {
+            board.addAction(action(id));
+        }
 
-        board.removePictogram(water);
-
-        assertEquals(List.of(apple), board.getPictograms());
-        assertFalse(board.contains(water));
+        assertTrue(board.isFull());
+        assertThrows(IllegalStateException.class, () -> board.addAction(play));
     }
 
     @Test
-    void cannotRemovePictogramNotOnBoard() {
-        assertThrows(IllegalArgumentException.class,
-                () -> board.removePictogram(water));
+    void removeActionAlsoRemovesItsThings() {
+        board.addAction(play);
+        board.addThing(play, ball);
+
+        board.removeAction(play);
+
+        assertFalse(board.containsAction(play));
+        assertThrows(IllegalArgumentException.class, () -> board.getThings(play));
     }
 
     @Test
-    void returnedListCannotBeModified() {
-        board.addPictogram(water);
+    void cannotRemoveActionNotOnBoard() {
+        assertThrows(IllegalArgumentException.class, () -> board.removeAction(play));
+    }
 
-        assertThrows(UnsupportedOperationException.class,
-                () -> board.getPictograms().clear());
-        assertEquals(1, board.size());
+    // ----- things -----
+
+    @Test
+    void addThingLinksItToAction() {
+        board.addAction(play);
+
+        board.addThing(play, ball);
+
+        assertEquals(List.of(ball), board.getThings(play));
+        assertTrue(board.hasThings(play));
     }
 
     @Test
-    void capacityMustBePositive() {
-        assertThrows(IllegalArgumentException.class,
-                () -> new CommunicationBoard(0));
+    void newActionHasNoThings() {
+        board.addAction(play);
+
+        assertFalse(board.hasThings(play));
+    }
+
+    @Test
+    void cannotAddThingToActionNotOnBoard() {
+        assertThrows(IllegalArgumentException.class, () -> board.addThing(play, ball));
+    }
+
+    @Test
+    void cannotLinkActionAsThing() {
+        board.addAction(play);
+        board.addAction(eat);
+
+        assertThrows(IllegalArgumentException.class, () -> board.addThing(play, eat));
+    }
+
+    @Test
+    void cannotLinkSameThingTwiceToSameAction() {
+        board.addAction(play);
+        board.addThing(play, ball);
+
+        assertThrows(IllegalArgumentException.class, () -> board.addThing(play, ball));
+    }
+
+    @Test
+    void sameThingCanBeLinkedToSeveralActions() {
+        board.addAction(play);
+        board.addAction(eat);
+
+        board.addThing(play, apple);
+        board.addThing(eat, apple);
+
+        assertEquals(List.of(apple), board.getThings(play));
+        assertEquals(List.of(apple), board.getThings(eat));
+    }
+
+    @Test
+    void actionHoldsAtMostSixThings() {
+        board.addAction(play);
+        for (int id = 200; id < 200 + CommunicationBoard.MAX_THINGS_PER_ACTION; id++) {
+            board.addThing(play, thing(id));
+        }
+
+        assertThrows(IllegalStateException.class, () -> board.addThing(play, ball));
+    }
+
+    @Test
+    void removeThingOnlyAffectsThatAction() {
+        board.addAction(play);
+        board.addAction(eat);
+        board.addThing(play, apple);
+        board.addThing(eat, apple);
+
+        board.removeThing(play, apple);
+
+        assertTrue(board.getThings(play).isEmpty());
+        assertEquals(List.of(apple), board.getThings(eat));
+    }
+
+    @Test
+    void cannotRemoveThingNotLinked() {
+        board.addAction(play);
+
+        assertThrows(IllegalArgumentException.class, () -> board.removeThing(play, ball));
+    }
+
+    // ----- encapsulation -----
+
+    @Test
+    void returnedListsCannotBeModified() {
+        board.addAction(play);
+        board.addThing(play, ball);
+
+        assertThrows(UnsupportedOperationException.class, () -> board.getActions().clear());
+        assertThrows(UnsupportedOperationException.class, () -> board.getThings(play).clear());
+        assertEquals(1, board.getActions().size());
+        assertEquals(1, board.getThings(play).size());
     }
 }

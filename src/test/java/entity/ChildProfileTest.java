@@ -62,9 +62,11 @@ class ChildProfileTest {
 
     @Test
     void boardChangesAreKeptInProfile() {
-        profile.getBoard().addPictogram(water);
+        Pictogram drink = new Pictogram(10, "drink", "drink.png", WordType.ACTION);
 
-        assertTrue(profile.getBoard().contains(water));
+        profile.getBoard().addAction(drink);
+
+        assertTrue(profile.getBoard().containsAction(drink));
     }
 
     @Test

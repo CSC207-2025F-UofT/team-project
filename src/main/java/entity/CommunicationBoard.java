@@ -2,83 +2,121 @@ package entity;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 /**
- * The set of pictograms currently available to the child.
- * A caregiver can add or remove pictograms.
+ * The vocabulary available to the child, organized as actions and related things.
+ * The main screen shows up to 6 actions (e.g. "play"); each action links to
+ * up to 6 related things (e.g. "ball", "toy"). A caregiver edits the board.
  */
 public final class CommunicationBoard {
 
-    public static final int DEFAULT_CAPACITY = 6;
+    public static final int MAX_ACTIONS = 6;
+    public static final int MAX_THINGS_PER_ACTION = 6;
 
-    private final int capacity;
-    private final List<Pictogram> pictograms;
-
-    public CommunicationBoard() {
-        this(DEFAULT_CAPACITY);
-    }
-
-    public CommunicationBoard(int capacity) {
-        if (capacity <= 0) {
-            throw new IllegalArgumentException("capacity must be positive");
-        }
-        this.capacity = capacity;
-        this.pictograms = new ArrayList<>();
-    }
+    /** Each action, in the caregiver's order, mapped to its related things. */
+    private final Map<Pictogram, List<Pictogram>> actions = new LinkedHashMap<>();
 
     /**
-     * Adds a pictogram to the end of the board.
-     * The same pictogram cannot be added twice.
+     * Adds an action to the end of the main board.
      */
-    public void addPictogram(Pictogram pictogram) {
-        Objects.requireNonNull(pictogram, "pictogram cannot be null");
-        if (contains(pictogram)) {
+    public void addAction(Pictogram action) {
+        Objects.requireNonNull(action, "action cannot be null");
+        if (!action.isAction()) {
             throw new IllegalArgumentException(
-                    "pictogram is already on the board: " + pictogram.getLabel());
+                    "only actions can go on the main board: " + action.getLabel());
+        }
+        if (containsAction(action)) {
+            throw new IllegalArgumentException(
+                    "action is already on the board: " + action.getLabel());
         }
         if (isFull()) {
-            throw new IllegalStateException("board is full");
+            throw new IllegalStateException("the board already has " + MAX_ACTIONS + " actions");
         }
-        pictograms.add(pictogram);
+        actions.put(action, new ArrayList<>());
     }
 
     /**
-     * Removes a pictogram from the board.
+     * Removes an action and all of its links to related things.
      */
-    public void removePictogram(Pictogram pictogram) {
-        Objects.requireNonNull(pictogram, "pictogram cannot be null");
-        if (!pictograms.remove(pictogram)) {
+    public void removeAction(Pictogram action) {
+        Objects.requireNonNull(action, "action cannot be null");
+        if (actions.remove(action) == null) {
             throw new IllegalArgumentException(
-                    "pictogram is not on the board: " + pictogram.getLabel());
+                    "action is not on the board: " + action.getLabel());
         }
     }
 
-    public boolean contains(Pictogram pictogram) {
-        return pictograms.contains(pictogram);
+    /**
+     * Links a thing to an action that is already on the board.
+     * The same thing can be linked to several actions.
+     */
+    public void addThing(Pictogram action, Pictogram thing) {
+        Objects.requireNonNull(thing, "thing cannot be null");
+        List<Pictogram> things = thingsOf(action);
+        if (!thing.isThing()) {
+            throw new IllegalArgumentException(
+                    "only things can be linked to an action: " + thing.getLabel());
+        }
+        if (things.contains(thing)) {
+            throw new IllegalArgumentException(
+                    thing.getLabel() + " is already linked to " + action.getLabel());
+        }
+        if (things.size() >= MAX_THINGS_PER_ACTION) {
+            throw new IllegalStateException(
+                    action.getLabel() + " already has " + MAX_THINGS_PER_ACTION + " things");
+        }
+        things.add(thing);
     }
 
+    /**
+     * Removes the link between a thing and an action.
+     */
+    public void removeThing(Pictogram action, Pictogram thing) {
+        Objects.requireNonNull(thing, "thing cannot be null");
+        if (!thingsOf(action).remove(thing)) {
+            throw new IllegalArgumentException(
+                    thing.getLabel() + " is not linked to " + action.getLabel());
+        }
+    }
+
+    public boolean containsAction(Pictogram action) {
+        return actions.containsKey(action);
+    }
+
+    /** True when the main board already has the maximum number of actions. */
     public boolean isFull() {
-        return pictograms.size() >= capacity;
+        return actions.size() >= MAX_ACTIONS;
     }
 
     public boolean isEmpty() {
-        return pictograms.isEmpty();
+        return actions.isEmpty();
     }
 
-    public int size() {
-        return pictograms.size();
+    /** Returns the actions in the caregiver's order (read-only copy). */
+    public List<Pictogram> getActions() {
+        return Collections.unmodifiableList(new ArrayList<>(actions.keySet()));
     }
 
-    public int getCapacity() {
-        return capacity;
+    /** Returns the things linked to an action (read-only copy). */
+    public List<Pictogram> getThings(Pictogram action) {
+        return Collections.unmodifiableList(new ArrayList<>(thingsOf(action)));
     }
 
-    /**
-     * Returns a read-only copy, so callers cannot change the board directly.
-     */
-    public List<Pictogram> getPictograms() {
-        return Collections.unmodifiableList(new ArrayList<>(pictograms));
+    public boolean hasThings(Pictogram action) {
+        return !thingsOf(action).isEmpty();
+    }
+
+    private List<Pictogram> thingsOf(Pictogram action) {
+        Objects.requireNonNull(action, "action cannot be null");
+        List<Pictogram> things = actions.get(action);
+        if (things == null) {
+            throw new IllegalArgumentException(
+                    "action is not on the board: " + action.getLabel());
+        }
+        return things;
     }
 }
