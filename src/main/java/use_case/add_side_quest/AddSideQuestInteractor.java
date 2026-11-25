@@ -38,8 +38,11 @@ public class AddSideQuestInteractor implements AddSideQuestInputBoundary {
             return;
         }
 
-        SideQuest sideQuest = new SideQuest(inputData.getName(), inputData.getDescription(),
-                inputData.isIndoor(), inputData.getBudget(), inputData.getExpectedTime(), inputData.getExp(),
+        // TODO (Isaac): SideQuest now stores budget and time as categories ("free", "under_60_minutes", ...),
+        // but the input data still has numbers. String.valueOf only makes it compile until you choose a mapping.
+        SideQuest sideQuest = new SideQuest(inputData.getId(), inputData.getName(),
+                inputData.isIndoor(), String.valueOf(inputData.getBudget()),
+                String.valueOf(inputData.getExpectedTime()), inputData.getExp(),
                 inputData.getLocation(), inputData.getInterests()
         );
 

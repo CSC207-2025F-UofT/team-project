@@ -11,6 +11,8 @@ public class FindNearbyQuestsOutputData {
     private final double centreLatitude;
     private final double centreLongitude;
     private final double radiusKm;
+    private final double northEdgeLatitude;
+    private final double eastEdgeLongitude;
     private final List<NearbyQuest> quests;
 
     /**
@@ -19,13 +21,18 @@ public class FindNearbyQuestsOutputData {
      * @param centreLatitude latitude of the user's location
      * @param centreLongitude longitude of the user's location
      * @param radiusKm the radius that was searched, in kilometres
+     * @param northEdgeLatitude latitude of the circle's edge straight north of the centre
+     * @param eastEdgeLongitude longitude of the circle's edge straight east of the centre
      * @param quests the nearby quests, nearest first
      */
     public FindNearbyQuestsOutputData(double centreLatitude, double centreLongitude,
-                                      double radiusKm, List<NearbyQuest> quests) {
+                                      double radiusKm, double northEdgeLatitude,
+                                      double eastEdgeLongitude, List<NearbyQuest> quests) {
         this.centreLatitude = centreLatitude;
         this.centreLongitude = centreLongitude;
         this.radiusKm = radiusKm;
+        this.northEdgeLatitude = northEdgeLatitude;
+        this.eastEdgeLongitude = eastEdgeLongitude;
         this.quests = List.copyOf(quests);
     }
 
@@ -54,6 +61,24 @@ public class FindNearbyQuestsOutputData {
      */
     public double getRadiusKm() {
         return radiusKm;
+    }
+
+    /**
+     * Returns the latitude of the circle's edge straight north of the centre.
+     *
+     * @return the latitude
+     */
+    public double getNorthEdgeLatitude() {
+        return northEdgeLatitude;
+    }
+
+    /**
+     * Returns the longitude of the circle's edge straight east of the centre.
+     *
+     * @return the longitude
+     */
+    public double getEastEdgeLongitude() {
+        return eastEdgeLongitude;
     }
 
     /**

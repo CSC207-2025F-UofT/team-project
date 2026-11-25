@@ -11,7 +11,10 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
+import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.GridLayout;
+import java.awt.Rectangle;
 import java.awt.RenderingHints;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
@@ -21,6 +24,8 @@ import java.awt.geom.Area;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Path2D;
 import java.awt.geom.Point2D;
+import java.awt.geom.Rectangle2D;
+import java.awt.geom.RoundRectangle2D;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
@@ -31,15 +36,17 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
 import javax.swing.BorderFactory;
-import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.DefaultListCellRenderer;
+import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
+import javax.swing.SwingConstants;
 import javax.swing.event.MouseInputListener;
+import javax.swing.plaf.basic.BasicComboBoxUI;
 import org.jxmapviewer.JXMapViewer;
 import org.jxmapviewer.OSMTileFactoryInfo;
 import org.jxmapviewer.cache.FileBasedLocalCache;
@@ -48,13 +55,17 @@ import org.jxmapviewer.input.ZoomMouseWheelListenerCursor;
 import org.jxmapviewer.painter.Painter;
 import org.jxmapviewer.viewer.DefaultTileFactory;
 import org.jxmapviewer.viewer.GeoPosition;
+import view.journal.JournalStyle;
 
 /**
- * The Map tab (Use Case 4). Draws OpenStreetMap tiles, a "you are here" marker,
- * and one pin per nearby quest, and shows a preview when a pin is clicked.
+ * The Map page (Use Case 4). Draws OpenStreetMap tiles, a "you are here" marker,
+ * a red circle showing the search radius, and one pin per nearby quest, and shows
+ * a preview card when a pin is clicked. The yellow bar holds the filters (for now
+ * only the radius drop-down), so later filters can be added next to it.
  *
  * <p>This view only displays the view model's state and forwards user actions to
- * the controller. It never filters quests or measures distances.
+ * the controller. It never filters quests or measures distances. It uses the same
+ * page style as the Journal ({@link JournalStyle}) so the app looks like one app.
  */
 public class MapView extends JPanel implements PropertyChangeListener {
     private static final Double[] RADIUS_PRESETS_KM = {0.5, 1.0, 2.0, 5.0, 10.0};
@@ -66,41 +77,52 @@ public class MapView extends JPanel implements PropertyChangeListener {
 
     private static final int DEFAULT_ZOOM = 4;
     private static final int CLOSEST_FIT_ZOOM = 3;
-    private static final double FIT_FRACTION = 0.7;
+    private static final double FIT_FRACTION = 0.8;
     private static final int PIN_HIT_RADIUS_PX = 14;
-    private static final int GAP = 8;
-    private static final int PADDING = 12;
+
+    // Page layout, matching the Journal pages (header ends at y = 58, strip at y = 72).
+    private static final int STRIP_TOP = 72;
+    private static final int STRIP_HEIGHT = 40;
+    private static final int STATUS_TOP = 114;
+    private static final int STATUS_HEIGHT = 26;
+    private static final int MAP_TOP = 142;
+    private static final int MARGIN = 10;
+    private static final int CORNER = 36;
+    private static final int RETRY_WIDTH = 72;
+    private static final int FILTER_GAP = 8;
+    private static final int DROPDOWN_WIDTH = 92;
+    private static final int DROPDOWN_HEIGHT = 26;
 
     private static final Color PIN_COLOUR = new Color(0xE0, 0x4F, 0x3F);
     private static final Color SELECTED_PIN_COLOUR = new Color(0x8E, 0x24, 0xAA);
     private static final Color YOU_ARE_HERE_COLOUR = new Color(0x1A, 0x73, 0xE8);
+    private static final Color RADIUS_FILL = new Color(0xE0, 0x4F, 0x3F, 28);
+    private static final Color RADIUS_EDGE = new Color(0xE0, 0x4F, 0x3F, 200);
     private static final Color ERROR_COLOUR = new Color(0xB3, 0x26, 0x1E);
-    private static final Color INFO_COLOUR = new Color(0x44, 0x44, 0x44);
 
     private final FindNearbyQuestsController controller;
     private final JXMapViewer map = new JXMapViewer();
     private final JComboBox<Double> radiusBox = new JComboBox<>(RADIUS_PRESETS_KM);
-    private final JLabel messageLabel = new JLabel(" ");
-    private final JButton retryButton = new JButton("Retry");
+    private final JLabel messageLabel =
+            JournalStyle.label(" ", JournalStyle.UI_FONT.deriveFont(12f));
+    private final JButton retryButton;
 
-    private final JPanel previewPanel = new JPanel(new BorderLayout(GAP, GAP));
-    private final JLabel previewTitle = new JLabel();
-    private final JLabel previewTheme = new JLabel();
-    private final JLabel previewXp = new JLabel();
-    private final JLabel previewDistance = new JLabel();
-    private final JButton openQuestButton = new JButton("Open quest");
-    private final JButton closePreviewButton = new JButton("Close");
+    private final JPanel previewCard = new RoundedPanel(JournalStyle.CARD_GREEN);
+    private final JLabel previewTitle = previewLabel(Font.BOLD, 15f);
+    private final JLabel previewTheme = previewLabel(Font.PLAIN, 13f);
+    private final JLabel previewXp = previewLabel(Font.PLAIN, 13f);
+    private final JLabel previewDistance = previewLabel(Font.PLAIN, 13f);
 
     private FindNearbyQuestsState state;
     private List<PinState> pins = new ArrayList<>();
     private PinState selectedPin;
     private boolean updatingFromState;
     private boolean fitPending;
-    private boolean hasFitted;
+    private double fittedRadiusKm = -1;
     private Consumer<String> openQuestAction = questId -> {};
 
     /**
-     * Creates the map view and registers it with the view model.
+     * Creates the map page and registers it with the view model.
      *
      * @param viewModel the view model to observe
      * @param controller receives the radius the user picks
@@ -110,10 +132,20 @@ public class MapView extends JPanel implements PropertyChangeListener {
         this.state = viewModel.getState();
         viewModel.addPropertyChangeListener(this);
 
-        setLayout(new BorderLayout());
-        add(buildToolbar(), BorderLayout.NORTH);
-        add(buildMap(), BorderLayout.CENTER);
-        add(buildPreview(), BorderLayout.SOUTH);
+        setLayout(null);
+        setBackground(JournalStyle.PAPER);
+        setPreferredSize(new Dimension(JournalStyle.WIDTH, JournalStyle.HEIGHT));
+        add(buildTitle());
+        add(buildFilterBar());
+
+        messageLabel.setHorizontalAlignment(SwingConstants.LEFT);
+        add(messageLabel);
+        retryButton = JournalStyle.roundedButton("Retry", JournalStyle.PHOTO_BUTTON,
+                () -> controller.execute(getSelectedRadiusKm()));
+        retryButton.setVisible(false);
+        add(retryButton);
+
+        add(buildMap());
         selectRadiusInBox(state.getRadiusKm());
     }
 
@@ -136,30 +168,94 @@ public class MapView extends JPanel implements PropertyChangeListener {
         return (Double) radiusBox.getSelectedItem();
     }
 
-    private JPanel buildToolbar() {
-        JPanel bar = new JPanel(new FlowLayout(FlowLayout.LEFT, GAP, GAP));
-        bar.add(new JLabel("Search radius:"));
+    @Override
+    public void doLayout() {
+        super.doLayout();
+        int width = getWidth();
+        messageLabel.setBounds(MARGIN + 6, STATUS_TOP, width - 2 * MARGIN - RETRY_WIDTH - 12,
+                STATUS_HEIGHT);
+        retryButton.setBounds(width - MARGIN - RETRY_WIDTH, STATUS_TOP + 1, RETRY_WIDTH, 24);
+        int mapHeight = Math.max(0, getHeight() - MAP_TOP - MARGIN);
+        map.setBounds(MARGIN, MAP_TOP, width - 2 * MARGIN, mapHeight);
+    }
+
+    /**
+     * The page title, placed like the Journal's header. There is no back arrow yet
+     * because the app has no home page to go back to.
+     */
+    private JLabel buildTitle() {
+        JLabel title = JournalStyle.label("Map", JournalStyle.UI_FONT.deriveFont(Font.BOLD, 26f));
+        title.setBounds(65, 22, JournalStyle.WIDTH - 130, 36);
+        return title;
+    }
+
+    /**
+     * The yellow bar from the Journal, used here as the filter bar. It holds the
+     * radius drop-down; later filters (for example theme) go next to it.
+     */
+    private JLabel buildFilterBar() {
+        JLabel bar = new JLabel(
+                JournalStyle.loadScaledIcon("tabs", JournalStyle.WIDTH, STRIP_HEIGHT));
+        int verticalGap = (STRIP_HEIGHT - DROPDOWN_HEIGHT) / 2;
+        bar.setLayout(new FlowLayout(FlowLayout.LEFT, FILTER_GAP, verticalGap));
+        bar.setBounds(0, STRIP_TOP, JournalStyle.WIDTH, STRIP_HEIGHT);
+
+        JLabel radiusLabel = JournalStyle.label("Radius", JournalStyle.UI_FONT.deriveFont(12f));
+        radiusLabel.setBorder(BorderFactory.createEmptyBorder(0, MARGIN, 0, 0));
+        radiusLabel.setLabelFor(radiusBox);
+        bar.add(radiusLabel);
+        bar.add(buildRadiusDropdown());
+        return bar;
+    }
+
+    /** A drop-down drawn as a white pill, like the Journal's buttons. */
+    private JPanel buildRadiusDropdown() {
+        radiusBox.setUI(new BasicComboBoxUI() {
+            @Override
+            protected JButton createArrowButton() {
+                JButton arrow = new JButton(new ChevronIcon());
+                arrow.setBorderPainted(false);
+                arrow.setContentAreaFilled(false);
+                arrow.setFocusPainted(false);
+                return arrow;
+            }
+
+            @Override
+            public void paintCurrentValueBackground(Graphics graphics, Rectangle bounds,
+                                                    boolean hasFocus) {
+                // The pill behind the drop-down is the background.
+            }
+        });
+        radiusBox.setOpaque(false);
+        radiusBox.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 4));
+        radiusBox.setFont(JournalStyle.UI_FONT.deriveFont(12f));
+        radiusBox.setForeground(JournalStyle.INK);
+        radiusBox.getAccessibleContext().setAccessibleName("Search radius");
         radiusBox.setRenderer(new DefaultListCellRenderer() {
             @Override
             public Component getListCellRendererComponent(JList<?> list, Object value, int index,
                                                           boolean selected, boolean focus) {
-                String text = BigDecimal.valueOf((Double) value).stripTrailingZeros()
-                        .toPlainString() + " km";
-                return super.getListCellRendererComponent(list, text, index, selected, focus);
+                super.getListCellRendererComponent(
+                        list, formatKm((Double) value), index, selected, focus);
+                setFont(JournalStyle.UI_FONT.deriveFont(selected ? Font.BOLD : Font.PLAIN, 12f));
+                setForeground(JournalStyle.INK);
+                setBackground(selected && index >= 0 ? JournalStyle.GREEN : JournalStyle.PAPER);
+                setOpaque(index >= 0);
+                return this;
             }
         });
+        // Only a user's choice reruns the use case; showing the state's radius does not.
         radiusBox.addActionListener(event -> {
             if (!updatingFromState) {
                 controller.execute(getSelectedRadiusKm());
             }
         });
-        bar.add(radiusBox);
-        bar.add(Box.createHorizontalStrut(GAP));
-        bar.add(messageLabel);
-        retryButton.setVisible(false);
-        retryButton.addActionListener(event -> controller.execute(getSelectedRadiusKm()));
-        bar.add(retryButton);
-        return bar;
+
+        JPanel pill = new RoundedPanel(JournalStyle.PAPER);
+        pill.setLayout(new BorderLayout());
+        pill.setPreferredSize(new Dimension(DROPDOWN_WIDTH, DROPDOWN_HEIGHT));
+        pill.add(radiusBox);
+        return pill;
     }
 
     private JXMapViewer buildMap() {
@@ -169,7 +265,6 @@ public class MapView extends JPanel implements PropertyChangeListener {
         tileFactory.setLocalCache(new FileBasedLocalCache(TILE_CACHE_DIR, false));
         map.setTileFactory(tileFactory);
         map.setZoom(DEFAULT_ZOOM);
-        map.setPreferredSize(new Dimension(800, 520));
 
         MouseInputListener pan = new PanMouseInputListener(map);
         map.addMouseListener(pan);
@@ -189,51 +284,73 @@ public class MapView extends JPanel implements PropertyChangeListener {
             @Override
             public void componentResized(ComponentEvent event) {
                 if (fitPending) {
-                    fitMapToPins();
+                    fitMapToCircle();
                 }
             }
         });
 
         JLabel attribution = new JLabel(ATTRIBUTION);
-        attribution.setFont(attribution.getFont().deriveFont(Font.PLAIN, 11f));
+        attribution.setFont(JournalStyle.UI_FONT.deriveFont(10f));
+        attribution.setForeground(JournalStyle.INK);
         attribution.setOpaque(true);
         attribution.setBackground(new Color(255, 255, 255, 200));
-        attribution.setBorder(BorderFactory.createEmptyBorder(2, 6, 2, 6));
+        attribution.setBorder(BorderFactory.createEmptyBorder(1, 6, 1, 6));
         JPanel attributionRow = new JPanel(new FlowLayout(FlowLayout.RIGHT, 0, 0));
         attributionRow.setOpaque(false);
+        // Keep the label clear of the map's rounded bottom-right corner.
+        attributionRow.setBorder(BorderFactory.createEmptyBorder(4, 0, 8, CORNER / 2));
         attributionRow.add(attribution);
+
+        JPanel bottom = new JPanel();
+        bottom.setOpaque(false);
+        bottom.setLayout(new BoxLayout(bottom, BoxLayout.Y_AXIS));
+        bottom.add(buildPreviewCard());
+        bottom.add(attributionRow);
+
         map.setLayout(new BorderLayout());
-        map.add(attributionRow, BorderLayout.SOUTH);
+        map.add(bottom, BorderLayout.SOUTH);
         return map;
     }
 
-    private JPanel buildPreview() {
-        previewTitle.setFont(previewTitle.getFont().deriveFont(Font.BOLD, 16f));
+    /** Same look as a Journal quest card: green, rounded, with white pill buttons. */
+    private JPanel buildPreviewCard() {
         JPanel details = new JPanel();
+        details.setOpaque(false);
         details.setLayout(new BoxLayout(details, BoxLayout.Y_AXIS));
-        details.add(previewTitle);
-        details.add(Box.createVerticalStrut(4));
         details.add(previewTheme);
         details.add(previewXp);
         details.add(previewDistance);
 
-        JPanel buttons = new JPanel(new FlowLayout(FlowLayout.RIGHT, GAP, 0));
-        buttons.add(closePreviewButton);
-        buttons.add(openQuestButton);
-        closePreviewButton.addActionListener(event -> hidePreview());
-        openQuestButton.addActionListener(event -> {
+        JButton closeButton =
+                JournalStyle.roundedButton("Close", JournalStyle.PAPER, this::hidePreview);
+        JButton openButton = JournalStyle.roundedButton("Open quest", JournalStyle.PAPER, () -> {
             if (selectedPin != null) {
                 openQuestAction.accept(selectedPin.getQuestId());
             }
         });
+        JPanel buttons = new JPanel(new GridLayout(2, 1, 0, 8));
+        buttons.setOpaque(false);
+        buttons.add(openButton);
+        buttons.add(closeButton);
+        JPanel buttonColumn = new JPanel(new BorderLayout());
+        buttonColumn.setOpaque(false);
+        buttonColumn.add(buttons, BorderLayout.SOUTH);
+        buttonColumn.setPreferredSize(new Dimension(96, 0));
 
-        previewPanel.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createMatteBorder(1, 0, 0, 0, Color.LIGHT_GRAY),
-                BorderFactory.createEmptyBorder(PADDING, PADDING, PADDING, PADDING)));
-        previewPanel.add(details, BorderLayout.CENTER);
-        previewPanel.add(buttons, BorderLayout.EAST);
-        previewPanel.setVisible(false);
-        return previewPanel;
+        // The title gets the card's full width, so long names end in "..." instead of being cut.
+        previewTitle.setBorder(BorderFactory.createEmptyBorder(0, 0, 6, 0));
+        previewCard.setLayout(new BorderLayout(12, 0));
+        previewCard.setBorder(BorderFactory.createEmptyBorder(14, 18, 14, 14));
+        previewCard.add(previewTitle, BorderLayout.NORTH);
+        previewCard.add(details, BorderLayout.CENTER);
+        previewCard.add(buttonColumn, BorderLayout.EAST);
+
+        JPanel inset = new JPanel(new BorderLayout());
+        inset.setOpaque(false);
+        inset.setBorder(BorderFactory.createEmptyBorder(0, MARGIN, 0, MARGIN));
+        inset.add(previewCard);
+        previewCard.setVisible(false);
+        return inset;
     }
 
     @Override
@@ -244,11 +361,13 @@ public class MapView extends JPanel implements PropertyChangeListener {
             messageLabel.setForeground(ERROR_COLOUR);
             messageLabel.setText(state.getErrorMessage());
         } else if (state.getInfoMessage() != null) {
-            messageLabel.setForeground(INFO_COLOUR);
+            messageLabel.setForeground(JournalStyle.INK);
             messageLabel.setText(state.getInfoMessage());
         } else {
             messageLabel.setText(" ");
         }
+        String message = messageLabel.getText();
+        messageLabel.setToolTipText(message.isBlank() ? null : message);
         retryButton.setVisible(state.isRetryAvailable());
 
         final List<PinState> newPins = state.getPins();
@@ -257,13 +376,14 @@ public class MapView extends JPanel implements PropertyChangeListener {
         if (pinsChanged) {
             hidePreview();
         }
-        if (pinsChanged || !hasFitted) {
-            fitMapToPins();
+        if (pinsChanged || state.getRadiusKm() != fittedRadiusKm) {
+            fitMapToCircle();
         }
         map.repaint();
     }
 
-    private void fitMapToPins() {
+    /** Zooms so the whole search circle is on screen, centred on "you are here". */
+    private void fitMapToCircle() {
         if (!state.hasCentre()) {
             return;
         }
@@ -273,28 +393,27 @@ public class MapView extends JPanel implements PropertyChangeListener {
             return;
         }
         fitPending = false;
-        GeoPosition centre = new GeoPosition(state.getCentreLatitude(), state.getCentreLongitude());
-        // Each pin is added with its mirror image across the centre, so the fitted
-        // area stays centred on "you are here" and every pin is on screen.
-        Set<GeoPosition> positions = new HashSet<>();
-        positions.add(centre);
-        for (PinState pin : pins) {
-            positions.add(new GeoPosition(pin.getLatitude(), pin.getLongitude()));
-            positions.add(new GeoPosition(2 * centre.getLatitude() - pin.getLatitude(),
-                    2 * centre.getLongitude() - pin.getLongitude()));
-        }
-        if (positions.size() == 1) {
-            map.setZoom(DEFAULT_ZOOM);
-        } else {
-            map.zoomToBestFit(positions, FIT_FRACTION);
+        double lat = state.getCentreLatitude();
+        double lon = state.getCentreLongitude();
+        if (state.hasCircle()) {
+            // The circle's four edge points; south and west mirror north and east.
+            double north = state.getCircleNorthLatitude();
+            double east = state.getCircleEastLongitude();
+            Set<GeoPosition> edges = new HashSet<>(List.of(
+                    new GeoPosition(north, lon), new GeoPosition(2 * lat - north, lon),
+                    new GeoPosition(lat, east), new GeoPosition(lat, 2 * lon - east)));
+            map.zoomToBestFit(edges, FIT_FRACTION);
             if (map.getZoom() < CLOSEST_FIT_ZOOM) {
                 map.setZoom(CLOSEST_FIT_ZOOM);
             }
+        } else {
+            map.setZoom(DEFAULT_ZOOM);
         }
-        map.setAddressLocation(centre);
-        hasFitted = true;
+        map.setAddressLocation(new GeoPosition(lat, lon));
+        fittedRadiusKm = state.getRadiusKm();
     }
 
+    /** Shows the state's radius in the drop-down without rerunning the use case. */
     private void selectRadiusInBox(double radiusKm) {
         updatingFromState = true;
         for (Double preset : RADIUS_PRESETS_KM) {
@@ -323,18 +442,19 @@ public class MapView extends JPanel implements PropertyChangeListener {
     private void showPreview(PinState pin) {
         selectedPin = pin;
         previewTitle.setText(pin.getTitle());
+        previewTitle.setToolTipText(pin.getTitle());
         previewTheme.setText("Theme: " + pin.getTheme());
         previewXp.setText("Reward: " + pin.getXpText());
         previewDistance.setText("Distance: " + pin.getDistanceText());
-        previewPanel.setVisible(true);
-        revalidate();
+        previewCard.setVisible(true);
+        map.revalidate();
         map.repaint();
     }
 
     private void hidePreview() {
         selectedPin = null;
-        previewPanel.setVisible(false);
-        revalidate();
+        previewCard.setVisible(false);
+        map.revalidate();
         map.repaint();
     }
 
@@ -354,6 +474,62 @@ public class MapView extends JPanel implements PropertyChangeListener {
         return true;
     }
 
+    private static String formatKm(double radiusKm) {
+        return BigDecimal.valueOf(radiusKm).stripTrailingZeros().toPlainString() + " km";
+    }
+
+    private static JLabel previewLabel(int style, float size) {
+        JLabel label = JournalStyle.label(" ", JournalStyle.UI_FONT.deriveFont(style, size));
+        label.setHorizontalAlignment(SwingConstants.LEFT);
+        label.setAlignmentX(LEFT_ALIGNMENT);
+        return label;
+    }
+
+    /** A panel filled with a rounded rectangle, like the Journal's cards. */
+    private static final class RoundedPanel extends JPanel {
+        private final Color fill;
+
+        RoundedPanel(Color fill) {
+            this.fill = fill;
+            setOpaque(false);
+        }
+
+        @Override
+        protected void paintComponent(Graphics graphics) {
+            int arc = Math.min(CORNER, getHeight());
+            JournalStyle.paintRounded(graphics, fill, getWidth(), getHeight(), arc);
+        }
+    }
+
+    /** A small downward chevron for the drop-down. */
+    private static final class ChevronIcon implements Icon {
+        private static final int SIZE = 10;
+
+        @Override
+        public void paintIcon(Component component, Graphics graphics, int x, int y) {
+            Graphics2D g = (Graphics2D) graphics.create();
+            g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            g.setColor(JournalStyle.INK);
+            g.setStroke(new BasicStroke(1.6f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+            Path2D chevron = new Path2D.Double();
+            chevron.moveTo(x + 1, y + 3);
+            chevron.lineTo(x + SIZE / 2.0, y + SIZE - 3);
+            chevron.lineTo(x + SIZE - 1, y + 3);
+            g.draw(chevron);
+            g.dispose();
+        }
+
+        @Override
+        public int getIconWidth() {
+            return SIZE;
+        }
+
+        @Override
+        public int getIconHeight() {
+            return SIZE;
+        }
+    }
+
     /** Sizes of the drawn pin, shared by the painter and the click test. */
     private static final class PinShape {
         static final double HEAD_RADIUS = 9;
@@ -363,12 +539,19 @@ public class MapView extends JPanel implements PropertyChangeListener {
         static final double YOU_HALO_RADIUS = 16;
     }
 
-    /** Draws the "you are here" marker and the quest pins on top of the tiles. */
+    /**
+     * Draws the "you are here" marker and the quest pins on top of the tiles, then
+     * paints the page colour outside a rounded rectangle so the map has the same
+     * rounded corners as the Journal's cards.
+     */
     private final class MarkerPainter implements Painter<JXMapViewer> {
         @Override
         public void paint(Graphics2D original, JXMapViewer viewer, int width, int height) {
             Graphics2D g = (Graphics2D) original.create();
             g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            if (state.hasCentre() && state.hasCircle()) {
+                drawRadiusCircle(g);
+            }
             if (state.hasCentre()) {
                 drawYouAreHere(g, toScreen(state.getCentreLatitude(), state.getCentreLongitude()));
             }
@@ -381,7 +564,35 @@ public class MapView extends JPanel implements PropertyChangeListener {
                 drawPin(g, toScreen(selectedPin.getLatitude(), selectedPin.getLongitude()),
                         SELECTED_PIN_COLOUR);
             }
+            roundCorners(g, width, height);
             g.dispose();
+        }
+
+        private void roundCorners(Graphics2D g, int width, int height) {
+            Area outside = new Area(new Rectangle2D.Double(0, 0, width, height));
+            outside.subtract(new Area(
+                    new RoundRectangle2D.Double(0, 0, width, height, CORNER, CORNER)));
+            g.setColor(JournalStyle.PAPER);
+            g.fill(outside);
+        }
+
+        /**
+         * Draws the search circle. The edge points come from the use case, so the
+         * view only converts positions to pixels and never measures distances.
+         */
+        private void drawRadiusCircle(Graphics2D g) {
+            Point2D centre = toScreen(state.getCentreLatitude(), state.getCentreLongitude());
+            Point2D north = toScreen(state.getCircleNorthLatitude(), state.getCentreLongitude());
+            Point2D east = toScreen(state.getCentreLatitude(), state.getCircleEastLongitude());
+            double radiusY = Math.abs(centre.getY() - north.getY());
+            double radiusX = Math.abs(east.getX() - centre.getX());
+            Ellipse2D circle = new Ellipse2D.Double(centre.getX() - radiusX,
+                    centre.getY() - radiusY, 2 * radiusX, 2 * radiusY);
+            g.setColor(RADIUS_FILL);
+            g.fill(circle);
+            g.setColor(RADIUS_EDGE);
+            g.setStroke(new BasicStroke(2f));
+            g.draw(circle);
         }
 
         private void drawYouAreHere(Graphics2D g, Point2D p) {
