@@ -1,12 +1,8 @@
 package use_case.import_photos;
 
 import java.time.Duration;
-import java.time.LocalDateTime;
-import java.time.format.TextStyle;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
-import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
@@ -15,9 +11,9 @@ import java.util.stream.Stream;
 import entity.Photo;
 import entity.Location;
 import entity.LocationInfo;
-import entity.LocationInfoType;
 import entity.Trip;
 import entity.TripBuilder;
+import use_case.IdGeneratorInterface;
 import use_case.PhotoAccessException;
 import use_case.PhotoAccessInterface;
 import use_case.TripAccessException;
@@ -32,18 +28,21 @@ public class ImportPhotosInteractor implements ImportPhotosInputBoundary {
     private final ReverseGeocoderInterface reverseGeocoder;
     private final PhotoAccessInterface photoAccess;
     private final TripAccessInterface tripAccess;
+    private final IdGeneratorInterface idGenerator;
     private final ImportPhotosOutputBoundary presenter;
 
     public ImportPhotosInteractor(
         ImageImporterInterface imageImporter, GeocoderInterface geocoder,
         ReverseGeocoderInterface reverseGeocoder, PhotoAccessInterface photoAccess,
-        TripAccessInterface tripAccess, ImportPhotosOutputBoundary presenter
+        TripAccessInterface tripAccess, IdGeneratorInterface idGenerator,
+        ImportPhotosOutputBoundary presenter
     ) {
         this.imageImporter = imageImporter;
         this.geocoder = geocoder;
         this.reverseGeocoder = reverseGeocoder;
         this.photoAccess = photoAccess;
         this.tripAccess = tripAccess;
+        this.idGenerator = idGenerator;
         this.presenter = presenter;
     }
 
@@ -127,7 +126,7 @@ public class ImportPhotosInteractor implements ImportPhotosInputBoundary {
 
     private Trip generateTrip(List<Photo> tripPhotos) {
         return new TripBuilder()
-            .generateId()
+            .setId(idGenerator.nextId())
             .setPhotos(tripPhotos)
             .generateTimeRange()
             .generateName()

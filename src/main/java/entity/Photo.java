@@ -1,7 +1,6 @@
 package entity;
 
 import java.util.Comparator;
-import java.util.UUID;
 import java.time.Duration;
 import java.time.LocalDateTime;
 
@@ -19,10 +18,6 @@ public class Photo implements Comparable<Photo> {
         this.type = type;
         this.location = location;
         this.time = time;
-    }
-
-    public static Photo createNew(ImageType type, Location location, LocalDateTime time) {
-        return new Photo(UUID.randomUUID().toString(), type, location, time);
     }
 
     public String getId() {

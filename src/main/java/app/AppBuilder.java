@@ -29,6 +29,8 @@ import interface_adapter.manipulate_trips.TripListViewModel;
 import interface_adapter.load_photos.LoadPhotoController;
 import interface_adapter.load_photos.LoadPhotoPresenter;
 import interface_adapter.load_photos.PhotoImageViewModel;
+import use_case.IdGeneratorInterface;
+import use_case.UuidGenerator;
 import use_case.dashboard.AnalyticsUseCase;
 import use_case.import_photos.ImportPhotosInteractor;
 import use_case.manipulate_trips.ManipulateTripsInputBoundary;
@@ -57,8 +59,9 @@ public class AppBuilder {
 
     // Storage. Replace with SQLite implementation later.
     private final InMemoryDataAccessObject dataAccess = new InMemoryDataAccessObject();
+    private final UuidGenerator idGenerator = new UuidGenerator();
     private final ImageResolver imageResolver = new ImageResolver(new StorageResolver());
-    private final ImageImporter imageImporter = new ImageImporter(imageResolver);
+    private final ImageImporter imageImporter = new ImageImporter(imageResolver, idGenerator);
     private final ImageReader imageReader = new ImageReader(imageResolver);
     private final NominatimGeocoder geocoder = new NominatimGeocoder();
 
@@ -85,7 +88,7 @@ public class AppBuilder {
         ImportPhotosViewModel viewModel = new ImportPhotosViewModel();
         ImportPhotosPresenter presenter = new ImportPhotosPresenter(viewModel);
         ImportPhotosInteractor interactor = new ImportPhotosInteractor(
-            imageImporter, geocoder, geocoder, dataAccess, dataAccess, presenter
+            imageImporter, geocoder, geocoder, dataAccess, dataAccess, idGenerator, presenter
         );
         ImportPhotosController controller = new ImportPhotosController(interactor);
         ImportPhotosView view = new ImportPhotosView(viewModel, controller);

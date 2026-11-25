@@ -2,7 +2,6 @@ package entity;
 
 import java.util.List;
 import java.util.Objects;
-import java.util.UUID;
 import java.time.LocalDateTime;
 
 public class TripBuilder {
@@ -19,12 +18,6 @@ public class TripBuilder {
         return this;
     }
 
-    public TripBuilder generateId() {
-        id = UUID.randomUUID().toString();
-
-        return this;
-    }
-
     public TripBuilder setPhotoIds(List<String> photoIds) {
         this.photoIds = photoIds;
 
@@ -33,7 +26,6 @@ public class TripBuilder {
 
     public TripBuilder setPhotos(List<Photo> photos) {
         this.photos = photos;
-
         photoIds = photos.stream().map(Photo::getId).toList();
 
         return this;
