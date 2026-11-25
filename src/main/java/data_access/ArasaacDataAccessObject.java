@@ -19,7 +19,8 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * Retrieves pictograms from the ARASAAC API.
+ * Retrieves pictogram metadata and image URLs from the ARASAAC API.
+ * Image bytes are not downloaded or cached by this data access object.
  */
 public final class ArasaacDataAccessObject implements PictogramSearchDataAccessInterface {
 
@@ -49,8 +50,9 @@ public final class ArasaacDataAccessObject implements PictogramSearchDataAccessI
                     "A pictogram search keyword is required.", null);
         }
 
+        String searchKeyword = keyword.trim();
         String encodedKeyword = URLEncoder.encode(
-                keyword.trim(), StandardCharsets.UTF_8);
+                searchKeyword, StandardCharsets.UTF_8);
         URI uri = URI.create(BASE_URL + encodedKeyword);
         HttpRequest request = HttpRequest.newBuilder(uri)
                 .timeout(Duration.ofSeconds(10))
@@ -76,14 +78,15 @@ public final class ArasaacDataAccessObject implements PictogramSearchDataAccessI
         }
 
         try {
-            return parseSearchResults(response.body());
+            return parseSearchResults(response.body(), searchKeyword);
         } catch (IOException | RuntimeException exception) {
             throw new PictogramSearchException(
                     "Could not read the ARASAAC search response.", exception);
         }
     }
 
-    List<Pictogram> parseSearchResults(String responseBody) throws IOException {
+    List<Pictogram> parseSearchResults(String responseBody, String searchKeyword)
+            throws IOException {
         JsonNode root = objectMapper.readTree(responseBody);
         if (!root.isArray()) {
             throw new IOException("ARASAAC response is not a JSON array");
@@ -96,12 +99,13 @@ public final class ArasaacDataAccessObject implements PictogramSearchDataAccessI
                 continue;
             }
 
-            String label = findLabel(result);
+            String label = findLabel(result, searchKeyword);
             if (label == null) {
                 continue;
             }
 
             int id = idNode.asInt();
+            // Store the URL for the UI to load later; do not request the image here.
             String imageLocation = String.format(
                     IMAGE_URL_TEMPLATE, id, id);
             pictograms.add(new Pictogram(id, label, imageLocation));
@@ -109,19 +113,32 @@ public final class ArasaacDataAccessObject implements PictogramSearchDataAccessI
         return List.copyOf(pictograms);
     }
 
-    private String findLabel(JsonNode result) {
+    private String findLabel(JsonNode result, String searchKeyword) {
         JsonNode keywords = result.get("keywords");
-        if (keywords != null && keywords.isArray()) {
-            for (JsonNode keyword : keywords) {
-                JsonNode keywordNode = keyword.get("keyword");
-                if (keywordNode != null && keywordNode.isTextual()
-                        && !keywordNode.asText().isBlank()) {
-                    return keywordNode.asText();
-                }
+        if (keywords == null || !keywords.isArray()) {
+            return null;
+        }
+
+        String firstNonBlankKeyword = null;
+        for (JsonNode keyword : keywords) {
+            JsonNode keywordNode = keyword.get("keyword");
+            if (keywordNode == null || !keywordNode.isTextual()
+                    || keywordNode.asText().isBlank()) {
+                continue;
+            }
+
+            String candidate = keywordNode.asText().trim();
+            if (candidate.equalsIgnoreCase(searchKeyword)) {
+                return candidate;
+            }
+            if (firstNonBlankKeyword == null) {
+                firstNonBlankKeyword = candidate;
             }
         }
 
-        return null;
+        // Phase 1 fallback: if ARASAAC has no exact search-term keyword, use its
+        // first non-blank keyword; ARASAAC's keyword order is not a semantic guarantee.
+        return firstNonBlankKeyword;
     }
 
     private static HttpRequestExecutor createHttpRequestExecutor() {

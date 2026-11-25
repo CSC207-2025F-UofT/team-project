@@ -44,6 +44,20 @@ class ArasaacDataAccessObjectTest {
     }
 
     @Test
+    void prefersSearchTermAsLabelWhenItIsNotTheFirstKeyword() throws Exception {
+        String json = "[{\"_id\":2248,\"keywords\":["
+                + "{\"keyword\":\"drink\"},{\"keyword\":\"water\"}]}]";
+        ArasaacDataAccessObject dataAccess =
+                new ArasaacDataAccessObject(
+                        request -> response(200, json),
+                        new ObjectMapper());
+
+        List<Pictogram> results = dataAccess.searchPictograms(" WATER ");
+
+        assertEquals("water", results.get(0).getLabel());
+    }
+
+    @Test
     void returnsEmptyListWhenNoPictogramsMatch() throws Exception {
         ArasaacDataAccessObject dataAccess =
                 new ArasaacDataAccessObject(
