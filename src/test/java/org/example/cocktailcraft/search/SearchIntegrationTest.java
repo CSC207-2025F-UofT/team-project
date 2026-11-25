@@ -86,7 +86,7 @@ class SearchIntegrationTest {
             assertTrue(fixture.hasLabel("No cocktails found."));
             fixture.name().setText("  ");
             fixture.button("Search").doClick();
-            assertTrue(fixture.hasLabel("Please enter a cocktail name or select a base spirit."));
+            assertTrue(fixture.hasLabel("Please enter a cocktail name or select a filter."));
             fixture.button("Clear").doClick();
             assertTrue(fixture.hasLabel("Explore Cocktails"));
             assertEquals("", fixture.model.getState().getErrorMessage());

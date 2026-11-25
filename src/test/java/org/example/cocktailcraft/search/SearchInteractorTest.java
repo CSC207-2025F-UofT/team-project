@@ -68,7 +68,7 @@ class SearchInteractorTest {
             throw new AssertionError("Invalid input must not access the catalog");
         }, presenter);
         interactor.execute(new SearchInputData(" \t ", Set.of()));
-        assertEquals("Please enter a cocktail name or select a base spirit.", presenter.error);
+        assertEquals("Please enter a cocktail name or select a filter.", presenter.error);
         assertNull(presenter.results);
         assertEquals(0, presenter.successes);
     }
@@ -76,7 +76,7 @@ class SearchInteractorTest {
     @Test
     void treatsNullCriteriaAsMissingInput() {
         search(null, null);
-        assertEquals("Please enter a cocktail name or select a base spirit.", presenter.error);
+        assertEquals("Please enter a cocktail name or select a filter.", presenter.error);
         assertEquals(1, presenter.failures);
     }
 
