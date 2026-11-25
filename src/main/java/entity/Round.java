@@ -28,12 +28,13 @@ public class Round {
         return guesses;
     }
 
-    public RoundStatus getStatus() {
-        return status;
+    // Accumulate previously guessed cities
+    public void addGuess(City city) {
+        guesses.add(city);
     }
 
-    public int attemptsUsed() {
-        return guesses.size();
+    public RoundStatus getStatus() {
+        return status;
     }
 
     public int getAttemptsLeft() {

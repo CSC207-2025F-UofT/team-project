@@ -1,6 +1,9 @@
 package use_case.submit_guess;
 
-public interface SubmitGuessOutputBoundary {
+import entity.City;
+import entity.Round;
 
-  void prepareFailView(String guessBoxEmpty);
+public interface SubmitGuessOutputBoundary {
+  void prepareFailView(String failure);
+  void prepareSuccessView(City city, Round round);
 }
