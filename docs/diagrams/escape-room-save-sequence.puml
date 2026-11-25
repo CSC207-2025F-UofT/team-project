@@ -1,0 +1,185 @@
+@startuml
+title Escape Room Adventure | Manual save and safe restoration
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+skinparam responseMessageBelowArrow true
+skinparam maxMessageSize 220
+skinparam participantPadding 12
+skinparam BoxPadding 8
+autonumber
+
+actor Player
+box "view / interface_adapter" #EAF2FF
+participant GameView as View
+participant GameController as Controller
+participant GamePresenter as Presenter
+participant GameViewModel as Model
+end box
+box "use_case" #EDF7EC
+participant "SaveGameInteractor\nimplements SaveGameInputBoundary" as SaveUC
+participant "LoadGameInteractor\nimplements LoadGameInputBoundary" as LoadUC
+participant GameContext as Context
+participant GameFactory as Factory
+participant GameOutputAssembler as Assembler
+end box
+box "entity" #FFF4DB
+participant Game
+end box
+box "data_access" #F7ECF7
+participant "JsonGameSaveDataAccessObject\nimplements GameSaveDataAccessInterface" as Saves
+participant "JsonStoryTemplateDataAccessObject\nimplements StoryTemplateDataAccessInterface" as Templates
+end box
+
+note over SaveUC, Templates
+  One manual save slot: data/savegame.json.
+  Controller dispatches both commands to the same serial worker.
+  Entity mutations and file operations never run on Swing's EDT.
+end note
+
+group SAVE: requires a current ACTIVE or ESCAPED game
+  Player -> View : choose Save
+  View -> Controller : save()
+  Controller -> SaveUC : save(), via SaveGameInputBoundary
+  SaveUC -> Context : requireCurrent()
+  alt no current game
+    Context --> SaveUC : DomainException: no game to save
+    SaveUC -> Assembler : fromNoGame("Start or load a game before saving")
+  else current game exists
+    Context --> SaveUC : game
+    SaveUC -> Game : snapshot()
+    Game --> SaveUC : immutable GameSnapshot
+    note over Game, Saves
+      Capture ALL rooms, including hidden items and unvisited rooms:
+      every configured item's location (ROOM / INVENTORY),
+      object values and completed one-shot actions,
+      exactly every room's door ItemLock and exit TriviaLock,
+      original questions/answers, generated values, current room and status.
+      Successor structure is retained in the compatible immutable template,
+      with no duplicate next-room or final-room flags in schema 4.
+      Items acquired on action appearance / room entry are already INVENTORY;
+      each configured item still occurs exactly once, with no acquisition ledger.
+      Snapshot capture does not mutate the game.
+    end note
+    SaveUC -> Saves : save(snapshot), via save port
+    alt serialize, write and atomic replacement succeed
+      Saves -> Saves : serialize snapshot; write and close temp file\nin the same directory as data/savegame.json
+      Saves -> Saves : atomically replace data/savegame.json\nwith the completed temp file
+      Saves --> SaveUC : success
+      SaveUC -> Assembler : fromGame(game, "Game saved", Optional.empty())
+    else serialization, write or atomic replacement fails
+      Saves --> SaveUC : DataAccessException
+      note over Context, Saves
+        Keep the previous save file and current Game unchanged.
+        An incomplete temp file never replaces the valid save.
+        If atomic replacement is unsupported, report failure;
+        do not fall back to truncating the destination file.
+        Clean up the temporary file after any failed save.
+      end note
+      SaveUC -> Assembler : fromGame(game, saveError, Optional.empty())
+    end
+  end
+  Assembler --> SaveUC : GameOutputData
+  SaveUC -> Presenter : present(output), via GameOutputBoundary
+  Presenter -> Model : setState(viewState), via UiDispatcher on EDT
+  Model --> View : property-change notification
+  View -> View : render(model.getState())
+end
+
+== LOAD: also available from the main menu ==
+
+group read, validate a candidate, then replace
+  Player -> View : choose Load
+  View -> Controller : load()
+  Controller -> LoadUC : load(), via LoadGameInputBoundary
+  note over LoadUC, Context
+    Loading never requires an existing Game.
+    No context.replace() occurs on any failure path.
+  end note
+  LoadUC -> Saves : load(), via save port
+  alt save file is absent
+    Saves --> LoadUC : Optional.empty()
+    LoadUC -> LoadUC : message = "No saved game exists"
+  else read or JSON decoding fails
+    Saves --> LoadUC : DataAccessException
+    LoadUC -> LoadUC : message = loadError
+  else snapshot is read
+    Saves --> LoadUC : Optional.of(snapshot)
+    LoadUC -> Templates : load(snapshot.templateId), via template port
+    alt referenced template is unavailable or invalid
+      Templates --> LoadUC : DataAccessException
+      LoadUC -> LoadUC : message = templateError
+    else matching template is available
+      Templates --> LoadUC : StoryTemplate
+      LoadUC -> Factory : restore(template, snapshot)
+      Factory -> Factory : validate schemaVersion == 4 and template ID/version;\nunique IDs, valid references and complete state coverage
+      note over Factory, Game
+        Rebuild a separate candidate from saved generated values,
+        ALL item locations, object/action state and lock/question state.
+        Restore the one finite forward path from the matching template:
+        every predecessor of the saved current room must have BOTH gates passed.
+        Current-room gates may be incomplete in either order; reject unreachable positions.
+        startingRoomId visits every room exactly once, ending at no successor.
+        Reject broken references, self-loops, cycles or unreachable rooms.
+        Changed successors or appearance rules require a new template version;
+        incompatible versions are rejected without migration.
+        Each configured item occurs exactly once in ROOM or INVENTORY.
+        ROOM roomId matches the template's configured owning room;
+        INVENTORY has no roomId and each held item is revealed.
+        An unlocked door requires ALL its requiredItemIds in INVENTORY.
+        A locked door with every required item held is valid:
+        its explicit unlock command may not yet have occurred.
+        Both door and exit Trivia locks are included for EVERY room.
+        Either gate may already be passed while the other remains locked.
+        TEMPLATE questions match the template resolved with saved values;
+        retained API questions are not fetched again.
+        Validate object state/action IDs, generated values, current room
+        and status; ESCAPED requires currentRoom.nextRoomId empty
+        and both current-room gates passed.
+        Missing/duplicate state or any older schema is rejected,
+        with no automatic migration.
+        Restore replays NO action;
+        uses NO random generation and makes NO trivia/API request.
+        State construction restores saved locations exactly, without enterRoom
+        or acquisition. Loading never replays obtained-item notices.
+      end note
+      alt schema, template or restored state fails validation
+        Factory --> LoadUC : DomainException: invalid saved game
+        LoadUC -> LoadUC : message = validationError
+      else complete candidate passes validation
+        Factory --> LoadUC : validated candidate Game
+        LoadUC -> Context : replace(candidate)
+        Context --> LoadUC : currentGame now refers to candidate
+        LoadUC -> LoadUC : message = "Game loaded"
+      end
+    end
+  end
+
+  LoadUC -> Context : current()
+  alt a current game exists after the operation
+    Context --> LoadUC : Optional.of(game)
+    note over LoadUC, Context
+      Success: display the restored candidate.
+      Failure: display the original game, unchanged.
+    end note
+    LoadUC -> Assembler : fromGame(game, message, Optional.empty())
+  else no current game exists
+    Context --> LoadUC : Optional.empty()
+    LoadUC -> Assembler : fromNoGame(message)
+  end
+  Assembler --> LoadUC : GameOutputData
+  LoadUC -> Presenter : present(output), via GameOutputBoundary
+  Presenter -> Model : setState(viewState), via UiDispatcher on EDT
+  Model --> View : property-change notification
+  View -> View : render(model.getState())
+end
+
+note over Controller, Templates
+  This diagram shows runtime calls; source dependencies point to owned interfaces:
+  controller -> input boundary <- interactor -> data-access port <- JSON adapter.
+  Presenter implements GameOutputBoundary; no interactor imports its concrete class.
+  Files, JSON libraries and Swing types stay outside use_case and entity.
+  Expected answers remain inside the save snapshot and never enter UI output.
+  Every result refreshes the view. Save/load messages never reannounce held items.
+end note
+@enduml

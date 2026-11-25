@@ -1,0 +1,235 @@
+@startuml
+!pragma layout smetana
+title Escape Room Adventure | Item appearances and atomic acquisition
+top to bottom direction
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam linetype polyline
+skinparam classAttributeIconSize 0
+skinparam classFontSize 15
+skinparam classAttributeFontSize 12
+skinparam ArrowColor #53657A
+skinparam classBorderColor #53657A
+skinparam classBackgroundColor #F3F7FC
+skinparam noteBackgroundColor #FFF8DD
+skinparam noteBorderColor #C4AD68
+skinparam nodesep 25
+skinparam ranksep 45
+hide empty members
+
+class Game <<domain command owner>> {
+  + interact(objectId: String, actionId: String,
+      itemId: Optional<String>): DomainResult
+  + useItems(lockId: String): DomainResult
+  + submitAnswer(lockId: String, answer: String): DomainResult
+  + canMove(): boolean
+  + move(): DomainResult
+  - preflightAcquisition(room: Room, itemIds: Set<String>): void
+  - acquireItems(room: Room, itemIds: Set<String>): List<Collectable>
+  - enterRoom(roomId: String): DomainResult
+}
+
+class Room {
+  - collectables: Map<String, Collectable>
+  - nextRoomId: Optional<String>
+  - doorLock: ItemLock
+  - exitChallenge: TriviaLock
+  - stateAccess: Room.StateAccess
+  + doorLock(): ItemLock
+  + exitChallenge(): TriviaLock
+  + canLeave(): boolean
+  + nextRoomId(): Optional<String>
+  + isFinal(): boolean
+  ~ findCollectable(itemId: String): Optional<Collectable>
+  ~ visibleCollectables(): List<Collectable>
+  ~ takeCollectable(itemId: String): Collectable
+  ~ prepareInteraction(objectId: String, actionId: String,
+      item: Optional<Collectable>): ActionPlan
+  ~ applyInteraction(plan: ActionPlan): DomainResult
+  - validatePlan(plan: ActionPlan): void
+}
+
+interface RoomReadState {
+  + objectState(objectId: String, key: String): String
+  + acceptsObjectState(objectId: String, key: String, value: String): boolean
+}
+
+interface RoomMutation {
+  + setObjectState(objectId: String, key: String, value: String): void
+}
+
+class "Room.StateAccess" as StateAccess <<private nested class>> {
+  - owner: Room
+  ~ StateAccess(owner: Room)
+}
+
+class Action {
+  - id: String
+  - label: String
+  - requiredItemId: Optional<String>
+  - appearingItemIds: Set<String> {readOnly}
+  - resultText: String
+  - repeatable: boolean
+  - preconditions: List<Condition>
+  - effects: List<Effect>
+  + appearingItemIds(): Set<String>
+  ~ prepare(objectId: String, facts: RoomReadState,
+      item: Optional<Collectable>): ActionPlan
+}
+
+class ActionPlan <<immutable domain value>> {
+  + objectId: String {readOnly}
+  + actionId: String {readOnly}
+  + effects: List<Effect> {readOnly}
+  + appearingItemIds: Set<String> {readOnly}
+  + resultText: String {readOnly}
+}
+
+interface Condition {
+  + test(facts: RoomReadState): boolean
+}
+
+class ObjectStateCondition {
+  - objectId: String
+  - key: String
+  - expectedValue: String
+}
+
+class AllOfCondition {
+  - conditions: List<Condition>
+}
+
+interface Effect {
+  + validate(facts: RoomReadState): void
+  + apply(target: RoomMutation): void
+}
+
+class SetObjectStateEffect {
+  - objectId: String
+  - key: String
+  - value: String
+}
+
+Game ..> Room : prepare; preflight acquisitions; apply; transfer
+Game ..> ActionPlan : coordinates validated command
+StateAccess ..|> RoomReadState
+StateAccess ..|> RoomMutation
+Room *-- StateAccess : stateAccess (private)
+StateAccess --> Room : owner
+Room ..> Action : prepares without mutation
+Room ..> ActionPlan : validates all targets, then applies
+Action "1" *-- "0..*" Condition : preconditions
+Action "1" *-- "0..*" Effect : effects
+Action ..> ActionPlan : creates
+Condition ..> RoomReadState : queries only
+Effect ..> RoomReadState : validates only
+Effect ..> RoomMutation : changes only
+ObjectStateCondition ..|> Condition
+AllOfCondition ..|> Condition
+SetObjectStateEffect ..|> Effect
+AllOfCondition "1" --> "1..*" Condition : conditions
+
+note bottom of Room
+  prepareInteraction validates current-room object access,
+  action ID, one-shot state, conditions,
+  required held item and ALL Effect targets before mutation.
+  It returns an immutable plan; no state changes during prepare.
+  Validate the plan against its exact object/action and configured fields.
+  Physical lookup of appearingItemIds belongs to Game, after preparation;
+  an already-held appearance is valid even though absent from ROOM.
+  applyInteraction performs deterministic state effects and records only
+  nonrepeatable completedActionIds on the owning Interactable.
+  Game combines these changes and automatic transfers in one serial command.
+  The prevalidated commit phase contains no fallible I/O.
+  StateAccess is private and never returned to callers.
+  It delegates only to room-owned object state, with no Game/Inventory access.
+end note
+
+note bottom of Action
+  Choice: switch.turnOn
+  condition: switch.mode == off
+  effect: switch.mode = on
+  resultText: descriptive text about the changed room
+
+  Puzzle choice: drawer.open
+  configured conditions/required item determine availability
+  effect: drawer.mode = open
+  appearingItemIds: {drawer-note}
+  one-shot completion is recorded on the drawer Interactable
+  its existing hidden note moves directly from ROOM into INVENTORY
+  resultText appends "Obtained: Drawer note" only for that new transfer
+
+  A repeatable action naming an already-held note never duplicates it.
+  It may still change object state and always presents its result text.
+end note
+
+note right of Effect
+  Only SetObjectStateEffect is supported.
+  Effects never add inventory items or unlock either room gate.
+  Conditions are pure; effects validate every target first.
+  A validated apply is deterministic and cannot reject midway.
+  No Condition or Effect receives the whole Game.
+  Item appearances are immutable Action/ActionPlan metadata;
+  acquisition is coordinated by Game, outside the state-effect interface.
+  HTTP, file operations and Swing remain outside this layer.
+end note
+
+note bottom of Game
+  An already-completed one-shot action or unlocked gate is a no-op
+  before any required-item or answer validation.
+  Incorrect items/answers or unmet conditions change nothing.
+  For interact, any selected item must be in the actual inventory
+  and match the action's optional requiredItemId.
+  Object actions use their own state and action completion rules;
+  Interactables have no Lock field or lock prerequisite.
+
+  preflightAcquisition checks ALL plan.appearingItemIds before mutation:
+  Inventory.contains(id) means skip; otherwise require Room.findCollectable(id).
+  Templates reject missing/foreign-room appearance IDs before publication.
+  After state/completion commit, acquireItems moves each remaining SAME item
+  using takeCollectable, reveal and Inventory.add; it returns only new objects.
+  Append obtained names only for that returned list; no extra DTO or ledger.
+  changed=false when object/completion/location state is all unchanged.
+
+  useItems resolves the current room's door ItemLock and calls
+  tryUnlock(inventory). The nonempty requiredItemIds set must
+  be contained in that inventory; items remain held after success.
+  submitAnswer validates only the current room's exit TriviaLock.
+  Door item checks and exit Trivia are independent and may occur
+  in either order. Leaving requires both gates to be unlocked.
+  canMove() = ACTIVE AND currentRoom.canLeave().
+  move() requires ACTIVE and both current-room gates, then validates
+  the one configured successor and its visible-item transfers before mutation.
+  enterRoom auto-acquires visibleCollectables only in the destination room.
+  Present nextRoomId enters that room; empty nextRoomId sets ESCAPED.
+  Room.isFinal() derives from an empty nextRoomId, without another flag.
+  Final completion uses the same gates and has no bypass command.
+end note
+
+note left of Game
+  New-game construction calls private enterRoom(startingRoomId) before publication.
+  Starting visible items enter inventory; Start names that new inventory once.
+  Future visible items remain ROOM until their first entry.
+  State-constructor restore never enters a room or acquires items again.
+  Save/load, Trivia, getters and presentation never grant or reannounce items.
+end note
+
+legend bottom left
+  Game / Room / Action are views of the SAME classes in the domain diagram.
+  Remaining fields, queries, constructors and lock subtypes are defined there.
+  ActionPlan is immutable; effect and condition configurations are immutable.
+  Templates validate item/object/action references and nonempty door item sets.
+  Action.appearingItemIds is a read-only set of own-room configured IDs.
+  Successors form one finite forward path through every room exactly once.
+  Required items must be obtainable here or earlier without either local gate.
+  Conditions cannot inspect gate state; effects cannot mutate gates.
+  Every configured item has one location: ROOM or INVENTORY.
+  Only successful appearances and first room entry transfer items to inventory.
+  Generated values instantiate descriptions, results and expected answers once.
+  UI presents descriptive text, available action buttons and answer input.
+  Room exit gate is door unlocked AND separate exit Trivia passed, in any order.
+  Schema 4 snapshots keep item locations and completed actions/locks.
+  DomainResult is immutable: { code, changed, resultText }.
+endlegend
+@enduml

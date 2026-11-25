@@ -1,0 +1,302 @@
+@startuml
+title Escape Room Adventure | Automatic acquisition and fresh two-gate output
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+skinparam responseMessageBelowArrow true
+skinparam maxMessageSize 220
+skinparam participantPadding 8
+autonumber
+actor Player
+participant GameView as View
+participant GameController as Controller
+participant "Focused Interactor\nthrough its InputBoundary" as UC
+participant Game
+participant "current Room" as Room
+participant "destination Room" as NextRoom
+participant Inventory
+participant "Room.doorLock\nItemLock" as Door
+participant "Room.exitChallenge\nTriviaLock" as Quiz
+participant "TriviaDataAccessInterface\nHTTP adapter" as API
+participant GamePresenter as Presenter
+participant GameViewModel as Model
+participant GameOutputAssembler as Assembler
+
+note over Player, Model
+  ItemLock and exit Trivia may finish in either order. There are seven use cases.
+  Every success, error and changed=false result produces fresh immutable output.
+  Each response renders before the next depicted input. Missing Game uses
+  fromNoGame(message) and the same presenter -> EDT model -> View completion.
+  Commands use one serial worker. Getters, output assembly and rendering never acquire items.
+  Presenter constructs ViewState inside its EDT callback, preserving CURRENT busy.
+  finally queues an EDT completion AFTER output; it clears UI busy + admission guard together.
+  Another command is admitted only after that result render/completion.
+end note
+
+group new game: starting visible items are acquired before its first output
+  Player -> View : choose a story
+  View -> Controller : start(templateId)
+  Controller -> UC : StartGameInputBoundary.start(templateId)
+  ref over UC, Inventory
+    Load template through the story port; GameFactory.create constructs a candidate.
+    Its new-game constructor invokes private enterRoom(startingRoomId) before publication:
+    resolve room, obtain visibleCollectables IDs, preflight ALL transfers, then enter/acquire.
+    The same original items become revealed INVENTORY items; no duplicate instances.
+    Future-room visible items stay in ROOM until normal entry.
+  end ref
+  alt candidate is valid
+    UC -> UC : context.replace(candidate); initial message names\ncandidate.inventoryItems() once
+  else template or creation fails
+    UC -> UC : keep previous context; message=error
+  end
+  UC -> Assembler : fromGame(currentGame, message, Optional.empty())\nor fromNoGame(message)
+  Assembler --> UC : fresh output; new-game message includes its initial obtained names
+  UC -> Presenter : present(output)
+  Presenter -> Model : setState(viewState), via UiDispatcher on EDT
+  Model --> View : notify -> render(model.getState())
+end
+
+group interaction: automatic appearance, failed input or repeated item IDs
+  Player -> View : choose an object action
+  View -> Controller : interact(objectId, actionId, optionalItemId)
+  Controller -> UC : InteractInputBoundary.execute(...)
+  UC -> Game : interact(objectId, actionId, optionalItemId)
+  Game -> Game : validate ACTIVE, current object/action and one-shot completion
+  alt invalid access OR completed one-shot
+    Game -> Game : unchanged error/no-op; no newly obtained items
+  else uncompleted or legitimate repeatable action
+    opt an itemId was supplied
+      Game -> Inventory : require(optionalItemId)
+      Inventory --> Game : actual held item, or precondition failure
+    end
+    alt supplied item is not actually held
+      Game -> Game : unchanged item-precondition error
+    else supplied item resolved, or no item supplied
+      Game -> Room : prepareInteraction(objectId, actionId, heldItem)
+      alt item, condition or state-effect validation fails
+        Room --> Game : DomainException; no mutation
+      else preparation succeeds
+        Room --> Game : ActionPlan with effects + appearingItemIds
+        Game -> Game : preflightAcquisition(room, plan.appearingItemIds)
+        note over Game, Inventory
+          For EACH appearance ID, skip it if already in inventory.
+          Otherwise require the remaining local ROOM item.
+          Validate ALL IDs before any object effect, completion or location mutation.
+          Authored appearingItemIds refer to original items of this action's own room.
+        end note
+        alt any new appearance target is invalid
+          Game -> Game : preserve object state, completion and every item location
+        else every acquisition is prevalidated
+          Game -> Room : applyInteraction(plan)
+          Room -> Room : apply object-state effects; record nonrepeatable completion
+          Game -> Game : acquireItems(room, plan.appearingItemIds)
+          loop each appearance ID not already in inventory
+            Game -> Room : takeCollectable(itemId), already prevalidated
+            Room --> Game : the same Collectable
+            Game -> Game : mark this item revealed
+            Game -> Inventory : add(the same item)
+          end
+          Game -> Game : newItems = ONLY actual new transfers;\nappend their labels to resultText
+          note over Room, Inventory
+            Repeated IDs yield no duplicate and no second Obtained notice.
+            Other valid repeatable state effects may still change the room.
+            State effects never transfer items or unlock either gate.
+          end note
+        end
+      end
+    end
+  end
+  Game --> UC : DomainResult(code, changed, resultText) or DomainException
+  UC -> Assembler : fromGame(game, resultText/error, Optional.empty())
+  Assembler --> UC : fresh inventory, action text + actual obtained names, gates and movement flags
+  UC -> Presenter : present(output), including errors and no-ops
+  Presenter -> Model : setState(viewState), via UiDispatcher on EDT
+  Model --> View : notify -> render(model.getState())
+end
+
+group ItemLock attempt checks the complete inventory
+  Player -> View : choose Attempt door
+  View -> Controller : useItems(doorLockId)
+  Controller -> UC : UseItemInputBoundary.execute(doorLockId)
+  UC -> Game : useItems(doorLockId)
+  Game -> Game : validate ACTIVE and current Room.doorLock ID
+  alt invalid status or target
+    Game -> Game : unchanged error
+  else current active door
+    Game -> Door : isUnlocked()
+    alt already unlocked
+      Door --> Game : true
+      Game -> Game : unchanged result BEFORE any item checks
+    else still locked
+      Door --> Game : false
+      Game -> Door : tryUnlock(inventory)
+      Door -> Inventory : containsAll(requiredItemIds)
+      alt any exact required ID missing
+        Inventory --> Door : false
+        Door --> Game : unchanged result with missing-item text
+        note over Inventory, Door
+          Required={brassKey,note}; held={coin,rope}.
+          Equal counts with wrong IDs still fail.
+        end note
+      else every required ID held
+        Inventory --> Door : true
+        Door -> Door : unlocked = true
+        Door --> Game : successful unlock result
+      end
+    end
+  end
+  note over Inventory, Door : Door checks leave every item held.
+  Game --> UC : DomainResult or DomainException
+  UC -> Assembler : fromGame(game, resultText/error, Optional.empty())
+  Assembler -> Game : itemDetails(currentRoom.doorLock.requiredItemIds())
+  Game --> Assembler : read-only metadata across rooms + inventory
+  Assembler --> UC : fresh required names, held IDs, canUnlock, gates and canMove/finalRoom
+  UC -> Presenter : present(output)
+  Presenter -> Model : setState(viewState), via UiDispatcher on EDT
+  Model --> View : notify -> render(model.getState())
+end
+
+group Trivia.open: cached, fetched, API failure or invalid target
+  Player -> View : choose exit Trivia
+  View -> Controller : openTrivia(exitTriviaId)
+  Controller -> UC : TriviaInputBoundary.open(exitTriviaId)
+  UC -> Game : triviaFor(exitTriviaId)
+  alt domain query rejects the target/status
+    Game --> UC : DomainException
+    UC -> UC : message=error; activeLockId=empty
+  else accessible current-room exitChallenge
+    Game -> Quiz : getTrivia()
+    Quiz --> Game : cached question or empty
+    Game --> UC : cached question or empty
+    alt initialized question exists
+      UC -> UC : reuse it; activeLockId=exitTriviaId
+    else API question is uninitialized
+      UC -> Game : triviaSpecFor(exitTriviaId)
+      Game --> UC : spec
+      UC -> API : fetchQuestion(spec)
+      alt API failure
+        API --> UC : DataAccessException
+        UC -> UC : message=retry error; activeLockId=empty
+        note over Game, Quiz : Question and gate remain unchanged; opening may be retried.
+      else API success
+        API --> UC : Trivia
+        UC -> Game : installTrivia(exitTriviaId, trivia)
+        Game -> Quiz : initializeTrivia(trivia), once
+        UC -> UC : activeLockId=exitTriviaId
+      end
+    end
+  end
+  UC -> Assembler : fromGame(game, message, activeLockId)
+  Assembler --> UC : fresh output; activeTrivia only for valid initialized question
+  UC -> Presenter : present(output), including API-error output
+  Presenter -> Model : setState(viewState), via UiDispatcher on EDT
+  Model --> View : notify -> render(model.getState())
+end
+
+group Trivia.submit: correct, wrong, uninitialized or repeated answer
+  Player -> View : submit answer (or direct uninitialized input)
+  View -> Controller : submitAnswer(exitTriviaId, answer)
+  Controller -> UC : TriviaInputBoundary.submit(exitTriviaId, answer)
+  UC -> Game : submitAnswer(exitTriviaId, answer)
+  Game -> Game : validate ACTIVE and current Room.exitChallenge ID
+  alt invalid status or target
+    Game -> Game : unchanged error
+  else valid active target
+    Game -> Quiz : submitAnswer(answer)
+    alt already passed
+      Quiz --> Game : unchanged result BEFORE answer checks
+    else question is uninitialized
+      Quiz --> Game : uninitialized-question error; unchanged
+    else wrong answer
+      Quiz --> Game : wrong-answer result; unchanged; same cached question
+    else correct answer
+      Quiz -> Quiz : markUnlocked()
+      Quiz --> Game : changed=true; success result
+    end
+  end
+  Game --> UC : DomainResult or DomainException
+  note over UC, API : Submit NEVER calls API. An uninitialized attempt changes no question/gate state.
+  UC -> UC : activeLockId=exitTriviaId only for wrong answer to initialized question;\notherwise empty
+  UC -> Assembler : fromGame(game, resultText/error, activeLockId)
+  Assembler -> Game : canMove()
+  Game --> Assembler : ACTIVE AND current Room.canLeave()
+  Assembler --> UC : fresh gate/movement flags; wrong answer retains the same active prompt
+  UC -> Presenter : present(output), for EVERY answer outcome
+  Presenter -> Model : setState(viewState), via UiDispatcher on EDT
+  Model --> View : notify -> render(model.getState())
+  note over View, Model : Correct completion of the second gate enables movement in this refreshed view.
+end
+
+group movement: enter/acquire atomically, escape or remain blocked
+  note over Player, View
+    Label = finalRoom ? Escape : Next room; enabled by canMove.
+    No destination selector or successor ID enters UI output.
+  end note
+  Player -> View : choose Next room / Escape (or direct blocked command)
+  View -> Controller : move()
+  Controller -> UC : MoveInputBoundary.execute()
+  UC -> Game : move()
+  Game -> Game : check ACTIVE
+  alt inactive
+    Game -> Game : unchanged status error
+  else ACTIVE
+    Game -> Room : canLeave()
+    Room -> Door : isUnlocked()
+    Room -> Quiz : isUnlocked()
+    alt door unlocked AND exit Trivia passed
+      Room --> Game : true
+      Game -> Room : nextRoomId()
+      Room --> Game : Optional successor ID
+      alt successor present
+        Game -> Game : enterRoom(nextRoomId): resolve destination
+        alt destination reference invalid
+          Game -> Game : preserve room/inventory; error
+        else destination exists
+          Game -> NextRoom : visibleCollectables()
+          NextRoom --> Game : visible Collectables
+          Game -> Game : visibleIds = IDs of the returned items
+          Game -> Game : preflightAcquisition(destination, visibleIds)
+          alt any transfer is invalid
+            Game -> Game : preserve current room and ALL item locations
+          else all transfers are prevalidated
+            Game -> Game : currentRoomId = successor ID
+            Game -> Game : acquireItems(destination, visibleIds)
+            loop each visible ID not already held
+              Game -> NextRoom : takeCollectable(itemId)
+              NextRoom --> Game : the same Collectable
+              Game -> Game : mark it revealed
+              Game -> Inventory : add(the same item)
+            end
+            Game -> Game : resultText includes ONLY newly obtained labels
+          end
+        end
+      else successor empty (Room.isFinal())
+        Game -> Game : status = ESCAPED; no extra item acquisition
+      end
+    else either gate incomplete
+      Room --> Game : false
+      Game -> Game : preserve room/status; explain missing gate
+    end
+  end
+  Game --> UC : DomainResult or DomainException
+  UC -> Assembler : fromGame(game, resultText/error, Optional.empty())
+  Assembler -> Game : canMove()
+  Game --> Assembler : ACTIVE AND current Room.canLeave()
+  Assembler -> Game : currentRoom()
+  Game --> Assembler : POST-COMMAND current Room
+  Assembler -> Assembler : finalRoom = returnedRoom.isFinal()
+  Assembler --> UC : fresh inventory/message with canMove + finalRoom
+  UC -> Presenter : present(output), for success AND blocked/error outcomes
+  Presenter -> Model : setState(viewState), via UiDispatcher on EDT
+  Model --> View : notify -> render(model.getState())
+end
+
+ref over Player, Model
+  Save/load retains schema 4 and the existing predecessor-gates validation.
+  Compatible immutable template versions define successors and appearance-item rules.
+  Restore uses state construction, never enterRoom/acquireItems; it replays no action or acquisition.
+  Load and later refresh display existing inventory without another Obtained notice.
+  No acquisition ledger or additional output field is introduced.
+  Detailed save/load success/error response cycles: escape-room-save-sequence.puml.
+end ref
+@enduml
