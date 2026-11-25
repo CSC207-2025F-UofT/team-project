@@ -28,8 +28,9 @@ public final class FinanceTracker {
             new TransactionDashboardInteractor(transactionData, dashboardPresenter);
         TransactionDashboardController dashboardController =
             new TransactionDashboardController(dashboardInteractor);
+        MultiUserManager manager = new MultiUserManager();
 
-        new FinanceTrackerView(dashboardController, dashboardModel);
+        new FinanceTrackerView(dashboardController, dashboardModel, manager);
     }
 
     public static void main(String[] args) {

@@ -36,9 +36,9 @@ public final class JsonAccountDataAccess implements AccountDataAccessInterface {
                 LocalDateTime created = LocalDateTime.parse(row.optString("createdAt", LocalDateTime.now().toString()));
                 String email = row.optString("email", "");
                 String passwordHash = row.optString("passwordHash", "");
-                UserProfile profile = email.isBlank() || passwordHash.isBlank()
+                UserProfile profile = passwordHash.isBlank()
                     ? new UserProfile(id, row.getString("name"), created)
-                    : new UserProfile(id, row.getString("name"), email, passwordHash, created);
+                    : new UserProfile(id, row.getString("name"), passwordHash, created);
                 JSONArray accounts = row.optJSONArray("accounts");
                 if (accounts != null)
                     for (int j = 0; j < accounts.length(); j++) profile.addAccount(readAccount(accounts.getJSONObject(j), id));

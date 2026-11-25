@@ -10,7 +10,6 @@ import java.util.Objects;
 public final class UserProfile {
     private final int userID;
     private String name;
-    private final String email;
     /** A password hash, when authentication has been implemented for this profile. */
     private final String passwordHash;
     private final LocalDateTime createdAt;
@@ -18,19 +17,18 @@ public final class UserProfile {
 
     /** Creates a profile for existing/demo data that has no authentication credentials yet. */
     public UserProfile(int id, String name, LocalDateTime createdAt) {
-        this(id, name, null, null, createdAt);
+        this(id, name, null, createdAt);
     }
 
-    public UserProfile(int id, String name, String email, String passwordHash) {
-        this(id, name, email, passwordHash, LocalDateTime.now());
+    public UserProfile(int id, String name, String passwordHash) {
+        this(id, name, passwordHash, LocalDateTime.now());
     }
 
-    public UserProfile(int id, String name, String email, String passwordHash, LocalDateTime createdAt) {
+    public UserProfile(int id, String name, String passwordHash, LocalDateTime createdAt) {
         if (id < 0) throw new IllegalArgumentException("User ID cannot be negative.");
         if (name == null || name.isBlank()) throw new IllegalArgumentException("Name cannot be empty.");
         this.userID = id;
         this.name = name.trim();
-        this.email = email == null || email.isBlank() ? null : email.trim().toLowerCase();
         this.passwordHash = passwordHash == null || passwordHash.isBlank() ? null : passwordHash;
         this.createdAt = Objects.requireNonNull(createdAt);
     }
@@ -38,7 +36,6 @@ public final class UserProfile {
     public int getId() { return userID; }
     public int getUserID() { return userID; }
     public String getName() { return name; }
-    public String getEmail() { return email; }
     public String getPasswordHash() { return passwordHash; }
     public LocalDateTime getCreatedAt() { return createdAt; }
     public int getNumAccounts() { return accounts.size(); }

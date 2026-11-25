@@ -5,6 +5,9 @@ import entity.Transaction;
 import entity.TransactionType;
 import interface_adapter.transactions.TransactionDashboardController;
 import interface_adapter.transactions.TransactionDashboardViewModel;
+import app.LoginApp;
+import app.MultiUserManager;
+import interface_adapter.login.LoginViewModel;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -26,9 +29,10 @@ public final class FinanceTrackerView extends JFrame {
     private final JLabel expenseTotal = new JLabel();
     private final JLabel balance = new JLabel();
     private boolean updatingUsers;
+    private final  MultiUserManager manager;
 
     public FinanceTrackerView(TransactionDashboardController controller,
-                              TransactionDashboardViewModel viewModel) {
+                              TransactionDashboardViewModel viewModel,MultiUserManager manager) {
         this.controller = controller;
         this.viewModel = viewModel;
         buildWindow();
@@ -40,6 +44,7 @@ public final class FinanceTrackerView extends JFrame {
             loadSelectedUser();
         }
         setVisible(true);
+        this.manager = manager;
     }
 
     private void buildWindow() {
@@ -75,7 +80,15 @@ public final class FinanceTrackerView extends JFrame {
         JButton add = new JButton("Add Transaction");
         add.addActionListener(event -> showAddDialog());
         actions.add(add);
-        addPlaceholderButton(actions, "Login");
+        JButton login = new JButton("Login");
+        login.addActionListener(e -> {
+            LoginViewModel model = LoginApp.open();
+            if (model.isSuccessful()) {
+                manager.login(model.getId());
+                controller.loadUsers();
+                refresh();}
+        });
+        actions.add(login);
         JButton signUp = new JButton("Sign Up");
         signUp.addActionListener(event -> SignUpApp.open());
         actions.add(signUp);

@@ -49,10 +49,6 @@ public final class JsonUserDataAccess implements SignUpDataAccessInterface, Logi
             throw new IllegalStateException("Cannot read profiles", e);
         }
     }
-    @Override
-    public boolean emailExists(String email) {
-        return find("email", email) != null;
-    }
 
     @Override
     public int nextUserId() {
@@ -73,7 +69,6 @@ public final class JsonUserDataAccess implements SignUpDataAccessInterface, Logi
 
             user.put("id", profile.getId());
             user.put("name", profile.getName());
-            user.put("email", profile.getEmail());
             user.put("passwordHash", profile.getPasswordHash());
             user.put("createdAt", profile.getCreatedAt().toString());
             user.put("accounts", new JSONArray());
@@ -97,7 +92,6 @@ public final class JsonUserDataAccess implements SignUpDataAccessInterface, Logi
         }
         return new UserProfile(user.getInt("id"),
                 user.getString("name"),
-                user.getString("email"),
                 user.optString("passwordHash", ""),
                 LocalDateTime.parse(user.getString("createdAt"))
         );

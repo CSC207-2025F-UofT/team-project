@@ -45,7 +45,6 @@ public class SignUpView extends JDialog {
         signUp.addActionListener(e -> {
             controller.execute(
                     username.getText(),
-                    email.getText(),
                     new String(password.getPassword()),
                     new String(repeatPassword.getPassword())
             );
