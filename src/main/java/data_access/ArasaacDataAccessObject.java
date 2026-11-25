@@ -3,6 +3,7 @@ package data_access;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import entity.Pictogram;
+import entity.WordType;
 import use_case.customize_board.PictogramSearchDataAccessInterface;
 import use_case.customize_board.PictogramSearchException;
 
@@ -108,7 +109,8 @@ public final class ArasaacDataAccessObject implements PictogramSearchDataAccessI
             // Store the URL for the UI to load later; do not request the image here.
             String imageLocation = String.format(
                     IMAGE_URL_TEMPLATE, id, id);
-            pictograms.add(new Pictogram(id, label, imageLocation));
+            WordType type = findWordType(result, searchKeyword);
+            pictograms.add(new Pictogram(id, label, imageLocation, type));
         }
         return List.copyOf(pictograms);
     }
@@ -139,6 +141,50 @@ public final class ArasaacDataAccessObject implements PictogramSearchDataAccessI
         // Phase 1 fallback: if ARASAAC has no exact search-term keyword, use its
         // first non-blank keyword; ARASAAC's keyword order is not a semantic guarantee.
         return firstNonBlankKeyword;
+    }
+
+    private WordType findWordType(JsonNode result, String searchKeyword) {
+        JsonNode keywords = result.get("keywords");
+        if (keywords == null || !keywords.isArray()) {
+            return WordType.THING;
+        }
+
+        Integer firstArasaacType = null;
+        for (JsonNode keyword : keywords) {
+            JsonNode keywordNode = keyword.get("keyword");
+            JsonNode typeNode = keyword.get("type");
+
+            if (keywordNode == null || !keywordNode.isTextual()
+                    || keywordNode.asText().isBlank()) {
+                continue;
+            }
+
+            String candidate = keywordNode.asText().trim();
+            if (firstArasaacType == null
+                    && typeNode != null && typeNode.isIntegralNumber()) {
+                firstArasaacType = typeNode.asInt();
+            }
+
+            if (candidate.equalsIgnoreCase(searchKeyword)
+                    && typeNode != null && typeNode.isIntegralNumber()) {
+                return wordTypeFromArasaacType(typeNode.asInt());
+            }
+        }
+
+        if (firstArasaacType != null) {
+            return wordTypeFromArasaacType(firstArasaacType);
+        }
+        return WordType.THING;
+    }
+
+    private WordType wordTypeFromArasaacType(int arasaacType) {
+        if (arasaacType == 3) {
+            return WordType.ACTION;
+        }
+        if (arasaacType == 2) {
+            return WordType.THING;
+        }
+        return WordType.THING;
     }
 
     private static HttpRequestExecutor createHttpRequestExecutor() {
