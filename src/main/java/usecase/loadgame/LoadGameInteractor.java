@@ -1,7 +1,7 @@
-package yinghaousecase.loadgame;
+package usecase.loadgame;
 
 import entity.GameResult;
-import yinghaousecase.savegame.SaveGameDataAccess;
+import usecase.savegame.SaveGameDataAccess;
 
 public class LoadGameInteractor implements LoadGameInputBoundary {
     private final SaveGameDataAccess dataAccess;

@@ -14,6 +14,7 @@ public class Game {
     private HashMap<Player, Deck> drawPiles;
     private HashMap<Player, Deck> discardPiles;
     private HashMap<Player, Deck> handPiles;
+    private final ArrayList<Player> players;
     private int turn;
     private int maxTurn;
 
@@ -24,6 +25,8 @@ public class Game {
         drawPiles = new HashMap<>();
         discardPiles = new HashMap<>();
         handPiles = new HashMap<>();
+
+        this.players = new ArrayList<>(playerNames);
 
         turn = 0;
         maxTurn = playerNames.size();
@@ -36,6 +39,17 @@ public class Game {
             drawPiles.put(player, DeckFactory.createDeck(player));
         }
     }
+
+    public void dealInitialHands(int cardsPerPlayer) {
+        for (Player player : players) {
+            Deck draw = drawPiles.get(player);
+            Deck hand = handPiles.get(player);
+            for (int i = 0; i < cardsPerPlayer && !draw.isEmpty(); i++) {
+                hand.addCard(draw.drawCard());
+            }
+        }
+    }
+
     public GameResult finish() {
         List<Player> players = new ArrayList<>(drawPiles.keySet());
         Player p1 = players.get(0);

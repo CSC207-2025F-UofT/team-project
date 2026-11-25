@@ -2,9 +2,9 @@ package adapters.presenter;
 
 import entity.Game;
 import entity.GameResult;
-import yinghaousecase.loadgame.LoadGameOutputBoundary;
-import yinghaousecase.savegame.SaveGameOutputBoundary;
-import yinghaousecase.startgame.StartGameOutputBoundary;
+import usecase.loadgame.LoadGameOutputBoundary;
+import usecase.savegame.SaveGameOutputBoundary;
+import usecase.startgame.StartGameOutputBoundary;
 
 public class GamePresenter implements StartGameOutputBoundary,
         SaveGameOutputBoundary,
@@ -49,6 +49,11 @@ public class GamePresenter implements StartGameOutputBoundary,
     @Override
     public void presentLoadFailure(String slotName, String reason) {
         System.err.println("[Presenter] Load failed (" + slotName + "): " + reason);
+    }
+
+    @Override
+    public void presentStartFailure(String reason) {
+        System.err.println("[Presenter] Cannot start: " + reason);
     }
 
     private void refresh() { if (onGameChanged != null) onGameChanged.run(); }

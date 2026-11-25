@@ -1,7 +1,7 @@
-package yinghaoframeworks;
+package frameworks;
 
 import entity.GameResult;
-import yinghaousecase.savegame.SaveGameDataAccess;
+import usecase.savegame.SaveGameDataAccess;
 
 import java.io.*;
 
