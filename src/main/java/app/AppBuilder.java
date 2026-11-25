@@ -37,6 +37,8 @@ import interface_adapter.interact_with_pet.InteractWithPetViewModel;
 import interface_adapter.get_pet_picture.GetPetPictureController;
 import interface_adapter.get_pet_picture.GetPetPicturePresenter;
 import interface_adapter.adopt_pet.AdoptPetController;
+import interface_adapter.play_with_pet.PlayWithPetController;
+import interface_adapter.play_with_pet.PlayWithPetPresenter;
 import interface_adapter.adopt_pet.AdoptPetPresenter;
 import use_case.change_password.ChangePasswordInputBoundary;
 import use_case.change_password.ChangePasswordInteractor;
@@ -61,6 +63,7 @@ import use_case.interact_with_pet.InteractWithPetInteractor;
 import use_case.get_pet_picture.GetPetPictureInteractor;
 import use_case.get_pet_picture.GetPetPictureOutputBoundary;
 import use_case.adopt_pet.AdoptPetInteractor;
+import use_case.play_with_pet.PlayWithPetInteractor;
 import view.LoggedInView;
 import view.LoginView;
 import view.RecordTransactionView;
@@ -161,6 +164,12 @@ public class AppBuilder {
                 interactWithPetView,
                 InteractWithPetViewModel.VIEW_NAME
         );
+
+        interactWithPetView.setBackAction(() -> {
+            viewManagerModel.setState(LoggedInViewModel.VIEW_NAME);
+            viewManagerModel.notifyViewChanged();
+        });
+
         return this;
     }
 
@@ -402,6 +411,27 @@ public class AppBuilder {
 
         AdoptPetController controller = new AdoptPetController(interactor);
         adoptPetView.setAdoptPetController(controller);
+
+        return this;
+    }
+
+    public AppBuilder addPlayWithPetUseCase() {
+        PlayWithPetPresenter presenter =
+                new PlayWithPetPresenter(interactWithPetViewModel);
+
+        PlayWithPetInteractor interactor =
+                new PlayWithPetInteractor(
+                        petDataAccessObject,
+                        presenter
+                );
+
+        PlayWithPetController controller =
+                new PlayWithPetController(interactor);
+
+        interactWithPetView.setPlayAction(() -> {
+            String username = loggedInViewModel.getState().getUsername();
+            controller.execute(username);
+        });
 
         return this;
     }

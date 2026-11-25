@@ -8,6 +8,7 @@ public class InteractWithPetState {
     private int hunger;
     private int happiness;
     private int health;
+    private String errorMessage = "";
 
     public String getPetName() {
         return petName;
@@ -44,5 +45,9 @@ public class InteractWithPetState {
     public int getHealth() { return health; }
 
     public void setHealth(int health) { this.health = health; }
+
+    public String getErrorMessage() { return errorMessage; }
+
+    public void setErrorMessage(String errorMessage) { this.errorMessage = errorMessage; }
 
 }

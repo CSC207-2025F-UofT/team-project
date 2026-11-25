@@ -27,6 +27,9 @@ public class InteractWithPetView extends JPanel
     private final JLabel hungerLabel = new JLabel();
     private final JLabel happinessLabel = new JLabel();
     private final JLabel healthLabel = new JLabel();
+    private final JButton playButton = new JButton("Play");
+    private final JLabel errorLabel = new JLabel();
+    private final JButton backButton = new JButton("Back to Main Menu");
 
     public InteractWithPetView(InteractWithPetViewModel viewModel) {
         this.viewModel = viewModel;
@@ -57,7 +60,22 @@ public class InteractWithPetView extends JPanel
 
         add(conditionPanel);
 
+        JPanel actionPanel = new JPanel();
+        actionPanel.add(playButton);
+        actionPanel.add(backButton);
+
+        add(actionPanel);
+        add(errorLabel);
+
         stateChanged();
+    }
+
+    public void setPlayAction(Runnable action) {
+        playButton.addActionListener(evt -> action.run());
+    }
+
+    public void setBackAction(Runnable action) {
+        backButton.addActionListener(evt -> action.run());
     }
 
     private void loadPicture(String imageUrl) {
@@ -138,6 +156,7 @@ public class InteractWithPetView extends JPanel
         hungerLabel.setText("Hunger: " + state.getHunger() + "/10");
         happinessLabel.setText("Happiness: " + state.getHappiness() + "/10");
         healthLabel.setText("Health: " + state.getHealth() + "/10");
+        errorLabel.setText(state.getErrorMessage());
 
         String imageUrl = state.getImageUrl();
 

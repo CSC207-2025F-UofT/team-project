@@ -31,7 +31,7 @@ public class AdoptPetView extends JPanel
     private final JLabel errorLabel = new JLabel();
 
     private final JButton anotherPictureButton =
-            new JButton("Generate Picture");
+            new JButton("Next Picture");
     private final JButton adoptButton = new JButton("Adopt");
     private boolean updatingFields = false;
     private GetPetPictureController getPetPictureController;
