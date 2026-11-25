@@ -4,17 +4,19 @@ import java.util.List;
 import java.util.ArrayList;
 
 public class AddSideQuestInputData {
+    private final String id;
+    private final String name;
     private final String questDescription;
     private final String photoUrl;
     private final String isIndoor;
-    private final double budget;
-    private final double expectedTime;
+    private final String budget;       // same categories as SideQuest.budget
+    private final String expectedTime; // same categories as SideQuest.expectedTime
     private final int exp;
     private final Location location;
     private final List<String> interests;
 
     public AddSideQuestInputData(String id, String name, String questDescription, String photoUrl, String isIndoor,
-                                 double budget, double expectedTime, int exp, Location location,
+                                 String budget, String expectedTime, int exp, Location location,
                                  List<String> interests) {
         this.id = id;
         this.name = name;
@@ -48,11 +50,11 @@ public class AddSideQuestInputData {
         return isIndoor;
     }
 
-    public double getBudget() {
+    public String getBudget() {
         return budget;
     }
 
-    public double getExpectedTime() {
+    public String getExpectedTime() {
         return expectedTime;
     }
 

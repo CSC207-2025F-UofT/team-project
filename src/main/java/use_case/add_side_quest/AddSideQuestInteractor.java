@@ -17,11 +17,11 @@ public class AddSideQuestInteractor implements AddSideQuestInputBoundary {
         } else if (inputData.getQuestDescription() == null || inputData.getQuestDescription().trim().isEmpty()) {
             // outputBoundary.prepareFailView("Please enter a description for your Side Quest.");
             return;
-        } else if (inputData.getBudget() < 0) {
-            // outputBoundary.prepareFailView("Budget cannot be a negative value.");
+        } else if (inputData.getBudget() == null || inputData.getBudget().trim().isEmpty()) {
+            // outputBoundary.prepareFailView("Please choose a budget.");
             return;
-        } else if (inputData.getExpectedTime() <= 0) {
-            // outputBoundary.prepareFailView("Expected time (in hours) must be greater than 0.");
+        } else if (inputData.getExpectedTime() == null || inputData.getExpectedTime().trim().isEmpty()) {
+            // outputBoundary.prepareFailView("Please choose an expected time.");
             return;
         } else if (inputData.getExp() <= 0) {
             // outputBoundary.prepareFailView("Exp for the side quest cannot be negative.");
@@ -38,7 +38,7 @@ public class AddSideQuestInteractor implements AddSideQuestInputBoundary {
             return;
         }
 
-        SideQuest sideQuest = new SideQuest(inputData.getName(), inputData.getDescription(),
+        SideQuest sideQuest = new SideQuest(inputData.getId(), inputData.getName(),
                 inputData.isIndoor(), inputData.getBudget(), inputData.getExpectedTime(), inputData.getExp(),
                 inputData.getLocation(), inputData.getInterests()
         );
