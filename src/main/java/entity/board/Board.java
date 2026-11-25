@@ -72,25 +72,17 @@ public class Board {
     /// @param y Explosion origin y
     /// @param spellCard Spell that has been cast
     private void checkExplosion(int x, int y, SpellCard spellCard) {
-        // TODO: Finish writing this.
+        // TODO: Implement this (May need to be an additional feature for later).
+
     }
 
     /// Step the spell cast's movement (part of Resolve Cast)
-    /// @param x The x position of the current tile the spell is on
-    /// @param y The y position of the current tile the spell is on
+    /// @param gridTransform The GridTransform that describes the position and direction of the spell in flight
     /// @param spellCard The spell card that is being cast
-    /// @param castDirection The direction the spell is being cast in
     /// @param traveled How far, in tiles this spell has traveled so far
-    private void stepSpell(int x, int y, SpellCard spellCard, Direction castDirection, int traveled) {
-        // TODO: Finish writing/refactoring this.
-        // Check if spell has reached the end of its flight
-        if (traveled >= spellCard.getRange()-1 && Directions.isDiagonal(castDirection)) {
-            // Diagonal flight goes 1 tile less far
-            checkExplosion(x, y, spellCard);
-        } else if (traveled >= spellCard.getRange() && !Directions.isDiagonal(castDirection)) {
-            // Non-diagonal flight
-            checkExplosion(x, y, spellCard);
-        }
+    private void stepSpell(GridTransform gridTransform, SpellCard spellCard, int traveled) {
+        int x = gridTransform.x();
+        int y = gridTransform.y();
 
         // Do damage to any card that is present on this tile
         CharacterCard characterCard = this.board[x][y].getCharacterCard();
@@ -108,12 +100,23 @@ public class Board {
         if (sorceryCard != null) {
             // Mirror reverses flight path and resets travel distance
             if (sorceryCard.getName().equals("Mirror")) {
-                castDirection = Directions.reverse(castDirection);
+                gridTransform = new GridTransform(x, y, Directions.reverse(gridTransform.direction()));
                 traveled = 0;
             }
         }
 
+        // Check if spell has reached the end of its flight
+        if (traveled >= spellCard.getRange()-1 && Directions.isDiagonal(gridTransform.direction())) {
+            // Diagonal flight goes 1 tile less far
+//            checkExplosion(x, y, spellCard);
+            return;
+        } else if (traveled >= spellCard.getRange() && !Directions.isDiagonal(gridTransform.direction())) {
+            // Non-diagonal flight
+//            checkExplosion(x, y, spellCard);
+            return;
+        }
 
+        stepSpell(gridTransform.step(), spellCard, traveled + 1);
     }
 
     // Getters
