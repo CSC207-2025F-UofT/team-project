@@ -39,6 +39,7 @@ public class SearchedResultsPageView extends JPanel implements ActionListener, S
     private ReviewsController reviewsController = null;
     private MovieDetailController movieDetailController = null;
     private AddToWatchlistController addToWatchlistController = null;
+    private String username = "";
 
     public SearchedResultsPageView(SearchedViewModel searchedViewModel) {
         this(searchedViewModel, null);
@@ -185,7 +186,7 @@ public class SearchedResultsPageView extends JPanel implements ActionListener, S
                         public void actionPerformed(ActionEvent e) {
                             if(e.getSource().equals(watchlistButton)){
                                 addToWatchlistController.execute(
-                                        "STILL NEED TO ADD USERNAME",
+                                        username,
                                         String.valueOf(movieId),
                                         movieTitleValue, posterURL);
                             }
@@ -330,6 +331,14 @@ public class SearchedResultsPageView extends JPanel implements ActionListener, S
 
     public void onOpenFavorites(Runnable action) {
         favourites.addActionListener(event -> action.run());
+    }
+
+    public void onOpenWatchlist(Runnable action) {
+        watchlist.addActionListener(event -> action.run());
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
     }
 
     public void setSearchController(SearchController searchController) {

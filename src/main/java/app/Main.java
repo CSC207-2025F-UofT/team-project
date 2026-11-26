@@ -37,6 +37,17 @@ import user_case.Reviews.ReviewsInputBoundary;
 import user_case.Reviews.ReviewsInteractor;
 import user_case.Search.*;
 import view.FavoritesPageView;
+import data_access.WatchlistDataAccessObject;
+import entity.WatchlistMovieFactory;
+import interface_adapter.AddToWatchlist.AddToWatchlistController;
+import interface_adapter.AddToWatchlist.AddToWatchlistPresenter;
+import interface_adapter.AddToWatchlist.AddToWatchlistViewModel;
+import interface_adapter.ViewWatchlist.ViewWatchlistController;
+import interface_adapter.ViewWatchlist.ViewWatchlistPresenter;
+import interface_adapter.ViewWatchlist.WatchlistViewModel;
+import user_case.AddToWatchlist.AddToWatchlistInteractor;
+import user_case.ViewWatchlist.ViewWatchlistInteractor;
+import view.WatchlistPageView;
 import data_access.GetMovieData;
 import data_access.MovieDetailDataAccessObject;
 import entity.Movie;
@@ -78,6 +89,27 @@ public class Main {
                     }));
             FavoriteController favoriteController = new FavoriteController(new FavoriteInteractor(
                     favoritesDao, new FavoritePresenter(favoriteModel)));
+
+            // Watchlist (add + view), saved in ~/.flicksy/watchlist.json
+            Path watchlistFile = Path.of(System.getProperty("user.home"), ".flicksy", "watchlist.json");
+            watchlistFile.getParent().toFile().mkdirs();
+            WatchlistDataAccessObject watchlistDao = new WatchlistDataAccessObject(watchlistFile.toString());
+            String envUser = System.getenv("FLICKSY_USERNAME");
+            String watchlistUser = envUser == null || envUser.isBlank() ? "guest" : envUser;
+
+            WatchlistViewModel watchlistViewModel = new WatchlistViewModel();
+            ViewWatchlistController viewWatchlistController = new ViewWatchlistController(
+                    new ViewWatchlistInteractor(watchlistDao, new ViewWatchlistPresenter(watchlistViewModel)));
+            WatchlistPageView watchlistView = new WatchlistPageView(watchlistViewModel);
+            watchlistView.setViewWatchlistController(viewWatchlistController);
+
+            AddToWatchlistViewModel addToWatchlistViewModel = new AddToWatchlistViewModel();
+            AddToWatchlistController addToWatchlistController = new AddToWatchlistController(
+                    new AddToWatchlistInteractor(watchlistDao,
+                            new AddToWatchlistPresenter(addToWatchlistViewModel), new WatchlistMovieFactory()));
+            addToWatchlistViewModel.addListener(state -> JOptionPane.showMessageDialog(views, state.getMessage(),
+                    "Watchlist", state.isSuccess()
+                            ? JOptionPane.INFORMATION_MESSAGE : JOptionPane.WARNING_MESSAGE));
             // Create the ViewModels
             SearchBarViewModel searchBarViewModel =
                     new SearchBarViewModel();
@@ -134,6 +166,21 @@ public class Main {
             };
             searchPageView.onOpenFavorites(() -> openFavorites.accept("search"));
 
+            // Watchlist page with a Back button to the previous page
+            String[] watchlistReturnView = {"search"};
+            JButton watchlistBack = new JButton("Back");
+            watchlistBack.addActionListener(e -> cardLayout.show(views, watchlistReturnView[0]));
+            JPanel watchlistPage = new JPanel(new BorderLayout());
+            watchlistPage.add(watchlistBack, BorderLayout.NORTH);
+            watchlistPage.add(watchlistView, BorderLayout.CENTER);
+            views.add(watchlistPage, WatchlistViewModel.VIEW_NAME);
+            java.util.function.Consumer<String> openWatchlist = previous -> {
+                watchlistReturnView[0] = previous;
+                viewWatchlistController.execute(watchlistUser);
+                cardLayout.show(views, WatchlistViewModel.VIEW_NAME);
+            };
+            searchPageView.onOpenWatchlist(() -> openWatchlist.accept("search"));
+
             // Listen for changes to the searched ViewModel
             searchedViewModel.addListener(() -> {
 
@@ -164,6 +211,9 @@ public class Main {
                         );
 
                         searchedResultsPageView.onOpenFavorites(() -> openFavorites.accept("results"));
+                        searchedResultsPageView.setAddToWatchlistController(addToWatchlistController);
+                        searchedResultsPageView.setUsername(watchlistUser);
+                        searchedResultsPageView.onOpenWatchlist(() -> openWatchlist.accept("results"));
                         views.add(searchedResultsPageView, "results");
 
                         cardLayout.show(views, "results");
