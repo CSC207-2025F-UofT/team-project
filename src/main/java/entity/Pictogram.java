@@ -69,4 +69,15 @@ public final class Pictogram {
         Pictogram pictogram = (Pictogram) other;
         return id == pictogram.id;
     }
+
+    /** Must match equals(): pictograms with the same id have the same hash code. */
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
+
+    @Override
+    public String toString() {
+        return label;
+    }
 }

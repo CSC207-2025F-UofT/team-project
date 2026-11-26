@@ -180,4 +180,17 @@ class CommunicationBoardTest {
         assertEquals(1, board.getActions().size());
         assertEquals(1, board.getThings(play).size());
     }
+
+
+    @Test
+    void lookupsWorkWithADifferentObjectWithTheSameId() {
+        board.addAction(play);
+        board.addThing(play, ball);
+        Pictogram samePlay = new Pictogram(1, "play", "play.png", WordType.ACTION);
+        Pictogram sameBall = new Pictogram(3, "ball", "ball.png", WordType.THING);
+
+        assertTrue(board.containsAction(samePlay));
+        assertEquals(List.of(ball), board.getThings(samePlay));
+        assertTrue(board.getThings(samePlay).contains(sameBall));
+    }
 }
