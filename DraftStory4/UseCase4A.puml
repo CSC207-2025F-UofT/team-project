@@ -3,38 +3,33 @@
 
 autonumber
 
-== Starting the Monitoring ==
+== "Turn on the Monitoring Window" ==
 actor "Human Student User" as humanStudentUser
 boundary "BaseView" as baseView
-control "MonitoringController" as monitoringController
-participant "MonitoringInputBoundary" as monitoringInputBoundary
-control "MonitoringInteractor" as monitoringInteractor
-participant "MonitoringOutputBoundary" as monitoringOutputBoundary
-control "MonitoringPresenter" as monitoringPresenter
-participant "MonitoringViewModel" as monitoringViewModel
+control "TurnOnMonitoringController" as turnOnMonitoringController
+participant "TurnOnMonitoringInputBoundary <<Interface>>" as turnOnMonitoringInputBoundary
+control "TurnOnMonitoringInteractor" as turnOnMonitoringInteractor
+participant "TurnOnMonitoringOutputBoundary <<Interface>>" as turnOnMonitoringOutputBoundary
+control "TurnOnMonitoringPresenter" as turnOnMonitoringPresenter
+participant "TurnOnMonitoringViewModel" as turnOnMonitoringViewModel
 participant "ViewModelManager" as viewModelManager
 boundary "MonitoringView<MonitoringState>" as monitoringView
 
-humanStudentUser -> baseView: Turn On the Monitoring Window
-baseView -> monitoringController: createMonitoringInputData()
-baseView <-- monitoringController
-baseView -> monitoringController: turnOnMonitoring(MonitoringInputData)
-monitoringController -> monitoringInputBoundary: execute(MonitoringInputData)
-monitoringInputBoundary -> monitoringInteractor: execute(MonitoringInputData)
+humanStudentUser -> baseView: Turn on the Monitoring Window
+baseView -> turnOnMonitoringController: execute()
+turnOnMonitoringController -> turnOnMonitoringInputBoundary: execute(MonitoringInputData)
+turnOnMonitoringInputBoundary -> turnOnMonitoringInteractor: execute(MonitoringInputData)
 
-ref over monitoringInteractor: Use Case 3
+ref over turnOnMonitoringInteractor: Use Case 3
 
-monitoringInteractor -> monitoringOutputBoundary: createMonitoringState(MonitoringOutputData)
-monitoringOutputBoundary -> monitoringPresenter: createMonitoringState(MonitoringOutputData)
-monitoringInteractor <-- monitoringPresenter
-monitoringInteractor -> monitoringOutputBoundary: turnOnMonitoring(monitoringState)
-monitoringOutputBoundary -> monitoringPresenter: turnOnMonitoring(monitoringState)
-monitoringPresenter -> monitoringViewModel: setState(monitoringState)
-monitoringPresenter <-- monitoringViewModel
-monitoringPresenter -> monitoringViewModel: firePropertyChange()
-monitoringViewModel -> monitoringView: propertyChange()
-monitoringPresenter <-- monitoringView
-monitoringPresenter -> viewModelManager: changeView("Monitoring")
+turnOnMonitoringInteractor -> turnOnMonitoringOutputBoundary: prepareMonitoringView(MonitoringOutputData)
+turnOnMonitoringOutputBoundary -> turnOnMonitoringPresenter: prepareMonitoringView(MonitoringOutputData)
+turnOnMonitoringPresenter -> turnOnMonitoringViewModel: setState(monitoringState)
+turnOnMonitoringPresenter <-- turnOnMonitoringViewModel
+turnOnMonitoringPresenter -> turnOnMonitoringViewModel: firePropertyChange()
+turnOnMonitoringViewModel -> monitoringView: propertyChange()
+turnOnMonitoringPresenter <-- monitoringView
+turnOnMonitoringPresenter -> viewModelManager: changeView("Monitoring")
 viewModelManager -> monitoringView: switch("Monitoring")
 
 @enduml
