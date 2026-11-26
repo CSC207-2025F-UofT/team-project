@@ -71,6 +71,15 @@ public final class LinkedVocabulary {
     }
 
     /**
+     * Removes the links of every action that is no longer on the board,
+     * so the saved profile never has links for a removed action.
+     */
+    public void removeLinksNotOn(CommunicationBoard board) {
+        Objects.requireNonNull(board, "board cannot be null");
+        links.keySet().removeIf(action -> !board.contains(action));
+    }
+
+    /**
      * Returns the things linked to this action, or an empty list if there are none.
      * The returned list cannot be modified.
      */

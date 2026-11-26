@@ -106,6 +106,19 @@ class LinkedVocabularyTest {
     }
 
     @Test
+    void removeLinksNotOnBoardKeepsOnlyActionsOnTheBoard() {
+        links.link(play, ball);
+        links.link(eat, apple);
+        CommunicationBoard board = new CommunicationBoard();
+        board.addPictogram(eat);
+
+        links.removeLinksNotOn(board);
+
+        assertFalse(links.hasThings(play));
+        assertEquals(List.of(apple), links.getThings(eat));
+    }
+
+    @Test
     void worksWithADifferentObjectWithTheSameId() {
         links.link(play, ball);
         Pictogram samePlay = new Pictogram(1, "play", "play.png", WordType.ACTION);

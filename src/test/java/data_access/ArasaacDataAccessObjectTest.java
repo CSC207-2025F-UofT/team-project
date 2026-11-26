@@ -156,6 +156,38 @@ class ArasaacDataAccessObjectTest {
     }
 
     @Test
+    void labelAndTypeComeFromTheSameKeywordWhenTypeIsMissing() throws Exception {
+        // "ball" (the search term) has no type; another keyword is a verb.
+        // The result must not borrow the verb's type.
+        String json = "[{\"_id\":4,\"keywords\":["
+                + "{\"keyword\":\"throw\",\"type\":3},"
+                + "{\"keyword\":\"ball\"}]}]";
+        ArasaacDataAccessObject dataAccess =
+                new ArasaacDataAccessObject(request -> response(200, json), new ObjectMapper());
+
+        Pictogram ball = dataAccess.searchPictograms("ball").get(0);
+
+        assertEquals("ball", ball.getLabel());
+        assertEquals(WordType.THING, ball.getType());
+    }
+
+    @Test
+    void fallbackKeywordWithoutTypeIsAThing() throws Exception {
+        // No keyword matches the search term, and the first keyword (used as the label)
+        // has no type, even though a later keyword is a verb.
+        String json = "[{\"_id\":5,\"keywords\":["
+                + "{\"keyword\":\"teddy bear\"},"
+                + "{\"keyword\":\"hug\",\"type\":3}]}]";
+        ArasaacDataAccessObject dataAccess =
+                new ArasaacDataAccessObject(request -> response(200, json), new ObjectMapper());
+
+        Pictogram result = dataAccess.searchPictograms("toy").get(0);
+
+        assertEquals("teddy bear", result.getLabel());
+        assertEquals(WordType.THING, result.getType());
+    }
+
+    @Test
     void searchResultsCanBeUsedOnTheLinkedBoard() throws Exception {
         String playJson = "[{\"_id\":1,\"keywords\":[{\"keyword\":\"play\",\"type\":3}]}]";
         String ballJson = "[{\"_id\":2,\"keywords\":[{\"keyword\":\"ball\",\"type\":2}]}]";
