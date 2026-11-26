@@ -1,0 +1,34 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+
+autonumber
+
+== "Turn on the Monitoring Window" ==
+actor "Human Student User" as humanStudentUser
+boundary "BaseView" as baseView
+control "TurnOnMonitoringController" as turnOnMonitoringController
+participant "TurnOnMonitoringInputBoundary <<Interface>>" as turnOnMonitoringInputBoundary
+control "TurnOnMonitoringInteractor" as turnOnMonitoringInteractor
+participant "TurnOnMonitoringOutputBoundary <<Interface>>" as turnOnMonitoringOutputBoundary
+control "TurnOnMonitoringPresenter" as turnOnMonitoringPresenter
+participant "MonitoringViewModel" as monitoringViewModel
+participant "ViewModelManager" as viewModelManager
+boundary "MonitoringView<MonitoringState>" as monitoringView
+
+humanStudentUser -> baseView: Turn on the Monitoring Window
+baseView -> turnOnMonitoringController: execute()
+turnOnMonitoringController -> turnOnMonitoringInputBoundary: execute(MonitoringInputData)
+turnOnMonitoringInputBoundary -> turnOnMonitoringInteractor: execute(MonitoringInputData)
+
+ref over turnOnMonitoringInteractor: Use Case 3
+
+turnOnMonitoringInteractor -> turnOnMonitoringOutputBoundary: prepareMonitoringView(MonitoringOutputData)
+turnOnMonitoringOutputBoundary -> turnOnMonitoringPresenter: prepareMonitoringView(MonitoringOutputData)
+turnOnMonitoringPresenter -> monitoringViewModel: setState(monitoringState)
+turnOnMonitoringPresenter <-- monitoringViewModel
+turnOnMonitoringPresenter -> monitoringViewModel: firePropertyChange()
+monitoringViewModel -> monitoringView: propertyChange()
+turnOnMonitoringPresenter <-- monitoringView
+turnOnMonitoringPresenter -> viewModelManager: changeView("Monitoring")
+
+@enduml
