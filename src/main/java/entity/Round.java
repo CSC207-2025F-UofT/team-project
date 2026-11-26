@@ -61,4 +61,6 @@ public class Round {
     public int getZoomStep() {
         return Math.min(guesses.size() + 1, MAX_ATTEMPTS);
     }
+
+    public int attemptsUsed() { return guesses.size();}
 }

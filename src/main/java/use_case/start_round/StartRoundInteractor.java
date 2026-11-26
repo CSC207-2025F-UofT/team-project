@@ -29,6 +29,6 @@ public class StartRoundInteractor implements StartRoundInputBoundary {
         System.out.println(answerCity.getName());
 
         String imageURL = imageProvider.getImageURL(answerCity, round.getZoomStep());
-        presenter.prepareSuccessView(new StartRoundOutputData(imageURL, round.getAttemptsLeft()));
+        presenter.prepareSuccessView(new StartRoundOutputData(imageURL, round.attemptsRemaining()));
     }
 }

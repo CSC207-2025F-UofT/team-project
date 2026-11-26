@@ -2,7 +2,7 @@ package data_access;
 
 import entity.Player;
 import entity.PlayerFactory;
-import use_case.makeNewPlayer.NewPlayerDataAccessInterface;
+import use_case.make_new_player.NewPlayerDataAccessInterface;
 
 import java.io.*;
 import java.util.HashMap;
