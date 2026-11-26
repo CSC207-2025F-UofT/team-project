@@ -1,5 +1,7 @@
 package data_access;
 import use_case.earn_reward_coins.EarnRewardCoinsDataAccessInterface;
+import use_case.purchase_pet_item.PurchasePetItemCoinDataAccessInterface;
+import use_case.open_pet_shop.OpenPetShopCoinDataAccessInterface;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -11,7 +13,8 @@ import java.util.Optional;
 import java.util.Set;
 
 public class EarnRewardCoinsDataAccessObject
-        implements EarnRewardCoinsDataAccessInterface{
+        implements EarnRewardCoinsDataAccessInterface,
+        PurchasePetItemCoinDataAccessInterface, OpenPetShopCoinDataAccessInterface {
     private final Map<String, ZoneId> timeZones = new HashMap<>();
     private final Map<String, Integer> balances = new HashMap<>();
     private final Map<String, Map<LocalDate, BigDecimal>> budgets =
@@ -118,5 +121,27 @@ public class EarnRewardCoinsDataAccessObject
     public synchronized int getCoinBalance(String userId) {
         requireUser(userId);
         return balances.get(userId);
+    }
+
+    @Override
+    public synchronized int spendCoins(String userId, int amount) {
+        requireUser(userId);
+
+        if (amount <= 0) {
+            throw new IllegalArgumentException(
+                    "Coins spent must be positive.");
+        }
+
+        int currentBalance = balances.get(userId);
+
+        if (currentBalance < amount) {
+            throw new IllegalStateException(
+                    "You don't have enough coins.");
+        }
+
+        int newBalance = currentBalance - amount;
+        balances.put(userId, newBalance);
+
+        return newBalance;
     }
 }
