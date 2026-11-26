@@ -515,32 +515,31 @@ Nager.Holidays
 
 ### Main UI flow chart
 - This is a high-level flow chart, and it might not capture all of the detailed flow.
-- The flow chart is described in a business sense and might use more business-friendly terms.
-- Task Planning Report is the same as Monitoring View.
+- The flow chart is described in a business user sense and might use more business-friendly terms.
 
 ```mermaid
 graph TD
   welcome["Welcome"]
   login["Login"]
   signup["Signup"]
-  main["Main"]
+  base["Base"]
   createTask["Create Task"]
   editTask["Edit Task"]
-  monitoring["Task Planning Report"]
+  monitoring["Monitoring"]
 
   welcome --> signup
   signup --> login
 
   welcome --> login
-  login --> main
-  main --> welcome
+  login --> base
+  base --> welcome
 
-  main --> createTask
-  createTask --> main
+  base --> createTask
+  createTask --> base
 
-  main --> editTask
-  editTask --> main
+  base --> editTask
+  editTask --> base
 
-  main --> monitoring
-  monitoring --> main
+  base --> monitoring
+  monitoring --> base
 ```
