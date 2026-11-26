@@ -117,8 +117,8 @@ public class Main {
         Pictogram water =
                 new Pictogram(1, "water", "water.png");
 
-        Pictogram apple =
-                new Pictogram(2, "apple", "apple.png");
+        Pictogram mom =
+                new Pictogram(2, "mom", "mom.png");
 
         Pictogram food =
                 new Pictogram(3, "food", "food.png");
@@ -133,7 +133,7 @@ public class Main {
                 new Pictogram(6, "sleep", "sleep.png");
 
         board.addPictogram(water);
-        board.addPictogram(apple);
+        board.addPictogram(mom);
         board.addPictogram(food);
         board.addPictogram(play);
         board.addPictogram(toilet);
@@ -146,8 +146,8 @@ public class Main {
 
         profile.addMessage(
                 new CommunicationMessage(
-                        List.of(apple),
-                        "I want apple.",
+                        List.of(mom),
+                        "I want mom.",
                         now.minusDays(1)
                                 .withHour(15)
                                 .withMinute(20)));
