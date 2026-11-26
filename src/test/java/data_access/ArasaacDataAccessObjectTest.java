@@ -2,8 +2,11 @@ package data_access;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import entity.Pictogram;
+import entity.WordType;
 import org.junit.jupiter.api.Test;
 import use_case.customize_board.PictogramSearchException;
+import entity.CommunicationBoard;
+import entity.LinkedVocabulary;
 
 import java.io.IOException;
 import java.net.URI;
@@ -17,6 +20,7 @@ import javax.net.ssl.SSLSession;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class ArasaacDataAccessObjectTest {
@@ -116,6 +120,93 @@ class ArasaacDataAccessObjectTest {
         assertThrows(
                 PictogramSearchException.class,
                 () -> dataAccess.searchPictograms("water"));
+    }
+
+    @Test
+    void mapsArasaacKeywordTypesToWordTypes() throws Exception {
+        String json = "["
+                + "{\"_id\":1,\"keywords\":[{\"keyword\":\"play\",\"type\":3}]},"
+                + "{\"_id\":2,\"keywords\":[{\"keyword\":\"ball\",\"type\":2}]},"
+                + "{\"_id\":3,\"keywords\":["
+                + "{\"keyword\":\"drink\",\"type\":3},"
+                + "{\"keyword\":\"water\",\"type\":2}]}"
+                + "]";
+
+        ArasaacDataAccessObject dataAccess =
+                new ArasaacDataAccessObject(
+                        request -> response(200, json),
+                        new ObjectMapper());
+
+        Pictogram play = dataAccess.searchPictograms("play").stream()
+                .filter(pictogram -> "play".equals(pictogram.getLabel()))
+                .findFirst()
+                .orElseThrow();
+        Pictogram ball = dataAccess.searchPictograms("ball").stream()
+                .filter(pictogram -> "ball".equals(pictogram.getLabel()))
+                .findFirst()
+                .orElseThrow();
+        Pictogram water = dataAccess.searchPictograms("water").stream()
+                .filter(pictogram -> "water".equals(pictogram.getLabel()))
+                .findFirst()
+                .orElseThrow();
+
+        assertEquals(WordType.ACTION, play.getType());
+        assertEquals(WordType.THING, ball.getType());
+        assertEquals(WordType.THING, water.getType());
+    }
+
+    @Test
+    void labelAndTypeComeFromTheSameKeywordWhenTypeIsMissing() throws Exception {
+        // "ball" (the search term) has no type; another keyword is a verb.
+        // The result must not borrow the verb's type.
+        String json = "[{\"_id\":4,\"keywords\":["
+                + "{\"keyword\":\"throw\",\"type\":3},"
+                + "{\"keyword\":\"ball\"}]}]";
+        ArasaacDataAccessObject dataAccess =
+                new ArasaacDataAccessObject(request -> response(200, json), new ObjectMapper());
+
+        Pictogram ball = dataAccess.searchPictograms("ball").get(0);
+
+        assertEquals("ball", ball.getLabel());
+        assertEquals(WordType.THING, ball.getType());
+    }
+
+    @Test
+    void fallbackKeywordWithoutTypeIsAThing() throws Exception {
+        // No keyword matches the search term, and the first keyword (used as the label)
+        // has no type, even though a later keyword is a verb.
+        String json = "[{\"_id\":5,\"keywords\":["
+                + "{\"keyword\":\"teddy bear\"},"
+                + "{\"keyword\":\"hug\",\"type\":3}]}]";
+        ArasaacDataAccessObject dataAccess =
+                new ArasaacDataAccessObject(request -> response(200, json), new ObjectMapper());
+
+        Pictogram result = dataAccess.searchPictograms("toy").get(0);
+
+        assertEquals("teddy bear", result.getLabel());
+        assertEquals(WordType.THING, result.getType());
+    }
+
+    @Test
+    void searchResultsCanBeUsedOnTheLinkedBoard() throws Exception {
+        String playJson = "[{\"_id\":1,\"keywords\":[{\"keyword\":\"play\",\"type\":3}]}]";
+        String ballJson = "[{\"_id\":2,\"keywords\":[{\"keyword\":\"ball\",\"type\":2}]}]";
+        ArasaacDataAccessObject playSearch =
+                new ArasaacDataAccessObject(request -> response(200, playJson), new ObjectMapper());
+        ArasaacDataAccessObject ballSearch =
+                new ArasaacDataAccessObject(request -> response(200, ballJson), new ObjectMapper());
+
+        Pictogram play = playSearch.searchPictograms("play").get(0);
+        Pictogram ball = ballSearch.searchPictograms("ball").get(0);
+
+        // A verb from ARASAAC can go on the board, and a noun can be linked to it.
+        CommunicationBoard board = new CommunicationBoard();
+        LinkedVocabulary links = new LinkedVocabulary();
+        board.addPictogram(play);
+        links.link(play, ball);
+
+        assertTrue(board.contains(play));
+        assertEquals(List.of(ball), links.getThings(play));
     }
 
     private static HttpResponse<String> response(int status, String body) {

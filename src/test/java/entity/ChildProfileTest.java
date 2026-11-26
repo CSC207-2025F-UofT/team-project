@@ -68,6 +68,21 @@ class ChildProfileTest {
     }
 
     @Test
+    void newProfileHasNoLinks() {
+        assertTrue(new ChildProfile().getLinks().getLinkedActions().isEmpty());
+    }
+
+    @Test
+    void linkChangesAreKeptInProfile() {
+        Pictogram play = new Pictogram(20, "play", "play.png", WordType.ACTION);
+        Pictogram ball = new Pictogram(21, "ball", "ball.png", WordType.THING);
+
+        profile.getLinks().link(play, ball);
+
+        assertEquals(List.of(ball), profile.getLinks().getThings(play));
+    }
+
+    @Test
     void cannotAddNullMessage() {
         assertThrows(NullPointerException.class,
                 () -> profile.addMessage(null));

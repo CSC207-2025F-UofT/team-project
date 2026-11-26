@@ -3,6 +3,7 @@ package data_access;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import entity.Pictogram;
+import entity.WordType;
 import use_case.customize_board.PictogramSearchDataAccessInterface;
 import use_case.customize_board.PictogramSearchException;
 
@@ -99,27 +100,35 @@ public final class ArasaacDataAccessObject implements PictogramSearchDataAccessI
                 continue;
             }
 
-            String label = findLabel(result, searchKeyword);
-            if (label == null) {
+            // Label and type always come from the same keyword entry,
+            // so a noun cannot get the type of a different (verb) keyword.
+            JsonNode keyword = chooseKeyword(result, searchKeyword);
+            if (keyword == null) {
                 continue;
             }
+            String label = keyword.get("keyword").asText().trim();
+            WordType type = wordTypeOf(keyword);
 
             int id = idNode.asInt();
             // Store the URL for the UI to load later; do not request the image here.
             String imageLocation = String.format(
                     IMAGE_URL_TEMPLATE, id, id);
-            pictograms.add(new Pictogram(id, label, imageLocation));
+            pictograms.add(new Pictogram(id, label, imageLocation, type));
         }
         return List.copyOf(pictograms);
     }
 
-    private String findLabel(JsonNode result, String searchKeyword) {
+    /**
+     * Returns the keyword entry used for this result: the one that matches the
+     * search term, otherwise the first keyword with text, or null if there is none.
+     */
+    private JsonNode chooseKeyword(JsonNode result, String searchKeyword) {
         JsonNode keywords = result.get("keywords");
         if (keywords == null || !keywords.isArray()) {
             return null;
         }
 
-        String firstNonBlankKeyword = null;
+        JsonNode firstNonBlankKeyword = null;
         for (JsonNode keyword : keywords) {
             JsonNode keywordNode = keyword.get("keyword");
             if (keywordNode == null || !keywordNode.isTextual()
@@ -127,18 +136,39 @@ public final class ArasaacDataAccessObject implements PictogramSearchDataAccessI
                 continue;
             }
 
-            String candidate = keywordNode.asText().trim();
-            if (candidate.equalsIgnoreCase(searchKeyword)) {
-                return candidate;
+            if (keywordNode.asText().trim().equalsIgnoreCase(searchKeyword)) {
+                return keyword;
             }
             if (firstNonBlankKeyword == null) {
-                firstNonBlankKeyword = candidate;
+                firstNonBlankKeyword = keyword;
             }
         }
 
-        // Phase 1 fallback: if ARASAAC has no exact search-term keyword, use its
+        // Fallback: if ARASAAC has no exact search-term keyword, use its
         // first non-blank keyword; ARASAAC's keyword order is not a semantic guarantee.
         return firstNonBlankKeyword;
+    }
+
+    /**
+     * The word type of one keyword entry. If that keyword has no type metadata,
+     * it is treated as a THING (we never borrow the type of another keyword).
+     */
+    private WordType wordTypeOf(JsonNode keyword) {
+        JsonNode typeNode = keyword.get("type");
+        if (typeNode == null || !typeNode.isIntegralNumber()) {
+            return WordType.THING;
+        }
+        return wordTypeFromArasaacType(typeNode.asInt());
+    }
+
+    private WordType wordTypeFromArasaacType(int arasaacType) {
+        if (arasaacType == 3) {
+            return WordType.ACTION;
+        }
+        if (arasaacType == 2) {
+            return WordType.THING;
+        }
+        return WordType.THING;
     }
 
     private static HttpRequestExecutor createHttpRequestExecutor() {

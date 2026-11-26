@@ -3,6 +3,7 @@ package data_access;
 import entity.ChildProfile;
 import entity.CommunicationBoard;
 import entity.CommunicationMessage;
+import entity.LinkedVocabulary;
 import use_case.communicate_request.CommunicateRequestDataAccessInterface;
 import use_case.core_message.CoreMessageDataAccessInterface;
 import use_case.customize_board.CustomizeBoardDataAccessInterface;
@@ -35,8 +36,11 @@ public class InMemoryProfileDataAccessObject implements
     @Override
     public void saveBoard(CommunicationBoard board) {
         Objects.requireNonNull(board, "board cannot be null");
-        // Keep the history and replace the board, so a different board is really saved.
-        profile = new ChildProfile(board, profile.getHistory());
+        // Actions that were removed from the board lose their links too.
+        LinkedVocabulary links = profile.getLinks();
+        links.removeLinksNotOn(board);
+        // Keep the links and history and replace the board, so a different board is really saved.
+        profile = new ChildProfile(board, links, profile.getHistory());
     }
 
     @Override

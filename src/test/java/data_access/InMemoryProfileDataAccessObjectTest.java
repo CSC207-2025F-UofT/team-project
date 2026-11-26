@@ -3,6 +3,7 @@ package data_access;
 import entity.ChildProfile;
 import entity.CommunicationMessage;
 import entity.Pictogram;
+import entity.WordType;
 import org.junit.jupiter.api.Test;
 import entity.CommunicationBoard;
 
@@ -42,6 +43,28 @@ class InMemoryProfileDataAccessObjectTest {
 
         assertSame(newBoard, dataAccess.getBoard());
         assertEquals(List.of(message), dataAccess.getHistory());
+    }
+
+    @Test
+    void savingABoardWithoutAnActionRemovesItsLinks() {
+        Pictogram play = new Pictogram(5, "play", "play.png", WordType.ACTION);
+        Pictogram eat = new Pictogram(6, "eat", "eat.png", WordType.ACTION);
+        Pictogram ball = new Pictogram(7, "ball", "ball.png", WordType.THING);
+        Pictogram apple = new Pictogram(8, "apple", "apple.png", WordType.THING);
+        ChildProfile profile = new ChildProfile();
+        profile.getBoard().addPictogram(play);
+        profile.getBoard().addPictogram(eat);
+        profile.getLinks().link(play, ball);
+        profile.getLinks().link(eat, apple);
+        InMemoryProfileDataAccessObject dataAccess = new InMemoryProfileDataAccessObject(profile);
+
+        // The caregiver removes "play" from the board.
+        CommunicationBoard newBoard = new CommunicationBoard();
+        newBoard.addPictogram(eat);
+        dataAccess.saveBoard(newBoard);
+
+        assertFalse(profile.getLinks().hasThings(play));
+        assertEquals(List.of(apple), profile.getLinks().getThings(eat));
     }
 
     @Test

@@ -10,8 +10,17 @@ public final class Pictogram {
     private final int id;
     private final String label;
     private final String imageLocation;
+    private final WordType type;
 
+    /**
+     * Creates a pictogram for a thing (noun).
+     * Kept so existing code keeps working; prefer the constructor with a type.
+     */
     public Pictogram(int id, String label, String imageLocation) {
+        this(id, label, imageLocation, WordType.THING);
+    }
+
+    public Pictogram(int id, String label, String imageLocation, WordType type) {
         if (label == null || label.isBlank()) {
             throw new IllegalArgumentException("label cannot be blank");
         }
@@ -22,6 +31,7 @@ public final class Pictogram {
         this.id = id;
         this.label = label;
         this.imageLocation = imageLocation;
+        this.type = Objects.requireNonNull(type, "type cannot be null");
     }
 
     public int getId() {
@@ -36,6 +46,18 @@ public final class Pictogram {
         return imageLocation;
     }
 
+    public WordType getType() {
+        return type;
+    }
+
+    public boolean isAction() {
+        return type == WordType.ACTION;
+    }
+
+    public boolean isThing() {
+        return type == WordType.THING;
+    }
+
     @Override
     public boolean equals(Object other) {
         if (this == other) {
@@ -48,6 +70,7 @@ public final class Pictogram {
         return id == pictogram.id;
     }
 
+    /** Must match equals(): pictograms with the same id have the same hash code. */
     @Override
     public int hashCode() {
         return Objects.hash(id);
