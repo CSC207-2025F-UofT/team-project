@@ -1,4 +1,5 @@
-     'https://plantuml.com/class-diagram
+@startuml
+'https://plantuml.com/class-diagram
 ' `..|>` represents Interface Realization/Implementation (dashed line with an open arrow).
 ' `--|>` represents Inheritance/Generalization (solid line with an open arrow).
 ' `o-->` represents Aggregation (a hollow diamond pointing to the owner/container).
