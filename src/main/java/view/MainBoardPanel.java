@@ -1,59 +1,158 @@
 package view;
 
-import javax.swing.*;
-import java.awt.*;
+import interface_adapter.communicate_request.CommunicateRequestController;
+import interface_adapter.communicate_request.CommunicateRequestState;
+import interface_adapter.communicate_request.CommunicateRequestViewModel;
 
+import javax.swing.BorderFactory;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JTextField;
+import java.awt.BorderLayout;
+import java.awt.GridLayout;
+
+/**
+ * Child-facing communication board.
+ */
 public class MainBoardPanel extends JPanel {
-    private final JTextField messageBar = new JTextField();
 
-    public MainBoardPanel(Navigator nav) {
+    private final Navigator navigator;
+    private final CommunicateRequestController controller;
+    private final CommunicateRequestViewModel viewModel;
+
+    private final JTextField messageBar = new JTextField();
+    private final JPanel pictogramGrid =
+            new JPanel(new GridLayout(2, 3, 8, 8));
+
+    private final JButton deleteButton = new JButton("Delete");
+    private final JButton clearButton = new JButton("Clear");
+    private final JButton speakButton = new JButton("Speak");
+
+    public MainBoardPanel(
+            Navigator navigator,
+            CommunicateRequestController controller,
+            CommunicateRequestViewModel viewModel) {
+
+        this.navigator = navigator;
+        this.controller = controller;
+        this.viewModel = viewModel;
+
+        buildUi();
+
+        viewModel.addPropertyChangeListener(
+                event -> render(viewModel.getState()));
+
+        controller.loadBoard();
+    }
+
+    private void buildUi() {
         setLayout(new BorderLayout(8, 8));
         setBorder(BorderFactory.createEmptyBorder(8, 8, 8, 8));
 
-        // top right: acorn opens caregiver mode
-        ImageIcon icon = Icons.acorn(40);
-        JButton acorn = new JButton(icon);
-        if (icon == null) {
-            acorn.setText("Caregiver");
-        }
-        acorn.addActionListener(e -> nav.show(ScreenNames.PIN));
-        JPanel top = new JPanel(new BorderLayout());
-        top.add(acorn, BorderLayout.EAST);
+        add(buildTopPanel(), BorderLayout.NORTH);
+        add(buildCentrePanel(), BorderLayout.CENTER);
+        add(buildCoreMessagePanel(), BorderLayout.SOUTH);
+    }
 
-        // message bar
+    private JPanel buildTopPanel() {
+        ImageIcon icon = Icons.acorn(40);
+        JButton caregiverButton = new JButton(icon);
+
+        if (icon == null) {
+            caregiverButton.setText("Caregiver");
+        }
+
+        caregiverButton.addActionListener(event -> {
+            controller.clearDraft();
+            navigator.show(ScreenNames.PIN);
+        });
+
+        JPanel top = new JPanel(new BorderLayout());
+        top.add(caregiverButton, BorderLayout.EAST);
+
+        return top;
+    }
+
+    private JPanel buildCentrePanel() {
         messageBar.setEditable(false);
         messageBar.setFont(messageBar.getFont().deriveFont(20f));
-        JPanel messageBlock = new JPanel(new BorderLayout());
+
+        JPanel messageBlock = new JPanel(new BorderLayout(8, 8));
         messageBlock.add(new JLabel("My message"), BorderLayout.NORTH);
         messageBlock.add(messageBar, BorderLayout.CENTER);
 
-        // pictogram grid (placeholder text buttons)
-        JPanel grid = new JPanel(new GridLayout(2, 3, 8, 8));
-        for (String label : new String[]{"Water", "Food", "Play", "Toilet", "Sleep", "More"}) {
-            JButton b = new JButton(label);
-            b.addActionListener(e -> messageBar.setText(messageBar.getText() + label + " "));
-            grid.add(b);
-        }
+        JPanel editButtons = new JPanel(new GridLayout(1, 2, 8, 8));
 
-        JButton speak = new JButton("Speak");
-        speak.addActionListener(e -> System.out.println("TODO speak: " + messageBar.getText()));
+        deleteButton.addActionListener(
+                event -> controller.removeLastSelection());
+
+        clearButton.addActionListener(
+                event -> controller.clearDraft());
+
+        editButtons.add(deleteButton);
+        editButtons.add(clearButton);
+
+        JPanel messageArea = new JPanel(new BorderLayout(8, 8));
+        messageArea.add(messageBlock, BorderLayout.CENTER);
+        messageArea.add(editButtons, BorderLayout.SOUTH);
+
+        // UC3 will replace this placeholder listener.
+        speakButton.addActionListener(
+                event -> System.out.println(
+                        "TODO UC3: speak completed message"));
 
         JPanel centre = new JPanel(new BorderLayout(8, 8));
-        centre.add(messageBlock, BorderLayout.NORTH);
-        centre.add(grid, BorderLayout.CENTER);
-        centre.add(speak, BorderLayout.SOUTH);
+        centre.add(messageArea, BorderLayout.NORTH);
+        centre.add(pictogramGrid, BorderLayout.CENTER);
+        centre.add(speakButton, BorderLayout.SOUTH);
 
-        // bottom: Help / Stop / Break show in the message bar
+        return centre;
+    }
+
+    private JPanel buildCoreMessagePanel() {
         JPanel bottom = new JPanel(new GridLayout(1, 3, 8, 8));
-        for (String s : new String[]{"Help", "Stop", "Break"}) {
-            JButton b = new JButton(s);
-            // TODO core message use case: build and save the message
-            b.addActionListener(e -> messageBar.setText(s));
-            bottom.add(b);
+
+        for (String label : new String[]{"Help", "Stop", "Break"}) {
+            JButton button = new JButton(label);
+
+            // TODO
+            button.addActionListener(
+                    event -> System.out.println(
+                            "TODO core message: " + label));
+
+            bottom.add(button);
         }
 
-        add(top, BorderLayout.NORTH);
-        add(centre, BorderLayout.CENTER);
-        add(bottom, BorderLayout.SOUTH);
+        return bottom;
+    }
+
+    private void render(CommunicateRequestState state) {
+        messageBar.setText(state.getPreviewText());
+
+        pictogramGrid.removeAll();
+
+        for (CommunicateRequestState.PictogramItem item
+                : state.getPictograms()) {
+
+            JButton button = new JButton(item.getLabel());
+
+            button.addActionListener(
+                    event -> controller.selectPictogram(item.getId()));
+
+            pictogramGrid.add(button);
+        }
+
+        deleteButton.setEnabled(state.hasSelection());
+        clearButton.setEnabled(state.hasSelection());
+        speakButton.setEnabled(state.hasSelection());
+
+        pictogramGrid.revalidate();
+        pictogramGrid.repaint();
+
+        if (state.getErrorMessage() != null) {
+            System.err.println(state.getErrorMessage());
+        }
     }
 }
