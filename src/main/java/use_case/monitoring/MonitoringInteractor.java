@@ -7,47 +7,100 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
-public class MonitoringInteractor {
+public class MonitoringInteractor implements MonitoringInputBoundary {
 
+    private final MonitoringDataAccessInterface monitoringDataAccessObject;
     private final HolidayService holidayService;
+    private final MonitoringOutputBoundary monitoringPresenter;
 
-    public MonitoringInteractor(HolidayService holidayService) {
+    public MonitoringInteractor(MonitoringDataAccessInterface monitoringDataAccessObject,
+                                HolidayService holidayService, MonitoringOutputBoundary monitoringPresenter) {
+        this.monitoringDataAccessObject = monitoringDataAccessObject;
         this.holidayService = holidayService;
+        this.monitoringPresenter = monitoringPresenter;
     }
 
-    public List<StudentTask> getTasksForMonitoring(List<StudentTask> tasks, String countryCode) {
+    @Override
+    public void execute(MonitoringInputData inputData) {
+        int uniqueUserId = inputData.getUniqueUserId();
+
+        List<StudentTask> tasks = monitoringDataAccessObject.getTasksByUserId(uniqueUserId);
+
+        String countryCode = monitoringDataAccessObject.getCountryCodeByUserId(uniqueUserId);
+
+        if (countryCode == null || countryCode.isBlank()) {
+            monitoringPresenter.prepareFailView("Country code not found.");
+            return;
+        }
+
         LocalDate today = LocalDate.now();
 
-        Comparator<StudentTask> byDeadlineThenTitle = new Comparator<StudentTask>() {
+        Comparator<StudentTask> sortByDeadlineThenTitle =
+                new Comparator<StudentTask>() {
+                    @Override
+                    public int compare(StudentTask first, StudentTask second) {
+                        int deadlineComparison = first.getDeadline().compareTo(second.getDeadline());
 
-            @Override
-            public int compare(StudentTask first, StudentTask second) {
-                int deadlineComparison = first.getDeadline().compareTo(second.getDeadline());
+                        if (deadlineComparison != 0) {
+                            return deadlineComparison;
+                        }
 
-                if (deadlineComparison != 0) {
-                    return deadlineComparison;
-                }
+                        return first.getTitle().compareToIgnoreCase(second.getTitle());
+                    }
+                };
 
-                return first.getTitle().compareToIgnoreCase(second.getTitle());
+        List<StudentTask> incompleteTasks = new ArrayList<>();
+
+        for (StudentTask task : tasks) {
+            if (task.getCompletionProgress() < 100) {
+                incompleteTasks.add(task);
             }
-        };
+        }
 
-        List<StudentTask> incomplete = tasks.stream().filter(task -> task.getCompletionProgress() < 100).collect(Collectors.toList());
+        List<StudentTask> overdueTasks = new ArrayList<>();
+        List<StudentTask> upcomingTasks = new ArrayList<>();
 
-        List<StudentTask> overdue = incomplete.stream().filter(task -> !task.getDeadline().isAfter(today)).sorted(byDeadlineThenTitle).collect(Collectors.toList());
+        for (StudentTask task : incompleteTasks) {
+            boolean overdue = !task.getDeadline().isAfter(today);
 
-        List<StudentTask> upcoming = incomplete.stream().filter(task -> task.getDeadline().isAfter(today)).sorted(byDeadlineThenTitle).collect(Collectors.toList());
+            if (overdue) {
+                overdueTasks.add(task);
+            } else {
+                upcomingTasks.add(task);
+            }
+        }
 
-        List<StudentTask> result = new ArrayList<>();
-        result.addAll(overdue);
-        result.addAll(upcoming);
+        overdueTasks.sort(sortByDeadlineThenTitle);
+        upcomingTasks.sort(sortByDeadlineThenTitle);
 
-        return result;
-    }
+        List<StudentTask> sortedTasks = new ArrayList<>();
+        sortedTasks.addAll(overdueTasks);
+        sortedTasks.addAll(upcomingTasks);
 
-    public Optional<String> getHolidayWarning(StudentTask task, String countryCode) {
-        return holidayService.getHolidayName(task.getDeadline(), countryCode);
+        List<MonitoringOutputData.MonitoringTaskData> outputTasks = new ArrayList<>();
+
+        for (StudentTask task : sortedTasks) {
+            boolean overdue = !task.getDeadline().isAfter(today);
+
+            Optional<String> holidayName = holidayService.getHolidayName(task.getDeadline(), countryCode);
+
+            MonitoringOutputData.MonitoringTaskData taskData = new MonitoringOutputData.MonitoringTaskData(
+                    task.getUniqueTaskId(), task.getTitle(), task.getDeadline(), task.getCompletionProgress(),
+                    task.getDifficultyLevel().toString(), overdue, holidayName);
+
+            outputTasks.add(taskData);
+        }
+
+        MonitoringOutputData outputData = new MonitoringOutputData(outputTasks);
+
+        monitoringPresenter.prepareSuccessView(outputData);
     }
 }
+
+
+
+
+
+
+

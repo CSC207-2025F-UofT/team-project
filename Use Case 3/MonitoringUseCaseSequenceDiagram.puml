@@ -1,0 +1,49 @@
+@startuml
+title Story 3 — Monitor incomplete tasks and holiday warnings
+hide footbox
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+
+actor Student as User
+boundary "MonitoringView" as View
+control "MonitoringController" as Controller
+control "MonitoringInteractor" as Interactor
+participant "Monitoring DAO" as DAO
+participant "HolidayService\n(NagerDateHolidayService)" as Holiday
+control "MonitoringPresenter" as Presenter
+participant "MonitoringViewModel" as VM
+
+User -> View : Open Monitoring page
+View -> Controller : Request monitoring data
+Controller -> Controller : Create MonitoringInputData(userId)
+Controller -> Interactor : execute(inputData)
+
+Interactor -> DAO : getTasksByUserId(userId)
+DAO --> Interactor : List<StudentTask>
+
+Interactor -> DAO : getCountryCodeByUserId(userId)
+DAO --> Interactor : countryCode
+
+alt Country code missing
+    Interactor -> Presenter : prepareFailView("Country code not found.")
+    Presenter -> VM : Set error message
+    VM -> View : Notify state change
+    View --> User : Show error message
+else Country code found
+    Interactor -> Interactor : Remove 100% complete tasks
+    Interactor -> Interactor : Divide into overdue and upcoming tasks
+    Interactor -> Interactor : Sort by deadline, then title
+
+    loop For each displayed task
+        Interactor -> Holiday : getHolidayName(deadline, countryCode)
+        Holiday --> Interactor : Optional<String> holidayName
+    end
+
+    Interactor -> Interactor : Create MonitoringOutputData
+    Interactor -> Presenter : prepareSuccessView(outputData)
+    Presenter -> VM : Set task rows and warnings
+    VM -> View : Notify state change
+    View --> User : Show overdue tasks first,\nthen upcoming tasks
+end
+
+@enduml
