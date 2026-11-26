@@ -6,8 +6,6 @@ import java.util.List;
 public class ClickViewModel {
     private final List<ClickViewModelListener> listeners = new ArrayList<>();
 
-    public static final String CLICK_NAME = "click";
-
     private ClickState state = new ClickState();
 
     public ClickState getState() {

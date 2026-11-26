@@ -15,4 +15,11 @@ public interface FavouriteDataAccessInterface {
      * @return the user with the given userId
      */
     User get(String userId);
+
+    /**
+     * Checks if the given cocktailId exists.
+     * @param cocktailId the cocktailId to look for
+     * @return true if a user with the given cocktailId exists; false otherwise
+     */
+    boolean existsByID(String cocktailId);
 }

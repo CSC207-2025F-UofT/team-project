@@ -35,12 +35,16 @@ public class ClickView extends JPanel implements ClickViewModelListener {
         instructionsArea.setWrapStyleWord(true);
         instructionsArea.getAccessibleContext().setAccessibleName("Instructions");
 
+        JPanel ingredientsPanel = new JPanel(new BorderLayout(5, 5));
+        ingredientsPanel.add(new JLabel("Ingredients:"), BorderLayout.NORTH);
+        ingredientsPanel.add(new JScrollPane(ingredientsArea), BorderLayout.CENTER);
+
         JPanel instructionsPanel = new JPanel(new BorderLayout(5, 5));
         instructionsPanel.add(new JLabel("Instructions:"), BorderLayout.NORTH);
         instructionsPanel.add(new JScrollPane(instructionsArea), BorderLayout.CENTER);
         JSplitPane details = new JSplitPane(
                 JSplitPane.VERTICAL_SPLIT,
-                new JScrollPane(ingredientsArea),
+                ingredientsPanel,
                 instructionsPanel
         );
         details.setResizeWeight(0.6);

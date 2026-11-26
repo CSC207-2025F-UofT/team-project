@@ -11,4 +11,5 @@ public class FavouriteOutputData {
     public boolean getIsFavourite() {
         return isFavourite;
     }
+
 }

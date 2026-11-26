@@ -9,7 +9,7 @@ public class InMemoryUserDataAccessObjectTest {
     @Test
     void testValidCredentials() {
         InMemoryUserDataAccessObject dao =
-                new InMemoryUserDataAccessObject();
+                new InMemoryUserDataAccessObject(new CocktailJsonReader());
 
         dao.createUser("alice", "password123");
 
@@ -20,7 +20,7 @@ public class InMemoryUserDataAccessObjectTest {
     @Test
     void testIncorrectPassword() {
         InMemoryUserDataAccessObject dao =
-                new InMemoryUserDataAccessObject();
+                new InMemoryUserDataAccessObject(new CocktailJsonReader());
 
         dao.createUser("alice", "password123");
 
@@ -30,7 +30,7 @@ public class InMemoryUserDataAccessObjectTest {
     @Test
     void testUnknownUser() {
         InMemoryUserDataAccessObject dao =
-                new InMemoryUserDataAccessObject();
+                new InMemoryUserDataAccessObject(new CocktailJsonReader());
 
         assertFalse(dao.validateCredentials("unknown", "password123"));
     }

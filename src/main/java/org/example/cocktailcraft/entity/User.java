@@ -33,4 +33,6 @@ public class User {
         }
     }
 
+    public boolean isFavourite(String cocktailId){return favourite.contains(cocktailId);}
+
 }

@@ -1,10 +1,12 @@
 package org.example.cocktailcraft.view.browse;
 
 import org.example.cocktailcraft.entity.Cocktail;
+import org.example.cocktailcraft.entity.User;
 import org.example.cocktailcraft.interface_adapter.click.ClickController;
 import org.example.cocktailcraft.interface_adapter.search.SearchState;
 import org.example.cocktailcraft.interface_adapter.search.SearchViewModel;
 import org.example.cocktailcraft.view.click.ClickView;
+import org.example.cocktailcraft.view.favourite.FavouriteView;
 import org.example.cocktailcraft.view.search.SearchView;
 import java.util.function.Consumer;
 
@@ -25,18 +27,12 @@ public class MainPageView extends JPanel {
     private final JButton customizeButton = new JButton("Customize");
 
     public MainPageView(SearchView search, List<Cocktail> cocktails,
-                        ClickController clickController, ClickView clickView) {
-        this(search, cocktails, clickController, clickView, null);
-    }
-
-    public MainPageView(SearchView search, List<Cocktail> cocktails,
-                        ClickController clickController, ClickView clickView,
-                        SearchViewModel searchViewModel) {
+                        ClickController clickController, ClickView clickView,SearchViewModel searchViewModel,
+                        User user, FavouriteView favouriteView) {
         super(new BorderLayout(12, 12));
         displayedCocktails = List.copyOf(cocktails);
         setBorder(BorderFactory.createEmptyBorder(12, 12, 12, 12));
         JPanel header = new JPanel(new BorderLayout());
-        header.add(new JLabel("CocktailCraft"), BorderLayout.WEST);
         header.add(search, BorderLayout.CENTER);
         JButton profile = new JButton("Profile");
         profile.setEnabled(false);
@@ -67,6 +63,12 @@ public class MainPageView extends JPanel {
 
                 selectedCocktail = displayedCocktails.get(index);
                 customizeButton.setEnabled(true);
+                selectedCocktail = cocktails.get(index);
+                customizeButton.setEnabled(true);
+
+                favouriteView.setCurrentCocktail(user, selectedCocktail.getId());
+
+                clickController.execute(selectedCocktail.getId());
 
                 clickController.execute(selectedCocktail.getId());
             }
@@ -100,6 +102,7 @@ public class MainPageView extends JPanel {
 
         JPanel detailsPanel = new JPanel(new BorderLayout(10, 10));
         detailsPanel.add(clickView, BorderLayout.CENTER);
+        detailsPanel.add(favouriteView, BorderLayout.NORTH);
         detailsPanel.add(customizeButton, BorderLayout.SOUTH);
 
         JSplitPane splitPane = new JSplitPane(

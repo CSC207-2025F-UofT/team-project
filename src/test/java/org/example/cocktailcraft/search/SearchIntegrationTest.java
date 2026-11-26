@@ -3,8 +3,10 @@ package org.example.cocktailcraft.search;
 import org.example.cocktailcraft.app.AppBuilder;
 import org.example.cocktailcraft.entity.Cocktail;
 import org.example.cocktailcraft.entity.Tags;
+import org.example.cocktailcraft.entity.User;
 import org.example.cocktailcraft.interface_adapter.click.ClickController;
 import org.example.cocktailcraft.interface_adapter.click.ClickViewModel;
+import org.example.cocktailcraft.interface_adapter.favourite.FavouriteViewModel;
 import org.example.cocktailcraft.interface_adapter.search.SearchController;
 import org.example.cocktailcraft.interface_adapter.search.SearchPresenter;
 import org.example.cocktailcraft.interface_adapter.search.SearchViewModel;
@@ -12,6 +14,7 @@ import org.example.cocktailcraft.use_case.search.SearchDataAccessInterface;
 import org.example.cocktailcraft.use_case.search.SearchInteractor;
 import org.example.cocktailcraft.view.browse.MainPageView;
 import org.example.cocktailcraft.view.click.ClickView;
+import org.example.cocktailcraft.view.favourite.FavouriteView;
 import org.example.cocktailcraft.view.customize.CustomizeView;
 import org.example.cocktailcraft.view.search.SearchView;
 import org.junit.jupiter.api.Test;
@@ -359,7 +362,8 @@ class SearchIntegrationTest {
             } else {
                 model.getState().setResults(catalog);
             }
-            home = new MainPageView(search, catalog, details, new ClickView(new ClickViewModel()), model);
+            home = new MainPageView(search, catalog, details, new ClickView(new ClickViewModel()), model,
+                    new User("1", "Alice"), new FavouriteView(new FavouriteViewModel()));
         }
 
         JButton button(String label) {

@@ -1,11 +1,16 @@
 package org.example.cocktailcraft.app;
 
 import org.example.cocktailcraft.data_access.CocktailJsonReader;
+import org.example.cocktailcraft.data_access.InMemoryUserDataAccessObject;
 import org.example.cocktailcraft.data_access.SearchCocktailDataAccessObject;
 import org.example.cocktailcraft.entity.Cocktail;
+import org.example.cocktailcraft.entity.User;
 import org.example.cocktailcraft.interface_adapter.click.ClickController;
 import org.example.cocktailcraft.interface_adapter.click.ClickPresenter;
 import org.example.cocktailcraft.interface_adapter.click.ClickViewModel;
+import org.example.cocktailcraft.interface_adapter.favourite.FavouriteController;
+import org.example.cocktailcraft.interface_adapter.favourite.FavouritePresenter;
+import org.example.cocktailcraft.interface_adapter.favourite.FavouriteViewModel;
 import org.example.cocktailcraft.interface_adapter.search.SearchController;
 import org.example.cocktailcraft.interface_adapter.search.SearchPresenter;
 import org.example.cocktailcraft.interface_adapter.search.SearchViewModel;
@@ -13,12 +18,17 @@ import org.example.cocktailcraft.use_case.click.ClickDataAccessInterface;
 import org.example.cocktailcraft.use_case.click.ClickInputBoundary;
 import org.example.cocktailcraft.use_case.click.ClickInteractor;
 import org.example.cocktailcraft.use_case.click.ClickOutputBoundary;
+import org.example.cocktailcraft.use_case.favourite.FavouriteDataAccessInterface;
+import org.example.cocktailcraft.use_case.favourite.FavouriteInputBoundary;
+import org.example.cocktailcraft.use_case.favourite.FavouriteInteractor;
+import org.example.cocktailcraft.use_case.favourite.FavouriteOutputBoundary;
 import org.example.cocktailcraft.use_case.search.SearchDataAccessInterface;
 import org.example.cocktailcraft.use_case.search.SearchInputBoundary;
 import org.example.cocktailcraft.use_case.search.SearchInteractor;
 import org.example.cocktailcraft.use_case.search.SearchOutputBoundary;
 import org.example.cocktailcraft.view.browse.MainPageView;
 import org.example.cocktailcraft.view.click.ClickView;
+import org.example.cocktailcraft.view.favourite.FavouriteView;
 import org.example.cocktailcraft.view.search.SearchView;
 import org.example.cocktailcraft.data_access.FileCustomRecipeDataAccessObject;
 import org.example.cocktailcraft.interface_adapter.customize.CustomizeController;
@@ -36,6 +46,7 @@ import javax.swing.JPanel;
 import javax.swing.JFrame;
 
 public class AppBuilder {
+    private User user;
     private SearchViewModel searchViewModel;
     private SearchView searchView;
     private MainPageView mainPageView;
@@ -43,6 +54,9 @@ public class AppBuilder {
     private ClickViewModel clickViewModel;
     private ClickView clickView;
     private ClickController clickController;
+    private FavouriteViewModel favouriteViewModel;
+    private FavouriteView favouriteView;
+    private FavouriteController favouriteController;
     private CustomizeViewModel customizeViewModel;
     private CustomizeView customizeView;
 
@@ -90,12 +104,32 @@ public class AppBuilder {
         return this;
     }
 
+    public AppBuilder addFavouriteUseCase() {
+        favouriteViewModel = new FavouriteViewModel();
+        favouriteView = new FavouriteView(favouriteViewModel);
+
+        final FavouriteDataAccessInterface FavouriteDataAccessObject =
+                new InMemoryUserDataAccessObject(new CocktailJsonReader());
+
+        final FavouriteOutputBoundary FavouriteOutputBoundary =
+                new FavouritePresenter(favouriteViewModel);
+
+        final FavouriteInputBoundary FavouriteInteractor =
+                new FavouriteInteractor(FavouriteDataAccessObject, FavouriteOutputBoundary);
+
+        favouriteController = new FavouriteController(FavouriteInteractor);
+
+        return this;
+    }
+
     public AppBuilder addMainPageView() {
         mainPageView = new MainPageView(searchView,
                 cocktails,
                 clickController,
                 clickView,
-                searchViewModel);
+                searchViewModel,
+                user,
+                favouriteView);
         return this;
     }
 
