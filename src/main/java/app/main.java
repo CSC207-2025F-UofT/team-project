@@ -3,13 +3,12 @@ package app;
 import javax.swing.*;
 
 public class main {
-  public static void main(String[] args) {
-    AppBuilder appBuilder = new AppBuilder();
-    JFrame application = appBuilder
-        .build();
-
-    application.pack();
-    application.setLocationRelativeTo(null);
-    application.setVisible(true);
-  }
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(() -> {
+            JFrame application = new AppBuilder().build();
+            application.pack();
+            application.setLocationRelativeTo(null);
+            application.setVisible(true);
+        });
+    }
 }

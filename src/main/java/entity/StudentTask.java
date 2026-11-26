@@ -81,7 +81,7 @@ public class StudentTask extends Task {
 
     /** Past deadlines are allowed, but null deadlines are not. */
     public void setDeadline(LocalDate newDeadline) {
-        if (!fieldsValidation()) {
+        if (!fieldsValidation() || !inputValidation(this.getUniqueUserId(), newDeadline, this.estimatedHoursToCompleteTask, this.completionProgress)) {
             throw new IllegalStateException("The task has invalid fields.");
         }
         if (!inputValidation(newDeadline, estimatedHoursToCompleteTask, completionProgress)) {
@@ -97,8 +97,14 @@ public class StudentTask extends Task {
         }
     }
 
-    public void setEstimatedHoursToCompleteTask(double newEstimatedHours) {
-        if (!fieldsValidation()) {
+    /**
+     * Update the estimated hours to complete this task.
+     *
+     * @param newEstimatedHoursToCompleteTask is the new estimated hour. This is a double that must be finite and positive.
+     * @throws IllegalArgumentException if the new estimated hour is not finite or is not positive.
+     */
+    public void setEstimatedHoursToCompleteTask(double newEstimatedHoursToCompleteTask) {
+        if (!fieldsValidation() || !inputValidation(this.getUniqueUserId(), this.getDeadline(), newEstimatedHoursToCompleteTask, this.completionProgress)) {
             throw new IllegalStateException("The task has invalid fields.");
         }
         if (!inputValidation(deadline, newEstimatedHours, completionProgress)) {
@@ -115,7 +121,7 @@ public class StudentTask extends Task {
     }
 
     public void setCompletionProgress(byte newCompletionProgress) {
-        if (!fieldsValidation()) {
+        if (!fieldsValidation() || !inputValidation(this.getUniqueUserId(), this.getDeadline(), this.getEstimatedHoursToCompleteTask(), newCompletionProgress)) {
             throw new IllegalStateException("The task has invalid fields.");
         }
         if (!inputValidation(deadline, estimatedHoursToCompleteTask, newCompletionProgress)) {
