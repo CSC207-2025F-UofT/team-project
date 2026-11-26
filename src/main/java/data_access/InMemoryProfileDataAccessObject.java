@@ -35,8 +35,8 @@ public class InMemoryProfileDataAccessObject implements
     @Override
     public void saveBoard(CommunicationBoard board) {
         Objects.requireNonNull(board, "board cannot be null");
-        // Keep the history and replace the board, so a different board is really saved.
-        profile = new ChildProfile(board, profile.getHistory());
+        // Keep the links and history and replace the board, so a different board is really saved.
+        profile = new ChildProfile(board, profile.getLinks(), profile.getHistory());
     }
 
     @Override

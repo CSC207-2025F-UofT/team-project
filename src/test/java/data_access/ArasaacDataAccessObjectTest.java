@@ -6,6 +6,7 @@ import entity.WordType;
 import org.junit.jupiter.api.Test;
 import use_case.customize_board.PictogramSearchException;
 import entity.CommunicationBoard;
+import entity.LinkedVocabulary;
 
 import java.io.IOException;
 import java.net.URI;
@@ -166,13 +167,14 @@ class ArasaacDataAccessObjectTest {
         Pictogram play = playSearch.searchPictograms("play").get(0);
         Pictogram ball = ballSearch.searchPictograms("ball").get(0);
 
-        // A verb from ARASAAC can go on the main board, and a noun can be linked to it.
+        // A verb from ARASAAC can go on the board, and a noun can be linked to it.
         CommunicationBoard board = new CommunicationBoard();
-        board.addAction(play);
-        board.addThing(play, ball);
+        LinkedVocabulary links = new LinkedVocabulary();
+        board.addPictogram(play);
+        links.link(play, ball);
 
-        assertTrue(board.containsAction(play));
-        assertEquals(List.of(ball), board.getThings(play));
+        assertTrue(board.contains(play));
+        assertEquals(List.of(ball), links.getThings(play));
     }
 
     private static HttpResponse<String> response(int status, String body) {

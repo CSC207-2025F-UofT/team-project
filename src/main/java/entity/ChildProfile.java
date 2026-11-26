@@ -6,26 +6,34 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * All saved data for the child using this app:
- * their customized communication board and their communication history.
+ * All saved data for the child using this app: their communication board,
+ * the things linked to actions on it, and their communication history.
  */
 public final class ChildProfile {
 
     private final CommunicationBoard board;
+    private final LinkedVocabulary links;
     private final List<CommunicationMessage> history;
 
-    /**
-     * Creates a new profile with an empty board and no history.
-     */
     public ChildProfile() {
-        this(new CommunicationBoard(), new ArrayList<>());
+        this(new CommunicationBoard(), new LinkedVocabulary(), new ArrayList<>());
+    }
+
+    /**
+     * Creates a profile with no linked things, e.g. for older saved data.
+     */
+    public ChildProfile(CommunicationBoard board, List<CommunicationMessage> history) {
+        this(board, new LinkedVocabulary(), history);
     }
 
     /**
      * Creates a profile from existing data, e.g. when loading from storage.
      */
-    public ChildProfile(CommunicationBoard board, List<CommunicationMessage> history) {
+    public ChildProfile(CommunicationBoard board,
+                        LinkedVocabulary links,
+                        List<CommunicationMessage> history) {
         this.board = Objects.requireNonNull(board, "board cannot be null");
+        this.links = Objects.requireNonNull(links, "links cannot be null");
         this.history = new ArrayList<>(
                 Objects.requireNonNull(history, "history cannot be null"));
     }
@@ -50,5 +58,9 @@ public final class ChildProfile {
 
     public CommunicationBoard getBoard() {
         return board;
+    }
+
+    public LinkedVocabulary getLinks() {
+        return links;
     }
 }

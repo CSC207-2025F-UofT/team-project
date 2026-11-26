@@ -62,11 +62,24 @@ class ChildProfileTest {
 
     @Test
     void boardChangesAreKeptInProfile() {
-        Pictogram drink = new Pictogram(10, "drink", "drink.png", WordType.ACTION);
+        profile.getBoard().addPictogram(water);
 
-        profile.getBoard().addAction(drink);
+        assertTrue(profile.getBoard().contains(water));
+    }
 
-        assertTrue(profile.getBoard().containsAction(drink));
+    @Test
+    void newProfileHasNoLinks() {
+        assertTrue(new ChildProfile().getLinks().getLinkedActions().isEmpty());
+    }
+
+    @Test
+    void linkChangesAreKeptInProfile() {
+        Pictogram play = new Pictogram(20, "play", "play.png", WordType.ACTION);
+        Pictogram ball = new Pictogram(21, "ball", "ball.png", WordType.THING);
+
+        profile.getLinks().link(play, ball);
+
+        assertEquals(List.of(ball), profile.getLinks().getThings(play));
     }
 
     @Test
