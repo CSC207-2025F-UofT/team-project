@@ -7,12 +7,10 @@ import javax.swing.*;
 import java.awt.*;
 
 public class DropdownRenderer implements DashboardRenderer<DashboardStateCatalog.DropdownState> {
-    private final DashboardController dashboardController;
     private final DropdownEventHandler dropdownEventHandler;
 
     DropdownRenderer(DashboardController dashboardController) {
         super();
-        this.dashboardController = dashboardController;
         this.dropdownEventHandler = new DropdownEventHandler(dashboardController);
     }
 

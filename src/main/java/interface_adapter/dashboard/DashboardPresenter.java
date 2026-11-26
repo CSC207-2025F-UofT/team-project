@@ -7,6 +7,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Year;
 import java.time.YearMonth;
+import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -60,18 +61,26 @@ public class DashboardPresenter implements DashboardOutputBoundary {
         List<Integer> counts = new ArrayList<>();
 
         dateToCount.entrySet().stream()
-                .sorted(Comparator.comparing(Map.Entry::getKey))
+                .sorted(Map.Entry.comparingByKey())
                 .forEach(entry -> {
                     LocalDateTime date = entry.getKey();
                     x_vals.add(dateToIndex(date, grouping, earliest));
                     y_vals.add(entry.getValue());
-                    dates.add(date.toString());
+                    dates.add(formatDate(date, grouping));
                     counts.add(entry.getValue());
                 });
 
         DashboardStateCatalog.LinePlotState linePlotState = new DashboardStateCatalog.LinePlotState(x_vals, y_vals, dates, counts);
         DashboardStateCatalog.NestedState nestedState = new DashboardStateCatalog.NestedState(
                 List.of(
+                        new DashboardStateCatalog.DropdownState(
+                                "photo-activity",
+                                "Photo Activity By...",
+                                List.of(
+                                        "Year",
+                                        "Month"
+                                )
+                        ),
                         new DashboardStateCatalog.HeadingState("Your photo activity (counts) by " + resolveGroupingString(grouping), 15f),
                         linePlotState
                 )
@@ -80,6 +89,13 @@ public class DashboardPresenter implements DashboardOutputBoundary {
         state.addItemState(nestedState);
         dashboardViewModel.setState(state);
         dashboardViewModel.firePropertyChanged();
+    }
+
+    private String formatDate(LocalDateTime date, AnalyticsOptions.TimeGrouping timeGrouping) {
+        return switch (timeGrouping) {
+            case YEAR -> date.format(DateTimeFormatter.ofPattern("yyyy"));
+            case MONTH -> date.format(DateTimeFormatter.ofPattern("yyyy-MM"));
+        };
     }
 
     private int dateToIndex(LocalDateTime date, AnalyticsOptions.TimeGrouping timeGrouping, LocalDateTime start) {

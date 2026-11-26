@@ -3,6 +3,7 @@ package view.dashboard;
 import entity.LocationInfo;
 import entity.LocationInfoType;
 import interface_adapter.dashboard.DashboardController;
+import use_case.dashboard.AnalyticsOptions;
 
 import java.util.Map;
 import java.util.Optional;
@@ -20,7 +21,9 @@ public class DropdownEventHandler implements EventHandler<DropdownEventPacket> {
     @Override
     public void handleEvent(String actionId, DropdownEventPacket eventPacket) {
         switch (actionId) {
-            case "most-visited": handleMostVisited(eventPacket);
+            case "most-visited" -> handleMostVisited(eventPacket);
+            case "photo-activity" -> handlePhotoActivity(eventPacket);
+            default -> throw new UnsupportedOperationException("Unknown action id " + actionId);
         }
     }
     private void handleMostVisited(DropdownEventPacket eventPacket) {
@@ -32,5 +35,13 @@ public class DropdownEventHandler implements EventHandler<DropdownEventPacket> {
                 "Continent", LocationInfoType.CONTINENT
         );
         controller.requestMostVisitedAnalytics(Optional.of(typeMap.get(eventPacket.selected())));
+    }
+
+    private void handlePhotoActivity(DropdownEventPacket eventPacket) {
+        Map<String, AnalyticsOptions.TimeGrouping> groupingMap = Map.of(
+                "Year", AnalyticsOptions.TimeGrouping.YEAR,
+                "Month", AnalyticsOptions.TimeGrouping.MONTH
+        );
+        controller.requestPhotoActivityAnalytics(Optional.of(groupingMap.get(eventPacket.selected())));
     }
 }
