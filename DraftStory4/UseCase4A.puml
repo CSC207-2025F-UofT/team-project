@@ -11,7 +11,7 @@ participant "TurnOnMonitoringInputBoundary <<Interface>>" as turnOnMonitoringInp
 control "TurnOnMonitoringInteractor" as turnOnMonitoringInteractor
 participant "TurnOnMonitoringOutputBoundary <<Interface>>" as turnOnMonitoringOutputBoundary
 control "TurnOnMonitoringPresenter" as turnOnMonitoringPresenter
-participant "TurnOnMonitoringViewModel" as turnOnMonitoringViewModel
+participant "MonitoringViewModel" as monitoringViewModel
 participant "ViewModelManager" as viewModelManager
 boundary "MonitoringView<MonitoringState>" as monitoringView
 
@@ -24,10 +24,10 @@ ref over turnOnMonitoringInteractor: Use Case 3
 
 turnOnMonitoringInteractor -> turnOnMonitoringOutputBoundary: prepareMonitoringView(MonitoringOutputData)
 turnOnMonitoringOutputBoundary -> turnOnMonitoringPresenter: prepareMonitoringView(MonitoringOutputData)
-turnOnMonitoringPresenter -> turnOnMonitoringViewModel: setState(monitoringState)
-turnOnMonitoringPresenter <-- turnOnMonitoringViewModel
-turnOnMonitoringPresenter -> turnOnMonitoringViewModel: firePropertyChange()
-turnOnMonitoringViewModel -> monitoringView: propertyChange()
+turnOnMonitoringPresenter -> monitoringViewModel: setState(monitoringState)
+turnOnMonitoringPresenter <-- monitoringViewModel
+turnOnMonitoringPresenter -> monitoringViewModel: firePropertyChange()
+monitoringViewModel -> monitoringView: propertyChange()
 turnOnMonitoringPresenter <-- monitoringView
 turnOnMonitoringPresenter -> viewModelManager: changeView("Monitoring")
 viewModelManager -> monitoringView: switch("Monitoring")

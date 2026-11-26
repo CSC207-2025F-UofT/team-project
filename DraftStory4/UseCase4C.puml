@@ -1,0 +1,32 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+
+autonumber
+
+== "Log Off" ==
+actor "Human Student User" as humanStudentUser
+boundary "BaseView" as baseView
+control "LogOff" as logOffController
+participant "LogOffInputBoundary <<Interface>>" as logOffInputBoundary
+control "LogOffInteractor" as logOffInteractor
+participant "LogOffOutputBoundary <<Interface>>" as logOffOutputBoundary
+control "LogOffPresenter" as logOffPresenter
+participant "LogOffViewModel" as logOffViewModel
+participant "ViewModelManager" as viewModelManager
+boundary "WelcomeView<WelcomeState>" as welcomeView
+
+humanStudentUser -> baseView: Request to Log off
+baseView -> logOffController: execute(RawRequestLogOffInputData)
+logOffController -> logOffInputBoundary: execute(RequestLogOffInputData)
+logOffInputBoundary -> logOffInteractor: execute(RequestLogOffInputData)
+logOffInteractor -> logOffOutputBoundary: generateConfirmationPopUp(ConfirmationPopUpOutputData)
+logOffOutputBoundary -> logOffPresenter: generateConfirmationPopUp(ConfirmationPopUpOutputData)
+logOffPresenter -> turnOnMonitoringViewModel: setState(monitoringState)
+logOffPresenter <-- turnOnMonitoringViewModel
+logOffPresenter -> turnOnMonitoringViewModel: firePropertyChange()
+turnOnMonitoringViewModel -> welcomeView: propertyChange()
+logOffPresenter <-- welcomeView
+logOffPresenter -> viewModelManager: changeView("Monitoring")
+viewModelManager -> welcomeView: switch("Monitoring")
+
+@enduml
