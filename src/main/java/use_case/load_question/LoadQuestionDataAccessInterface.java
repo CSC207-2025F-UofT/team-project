@@ -6,6 +6,4 @@ public interface LoadQuestionDataAccessInterface {
     boolean existsUnusedQuestion();
 
     Question getNextQuestion();
-
-    void setCurrentQuestion(Question question);
 }
