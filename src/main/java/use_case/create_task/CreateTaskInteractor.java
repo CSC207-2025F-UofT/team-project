@@ -2,6 +2,7 @@ package use_case.create_task;
 
 import entity.DifficultyLevel;
 import entity.StudentTask;
+import entity.StudentTaskFactory;
 import java.time.LocalDate;
 
 public class CreateTaskInteractor implements CreateTaskInputBoundary {
@@ -11,13 +12,16 @@ public class CreateTaskInteractor implements CreateTaskInputBoundary {
 
     private final CreateTaskUserDataAccessInterface userDataAccess;
     private final CreateTaskOutputBoundary presenter;
+    private final StudentTaskFactory taskFactory;
 
     public CreateTaskInteractor(
             CreateTaskUserDataAccessInterface userDataAccess,
-            CreateTaskOutputBoundary presenter
+            CreateTaskOutputBoundary presenter,
+            StudentTaskFactory taskFactory
     ) {
         this.userDataAccess = userDataAccess;
         this.presenter = presenter;
+        this.taskFactory = taskFactory;
     }
 
     @Override
@@ -49,12 +53,7 @@ public class CreateTaskInteractor implements CreateTaskInputBoundary {
                 ? inputData.getDifficultyLevel()
                 : DEFAULT_DIFFICULTY;
 
-        int taskId = userDataAccess.generateNextTaskId();
-
-        // Adjust constructor arguments to match your exact StudentTask constructor signature
-        StudentTask newTask = new StudentTask(
-                taskId,
-                inputData.getUserId(),
+        StudentTask newTask = taskFactory.createStudentTask(
                 title,
                 description,
                 deadline,
@@ -66,7 +65,7 @@ public class CreateTaskInteractor implements CreateTaskInputBoundary {
         userDataAccess.saveTask(inputData.getUserId(), newTask);
 
         CreateTaskOutputData outputData = new CreateTaskOutputData(
-                taskId,
+                newTask.getUniqueTaskId(), // or whatever getter StudentTask uses for its ID
                 title,
                 deadline,
                 estimatedHours,
