@@ -1,4 +1,8 @@
 package use_case.create_task;
 
-public class CreateTaskOutputBoundary {
+import java.time.LocalDate;
+
+public interface CreateTaskOutputBoundary {
+    void prepareSuccessView(CreateTaskOutputData outputData);
+    void prepareFailView(String errorMessage);
 }
