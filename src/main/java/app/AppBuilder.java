@@ -5,8 +5,10 @@ import data_access.InMemoryPetDataAccessObject;
 import data_access.GoogleDesktopIdentityGateway;
 import data_access.InMemoryTransactionDataAccessObject;
 import data_access.InMemoryBudgetDataAccessObject;
-
 import data_access.ApiPetImageDataAccessObject;
+import data_access.EarnRewardCoinsDataAccessObject;
+import data_access.InMemoryPetItemDataAccessObject;
+
 import entity.UserFactory;
 
 import interface_adapter.ViewManagerModel;
@@ -40,6 +42,12 @@ import interface_adapter.adopt_pet.AdoptPetController;
 import interface_adapter.play_with_pet.PlayWithPetController;
 import interface_adapter.play_with_pet.PlayWithPetPresenter;
 import interface_adapter.adopt_pet.AdoptPetPresenter;
+import interface_adapter.pet_shop.PetShopViewModel;
+import interface_adapter.purchase_pet_item.PurchasePetItemController;
+import interface_adapter.purchase_pet_item.PurchasePetItemPresenter;
+import interface_adapter.open_pet_shop.OpenPetShopController;
+import interface_adapter.open_pet_shop.OpenPetShopPresenter;
+import interface_adapter.logged_in.LoggedInViewModelListener;
 import use_case.change_password.ChangePasswordInputBoundary;
 import use_case.change_password.ChangePasswordInteractor;
 import use_case.change_password.ChangePasswordOutputBoundary;
@@ -64,6 +72,9 @@ import use_case.get_pet_picture.GetPetPictureInteractor;
 import use_case.get_pet_picture.GetPetPictureOutputBoundary;
 import use_case.adopt_pet.AdoptPetInteractor;
 import use_case.play_with_pet.PlayWithPetInteractor;
+import use_case.purchase_pet_item.PurchasePetItemInteractor;
+import use_case.open_pet_shop.OpenPetShopInteractor;
+
 import view.LoggedInView;
 import view.LoginView;
 import view.RecordTransactionView;
@@ -72,11 +83,13 @@ import view.ViewManager;
 import view.ViewBudgetProgressView;
 import view.AdoptPetView;
 import view.InteractWithPetView;
+import view.PetShopView;
 
 
 import javax.swing.*;
 import java.awt.*;
 import java.util.concurrent.ExecutionException;
+import java.time.ZoneId;
 
 public class AppBuilder {
     private final JPanel cardPanel = new JPanel();
@@ -119,6 +132,15 @@ public class AppBuilder {
     private ViewBudgetProgressViewModel budgetProgressViewModel;
     private ViewBudgetProgressView budgetProgressView;
 
+    private final EarnRewardCoinsDataAccessObject rewardDataAccessObject =
+            new EarnRewardCoinsDataAccessObject();
+
+    private final InMemoryPetItemDataAccessObject petItemDataAccessObject =
+            new InMemoryPetItemDataAccessObject();
+
+    private PetShopViewModel petShopViewModel;
+    private PetShopView petShopView;
+
     public AppBuilder() {
         view.settings.ThemeManager.initialize();
 
@@ -148,8 +170,32 @@ public class AppBuilder {
 
     public AppBuilder addLoggedInView() {
         loggedInViewModel = new LoggedInViewModel();
+
+        loggedInViewModel.addListener(
+                new LoggedInViewModelListener() {
+                    @Override
+                    public void stateChanged() {
+                        String username =
+                                loggedInViewModel.getState().getUsername();
+
+                        if (username != null && !username.isBlank()) {
+                            rewardDataAccessObject.ensureUserExists(
+                                    username,
+                                    ZoneId.systemDefault()
+                            );
+                        }
+                    }
+
+                    @Override
+                    public void passwordChanged() {
+                        // Changing a password doesn't affect reward registration.
+                    }
+                }
+        );
+
         loggedInView = new LoggedInView(loggedInViewModel);
         cardPanel.add(loggedInView, LoggedInViewModel.VIEW_NAME);
+
         return this;
     }
 
@@ -172,6 +218,20 @@ public class AppBuilder {
         );
 
         interactWithPetView.setBackAction(() -> {
+            viewManagerModel.setState(LoggedInViewModel.VIEW_NAME);
+            viewManagerModel.notifyViewChanged();
+        });
+
+        return this;
+    }
+
+    public AppBuilder addPetShopView() {
+        petShopViewModel = new PetShopViewModel();
+        petShopView = new PetShopView(petShopViewModel);
+
+        cardPanel.add(petShopView, PetShopViewModel.VIEW_NAME);
+
+        petShopView.setBackAction(() -> {
             viewManagerModel.setState(LoggedInViewModel.VIEW_NAME);
             viewManagerModel.notifyViewChanged();
         });
@@ -453,6 +513,52 @@ public class AppBuilder {
             String username = loggedInViewModel.getState().getUsername();
             controller.execute(username);
         });
+
+        return this;
+    }
+
+    public AppBuilder addPurchasePetItemUseCase() {
+        PurchasePetItemPresenter presenter =
+                new PurchasePetItemPresenter(petShopViewModel);
+
+        PurchasePetItemInteractor interactor =
+                new PurchasePetItemInteractor(
+                        petItemDataAccessObject,
+                        rewardDataAccessObject,
+                        presenter
+                );
+
+        PurchasePetItemController controller =
+                new PurchasePetItemController(interactor);
+
+        petShopView.setPurchaseController(controller);
+
+        return this;
+    }
+
+    public AppBuilder addOpenPetShopUseCase() {
+        OpenPetShopPresenter presenter =
+                new OpenPetShopPresenter(
+                        petShopViewModel,
+                        viewManagerModel,
+                        message -> JOptionPane.showMessageDialog(
+                                loggedInView,
+                                message,
+                                "Cannot Open Shop",
+                                JOptionPane.ERROR_MESSAGE)
+                );
+
+        OpenPetShopInteractor interactor =
+                new OpenPetShopInteractor(
+                        petItemDataAccessObject,
+                        rewardDataAccessObject,
+                        presenter
+                );
+
+        OpenPetShopController controller =
+                new OpenPetShopController(interactor);
+
+        loggedInView.setOpenPetShopController(controller);
 
         return this;
     }

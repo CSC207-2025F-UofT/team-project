@@ -28,6 +28,9 @@ public class Main {
                 .addGetPetPictureUseCase()
                 .addAdoptPetUseCase()
                 .addPlayWithPetUseCase()
+                .addPetShopView()
+                .addPurchasePetItemUseCase()
+                .addOpenPetShopUseCase()
                 .build();
 
         application.pack();

@@ -6,6 +6,7 @@ import interface_adapter.logged_in.LoggedInViewModel;
 import interface_adapter.logged_in.LoggedInViewModelListener;
 import interface_adapter.logout.LogoutController;
 import interface_adapter.interact_with_pet.InteractWithPetController;
+import interface_adapter.open_pet_shop.OpenPetShopController;
 
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
@@ -24,6 +25,7 @@ public class LoggedInView extends JPanel implements ActionListener, LoggedInView
     private ChangePasswordController changePasswordController = null;
     private LogoutController logoutController;
     private InteractWithPetController interactWithPetController;
+    private OpenPetShopController openPetShopController;
 
     private final JLabel username;
 
@@ -112,6 +114,13 @@ public class LoggedInView extends JPanel implements ActionListener, LoggedInView
         final JButton interactPet = new JButton("Interact with pet!");
         final JButton petShop = new JButton("Enter pet item shop!");
 
+        petShop.addActionListener(event -> {
+            String currentUsername =
+                    loggedInViewModel.getState().getUsername();
+
+            openPetShopController.execute(currentUsername);
+        });
+
         interactPet.addActionListener(evt -> {
             String currentUsername =
                     loggedInViewModel.getState().getUsername();
@@ -154,6 +163,11 @@ public class LoggedInView extends JPanel implements ActionListener, LoggedInView
     public void setInteractWithPetController(
             InteractWithPetController interactWithPetController) {
         this.interactWithPetController = interactWithPetController;
+    }
+
+    public void setOpenPetShopController(
+            OpenPetShopController openPetShopController) {
+        this.openPetShopController = openPetShopController;
     }
 
     /**

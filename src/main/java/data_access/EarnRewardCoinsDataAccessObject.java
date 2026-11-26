@@ -38,6 +38,21 @@ public class EarnRewardCoinsDataAccessObject
         claimedDates.put(userId, new HashSet<>());
     }
 
+    public synchronized void ensureUserExists(
+            String userId, ZoneId timeZone) {
+        if (userId == null || userId.isBlank()) {
+            throw new IllegalArgumentException("User ID is required.");
+        }
+
+        if (timeZone == null) {
+            throw new IllegalArgumentException("Time zone is required.");
+        }
+
+        if (!timeZones.containsKey(userId)) {
+            addUser(userId, timeZone);
+        }
+    }
+
     public synchronized void setBudget(
             String userId, LocalDate date, BigDecimal amount) {
         requireUser(userId);
