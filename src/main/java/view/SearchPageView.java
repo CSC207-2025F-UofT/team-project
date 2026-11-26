@@ -82,19 +82,7 @@ public class SearchPageView extends JPanel implements ActionListener, SearchView
                     }
                 }
         );
-//        favourites.addActionListener(
-//                new ActionListener() {
-//                    public void actionPerformed(ActionEvent evt) {
-//                        if (evt.getSource().equals(favourites)) {
-//                            final SearchState currentState = searchBarViewModel.getState();
-//
-//                            favouriteController.execute(
-//                                    currentState.getTitle()
-//                            );
-//                        }
-//                    }
-//                }
-//        );
+
 
 //        watchlist.addActionListener(
 //                new ActionListener() {
@@ -174,6 +162,10 @@ public class SearchPageView extends JPanel implements ActionListener, SearchView
 
     private void setFields(SearchState state) {
         searchInputField.setText(state.getTitle());
+    }
+
+    public void onOpenFavorites(Runnable action) {
+        favourites.addActionListener(event -> action.run());
     }
 
     public void setSearchController(SearchController searchController) {
