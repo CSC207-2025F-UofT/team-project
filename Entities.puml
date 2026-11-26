@@ -1,0 +1,190 @@
+@startuml
+'https://plantuml.com/class-diagram
+' `..|>` represents Interface Realization/Implementation (dashed line with an open arrow).
+' `--|>` represents Inheritance/Generalization (solid line with an open arrow).
+' `o-->` represents Aggregation (a hollow diamond pointing to the owner/container).
+'     The "\*" indicates multiplicity (e.g., Drawing holds multiple Shape objects).
+skinparam dpi 120
+skinparam classAttributeIconSize 0
+hide empty members
+
+' ========
+' Foundational entities
+' ========
+
+' The enumeration here must be properly ordered
+enum DifficultyLevel {
+  EASY
+  AVERAGE
+  DIFFICULT
+  --
+  -displayName: String
+  --
+  +getDisplayName(): String
+  +toString(): String
+}
+
+enum SortingStrategy {
+  BY_DUE_DATE
+  BY_SUGGESTED_HOURS_TO_WORK_PER_DAY
+  --
+  -displayName: String
+  --
+  +getDisplayName(): String
+  +toString(): String
+}
+
+' CA - Canada, US - USA, ET - Ethiopia, IN - India, FR - France, GH - Ghana
+' There are more country codes, below is just an example.
+' The implementation would contain a much more comprehensive list.
+enum Country {
+  CA
+  US
+  ET
+  IN
+  FR
+  GH
+  --
+  -displayName: String
+  --
+  +getDisplayName(): String
+  +toString(): String
+}
+
+' The `uniqueTaskId` is only unique per user
+' The `uniqueUserId` reflects the user that owns the `Task`
+abstract class Task {
+  - {final} uniqueTaskId : int
+  - {final} uniqueUserId : int
+  + getUniqueTaskId() : int
+  + getUniqueUserId() : int
+}
+
+' The `fieldsValidation()` method checks the following in the fields of the StudentTask object:
+' - The estimated number of hours needed to complete the task must be positive
+' - The completion progress must be an integer between 0 and 100. Both 0 and 100 are allowed.
+' - The `deadline` field cannot be empty, and it can be a date that has already passed.
+' - The `uniqueUserId` field cannot be 0 (the default initializing value)
+' - Neither the title nor the description can be null, although they can be empty strings.
+' - The difficulty level cannot be `null`.
+' The constructor of `StudentTask` should use the method `fieldsValidation()` to double-check the validity of the
+'     object created, and throw an error if the item is not valid.
+' The setter of `StudentTask` should use the method `fieldsValidation()` to double-check the validity of the object
+'     before and after the fields are changed, and throw an error if the item is not valid.
+' The `inputValidation()` method checks the following inputs, which may or may not be fields of the StudentTask object.
+'     This method would be used in the setter methods of the following fields, before the changes, to prevent illegal
+'     inputs from modifying these fields of the `StudentTask` object. In addition, this method can be used in the use
+'     cases to prevent users from entering bad data, corrupting the `StudentTask`.
+' - The `deadline`
+' - The `estimated number of hours`
+' - The `completion progress`
+class StudentTask {
+  - title : String
+  - description : String
+  - deadline : LocalDate
+  - estimatedHoursToCompleteTask : double
+  - completionProgress : byte
+  - difficultyLevel : DifficultyLevel
+  + fieldsValidation() : boolean
+  + inputValidation(deadline : LocalDate, estimatedHours : double, progress : byte) : boolean
+}
+
+abstract class User {
+  - username : String
+  - password : String
+  - {final} uniqueUserId : int
+}
+
+abstract class TaskUser<T extends Task> {
+  - tasks : List<T>
+}
+
+' When a new user is signed up, the constructor should set `nextTaskUniqueId` to 1 before any tasks are added.
+' The constructor should also include an additional `nextTaskUniqueId` parameter to be used when loading from
+'     persistent storage upon logging in.
+class StudentTaskUser {
+  - countryCode : Country
+  + {final} studentTaskFactory : StudentTaskFactory
+}
+
+class SortingByDueDateStrategy {
+}
+
+class SortingBySuggestedHoursToWorkPerDayStrategy {
+  - today : LocalDate
+}
+
+' Country code is in ISO 3166-1 alpha-2 code
+class Holidays {
+  - countryCodeToHolidays: Map<Country, Set<LocalDate>>
+}
+
+interface Comparator<StudentTask>
+
+Task <|-- StudentTask
+
+User <|-- TaskUser
+TaskUser <|-- StudentTaskUser : T = StudentTask
+
+Task <--o TaskUser
+
+DifficultyLevel <--o StudentTask
+
+Comparator <|.. SortingByDueDateStrategy
+Comparator <|.. SortingBySuggestedHoursToWorkPerDayStrategy
+
+@enduml
+
+@startuml
+'https://plantuml.com/class-diagram
+' `..|>` represents Interface Realization/Implementation (dashed line with an open arrow).
+' `--|>` represents Inheritance/Generalization (solid line with an open arrow).
+' `o-->` represents Aggregation (a hollow diamond pointing to the owner/container).
+'     The "\*" indicates multiplicity (e.g., Drawing holds multiple Shape objects).
+skinparam dpi 120
+skinparam classAttributeIconSize 0
+hide empty members
+
+' ========
+' Factories
+' ========
+
+class StudentTaskUser
+
+abstract class UserFactory {
+  - nextUniqueID : int
+  # generateNextUniqueId() : int
+}
+
+class StudentUserFactory {
+  + createStudentUser(username : String, password : String, countryCode : Country) : StudentTaskUser
+}
+
+UserFactory <|-- StudentUserFactory
+
+' `nextUniqueId` would be stored in persistent storage and loaded every time a user logs in.
+' The persistent storage should be updated whenever a new task is added.
+' The implementation of the persistent storage is not within the scope of the entities layer
+abstract class TaskFactory {
+  - nextTaskUniqueId : int
+  # generateNextTaskUniqueId() : int
+}
+
+' The `uniqueUserId` here is an immutable copy of the `uniqueUserId` for the `StudentUser` that owns this factory
+' The `uniqueUserId` would be passed to the `StudentTaskFactory` in the constructor of `StudentUser`.
+class StudentTaskFactory {
+  - {final} uniqueUserId : int
+  + createStudentTask(title : String, description : String, deadline : LocalDate,
+  estimatedHoursToCompleteTask : double, completionProgress : byte, difficultyLevel : DifficultyLevel) : StudentTask
+}
+
+TaskFactory <|-- StudentTaskFactory
+
+' The following StudentTaskUser is a continuation of the PlantUML diagram described above.
+StudentTaskFactory <--o StudentTaskUser
+
+class StudentTaskSortingStrategyFactory {
+  + createStrategy(strategyName : SortingStrategy) : Comparator<StudentTask>
+}
+
+@enduml

@@ -1,0 +1,56 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+
+autonumber
+
+actor User
+participant System
+database "Local Storage\n(JSON / SQLite)" as Storage
+
+== Request Task Creation ==
+
+User -> System: Request to create a new academic task
+System --> User: Display task creation form (for logged-in user)
+
+== Enter Task Information ==
+
+User -> System: Enter title, description, and deadline
+opt Estimated hours entered
+    User -> System: Enter estimated hours
+else Not specified
+    System -> System: Default estimated hours to 10
+end
+opt Difficulty selected (fixed choices only)
+    User -> System: Select difficulty level
+else Not specified
+    System -> System: Default difficulty to Average
+end
+
+== Submit and Validate ==
+
+alt User submits task
+    User -> System: Submit task information
+    System -> System: Validate entered information
+
+    alt Hours not positive, or completion % not in [0, 100]
+        System --> User: Error message, request valid value
+    else Deadline invalid or missing
+        System --> User: Error message, task not saved
+    else Information valid
+        == Save Task ==
+        System -> System: Assign unique ID, set progress to 0%
+        System -> Storage: Save new task
+        Storage --> System: Save successful
+        System --> User: Confirm task successfully created
+    end
+
+else User cancels task creation
+    == Cancel Task Creation ==
+    User -> System: Cancel task creation
+    System --> User: Pop up window to confirm cancellation
+    User -> System: Confirm cancellation
+    System -> System: Discard unsaved task
+    System --> User: Task not saved, use case ends
+end
+
+@enduml
