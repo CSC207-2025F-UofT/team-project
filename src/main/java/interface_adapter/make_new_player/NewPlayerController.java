@@ -1,7 +1,7 @@
-package interface_adapter.makeNewPlayer;
+package interface_adapter.make_new_player;
 
-import use_case.makeNewPlayer.NewPlayerInputBoundary;
-import use_case.makeNewPlayer.NewPlayerInputData;
+import use_case.make_new_player.NewPlayerInputBoundary;
+import use_case.make_new_player.NewPlayerInputData;
 
 /**
  * Controller for making a new player

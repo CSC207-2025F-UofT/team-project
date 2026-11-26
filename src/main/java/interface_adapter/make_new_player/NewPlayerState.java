@@ -1,4 +1,4 @@
-package interface_adapter.makeNewPlayer;
+package interface_adapter.make_new_player;
 
 /**
  * The state for the NewPlayer View Model.

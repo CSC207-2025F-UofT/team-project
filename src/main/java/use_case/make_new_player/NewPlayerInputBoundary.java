@@ -1,4 +1,4 @@
-package use_case.makeNewPlayer;
+package use_case.make_new_player;
 
 public interface NewPlayerInputBoundary {
     /**

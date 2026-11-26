@@ -1,4 +1,4 @@
-package use_case.welcomeMenu;
+package use_case.welcome_menu;
 
 /**
  * Output Data for the Welcome Menu.

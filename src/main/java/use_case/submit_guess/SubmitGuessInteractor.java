@@ -24,7 +24,6 @@ public class SubmitGuessInteractor implements SubmitGuessInputBoundary {
       presenter.prepareFailView("Guess box empty");
     } else if (city == null) {
       presenter.prepareFailView("No city found");
-      // TODO: check if City found in previous rounds
     } else if (round.getGuesses().contains(city)){
       presenter.prepareFailView("City already guessed");
     }

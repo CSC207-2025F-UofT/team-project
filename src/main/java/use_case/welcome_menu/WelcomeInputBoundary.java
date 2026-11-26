@@ -1,6 +1,4 @@
-package use_case.welcomeMenu;
-
-import use_case.welcomeMenu.WelcomeInputData;
+package use_case.welcome_menu;
 
 public interface WelcomeInputBoundary {
     /**

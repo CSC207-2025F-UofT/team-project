@@ -1,4 +1,4 @@
-package interface_adapter.welcomeMenu;
+package interface_adapter.welcome_menu;
 
 import java.util.ArrayList;
 import java.util.List;
