@@ -21,7 +21,7 @@ import use_case.TripAccessInterface;
 
 public class ImportPhotosInteractor implements ImportPhotosInputBoundary {
     private static final float TRIP_END_TIME_THRESHOLD = 48;
-    private static final float TRIP_END_DISTANCE_THRESHOLD = 6672;
+    private static final float TRIP_END_DISTANCE_THRESHOLD = 5004;
 
     private final ImageImporterInterface imageImporter;
     private final GeocoderInterface geocoder;
@@ -110,8 +110,6 @@ public class ImportPhotosInteractor implements ImportPhotosInputBoundary {
     }
 
     private List<Photo> getSortedTripEligiblePhotos(List<Photo> photos, Location exLocation, int exDistance) {
-        presenter.preparePhotoSortingView();
-
         Stream<Photo> includedPhotoStream = photos.stream()
             .filter(photo -> photo.getLocation() != null && photo.getTime() != null);
 
@@ -134,8 +132,6 @@ public class ImportPhotosInteractor implements ImportPhotosInputBoundary {
     }
 
     private List<Trip> generateTrips(List<Photo> orderedEligiblePhotos) {
-        presenter.prepareTripGenerationView();
-
         List<Trip> trips = new ArrayList<>();
         List<Photo> currentTripPhotos = new ArrayList<>();
 
@@ -180,9 +176,14 @@ public class ImportPhotosInteractor implements ImportPhotosInputBoundary {
             try {
                 exLocation = geocoder.getLocation(exLocationDesc);
 
+                if (exLocation == null) {
+                    // TODO: Make this a separate stage and get rid of message here (also consider getting rid of error message logic in custom exceptions)
+                    presenter.prepareInvalidExclusionView("No results found");
+                    return;
+                }
+
             } catch (GeocodeException e) {
                 presenter.prepareInvalidExclusionView(e.getMessage());
-
                 return;
             }
         }
@@ -192,6 +193,7 @@ public class ImportPhotosInteractor implements ImportPhotosInputBoundary {
             reverseGeocodePhotos(photos);
 
             try {
+                presenter.preparePhotoSavingView();
                 photoAccess.writePhotos(photos);
 
             } catch (PhotoAccessException e) {
@@ -207,6 +209,7 @@ public class ImportPhotosInteractor implements ImportPhotosInputBoundary {
             List<Trip> generatedTrips = generateTrips(tripEligiblePhotos);
 
             try {
+                presenter.prepareTripSavingView();
                 tripAccess.writeTrips(generatedTrips);
 
                 presenter.prepareTripSaveSuccessView(new ImportPhotosTripOutputData(
