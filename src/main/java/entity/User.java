@@ -4,7 +4,7 @@ public abstract class User {
 
     private String username;
     private String password;
-    private int uniqueUserId;
+    private final int uniqueUserId;
 
     // Constructor
     public User(String username, String password, int uniqueUserId) {
@@ -33,9 +33,5 @@ public abstract class User {
 
     public void setPassword(String password) {
         this.password = password;
-    }
-
-    public void setUniqueUserId(int uniqueUserId) {
-        this.uniqueUserId = uniqueUserId;
     }
 }

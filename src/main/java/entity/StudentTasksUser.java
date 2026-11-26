@@ -2,27 +2,50 @@ package entity;
 
 import java.util.List;
 
-public class StudentTasksUser extends TasksUser {
-    public static final String DEFAULT_COUNTRY_CODE = "CA";
+public class StudentTaskUser extends TaskUser<StudentTask> {
+    public static final Country DEFAULT_COUNTRY_CODE = Country.CA;
 
-    private String countryCode = DEFAULT_COUNTRY_CODE; // ISO 3166-1 alpha-2, drives holiday warnings
+    private Country countryCode = DEFAULT_COUNTRY_CODE;
 
-    public StudentTasksUser(String username, String password, int uniqueUserId) {
+    public final StudentTaskFactory studentTaskFactory;
+
+    public StudentTaskUser(String username, String password, int uniqueUserId) {
         super(username, password, uniqueUserId);
+
+        this.studentTaskFactory =
+                new StudentTaskFactory(1, getUniqueUserId());
     }
 
-    public StudentTasksUser(String username, String password, int uniqueUserId, List<Task> tasks) {
+    public StudentTaskUser(String username, String password, int uniqueUserId,
+                           List<StudentTask> tasks, int nextTaskUniqueId) {
         super(username, password, uniqueUserId, tasks);
+
+        if (nextTaskUniqueId <= 0) {
+            throw new IllegalArgumentException(
+                    "The next task unique ID must be positive.");
+        }
+
+        for (StudentTask task : getTasks()) {
+            if (nextTaskUniqueId <= task.getUniqueTaskId()) {
+                throw new IllegalArgumentException(
+                        "The next task unique ID must be greater than "
+                                + "every existing task's unique ID.");
+            }
+        }
+
+        this.studentTaskFactory =
+                new StudentTaskFactory(nextTaskUniqueId, getUniqueUserId());
     }
 
-    public String getCountryCode() {
+    public Country getCountryCode() {
         return countryCode;
     }
 
-    public void setCountryCode(String countryCode) {
-        if (countryCode == null || !countryCode.matches("[A-Za-z]{2}")) {
-            throw new IllegalArgumentException("Country code must be ISO 3166-1 alpha-2.");
+    public void setCountryCode(Country countryCode) {
+        if (countryCode == null) {
+            throw new IllegalArgumentException("Country code cannot be null.");
         }
-        this.countryCode = countryCode.toUpperCase();
+
+        this.countryCode = countryCode;
     }
 }
