@@ -5,6 +5,7 @@ import entity.Pictogram;
 import entity.WordType;
 import org.junit.jupiter.api.Test;
 import use_case.customize_board.PictogramSearchException;
+import entity.CommunicationBoard;
 
 import java.io.IOException;
 import java.net.URI;
@@ -18,6 +19,7 @@ import javax.net.ssl.SSLSession;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class ArasaacDataAccessObjectTest {
@@ -150,6 +152,27 @@ class ArasaacDataAccessObjectTest {
         assertEquals(WordType.ACTION, play.getType());
         assertEquals(WordType.THING, ball.getType());
         assertEquals(WordType.THING, water.getType());
+    }
+
+    @Test
+    void searchResultsCanBeUsedOnTheLinkedBoard() throws Exception {
+        String playJson = "[{\"_id\":1,\"keywords\":[{\"keyword\":\"play\",\"type\":3}]}]";
+        String ballJson = "[{\"_id\":2,\"keywords\":[{\"keyword\":\"ball\",\"type\":2}]}]";
+        ArasaacDataAccessObject playSearch =
+                new ArasaacDataAccessObject(request -> response(200, playJson), new ObjectMapper());
+        ArasaacDataAccessObject ballSearch =
+                new ArasaacDataAccessObject(request -> response(200, ballJson), new ObjectMapper());
+
+        Pictogram play = playSearch.searchPictograms("play").get(0);
+        Pictogram ball = ballSearch.searchPictograms("ball").get(0);
+
+        // A verb from ARASAAC can go on the main board, and a noun can be linked to it.
+        CommunicationBoard board = new CommunicationBoard();
+        board.addAction(play);
+        board.addThing(play, ball);
+
+        assertTrue(board.containsAction(play));
+        assertEquals(List.of(ball), board.getThings(play));
     }
 
     private static HttpResponse<String> response(int status, String body) {
