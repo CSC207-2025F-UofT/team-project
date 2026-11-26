@@ -14,6 +14,8 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class FlashcardGeneratorInteractorTest {
+
+    @Test
     void successTest() {
         List<FlashcardGeneratorInputData.TextPiece> textPieces = new ArrayList<>();
 
@@ -66,7 +68,8 @@ public class FlashcardGeneratorInteractorTest {
 
             @Override
             public void prepareFailView(String error) {
-                assertEquals("Incorrect format for \"Flashcard\".", error);
+                assertEquals("You have to enter at least one question and answer"
+                        , error);
             }
         };
 
@@ -75,10 +78,12 @@ public class FlashcardGeneratorInteractorTest {
     }
 
     @Test
-    void failureUserDoesNotExistTest() {
+    void failureMissingAnswerTest() {
         List<FlashcardGeneratorInputData.TextPiece> textPieces = new ArrayList<>();
        FlashcardGeneratorInputData inputData = new FlashcardGeneratorInputData(textPieces);
         FlashcardDataAccessInterface flashcardRepository = new FlashcardDAO();
+
+        textPieces.add(new FlashcardGeneratorInputData.TextPiece("What course is this project for?", true));
 
 
         FlashcardGeneratorOutputBoundary flashcardPresenter = new FlashcardGeneratorOutputBoundary() {
@@ -90,7 +95,7 @@ public class FlashcardGeneratorInteractorTest {
 
             @Override
             public void prepareFailView(String error) {
-                assertEquals("Paul: Account does not exist.", error);
+                assertEquals("Incorrect format, please see tutorial", error);
             }
         };
 
