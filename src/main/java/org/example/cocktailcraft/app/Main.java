@@ -20,6 +20,7 @@ public class Main {
                 .addSearchView()
                 .addSearchUseCase()
                 .addClickUseCase()
+                .addFavouriteUseCase()
                 .addCustomizeUseCase(() -> null)
                 .addMainPageView()
                 .build();

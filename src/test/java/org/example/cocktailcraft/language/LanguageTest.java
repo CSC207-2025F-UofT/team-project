@@ -68,9 +68,6 @@ class LanguageTest {
                 gin.doClick(0);
                 assertEquals(Set.of(Tags.BaseSpirit.GIN), search.getSelectedBaseSpirits());
                 assertEquals(i18n.text("spirits.count", 1), spirits.getText());
-                searchModel.setErrorMessage("Please enter a cocktail name or select a base spirit");
-                searchModel.notifyStateChanged();
-                assertTrue(labels(search).contains(i18n.text("message.search")));
 
                 ClickViewModel clickModel = new ClickViewModel();
                 clickModel.getState().setInstructions("Stir gently. 自定义步骤。");
@@ -80,8 +77,11 @@ class LanguageTest {
                 assertTrue(components(details, JTextArea.class).stream()
                         .anyMatch(area -> area.getText().equals("Stir gently. 自定义步骤。")));
                 MainPageView home = new MainPageView(search, List.<Cocktail>of(),
-                        new ClickController(input -> { }), details, i18n);
+                        new ClickController(input -> { }), details, searchModel, null, null, i18n);
                 assertTrue(labels(home).contains(i18n.text("explore")));
+                searchModel.getState().setErrorMessage("Please enter a cocktail name or select a filter.");
+                searchModel.notifyStateChanged();
+                assertTrue(labels(home).contains(i18n.text("message.filters")));
                 assertFalse(button(home, i18n.text("customize")).isEnabled());
 
                 CustomizeViewModel model = new CustomizeViewModel();

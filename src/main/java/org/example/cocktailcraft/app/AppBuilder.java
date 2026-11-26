@@ -1,27 +1,38 @@
 package org.example.cocktailcraft.app;
 
-import org.example.cocktailcraft.view.language.I18n;
-import org.example.cocktailcraft.view.language.Language;
 import org.example.cocktailcraft.data_access.CocktailJsonReader;
 import org.example.cocktailcraft.data_access.RecipeTranslations;
+import org.example.cocktailcraft.data_access.InMemoryUserDataAccessObject;
 import org.example.cocktailcraft.data_access.SearchCocktailDataAccessObject;
 import org.example.cocktailcraft.entity.Cocktail;
+import org.example.cocktailcraft.entity.User;
 import org.example.cocktailcraft.interface_adapter.click.ClickController;
 import org.example.cocktailcraft.interface_adapter.click.ClickPresenter;
 import org.example.cocktailcraft.interface_adapter.click.ClickViewModel;
+import org.example.cocktailcraft.interface_adapter.favourite.FavouriteController;
+import org.example.cocktailcraft.interface_adapter.favourite.FavouritePresenter;
+import org.example.cocktailcraft.interface_adapter.favourite.FavouriteViewModel;
 import org.example.cocktailcraft.interface_adapter.search.SearchController;
 import org.example.cocktailcraft.interface_adapter.search.SearchPresenter;
 import org.example.cocktailcraft.interface_adapter.search.SearchViewModel;
+import org.example.cocktailcraft.use_case.click.ClickDataAccessInterface;
 import org.example.cocktailcraft.use_case.click.ClickInputBoundary;
 import org.example.cocktailcraft.use_case.click.ClickInteractor;
 import org.example.cocktailcraft.use_case.click.ClickOutputBoundary;
+import org.example.cocktailcraft.use_case.favourite.FavouriteDataAccessInterface;
+import org.example.cocktailcraft.use_case.favourite.FavouriteInputBoundary;
+import org.example.cocktailcraft.use_case.favourite.FavouriteInteractor;
+import org.example.cocktailcraft.use_case.favourite.FavouriteOutputBoundary;
 import org.example.cocktailcraft.use_case.search.SearchDataAccessInterface;
 import org.example.cocktailcraft.use_case.search.SearchInputBoundary;
 import org.example.cocktailcraft.use_case.search.SearchInteractor;
 import org.example.cocktailcraft.use_case.search.SearchOutputBoundary;
 import org.example.cocktailcraft.view.browse.MainPageView;
 import org.example.cocktailcraft.view.click.ClickView;
+import org.example.cocktailcraft.view.favourite.FavouriteView;
 import org.example.cocktailcraft.view.search.SearchView;
+import org.example.cocktailcraft.view.language.I18n;
+import org.example.cocktailcraft.view.language.Language;
 import org.example.cocktailcraft.data_access.FileCustomRecipeDataAccessObject;
 import org.example.cocktailcraft.interface_adapter.customize.CustomizeController;
 import org.example.cocktailcraft.interface_adapter.customize.CustomizePresenter;
@@ -30,20 +41,32 @@ import org.example.cocktailcraft.use_case.customize.CustomizeInteractor;
 import org.example.cocktailcraft.view.customize.CustomizeView;
 import org.example.cocktailcraft.interface_adapter.customize.CustomizeState;
 
-import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.util.List;
 import java.nio.file.Path;
 import java.util.function.Supplier;
-import java.awt.CardLayout;
-import javax.swing.JPanel;
-import javax.swing.JLabel;
 import java.awt.BorderLayout;
+import java.awt.CardLayout;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
 import javax.swing.JFrame;
 
 public class AppBuilder {
     private final I18n i18n;
     private final CocktailJsonReader catalogReader;
+
+    private User user;
+    private SearchViewModel searchViewModel;
+    private SearchView searchView;
+    private MainPageView mainPageView;
+    private List<Cocktail> cocktails;
+    private ClickViewModel clickViewModel;
+    private ClickView clickView;
+    private ClickController clickController;
+    private FavouriteViewModel favouriteViewModel;
+    private FavouriteView favouriteView;
+    private FavouriteController favouriteController;
+    private CustomizeViewModel customizeViewModel;
+    private CustomizeView customizeView;
 
     public AppBuilder() {
         this(Language.ENGLISH);
@@ -55,16 +78,6 @@ public class AppBuilder {
         catalogReader = new CocktailJsonReader(translations::translate);
     }
 
-    private SearchViewModel searchViewModel;
-    private SearchView searchView;
-    private MainPageView mainPageView;
-    private List<Cocktail> cocktails;
-    private ClickViewModel clickViewModel;
-    private ClickView clickView;
-    private ClickController clickController;
-    private CustomizeViewModel customizeViewModel;
-    private CustomizeView customizeView;
-
     public AppBuilder addSearchView() {
         searchViewModel = new SearchViewModel();
         searchView = new SearchView(searchViewModel, i18n);
@@ -72,15 +85,10 @@ public class AppBuilder {
     }
 
     public AppBuilder addSearchUseCase() {
-        try {
-            this.cocktails = catalogReader.readAll();
-        } catch (IOException exception) {
-            throw new UncheckedIOException(exception);
-        }
+        return addSearchUseCase(new SearchCocktailDataAccessObject(catalogReader));
+    }
 
-        final SearchDataAccessInterface searchDataAccessObject =
-                new SearchCocktailDataAccessObject(this.cocktails);
-
+    public AppBuilder addSearchUseCase(SearchDataAccessInterface searchDataAccessObject) {
         final SearchOutputBoundary searchOutputBoundary =
                 new SearchPresenter(searchViewModel);
 
@@ -91,6 +99,8 @@ public class AppBuilder {
                 new SearchController(searchInteractor);
 
         searchView.setSearchController(searchController);
+        searchController.clear();
+        cocktails = searchViewModel.getState().getResults();
         return this;
     }
 
@@ -98,13 +108,34 @@ public class AppBuilder {
         clickViewModel = new ClickViewModel();
         clickView = new ClickView(clickViewModel, i18n);
 
+        final ClickDataAccessInterface clickDataAccessObject = catalogReader;
+
         final ClickOutputBoundary clickOutputBoundary =
                 new ClickPresenter(clickViewModel);
 
         final ClickInputBoundary clickInteractor =
-                new ClickInteractor(catalogReader, clickOutputBoundary);
+                new ClickInteractor(clickDataAccessObject, clickOutputBoundary);
 
         clickController = new ClickController(clickInteractor);
+
+        return this;
+    }
+
+    public AppBuilder addFavouriteUseCase() {
+        favouriteViewModel = new FavouriteViewModel();
+        favouriteView = new FavouriteView(favouriteViewModel);
+
+        final FavouriteDataAccessInterface FavouriteDataAccessObject =
+                new InMemoryUserDataAccessObject(catalogReader);
+
+        final FavouriteOutputBoundary FavouriteOutputBoundary =
+                new FavouritePresenter(favouriteViewModel);
+
+        final FavouriteInputBoundary FavouriteInteractor =
+                new FavouriteInteractor(FavouriteDataAccessObject, FavouriteOutputBoundary);
+
+        favouriteController = new FavouriteController(FavouriteInteractor);
+        favouriteView.setFavouriteController(favouriteController);
 
         return this;
     }
@@ -113,7 +144,11 @@ public class AppBuilder {
         mainPageView = new MainPageView(searchView,
                 cocktails,
                 clickController,
-                clickView, i18n);
+                clickView,
+                searchViewModel,
+                user,
+                favouriteView,
+                i18n);
         return this;
     }
 

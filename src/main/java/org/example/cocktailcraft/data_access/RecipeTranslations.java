@@ -43,7 +43,7 @@ public final class RecipeTranslations {
                         lookup("units", item.getUnit())))
                 .collect(Collectors.toList());
         return new Cocktail(cocktail.getId(), lookup("names", cocktail.getName()), ingredients,
-                cocktail.getTags(), lookup("instructions", cocktail.getInstructions()));
+                cocktail.getTags(), lookup("instructions", cocktail.getInstructions()), cocktail.getAbv());
     }
 
     private String lookup(String field, String original) {

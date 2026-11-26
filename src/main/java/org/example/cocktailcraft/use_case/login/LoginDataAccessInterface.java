@@ -5,5 +5,5 @@ public interface LoginDataAccessInterface {
     boolean existsByName(String username);
 
     boolean validateCredentials(String username, String password);
-
 }
+

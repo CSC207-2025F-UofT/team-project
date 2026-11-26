@@ -13,7 +13,16 @@ public class SearchController {
         this.searchInteractor = searchInteractor;
     }
 
+    public void clear() {
+        searchInteractor.clear();
+    }
+
     public void execute(String name, Set<Tags.BaseSpirit> baseSpirits) {
-        searchInteractor.execute(new SearchInputData(name, baseSpirits));
+        execute(name, baseSpirits, Set.of(), Set.of());
+    }
+
+    public void execute(String name, Set<Tags.BaseSpirit> baseSpirits,
+                        Set<Tags.Flavor> flavors, Set<Tags.AlcoholRange> alcoholRanges) {
+        searchInteractor.execute(new SearchInputData(name, baseSpirits, flavors, alcoholRanges));
     }
 }

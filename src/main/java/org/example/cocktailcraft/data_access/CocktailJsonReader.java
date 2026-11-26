@@ -24,6 +24,7 @@ import java.util.Map;
 import java.util.EnumSet;
 import java.util.Set;
 import java.util.function.UnaryOperator;
+import java.util.Locale;
 
 public class CocktailJsonReader implements ClickDataAccessInterface {
     public static final String DATASET_INDEX = "/bar-assistant/cocktail-index.txt";
@@ -90,11 +91,85 @@ public class CocktailJsonReader implements ClickDataAccessInterface {
                 ));
             }
 
-            return translate.apply(new Cocktail(id, name, ingredients, new Tags(baseSpirits), instructions));
+            return translate.apply(new Cocktail(id, name, ingredients,
+                    new Tags(baseSpirits, readFlavors(json)), instructions, readAbv(json)));
         } catch (JsonParseException | IllegalStateException | NullPointerException
                  | UnsupportedOperationException exception) {
             throw new IOException("Invalid cocktail JSON: " + resourcePath, exception);
         }
+    }
+
+    private Double readAbv(JsonObject json) throws IOException {
+        JsonElement value = json.get("abv");
+        if (value == null || value.isJsonNull()) {
+            return null;
+        }
+        if (!value.isJsonPrimitive() || !value.getAsJsonPrimitive().isNumber()) {
+            throw new IOException("Invalid recipe ABV: expected a number.");
+        }
+        double abv = value.getAsDouble();
+        if (!Double.isFinite(abv) || abv < 0 || abv > 100) {
+            throw new IOException("Invalid recipe ABV: expected a percentage between 0 and 100.");
+        }
+        return abv;
+    }
+
+    private Set<Tags.Flavor> readFlavors(JsonObject json) throws IOException {
+        Set<Tags.Flavor> flavors = EnumSet.noneOf(Tags.Flavor.class);
+        JsonElement tags = json.get("tags");
+        if (tags == null || tags.isJsonNull()) {
+            return flavors;
+        }
+        for (JsonElement tag : tags.getAsJsonArray()) {
+            if (!tag.isJsonPrimitive() || !tag.getAsJsonPrimitive().isString()) {
+                throw new IOException("Invalid recipe flavor tag: expected a string.");
+            }
+            switch (tag.getAsString().strip().toLowerCase(Locale.ROOT)) {
+                case "sweet":
+                case "dessert":
+                    flavors.add(Tags.Flavor.SWEET);
+                    break;
+                case "sour":
+                case "citrusy":
+                    flavors.add(Tags.Flavor.SOUR_CITRUS);
+                    break;
+                case "fruity":
+                case "tropical":
+                    flavors.add(Tags.Flavor.FRUITY_TROPICAL);
+                    break;
+                case "bitter":
+                    flavors.add(Tags.Flavor.BITTER);
+                    break;
+                case "herbal":
+                case "herbacious":
+                case "herbaceous":
+                case "floral":
+                case "minty":
+                    flavors.add(Tags.Flavor.HERBAL_FLORAL);
+                    break;
+                case "smokey":
+                case "smoky":
+                case "spicy":
+                    flavors.add(Tags.Flavor.SMOKY_SPICY);
+                    break;
+                case "coffee":
+                case "nutty":
+                    flavors.add(Tags.Flavor.COFFEE_NUTTY);
+                    break;
+                case "savory":
+                case "savoury":
+                case "briny":
+                    flavors.add(Tags.Flavor.SAVORY);
+                    break;
+                case "dry":
+                    flavors.add(Tags.Flavor.DRY);
+                    break;
+                default:
+                    // Source tags also include seasons, recipe families and IBA categories.
+                    break;
+            }
+        }
+        return flavors;
     }
 
     private Set<BaseSpirit> readBaseSpirits(String ingredientId) throws IOException {

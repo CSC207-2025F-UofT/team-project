@@ -1,0 +1,27 @@
+{
+  "_id": "search-fixture",
+  "name": "Classification fixture",
+  "ingredients": [],
+  "abv": 10,
+  "tags": [
+    "Sweet",
+    "Dessert",
+    "Sour",
+    "Citrusy",
+    "Fruity",
+    "Tropical",
+    "Bitter",
+    "Herbal",
+    "Herbacious",
+    "Floral",
+    "Minty",
+    "Smokey",
+    "Smoky",
+    "Spicy",
+    "Coffee",
+    "Nutty",
+    "Savory",
+    "Briny",
+    "Dry"
+  ]
+}
