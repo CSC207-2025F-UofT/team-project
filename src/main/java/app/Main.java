@@ -36,6 +36,12 @@ import interface_adapter.ViewManagerModel;
 import user_case.Reviews.ReviewsInputBoundary;
 import user_case.Reviews.ReviewsInteractor;
 import user_case.Search.*;
+import view.FavoritesPageView;
+import data_access.GetMovieData;
+import data_access.MovieDetailDataAccessObject;
+import entity.Movie;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import view.SearchPageView;
 import view.SearchedResultsPageView;
 
@@ -60,8 +66,18 @@ public class Main {
 
             FavoriteViewModel favoriteModel = new FavoriteViewModel();
             Path favoritesFile = Path.of(System.getProperty("user.home"), ".flicksy", "favorites.json");
+            FavoriteDataAccessObject favoritesDao = new FavoriteDataAccessObject(favoritesFile.toString());
+            Map<Integer, String> knownTitles = new ConcurrentHashMap<>();
+            String token = System.getenv("token");
+            MovieDetailDataAccessObject details = token == null || token.isBlank() ? null
+                    : new MovieDetailDataAccessObject(new GetMovieData(token));
+            FavoritesPageView favoritesPage = new FavoritesPageView(favoritesDao::getFavoriteMovieIds,
+                    id -> knownTitles.computeIfAbsent(id, key -> {
+                        Movie movie = details == null ? null : details.getMovieById(key);
+                        return movie == null ? null : movie.getName();
+                    }));
             FavoriteController favoriteController = new FavoriteController(new FavoriteInteractor(
-                    new FavoriteDataAccessObject(favoritesFile.toString()), new FavoritePresenter(favoriteModel)));
+                    favoritesDao, new FavoritePresenter(favoriteModel)));
             // Create the ViewModels
             SearchBarViewModel searchBarViewModel =
                     new SearchBarViewModel();
@@ -111,6 +127,12 @@ public class Main {
 
             // Add the search page to CardLayout
             views.add(searchPageView, "search");
+            views.add(favoritesPage, "favorites");
+            java.util.function.Consumer<String> openFavorites = previous -> {
+                favoritesPage.open(System.getenv("FLICKSY_USERNAME"), () -> cardLayout.show(views, previous));
+                cardLayout.show(views, "favorites");
+            };
+            searchPageView.onOpenFavorites(() -> openFavorites.accept("search"));
 
             // Listen for changes to the searched ViewModel
             searchedViewModel.addListener(() -> {
@@ -127,6 +149,9 @@ public class Main {
                             }
                         }
 
+                        for (String[] row : searchedViewModel.getState().getOutputMovieData()) {
+                            knownTitles.put(Integer.parseInt(row[3]), row[0]);
+                        }
                         // Create the results page using returned movie data
                         SearchedResultsPageView searchedResultsPageView =
                                 new SearchedResultsPageView(searchedViewModel, movieId -> {
@@ -138,6 +163,7 @@ public class Main {
                                 searchController
                         );
 
+                        searchedResultsPageView.onOpenFavorites(() -> openFavorites.accept("results"));
                         views.add(searchedResultsPageView, "results");
 
                         cardLayout.show(views, "results");
