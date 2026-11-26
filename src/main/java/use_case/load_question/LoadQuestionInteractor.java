@@ -20,8 +20,6 @@ public class LoadQuestionInteractor implements LoadQuestionInputBoundary {
         else {
             final Question nextQuestion = questionDataAccessObject.getNextQuestion();
 
-            questionDataAccessObject.setCurrentQuestion(nextQuestion);
-
             final LoadQuestionOutputData outputData = new LoadQuestionOutputData(
                     nextQuestion.getQuestionText(), nextQuestion.getAnswerCount()
             );
