@@ -1,0 +1,38 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+
+autonumber
+
+== "Confirm Log Off Request" ==
+actor "Human Student User" as humanStudentUser
+boundary "BaseViewWithLogOffConfirmationMessage" as baseView
+control "LogOff" as logOffController
+participant "LogOffInputBoundary <<Interface>>" as logOffInputBoundary
+control "LogOffInteractor" as logOffInteractor
+participant "LogOffOutputBoundary <<Interface>>" as logOffOutputBoundary
+control "LogOffPresenter" as logOffPresenter
+participant "BaseViewModel" as baseViewModel
+participant "ViewModelManager" as viewModelManager
+boundary "LogOffViewModel" as logOffViewModel
+boundary "WelcomeView<WelcomeState>" as welcomeView
+
+humanStudentUser -> baseView: Confirm the Log-off on the Pop-up
+baseView -> logOffController: execute(RawConfirmLogOffInputData)
+logOffController -> logOffInputBoundary: execute(ConfirmLogOffInputData)
+logOffInputBoundary -> logOffInteractor: execute(ConfirmLogOffInputData)
+logOffInteractor -> logOffOutputBoundary: logOff(LogOffOutputData)
+logOffOutputBoundary -> logOffPresenter: logOff(LogOffOutputData)
+logOffPresenter -> baseViewModel: setState(LogOffClearingState)
+logOffPresenter <-- baseViewModel
+logOffPresenter -> baseViewModel: firePropertyChange()
+baseViewModel -> baseView: propertyChange()
+baseView --> logOffPresenter
+logOffPresenter -> viewModelManager: changeView("Welcome")
+
+'????????
+
+== "Cancel Log Off Request" ==
+
+
+
+@enduml

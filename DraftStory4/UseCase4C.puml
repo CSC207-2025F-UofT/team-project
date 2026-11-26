@@ -1,0 +1,27 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+
+autonumber
+
+== "Send Log Off Request" ==
+actor "Human Student User" as humanStudentUser
+boundary "BaseView" as baseView
+control "LogOff" as logOffController
+participant "LogOffInputBoundary <<Interface>>" as logOffInputBoundary
+control "LogOffInteractor" as logOffInteractor
+participant "LogOffOutputBoundary <<Interface>>" as logOffOutputBoundary
+control "LogOffPresenter" as logOffPresenter
+participant "BaseViewModel" as baseViewModel
+
+humanStudentUser -> baseView: Request to Log off
+baseView -> logOffController: execute(RawRequestLogOffInputData)
+logOffController -> logOffInputBoundary: execute(RequestLogOffInputData)
+logOffInputBoundary -> logOffInteractor: execute(RequestLogOffInputData)
+logOffInteractor -> logOffOutputBoundary: prepareConfirmationPopUp(ConfirmationPopUpOutputData)
+logOffOutputBoundary -> logOffPresenter: prepareConfirmationPopUp(ConfirmationPopUpOutputData)
+logOffPresenter -> baseViewModel: setState(confirmationPopUpState)
+logOffPresenter <-- baseViewModel
+logOffPresenter -> baseViewModel: firePropertyChange()
+baseViewModel -> baseView: propertyChange()
+
+@enduml

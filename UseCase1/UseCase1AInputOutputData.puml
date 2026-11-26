@@ -1,0 +1,86 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+
+autonumber
+
+participant "CreateTaskView" as View
+participant "CreateTaskController" as Controller
+participant "CreateTaskInteractor" as Interactor
+participant "CreateTaskValidator" as Validator
+participant "CreateTaskDataAccessInterface" as DAO
+database "Local Storage\n(JSON)" as Storage
+participant "CreateTaskOutputBoundary" as OutputBoundary
+participant "CreateTaskPresenter" as Presenter
+participant "CreateTaskViewModel" as ViewModel
+
+== Input Data ==
+
+View -> Controller: execute(userId, title, description,\ndeadline, estimatedHours, difficultyLevel)
+Controller -> Controller: inputData = new CreateTaskInputData(...)
+Controller -> Interactor: execute(inputData)
+
+== Apply Defaults ==
+
+opt estimatedHours not provided
+    Interactor -> Interactor: estimatedHours = 10
+end
+opt difficultyLevel not provided
+    Interactor -> Interactor: difficultyLevel = AVERAGE
+end
+
+== Validation ==
+
+Interactor -> Validator: validate(inputData)
+Validator --> Interactor: ValidationResult
+
+alt estimatedHours is not a positive number
+    Interactor -> OutputBoundary: prepareFailView("Hours must be positive")
+    OutputBoundary -> Presenter: prepareFailView("Hours must be positive")
+    Presenter -> ViewModel: setError("Hours must be positive")
+    Presenter -> ViewModel: firePropertyChanged()
+    ViewModel --> View: propertyChange(evt) [displays error]
+
+else deadline is missing or invalid
+    Interactor -> OutputBoundary: prepareFailView("Invalid or missing deadline")
+    OutputBoundary -> Presenter: prepareFailView("Invalid or missing deadline")
+    Presenter -> ViewModel: setError("Invalid or missing deadline")
+    Presenter -> ViewModel: firePropertyChanged()
+    ViewModel --> View: propertyChange(evt) [displays error]
+
+else input is valid
+
+    == Create Entity ==
+
+    Interactor -> Interactor: taskId = generateUniqueId()
+    Interactor -> Interactor: task = new StudentTask(taskId, userId, title,\ndescription, deadline, estimatedHours,\ndifficultyLevel, completionProgress = 0%)
+
+    == Persist ==
+
+    Interactor -> DAO: save(task)
+    DAO -> Storage: write StudentTask record
+    Storage --> DAO: write successful
+    DAO --> Interactor: saved StudentTask
+
+    == Output Data (Success Path) ==
+
+    Interactor -> Interactor: outputData = new CreateTaskOutputData(task)
+    Interactor -> OutputBoundary: prepareSuccessView(outputData)
+    OutputBoundary -> Presenter: prepareSuccessView(outputData)
+    Presenter -> ViewModel: setState(updatedTaskState)
+    Presenter -> ViewModel: firePropertyChanged()
+    ViewModel --> View: propertyChange(evt) [displays confirmation & updates list]
+end
+
+== Cancel Task Creation ==
+
+View -> Controller: cancelCreation()
+Controller --> View: Request cancellation confirmation
+View -> Controller: confirmCancellation()
+Controller -> Interactor: discardDraft(inputData)
+Interactor -> OutputBoundary: prepareCancelView()
+OutputBoundary -> Presenter: prepareCancelView()
+Presenter -> ViewModel: clearDraftState()
+Presenter -> ViewModel: firePropertyChanged()
+ViewModel --> View: propertyChange(evt) [closes form, nothing persisted]
+
+@enduml

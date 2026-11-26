@@ -134,7 +134,7 @@ As a student, I want to create academic tasks with deadlines and workload estima
 2. The user can specify the estimated number of hours required to complete the task, defaulting to 10 hours if unspecified.
 3. The user can specify the task's difficulty, defaulting to Average if unspecified.
 4. The system validates task information before saving and prevents invalid task entries.
-5. Each task is assigned a unique identifier and an initial completion progress of 0%.
+5. Each task is assigned a unique identifier and a default initial completion progress of 0%. The student may override the default completion progress.
 6. Tasks are saved locally using JSON or SQLite and remain available after the application is restarted.
 7. When a Monitoring View is opened/reopened, it is able to retrieve the latest task information, including newly created tasks.
 
@@ -330,7 +330,7 @@ As a student, I want to be able to have a suggested prioritization of today's ta
 - There is at least one task in the system.
 
 #### Trigger
-- The user chooses to edit an existing task.
+- The user chooses to delete an existing task.
 
 #### Success outcome
 - The task is deleted from local storage, remains deleted after restarting the application, and is excluded from subsequent Monitoring View results.
@@ -368,7 +368,7 @@ As a student, I want to be able to have a suggested prioritization of today's ta
 
 1. The user requests to sign up as a new user of the app. 
 2. The system displays the sign-up screen to the user.
-3. The user enters the username and password and clicks on the sign-up button.
+3. The user enters the username, password, and country and clicks on the sign-up button.
 4. The system checks the information entered by the user against the list of users stored in the system.
 5. The system confirms the user is not already in the system.
 6. The user information is added to the system. 
@@ -432,10 +432,7 @@ As a student, I want to be able to have a suggested prioritization of today's ta
 
 ##### Main success scenario
 1. The user requests to activate the Monitoring View.
-2. The user is prompted to select the country code setting. It will impact the holiday warning.
-  - The country would default to Canada.
-  - The ISO 3166-1 alpha-2 country code would be used here.
-3. The Monitoring View window is displayed and supports the functionality of the Story 3 use case through an abstract interface. 
+2. The Monitoring View window is displayed and supports the functionality of the Story 3 use case through an abstract interface. 
 
 #### Sub Case 4B Name
 - Prioritizing today's tasks using the suggested daily workload.
@@ -455,7 +452,7 @@ As a student, I want to be able to have a suggested prioritization of today's ta
 ##### Main success scenario
 1. The user requests to prioritize the tasks in the Monitoring View using the suggested daily workload algorithm.
 2. The system retrieves all the tasks stored inside the system.
-    -  The tasks retrieved are specific to the user logged in. 
+    -  The tasks retrieved are specific to the logged-in user. 
 3. The system finds all the tasks ***NOT*** overdue ***AND*** that have ***NOT*** been completed, as the overdue tasks would always be displayed at the top separately.
 4. The system sorts the tasks using the suggested daily workload, with the task requiring the greatest workload listed first.
 5. The system selects the top three tasks (or up to three tasks, if there are fewer than three tasks), and they are already sorted in the right order to be displayed.
@@ -508,6 +505,41 @@ Nager.Holidays
 - Detailed technical documentation [https://nagerholidays.com/scalar/#community-api-v4/description/introduction]
 
 **How it is used in the program:**
-- The program uses the Nager.Date Public Holiday API to retrieve public holiday information. 
+- The program uses the `Nager.Date` Public Holiday API to retrieve public holiday information. 
 - It checks whether academic task deadlines fall on public holidays and displays holiday warnings beside affected tasks in the Monitoring View. 
 - The API results are cached to avoid repeated requests.
+
+---
+
+## User Manual
+
+### Main UI flow chart
+- This is a high-level flow chart, and it might not capture all of the detailed flow.
+- The flow chart is described in a business user sense and might use more business-friendly terms.
+
+```mermaid
+graph TD
+  welcome["Welcome"]
+  login["Login"]
+  signup["Signup"]
+  base["Base"]
+  createTask["Create Task"]
+  editTask["Edit Task"]
+  monitoring["Monitoring"]
+
+  welcome --> signup
+  signup --> login
+
+  welcome --> login
+  login --> base
+  base --> welcome
+
+  base --> createTask
+  createTask --> base
+
+  base --> editTask
+  editTask --> base
+
+  base --> monitoring
+  monitoring --> base
+```
