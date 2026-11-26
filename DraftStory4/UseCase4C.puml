@@ -12,9 +12,6 @@ control "LogOffInteractor" as logOffInteractor
 participant "LogOffOutputBoundary <<Interface>>" as logOffOutputBoundary
 control "LogOffPresenter" as logOffPresenter
 participant "BaseViewModel" as baseViewModel
-participant "ViewModelManager" as viewModelManager
-boundary "LogOffViewModel" as logOffViewModel
-boundary "WelcomeView<WelcomeState>" as welcomeView
 
 humanStudentUser -> baseView: Request to Log off
 baseView -> logOffController: execute(RawRequestLogOffInputData)
@@ -26,23 +23,5 @@ logOffPresenter -> baseViewModel: setState(confirmationPopUpState)
 logOffPresenter <-- baseViewModel
 logOffPresenter -> baseViewModel: firePropertyChange()
 baseViewModel -> baseView: propertyChange()
-
-== "Confirm Log Off Request" ==
-humanStudentUser -> baseView: Confirm the Log-off on the Pop-up
-baseView -> logOffController: execute(RawConfirmLogOffInputData)
-logOffController -> logOffInputBoundary: execute(ConfirmLogOffInputData)
-logOffInputBoundary -> logOffInteractor: execute(ConfirmLogOffInputData)
-logOffInteractor -> logOffOutputBoundary: logOff(LogOffOutputData)
-logOffOutputBoundary -> logOffPresenter: logOff(LogOffOutputData)
-logOffPresenter -> baseViewModel: setState(LogOffClearingState)
-logOffPresenter <-- baseViewModel
-logOffPresenter -> baseViewModel: firePropertyChange()
-baseViewModel -> baseView: propertyChange()
-baseView --> logOffPresenter
-logOffPresenter -> viewModelManager: changeView("Welcome")
-
-== "Cancel Log Off Request" ==
-
-
 
 @enduml
