@@ -30,6 +30,5 @@ turnOnMonitoringPresenter -> monitoringViewModel: firePropertyChange()
 monitoringViewModel -> monitoringView: propertyChange()
 turnOnMonitoringPresenter <-- monitoringView
 turnOnMonitoringPresenter -> viewModelManager: changeView("Monitoring")
-viewModelManager -> monitoringView: switch("Monitoring")
 
 @enduml

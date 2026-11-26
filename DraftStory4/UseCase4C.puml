@@ -3,7 +3,7 @@
 
 autonumber
 
-== "Log Off" ==
+== "Send Log Off Request" ==
 actor "Human Student User" as humanStudentUser
 boundary "BaseView" as baseView
 control "LogOff" as logOffController
@@ -11,22 +11,38 @@ participant "LogOffInputBoundary <<Interface>>" as logOffInputBoundary
 control "LogOffInteractor" as logOffInteractor
 participant "LogOffOutputBoundary <<Interface>>" as logOffOutputBoundary
 control "LogOffPresenter" as logOffPresenter
-participant "LogOffViewModel" as logOffViewModel
+participant "BaseViewModel" as baseViewModel
 participant "ViewModelManager" as viewModelManager
+boundary "LogOffViewModel" as logOffViewModel
 boundary "WelcomeView<WelcomeState>" as welcomeView
 
 humanStudentUser -> baseView: Request to Log off
 baseView -> logOffController: execute(RawRequestLogOffInputData)
 logOffController -> logOffInputBoundary: execute(RequestLogOffInputData)
 logOffInputBoundary -> logOffInteractor: execute(RequestLogOffInputData)
-logOffInteractor -> logOffOutputBoundary: generateConfirmationPopUp(ConfirmationPopUpOutputData)
-logOffOutputBoundary -> logOffPresenter: generateConfirmationPopUp(ConfirmationPopUpOutputData)
-logOffPresenter -> turnOnMonitoringViewModel: setState(monitoringState)
-logOffPresenter <-- turnOnMonitoringViewModel
-logOffPresenter -> turnOnMonitoringViewModel: firePropertyChange()
-turnOnMonitoringViewModel -> welcomeView: propertyChange()
-logOffPresenter <-- welcomeView
-logOffPresenter -> viewModelManager: changeView("Monitoring")
-viewModelManager -> welcomeView: switch("Monitoring")
+logOffInteractor -> logOffOutputBoundary: prepareConfirmationPopUp(ConfirmationPopUpOutputData)
+logOffOutputBoundary -> logOffPresenter: prepareConfirmationPopUp(ConfirmationPopUpOutputData)
+logOffPresenter -> baseViewModel: setState(confirmationPopUpState)
+logOffPresenter <-- baseViewModel
+logOffPresenter -> baseViewModel: firePropertyChange()
+baseViewModel -> baseView: propertyChange()
+
+== "Confirm Log Off Request" ==
+humanStudentUser -> baseView: Confirm the Log-off on the Pop-up
+baseView -> logOffController: execute(RawConfirmLogOffInputData)
+logOffController -> logOffInputBoundary: execute(ConfirmLogOffInputData)
+logOffInputBoundary -> logOffInteractor: execute(ConfirmLogOffInputData)
+logOffInteractor -> logOffOutputBoundary: logOff(LogOffOutputData)
+logOffOutputBoundary -> logOffPresenter: logOff(LogOffOutputData)
+logOffPresenter -> baseViewModel: setState(LogOffClearingState)
+logOffPresenter <-- baseViewModel
+logOffPresenter -> baseViewModel: firePropertyChange()
+baseViewModel -> baseView: propertyChange()
+baseView --> logOffPresenter
+logOffPresenter -> viewModelManager: changeView("Welcome")
+
+== "Cancel Log Off Request" ==
+
+
 
 @enduml
