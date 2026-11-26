@@ -13,6 +13,10 @@ public class Location {
         this.info = info;
     }
 
+    public Location(double latitude, double longitude) {
+        this(latitude, longitude, null);
+    }
+
     public double getLatitude() {
         return latitude;
     }
