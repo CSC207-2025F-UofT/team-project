@@ -25,8 +25,8 @@ public class WeatherData {
             if (roundedTemp % 2 != 0) {
                 roundedTemp += 1;
             }
-            int median = roundedTemp/2 - 5;
-            this.warmthLevels = List.of(median - 1, median, median + 1);
+            int level = roundedTemp/2 - 5;
+            this.warmthLevels = List.of(level, level + 2);
         }
     }
 
