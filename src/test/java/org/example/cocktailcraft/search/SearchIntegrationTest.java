@@ -1,5 +1,6 @@
 package org.example.cocktailcraft.search;
 
+import org.example.cocktailcraft.app.AppBuilder;
 import org.example.cocktailcraft.entity.Cocktail;
 import org.example.cocktailcraft.entity.Tags;
 import org.example.cocktailcraft.interface_adapter.click.ClickController;
@@ -11,17 +12,21 @@ import org.example.cocktailcraft.use_case.search.SearchDataAccessInterface;
 import org.example.cocktailcraft.use_case.search.SearchInteractor;
 import org.example.cocktailcraft.view.browse.MainPageView;
 import org.example.cocktailcraft.view.click.ClickView;
+import org.example.cocktailcraft.view.customize.CustomizeView;
 import org.example.cocktailcraft.view.search.SearchView;
 import org.junit.jupiter.api.Test;
 
 import java.awt.Component;
 import java.awt.Container;
+import java.awt.GraphicsEnvironment;
 import java.io.IOException;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JTextArea;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JList;
@@ -32,13 +37,14 @@ import javax.swing.SwingUtilities;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 /** Exercises the Search UI through its controller, interactor, presenter and shared Home list. */
 class SearchIntegrationTest {
     private final Cocktail gin = new Cocktail("gin-fizz", "Gin Fizz", List.of(),
-            new Tags(Set.of(Tags.BaseSpirit.GIN)));
+            new Tags(Set.of(Tags.BaseSpirit.GIN), Set.of(Tags.Flavor.SOUR_CITRUS)), "", 12.5);
     private final Cocktail rum = new Cocktail("daiquiri", "Daiquiri", List.of(),
-            new Tags(Set.of(Tags.BaseSpirit.RUM)));
+            new Tags(Set.of(Tags.BaseSpirit.RUM), Set.of(Tags.Flavor.SWEET)), "", 21.0);
     private final List<Cocktail> catalog = List.of(gin, rum);
 
     @Test
@@ -86,7 +92,7 @@ class SearchIntegrationTest {
             assertTrue(fixture.hasLabel("No cocktails found."));
             fixture.name().setText("  ");
             fixture.button("Search").doClick();
-            assertTrue(fixture.hasLabel("Please enter a cocktail name or select a base spirit."));
+            assertTrue(fixture.hasLabel("Please enter a cocktail name or select a filter."));
             fixture.button("Clear").doClick();
             assertTrue(fixture.hasLabel("Explore Cocktails"));
             assertEquals("", fixture.model.getState().getErrorMessage());
@@ -212,6 +218,123 @@ class SearchIntegrationTest {
         });
     }
 
+    @Test
+    void newDropdownsCombineWithNameAndSpiritAndClearResetsEverySelection() throws Exception {
+        SwingUtilities.invokeAndWait(() -> {
+            Fixture fixture = new Fixture(() -> catalog);
+            fixture.name().setText("fizz");
+            fixture.selectSpirit("Gin");
+            fixture.selectFilter("Flavors", "Sour / Citrus");
+            fixture.selectFilter("Alcohol content", "10% to below 20% ABV");
+            fixture.name().postActionEvent();
+            assertEquals(1, fixture.results().getModel().getSize());
+            assertEquals("Gin Fizz", fixture.results().getModel().getElementAt(0));
+            fixture.results().setSelectedIndex(0);
+            assertEquals("gin-fizz", fixture.selectedId.get());
+            fixture.button("Clear").doClick();
+            assertEquals("", fixture.name().getText());
+            assertTrue(fixture.search.getSelectedBaseSpirits().isEmpty());
+            assertTrue(fixture.search.getSelectedFlavors().isEmpty());
+            assertTrue(fixture.search.getSelectedAlcoholRanges().isEmpty());
+            assertTrue(fixture.button("Flavors").isEnabled());
+            assertTrue(fixture.button("Alcohol content").isEnabled());
+            assertEquals(2, fixture.results().getModel().getSize());
+        });
+    }
+
+    @Test
+    void flavorOnlyAndAlcoholOnlySearchWorkFromDropdowns() throws Exception {
+        SwingUtilities.invokeAndWait(() -> {
+            Fixture fixture = new Fixture(() -> catalog);
+            fixture.selectFilter("Flavors", "Sweet");
+            fixture.button("Search").doClick();
+            assertEquals("Daiquiri", fixture.results().getModel().getElementAt(0));
+            assertEquals(1, fixture.results().getModel().getSize());
+            fixture.button("Clear").doClick();
+            fixture.selectFilter("Alcohol content", "10% to below 20% ABV");
+            fixture.button("Search").doClick();
+            assertEquals("Gin Fizz", fixture.results().getModel().getElementAt(0));
+            assertEquals(1, fixture.results().getModel().getSize());
+        });
+    }
+
+    @Test
+    void failurePreservesNewDropdownSelectionsForRetry() throws Exception {
+        SwingUtilities.invokeAndWait(() -> {
+            AtomicInteger attempts = new AtomicInteger();
+            Fixture fixture = new Fixture(() -> {
+                if (attempts.getAndIncrement() == 0) {
+                    throw new IOException("Unavailable");
+                }
+                return catalog;
+            });
+            fixture.selectFilter("Flavors", "Sweet");
+            fixture.selectFilter("Alcohol content", "20% ABV and above");
+            fixture.button("Search").doClick();
+            assertTrue(fixture.hasLabel("Unable to load the cocktail catalog. Please try again."));
+            assertEquals(Set.of(Tags.Flavor.SWEET), fixture.search.getSelectedFlavors());
+            assertEquals(Set.of(Tags.AlcoholRange.HIGH), fixture.search.getSelectedAlcoholRanges());
+            fixture.button("Search").doClick();
+            assertEquals(1, fixture.results().getModel().getSize());
+            assertEquals("Daiquiri", fixture.results().getModel().getElementAt(0));
+        });
+    }
+
+    @Test
+    void windowPreservesFilteredRecipeAcrossDetailsAndCustomize() throws Exception {
+        assumeFalse(GraphicsEnvironment.isHeadless(), "Requires a graphical environment");
+        SwingUtilities.invokeAndWait(() -> {
+            JFrame frame = new AppBuilder().addSearchView().addSearchUseCase().addClickUseCase()
+                    .addCustomizeUseCase(() -> null).addMainPageView().build();
+            try {
+                frame.pack();
+                MainPageView home = find(frame.getContentPane(), MainPageView.class, null);
+                CustomizeView customize = find(frame.getContentPane(), CustomizeView.class, null);
+                find(home, JTextField.class, null).setText("negroni");
+                selectMenu(home, "Base spirits", "Gin");
+                selectMenu(home, "Flavors", "Bitter");
+                selectMenu(home, "Alcohol content", "20% ABV and above");
+                find(home, JButton.class, "Search").doClick();
+                JList<?> results = find(home, JList.class, null);
+                int negroniIndex = -1;
+                for (int index = 0; index < results.getModel().getSize(); index++) {
+                    if ("Negroni".equals(results.getModel().getElementAt(index))) {
+                        negroniIndex = index;
+                    }
+                }
+                assertTrue(negroniIndex >= 0, "The actual catalog must contain a matching Negroni");
+                results.setSelectedIndex(negroniIndex);
+                assertTrue(find(home, JTextArea.class, null).getText().contains("Campari"));
+                find(home, JButton.class, "Customize").doClick();
+                assertTrue(customize.isVisible());
+                assertEquals("Negroni", find(customize, JTextField.class, null).getText());
+                find(customize, JButton.class, "Cancel").doClick();
+                assertTrue(home.isVisible());
+                assertEquals("Negroni", results.getSelectedValue());
+                SearchView search = find(home, SearchView.class, null);
+                assertEquals(Set.of(Tags.Flavor.BITTER), search.getSelectedFlavors());
+                assertEquals(Set.of(Tags.AlcoholRange.HIGH), search.getSelectedAlcoholRanges());
+                find(home, JButton.class, "Clear").doClick();
+                assertEquals(663, results.getModel().getSize());
+                assertFalse(find(home, JButton.class, "Customize").isEnabled());
+            } finally {
+                frame.dispose();
+            }
+        });
+    }
+
+    private static void selectMenu(Container parent, String title, String label) {
+        JPopupMenu menu = find(parent, JButton.class, title).getComponentPopupMenu();
+        for (Component component : menu.getComponents()) {
+            JCheckBox option = (JCheckBox) component;
+            if (label.equals(option.getText())) {
+                option.doClick();
+                return;
+            }
+        }
+        throw new AssertionError("Missing filter " + title + ": " + label);
+    }
+
     private final class Fixture {
         private final SearchViewModel model = new SearchViewModel();
         private final SearchView search = new SearchView(model);
@@ -253,6 +376,22 @@ class SearchIntegrationTest {
 
         boolean hasLabel(String text) {
             return find(home, JLabel.class, text) != null;
+        }
+
+        void selectFilter(String title, String label) {
+            for (Component component : search.getComponents()) {
+                if (component instanceof JButton && ((JButton) component).getText().startsWith(title)) {
+                    JPopupMenu dropdown = ((JButton) component).getComponentPopupMenu();
+                    for (Component item : dropdown.getComponents()) {
+                        JCheckBox option = (JCheckBox) item;
+                        if (label.equals(option.getText())) {
+                            option.doClick();
+                            return;
+                        }
+                    }
+                }
+            }
+            throw new AssertionError("Missing filter " + title + ": " + label);
         }
 
         void selectSpirit(String label) {
