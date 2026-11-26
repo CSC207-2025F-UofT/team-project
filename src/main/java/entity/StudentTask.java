@@ -14,16 +14,16 @@ public class StudentTask extends Task {
     private byte completionProgress;
     private DifficultyLevel difficultyLevel;
 
-    public StudentTask(int uniqueTaskId, int uniqueUserId, String title,
-                       String description, LocalDate deadline) {
+    StudentTask(int uniqueTaskId, int uniqueUserId, String title,
+                String description, LocalDate deadline) {
         this(uniqueTaskId, uniqueUserId, title, description, deadline,
                 DEFAULT_ESTIMATED_HOURS, (byte) 0, DEFAULT_DIFFICULTY_LEVEL);
     }
 
-    public StudentTask(int uniqueTaskId, int uniqueUserId, String title,
-                       String description, LocalDate deadline,
-                       double estimatedHoursToCompleteTask, byte completionProgress,
-                       DifficultyLevel difficultyLevel) {
+    StudentTask(int uniqueTaskId, int uniqueUserId, String title,
+                String description, LocalDate deadline,
+                double estimatedHoursToCompleteTask, byte completionProgress,
+                DifficultyLevel difficultyLevel) {
         super(uniqueTaskId, uniqueUserId);
         this.title = title;
         this.description = description;
