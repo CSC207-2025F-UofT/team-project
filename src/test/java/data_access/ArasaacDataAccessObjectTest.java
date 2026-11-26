@@ -2,6 +2,7 @@ package data_access;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import entity.Pictogram;
+import entity.WordType;
 import org.junit.jupiter.api.Test;
 import use_case.customize_board.PictogramSearchException;
 
@@ -116,6 +117,39 @@ class ArasaacDataAccessObjectTest {
         assertThrows(
                 PictogramSearchException.class,
                 () -> dataAccess.searchPictograms("water"));
+    }
+
+    @Test
+    void mapsArasaacKeywordTypesToWordTypes() throws Exception {
+        String json = "["
+                + "{\"_id\":1,\"keywords\":[{\"keyword\":\"play\",\"type\":3}]},"
+                + "{\"_id\":2,\"keywords\":[{\"keyword\":\"ball\",\"type\":2}]},"
+                + "{\"_id\":3,\"keywords\":["
+                + "{\"keyword\":\"drink\",\"type\":3},"
+                + "{\"keyword\":\"water\",\"type\":2}]}"
+                + "]";
+
+        ArasaacDataAccessObject dataAccess =
+                new ArasaacDataAccessObject(
+                        request -> response(200, json),
+                        new ObjectMapper());
+
+        Pictogram play = dataAccess.searchPictograms("play").stream()
+                .filter(pictogram -> "play".equals(pictogram.getLabel()))
+                .findFirst()
+                .orElseThrow();
+        Pictogram ball = dataAccess.searchPictograms("ball").stream()
+                .filter(pictogram -> "ball".equals(pictogram.getLabel()))
+                .findFirst()
+                .orElseThrow();
+        Pictogram water = dataAccess.searchPictograms("water").stream()
+                .filter(pictogram -> "water".equals(pictogram.getLabel()))
+                .findFirst()
+                .orElseThrow();
+
+        assertEquals(WordType.ACTION, play.getType());
+        assertEquals(WordType.THING, ball.getType());
+        assertEquals(WordType.THING, water.getType());
     }
 
     private static HttpResponse<String> response(int status, String body) {
