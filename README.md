@@ -21,14 +21,10 @@
 ## Project Description
 
 CocktailCraft is a Java Swing desktop application for discovering, customizing,
-and managing cocktail recipes. Users will browse recipes, search by name and base
-spirit, view recipe details and available images, save favourites, and create
+and managing cocktail recipes. Users will browse recipes, search by name, base
+spirit, flavor, and alcohol content, view recipe details, save favourites, and create
 personal recipe variations. A personal profile will provide access to each user's
 favourites and customized recipes across application sessions.
-
-Search & Filter is implemented over the bundled catalog. See the Search demo and
-verification steps below. Some scaffold descriptions later in this document are
-historical; other feature owners maintain their implementation status.
 
 ### Domain
 
@@ -40,8 +36,8 @@ historical; other feature owners maintain their implementation status.
 
 ### User Story 1 [Qinli]
 
-As a user, I want to search for cocktails by name and/or base spirit so that I can
-find recipes that match my preferences.
+As a user, I want to search for cocktails by name, base spirit, flavor, and/or
+alcohol content so that I can find recipes that match my preferences.
 
 ### User Story 2 [Enhao]
 
@@ -66,26 +62,30 @@ As a user, I want to save my favourite cocktails so that I can easily find and r
 
 - An optional cocktail name.
 - Zero or more selected base spirits.
+- Zero or more selected flavor families.
+- Zero or more selected alcohol-content ranges.
 
 **Input Requirement**
 
-The user must enter a name, select at least one base spirit, or both.
+The user must enter a name or select at least one base spirit, flavor, or alcohol-content range.
 
 **Normal Flow**
 
-1. The user enters a name and/or selects base spirits in the Home search area.
+1. The user enters a name and/or selects base spirits, flavors, or alcohol-content ranges on Home.
 2. The user clicks Search.
 3. The system finds matching cocktails. Name matching is case-insensitive and
    supports partial matches. Space-separated keywords must all occur in the name,
-   in any order (for example, `gin tonic` matches `Gin & Tonic`). A cocktail must match every selected spirit; when both
-   name and spirit criteria are provided, both must be satisfied.
-4. The system displays matching cocktails using the same card layout as Home.
-5. The user selects a card to open Cocktail Details.
+   in any order (for example, `gin tonic` matches `Gin & Tonic`). Every selected base
+   spirit must match. Within the flavor menu, any selected family matches; within
+   the alcohol menu, any selected range matches. Different filter categories must
+   all be satisfied.
+4. The system displays matching cocktails using the existing Home list.
+5. The user selects a list entry to open Cocktail Details.
 6. The user can clear the search to return to catalog browsing.
 
 **Alternative Flows**
 
-- If neither criterion is provided, the system requests a name or base spirit.
+- If all criteria are empty, the system requests a name or filter selection.
 - If no cocktails match, the system displays “No cocktails found.”
 - If the catalog cannot be accessed, the system reports the failure and allows retry.
 
@@ -230,10 +230,10 @@ Updated favourite status
 
 | Team Member | MVP Use Case |
 |-------------|--------------|
-| Qinli | The user enters a cocktail name and/or selects one or more base spirits, then clicks Search. The system displays matching cocktail names or a message indicating missing input, no matches, or a catalog failure. |
+| Qinli | The user enters a name and/or selects base spirits, flavor families, or alcohol-content ranges. Search updates the Home list with matching recipes that can be opened in Details. Clear restores browsing. Missing input, no matches, and catalog failure have distinct messages. |
 | Enhao | The user customizes an existing cocktail recipe by changing its name, ingredients, and quantities, then saves it as a separate Custom Recipe linked to their account. Through My Custom Cocktails, the user can list, reopen, and edit their own recipes. Saved recipes remain available after restarting the application and logging in again. |
 | Jiaqi | The users register a new account, log in with their username and password, and access their personal profile to access saved cocktails. The system saves user account information so that users can log in again after restarting the application.|
-| Wenqian | The user clicks a cocktail, the system display the ingredients of it. The user click 'Favourite' button, then save this cocktail to home page.|
+| Wenqian | The user clicks a cocktail, the system display the ingredients and instructions of it. The user click 'Favourite' button, then save this cocktail to home page.|
 ---
 
 ## Entities
@@ -248,22 +248,15 @@ and contracts require team agreement before implementation.
 - `id`
 - `name`
 - `ingredients`: a list of `RecipeIngredient`
-- Planned additions: `instructions` and optional `description`.
-- Base-spirit classification and image metadata representation are not finalized.
+- `tags`
+- `instructions` 
 
 ### Entity 2
-
-**Ingredient — under discussion; no separate Class currently exists**
-
-- A stable ingredient ID and name may be needed.
-- Classification/category fields should follow the agreed Search requirements.
-
-### Entity 3
 RecipeIngredient
 - ingredient
 - unit
-- quantity
-### Entity 4
+- amount
+### Entity 3
 User
 - userId
 - userName
@@ -348,13 +341,16 @@ Other feature sequences remain owner-maintained.
 Run `org.example.cocktailcraft.app.Main`.
 
 Home loads the bundled cocktail catalog through the Search use case. Enter a
-partial name, select one or more base spirits, or combine both, then click Search
-or press Enter. Matching is case-insensitive; every name keyword and every selected spirit must match.
+partial name or select options in the Base spirits, Flavors, and Alcohol content
+checkbox dropdowns, then click Search or press Enter. Each dropdown supports
+multiple selections and displays the selected count. Matching is case-insensitive;
+every name keyword and every selected spirit must match. Any selected flavor and
+any selected alcohol range must match; different categories are combined with AND.
 Keywords do not have to be adjacent: `gin tonic` finds `Gin & Tonic` and `Gin and Tonic`.
 Results use the same list as Home. Select a result to pass its ID to Details.
-Clear resets the input and spirit selections and restores the full catalog.
+Clear resets the name and all three dropdowns and restores the full catalog.
 
-An empty query requests a name or spirit. No matches displays "No cocktails found."
+A completely empty query requests a name or filter. No matches displays "No cocktails found."
 If catalog loading fails, Home stays open with an error. Retry Search with criteria,
 or click Clear to retry loading the full catalog. Successful reads are cached for
 the application session; failed reads are retried on the next request.
@@ -367,6 +363,17 @@ the application session; failed reads are retried on the next request.
 3. Select a result and verify its Details, then Clear and verify catalog browsing.
 4. Search for `no-such-cocktail-xyz`; expect "No cocktails found."
 5. Clear, then Search with no criteria; expect the missing-input message.
+6. Select Bitter under Flavors and 20% ABV and above under Alcohol content; search
+   for `negroni` with Gin selected. Negroni should appear and remain clickable.
+7. Clear, select only Sweet and Fruity / Tropical, then Search. Results may match
+   either flavor. Clear again and verify that all dropdown counts are reset.
+
+Alcohol options are 0%, above 0% to below 10%, 10% to below 20%, 20% and above,
+and ABV not specified. They use the source recipe ABV, not a measured serving
+strength. Unknown ABV does not mean zero. Flavor families and their source tag
+mapping are documented in [Search metadata](docs/ARCHITECTURE.md#search-metadata-flavor-families-and-alcohol-ranges).
+Recipes with no mapped flavor tags do not match a selected flavor; they remain
+available when the flavor menu has no selection.
 
 Search runs offline against the 663 bundled recipes. Its data-access failure is a
 catalog failure, not a network/API failure. Runtime API integration belongs to the
@@ -376,13 +383,15 @@ Run the focused Search tests and Checkstyle checks:
 
 ```bash
 mvn test -Djava.awt.headless=true -Dtest='Search*Test' \
-  -Dcheckstyle.includes='**/search/*.java,**/SearchCocktailDataAccessObject.java'
+  -Dcheckstyle.includes='**/search/*.java,**/SearchCocktailDataAccessObject.java,**/CocktailJsonReader.java,**/Cocktail.java,**/Tags.java'
 ```
 
 Tests cover matching, collection isolation, state transitions, Enter and Clear,
 correct Details/Customize selection after filtering, startup failure and retry,
-DAO caching, and searches against the actual bundled catalog. The focused command
-limits Checkstyle to Search; normal project checks below still apply. See the
+DAO caching, flavor/ABV classification and range boundaries, multi-select filters,
+and searches against the actual bundled catalog. The focused command
+limits Checkstyle to Search and its metadata Reader/entities; normal project
+checks below still apply. See the
 [Search architecture](docs/ARCHITECTURE.md#search--filter) for dependency and
 sequence diagrams.
 
@@ -459,7 +468,7 @@ data access implementation, and tests.
 
 | Owner | Feature | Packages and Views |
 |---|---|---|
-| Qinli | Search & Filter | `use_case/search/`, `interface_adapter/search/`, `view/search/`. `SearchView.java` supports name/spirit input, Search, Enter, and Clear; see the Search documentation above. |
+| Qinli | Search & Filter | `use_case/search/`, `interface_adapter/search/`, `view/search/`. `SearchView.java` supports name input and base-spirit, flavor, and ABV dropdowns, Search, Enter, and Clear; see the Search documentation above. |
 | Enhao | Customize | `use_case/customize/`, `interface_adapter/customize/`, `view/customize/`. The View folder is empty, tracked with `.gitkeep`. |
 | Jiaqi | Profile and Account | `use_case/profile/`, `interface_adapter/profile/`, `view/profile/`. The View folder is empty, tracked with `.gitkeep`. |
 | Wenqian | Browse, Details, and Favourites | `use_case/browse/`, `interface_adapter/browse/`, `view/browse/`. `MainPageView.java` currently contains only the opening Home layout. Other Views are not created yet. |
@@ -492,7 +501,7 @@ same starting filenames. These declarations do not define final contracts.
 | `app/Main.java` | Starts the application on the Swing EDT. |
 | `app/AppBuilder.java` | Creates the JFrame and opening Home layout. Add completed feature wiring here later. |
 | `view/browse/MainPageView.java` | Displays the Home title, search area, inactive Profile button, and catalog placeholder. No catalog behaviour. |
-| `view/search/SearchView.java` | Collects name and spirit selections and calls the Search controller; Clear restores browsing. |
+| `view/search/SearchView.java` | Collects name, base-spirit, flavor, and ABV selections and calls the Search controller; Clear resets every selection and restores browsing. |
 | `entity/Cocktail.java` | Stores ID, name, and ingredients. |
 | `entity/RecipeIngredient.java` | Stores ingredient name, amount (currently String), and unit. |
 | `data_access/CocktailJsonReader.java` | Reads one recipe or the indexed dataset into shared Entities; no searching, caching, or saving. |

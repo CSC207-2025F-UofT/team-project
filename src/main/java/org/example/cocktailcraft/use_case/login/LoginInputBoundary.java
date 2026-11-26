@@ -1,4 +1,6 @@
 package org.example.cocktailcraft.use_case.login;
 
-public class LoginInputBoundary {
+public interface LoginInputBoundary {
+    void execute(LoginInputData loginInputData);
 }
+

@@ -40,6 +40,8 @@ class AppBuilderTest {
                 MainPageView home = find(frame.getContentPane(), MainPageView.class, null);
                 CustomizeView customize = find(frame.getContentPane(), CustomizeView.class, null);
                 assertTrue(find(home, JButton.class, "Base spirits").isEnabled());
+                assertTrue(find(home, JButton.class, "Flavors").isEnabled());
+                assertTrue(find(home, JButton.class, "Alcohol content").isEnabled());
                 for (String label : new String[] {"Search", "Clear"}) {
                     JButton searchButton = find(home, JButton.class, label);
                     assertTrue(searchButton.isEnabled(), label);

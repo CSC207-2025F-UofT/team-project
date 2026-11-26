@@ -86,7 +86,7 @@ sequenceDiagram
     participant Model as SearchViewModel
     participant Home as MainPageView
     User->>View: Search or Enter
-    View->>Controller: execute(name, selected spirits)
+    View->>Controller: execute(name, spirits, flavors, alcohol ranges)
     Controller->>Interactor: execute(InputData)
     Interactor->>Interactor: Validate criteria
     alt Missing criteria
@@ -95,7 +95,7 @@ sequenceDiagram
         Interactor->>DAO: getAllCocktails()
         alt Catalog available
             DAO-->>Interactor: Immutable catalog
-            Interactor->>Interactor: Every name keyword AND every spirit
+            Interactor->>Interactor: Name keywords AND all spirits AND any flavor AND any ABV range
             Interactor->>Presenter: prepareSuccessView(results)
         else Read failure
             Interactor->>Presenter: prepareFailureView(retry message)
@@ -117,3 +117,82 @@ Search results reuse Home's current list presentation; Search does not implement
 a separate card design or change Details/Customize business rules. Home passes
 the ID from the displayed results to the existing Details controller and passes
 the same selected entity to the existing Customize action.
+
+### Search metadata: flavor families and alcohol ranges
+
+The Reader now retains optional source `abv` as a `Double` on Cocktail and maps
+explicit source flavor tags into `Tags.Flavor`. SearchInputData retains immutable
+snapshots of selected spirits, flavors, and alcohol ranges. The SearchController
+keeps its existing two-argument execute overload for compatibility, and its new
+four-argument overload passes all criteria to the Interactor. Existing Cocktail
+and Tags constructors still work, with unknown ABV and an empty flavor set. Existing ingredient, base-spirit and instruction loading
+remains unchanged.
+
+| Flavor family | Source tags (case-insensitive) |
+|---|---|
+| Sweet | Sweet, Dessert |
+| Sour / Citrus | Sour, Citrusy |
+| Fruity / Tropical | Fruity, Tropical |
+| Bitter | Bitter |
+| Herbal / Floral | Herbal, Herbacious, Herbaceous, Floral, Minty |
+| Smoky / Spicy | Smokey, Smoky, Spicy |
+| Coffee / Nutty | Coffee, Nutty |
+| Savory | Savory, Savoury, Briny |
+| Dry | Dry |
+
+Each recipe can belong to multiple families. Missing or null tags produce an
+empty flavor set. Season, IBA status, recipe family and unrecognized tags do not
+imply flavor. Original bundled JSON is not edited.
+
+`Tags.AlcoholRange` classifies the recorded ABV percentage: ZERO is exactly 0,
+LOW is greater than 0 and less than 10, MEDIUM is at least 10 and less than 20,
+and HIGH is at least 20 (up to 100). UNKNOWN represents a missing or null value,
+not zero. These are application-defined intervals, not source categories.
+Non-numeric, non-finite and out-of-range percentages are rejected as catalog
+read failures. The pinned dataset yields 12 ZERO, 79 LOW, 287 MEDIUM, 283 HIGH,
+and 2 UNKNOWN recipes.
+
+Reader and domain tests cover boundaries, aliases, immutable sets, legacy
+constructors, missing metadata, malformed metadata and the full 663-recipe
+snapshot. Flavor metadata remains unknown when a source recipe has no explicit
+flavor labels; it is not inferred from its ingredients.
+
+The SearchView uses the same checkbox-popup behavior for all three dropdowns.
+A small generic helper creates the options and selected-count labels; labels stay
+in the View rather than the entity enums. Search and Enter share one submission
+method. Clear resets all options and counts before calling the existing clear
+use case. Loading failures leave the selected filters intact for retry.
+
+The Interactor accepts any nonempty criterion: name, spirits, flavors, or alcohol
+ranges. Name keywords and all selected spirits must match. Selected flavors use
+OR within their menu, and selected alcohol ranges use OR within their menu; the
+four categories use AND across menus. An empty menu adds no restriction. Unknown
+ABV matches only UNKNOWN when a range is selected. Missing flavor metadata never
+implies a flavor. Existing Home result rendering and Details/Customize selection
+are reused without changing those features' business logic.
+
+### Search acceptance checks
+
+| Behavior | Automated evidence |
+|---|---|
+| Source tags, aliases, missing values and all 663 recipes | SearchMetadataReaderTest |
+| ABV boundaries, old constructors and immutable metadata | SearchClassificationTest |
+| Multi-keyword names, all selected spirits, validation and read retry | SearchInteractorTest |
+| Flavor/range OR, category AND, unknown versus zero ABV and immutable criteria | SearchFilterTest |
+| Independent checkbox selection, deselection and count labels | SearchViewTest |
+| Search/Enter, Clear, preserved filters on retry and correct result IDs | SearchIntegrationTest |
+| Actual window filters Negroni, opens Details/Customize and returns Home | SearchIntegrationTest.windowPreservesFilteredRecipeAcrossDetailsAndCustomize |
+| Startup navigation and new controls connected | AppBuilderTest |
+
+The window tests use a real JFrame and are skipped in headless mode. On a desktop,
+they can be run with the following command; no recipes are saved by these tests:
+
+```bash
+mvn test -Djava.awt.headless=false -Dtest=SearchIntegrationTest,AppBuilderTest \
+  -Dcheckstyle.includes='**/search/*.java,**/AppBuilderTest.java'
+```
+
+The focused command checks Search code and the startup test, and deliberately
+does not waive the team's full-repository Checkstyle requirement. Other owners'
+existing style violations must be resolved before the normal unfiltered Maven
+checks can pass. See README for the complete manual Search demo.
