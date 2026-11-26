@@ -1,5 +1,7 @@
 package org.example.cocktailcraft.view.click;
 
+import org.example.cocktailcraft.view.language.I18n;
+import org.example.cocktailcraft.view.language.Language;
 import java.awt.BorderLayout;
 import java.util.List;
 
@@ -14,17 +16,23 @@ import org.example.cocktailcraft.interface_adapter.click.ClickViewModelListener;
 import org.example.cocktailcraft.interface_adapter.click.ClickState;
 
 public class ClickView extends JPanel implements ClickViewModelListener {
+    private final I18n i18n;
     private final ClickViewModel clickViewModel;
     private final JLabel errorLabel;
     private final JTextArea ingredientsArea;
     private final JTextArea instructionsArea;
 
     public ClickView(ClickViewModel clickViewModel) {
+        this(clickViewModel, new I18n(Language.ENGLISH));
+    }
+
+    public ClickView(ClickViewModel clickViewModel, I18n i18n) {
+        this.i18n = i18n;
         this.clickViewModel = clickViewModel;
         this.clickViewModel.addListener(this);
         setLayout(new BorderLayout(10, 10));
 
-        JLabel title = new JLabel("Cocktail Details");
+        JLabel title = new JLabel(i18n.text("details"));
         ingredientsArea = new JTextArea();
         instructionsArea = new JTextArea(6, 30);
         errorLabel = new JLabel();
@@ -33,10 +41,10 @@ public class ClickView extends JPanel implements ClickViewModelListener {
         instructionsArea.setEditable(false);
         instructionsArea.setLineWrap(true);
         instructionsArea.setWrapStyleWord(true);
-        instructionsArea.getAccessibleContext().setAccessibleName("Instructions");
+        instructionsArea.getAccessibleContext().setAccessibleName(i18n.text("instructions"));
 
         JPanel instructionsPanel = new JPanel(new BorderLayout(5, 5));
-        instructionsPanel.add(new JLabel("Instructions:"), BorderLayout.NORTH);
+        instructionsPanel.add(new JLabel(i18n.text("instructions.label")), BorderLayout.NORTH);
         instructionsPanel.add(new JScrollPane(instructionsArea), BorderLayout.CENTER);
         JSplitPane details = new JSplitPane(
                 JSplitPane.VERTICAL_SPLIT,
@@ -56,7 +64,7 @@ public class ClickView extends JPanel implements ClickViewModelListener {
         ClickState state = clickViewModel.getState();
         String error = state.getCocktailError();
         if (error != null) {
-            errorLabel.setText(error);
+            errorLabel.setText(i18n.message(error));
             ingredientsArea.setText("");
             instructionsArea.setText("");
         } else {

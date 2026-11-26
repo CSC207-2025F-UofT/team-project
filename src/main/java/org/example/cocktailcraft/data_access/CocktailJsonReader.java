@@ -23,10 +23,20 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.EnumSet;
 import java.util.Set;
+import java.util.function.UnaryOperator;
 
 public class CocktailJsonReader implements ClickDataAccessInterface {
     public static final String DATASET_INDEX = "/bar-assistant/cocktail-index.txt";
     private final Map<String, String> ingredientParents = new HashMap<>();
+    private final UnaryOperator<Cocktail> translate;
+
+    public CocktailJsonReader() {
+        this(UnaryOperator.identity());
+    }
+
+    public CocktailJsonReader(UnaryOperator<Cocktail> translate) {
+        this.translate = translate;
+    }
 
     /** Reads the bundled dataset once per call; callers should retain the result. */
     public List<Cocktail> readAll() throws IOException {
@@ -80,7 +90,7 @@ public class CocktailJsonReader implements ClickDataAccessInterface {
                 ));
             }
 
-            return new Cocktail(id, name, ingredients, new Tags(baseSpirits), instructions);
+            return translate.apply(new Cocktail(id, name, ingredients, new Tags(baseSpirits), instructions));
         } catch (JsonParseException | IllegalStateException | NullPointerException
                  | UnsupportedOperationException exception) {
             throw new IOException("Invalid cocktail JSON: " + resourcePath, exception);

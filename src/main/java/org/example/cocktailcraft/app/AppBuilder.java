@@ -1,6 +1,9 @@
 package org.example.cocktailcraft.app;
 
+import org.example.cocktailcraft.view.language.I18n;
+import org.example.cocktailcraft.view.language.Language;
 import org.example.cocktailcraft.data_access.CocktailJsonReader;
+import org.example.cocktailcraft.data_access.RecipeTranslations;
 import org.example.cocktailcraft.data_access.SearchCocktailDataAccessObject;
 import org.example.cocktailcraft.entity.Cocktail;
 import org.example.cocktailcraft.interface_adapter.click.ClickController;
@@ -9,7 +12,6 @@ import org.example.cocktailcraft.interface_adapter.click.ClickViewModel;
 import org.example.cocktailcraft.interface_adapter.search.SearchController;
 import org.example.cocktailcraft.interface_adapter.search.SearchPresenter;
 import org.example.cocktailcraft.interface_adapter.search.SearchViewModel;
-import org.example.cocktailcraft.use_case.click.ClickDataAccessInterface;
 import org.example.cocktailcraft.use_case.click.ClickInputBoundary;
 import org.example.cocktailcraft.use_case.click.ClickInteractor;
 import org.example.cocktailcraft.use_case.click.ClickOutputBoundary;
@@ -35,9 +37,24 @@ import java.nio.file.Path;
 import java.util.function.Supplier;
 import java.awt.CardLayout;
 import javax.swing.JPanel;
+import javax.swing.JLabel;
+import java.awt.BorderLayout;
 import javax.swing.JFrame;
 
 public class AppBuilder {
+    private final I18n i18n;
+    private final CocktailJsonReader catalogReader;
+
+    public AppBuilder() {
+        this(Language.ENGLISH);
+    }
+
+    public AppBuilder(Language language) {
+        i18n = new I18n(language);
+        RecipeTranslations translations = new RecipeTranslations(language.getLocale().getLanguage());
+        catalogReader = new CocktailJsonReader(translations::translate);
+    }
+
     private SearchViewModel searchViewModel;
     private SearchView searchView;
     private MainPageView mainPageView;
@@ -50,13 +67,13 @@ public class AppBuilder {
 
     public AppBuilder addSearchView() {
         searchViewModel = new SearchViewModel();
-        searchView = new SearchView(searchViewModel);
+        searchView = new SearchView(searchViewModel, i18n);
         return this;
     }
 
     public AppBuilder addSearchUseCase() {
         try {
-            this.cocktails = new CocktailJsonReader().readAll();
+            this.cocktails = catalogReader.readAll();
         } catch (IOException exception) {
             throw new UncheckedIOException(exception);
         }
@@ -79,16 +96,13 @@ public class AppBuilder {
 
     public AppBuilder addClickUseCase() {
         clickViewModel = new ClickViewModel();
-        clickView = new ClickView(clickViewModel);
-
-        final ClickDataAccessInterface clickDataAccessObject =
-                new CocktailJsonReader();
+        clickView = new ClickView(clickViewModel, i18n);
 
         final ClickOutputBoundary clickOutputBoundary =
                 new ClickPresenter(clickViewModel);
 
         final ClickInputBoundary clickInteractor =
-                new ClickInteractor(clickDataAccessObject, clickOutputBoundary);
+                new ClickInteractor(catalogReader, clickOutputBoundary);
 
         clickController = new ClickController(clickInteractor);
 
@@ -99,7 +113,7 @@ public class AppBuilder {
         mainPageView = new MainPageView(searchView,
                 cocktails,
                 clickController,
-                clickView);
+                clickView, i18n);
         return this;
     }
 
@@ -123,7 +137,8 @@ public class AppBuilder {
         customizeView = new CustomizeView(
                 customizeViewModel,
                 controller,
-                currentUserId
+                currentUserId,
+                i18n
         );
 
         return this;
@@ -160,7 +175,10 @@ public class AppBuilder {
             cardLayout.show(pages, "home");
         });
 
-        frame.setContentPane(pages);
+        final JPanel content = new JPanel(new BorderLayout());
+        content.add(pages, BorderLayout.CENTER);
+        content.add(new JLabel(i18n.text("language.current", i18n.getLanguage())), BorderLayout.SOUTH);
+        frame.setContentPane(content);
         cardLayout.show(pages, "home");
 
         return frame;

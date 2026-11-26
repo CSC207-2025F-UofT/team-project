@@ -1,5 +1,7 @@
 package org.example.cocktailcraft.view.customize;
 
+import org.example.cocktailcraft.view.language.I18n;
+import org.example.cocktailcraft.view.language.Language;
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.util.ArrayList;
@@ -25,6 +27,7 @@ import org.example.cocktailcraft.interface_adapter.customize.CustomizeController
 
 public class CustomizeView extends JPanel implements CustomizeViewModelListener {
 
+    private final I18n i18n;
     private final CustomizeViewModel viewModel;
 
     private final CustomizeController controller;
@@ -34,18 +37,12 @@ public class CustomizeView extends JPanel implements CustomizeViewModelListener 
     private final JTextField nameInputField = new JTextField(25);
     private final JTextArea instructionsInputArea = new JTextArea(6, 40);
 
-    private final DefaultTableModel ingredientModel =
-            new DefaultTableModel(
-                    new String[] {"Ingredient", "Quantity", "Unit"},
-                    0
-            );
-
-    private final JTable ingredientTable = new JTable(ingredientModel);
-
-    private final JButton addButton = new JButton("Add Ingredient");
-    private final JButton removeButton = new JButton("Remove Selected");
-    private final JButton saveButton = new JButton("Save");
-    private final JButton cancelButton = new JButton("Cancel");
+    private final DefaultTableModel ingredientModel;
+    private final JTable ingredientTable;
+    private final JButton addButton;
+    private final JButton removeButton;
+    private final JButton saveButton;
+    private final JButton cancelButton;
 
     private final JLabel messageLabel = new JLabel(" ");
 
@@ -54,6 +51,23 @@ public class CustomizeView extends JPanel implements CustomizeViewModelListener 
             CustomizeController controller,
             Supplier<String> currentUserId) {
 
+        this(viewModel, controller, currentUserId, new I18n(Language.ENGLISH));
+    }
+
+    public CustomizeView(
+            CustomizeViewModel viewModel,
+            CustomizeController controller,
+            Supplier<String> currentUserId,
+            I18n i18n) {
+
+        this.i18n = i18n;
+        ingredientModel = new DefaultTableModel(
+                new String[] {i18n.text("ingredient"), i18n.text("quantity"), i18n.text("unit")}, 0);
+        ingredientTable = new JTable(ingredientModel);
+        addButton = new JButton(i18n.text("ingredient.add"));
+        removeButton = new JButton(i18n.text("ingredient.remove"));
+        saveButton = new JButton(i18n.text("save"));
+        cancelButton = new JButton(i18n.text("cancel"));
         this.viewModel = viewModel;
         this.controller = controller;
         this.currentUserId = currentUserId;
@@ -62,10 +76,10 @@ public class CustomizeView extends JPanel implements CustomizeViewModelListener 
         setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
 
         JPanel header = new JPanel(new BorderLayout(10, 10));
-        header.add(new JLabel("Customize Cocktail"), BorderLayout.NORTH);
+        header.add(new JLabel(i18n.text("customize.title")), BorderLayout.NORTH);
 
         JPanel namePanel = new JPanel(new BorderLayout(10, 0));
-        namePanel.add(new JLabel("Recipe name:"), BorderLayout.WEST);
+        namePanel.add(new JLabel(i18n.text("recipe.name")), BorderLayout.WEST);
         namePanel.add(nameInputField, BorderLayout.CENTER);
 
         header.add(namePanel, BorderLayout.CENTER);
@@ -74,10 +88,10 @@ public class CustomizeView extends JPanel implements CustomizeViewModelListener 
         ingredientTable.setFillsViewportHeight(true);
         instructionsInputArea.setLineWrap(true);
         instructionsInputArea.setWrapStyleWord(true);
-        instructionsInputArea.getAccessibleContext().setAccessibleName("Instructions");
+        instructionsInputArea.getAccessibleContext().setAccessibleName(i18n.text("instructions"));
 
         JPanel instructionsPanel = new JPanel(new BorderLayout(5, 5));
-        JLabel instructionsLabel = new JLabel("Instructions:");
+        JLabel instructionsLabel = new JLabel(i18n.text("instructions.label"));
         instructionsLabel.setLabelFor(instructionsInputArea);
         instructionsPanel.add(instructionsLabel, BorderLayout.NORTH);
         instructionsPanel.add(new JScrollPane(instructionsInputArea), BorderLayout.CENTER);
@@ -122,7 +136,7 @@ public class CustomizeView extends JPanel implements CustomizeViewModelListener 
 
             if (selectedRows.length == 0) {
                 messageLabel.setText(
-                        "Please select an ingredient to remove."
+                        i18n.text("ingredient.select")
                 );
                 return;
             }
@@ -205,9 +219,9 @@ public class CustomizeView extends JPanel implements CustomizeViewModelListener 
         }
 
         if (state.getErrorMessage() != null) {
-            messageLabel.setText(state.getErrorMessage());
+            messageLabel.setText(i18n.message(state.getErrorMessage()));
         } else if (state.isSaved()) {
-            messageLabel.setText("Recipe saved successfully.");
+            messageLabel.setText(i18n.text("recipe.saved"));
         } else {
             messageLabel.setText(" ");
         }
