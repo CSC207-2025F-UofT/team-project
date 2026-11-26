@@ -1,0 +1,5 @@
+package user_case.change_password;
+
+public interface ChangePasswordInputBoundary {
+    void execute(ChangePasswordInputData changePasswordInputData);
+}
