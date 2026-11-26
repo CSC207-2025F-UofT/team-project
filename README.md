@@ -13,7 +13,7 @@
 
 ### Domain
 
-**Augmentative and Alternative Communication (AAC).** AACorn is a Java Swing application for autistic children aged approximately 5–12 with limited functional speech. Children build and speak requests using pictograms (e.g., `I want` → `water` → “I want water”). Caregivers customize vocabulary, review history and suggestions, and manage access through a PIN. The scope is functional communication, not clinical assessment or therapy.
+**Augmentative and Alternative Communication (AAC).** AACorn is a Java Swing application for autistic children aged approximately 5–12 with limited functional speech. Children build and speak requests using pictograms (e.g., `I want` → `water` → “I want water”). Actions can have optional linked things (e.g., `play` → `ball`), so the child can also say “I want to play ball” without the board needing a tile for every noun. Caregivers customize vocabulary, review history and suggestions, and manage access through a PIN. The scope is functional communication, not clinical assessment or therapy.
 
 <p align="center">
   <img src="docs/images/aacorn-mascot.png" width="420" alt="AACorn mascot">
@@ -49,6 +49,7 @@
 
 **Extensions:**
 - **2a.** A repeated selection is appended as a separate occurrence.
+- **2b.** If the selected pictogram is an action with linked things, the system also offers those things as optional follow-ups (e.g., `play` → `ball`, `toy`); the child may pick one or stop at the action (“I want to play”).
 - **3a.** The child removes a selection; the system updates the preview.
 - **3b.** The child clears or abandons the draft; no completed message is recorded.
 
@@ -63,13 +64,14 @@
 1. The system displays the current board.
 2. The caregiver requests a pictogram search and supplies a keyword.
 3. The system displays matching pictograms.
-4. The caregiver selects a pictogram to add.
-5. The system validates, saves and displays the updated board.
+4. The caregiver selects a pictogram and either adds it to the board as an action or a thing, or links it as a thing to a selected action on the board.
+5. The system validates, saves and displays the updated board and links.
 
 **Extensions:**
-- **2a.** The caregiver selects an existing pictogram to remove; the system removes it and saves the board.
+- **2a.** The caregiver selects an existing pictogram to remove; the system removes it (and, for an action, its links) and saves the board.
 - **3a.** No matches or an API error: the system reports the result; the board is unchanged.
 - **5a.** Duplicate selection or capacity reached: the system rejects the addition; the board is unchanged.
+- **5b.** Linking: only a thing can be linked, only to an action on the board, at most six things per action and no duplicates; otherwise the system rejects the link.
 
 ### UC3 – Speak a Message
 
@@ -150,18 +152,20 @@ Each lead owns the use-case interactor, boundaries, controller, presenter, UI in
 
 See the UML class diagram below for the actual instance variables and relevant methods on `main`.
 
-- **`Pictogram`:** Immutable symbol; equality is based on its ID.
-- **`CommunicationBoard`:** Ordered, duplicate-free vocabulary; default capacity is six (configurable).
+- **`Pictogram`:** Immutable symbol with a `WordType`; equality and hash code are based on its ID.
+- **`WordType`:** `ACTION` (a verb such as *play*) or `THING` (a noun such as *ball*).
+- **`CommunicationBoard`:** Ordered, duplicate-free vocabulary of actions and things; default capacity is six (configurable).
+- **`LinkedVocabulary`:** Optional follow-ups for actions (e.g., *play* → *ball*, *toy*): only things can be linked, only to actions, at most six per action. Kept separate from the board, so the board itself is unchanged.
 - **`CommunicationDraft`:** Temporary ordered selections; permits repetition and rejects building an empty message.
 - **`CommunicationMessage`:** Immutable, non-empty completed message with text and timestamp.
-- **`ChildProfile`:** One board and append-only history; one child per installation.
+- **`ChildProfile`:** One board, its linked vocabulary and append-only history; one child per installation.
 
 
 ## API Usage
 
 **API Name:** ARASAAC Data API  
 **Documentation:** [ARASAAC Data API](https://developers.arasaac.org/data-api)  
-**How it is used in the program:** Search English pictograms by keyword; parse JSON metadata into `Pictogram` objects with IDs, labels and image URLs. `ArasaacDataAccessObject` implements `PictogramSearchDataAccessInterface` and handles empty results and request failures.  
+**How it is used in the program:** Search English pictograms by keyword; parse JSON metadata into `Pictogram` objects with IDs, labels, image URLs and word types. The label and type come from the same keyword entry (the one matching the search term, otherwise the first keyword): ARASAAC type 3 (verb) becomes `ACTION`; type 2 (noun), any other type or a missing type becomes `THING`. `ArasaacDataAccessObject` implements `PictogramSearchDataAccessInterface` and handles empty results and request failures.  
 **Status:** HTTP request construction and response handling have unit tests using simulated HTTP responses. A successful live call is not yet documented; the adapter is not wired into the Swing search screen on `main`.
 
 ## Design Diagrams
@@ -170,13 +174,22 @@ See the UML class diagram below for the actual instance variables and relevant m
 
 ```mermaid
 classDiagram
+    class WordType {
+        <<enumeration>>
+        ACTION
+        THING
+    }
     class Pictogram {
         -int id
         -String label
         -String imageLocation
+        -WordType type
         +getId() int
         +getLabel() String
         +getImageLocation() String
+        +getType() WordType
+        +isAction() boolean
+        +isThing() boolean
         +equals(Object) boolean
         +hashCode() int
         +toString() String
@@ -192,6 +205,17 @@ classDiagram
         +size() int
         +getCapacity() int
         +getPictograms() List~Pictogram~
+    }
+    class LinkedVocabulary {
+        +int MAX_THINGS_PER_ACTION$
+        -Map~Pictogram, List~ links
+        +link(Pictogram action, Pictogram thing) void
+        +unlink(Pictogram action, Pictogram thing) void
+        +removeAllLinks(Pictogram action) void
+        +removeLinksNotOn(CommunicationBoard) void
+        +getThings(Pictogram action) List~Pictogram~
+        +hasThings(Pictogram action) boolean
+        +getLinkedActions() List~Pictogram~
     }
     class CommunicationDraft {
         -String sentenceStarter
@@ -217,15 +241,20 @@ classDiagram
     }
     class ChildProfile {
         -CommunicationBoard board
+        -LinkedVocabulary links
         -List~CommunicationMessage~ history
         +getBoard() CommunicationBoard
+        +getLinks() LinkedVocabulary
         +addMessage(CommunicationMessage) void
         +getHistory() List~CommunicationMessage~
         +hasHistory() boolean
     }
     ChildProfile --> "1" CommunicationBoard : board
+    ChildProfile --> "1" LinkedVocabulary : links
     ChildProfile --> "0..*" CommunicationMessage : history
     CommunicationBoard --> "0..*" Pictogram : vocabulary
+    LinkedVocabulary --> "0..*" Pictogram : action to things
+    Pictogram --> "1" WordType : type
     CommunicationDraft --> "0..*" Pictogram : selections
     CommunicationMessage --> "1..*" Pictogram : selections
     CommunicationDraft ..> CommunicationMessage : builds
@@ -268,7 +297,7 @@ Run the unit tests from the repository root:
 mvn clean test
 ```
 
-The current GUI supports navigation and viewing sample history. Board buttons, Help/Stop/Break, speech and PIN access are prototypes; customization/search screens are placeholders.
+The current GUI lets the child build a request from the board's pictograms (UC1) and lets the caregiver view sample history (UC4). Help/Stop/Break, speech and PIN access are prototypes; customization/search and suggestion screens are still on feature branches.
 
 ## Notes
 
