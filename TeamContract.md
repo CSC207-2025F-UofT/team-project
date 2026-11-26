@@ -58,4 +58,9 @@ By signing below, we acknowledge that we have read, discussed, and agreed to the
 
 Team Member Signatures:
 
-(type names here)
+Syaikha Faiza Arifin
+Yuxuan Lin
+Mehal Patel
+Grace Natalia Manurung
+Frank Li
+Zhanyuan Su
