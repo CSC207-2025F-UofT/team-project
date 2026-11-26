@@ -2,21 +2,24 @@ package entity;
 
 import java.time.LocalDate;
 
-public class StudentTaskFactory extends TaskFactory{
-    public StudentTaskFactory(int nextUniqueId){
-        super(nextUniqueId);
+public class StudentTaskFactory extends TaskFactory {
+    private final int uniqueUserId;
+
+    public StudentTaskFactory(int nextTaskUniqueId, int uniqueUserId) {
+        super(nextTaskUniqueId);
+        this.uniqueUserId = uniqueUserId;
     }
 
-    @Override
-    public StudentTask createTask(int uniqueUserId, String title, String description, LocalDate deadline, double estimatedHoursToCompleteTask, int completionProgress, byte difficultyLevel) {
-        if (!StudentTask.inputValidation(
-                uniqueUserId, deadline,
-                estimatedHoursToCompleteTask, completionProgress)) {
-            throw new IllegalArgumentException("Invalid task input.");
-        }
+    public StudentTask createStudentTask(String title,
+                                         String description,
+                                         LocalDate deadline,
+                                         double estimatedHoursToCompleteTask,
+                                         byte completionProgress,
+                                         DifficultyLevel difficultyLevel) {
+        int taskId = generateNextTaskUniqueId();
 
-        int taskId = generateTaskId();
-
-        return new StudentTask(taskId, uniqueUserId, title, description, deadline, estimatedHoursToCompleteTask, (byte) completionProgress, difficultyLevel);
+        return new StudentTask(taskId, uniqueUserId, title, description,
+                deadline, estimatedHoursToCompleteTask,
+                completionProgress, difficultyLevel);
     }
 }

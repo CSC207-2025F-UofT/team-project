@@ -1,17 +1,13 @@
 package entity;
 
-import java.time.LocalDate;
-
 public abstract class TaskFactory {
-    private int nextUniqueId;
+    private int nextTaskUniqueId;
 
-    protected TaskFactory(int nextUniqueId){
-        this.nextUniqueId = nextUniqueId;
+    protected TaskFactory(int nextTaskUniqueId) {
+        this.nextTaskUniqueId = nextTaskUniqueId;
     }
 
-    protected int generateTaskId(){
-        return nextUniqueId ++;
+    protected int generateNextTaskUniqueId() {
+        return nextTaskUniqueId++;
     }
-
-    public abstract Task createTask(int uniqueUserID, String title, String description, LocalDate deadline, double estimatedHoursToCompleteTask, int completionProgress, byte difficultyLevel);
 }
