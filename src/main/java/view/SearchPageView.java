@@ -168,6 +168,10 @@ public class SearchPageView extends JPanel implements ActionListener, SearchView
         favourites.addActionListener(event -> action.run());
     }
 
+    public void onOpenWatchlist(Runnable action) {
+        watchlist.addActionListener(event -> action.run());
+    }
+
     public void setSearchController(SearchController searchController) {
         this.searchController = searchController;
     }

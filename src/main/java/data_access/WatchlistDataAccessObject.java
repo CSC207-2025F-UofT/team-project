@@ -4,6 +4,7 @@ import entity.WatchlistMovie;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import user_case.AddToWatchlist.AddToWatchlistDataAccessInterface;
+import user_case.ViewWatchlist.ViewWatchlistDataAccessInterface;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -21,7 +22,8 @@ import java.util.Map;
  * TMDB has no concept of this app's own user accounts, so the watchlist is
  * not fetched from the TMDB API -- it is data this app owns and persists itself.
  */
-public class WatchlistDataAccessObject implements AddToWatchlistDataAccessInterface {
+public class WatchlistDataAccessObject implements AddToWatchlistDataAccessInterface,
+        ViewWatchlistDataAccessInterface {
 
     private final File file;
     private final Map<String, List<WatchlistMovie>> watchlist = new LinkedHashMap<>();
@@ -45,6 +47,11 @@ public class WatchlistDataAccessObject implements AddToWatchlistDataAccessInterf
     public void addToWatchlist(String username, WatchlistMovie movie) {
         watchlist.computeIfAbsent(username, key -> new ArrayList<>()).add(movie);
         save();
+    }
+
+    @Override
+    public List<WatchlistMovie> getWatchlist(String username) {
+        return new ArrayList<>(watchlist.getOrDefault(username, List.of()));
     }
 
     private void load() {

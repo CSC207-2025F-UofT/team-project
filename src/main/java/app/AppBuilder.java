@@ -23,6 +23,14 @@ import data_access.MovieDetailDataAccessObject;
 import interface_adapter.MovieDetail.*;
 import user_case.MovieDetail.*;
 import view.MovieDetailView;
+import data_access.WatchlistDataAccessObject;
+import entity.WatchlistMovieFactory;
+import interface_adapter.AddToWatchlist.*;
+import interface_adapter.ViewWatchlist.*;
+import user_case.AddToWatchlist.*;
+import user_case.ViewWatchlist.*;
+import view.WatchlistPageView;
+import java.io.File;
 
 import javax.swing.*;
 import java.awt.*;
@@ -36,6 +44,9 @@ public class AppBuilder {
     private final UserFactory userFactory = new UserFactory();
     private SearchedResultsPageView resultView;
     private MovieDetailController movieDetailController;
+    private AddToWatchlistController addToWatchlistController;
+    private ViewWatchlistController viewWatchlistController;
+    private String watchlistReturnView = SearchBarViewModel.VIEW_NAME;
 
     //view models
     private final LoginViewModel loginViewModel = new LoginViewModel();
@@ -97,6 +108,7 @@ public class AppBuilder {
         //homepage
         SearchPageView searchView = new SearchPageView(searchViewModel);
         searchView.setSearchController(controller);
+        searchView.onOpenWatchlist(() -> openWatchlist(SearchBarViewModel.VIEW_NAME));
         views.add(searchView, SearchBarViewModel.VIEW_NAME);
 
         //display search result
@@ -109,6 +121,9 @@ public class AppBuilder {
                     resultView = new SearchedResultsPageView(searchedViewModel);
                     resultView.setSearchController(controller);
                     resultView.setMovieDetailController(movieDetailController);
+                    resultView.setAddToWatchlistController(addToWatchlistController);
+                    resultView.setUsername(loggedInViewModel.getState().getUsername());
+                    resultView.onOpenWatchlist(() -> openWatchlist(SearchedViewModel.VIEW_NAME));
 
                     views.add(resultView, SearchedViewModel.VIEW_NAME);
                     cardLayout.show(views, SearchedViewModel.VIEW_NAME);
@@ -143,6 +158,53 @@ public class AppBuilder {
             popup.setVisible(true);
         });
         return this;
+    }
+
+    //watchlist use cases (add to watchlist + view watchlist)
+    public AppBuilder addWatchlistUseCases() {
+        File file = new File(System.getProperty("user.home"), ".flicksy/watchlist.json");
+        file.getParentFile().mkdirs();
+        WatchlistDataAccessObject dataAccess = new WatchlistDataAccessObject(file.getPath());
+
+        //view watchlist
+        WatchlistViewModel watchlistViewModel = new WatchlistViewModel();
+        ViewWatchlistOutputBoundary viewPresenter = new ViewWatchlistPresenter(watchlistViewModel);
+        ViewWatchlistInputBoundary viewInteractor = new ViewWatchlistInteractor(dataAccess, viewPresenter);
+        viewWatchlistController = new ViewWatchlistController(viewInteractor);
+
+        WatchlistPageView watchlistView = new WatchlistPageView(watchlistViewModel);
+        watchlistView.setViewWatchlistController(viewWatchlistController);
+
+        //page + back button
+        JButton backButton = new JButton("Back");
+        backButton.addActionListener(e -> cardLayout.show(views, watchlistReturnView));
+        JPanel watchlistPage = new JPanel(new BorderLayout());
+        watchlistPage.add(backButton, BorderLayout.NORTH);
+        watchlistPage.add(watchlistView, BorderLayout.CENTER);
+        views.add(watchlistPage, WatchlistViewModel.VIEW_NAME);
+
+        //add to watchlist
+        AddToWatchlistViewModel addViewModel = new AddToWatchlistViewModel();
+        AddToWatchlistOutputBoundary addPresenter = new AddToWatchlistPresenter(addViewModel);
+        AddToWatchlistInputBoundary addInteractor =
+                new AddToWatchlistInteractor(dataAccess, addPresenter, new WatchlistMovieFactory());
+        addToWatchlistController = new AddToWatchlistController(addInteractor);
+
+        //show confirmation / error after "Add to Watchlist" is clicked
+        addViewModel.addListener(state -> JOptionPane.showMessageDialog(views, state.getMessage(),
+                "Watchlist", state.isSuccess()
+                        ? JOptionPane.INFORMATION_MESSAGE : JOptionPane.WARNING_MESSAGE));
+        return this;
+    }
+
+    //open watchlist page for the logged-in user
+    private void openWatchlist(String returnView) {
+        if (viewWatchlistController == null) {
+            return;
+        }
+        watchlistReturnView = returnView;
+        viewWatchlistController.execute(loggedInViewModel.getState().getUsername());
+        cardLayout.show(views, WatchlistViewModel.VIEW_NAME);
     }
 
     //build app
