@@ -11,8 +11,10 @@ import de.articdive.jnoise.generators.noise_parameters.fade_functions.FadeFuncti
 import de.articdive.jnoise.pipeline.JNoise;
 
 public class TerrainGenerator {
+    public TerrainMap map;
+
     // Same settings and seed always produce the same map.
-    public TerrainMap generate(GenerationSettings settings) {
+    public void generate(GenerationSettings settings) {
         TerrainMap map = new TerrainMap(settings.world.mapWidth(), settings.world.mapHeight());
 
         long seed = settings.seed;
@@ -74,7 +76,7 @@ public class TerrainGenerator {
             feature.apply(map, new Random(settings.seed * 31 + i));
         }
 
-        return map;
+        this.map = map;
     }
 
     public double squareParabola(double x, double y, double radius, double slope, double roundness,

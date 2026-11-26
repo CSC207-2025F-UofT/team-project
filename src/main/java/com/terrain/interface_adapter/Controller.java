@@ -40,6 +40,7 @@ public class Controller {
 
     // "Generate" button.
     public void onGenerate() {
-        mapView.display(generator.generate(settings));
+        generator.generate(settings);
+        mapView.display(generator.map);
     }
 }
