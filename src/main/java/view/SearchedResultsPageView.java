@@ -156,12 +156,20 @@ public class SearchedResultsPageView extends JPanel implements ActionListener, S
             reviews.setFont(new Font("SansSerif", Font.PLAIN, 14));
             button.add(reviews);
 
-            JLabel favoriteFeedback = new JLabel();
-            favoriteFeedback.setAlignmentX(Component.CENTER_ALIGNMENT);
             JButton favoriteButton = new JButton("Add to Favorites");
             favoriteButton.setFont(reviews.getFont());
             favoriteButton.setEnabled(addFavorite != null && movieId > 0);
-            favoriteButton.addActionListener(event -> favoriteFeedback.setText(addFavorite.apply(movieId)));
+
+            favoriteButton.addActionListener(event -> {
+                String message = addFavorite.apply(movieId);
+                JOptionPane.showMessageDialog(
+                        SearchedResultsPageView.this,
+                        message,
+                        "Favorites",
+                        JOptionPane.INFORMATION_MESSAGE
+                );
+            });
+
             button.add(favoriteButton);
 
             JButton watchlistButton = new JButton("Add to Watchlist");
@@ -208,7 +216,6 @@ public class SearchedResultsPageView extends JPanel implements ActionListener, S
 
             details.add(button);
             details.add(Box.createRigidArea(new Dimension(0, 5)));
-            details.add(favoriteFeedback);
             details.add(Box.createVerticalGlue());
             movieData.add(details, BorderLayout.CENTER);
 

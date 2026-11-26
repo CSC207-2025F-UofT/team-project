@@ -21,6 +21,7 @@
 package app;
 
 import data_access.FavoriteDataAccessObject;
+import data_access.FavoritePosterDataAccessObject;
 import interface_adapter.Favorite.FavoriteController;
 import interface_adapter.Favorite.FavoritePresenter;
 import interface_adapter.Favorite.FavoriteViewModel;
@@ -48,8 +49,6 @@ import interface_adapter.ViewWatchlist.WatchlistViewModel;
 import user_case.AddToWatchlist.AddToWatchlistInteractor;
 import user_case.ViewWatchlist.ViewWatchlistInteractor;
 import view.WatchlistPageView;
-import data_access.GetMovieData;
-import data_access.MovieDetailDataAccessObject;
 import entity.Movie;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -78,15 +77,20 @@ public class Main {
             FavoriteViewModel favoriteModel = new FavoriteViewModel();
             Path favoritesFile = Path.of(System.getProperty("user.home"), ".flicksy", "favorites.json");
             FavoriteDataAccessObject favoritesDao = new FavoriteDataAccessObject(favoritesFile.toString());
-            Map<Integer, String> knownTitles = new ConcurrentHashMap<>();
+            Map<Integer, FavoritesPageView.MovieInfo> favoriteMovies = new ConcurrentHashMap<>();
             String token = System.getenv("token");
-            MovieDetailDataAccessObject details = token == null || token.isBlank() ? null
-                    : new MovieDetailDataAccessObject(new GetMovieData(token));
+            FavoritePosterDataAccessObject favoritePosters = new FavoritePosterDataAccessObject(token);
             FavoritesPageView favoritesPage = new FavoritesPageView(favoritesDao::getFavoriteMovieIds,
-                    id -> knownTitles.computeIfAbsent(id, key -> {
-                        Movie movie = details == null ? null : details.getMovieById(key);
-                        return movie == null ? null : movie.getName();
-                    }));
+                    id -> {
+                        Movie movie = favoritePosters.getMovieById(id);
+                        if (movie == null) {
+                            return favoriteMovies.get(id);
+                        }
+                        FavoritesPageView.MovieInfo fresh = new FavoritesPageView.MovieInfo(
+                                movie.getName(), movie.getPosterPath());
+                        favoriteMovies.put(id, fresh);
+                        return fresh;
+                    }, favoritesDao::removeFavorite);
             FavoriteController favoriteController = new FavoriteController(new FavoriteInteractor(
                     favoritesDao, new FavoritePresenter(favoriteModel)));
 
@@ -197,7 +201,7 @@ public class Main {
                         }
 
                         for (String[] row : searchedViewModel.getState().getOutputMovieData()) {
-                            knownTitles.put(Integer.parseInt(row[3]), row[0]);
+                            favoriteMovies.put(Integer.parseInt(row[3]), new FavoritesPageView.MovieInfo(row[0], row[2]));
                         }
                         // Create the results page using returned movie data
                         SearchedResultsPageView searchedResultsPageView =

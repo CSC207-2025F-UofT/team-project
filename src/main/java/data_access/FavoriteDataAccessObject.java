@@ -27,6 +27,15 @@ public final class FavoriteDataAccessObject implements FavoriteMovieDataAccessIn
 
     @Override
     public boolean addFavorite(String username, int tmdbMovieId) {
+        return update(username, tmdbMovieId, true);
+    }
+
+    /** Removes just this user's entry. A repeated removal leaves the file unchanged. */
+    public boolean removeFavorite(String username, int tmdbMovieId) {
+        return update(username, tmdbMovieId, false);
+    }
+
+    private boolean update(String username, int tmdbMovieId, boolean adding) {
         if (username == null || username.isBlank() || tmdbMovieId <= 0) {
             throw new IllegalArgumentException("A username and a positive movie ID are required.");
         }
@@ -40,10 +49,14 @@ public final class FavoriteDataAccessObject implements FavoriteMovieDataAccessIn
                      FileLock lock = channel.lock()) {
                     JSONObject favorites = load();
                     List<Integer> ids = movieIds(favorites, username);
-                    if (ids.contains(tmdbMovieId)) {
+                    if (ids.contains(tmdbMovieId) == adding) {
                         return false;
                     }
-                    ids.add(tmdbMovieId);
+                    if (adding) {
+                        ids.add(tmdbMovieId);
+                    } else {
+                        ids.remove(Integer.valueOf(tmdbMovieId));
+                    }
                     favorites.put(username, new JSONArray(ids));
                     save(favorites);
                     return true;

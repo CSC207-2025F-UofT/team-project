@@ -1,6 +1,18 @@
 package app;
 
 import data_access.UserDataAccess;
+import data_access.FavoriteDataAccessObject;
+import data_access.FavoritePosterDataAccessObject;
+import entity.Movie;
+import interface_adapter.Favorite.FavoriteController;
+import interface_adapter.Favorite.FavoritePresenter;
+import interface_adapter.Favorite.FavoriteViewModel;
+import user_case.Favorite.FavoriteInteractor;
+import view.FavoritesPageView;
+import java.nio.file.Path;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.IntFunction;
 import entity.UserFactory;
 import interface_adapter.ViewManagerModel;
 import interface_adapter.Login.LoginViewModel;
@@ -42,6 +54,11 @@ public class AppBuilder {
 
     private final UserDataAccess userDataAccess = new UserDataAccess();
     private final UserFactory userFactory = new UserFactory();
+    private static final String FAVORITES_CARD = "favorites";
+    private final Map<Integer, FavoritesPageView.MovieInfo> favoriteMovies = new ConcurrentHashMap<>();
+    private MovieDetailDataAccessObject movieDetails;
+    private FavoritesPageView favoritesPage;
+    private IntFunction<String> addFavorite;
     private SearchedResultsPageView resultView;
     private MovieDetailController movieDetailController;
     private AddToWatchlistController addToWatchlistController;
@@ -109,6 +126,7 @@ public class AppBuilder {
         SearchPageView searchView = new SearchPageView(searchViewModel);
         searchView.setSearchController(controller);
         searchView.onOpenWatchlist(() -> openWatchlist(SearchBarViewModel.VIEW_NAME));
+        searchView.onOpenFavorites(() -> openFavorites(SearchBarViewModel.VIEW_NAME));
         views.add(searchView, SearchBarViewModel.VIEW_NAME);
 
         //display search result
@@ -118,7 +136,11 @@ public class AppBuilder {
                     if (resultView != null) {
                         views.remove(resultView);
                     }
-                    resultView = new SearchedResultsPageView(searchedViewModel);
+                    for (String[] movie : searchedViewModel.getState().getOutputMovieData()) {
+                        favoriteMovies.put(Integer.parseInt(movie[3]), new FavoritesPageView.MovieInfo(movie[0], movie[2]));
+                    }
+                    resultView = new SearchedResultsPageView(searchedViewModel, addFavorite);
+                    resultView.onOpenFavorites(() -> openFavorites(SearchedViewModel.VIEW_NAME));
                     resultView.setSearchController(controller);
                     resultView.setMovieDetailController(movieDetailController);
                     resultView.setAddToWatchlistController(addToWatchlistController);
@@ -140,8 +162,8 @@ public class AppBuilder {
         MovieDetailViewModel viewModel = new MovieDetailViewModel();
         MovieDetailPresenter presenter = new MovieDetailPresenter(viewManagerModel, viewModel);
         GetMovieData api = new GetMovieData(System.getenv("TMDB_ACCESS_TOKEN"));
-        MovieDetailDataAccessObject dataAccess = new MovieDetailDataAccessObject(api);
-        MovieDetailInputBoundary interactor = new MovieDetailInteractor(dataAccess, presenter);
+        movieDetails = new MovieDetailDataAccessObject(api);
+        MovieDetailInputBoundary interactor = new MovieDetailInteractor(movieDetails, presenter);
         movieDetailController = new MovieDetailController(interactor);
 
         //movie details popup
@@ -158,6 +180,42 @@ public class AppBuilder {
             popup.setVisible(true);
         });
         return this;
+    }
+
+    /** Connect adding and displaying favorites to the same store and login session. */
+    public AppBuilder addFavoriteUseCase() {
+        Path file = Path.of(System.getProperty("user.home"), ".flicksy", "favorites.json");
+        FavoriteDataAccessObject favorites = new FavoriteDataAccessObject(file.toString());
+        FavoriteViewModel model = new FavoriteViewModel();
+        FavoriteController controller = new FavoriteController(
+                new FavoriteInteractor(favorites, new FavoritePresenter(model)));
+        addFavorite = movieId -> {
+            controller.addFavorite(loggedInViewModel.getState().getUsername(), movieId);
+            return model.getState().getMessage();
+        };
+        FavoritePosterDataAccessObject favoritePosters = new FavoritePosterDataAccessObject(
+                System.getenv("TMDB_ACCESS_TOKEN"));
+        favoritesPage = new FavoritesPageView(favorites::getFavoriteMovieIds,
+                id -> {
+                    Movie movie = favoritePosters.getMovieById(id);
+                    if (movie == null) {
+                        return favoriteMovies.get(id);
+                    }
+                    FavoritesPageView.MovieInfo fresh = new FavoritesPageView.MovieInfo(
+                            movie.getName(), movie.getPosterPath());
+                    favoriteMovies.put(id, fresh);
+                    return fresh;
+                }, favorites::removeFavorite);
+        views.add(favoritesPage, FAVORITES_CARD);
+        return this;
+    }
+
+    private void openFavorites(String previousCard) {
+        if (favoritesPage != null) {
+            favoritesPage.open(loggedInViewModel.getState().getUsername(),
+                    () -> cardLayout.show(views, previousCard));
+            cardLayout.show(views, FAVORITES_CARD);
+        }
     }
 
     //watchlist use cases (add to watchlist + view watchlist)

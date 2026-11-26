@@ -15,6 +15,7 @@ public class AppPreview {
             builder.addSearchUseCase();
             builder.addMovieDetailUseCase();
             builder.addWatchlistUseCases();
+            builder.addFavoriteUseCase();
 
             JFrame application = builder.build();
             application.setVisible(true);
