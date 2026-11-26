@@ -46,8 +46,6 @@ public class ClosetData implements AddClothingDataAccessInterface {
         load();
     }
 
-    // ---------- who is logged in (set by Carmen's login) ----------
-
     @Override
     public String getCurrentUsername() {
         return currentUsername;
@@ -62,7 +60,6 @@ public class ClosetData implements AddClothingDataAccessInterface {
         this.currentUsername = username;
     }
 
-    // ---------- Add Clothing (Ginni) ----------
 
     @Override
     public String generateItemId(String username) {
@@ -82,7 +79,6 @@ public class ClosetData implements AddClothingDataAccessInterface {
         save();
     }
 
-    // ---------- reading the closet (Rie, Sofiia, Zahraa can use these) ----------
 
     /**
      * Every item in one user's closet.
@@ -110,7 +106,6 @@ public class ClosetData implements AddClothingDataAccessInterface {
         return null;
     }
 
-    // ---------- reading and writing the file ----------
 
     private List<ClothingItem> closetOf(String username) {
         return closets.getOrDefault(username, new ArrayList<>());
@@ -166,7 +161,7 @@ public class ClosetData implements AddClothingDataAccessInterface {
         json.put("color", item.getColor());
         json.put("style", item.getStyle());
         json.put("layer", item.isLayer());
-        json.put("weatherRating", item.getWeatherRating());
+        json.put("warmthLevels", new JSONArray(item.getWarmthLevels()));
         json.put("imagePath", item.getImagePath());
         return json;
     }
@@ -180,7 +175,15 @@ public class ClosetData implements AddClothingDataAccessInterface {
                 json.getString("color"),
                 json.getString("style"),
                 json.getBoolean("layer"),
-                json.getInt("weatherRating"),
+                readWarmthLevels(json.getJSONArray("warmthLevels")),
                 json.getString("imagePath"));
+    }
+
+    private static List<Integer> readWarmthLevels(JSONArray array) {
+        final List<Integer> range = new ArrayList<>();
+        for (int i = 0; i < array.length(); i++) {
+            range.add(array.getInt(i));
+        }
+        return range;
     }
 }

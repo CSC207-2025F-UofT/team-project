@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -23,7 +24,7 @@ class ClosetDataTest {
 
     private static ClothingItem shirt(String id) {
         return new ClothingItem(id, "Pink Dress Shirt", Category.TOP, "Long-sleeved shirt",
-                "Pink", "Feminine", false, 2, "data/images/ginni/" + id + ".png");
+                "Pink", "Feminine", false, Arrays.asList(2, 3, 4), "data/images/ginni/" + id + ".png");
     }
 
     @Test
@@ -40,7 +41,7 @@ class ClosetDataTest {
         assertEquals("c001", item.getId());
         assertEquals(Category.TOP, item.getCategory());
         assertEquals("Pink", item.getColor());
-        assertEquals(2, item.getWeatherRating());
+        assertEquals(Arrays.asList(2, 3, 4), item.getWarmthLevels());
         assertEquals("data/images/ginni/c001.png", item.getImagePath());
     }
 

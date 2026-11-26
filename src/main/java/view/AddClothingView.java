@@ -4,20 +4,39 @@ import interface_adapter.add_clothing.AddClothingController;
 import interface_adapter.add_clothing.AddClothingState;
 import interface_adapter.add_clothing.AddClothingViewModel;
 
-import javax.swing.*;
-import javax.swing.filechooser.FileNameExtensionFilter;
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.Font;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Image;
+import java.awt.Insets;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
-import java.util.Hashtable;
 import java.util.List;
+import javax.swing.BorderFactory;
+import javax.swing.ButtonGroup;
+import javax.swing.DefaultComboBoxModel;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JComponent;
+import javax.swing.JFileChooser;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JRadioButton;
+import javax.swing.JTextField;
+import javax.swing.SwingConstants;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 /**
- * The Swing screen for adding a new clothing item (with picture) to the closet.
- * A form: text boxes, dropdowns (category, vibe), sliders (warmth),
- * a see-through checkbox, a "Choose Image" button (JFileChooser) and a Save button.
- * TODO: for ginni
+ * The Add Clothing form: name, category, type, colour, style, layer (yes/no),
+ * the temperatures it can be worn in (a two-handle range slider) and a picture,
+ * with Save, Cancel, Draft and Home buttons. Says which fields are required.
+ * Only shows things and passes clicks to the Controller; no logic here.
  */
 public class AddClothingView extends JPanel implements PropertyChangeListener {
     private static final Color ERROR_RED = new Color(0xB4, 0x23, 0x18);
@@ -35,7 +54,8 @@ public class AddClothingView extends JPanel implements PropertyChangeListener {
     private final JComboBox<String> styleBox = new JComboBox<>();
     private final JRadioButton layerYes = new JRadioButton("Yes");
     private final JRadioButton layerNo = new JRadioButton("No", true);
-    private final JSlider weatherSlider = new JSlider(-10, 10, 0);
+    private final RangeSlider weatherSlider;
+    private final JLabel weatherRangeLabel = new JLabel(" ");
 
     private final JLabel thumbnail = new JLabel("No picture", SwingConstants.CENTER);
     private final JLabel fileNameLabel = new JLabel("No picture chosen");
@@ -50,14 +70,10 @@ public class AddClothingView extends JPanel implements PropertyChangeListener {
     private final JButton draftButton = new JButton("Draft");
     private final JButton saveButton = new JButton("Save");
 
-    /**
-     * Builds the form.
-     *
-     * @param viewModel this screen's ViewModel
-     */
     public AddClothingView(AddClothingViewModel viewModel) {
         this.viewModel = viewModel;
         viewModel.addPropertyChangeListener(this);
+        this.weatherSlider = new RangeSlider(viewModel.getWeatherLabels());
 
         setLayout(new BorderLayout(0, 12));
         setBorder(BorderFactory.createEmptyBorder(16, 24, 16, 24));
@@ -101,7 +117,6 @@ public class AddClothingView extends JPanel implements PropertyChangeListener {
         }
     }
 
-    // ---------- layout ----------
 
     private JPanel buildHeader() {
         final JPanel header = new JPanel(new BorderLayout());
@@ -109,6 +124,11 @@ public class AddClothingView extends JPanel implements PropertyChangeListener {
         title.setFont(title.getFont().deriveFont(Font.BOLD, 22f));
         header.add(title, BorderLayout.WEST);
         header.add(homeButton, BorderLayout.EAST);
+
+        final JLabel requiredNote = new JLabel("Fields marked * are required.");
+        requiredNote.setForeground(MUTED);
+        requiredNote.setBorder(BorderFactory.createEmptyBorder(4, 0, 0, 0));
+        header.add(requiredNote, BorderLayout.SOUTH);
         return header;
     }
 
@@ -145,21 +165,16 @@ public class AddClothingView extends JPanel implements PropertyChangeListener {
         return panel;
     }
 
-    private JSlider buildWeatherSlider() {
-        weatherSlider.setMinimum(viewModel.getWeatherMin());
-        weatherSlider.setMaximum(viewModel.getWeatherMax());
-        weatherSlider.setMajorTickSpacing(5);
-        weatherSlider.setMinorTickSpacing(1);
-        weatherSlider.setPaintTicks(true);
-        weatherSlider.setSnapToTicks(true);
+    private JPanel buildWeatherSlider() {
+        weatherRangeLabel.setForeground(MUTED);
+        weatherSlider.addChangeListener(e -> weatherRangeLabel.setText(
+                viewModel.describeRange(weatherSlider.getLow(), weatherSlider.getHigh())));
+        weatherSlider.setRange(0, Integer.MAX_VALUE);
 
-        final Hashtable<Integer, JLabel> labels = new Hashtable<>();
-        for (int rating = viewModel.getWeatherMin(); rating <= viewModel.getWeatherMax(); rating += 5) {
-            labels.put(rating, new JLabel(viewModel.weatherLabel(rating)));
-        }
-        weatherSlider.setLabelTable(labels);
-        weatherSlider.setPaintLabels(true);
-        return weatherSlider;
+        final JPanel panel = new JPanel(new BorderLayout(0, 4));
+        panel.add(weatherSlider, BorderLayout.CENTER);
+        panel.add(weatherRangeLabel, BorderLayout.SOUTH);
+        return panel;
     }
 
     private JPanel buildPicturePicker() {
@@ -206,8 +221,6 @@ public class AddClothingView extends JPanel implements PropertyChangeListener {
         return c;
     }
 
-    // ---------- behaviour ----------
-
     private void fillDropdowns() {
         setChoices(categoryBox, viewModel.getCategoryChoices());
         setChoices(subCategoryBox, viewModel.getSubCategoryChoices(""));
@@ -226,7 +239,8 @@ public class AddClothingView extends JPanel implements PropertyChangeListener {
                 (String) colorBox.getSelectedItem(),
                 (String) styleBox.getSelectedItem(),
                 layerYes.isSelected(),
-                weatherSlider.getValue(),
+                weatherSlider.getLow(),
+                weatherSlider.getHigh(),
                 chosenImagePath));
         cancelButton.addActionListener(e -> controller.switchToWelcomeView());
         homeButton.addActionListener(e -> controller.switchToWelcomeView());
@@ -261,7 +275,7 @@ public class AddClothingView extends JPanel implements PropertyChangeListener {
         colorBox.setSelectedIndex(0);
         styleBox.setSelectedIndex(0);
         layerNo.setSelected(true);
-        weatherSlider.setValue(0);
+        weatherSlider.setRange(0, Integer.MAX_VALUE);
         chosenImagePath = "";
         fileNameLabel.setText("No picture chosen");
         thumbnail.setIcon(null);

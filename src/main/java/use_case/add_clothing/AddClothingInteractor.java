@@ -2,20 +2,26 @@ package use_case.add_clothing;
 
 import entity.Category;
 import entity.ClothingItem;
+import entity.ClothingOptions;
 
 import java.io.IOException;
+import java.util.List;
 
-// check every required field, copy the picture into the app's folder, then save the item.
-
-public class  AddClothingInteractor implements AddClothingInputBoundary {
+/**
+ * The rules for adding a clothing item: check every required field,
+ * copy the picture into the app's folder, then save the item.
+ */
+public class AddClothingInteractor implements AddClothingInputBoundary {
     private final AddClothingDataAccessInterface dataAccess;
     private final ImageStorageInterface imageStorage;
     private final AddClothingOutputBoundary presenter;
 
     /**
-     * dataAccess where items are saved
-     * imageStorage where pictures are copied
-     * presenter who shows the result
+     * Connects the interactor to its storage and presenter.
+     *
+     * @param dataAccess where items are saved
+     * @param imageStorage where pictures are copied
+     * @param presenter who shows the result
      */
     public AddClothingInteractor(AddClothingDataAccessInterface dataAccess,
                                  ImageStorageInterface imageStorage,
@@ -40,7 +46,8 @@ public class  AddClothingInteractor implements AddClothingInputBoundary {
         final String imagePath;
         try {
             imagePath = imageStorage.saveImage(inputData.getImageSourcePath(), username, itemId);
-        } catch (IOException ex) {
+        }
+        catch (IOException ex) {
             presenter.prepareFailView("Couldn't save the picture. Try choosing it again.");
             return;
         }
@@ -53,7 +60,7 @@ public class  AddClothingInteractor implements AddClothingInputBoundary {
                 inputData.getColor(),
                 inputData.getStyle(),
                 inputData.isLayer(),
-                inputData.getWeatherRating(),
+                inputData.getWarmthLevels(),
                 imagePath);
         dataAccess.saveItem(username, item);
 
@@ -84,19 +91,22 @@ public class  AddClothingInteractor implements AddClothingInputBoundary {
         if (isBlank(input.getStyle())) {
             return "Please choose a style.";
         }
-        if (input.getWeatherRating() < ClothingItem.MIN_WEATHER_RATING
-                || input.getWeatherRating() > ClothingItem.MAX_WEATHER_RATING) {
-            return "Weather must be between -10 and 10.";
+        if (!isValidRange(input.getWarmthLevels())) {
+            return "Please choose a weather range.";
         }
         if (isBlank(input.getImageSourcePath())) {
             return "Please choose a picture.";
         }
-        if (input.getWeatherRating() < ClothingItem.MIN_WEATHER_RATING
-                || input.getWeatherRating() > ClothingItem.MAX_WEATHER_RATING) {
-            return "Weather must be between " + ClothingItem.MIN_WEATHER_RATING
-                    + " and " + ClothingItem.MAX_WEATHER_RATING + ".";
-        }
         return null;
+    }
+
+    /**
+     * A range is valid if it has at least one warmth level, every level is between
+     * -10 and 10, and the levels go up by one with no gaps (e.g. [2, 3, 4, 5]),
+     * just like the slider produces.
+     */
+    private static boolean isValidRange(List<Integer> warmthLevels) {
+        return warmthLevels != null && !warmthLevels.isEmpty();
     }
 
     private static boolean isBlank(String text) {

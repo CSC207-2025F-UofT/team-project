@@ -2,18 +2,28 @@ package use_case.add_clothing;
 
 import entity.Category;
 import entity.ClothingItem;
+import entity.ClothingOptions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
-
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-public class AddClothingInteractorTest {
+
+/**
+ * Tests AddClothingInteractor with fake storage and a fake presenter,
+ * so no window opens and no real files are touched.
+ */
+class AddClothingInteractorTest {
+    private static final List<Integer> ALL_YEAR = ClothingOptions.WARMTH_LEVELS;
+    private static final List<Integer> SPRING = Arrays.asList(1, 2, 3, 4, 5, 6);
+
     private FakeCloset closet;
     private FakeImages images;
     private FakePresenter presenter;
@@ -29,7 +39,7 @@ public class AddClothingInteractorTest {
 
     private static AddClothingInputData validInput() {
         return new AddClothingInputData("Pink Dress Shirt", "TOP", "Long-sleeved shirt",
-                "Pink", "Feminine", false, 2, "/Users/ginni/Downloads/shirt.png");
+                "Pink", "Feminine", false, SPRING, "/Users/ginni/Downloads/shirt.png");
     }
 
     @Test
@@ -41,7 +51,7 @@ public class AddClothingInteractorTest {
         assertEquals("c001", item.getId());
         assertEquals("Pink Dress Shirt", item.getName());
         assertEquals(Category.TOP, item.getCategory());
-        assertEquals(2, item.getWeatherRating());
+        assertEquals(SPRING, item.getWarmthLevels());
         assertEquals("data/images/ginni/c001.png", item.getImagePath());
         assertEquals("Pink Dress Shirt", presenter.successName);
         assertEquals(null, presenter.error);
@@ -50,56 +60,77 @@ public class AddClothingInteractorTest {
     @Test
     void nameIsTrimmed() {
         interactor.execute(new AddClothingInputData("  Grey Hoodie  ", "TOP", "Sweater",
-                "Grey", "Casual", true, -3, "/tmp/hoodie.jpg"));
+                "Grey", "Casual", true, ALL_YEAR, "/tmp/hoodie.jpg"));
         assertEquals("Grey Hoodie", closet.saved.get(0).getName());
     }
 
     @Test
     void emptyNameFails() {
         interactor.execute(new AddClothingInputData("   ", "TOP", "Tank", "Black", "Goth",
-                false, 0, "/tmp/a.png"));
+                false, ALL_YEAR, "/tmp/a.png"));
         assertNothingSaved("Please enter a name.");
     }
 
     @Test
     void missingCategoryFails() {
         interactor.execute(new AddClothingInputData("Jeans", "", "Baggy jeans", "Blue",
-                "Casual", false, 0, "/tmp/a.png"));
+                "Casual", false, ALL_YEAR, "/tmp/a.png"));
         assertNothingSaved("Please choose a category.");
     }
 
     @Test
     void missingTypeFails() {
         interactor.execute(new AddClothingInputData("Jeans", "BOTTOM", "", "Blue",
-                "Casual", false, 0, "/tmp/a.png"));
+                "Casual", false, ALL_YEAR, "/tmp/a.png"));
         assertNothingSaved("Please choose a type.");
     }
 
     @Test
     void missingColourFails() {
         interactor.execute(new AddClothingInputData("Jeans", "BOTTOM", "Baggy jeans", "",
-                "Casual", false, 0, "/tmp/a.png"));
+                "Casual", false, ALL_YEAR, "/tmp/a.png"));
         assertNothingSaved("Please choose a colour.");
     }
 
     @Test
     void missingStyleFails() {
         interactor.execute(new AddClothingInputData("Jeans", "BOTTOM", "Baggy jeans", "Blue",
-                "", false, 0, "/tmp/a.png"));
+                "", false, ALL_YEAR, "/tmp/a.png"));
         assertNothingSaved("Please choose a style.");
     }
 
     @Test
-    void weatherOutOfRangeFails() {
+    void emptyWeatherRangeFails() {
         interactor.execute(new AddClothingInputData("Jeans", "BOTTOM", "Baggy jeans", "Blue",
-                "Casual", false, 9, "/tmp/a.png"));
-        assertNothingSaved("Weather must be between -5 and 5.");
+                "Casual", false, Collections.emptyList(), "/tmp/a.png"));
+        assertNothingSaved("Please choose a weather range.");
+    }
+
+    @Test
+    void levelAbove10Fails() {
+        interactor.execute(new AddClothingInputData("Jeans", "BOTTOM", "Baggy jeans", "Blue",
+                "Casual", false, Arrays.asList(9, 10, 11), "/tmp/a.png"));
+        assertNothingSaved("Please choose a weather range.");
+    }
+
+    @Test
+    void rangeWithAGapFails() {
+        interactor.execute(new AddClothingInputData("Jeans", "BOTTOM", "Baggy jeans", "Blue",
+                "Casual", false, Arrays.asList(0, 6, 7), "/tmp/a.png"));
+        assertNothingSaved("Please choose a weather range.");
+    }
+
+    @Test
+    void rangeOutOfOrderFails() {
+        interactor.execute(new AddClothingInputData("Jeans", "BOTTOM", "Baggy jeans", "Blue",
+                "Casual", false, Arrays.asList(5, 1), "/tmp/a.png"));
+        assertNothingSaved("Please choose a weather range.");
     }
 
     @Test
     void missingPictureFails() {
         interactor.execute(new AddClothingInputData("Jeans", "BOTTOM", "Baggy jeans", "Blue",
-                "Casual", false, 0, ""));
+                "Casual", false, ALL_YEAR, ""));
         assertNothingSaved("Please choose a picture.");
     }
 
