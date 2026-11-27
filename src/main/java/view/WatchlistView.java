@@ -99,7 +99,7 @@ public class WatchlistView extends JPanel implements PropertyChangeListener {
 
     private void runInBackground(Runnable task) {
         messageLabel.setText("Loading");
-        new Thread(task).start();
+        worker.execute(task);
     }
 
     private void getChanges(){
