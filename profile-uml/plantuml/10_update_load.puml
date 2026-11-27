@@ -1,0 +1,40 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName DejaVu Sans
+skinparam defaultFontSize 14
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam ArrowColor #42566D
+skinparam classAttributeIconSize 0
+skinparam classBackgroundColor #F5F8FC
+skinparam classBorderColor #46617C
+skinparam interfaceBackgroundColor #E8F4F1
+skinparam interfaceBorderColor #237D70
+skinparam enumBackgroundColor #FFF4DE
+skinparam sequenceParticipantBackgroundColor #EAF0F8
+skinparam sequenceParticipantBorderColor #46617C
+skinparam sequenceLifeLineBorderColor #A5B3C2
+skinparam sequenceGroupBackgroundColor #F6F8FB
+skinparam NoteBackgroundColor #FFF5DC
+skinparam NoteBorderColor #C8A555
+skinparam maxMessageSize 65
+hide footbox
+title UC6 sequence | Open the saved profile
+participant "controller :\nUpdateProfileController" as C
+participant "interactor :\nUpdateProfileInteractor" as I
+participant "profiles : ProfileRepository\n(FileProfileDataAccess)" as R
+participant "output : UpdateProfileOutputBoundary\n(UpdateProfilePresenter)" as P
+C -> I : loadProfile()
+I -> R : load()
+alt File malformed or inaccessible
+ R --> I : ProfileStorageException
+ I -> P : presentLoadError(STORAGE)
+else No saved profile
+ R --> I : Optional.empty()
+ I -> P : presentLoadError(PROFILE_MISSING)
+else Profile found
+ R --> I : Optional.of(user)
+ I -> P : presentLoaded(toOutput(user))
+end
+note over P : Presenter distinguishes missing profile from read failure.\nMissing -> offer creation. Read failure -> show retry, disable edits.
+@enduml

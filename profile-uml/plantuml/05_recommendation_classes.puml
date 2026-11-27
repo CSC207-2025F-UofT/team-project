@@ -1,0 +1,82 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName DejaVu Sans
+skinparam defaultFontSize 14
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam ArrowColor #42566D
+skinparam classAttributeIconSize 0
+skinparam classBackgroundColor #F5F8FC
+skinparam classBorderColor #46617C
+skinparam interfaceBackgroundColor #E8F4F1
+skinparam interfaceBorderColor #237D70
+skinparam enumBackgroundColor #FFF4DE
+skinparam sequenceParticipantBackgroundColor #EAF0F8
+skinparam sequenceParticipantBorderColor #46617C
+skinparam sequenceLifeLineBorderColor #A5B3C2
+skinparam sequenceGroupBackgroundColor #F6F8FB
+skinparam NoteBackgroundColor #FFF5DC
+skinparam NoteBorderColor #C8A555
+skinparam maxMessageSize 65
+hide footbox
+title UC7 | Recommendation dependencies
+top to bottom direction
+class RecommendationController {
+- useCase: RecommendationInputBoundary
+- executor: Executor
++ execute(): void
+}
+interface RecommendationInputBoundary {
++ execute(): void
+}
+class RecommendationInteractor {
+- profiles: ProfileRepository
+- jobs: JobSource
+- matcher: InternshipMatcher
+- output: RecommendationOutputBoundary
++ execute(): void
+}
+interface RecommendationOutputBoundary {
++ presentResults(data: RecommendationOutputData): void
++ presentError(error: ProfileError): void
+}
+class RecommendationPresenter {
+- viewModel: RecommendationViewModel
+- uiExecutor: Executor
++ presentResults(data: RecommendationOutputData): void
++ presentError(error: ProfileError): void
+}
+interface ProfileRepository {
++ load(): Optional<User>
++ save(user: User): void
+}
+interface JobSource {
++ fetch(): JobFetchResult
+}
+interface InternshipMatcher {
++ rank(user: User, jobs: List<Internship>): List<InternshipMatch>
+}
+class KeywordInternshipMatcher {
++ rank(user: User, jobs: List<Internship>): List<InternshipMatch>
+}
+class RecommendationViewModel {
+- state: RecommendationState
+- changes: PropertyChangeSupport
++ getState(): RecommendationState
++ setState(state: RecommendationState): void
++ addPropertyChangeListener(listener: PropertyChangeListener): void
+}
+
+RecommendationController --> RecommendationInputBoundary : useCase
+RecommendationInputBoundary <|.. RecommendationInteractor
+RecommendationInteractor --> ProfileRepository : profiles
+RecommendationInteractor --> JobSource : jobs
+RecommendationInteractor --> InternshipMatcher : matcher
+RecommendationInteractor --> RecommendationOutputBoundary : output
+RecommendationOutputBoundary <|.. RecommendationPresenter
+InternshipMatcher <|.. KeywordInternshipMatcher
+RecommendationPresenter --> RecommendationViewModel : viewModel
+ProfileRepository -[hidden]right- JobSource
+JobSource -[hidden]right- InternshipMatcher
+InternshipMatcher -[hidden]right- RecommendationOutputBoundary
+@enduml

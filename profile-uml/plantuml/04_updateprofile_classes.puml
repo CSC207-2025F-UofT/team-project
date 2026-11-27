@@ -1,0 +1,80 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName DejaVu Sans
+skinparam defaultFontSize 14
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam ArrowColor #42566D
+skinparam classAttributeIconSize 0
+skinparam classBackgroundColor #F5F8FC
+skinparam classBorderColor #46617C
+skinparam interfaceBackgroundColor #E8F4F1
+skinparam interfaceBorderColor #237D70
+skinparam enumBackgroundColor #FFF4DE
+skinparam sequenceParticipantBackgroundColor #EAF0F8
+skinparam sequenceParticipantBorderColor #46617C
+skinparam sequenceLifeLineBorderColor #A5B3C2
+skinparam sequenceGroupBackgroundColor #F6F8FB
+skinparam NoteBackgroundColor #FFF5DC
+skinparam NoteBorderColor #C8A555
+skinparam maxMessageSize 65
+hide footbox
+title UC6 | Update a qualification profile
+top to bottom direction
+class UpdateProfileController {
+- useCase: UpdateProfileInputBoundary
+- executor: Executor
++ loadProfile(): void
++ execute(form: ProfileForm): void
+}
+interface UpdateProfileInputBoundary {
++ loadProfile(): void
++ execute(input: ProfileInputData): void
+}
+class UpdateProfileInteractor {
+- profiles: ProfileRepository
+- validator: ProfileValidator
+- output: UpdateProfileOutputBoundary
++ loadProfile(): void
++ execute(input: ProfileInputData): void
+- toOutput(user: User): ProfileOutputData
+}
+interface UpdateProfileOutputBoundary {
++ presentLoaded(data: ProfileOutputData): void
++ presentLoadError(error: ProfileError): void
++ presentSaved(data: ProfileOutputData): void
++ presentError(error: ProfileError): void
+}
+class UpdateProfilePresenter {
+- viewModel: ProfileViewModel
+- uiExecutor: Executor
++ presentLoaded(data: ProfileOutputData): void
++ presentLoadError(error: ProfileError): void
++ presentSaved(data: ProfileOutputData): void
++ presentError(error: ProfileError): void
+}
+interface ProfileRepository {
++ load(): Optional<User>
++ save(user: User): void
+}
+class ProfileValidator {
++ createValidatedUser(id: String, input: ProfileInputData): User
+}
+class ProfileViewModel {
+- state: ProfileState
+- changes: PropertyChangeSupport
++ getState(): ProfileState
++ setState(state: ProfileState): void
++ addPropertyChangeListener(listener: PropertyChangeListener): void
+}
+
+UpdateProfileController --> UpdateProfileInputBoundary : useCase
+UpdateProfileInputBoundary <|.. UpdateProfileInteractor
+UpdateProfileInteractor --> ProfileRepository : profiles
+UpdateProfileInteractor --> ProfileValidator : validator
+UpdateProfileInteractor --> UpdateProfileOutputBoundary : output
+UpdateProfileOutputBoundary <|.. UpdateProfilePresenter
+UpdateProfilePresenter --> ProfileViewModel : viewModel
+ProfileRepository -[hidden]right- ProfileValidator
+ProfileValidator -[hidden]right- UpdateProfileOutputBoundary
+@enduml

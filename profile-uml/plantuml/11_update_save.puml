@@ -1,0 +1,52 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName DejaVu Sans
+skinparam defaultFontSize 14
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam ArrowColor #42566D
+skinparam classAttributeIconSize 0
+skinparam classBackgroundColor #F5F8FC
+skinparam classBorderColor #46617C
+skinparam interfaceBackgroundColor #E8F4F1
+skinparam interfaceBorderColor #237D70
+skinparam enumBackgroundColor #FFF4DE
+skinparam sequenceParticipantBackgroundColor #EAF0F8
+skinparam sequenceParticipantBorderColor #46617C
+skinparam sequenceLifeLineBorderColor #A5B3C2
+skinparam sequenceGroupBackgroundColor #F6F8FB
+skinparam NoteBackgroundColor #FFF5DC
+skinparam NoteBorderColor #C8A555
+skinparam maxMessageSize 65
+hide footbox
+title UC6 sequence | Save edited qualifications
+participant "controller :\nUpdateProfileController" as C
+participant "interactor :\nUpdateProfileInteractor" as I
+participant "profiles : ProfileRepository\n(FileProfileDataAccess)" as R
+participant "validator :\nProfileValidator" as V
+participant "output : UpdateProfileOutputBoundary\n(UpdateProfilePresenter)" as P
+C -> I : execute(inputData)
+I -> R : load()
+alt Read fails or profile is missing
+ R --> I : exception or Optional.empty()
+ I -> P : presentError(STORAGE or PROFILE_MISSING)
+else Existing profile found
+ R --> I : Optional.of(existing)
+ I -> V : createValidatedUser(existing.getId(), inputData)
+ alt Invalid input
+  V --> I : ProfileValidationException(fieldErrors)
+  I -> P : presentError(VALIDATION, fieldErrors)
+ else Valid replacement User
+  V --> I : updated
+  note over I,R : Existing User is immutable; its ID is preserved.\nOnly successful persistence replaces the saved version.
+  I -> R : save(updated)
+  alt Write fails
+   R --> I : ProfileStorageException
+   I -> P : presentError(STORAGE)
+  else Write succeeds
+   R --> I : completed
+   I -> P : presentSaved(toOutput(updated))
+  end
+ end
+end
+@enduml
