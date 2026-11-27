@@ -58,6 +58,7 @@ public class GameRunningView extends JPanel implements GameRunningViewModelListe
         answers.add(Box.createRigidArea(new Dimension(200, 0))); // gap separating answers
         answers.add(answersRight);
 
+        //SUBMIT SON
         final JPanel inputPanel = new JPanel();
         JButton submitAnswerButton = new JButton("Submit");
         inputPanel.add(answerInput);

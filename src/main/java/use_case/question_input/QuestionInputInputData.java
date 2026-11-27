@@ -1,7 +1,5 @@
 package use_case.question_input;
 
-import entity.Question;
-
 public class QuestionInputInputData {
     private final String guessText;
 

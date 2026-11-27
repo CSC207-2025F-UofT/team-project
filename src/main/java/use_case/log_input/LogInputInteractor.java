@@ -8,14 +8,17 @@ import entity.RoundRecord;
  */
 public class LogInputInteractor implements LogInputInputBoundary {
     private final LogInputDataAccessInterface logInputDataAccess;
+    private final LogInputOutputBoundary logInputPresenter;
 
-    public LogInputInteractor(LogInputDataAccessInterface logInputDataAccess) {
+    public LogInputInteractor(LogInputDataAccessInterface logInputDataAccess, LogInputOutputBoundary logInputPresenter) {
         this.logInputDataAccess = logInputDataAccess;
+        this.logInputPresenter = logInputPresenter;
     }
 
     @Override
     public void execute(LogInputInputData logInputInputData) {
         final RoundRecord roundRecord = logInputDataAccess.getCurrentRoundRecord();
+
         if (roundRecord == null) {
             throw new IllegalStateException("No active round to log the guess to");
         }
@@ -24,8 +27,12 @@ public class LogInputInteractor implements LogInputInputBoundary {
         final String guess = logInputInputData.getGuess();
         final Boolean correct = logInputInputData.isCorrect();
         final int points = logInputInputData.getPointsAwarded();
+        int roundNumber = roundRecord.getRoundNumber();
 
         GuessRecord guessRecord = new GuessRecord(teamName, question, guess, correct, points);
         roundRecord.addGuess(guessRecord);
+
+        LogInputOutputData logInputOutputData = new LogInputOutputData(roundNumber, question, teamName, guess, correct, points);
+        logInputPresenter.prepareSuccessView(logInputOutputData);
     }
 }

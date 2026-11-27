@@ -44,3 +44,14 @@ Testing
   - a blank guess,
   - the 3-strike block,
   - logging with no active round.
+
+
+
+ // TODO (game summary): Add an addLogInputUseCase() method that creates a LogInputPresenter (taking
+      //  gameSummaryViewModel), a LogInputInteractor(dataAccessObject, presenter), and a LogInputController,
+      //  and gives the controller to GameRunningView so Submit can call it.
+      //  DataAccessObject will need to implement LogInputDataAccessInterface.
+
+ // TODO (game summary): Whatever ends the game needs to fill in teamWon/teamLost/questionCount on
+      //  GameSummaryState and switch screens with viewManagerModel.setState(GameSummaryViewModel.VIEW_NAME)
+      //  and viewManagerModel.notifyViewChanged().
