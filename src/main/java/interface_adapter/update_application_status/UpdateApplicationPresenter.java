@@ -1,0 +1,7 @@
+package interface_adapter.update_application_status;
+
+import use_case.update_application_status.UpdateApplicationOutputBoundary;
+
+public class UpdateApplicationPresenter implements UpdateApplicationOutputBoundary {
+
+}
