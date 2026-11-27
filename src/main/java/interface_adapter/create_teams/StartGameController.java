@@ -15,7 +15,6 @@ public class StartGameController {
      */
     public void execute(String team1Name, String team2Name) {
         final StartGameInputData startGameInputData = new StartGameInputData(team1Name, team2Name);
-
         startGameUseCaseInteractor.execute(startGameInputData);
     }
 }
