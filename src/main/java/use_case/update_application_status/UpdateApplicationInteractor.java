@@ -42,6 +42,7 @@ public class UpdateApplicationInteractor implements UpdateApplicationInputBounda
             if (status == ApplicationStatus.APPROVED) {
                 Pet pet = petDataAccess.findById(application.getPetId());
                 pet.updatePetStatus(PetStatus.ADOPTED);
+                petDataAccess.update(pet);
             }
         }
         catch (RuntimeException ex) {

@@ -4,4 +4,6 @@ import entity.Pet;
 
 public interface UpdateApplicationPetDataAccessInterface {
     Pet findById(String id);
+
+    boolean update(Pet pet);
 }
