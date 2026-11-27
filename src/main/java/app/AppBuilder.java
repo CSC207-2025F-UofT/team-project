@@ -2,9 +2,7 @@ package app;
 
 import data_access.DataAccessObject;
 import interface_adapter.ViewManagerModel;
-import interface_adapter.game_running.GameRunningViewModel;
-import interface_adapter.game_running.LoadQuestionController;
-import interface_adapter.game_running.LoadQuestionPresenter;
+import interface_adapter.game_running.*;
 import interface_adapter.game_summary.GameSummaryViewModel;
 import use_case.load_question.LoadQuestionInputBoundary;
 import use_case.load_question.LoadQuestionInteractor;
