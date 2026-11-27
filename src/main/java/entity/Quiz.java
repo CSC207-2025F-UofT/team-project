@@ -1,8 +1,10 @@
 package entity;
 
+import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * A quiz: an ordered list of questions, plus the rule for scoring a set of answers.
@@ -30,9 +32,9 @@ public class Quiz {
     }
 
     /**
-     * Adds up each library's points from the chosen answers.
+     * Adds up each library's points from the answers of the entire quiz.
      *
-     * @param chosenIndices the index of the chosen option for each question, in order
+     * @param chosenIndices the index of the question's chosen answers, in order
      * @throws IllegalArgumentException if not every question was answered
      */
     public Map<Library, Integer> score(List<Integer> chosenIndices) {
@@ -52,14 +54,25 @@ public class Quiz {
         return scores;
     }
 
-    /** Returns the library with the highest score (ties go to the one listed first in Library). */
+    /** Returns the library with the highest score (ties broken at random). */
     public static Library bestLibrary(Map<Library, Integer> scores) {
-        Library best = Library.values()[0];
+        int max = Integer.MIN_VALUE; // -∞ 
+
+        // Identify max
         for (Library library : Library.values()) {
-            if (scores.getOrDefault(library, 0) > scores.getOrDefault(best, 0)) {
-                best = library;
+            max = Math.max(max, scores.getOrDefault(library, 0));
+        }
+
+        // Collect maxes
+        List<Library> best = new ArrayList<>();
+        for (Library library : Library.values()) {
+            if (scores.getOrDefault(library, 0) == max) {
+                best.add(library);
             }
         }
-        return best;
+
+        // Pick one at random
+        int k = ThreadLocalRandom.current().nextInt(best.size()); // 0 to best.size() - 1
+        return best.get(k);
     }
 }
