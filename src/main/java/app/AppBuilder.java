@@ -66,7 +66,7 @@ public class AppBuilder {
     }
 
     public AppBuilder addStartGameUseCase() {
-        final StartGameOutputBoundary startGameOutputBoundary = new StartGamePresenter(viewManagerModel, createTeamViewModel);
+        final StartGameOutputBoundary startGameOutputBoundary = new StartGamePresenter(viewManagerModel, createTeamViewModel, gameRunningViewModel);
         final StartGameInputBoundary startGameInteractor = new StartGameInteractor(dataAccessObject, startGameOutputBoundary);
 
         StartGameController startGameController = new StartGameController(startGameInteractor);

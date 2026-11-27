@@ -44,7 +44,7 @@ public class StartGameInteractor implements StartGameInputBoundary {
         }
         // Create final output data
         // TODO: Implement output data
-        final StartGameOutputData startGameOutputData = new StartGameOutputData();
+        final StartGameOutputData startGameOutputData = new StartGameOutputData(team1Name, team2Name);
 
         // Prepare Success View
         startGamePresenter.prepareSuccessView(startGameOutputData);
