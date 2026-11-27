@@ -28,13 +28,7 @@ public class DataAccessObject implements LoadQuestionDataAccessInterface, StartG
         answers.add(new Answer("Raft", null, 5));
         return new Question("Name something that can be inflated or deflated", answers);
     }
-
-    // TEMPORARY IMPLEMENTATION FOR TESTING PURPOSES
-    @Override
-    public void setCurrentQuestion(Question question) {
-        return;
-    }
-
+  
     // TODO: Implement StartGame use case functions
     @Override
     public boolean teamExists(String teamName){
@@ -45,5 +39,4 @@ public class DataAccessObject implements LoadQuestionDataAccessInterface, StartG
     public Team getTeam(String teamName){
         return new Team("TEMP.");
     }
-
 }

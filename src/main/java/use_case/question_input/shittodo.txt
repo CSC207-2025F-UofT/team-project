@@ -1,0 +1,46 @@
+Ok this is a bunch of shit that claude told me i need to fix at some point. Just wanted it as a not for myself as it
+is useful for when im cleaning stuff. But the kid said the code 'should' work so like fuck idk. I'm leaving it as it
+is for now.
+
+Primitives and types
+- QuestionInputOutputData: change Boolean correctAnswer to boolean and Integer pointsAwarded to int.
+- LogInputInteractor line 25: change final Boolean correct to boolean.
+- Rename getCorrectAnswer() to isCorrect(), the usual Java name for a boolean getter and the same as GuessRecord.
+
+Naming and variables
+- QuestionInputInteractor: rename points_gained to pointsGained, since Java uses camelCase.
+- It doesn't need to start at 0. Write final int pointsGained = currentQuestion.verifyAnswer(guess);.
+- Likewise, correct can be final boolean correct = pointsGained > 0;, which replaces the false start and the if that sets it.
+- In LogInputInteractor, rename the local question to questionText to match the getter it comes from.
+
+Magic numbers
+- The 3 in getWrongCount() == 3 should be a named constant, e.g. private static final int MAX_WRONG_GUESSES = 3;.
+- Use >= instead of ==, so a count that somehow goes past 3 still blocks input.
+
+Entity design
+- Replace Board.setWrongCount(getWrongCount() + 1) with a board.recordWrongGuess() method, so the rule lives in the entity, the same way Team.addPoints does.
+
+Imports
+- Replace import entity.*; with explicit imports, in the interactor and the data access interface.
+- QuestionInputInputData has an unused import entity.Question;.
+- RoundRecord has import entity.GuessRecord;, which isn't needed because it's in the same package.
+
+Comments and docs
+- Rewrite casual comments before you submit, e.g. "Idk which will actually happen…" and "these 3 are for the log_input basically".
+- The Javadoc on Board.getTeam is wrong; it was copy-pasted from Question.
+- Add Javadoc to the input and output data classes and their constructors, to match the style of the entities.
+
+Redundancy
+- LogInputInputData.questionText duplicates what's already stored in RoundRecord.
+- If QuestionInputDataAccessInterface still has getCurrentRoundRecord(), remove it. That belongs to log_input now.
+
+Formatting
+- QuestionInputOutputBoundary  questionInputPresenter in QuestionInputInteractor has a double space.
+
+Testing
+- Neither interactor has unit tests yet. Fake data access and presenter classes would cover:
+  - a correct guess,
+  - a wrong guess,
+  - a blank guess,
+  - the 3-strike block,
+  - logging with no active round.
