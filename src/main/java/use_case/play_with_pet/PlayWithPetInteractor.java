@@ -32,7 +32,16 @@ public class PlayWithPetInteractor
         }
 
         pet.play(2);
-        petDataAccess.save(pet);
+        pet.play(2);
+
+        try {
+            petDataAccess.save(pet);
+        }
+        catch (IllegalStateException exception) {
+            presenter.prepareFailView(
+                    "Could not save your pet's progress. Please try again.");
+            return;
+        }
 
         PlayWithPetOutputData outputData =
                 new PlayWithPetOutputData(pet.getHappiness());

@@ -55,7 +55,14 @@ public class AdoptPetInteractor implements AdoptPetInputBoundary {
                 imageUrl
         );
 
-        petDataAccess.save(pet);
+        try {
+            petDataAccess.save(pet);
+        }
+        catch (IllegalStateException exception) {
+            presenter.prepareFailView(
+                    "Could not save your pet. Please try again.");
+            return;
+        }
 
         AdoptPetOutputData outputData = new AdoptPetOutputData(
                 pet.getName(),

@@ -1,7 +1,7 @@
 package app;
 
 import data_access.FileUserDataAccessObject;
-import data_access.InMemoryPetDataAccessObject;
+import data_access.FilePetDataAccessObject;
 import data_access.GoogleDesktopIdentityGateway;
 import data_access.InMemoryTransactionDataAccessObject;
 import data_access.InMemoryBudgetDataAccessObject;
@@ -117,8 +117,8 @@ public class AppBuilder {
     private LoggedInView loggedInView;
     private LoginView loginView;
     private SwingWorker<String, Void> googleLoginWorker;
-    private final InMemoryPetDataAccessObject petDataAccessObject =
-            new InMemoryPetDataAccessObject();
+    private final FilePetDataAccessObject petDataAccessObject =
+            new FilePetDataAccessObject("pets.json");
 
     private AdoptPetViewModel adoptPetViewModel;
     private InteractWithPetViewModel interactWithPetViewModel;

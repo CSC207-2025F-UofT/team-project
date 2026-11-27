@@ -11,18 +11,33 @@ public class Pet {
     private final String name;
     private final Species species;
     private final String picturesURL;
-    private int hunger = 5;
-    private int happiness = 5;
-    private int health = 10;
+    private int hunger;
+    private int happiness;
+    private int health;
 
-    public Pet (String owner, String name,
-                Species species, String URL) {
+    public Pet(String owner, String name,
+               Species species, String URL) {
+        this(owner, name, species, URL, 5, 5, 10);
+    }
 
-    this.owner = owner;
-    this.name = name;
-    this.species = species;
-    this.picturesURL = URL;
+    public Pet(String owner, String name,
+               Species species, String URL,
+               int hunger, int happiness, int health) {
 
+        if (hunger < 0 || hunger > 10
+                || happiness < 0 || happiness > 10
+                || health < 0 || health > 10) {
+            throw new IllegalArgumentException(
+                    "Pet stats must be between 0 and 10.");
+        }
+
+        this.owner = owner;
+        this.name = name;
+        this.species = species;
+        this.picturesURL = URL;
+        this.hunger = hunger;
+        this.happiness = happiness;
+        this.health = health;
     }
 
     public int getHunger() {
