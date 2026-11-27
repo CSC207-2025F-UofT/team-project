@@ -29,10 +29,7 @@ public class InMemoryDataAccessObject implements PhotoAccessInterface, TripAcces
     public Photo getPhotoById(String id) {
         if (photoFailMode) throw new PhotoAccessException("Photo access failed");
 
-        Photo photo = photos.get(id);
-        if (photo == null) throw new PhotoAccessException("No photo with id " + id);
-
-        return photo;
+        return photos.get(id);
     }
 
     @Override
@@ -61,22 +58,16 @@ public class InMemoryDataAccessObject implements PhotoAccessInterface, TripAcces
         if (photoFailMode) throw new PhotoAccessException("Photo access failed");
 
         Trip trip = trips.get(tripId);
-        if (trip == null) return new ArrayList<>();
+        if (trip == null) return List.of();
 
-        return trip.getPhotoIds().stream()
-            .map(photos::get)
-            .filter(Objects::nonNull)
-            .collect(Collectors.toList());
+        return trip.getPhotoIds().stream().map(photos::get).filter(Objects::nonNull).toList();
     }
 
     @Override 
     public Trip getTripById(String id) {
         if (tripFailMode) throw new TripAccessException("Trip access failed");
 
-        Trip trip = trips.get(id);
-        if (trip == null) throw new TripAccessException("No trip with id " + id);
-
-        return trip;
+        return trips.get(id);
     }
 
     @Override
@@ -104,9 +95,7 @@ public class InMemoryDataAccessObject implements PhotoAccessInterface, TripAcces
     public void deleteTripById(String tripId) {
         if (tripFailMode) throw new TripAccessException("Trip access failed");
 
-        if (trips.remove(tripId) == null) {
-            throw new TripAccessException("No trip with id " + tripId);
-        }
+        trips.remove(tripId);
     }
 
     public void setPhotoFailMode(boolean mode) {
