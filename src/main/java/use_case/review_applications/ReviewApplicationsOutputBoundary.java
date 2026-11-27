@@ -28,4 +28,6 @@ public interface ReviewApplicationsOutputBoundary {
      * @param errorMessage the message to show
      */
     void prepareDetailFailView(String errorMessage);
+
+    void switchToUpdateApplicationView();
 }

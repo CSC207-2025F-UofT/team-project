@@ -5,4 +5,6 @@ public interface UpdateApplicationOutputBoundary {
     void prepareSuccessView(UpdateApplicationOutputData outputData);
 
     void prepareFailView(String errorMessage);
+
+    void switchToReviewApplicationView();
 }

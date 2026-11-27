@@ -23,4 +23,8 @@ public class UpdateApplicationController {
         }
         return ApplicationStatus.valueOf(status);
     }
+
+    public void switchToReviewApplicationView() {
+        updateApplicationInteractor.switchToReviewApplicationView();
+    }
 }

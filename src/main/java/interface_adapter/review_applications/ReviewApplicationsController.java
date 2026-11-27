@@ -44,4 +44,6 @@ public class ReviewApplicationsController {
         }
         return ApplicationStatus.valueOf(status);
     }
+
+    public void switchToUpdateApplicationView() {reviewApplicationsInteractor.switchToUpdateApplicationView();}
 }

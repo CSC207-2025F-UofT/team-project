@@ -297,4 +297,5 @@ public final class AppBuilder {
         viewManagerModel.setActiveView(GalleryView.VIEW_NAME);
         return views;
     }
+
 }

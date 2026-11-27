@@ -16,4 +16,6 @@ public interface ReviewApplicationsInputBoundary {
      * @param applicationId the application the admin chose
      */
     void viewApplication(String applicationId);
+
+    void switchToUpdateApplicationView();
 }

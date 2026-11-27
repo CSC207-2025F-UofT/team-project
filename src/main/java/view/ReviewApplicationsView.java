@@ -58,6 +58,7 @@ public final class ReviewApplicationsView extends JPanel implements ReviewApplic
     private final JTextArea detailsArea = new JTextArea(DETAILS_ROWS, DETAILS_COLUMNS);
     private final JLabel detailMessageLabel = new JLabel(BLANK);
 
+    private final JButton update = new JButton("update status");
     /** The ids of the applications in the table, in table order. */
     private List<String> shownIds = new ArrayList<>();
     /** True while the table is being refilled, so selection changes made by the view itself are ignored. */
@@ -133,10 +134,21 @@ public final class ReviewApplicationsView extends JPanel implements ReviewApplic
         detailsArea.setLineWrap(true);
         detailsArea.setWrapStyleWord(true);
 
+        update.setEnabled(false);
+        update.addActionListener(event -> {
+            if (reviewApplicationsController != null) {
+                reviewApplicationsController.switchToUpdateApplicationView();
+            }
+        });
+
+        final JPanel bottom = new JPanel(new BorderLayout(GAP, 0));
+        bottom.add(detailMessageLabel, BorderLayout.CENTER);
+        bottom.add(update, BorderLayout.EAST);
+
         final JPanel details = new JPanel(new BorderLayout(0, GAP));
         details.add(new JLabel("Adopter's answers"), BorderLayout.NORTH);
         details.add(new JScrollPane(detailsArea), BorderLayout.CENTER);
-        details.add(detailMessageLabel, BorderLayout.SOUTH);
+        details.add(bottom, BorderLayout.SOUTH);
         return details;
     }
 
@@ -182,6 +194,7 @@ public final class ReviewApplicationsView extends JPanel implements ReviewApplic
             detailsArea.setText("");
         }
         detailMessageLabel.setText(textOrBlank(state.getDetailMessage()));
+        update.setEnabled(state.hasDetails());
     }
 
     private static String detailsText(ReviewApplicationsState state) {

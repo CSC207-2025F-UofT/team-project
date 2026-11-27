@@ -53,4 +53,9 @@ public class UpdateApplicationInteractor implements UpdateApplicationInputBounda
         presenter.prepareSuccessView(new UpdateApplicationOutputData(application.getId(),
                 application.getStatus(), application.getAdminNote()));
     }
+
+    @Override
+    public void switchToReviewApplicationView() {
+        presenter.switchToReviewApplicationView();
+    }
 }
