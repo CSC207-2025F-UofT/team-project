@@ -1,13 +1,15 @@
 package data_access;
 
 import entity.Answer;
+import entity.Board;
 import entity.Question;
 import use_case.load_question.LoadQuestionDataAccessInterface;
+import use_case.question_input.QuestionInputDataAccessInterface;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class DataAccessObject implements LoadQuestionDataAccessInterface {
+public class DataAccessObject implements LoadQuestionDataAccessInterface, QuestionInputDataAccessInterface {
 
     // TEMPORARY IMPLEMENTATION FOR TESTING PURPOSES
     @Override
@@ -31,5 +33,9 @@ public class DataAccessObject implements LoadQuestionDataAccessInterface {
     @Override
     public void setCurrentQuestion(Question question) {
         return;
+    }
+
+    public Board getCurrentBoard() {
+        return null;
     }
 }

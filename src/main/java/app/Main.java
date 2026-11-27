@@ -9,6 +9,7 @@ public class Main {
                 .addGameRunningView()
                 .addLoadQuestionUseCase()
                 .addGameSummaryView()
+                .addQuestionInputUseCase()
                 .build();
 
         application.setLocationRelativeTo(null);

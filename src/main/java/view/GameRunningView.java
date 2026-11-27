@@ -1,9 +1,6 @@
 package view;
 
-import interface_adapter.game_running.GameRunningState;
-import interface_adapter.game_running.GameRunningViewModel;
-import interface_adapter.game_running.GameRunningViewModelListener;
-import interface_adapter.game_running.LoadQuestionController;
+import interface_adapter.game_running.*;
 
 import javax.swing.*;
 import java.awt.*;
@@ -16,6 +13,7 @@ public class GameRunningView extends JPanel implements GameRunningViewModelListe
     private final JLabel questionLabel = new JLabel("[Question Box]");
     private final JLabel[] answerLabels = new JLabel[8];
     private final JTextField answerInput = new JTextField(20);
+    private QuestionInputController questionInputController = null;
 
     public GameRunningView(GameRunningViewModel gameRunningViewModel) {
         this.gameRunningViewModel = gameRunningViewModel;
@@ -62,6 +60,11 @@ public class GameRunningView extends JPanel implements GameRunningViewModelListe
         final JPanel inputPanel = new JPanel();
         JButton submitAnswerButton = new JButton("Submit");
         inputPanel.add(answerInput);
+        submitAnswerButton.addActionListener(
+                evt -> {
+                    this.questionInputController.execute(this.answerInput.getText());
+                }
+        );
         inputPanel.add(submitAnswerButton);
 
         final JPanel loadQuestionButtonPanel = new JPanel();
@@ -98,5 +101,9 @@ public class GameRunningView extends JPanel implements GameRunningViewModelListe
 
     public void setLoadQuestionController(LoadQuestionController loadQuestionController) {
         this.loadQuestionController = loadQuestionController;
+    }
+
+    public void setQuestionInputController(QuestionInputController questionInputController) {
+        this.questionInputController = questionInputController;
     }
 }
