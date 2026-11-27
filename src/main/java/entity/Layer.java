@@ -1,17 +1,22 @@
 package entity;
+import java.util.UUID;
 
 public abstract class Layer {
 
     private String name;
     private boolean visible;
-    private int position;
+    private double x;
+    private double y;
     private double transparency;
+    private String layerId;
 
-    public Layer(String name, int position) {
+    public Layer(String name) {
         this.name = name;
         this.visible = true;
-        this.position = position;
+        this.x = 0.0;
+        this.y = 0.0;
         this.transparency = 1.0;
+        this.layerId = UUID.randomUUID().toString();
     }
 
     public String getName() {
@@ -30,12 +35,17 @@ public abstract class Layer {
         this.visible = !this.visible;
     }
 
-    public int getPosition() {
-        return position;
+    public double getX() {
+        return x;
     }
 
-    public void setPosition(int position) {
-        this.position = position;
+    public double getY() {
+        return y;
+    }
+
+    public void setPosition(double x, double y) {
+        this.x = x;
+        this.y = y;
     }
 
     public double getTransparency() {
@@ -50,5 +60,9 @@ public abstract class Layer {
         }
 
         this.transparency = transparency;
+    }
+
+    public String getLayerId() {
+        return layerId;
     }
 }
