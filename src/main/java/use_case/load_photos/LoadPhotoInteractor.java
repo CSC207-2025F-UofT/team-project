@@ -21,14 +21,21 @@ public class LoadPhotoInteractor implements LoadPhotoInputBoundary {
     @Override
     public void execute(LoadPhotoInputData inputData) {
         String id = inputData.getPhotoId();
-        byte[] bytes;
+
         try {
             Photo photo = photoAccess.getPhotoById(id);
-            bytes = imageReader.readFullImage(photo);
+
+            if (photo == null) {
+                presenter.prepareFailView(id, "Photo not found");
+
+                return;
+            }
+
+            byte[] bytes = imageReader.readFullImage(photo);
+            presenter.prepareSuccessView(new LoadPhotoOutputData(id, bytes));
+
         } catch (PhotoAccessException | ImageReadException e) {
             presenter.prepareFailView(id, e.getMessage());
-            return;
         }
-        presenter.prepareSuccessView(new LoadPhotoOutputData(id, bytes));
     }
 }
