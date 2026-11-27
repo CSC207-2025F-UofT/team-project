@@ -1,0 +1,92 @@
+@startuml
+skinparam dpi 150
+
+package "Entities" {
+  class Location {
+    - latitude : double
+    - longitude : double
+    - landmark : String
+    - city : String
+    - county: String
+    - state: String
+    - country : String
+
+    + getDistanceFrom(other : Location) : double
+    + getDisplayString() : String
+  }
+
+  class Photo implements "Comparable<Photo>" {
+    - id : String
+    - location : Location
+    - time : LocalDateTime
+
+    + compareTo(other : Photo) : int
+  }
+
+  class Trip {
+    - id : String
+    - name : String
+    - startTime : LocalDateTime
+    - endTime : LocalDateTime
+    - photoIds : List<String>
+  }
+}
+package "Drivers" {
+  interface "LocalDataAccess" {
+    - path: String
+    + setPath(path: String): void
+  }
+  abstract class ArchiveAccess {
+    + getTrips(): List<Trip>
+    + getTripById(id: String): Trip
+    + getPhotoMetadataById(id: String): JSONObject
+    + getSettings(): JSONObject
+  }
+  abstract class FileAccess {
+    + getImageById(id: String): BufferedImage
+  }
+  class LocalArchiveAccess extends ArchiveAccess implements "LocalDataAccess" {}
+  class LocalFileAccess extends FileAccess implements "LocalDataAccess"
+}
+
+package "Application" {
+  interface InputBoundary {
+    + execute(input: InputData): OutputData
+  }
+  interface InputData
+  interface OutputData
+
+  ' analytics use case
+  class AnalyticsUseCase extends InputBoundary {
+    + execute(input: AnalyticsInputData): AnalyticsOutputData
+    - prepareAnalytics(trips: List<Trip>): AnalyticsOutputData
+    - prepareAnalytics(photoIds: List<String>): AnalyticsOutputData
+    - accessTrips(filter: TripFilter): List<Trip>
+  }
+}
+
+package "Adapters" {
+  interface OutputBoundary {
+    + prepareSuccessView(data: OutputData): void
+    + prepareFailView(message: String): void
+  }
+  interface ViewModel {
+  }
+
+  ' Analytics use case
+  class AnalyticsState {
+
+  }
+  class AnalyticsViewModel implements "ViewModel" {
+    + setState(state: AnalyticsState): void
+    + getState(): AnalyticsState
+    + notifyStateChange(): void
+    + addListener(viewModelListener: AnalyticsViewModelListener)
+  }
+  class AnalyticsPresenter implements OutputBoundary {
+    + prepareSuccessView(data: AnalyticsOutputData): void
+    + prepareFailView(message: String): void
+  }
+}
+
+@enduml
