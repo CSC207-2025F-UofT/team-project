@@ -3,6 +3,8 @@ package interface_adapter.watchlist;
 import use_case.watchlist.WatchListOutputdata;
 import use_case.watchlist.WatchlistOutputBoundary;
 
+import java.util.List;
+
 public class WatchlistPresenter implements WatchlistOutputBoundary {
 
     private final WatchListViewModel viewModel;
@@ -19,8 +21,8 @@ public class WatchlistPresenter implements WatchlistOutputBoundary {
         if(!outputdata.getChanges().isEmpty()){
             viewModel.setChangesText(formatChanges(outputdata));
         }
-        else if(outputdata.getStockWatchers().isEmpty()){
-            viewModel.setChangesText("");
+        else{
+            viewModel.setChangesText(retainLines(viewModel.getChangesText(), outputdata.getStockWatchers()));
         }
 
         viewModel.firePropertyChanged();
@@ -46,5 +48,16 @@ public class WatchlistPresenter implements WatchlistOutputBoundary {
             message.append("\n");
         }
         return message.toString();
+    }
+
+    private String retainLines(String text, List<String> stockWatchers){
+        StringBuilder retained = new StringBuilder();
+        for(String line : text.split("\n")){
+            String stockWatcher = line.split(":")[0];
+            if(stockWatchers.contains(stockWatcher)){
+                retained.append(line).append("\n");
+            }
+        }
+        return retained.toString();
     }
 }

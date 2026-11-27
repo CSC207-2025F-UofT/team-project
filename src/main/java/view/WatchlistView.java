@@ -7,6 +7,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class WatchlistView extends JPanel implements PropertyChangeListener {
 
@@ -88,6 +90,12 @@ public class WatchlistView extends JPanel implements PropertyChangeListener {
         refreshButton.addActionListener(event -> getChanges());
         runInBackground(() -> controller.showWatchList(username));
     }
+
+    private final ExecutorService worker = Executors.newSingleThreadExecutor(task ->{
+        Thread thread = new Thread(task);
+        thread.setDaemon(true);
+        return thread;
+    });
 
     private void runInBackground(Runnable task) {
         messageLabel.setText("Loading");
