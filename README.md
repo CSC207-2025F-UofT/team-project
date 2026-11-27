@@ -42,6 +42,18 @@ As a user, I want to search for foods using an external nutritional database and
 
 I also want to review and modify the retrieved information before saving it to my personal food bank.
 
+### User Story 3: Daily Nutrition Tracking
+
+As a user, I want to select a specific date and view my planned and actual meals, including total calories, protein, carbohydrates, and fat, so that I can monitor my daily nutritional intake.
+
+Users can navigate between dates to review their planned and recorded meals.
+
+### User Story 4: Diet History
+
+As a user, I want to view weekly nutritional comparisons and percentage-based meal plan adherence rates, so that I can evaluate how consistently I follow my meal plans and monitor my dietary progress over time.
+
+Adherence percentages and bar charts illustrate how closely actual nutritional intake matches planned intake.
+
 ---
 
 ## Use Cases
@@ -62,6 +74,44 @@ Each use case follows Clean Architecture with its own interactor and interfaces 
 
 Allow users to retrieve food information from an external nutrition API, review or adjust the results, and save selected foods through the existing Add Food use case.
 
+### Daily Nutrition Tracking
+
+#### Use Case: View Daily Summary
+
+**Primary Actor:** User
+
+**Precondition:** The application is running.
+
+**Main Flow:**
+1. The user selects a specific date.
+2. The application retrieves the planned and recorded meals for the selected date.
+3. The application calculates the total calories, protein, carbohydrates, and fat.
+4. Planned and actual nutritional information is displayed side by side.
+
+**Alternative Flow:**
+- If no planned or recorded meals exist for the selected date, the application displays an appropriate empty state.
+
+**Postcondition:** The daily nutritional summary is displayed without modifying existing meal records.
+
+### Diet History
+
+#### Use Case: Browse Diet History
+
+**Primary Actor:** User
+
+**Precondition:** The application is running.
+
+**Main Flow:**
+1. The user selects a week.
+2. The application retrieves the planned and recorded nutritional information for that week.
+3. The application calculates individual nutrient adherence percentages and an overall weekly adherence rate.
+4. The application displays planned and actual nutritional intake using bar charts.
+
+**Alternative Flow:**
+- If sufficient nutritional data is unavailable, the application displays an appropriate message instead of a misleading percentage.
+
+**Postcondition:** The weekly nutritional analysis is displayed without modifying existing meal records.
+
 ---
 
 ## Minimal Viable Product (MVP)
@@ -70,7 +120,7 @@ The MVP of NutriTrack focuses on food bank management, meal planning, and nutrit
 
 | Team Member | User Story | Use Cases | Description |
 |-------------|------------|-----------|-------------|
-| Eric Wei | To be confirmed | To be confirmed | To be confirmed |
+| Eric Wei | Daily Nutrition Tracking, Diet History | View Daily Summary, Browse Diet History | Allow users to select dates, compare planned and actual nutritional intake, and evaluate weekly meal plan adherence through bar charts and percentage-based analysis. |
 | Tony Wu | Food Bank Management | Add Food, View Food Bank, Search Food, Edit Food, Delete Food | Allow users to create, view, search, update, and remove food entries containing nutritional information per 100g. |
 | Letao Li | To be confirmed | To be confirmed | To be confirmed |
 | Pangbo Li | To be confirmed | To be confirmed | To be confirmed |
@@ -84,6 +134,8 @@ The MVP of NutriTrack focuses on food bank management, meal planning, and nutrit
 | Search Food | In Development |
 | Edit Food | Planned |
 | Delete Food | Planned |
+| View Daily Summary | In Development |
+| Browse Diet History | In Development |
 
 ### Current Limitations
 
@@ -129,12 +181,32 @@ It is used by `FoodItem` to represent nutritional values per 100 grams and can a
 - Support nutritional calculations through addition and scaling.
 - Provide reusable nutritional data across food management, meal planning, and food logging.
 
+### Entity 3: DailyMealPlan
+
+`DailyMealPlan` represents a collection of meals that a user intends to consume on a specific date.
+
+**Responsibilities:**
+- Store and manage planned meals for a specific date.
+- Calculate total planned calories and macronutrients.
+- Provide planned nutritional information for daily summaries and weekly comparisons.
+
+### Entity 4: DailyFoodLog
+
+`DailyFoodLog` represents a collection of meals that a user has actually consumed on a specific date.
+
+**Responsibilities:**
+- Store and manage recorded meals for a specific date.
+- Calculate total consumed calories and macronutrients.
+- Provide historical nutritional information for daily summaries and weekly adherence calculations.
+
 ### Entity Relationships
 
 - Each `FoodItem` contains one `NutritionTotals` object representing nutrition per 100g.
 - Multiple `FoodItem` objects are stored in the food repository and identified by their UUIDs.
 - Food management use cases retrieve, create, update, or delete food entries through data access interfaces.
-
+- Each `DailyMealPlan` contains a collection of `PlannedMeal` objects.
+- Each `DailyFoodLog` contains a collection of `RecordedMeal` objects.
+- Both entities use `NutritionTotals` to represent daily nutritional totals.
 ---
 
 ## API Usage
@@ -174,6 +246,18 @@ API integration will be implemented as a separate use case following Clean Archi
 ### UML Class Diagram
 
 ### Sequence Diagrams
+
+### Planned User Interface
+
+#### Daily Summary
+
+The Daily Summary interface allows users to navigate between dates and compare planned and actual meals and nutritional totals side by side.
+
+#### Diet History
+
+The Diet History interface displays weekly nutritional comparisons using four bar charts for calories, protein, carbohydrates, and fat, together with individual and overall adherence percentages.
+
+Both interfaces are currently under development.
 
 ---
 
