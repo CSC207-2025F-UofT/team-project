@@ -20,6 +20,8 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.SwingConstants;
 
+import interface_adapter.view_closet.ViewClosetController;
+
 public class ClosetView extends JPanel {
 
     private final JButton allButton = new JButton("All");
@@ -66,6 +68,7 @@ public class ClosetView extends JPanel {
         add(bottomPanel, BorderLayout.SOUTH);
     }
 
+
     private JPanel createItemCard(String name, String category, String colour) {
         JPanel card = new JPanel(new BorderLayout(5, 5));
         card.setBorder(BorderFactory.createCompoundBorder(
@@ -85,5 +88,11 @@ public class ClosetView extends JPanel {
         card.add(details, BorderLayout.SOUTH);
 
         return card;
+    }
+
+    private ViewClosetController viewClosetController;
+
+    public void setViewClosetController(ViewClosetController controller) {
+        this.viewClosetController = controller;
     }
 }
