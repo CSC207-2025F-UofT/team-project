@@ -19,6 +19,7 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
@@ -38,6 +39,7 @@ import org.junit.jupiter.api.io.TempDir;
 import use_case.port.JobFetchResult;
 import use_case.port.JobSource;
 import use_case.port.JobSourceException;
+import use_case.port.PagedJobSearchSource;
 import use_case.port.SourceFailure;
 import use_case.profile.ProfileData;
 
@@ -107,6 +109,43 @@ class ProfileWorkflowTest {
           assertEquals("SQL", table(newResults).getValueAt(0, 4));
           button(newResults, "Edit profile").doClick();
           assertEquals(edit, reopened.getSelectedComponent());
+          return null;
+        });
+  }
+
+  @Test
+  void liveFinderAndProfileRecommendationsWorkInTheSameWindow() throws Exception {
+    FileProfileDataAccess profiles = new FileProfileDataAccess(directory.resolve("profile.json"));
+    profiles.create(new ProfileData("CS", "", "SQL", "", "", "ANY").toProfile(new User()));
+    List<Integer> pages = new ArrayList<>();
+    PagedJobSearchSource jooble =
+        (criteria, page) -> {
+          pages.add(page);
+          return new PagedJobSearchSource.Page(
+              new JobFetchResult(List.of(), List.of("jooble"), List.of()), 0);
+        };
+    onEdt(
+        () -> {
+          JTabbedPane tabs =
+              ProfileApplication.createLiveTabs(
+                  new DemoJobSource(),
+                  profiles,
+                  Runnable::run,
+                  Runnable::run,
+                  url -> {},
+                  "Test boards",
+                  Optional.of(jooble));
+          JTabbedPane finder = (JTabbedPane) show(tabs, "Finder");
+          assertEquals("Company boards", finder.getTitleAt(finder.getSelectedIndex()));
+          Container jobs = show(finder, "Jooble Canada");
+          field(jobs, "Keywords (required)").setText("software");
+          button(jobs, "Search").doClick();
+          assertEquals(List.of(1), pages);
+          assertEquals("SQL", field(show(tabs, "Profile"), "Skills").getText());
+          assertEquals("Data Science Co-op", table(show(tabs, "Recommendations")).getValueAt(0, 0));
+          show(tabs, "Finder");
+          assertEquals(jobs, finder.getSelectedComponent());
+          assertEquals(List.of(1), pages);
           return null;
         });
   }

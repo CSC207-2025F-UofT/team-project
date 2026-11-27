@@ -4,6 +4,7 @@ import data_access.DemoJobSource;
 import data_access.FileProfileDataAccess;
 import data_access.GreenhouseJobSource;
 import data_access.JobBoard;
+import data_access.JoobleJobSearch;
 import java.awt.GraphicsEnvironment;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
@@ -15,6 +16,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
@@ -80,7 +82,7 @@ public final class Main {
               boards,
               timeout);
       sourceLabel =
-          "Searching company boards: "
+          "Configured company boards: "
               + boards.stream().map(JobBoard::getCompany).collect(Collectors.joining(", "));
     }
     if (checkApi) {
@@ -99,10 +101,11 @@ public final class Main {
     if (GraphicsEnvironment.isHeadless()) {
       throw new IllegalArgumentException("A graphical desktop is required to open the Finder.");
     }
-    SwingUtilities.invokeLater(() -> showWindow(source, sourceLabel));
+    boolean offline = demo;
+    SwingUtilities.invokeLater(() -> showWindow(source, sourceLabel, offline));
   }
 
-  private static void showWindow(JobSource source, String sourceLabel) {
+  private static void showWindow(JobSource source, String sourceLabel, boolean offline) {
     ExecutorService worker =
         Executors.newSingleThreadExecutor(
             task -> {
@@ -116,14 +119,25 @@ public final class Main {
         Path.of(System.getProperty("user.home"), ".intern-finder", "profile.json");
     Path profilePath =
         Path.of(System.getProperty("internfinder.profile", defaultProfile.toString()));
-    window.add(
-        ProfileApplication.createTabs(
-            source,
-            new FileProfileDataAccess(profilePath),
-            worker,
-            SwingUtilities::invokeLater,
-            new DesktopLinkOpener(),
-            sourceLabel));
+    FileProfileDataAccess profiles = new FileProfileDataAccess(profilePath);
+    DesktopLinkOpener links = new DesktopLinkOpener();
+    if (offline) {
+      window.add(
+          ProfileApplication.createTabs(
+              source, profiles, worker, SwingUtilities::invokeLater, links, sourceLabel));
+    } else {
+      window.add(
+          ProfileApplication.createLiveTabs(
+              source,
+              profiles,
+              worker,
+              SwingUtilities::invokeLater,
+              links,
+              sourceLabel,
+              Optional.ofNullable(System.getenv("JOOBLE_API_KEY"))
+                  .filter(key -> !key.isBlank())
+                  .map(JoobleJobSearch::new)));
+    }
     window.addWindowListener(
         new WindowAdapter() {
           @Override
