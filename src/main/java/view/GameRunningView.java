@@ -5,6 +5,7 @@ import interface_adapter.game_running.GameRunningViewModel;
 import interface_adapter.game_running.GameRunningViewModelListener;
 import interface_adapter.game_running.LoadQuestionController;
 import interface_adapter.game_running.QuestionInputController;
+import interface_adapter.game_running.LogInputController;
 
 import javax.swing.*;
 import java.awt.*;
@@ -13,11 +14,12 @@ public class GameRunningView extends JPanel implements GameRunningViewModelListe
 
     private final GameRunningViewModel gameRunningViewModel;
     private LoadQuestionController loadQuestionController = null;
+    private QuestionInputController questionInputController = null;
+    private LogInputController logInputController = null;
 
     private final JLabel questionLabel = new JLabel("[Question Box]");
     private final JLabel[] answerLabels = new JLabel[8];
     private final JTextField answerInput = new JTextField(20);
-    private QuestionInputController questionInputController = null;
 
     public GameRunningView(GameRunningViewModel gameRunningViewModel) {
         this.gameRunningViewModel = gameRunningViewModel;
@@ -67,6 +69,9 @@ public class GameRunningView extends JPanel implements GameRunningViewModelListe
         submitAnswerButton.addActionListener(
                 evt -> {
                     this.questionInputController.execute(this.answerInput.getText());
+                    if (this.gameRunningViewModel.getState().getQuestionInputError() == null) {
+                        //TODO this.logInputController.execute();
+                    }
                 }
         );
         inputPanel.add(submitAnswerButton);
@@ -109,5 +114,9 @@ public class GameRunningView extends JPanel implements GameRunningViewModelListe
 
     public void setQuestionInputController(QuestionInputController questionInputController) {
         this.questionInputController = questionInputController;
+    }
+
+    public void setLogInputController(LogInputController logInputController) {
+        this.logInputController = logInputController;
     }
 }

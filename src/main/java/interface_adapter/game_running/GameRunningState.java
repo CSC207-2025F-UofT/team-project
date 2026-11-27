@@ -7,7 +7,7 @@ public class GameRunningState {
     private String questionText = "";
     private int answerCount = 0;
     private String loadQuestionError = null;
-    //ADD questioninputError
+    private String questionInputError = null;
 
     public String getQuestionText() {
         return questionText;
@@ -32,4 +32,8 @@ public class GameRunningState {
     public void setLoadQuestionError(String loadQuestionError) {
         this.loadQuestionError = loadQuestionError;
     }
+
+    public String getQuestionInputError() {return questionInputError;}
+
+    public void setQuestionInputError(String questionInputError) {this.questionInputError = questionInputError;}
 }
