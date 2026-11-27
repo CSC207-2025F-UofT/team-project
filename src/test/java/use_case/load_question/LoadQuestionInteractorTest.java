@@ -3,6 +3,7 @@ package use_case.load_question;
 import data_access.InMemoryDataAccessObject;
 import entity.Answer;
 import entity.Question;
+import entity.QuestionBuilder;
 import org.junit.jupiter.api.Test;
 import use_case.add_question.AddQuestionDataAccessInterface;
 
@@ -18,15 +19,14 @@ public class LoadQuestionInteractorTest {
         InMemoryDataAccessObject dataAccessObject = new InMemoryDataAccessObject();
 
         // For the success test, we need to add a question to the data access before retrieving one.
-        Question testQuestion = new Question("Name something that can be inflated or deflated",
-                new ArrayList<>(List.of(
-                        new Answer("Balloon", null, 44),
-                        new Answer("Tire", null, 25),
-                        new Answer("Beach ball", null, 10),
-                        new Answer("Ego", null, 7),
-                        new Answer("Raft", null, 5)
-                ))
-        );
+        QuestionBuilder questionBuilder = new QuestionBuilder();
+        Question testQuestion = questionBuilder.setQuestionText("Name something that can be inflated or deflated")
+                .addAnswer("Balloon", null, 44)
+                .addAnswer("Tire", null, 25)
+                .addAnswer("Beach ball", null, 10)
+                .addAnswer("Ego", null, 7)
+                .addAnswer("Raft", null, 5)
+                .toQuestion();
         dataAccessObject.saveQuestion(testQuestion);
 
         // This creates a successPresenter that tests whether the test case is as we expect.
