@@ -9,6 +9,7 @@ import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.awt.event.HierarchyEvent;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -17,6 +18,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
+import javax.swing.Timer;
 import use_case.profile.ProfileData;
 
 /** Shared Swing form for creating and updating the local student's qualification profile. */
@@ -33,6 +35,7 @@ public final class ProfileView extends JPanel {
   private final JButton reload = new JButton("Reload profile");
   private final JButton recommendations = new JButton("View recommendations");
   private final JLabel status = new JLabel();
+  private final JLabel externalChange = new JLabel();
 
   /** Connects form actions to their use cases and observes presenter updates. */
   public ProfileView(
@@ -62,6 +65,7 @@ public final class ProfileView extends JPanel {
     buttons.add(recommendations);
     JPanel footer = new JPanel(new BorderLayout(0, 6));
     footer.add(status, BorderLayout.NORTH);
+    footer.add(externalChange, BorderLayout.CENTER);
     footer.add(buttons, BorderLayout.SOUTH);
     add(footer, BorderLayout.SOUTH);
 
@@ -82,6 +86,34 @@ public final class ProfileView extends JPanel {
     recommendations.addActionListener(event -> showRecommendations.run());
     model.addPropertyChangeListener(event -> render(model.getState()));
     render(model.getState());
+
+    Timer refresh =
+        new Timer(1000, event -> update.checkForChanges(this::displays, this::showChangeNotice));
+    refresh.setInitialDelay(0);
+    addHierarchyListener(
+        event -> {
+          if ((event.getChangeFlags() & HierarchyEvent.SHOWING_CHANGED) != 0) {
+            if (isShowing()) {
+              refresh.start();
+            } else {
+              refresh.stop();
+            }
+          }
+        });
+  }
+
+  private boolean displays(ProfileData values) {
+    return values.getProgram().equals(program.getText())
+        && values.getYear().equals(year.getText())
+        && values.getSkills().equals(skills.getText())
+        && values.getRoles().equals(roles.getText())
+        && values.getLocations().equals(locations.getText())
+        && values.getArrangement().equals(arrangement.getSelectedItem());
+  }
+
+  private void showChangeNotice(String message) {
+    externalChange.setText(message);
+    externalChange.setVisible(true);
   }
 
   private static void addField(JPanel form, int row, String text, JComponent field) {
@@ -118,5 +150,6 @@ public final class ProfileView extends JPanel {
     reload.setEnabled(state.isEditable() || state.getMode() == ProfileViewModel.Mode.UNAVAILABLE);
     recommendations.setEnabled(existing);
     status.setText(state.getMessage());
+    externalChange.setVisible(false);
   }
 }

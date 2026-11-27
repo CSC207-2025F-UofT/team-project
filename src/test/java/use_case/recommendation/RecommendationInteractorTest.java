@@ -11,12 +11,14 @@ import entity.QualificationProfile;
 import entity.User;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import use_case.port.JobFetchResult;
 import use_case.port.JobSource;
 import use_case.port.SourceFailure;
 import use_case.profile.ProfileData;
 import use_case.profile.ProfileRepository;
+import use_case.profile.SavedProfile;
 
 /** Exercises the primary MVP use case through its boundaries without Swing, files or HTTP. */
 class RecommendationInteractorTest {
@@ -37,7 +39,7 @@ class RecommendationInteractorTest {
   @Test
   void forwardsTheLatestProfileAndSharedPostingsToTheStrategyAndRetainsBoardWarnings() {
     MemoryProfiles profiles = new MemoryProfiles();
-    profiles.create(profile("Java"));
+    final SavedProfile saved = profiles.create(profile("Java"));
     JobPosting posting =
         new JobPosting.Builder("greenhouse", "board", "1")
             .title("Intern")
@@ -60,7 +62,7 @@ class RecommendationInteractorTest {
         new RecommendationInteractor(profiles, jobs, matcher, output);
     interactor.execute();
     assertEquals(List.of("Java"), output.results.getMatches().get(0).getMatchedSkills());
-    profiles.update(profile("SQL"));
+    profiles.update(profile("SQL"), saved);
     interactor.execute();
     assertEquals(List.of("SQL"), output.results.getMatches().get(0).getMatchedSkills());
     assertEquals(List.of("unavailable"), output.results.getFailedBoards());
@@ -72,21 +74,23 @@ class RecommendationInteractorTest {
   }
 
   private static final class MemoryProfiles implements ProfileRepository {
-    private QualificationProfile value;
+    private SavedProfile value;
 
     @Override
-    public Optional<QualificationProfile> load() {
+    public Optional<SavedProfile> loadSnapshot() {
       return Optional.ofNullable(value);
     }
 
     @Override
-    public void create(QualificationProfile profile) {
-      value = profile;
+    public SavedProfile create(QualificationProfile profile) {
+      value = new SavedProfile(profile, UUID.randomUUID());
+      return value;
     }
 
     @Override
-    public void update(QualificationProfile profile) {
-      value = profile;
+    public SavedProfile update(QualificationProfile profile, SavedProfile baseline) {
+      assertSame(value, baseline);
+      return create(profile);
     }
   }
 

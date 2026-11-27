@@ -6,6 +6,7 @@ import use_case.profile.ProfileData;
 import use_case.profile.ProfileRepository;
 import use_case.profile.ProfileSaveOutputBoundary;
 import use_case.profile.ProfileStorageException;
+import use_case.profile.SavedProfile;
 
 /** Creates a profile and publishes success only after persistence completes. */
 public final class CreateProfileInteractor implements CreateProfileInputBoundary {
@@ -20,14 +21,14 @@ public final class CreateProfileInteractor implements CreateProfileInputBoundary
 
   @Override
   public void execute(ProfileData input) {
-    QualificationProfile profile;
+    SavedProfile saved;
     try {
-      profile = input.toProfile(new User());
-      profiles.create(profile);
+      QualificationProfile profile = input.toProfile(new User());
+      saved = profiles.create(profile);
     } catch (IllegalArgumentException | ProfileStorageException exception) {
       output.presentError(exception.getMessage());
       return;
     }
-    output.presentSaved(ProfileData.from(profile));
+    output.presentSaved(saved);
   }
 }

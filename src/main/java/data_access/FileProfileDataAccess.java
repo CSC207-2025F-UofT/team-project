@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
 import java.nio.channels.OverlappingFileLockException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
@@ -15,11 +16,13 @@ import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import use_case.profile.ProfileRepository;
 import use_case.profile.ProfileStorageException;
+import use_case.profile.SavedProfile;
 
 /** Stores one local qualification profile as UTF-8 JSON using whole-file replacement. */
 public final class FileProfileDataAccess implements ProfileRepository {
@@ -31,13 +34,14 @@ public final class FileProfileDataAccess implements ProfileRepository {
   }
 
   @Override
-  public Optional<QualificationProfile> load() throws ProfileStorageException {
+  public Optional<SavedProfile> loadSnapshot() throws ProfileStorageException {
     try {
-      JSONObject json = new JSONObject(Files.readString(path));
+      String contents = Files.readString(path);
+      JSONObject json = new JSONObject(contents);
       User owner =
           new User(json.getString("userId"), json.getString("name"), json.getString("email"));
       Object year = json.get("graduationYear");
-      return Optional.of(
+      QualificationProfile profile =
           new QualificationProfile(
               owner,
               json.getString("program"),
@@ -47,7 +51,13 @@ public final class FileProfileDataAccess implements ProfileRepository {
               strings(json, "preferredLocations"),
               json.isNull("preferredArrangement")
                   ? Optional.empty()
-                  : Optional.of(WorkArrangement.valueOf(json.getString("preferredArrangement")))));
+                  : Optional.of(WorkArrangement.valueOf(json.getString("preferredArrangement"))));
+      // Older files have no revision. Two readers of the same bytes must get the same token.
+      UUID revision =
+          json.has("revision")
+              ? UUID.fromString(json.getString("revision"))
+              : UUID.nameUUIDFromBytes(contents.getBytes(StandardCharsets.UTF_8));
+      return Optional.of(new SavedProfile(profile, revision));
     } catch (NoSuchFileException absent) {
       return Optional.empty();
     } catch (IOException | JSONException | IllegalArgumentException | SecurityException exception) {
@@ -57,16 +67,17 @@ public final class FileProfileDataAccess implements ProfileRepository {
   }
 
   @Override
-  public void create(QualificationProfile profile) throws ProfileStorageException {
-    write(profile, true);
+  public SavedProfile create(QualificationProfile profile) throws ProfileStorageException {
+    return write(profile, Optional.empty());
   }
 
   @Override
-  public void update(QualificationProfile profile) throws ProfileStorageException {
-    write(profile, false);
+  public SavedProfile update(QualificationProfile edited, SavedProfile baseline)
+      throws ProfileStorageException {
+    return write(edited, Optional.of(baseline));
   }
 
-  private void write(QualificationProfile profile, boolean creating)
+  private SavedProfile write(QualificationProfile profile, Optional<SavedProfile> baseline)
       throws ProfileStorageException {
     try {
       Files.createDirectories(path.getParent());
@@ -77,17 +88,21 @@ public final class FileProfileDataAccess implements ProfileRepository {
         if (lock == null) {
           throw new ProfileStorageException("Another copy of the app is saving. Try again.");
         }
-        Optional<QualificationProfile> existing = load();
-        if (creating && existing.isPresent()) {
+        Optional<SavedProfile> existing = loadSnapshot();
+        QualificationProfile toSave = profile;
+        if (baseline.isPresent()) {
+          SavedProfile current =
+              existing.orElseThrow(
+                  () ->
+                      new ProfileStorageException(
+                          "The saved profile is missing. Click Reload profile."));
+          toSave = current.applyEdits(baseline.get(), profile);
+        } else if (existing.isPresent()) {
           throw new ProfileStorageException("A profile already exists. Reload it to edit it.");
         }
-        if (!creating
-            && (existing.isEmpty()
-                || !existing.get().getOwner().getUserId().equals(profile.getOwner().getUserId()))) {
-          throw new ProfileStorageException(
-              "The saved profile has changed. Reload it before editing.");
-        }
-        replaceFile(profile);
+        SavedProfile saved = new SavedProfile(toSave, UUID.randomUUID());
+        replaceFile(saved);
+        return saved;
       }
     } catch (OverlappingFileLockException exception) {
       throw new ProfileStorageException("Another save is in progress. Try again.", exception);
@@ -97,10 +112,12 @@ public final class FileProfileDataAccess implements ProfileRepository {
     }
   }
 
-  private void replaceFile(QualificationProfile profile) throws IOException {
+  private void replaceFile(SavedProfile saved) throws IOException {
+    QualificationProfile profile = saved.getProfile();
     User owner = profile.getOwner();
     JSONObject json =
         new JSONObject()
+            .put("revision", saved.getRevision().toString())
             .put("userId", owner.getUserId())
             .put("name", owner.getName())
             .put("email", owner.getEmail())

@@ -21,6 +21,7 @@ import java.util.Deque;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.Callable;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -114,6 +115,33 @@ class ProfileWorkflowTest {
   }
 
   @Test
+  void twoWindowsCanSaveDifferentFieldsWithoutReloading() throws Exception {
+    Path file = directory.resolve("profile.json");
+    FileProfileDataAccess store = new FileProfileDataAccess(file);
+    onEdt(
+        () -> {
+          Container first = show(tabs(file, new DemoJobSource(), url -> {}), "Profile");
+          field(first, "Program of study").setText("Math");
+          field(first, "Skills").setText("Java");
+          button(first, "Save profile").doClick();
+          Container second = show(tabs(file, new DemoJobSource(), url -> {}), "Profile");
+          assertEquals("Java", field(second, "Skills").getText());
+
+          field(first, "Skills").setText("SQL");
+          button(first, "Save changes").doClick();
+          assertTrue(shows(first, "Changes saved."));
+          field(second, "Program of study").setText("Statistics");
+          button(second, "Save changes").doClick();
+          assertTrue(shows(second, "Changes saved."));
+          assertEquals("Statistics", field(second, "Program of study").getText());
+          assertEquals("SQL", field(second, "Skills").getText());
+          assertEquals("Statistics", store.load().orElseThrow().getProgram());
+          assertEquals(List.of("SQL"), store.load().orElseThrow().getSkills());
+          return null;
+        });
+  }
+
+  @Test
   void liveFinderAndProfileRecommendationsWorkInTheSameWindow() throws Exception {
     FileProfileDataAccess profiles = new FileProfileDataAccess(directory.resolve("profile.json"));
     profiles.create(new ProfileData("CS", "", "SQL", "", "", "ANY").toProfile(new User()));
@@ -148,6 +176,94 @@ class ProfileWorkflowTest {
           assertEquals(List.of(1), pages);
           return null;
         });
+  }
+
+  @Test
+  void lastWindowToEditTheProgramWinsOnItsFirstSave() throws Exception {
+    Path file = directory.resolve("profile.json");
+    new FileProfileDataAccess(file)
+        .create(new ProfileData("Physics", "", "Java", "", "", "ANY").toProfile(new User()));
+    onEdt(
+        () -> {
+          Container first = show(tabs(file, new DemoJobSource(), url -> {}), "Profile");
+          Container second = show(tabs(file, new DemoJobSource(), url -> {}), "Profile");
+          assertEquals("Physics", field(second, "Program of study").getText());
+          field(first, "Program of study").setText("Math");
+          button(first, "Save changes").doClick();
+          assertTrue(shows(first, "Changes saved."));
+          field(second, "Program of study").setText("CS");
+          button(second, "Save changes").doClick();
+          assertTrue(shows(second, "Changes saved."));
+          button(first, "Reload profile").doClick();
+          assertEquals("CS", field(first, "Program of study").getText());
+          return null;
+        });
+  }
+
+  @Test
+  void visibleProfileRefreshesAfterAnotherWindowSavesAndKeepsAnUnfinishedEdit() throws Exception {
+    Path file = directory.resolve("profile.json");
+    new FileProfileDataAccess(file)
+        .create(new ProfileData("Math", "", "Java", "", "", "ANY").toProfile(new User()));
+    CountDownLatch refreshed = new CountDownLatch(1);
+    CountDownLatch draftNotice = new CountDownLatch(1);
+    JTabbedPane first = onEdt(() -> tabs(file, new DemoJobSource(), url -> {}));
+    Container second = onEdt(() -> show(tabs(file, new DemoJobSource(), url -> {}), "Profile"));
+    try {
+      Container profile =
+          onEdt(
+              () -> {
+                Container view = show(first, "Profile");
+                children(view, JLabel.class)
+                    .forEach(
+                        label ->
+                            label.addPropertyChangeListener(
+                                "text",
+                                event -> {
+                                  String message = (String) event.getNewValue();
+                                  if (message.startsWith("Profile refreshed")) {
+                                    refreshed.countDown();
+                                  } else if (message.contains("Your unsaved edits")) {
+                                    draftNotice.countDown();
+                                  }
+                                }));
+                first.addNotify();
+                field(second, "Program of study").setText("CS");
+                button(second, "Save changes").doClick();
+                return view;
+              });
+      assertTrue(refreshed.await(5, TimeUnit.SECONDS), "An idle window should refresh itself");
+      onEdt(
+          () -> {
+            assertEquals("CS", field(profile, "Program of study").getText());
+            JTextField major = field(profile, "Program of study");
+            major.setText("Statistics");
+            major.setCaretPosition(3);
+            field(second, "Skills").setText("SQL");
+            button(second, "Save changes").doClick();
+            return null;
+          });
+      assertTrue(
+          draftNotice.await(5, TimeUnit.SECONDS), "A window with edits should show a notice");
+      onEdt(
+          () -> {
+            assertTrue(shows(profile, "Your unsaved edits"));
+            assertEquals("Statistics", field(profile, "Program of study").getText());
+            assertEquals(3, field(profile, "Program of study").getCaretPosition());
+            button(profile, "Save changes").doClick();
+            assertTrue(shows(profile, "Changes saved."));
+            assertFalse(shows(profile, "Your unsaved edits"));
+            assertEquals("SQL", field(profile, "Skills").getText());
+            assertEquals("Statistics", field(profile, "Program of study").getText());
+            return null;
+          });
+    } finally {
+      onEdt(
+          () -> {
+            first.removeNotify();
+            return null;
+          });
+    }
   }
 
   @Test
