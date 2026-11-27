@@ -1,0 +1,26 @@
+@startuml
+class PlayerData {
+    - id: String
+    - password: String
+    - gamesPlayed: int
+    - gameWin: int
+    - unoCallsMade: int
+    - achievements: List<String>
+
+    + PlayerData(id: String, password: String)
+    + getId(): String
+    + setId(id: String): void
+    + getPassword(): String
+    + setPassword(password: String): void
+    + getGamesPlayed(): int
+    + setGamesPlayed(gamesPlayed: int): void
+    + getGameWin(): int
+    + setGameWin(gameWin: int): void
+    + getWinRate(): float
+    + getUnoCallsMade(): int
+    + setUnoCallsMade(unoCallsMade: int): void
+    + getAchievements(): List<String>
+    + addAchievement(name: String): void
+    + hasAchievement(name: String): boolean
+}
+@enduml

@@ -1,0 +1,17 @@
+@startuml
+
+class Deck {
+    - cardPile: List<Card>
+    --
+    + shuffle(): void
+    + drawCards(n: int): List<Card>
+    + dealCards(numCards: int, players: List<Player>): void
+}
+
+class Player
+interface Card
+
+Deck "1" *-- "0..*" Card : contains
+Deck ..|> Player : deals cards to
+
+@enduml

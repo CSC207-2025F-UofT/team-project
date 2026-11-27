@@ -1,0 +1,44 @@
+@startuml
+
+package entity {
+    class Game {
+        - gameId: String {readOnly}
+        - settings: gameSetting {readOnly}
+        - players: List<Player> {readOnly}
+        - drawPile: Deck {readOnly}
+        - discardPile: List<Card> {readOnly}
+
+        - currentPlayerIndex: int
+        - direction: Direction
+        - currentColor: CardColor
+        - winnerId: String
+        - skipPending: boolean
+
+        + Game(settings: gameSetting, players: List<Player>, drawPile: Deck, firstDiscard: Card, initialColor: CardColor)
+
+        + getGameId(): String
+        + getSettings(): gameSetting
+        + getPlayers(): List<Player>
+        + getDrawPile(): Deck
+        + getDiscardPile(): List<Card>
+        + getCurrentPlayerIndex(): int
+        + getDirection(): Direction
+        + getCurrentColor(): CardColor
+        + getCurrentPlayer(): Player
+        + getTopDiscard(): Card
+
+        + advanceTurn(): void
+        + checkForWinner(): void
+        + isFinished(): boolean
+        + getWinnerId(): String
+        + skipNextPlayer(): void
+        + reverseDirection(): void
+        + changeColor(newColor: CardColor): void
+        + addToDiscardPile(card: Card): void
+        + canPlayCard(card: Card): boolean
+        + drawCardsForCurrentPlayer(count: int): void
+        + drawCardsForNextPlayer(count: int): void
+    }
+}
+
+@enduml
