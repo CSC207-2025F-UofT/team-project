@@ -137,6 +137,11 @@ class ProfileWorkflowTest {
           assertEquals("SQL", field(second, "Skills").getText());
           assertEquals("Statistics", store.load().orElseThrow().getProgram());
           assertEquals(List.of("SQL"), store.load().orElseThrow().getSkills());
+          return null;
+        });
+  }
+
+  @Test
   void liveFinderAndProfileRecommendationsWorkInTheSameWindow() throws Exception {
     FileProfileDataAccess profiles = new FileProfileDataAccess(directory.resolve("profile.json"));
     profiles.create(new ProfileData("CS", "", "SQL", "", "", "ANY").toProfile(new User()));
