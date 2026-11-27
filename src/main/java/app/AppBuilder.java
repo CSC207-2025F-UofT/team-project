@@ -6,7 +6,6 @@ import javax.swing.JComponent;
 import javax.swing.JFrame;
 
 import data_access.InMemoryDataAccessObject;
-import data_access.SampleData;
 import data_access.StorageResolver;
 import data_access.image.ImageImporter;
 import data_access.image.ImageReader;
@@ -70,10 +69,6 @@ public class AppBuilder {
     private TripListView tripListView;
     private TripDetailsViewModel tripDetailsViewModel;
     private TripDetailsView tripDetailsView;
-
-    public AppBuilder() {
-        SampleData.populate(dataAccess, dataAccess, imageResolver);
-    }
 
     private ThumbnailCache buildThumbnailCache() {
         LoadPhotoOutputBoundary presenter = new LoadPhotoPresenter(photoImageViewModel);
