@@ -9,15 +9,33 @@ public final class SearchJobsState {
   private final String warning;
   private final boolean loading;
   private final boolean error;
+  private final boolean hasMore;
 
   /** Copies result rows and records the current status, warning and loading state. */
   public SearchJobsState(
       List<Row> rows, String message, String warning, boolean loading, boolean error) {
+    this(rows, message, warning, loading, error, false);
+  }
+
+  /** Records whether more matches can be requested for this search. */
+  public SearchJobsState(
+      List<Row> rows,
+      String message,
+      String warning,
+      boolean loading,
+      boolean error,
+      boolean hasMore) {
+    this.hasMore = hasMore;
     this.rows = List.copyOf(rows);
     this.message = message;
     this.warning = warning;
     this.loading = loading;
     this.error = error;
+  }
+
+  /** Returns whether another batch can be requested. */
+  public boolean hasMore() {
+    return hasMore;
   }
 
   public List<Row> getRows() {

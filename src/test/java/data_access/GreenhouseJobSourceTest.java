@@ -119,6 +119,57 @@ class GreenhouseJobSourceTest {
     assertThrows(JobSourceException.class, () -> source(Duration.ofSeconds(2)).fetch());
   }
 
+  @ParameterizedTest
+  @ValueSource(
+      strings = {
+        "startup",
+        "https://job-boards.greenhouse.io/startup/",
+        "https://boards.greenhouse.io/startup/jobs/42?gh_src=ref"
+      })
+  void searchesOnlyAnUnlistedBoardAndPreservesConfiguredBoards(String selection) throws Exception {
+    respond(
+        "startup",
+        200,
+        "{\"jobs\":[{\"id\":42,\"title\":\"Software Intern\","
+            + "\"absolute_url\":\"https://example.com/jobs/42\"}]}");
+    respond("configured", 200, "{\"jobs\":[]}");
+    GreenhouseJobSource source = source(Duration.ofSeconds(2), "configured");
+    JobFetchResult result = source.fetchCompany(selection);
+    assertEquals(List.of("startup"), result.getSuccessfulSources());
+    assertTrue(result.getFailedBoards().isEmpty());
+    assertEquals("greenhouse:startup:42", result.getJobs().get(0).getStableId());
+    assertEquals(List.of("configured"), source.fetch().getSuccessfulSources());
+  }
+
+  @ParameterizedTest
+  @ValueSource(
+      strings = {
+        "",
+        "two words",
+        "../wrong",
+        "https://example.org/startup",
+        "https://job-boards.greenhouse.io/fake/path",
+        "https://job-boards.greenhouse.io/"
+      })
+  void invalidCustomBoardReportsAnInputError(String selection) {
+    JobSourceException failure =
+        assertThrows(
+            JobSourceException.class,
+            () -> source(Duration.ofSeconds(2), "configured").fetchCompany(selection));
+    assertTrue(failure.getMessage().contains("token or a hosted board URL"));
+    org.junit.jupiter.api.Assertions.assertNull(query.get());
+  }
+
+  @Test
+  void unavailableSelectedBoardReportsFailure() {
+    respond("gone", 404, "{}");
+    JobSourceException failure =
+        assertThrows(
+            JobSourceException.class,
+            () -> source(Duration.ofSeconds(2), "a").fetchCompany("gone"));
+    assertTrue(failure.getMessage().contains("gone"));
+  }
+
   @Test
   void timeoutDoesNotPreventAnotherBoardFromSucceeding() throws Exception {
     server.createContext(

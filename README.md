@@ -9,8 +9,10 @@
 ---
 ## Project Description
 ### Domain
-This project will be a Java Swing desktop application that helps students discover internship opportunities, 
-create/record the resume used for each application, and track application progress and deadlines.
+The team is building a Java Swing desktop application for finding internships, recording the resume used for each application, and tracking progress and deadlines.
+
+Finder (UC4) searches public Greenhouse boards and Jooble Canada. Students can also create and update a qualification profile (UC5–UC6) and get personalized recommendations from the configured Greenhouse boards (UC7).
+
 ---
 ## User Stories
 ### User Story 1
@@ -99,43 +101,31 @@ Shared integration contract: [Job source and Ling compatibility review](docs/des
 
 Primary actor: A user looking for internship opportunities.
 
-Supporting actor: An external job-listing service, initially the Greenhouse Job Board API.
+**Supporting actors.** Greenhouse Job Board API and Jooble Canada REST API.
 
-Preconditions:
-- The application is running, and the user can access the Finder feature.
-- At least one supported company job board has been configured.
-  Trigger:
-  The user submits a keyword search.
+**Preconditions.** Finder is open. Live searches need an internet connection. **Company boards** works without credentials. **Jooble Canada** requires a Canada-issued `JOOBLE_API_KEY`.
 
-Success outcome:
-The system displays matching internship opportunities, the number of matches, and application links so that the user can review relevant positions.
+**Trigger.** The student presses **Search** or Enter after entering keywords.
 
-Main success scenario:
-1. The user enters one or more keywords and requests a search.
-2. The system checks that the input contains at least one non-empty keyword.
-3. The system retrieves job postings from the configured company job boards.
-4. The system identifies internship postings and filters them according to the search rules below.
-5. The system displays the number of matching postings and each posting’s title, company, location, and application link. Missing location information is displayed as “Not specified.”
-6. The user reviews the search results.
-   Extensions:
-- 2a. The search input is empty or contains only whitespace.
-  The system asks the user to enter at least one keyword and does not retrieve job postings. The user may correct the input and return to step 1.
-- 3a. All configured job boards fail to return data because of a connection problem, timeout, or service error.
-  The system explains that the search could not be completed and allows the user to retry. It does not present the failure as a successful search with zero matches.
-- 3b. Some configured job boards fail to return data.
-  The system continues to step 4 using the successfully retrieved postings. When displaying the results, it identifies the unavailable sources and states that the results are incomplete.
-- 4a. No retrieved internship postings match the search criteria.
-  The system displays a result count of zero and explains that no matching internships were found in the retrieved postings. The user may revise the keywords and return to step 1.
-- 6a. The user selects an application link.
-  The system opens the selected posting’s application page in the user’s browser. Opening the page does not create an application record or mark the position as applied.
-  Search rules for the MVP:
-- Internship identification uses explicit title indicators, such as “Intern,” “Internship,” or “Co-op.”
-- Keyword matching ignores capitalization and leading or trailing whitespace.
-- Every submitted keyword must appear in the posting’s title or description for the posting to match.
-- Search results cover only the configured company job boards.
-- A keyword match indicates relevance, not verified eligibility. Users must review the employer’s requirements before applying.
-  Failure guarantee:
-  An unsuccessful search does not modify saved jobs, resumes, or application records.
+**Success outcome.** The student can review matching internships and open a listing.
+
+**Main success scenario**
+
+1. Choose **Company boards** or **Jooble Canada** and enter at least one keyword.
+2. On **Company boards**, choose all configured boards, one employer, or a Greenhouse board supplied by token or URL. On **Jooble Canada**, optionally fill in **Company**, **Location**, or both.
+3. Finder retrieves postings from the selected source and keeps titles containing an internship indicator such as `intern`, `internship`, or `co-op`. Matching ignores case and respects word boundaries, so `Software Engineering Intern` qualifies and `Internal Tools Engineer` does not.
+4. Finder shows the number of matches displayed, with each posting’s title, company, and location. A missing location appears as **Not specified**. Jooble shows up to 10 matching internships on the first search. **Load more** appends up to 10 more.
+5. Select a row to see its copyable URL. **Open application page** opens that listing in the browser. Applying takes place on the external site. On the Jooble tab, the **Source** link opens Jooble Canada’s homepage.
+
+**Extensions**
+
+- **Blank keywords.** Finder prompts for a keyword before making any network request, even when Company or Location is filled in.
+- **No matches.** A successful search can return zero matching internships. Matches indicate keyword relevance. Students review the posting for eligibility.
+- **Greenhouse board unavailable.** If some requested boards fail, Finder displays matches from the others and identifies the unavailable boards. If all fail, it displays an error.
+- **Jooble request fails.** An initial failure displays an error. If a later page fails, Finder keeps the rows already found and shows a warning. **Load more** retries that page.
+- **Browser fails to open.** The selected listing URL remains available to copy.
+
+**Failure guarantee.** A failed search preserves saved jobs, resumes, and application records.
 
 ### Use Case 5: Create a Qualification Profile
 Lead: Lingnan Meng
@@ -311,39 +301,46 @@ fields.
 |Yuheng Liu| UC4: Search Internship Opportunities |
 ---
 ## Entities
-- User
-- QualificationProfile (program, graduation year, skills and internship preferences for a student)
-- Resume
-- Application
-- JobPosting
+
+- **`JobPosting`** is the shared snapshot of a listing. It holds the title, employer, location, description text, and application URL. `getWorkArrangement()` returns `REMOTE`, `HYBRID`, `ONSITE`, or `UNKNOWN` (the default). `getStableId()` combines the source, board, and external posting ID so Finder can skip a posting it has already shown.
+- **`User`** represents a student and has fields for their user ID, name, and email.
+- **`Resume`** represents one version of a student's resume, identified by an ID and described by a name and date.
+- **`Application`** represents a student's application to a specific `JobPosting`. Its fields link that posting to the `Resume` version used and hold the application's status and priority.
+- **`QualificationProfile`** stores the student’s program, expected graduation year, skills, and internship preferences for UC5–UC7. [Profile design](docs/design/profile.md)
+
+A `JobPosting` can appear in many searches. An `Application` records a student’s application to one such posting with a particular resume. The Finder screen only retrieves and opens listings.
+
 ---
 ## API Usage
-**API Name:**: Greenhouse Job Board API
-**Documentation:** [https://docs.greenhouse.io/job-board.html]
-**How it is used in the program:**
-The Finder feature will use the Greenhouse Job Board API to retrieve
-public job postings from a configured list of company job boards.
+| Finder tab | Where listings come from | How the search works |
+| --- | --- | --- |
+| **Company boards** | The public Greenhouse boards selected by the student | Finder downloads each board’s postings and checks every keyword against the combined title and full description, ignoring case. |
+| **Jooble Canada** | Employers indexed by Jooble in Canada | Jooble searches job titles and descriptions using the entered keywords and location. Finder applies the optional employer filter to the returned company names. |
 
-The program will send an HTTP GET request to:
-`https://boards-api.greenhouse.io/v1/boards/{board_token}/jobs?content=true`
+### Greenhouse Job Board API
 
-Each `board_token` identifies a company's job board. The `content=true`
-parameter includes job descriptions in the JSON response. These public
-GET requests do not require authentication or an API key.
+Finder sends `GET https://boards-api.greenhouse.io/v1/boards/{board_token}/jobs?content=true`. The response supplies the full posting description in `content` and the employer’s posting URL in `absolute_url`. The default boards are Cloudflare and Figma. A student can also search another public Greenhouse board directly, even if its postings do not appear in Jooble’s results. A live check of the packaged app retrieved postings from both default boards. [Greenhouse Job Board API](https://docs.greenhouse.io/job-board.html#list-jobs) · [Verification](docs/design/finder.md#verified-on-2026-11-16)
 
-The program will parse the response into JobPosting objects containing
-information such as the job ID, title, location, description, and
-application URL. It will then identify internship postings and apply
-keyword matching to their titles and descriptions within the application.
+Recommendations match postings from the configured Greenhouse boards to saved qualifications on the student’s device. The packaged app retrieved both default boards during the profile integration check on 2026-11-22.
 
-Matching results will be displayed in the Swing interface with links
-to the original application pages. Searches will cover only the
-configured company job boards.
-The packaged Java client successfully retrieved both configured boards (Cloudflare and Figma)
-on 2026-11-16. Availability and posting counts can change; use `--check-api` to recheck.
-The profile integration check reached both boards again on 2026-11-22 using the packaged Java app.
-Recommendations use those postings and match them to saved qualifications on the student's device.
+### Jooble REST API
+
+Finder sends one POST per requested page to `https://ca.jooble.org/api/{key}`. For example, with Keywords `software`, Company `Amazon`, and Location `Toronto`, Finder sends the following first-page request.
+
+```json
+{"keywords": "software", "location": "Toronto", "companysearch": false, "page": 1}
+```
+
+Finder sends the student’s keywords after trimming and normalizing whitespace. An empty location defaults to `Canada`. For this example, Finder keeps internships whose returned `company` contains `Amazon`, ignoring case. Leaving Company blank includes all matching employers. Finder uses Jooble’s `snippet` for the description and `link` for the listing URL. [Jooble REST API](https://help.jooble.org/en/support/solutions/articles/60001448238-rest-api-documentation)
+
+A live Finder search for `software intern` returned Canadian internship listings from Jooble.
+
+**Search** starts at page 1, even if the fields are unchanged. Finder reads pages in order and skips duplicate posting IDs until it has 10 matching internships or runs out of results. The final batch can contain fewer than 10.
+
+**Load more** shows matches already fetched but not yet displayed. If it can fill the batch from those matches, it makes no API request. Otherwise it continues from the next unread page, making one request per additional page. Finder disables **Load more** once it reaches the end and has shown every match. Editing Keywords, Company, or Location clears the displayed results.
+
 ---
+
 ## Design Diagrams
 ### Profile — Class Diagrams
 
@@ -362,38 +359,35 @@ Recommendations use those postings and match them to saved qualifications on the
 ![UC6 Save Profile Changes sequence](profile-uml/svg/11_update_save.svg)
 
 ![UC7 Recommendations sequence](profile-uml/svg/12_recommendation_core.svg)
+
 ### UML Class Diagram
+
+[UC4 class diagram and Clean Architecture dependencies](docs/design/finder.md#architecture-and-source-dependencies)
 
 [UC5 and UC6 profile persistence](docs/design/profile.md#class-diagram-for-profile-persistence)
 
 ### Sequence Diagrams
 
-[UC7 personalized recommendations using Finder's job source](docs/design/profile.md#sequence-diagram-for-recommendations)
+[UC4 search, pagination, and result display](docs/design/finder.md#runtime-sequence)
+
+[UC7 personalized recommendations](docs/design/profile.md#sequence-diagram-for-recommendations)
 
 ---
-## How to Run
-The Swing app includes **Finder** (UC4), **Profile** (UC5 and UC6), and
-**Recommendations** (UC7). Finder and recommendations share one job source.
 
-Prerequisites: **JDK 11** and Maven. In IntelliJ, import `pom.xml` and select an installed
-JDK 11 for both the project SDK and Maven runner. Check `mvn -version` before building.
+## How to Run
+Use **JDK 11** and Maven. Build and launch the app from the directory containing `pom.xml`. It opens with three tabs: **Finder**, **Profile**, and **Recommendations**. In live mode, open **Finder** to choose **Company boards** or **Jooble Canada**.
 
 ```bash
 mvn verify
 java -jar target/TeamProject-1.0-SNAPSHOT.jar
 ```
 
-On macOS with multiple JDKs, select JDK 11 first:
+In IntelliJ, import `pom.xml`, select JDK 11 for the project SDK and Maven runner, and run `app.Main`. On macOS with multiple JDKs, run `export JAVA_HOME="$(/usr/libexec/java_home -v 11)"` in the terminal before building. Check the selected JDK with `mvn -version`.
 
-```bash
-export JAVA_HOME="$(/usr/libexec/java_home -v 11)"
-```
+- **Try a company board.** Select **Company boards**, choose **All configured companies** or one employer, enter `software`, and press **Search**. For another board, select **Other Greenhouse board** and enter a token or hosted board URL such as `https://job-boards.greenhouse.io/figma`.
+- **Try Jooble Canada.** Set `JOOBLE_API_KEY` in the local environment of the `app.Main` run configuration (or the launching shell), then restart Finder. Enter `software` under **Keywords**, optionally add `Amazon` under **Company** and `Toronto` under **Location**, and press **Search**. Without a key, the Jooble tab displays setup instructions and **Company boards** remains available.
 
-The default boards are Cloudflare and Figma. Enter keywords, press Search (or Enter),
-select a result and open its application page. No login or API key is required for Finder.
-The application does not automatically apply or mark a job as applied.
-
-For an offline demonstration using clearly labelled fictional listings:
+To try Finder offline, launch it with its bundled fictional listings.
 
 ```bash
 java -jar target/TeamProject-1.0-SNAPSHOT.jar --demo
@@ -414,7 +408,7 @@ entries and supply its path:
 java -jar target/TeamProject-1.0-SNAPSHOT.jar --boards /path/to/boards.properties
 ```
 
-API connectivity can be checked separately from the UI and unit tests:
+Greenhouse board connectivity can be checked separately from the UI and unit tests:
 
 ```bash
 java -jar target/TeamProject-1.0-SNAPSHOT.jar --check-api

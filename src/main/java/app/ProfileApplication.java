@@ -9,10 +9,13 @@ import interface_adapter.profile.UpdateProfilePresenter;
 import interface_adapter.recommendation.RecommendationController;
 import interface_adapter.recommendation.RecommendationPresenter;
 import interface_adapter.recommendation.RecommendationViewModel;
+import java.util.Optional;
 import java.util.concurrent.Executor;
+import javax.swing.JComponent;
 import javax.swing.JTabbedPane;
 import use_case.create_profile.CreateProfileInteractor;
 import use_case.port.JobSource;
+import use_case.port.PagedJobSearchSource;
 import use_case.profile.ProfileRepository;
 import use_case.recommendation.KeywordInternshipMatcher;
 import use_case.recommendation.RecommendationInteractor;
@@ -25,8 +28,34 @@ import view.RecommendationView;
 public final class ProfileApplication {
   private ProfileApplication() {}
 
-  /** Builds the desktop tabs on the EDT; both discovery features receive the same job source. */
+  /** Builds desktop tabs with a single board or offline Finder. */
   public static JTabbedPane createTabs(
+      JobSource jobs,
+      ProfileRepository profiles,
+      Executor worker,
+      Executor ui,
+      LinkOpener links,
+      String sourceLabel) {
+    JComponent finder = FinderApplication.createView(jobs, worker, ui, links, sourceLabel);
+    return withFinder(finder, jobs, profiles, worker, ui, links, sourceLabel);
+  }
+
+  /** Builds desktop tabs with both live search sources inside Finder. */
+  public static JTabbedPane createLiveTabs(
+      JobSource jobs,
+      ProfileRepository profiles,
+      Executor worker,
+      Executor ui,
+      LinkOpener links,
+      String sourceLabel,
+      Optional<PagedJobSearchSource> jooble) {
+    JComponent finder =
+        FinderApplication.createLiveView(jobs, jooble, worker, ui, links, sourceLabel);
+    return withFinder(finder, jobs, profiles, worker, ui, links, sourceLabel);
+  }
+
+  private static JTabbedPane withFinder(
+      JComponent finder,
       JobSource jobs,
       ProfileRepository profiles,
       Executor worker,
@@ -58,7 +87,7 @@ public final class ProfileApplication {
             tasks);
 
     JTabbedPane tabs = new JTabbedPane();
-    tabs.addTab("Finder", FinderApplication.createView(jobs, worker, ui, links, sourceLabel));
+    tabs.addTab("Finder", finder);
     ProfileView profileView =
         new ProfileView(
             create,
