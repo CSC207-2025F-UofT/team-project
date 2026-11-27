@@ -1,6 +1,10 @@
 package view;
 
-import interface_adapter.game_running.*;
+import interface_adapter.game_running.GameRunningState;
+import interface_adapter.game_running.GameRunningViewModel;
+import interface_adapter.game_running.GameRunningViewModelListener;
+import interface_adapter.game_running.LoadQuestionController;
+import interface_adapter.game_running.QuestionInputController;
 
 import javax.swing.*;
 import java.awt.*;

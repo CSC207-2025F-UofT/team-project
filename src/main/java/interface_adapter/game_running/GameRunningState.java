@@ -7,6 +7,7 @@ public class GameRunningState {
     private String questionText = "";
     private int answerCount = 0;
     private String loadQuestionError = null;
+    //ADD questioninputError
 
     public String getQuestionText() {
         return questionText;

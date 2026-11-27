@@ -31,6 +31,7 @@ public class LogInputInteractor implements LogInputInputBoundary {
 
         GuessRecord guessRecord = new GuessRecord(teamName, question, guess, correct, points);
         roundRecord.addGuess(guessRecord);
+        //add the roundRecord to the game
 
         LogInputOutputData logInputOutputData = new LogInputOutputData(roundNumber, question, teamName, guess, correct, points);
         logInputPresenter.prepareSuccessView(logInputOutputData);
