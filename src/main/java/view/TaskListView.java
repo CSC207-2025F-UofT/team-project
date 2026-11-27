@@ -2,6 +2,9 @@ package view;
 
 import interface_adapter.edit_task.EditTaskController;
 import interface_adapter.edit_task.EditTaskViewModel;
+import interface_adapter.create_task.CreateTaskController;
+import interface_adapter.create_task.CreateTaskViewModel;
+import use_case.create_task.CreateTaskOutputData;
 import use_case.edit_task.EditTaskOutputData;
 
 import javax.swing.*;
@@ -26,7 +29,8 @@ import java.util.List;
  */
 public class TaskListView extends JPanel {
     public TaskListView(int currentUserId, List<EditTaskOutputData> tasks,
-                        EditTaskController controller, EditTaskViewModel viewModel) {
+                        EditTaskController editController, EditTaskViewModel editViewModel, CreateTaskController createController,
+                        CreateTaskViewModel createViewModel) {
 
         super(new BorderLayout(6, 6));
         setBorder(BorderFactory.createEmptyBorder(12, 12, 12, 12));
@@ -40,18 +44,25 @@ public class TaskListView extends JPanel {
         add(heading, BorderLayout.NORTH);
         add(new JScrollPane(list), BorderLayout.CENTER);
 
+        JButton create = new JButton("Create Task");
+        create.addActionListener(event ->
+                CreateTaskView.open(this, currentUserId, createController, createViewModel)
+                        .ifPresent(created -> model.addElement(toListItem(currentUserId, created)))
+        );
+
         JButton edit = new JButton("Edit Task");
         edit.setEnabled(false);
         list.addListSelectionListener(event -> edit.setEnabled(!list.isSelectionEmpty()));
         edit.addActionListener(event -> {
             int index = list.getSelectedIndex();
             if (index >= 0) {
-                EditTaskView.open(this, currentUserId, model.get(index), controller, viewModel)
+                EditTaskView.open(this, currentUserId, model.get(index), editController, editViewModel)
                         .ifPresent(saved -> model.set(index, saved));
             }
         });
         JPanel actions = new JPanel(new FlowLayout(FlowLayout.TRAILING));
         actions.add(edit);
+        actions.add(create);
         add(actions, BorderLayout.SOUTH);
     }
 
@@ -70,5 +81,32 @@ public class TaskListView extends JPanel {
             return renderer.getListCellRendererComponent(source, text, index, selected, focus);
         });
         return list;
+    }
+
+    private static EditTaskOutputData toListItem(int userId, CreateTaskOutputData created) {
+        byte difficultyByte;
+        String displayName = created.getDifficultyDisplayName();
+        switch (displayName == null ? "" : displayName.toLowerCase()) {
+            case "easy":
+                difficultyByte = 1;
+                break;
+            case "difficult":
+            case "hard":
+                difficultyByte = 3;
+                break;
+            default:
+                difficultyByte = 2;
+                break;
+        }
+        return new EditTaskOutputData(
+                created.getTaskId(),
+                userId,
+                created.getTitle(),
+                "",
+                created.getDeadline(),
+                created.getEstimatedHours(),
+                created.getCompletionProgress(),
+                difficultyByte
+        );
     }
 }
