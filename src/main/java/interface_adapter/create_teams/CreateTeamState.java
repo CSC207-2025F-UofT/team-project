@@ -28,7 +28,7 @@ public class CreateTeamState {
         return startGameError;
     }
 
-    public void setLoadQuestionError(String startGameError) {
+    public void setStartGameError(String startGameError) {
         this.startGameError = startGameError;
     }
 }

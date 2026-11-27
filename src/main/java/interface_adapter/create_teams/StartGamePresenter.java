@@ -26,7 +26,7 @@ public class StartGamePresenter implements StartGameOutputBoundary {
         gameRunningState.setTeam1Name(teams.getTeam1Name());
         gameRunningState.setTeam2Name(teams.getTeam2Name());
         gameRunningViewModel.notifyStateChanged();
-        
+
         // Change the main board
         viewManagerModel.setState(GameRunningViewModel.VIEW_NAME);
         viewManagerModel.notifyViewChanged();
@@ -35,7 +35,7 @@ public class StartGamePresenter implements StartGameOutputBoundary {
     @Override
     public void prepareFailView(String error) {
         final CreateTeamState state = createTeamViewModel.getState();
-        state.setLoadQuestionError(error);
+        state.setStartGameError(error);
         createTeamViewModel.notifyStateChanged();
     }
 }
