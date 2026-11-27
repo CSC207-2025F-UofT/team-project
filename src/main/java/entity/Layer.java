@@ -1,20 +1,24 @@
+
 package entity;
+
 import java.util.UUID;
 
 public abstract class Layer {
 
     private String name;
     private boolean visible;
-    private int position;
+    private double x; // Horizontal position
+    private double y; // Vertical position
     private double transparency;
-    private String ID;
+    private String layerId;
 
-    public Layer(String name, int position) {
+    public Layer(String name) {
         this.name = name;
         this.visible = true;
-        this.position = position;
+        this.x = 0.0;
+        this.y = 0.0;
         this.transparency = 1.0;
-        this.ID = UUID.randomUUID().toString();
+        this.layerId = UUID.randomUUID().toString();
     }
 
     public String getName() {
@@ -33,12 +37,28 @@ public abstract class Layer {
         this.visible = !this.visible;
     }
 
-    public int getPosition() {
-        return position;
+    // X coordinate
+    public double getX() {
+        return x;
     }
 
-    public void setPosition(int position) {
-        this.position = position;
+    public void setX(double x) {
+        this.x = x;
+    }
+
+    // Y coordinate
+    public double getY() {
+        return y;
+    }
+
+    public void setY(double y) {
+        this.y = y;
+    }
+
+    // Update both coordinates
+    public void setCoordinates(double x, double y) {
+        this.x = x;
+        this.y = y;
     }
 
     public double getTransparency() {
@@ -55,7 +75,7 @@ public abstract class Layer {
         this.transparency = transparency;
     }
 
-    public String getID() {
-        return ID;
+    public String getLayerId() {
+        return layerId;
     }
 }
