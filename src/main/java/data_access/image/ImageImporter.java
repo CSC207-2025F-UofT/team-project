@@ -6,7 +6,6 @@ import java.io.UncheckedIOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
@@ -26,6 +25,7 @@ import com.drew.metadata.exif.GpsDirectory;
 import entity.Photo;
 import entity.ImageType;
 import entity.Location;
+import use_case.IdGeneratorInterface;
 import use_case.import_photos.ImageImportException;
 import use_case.import_photos.ImageImportProgressData;
 import use_case.import_photos.ImageImporterInterface;
@@ -39,12 +39,14 @@ public class ImageImporter implements ImageImporterInterface {
     );
 
     private final ImageResolver resolver;
+    private final IdGeneratorInterface idGenerator;
 
-    public ImageImporter(ImageResolver resolver) {
+    public ImageImporter(ImageResolver resolver, IdGeneratorInterface idGenerator) {
         this.resolver = resolver;
+        this.idGenerator = idGenerator;
     }
 
-    private static Optional<Photo> getPhotoFromPath(Path imagePath) {
+    private Optional<Photo> getPhotoFromPath(Path imagePath) {
         Optional<ImageType> type = ImageResolver.getImageType(imagePath);
         if (type.isEmpty()) return Optional.empty();
 
@@ -78,10 +80,7 @@ public class ImageImporter implements ImageImporterInterface {
                 }
             }
 
-            String id = UUID.randomUUID().toString();
-            Photo photo = new Photo(id, type.get(), location, time);
-
-            return Optional.of(photo);
+            return Optional.of(new Photo(idGenerator.nextId(), type.get(), location, time));
 
         } catch (Exception e) {
             return Optional.empty();

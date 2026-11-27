@@ -7,7 +7,6 @@ public interface ImportPhotosOutputBoundary {
     void updateGeocodeView(ImportPhotosGeocodeOutputData outputData);
     void preparePhotoSavingView();
     void preparePhotoSaveFailureView(String error);
-    void preparePhotoSortingView();
     void prepareTripGenerationView();
     void prepareTripSavingView();
     void prepareTripSaveFailureView(String error);

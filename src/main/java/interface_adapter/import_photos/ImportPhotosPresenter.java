@@ -53,12 +53,6 @@ public class ImportPhotosPresenter implements ImportPhotosOutputBoundary {
     }
 
     @Override
-    public void preparePhotoSortingView() {
-        viewModel.getState().setStage(ImportPhotosStage.PHOTO_SORTING);
-        viewModel.firePropertyChanged();
-    }
-
-    @Override
     public void prepareTripGenerationView() {
         viewModel.getState().setStage(ImportPhotosStage.TRIP_GENERATION);
         viewModel.firePropertyChanged();

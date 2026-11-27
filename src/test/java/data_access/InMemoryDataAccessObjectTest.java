@@ -41,9 +41,9 @@ class InMemoryDataAcessObjectTest {
     }
 
     @Test
-    void missingIdsThrow() {
-        assertThrows(TripAccessException.class, () -> dao.getTripById("nope"));
-        assertThrows(PhotoAccessException.class, () -> dao.getPhotoById("nope"));
+    void missingIdsAreNull() {
+        assertNull(dao.getTripById("nope"));
+        assertNull(dao.getPhotoById("nope"));
     }
 
     @Test
@@ -80,13 +80,23 @@ class InMemoryDataAcessObjectTest {
 
         dao.deleteTripById("t1");
 
-        assertThrows(TripAccessException.class, () -> dao.getTripById("t1"));
+        assertNull(dao.getTripById("t1"));
         assertSame(p, dao.getPhotoById("p1"));
     }
 
-    @Test 
-    void deletingMissingTripThrows() {
-        assertThrows(TripAccessException.class, () -> dao.deleteTripById("nope"));
+    @Test
+    void deletingMissingTripDoesNotThrow() {
+        dao.deleteTripById("nope");
+        assertNull(dao.getTripById("nope"));
+    }
+
+    @Test
+    void failedOperationsThrow() {
+        dao.setPhotoFailMode(true);
+        dao.setTripFailMode(true);
+
+        assertThrows(PhotoAccessException.class, () -> dao.writePhotos(List.of()));
+        assertThrows(TripAccessException.class, () -> dao.writeTrip(new Trip("t", "Trip", null, null)));
     }
 
     @Test

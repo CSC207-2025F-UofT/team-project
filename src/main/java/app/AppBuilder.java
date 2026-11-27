@@ -1,14 +1,11 @@
 package app;
 
 import java.awt.BorderLayout;
-import java.util.UUID;
 
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 
-
 import data_access.InMemoryDataAccessObject;
-import data_access.SampleData;
 import data_access.StorageResolver;
 import data_access.image.ImageImporter;
 import data_access.image.ImageReader;
@@ -29,6 +26,7 @@ import interface_adapter.manipulate_trips.TripListViewModel;
 import interface_adapter.load_photos.LoadPhotoController;
 import interface_adapter.load_photos.LoadPhotoPresenter;
 import interface_adapter.load_photos.PhotoImageViewModel;
+import use_case.UuidGenerator;
 import use_case.dashboard.AnalyticsUseCase;
 import use_case.import_photos.ImportPhotosInteractor;
 import use_case.manipulate_trips.ManipulateTripsInputBoundary;
@@ -57,8 +55,9 @@ public class AppBuilder {
 
     // Storage. Replace with SQLite implementation later.
     private final InMemoryDataAccessObject dataAccess = new InMemoryDataAccessObject();
+    private final UuidGenerator idGenerator = new UuidGenerator();
     private final ImageResolver imageResolver = new ImageResolver(new StorageResolver());
-    private final ImageImporter imageImporter = new ImageImporter(imageResolver);
+    private final ImageImporter imageImporter = new ImageImporter(imageResolver, idGenerator);
     private final ImageReader imageReader = new ImageReader(imageResolver);
     private final NominatimGeocoder geocoder = new NominatimGeocoder();
 
@@ -71,13 +70,10 @@ public class AppBuilder {
     private TripDetailsViewModel tripDetailsViewModel;
     private TripDetailsView tripDetailsView;
 
-    public AppBuilder() {
-        SampleData.populate(dataAccess, dataAccess, imageResolver);
-    }
-
     private ThumbnailCache buildThumbnailCache() {
         LoadPhotoOutputBoundary presenter = new LoadPhotoPresenter(photoImageViewModel);
         LoadPhotoInputBoundary interactor = new LoadPhotoInteractor(dataAccess, imageReader, presenter);
+
         return new ThumbnailCache(96, 300, photoImageViewModel, new LoadPhotoController(interactor));
     }
 
@@ -85,7 +81,7 @@ public class AppBuilder {
         ImportPhotosViewModel viewModel = new ImportPhotosViewModel();
         ImportPhotosPresenter presenter = new ImportPhotosPresenter(viewModel);
         ImportPhotosInteractor interactor = new ImportPhotosInteractor(
-            imageImporter, geocoder, geocoder, dataAccess, dataAccess, presenter
+            imageImporter, geocoder, geocoder, dataAccess, dataAccess, idGenerator, presenter
         );
         ImportPhotosController controller = new ImportPhotosController(interactor);
         ImportPhotosView view = new ImportPhotosView(viewModel, controller);
@@ -96,6 +92,7 @@ public class AppBuilder {
     public AppBuilder addTripListView() {
         tripListViewModel = new TripListViewModel();
         tripListView = new TripListView(tripListViewModel, thumbnailCache);
+
         return addScreen("Trips", ViewNames.TRIPS, tripListView);
     }
 
@@ -103,6 +100,7 @@ public class AppBuilder {
         tripDetailsViewModel = new TripDetailsViewModel();
         tripDetailsView = new TripDetailsView(tripDetailsViewModel, viewManagerModel, thumbnailCache);
         viewManager.addView(ViewNames.TRIP_DETAILS, tripDetailsView);
+
         return this;
     }
 
@@ -110,10 +108,11 @@ public class AppBuilder {
         ManipulateTripsOutputBoundary presenter = 
                 new ManipulateTripsPresenter(tripListViewModel, tripDetailsViewModel, viewManagerModel);
         ManipulateTripsInputBoundary interactor = new ManipulateTripsInteractor(dataAccess, dataAccess, presenter,
-                () -> "trip-" + UUID.randomUUID());
+                idGenerator);
         ManipulateTripsController controller = new ManipulateTripsController(interactor);
         tripListView.setManipulateTripsController(controller);
         tripDetailsView.setManipulateTripsController(controller);
+
         return this;
     }
 
@@ -126,12 +125,14 @@ public class AppBuilder {
         DashboardPresenter dashboardPresenter = new DashboardPresenter(dashboardViewModel);
         AnalyticsUseCase analyticsUseCase = new AnalyticsUseCase(dataAccess, dataAccess, dashboardPresenter);
         DashboardController dashboardController = new DashboardController(analyticsUseCase);
+
         return addScreen("Dashboard", ViewNames.DASHBOARD, new DashboardView(dashboardViewModel, dashboardController));
     }
 
     private AppBuilder addScreen(String label, String viewName, JComponent view) {
         viewManager.addView(viewName, view);
         navigationBar.addNavItem(label, viewName);
+
         return this;
     }
 
@@ -145,7 +146,7 @@ public class AppBuilder {
         frame.setLocationRelativeTo(null);
 
         viewManagerModel.setActiveView(ViewNames.TRIPS);
-        return frame;
 
+        return frame;
     }
 }
