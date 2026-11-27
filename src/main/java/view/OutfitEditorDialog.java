@@ -1,6 +1,7 @@
 package view;
 
-import interface_adapter.outfit.*;
+import interface_adapter.outfit.OutfitController;
+import interface_adapter.outfit.OutfitViewModel;
 import use_case.outfit.OutfitOutputData;
 import use_case.outfit.OutfitOutputData.*;
 import javax.swing.*;
