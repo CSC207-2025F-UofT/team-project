@@ -75,7 +75,7 @@ As a user, I want to be able to label specific clothes so that I can note attrib
 1. The user clicks "Add Clothing" button
 2. The application displays a clothing registration form.
 3. The user selects an image from their device.
-4. The user enters a name and selects type "Top", "Bottom", "Outerwear", or "Shoes".
+4. The user enters a name and selects type "Top", "Bottom", "Hat", or "Shoes".
 5. The user selects "Save"
 6. The application validates the input and saves the clothing
    item, including its image, name, and label.
