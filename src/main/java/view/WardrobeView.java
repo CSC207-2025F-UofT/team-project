@@ -16,6 +16,8 @@ public final class WardrobeView extends JPanel {
     private final JPanel grid = new JPanel(new GridLayout(0, 4, 10, 10));
     private final JPanel gridHolder = new JPanel(new BorderLayout());
     private final JTextField search = new JTextField(18);
+    private final JComboBox<String> typeFilter = new JComboBox<>(
+            new String[]{"All types", "HAT", "TOP", "BOTTOM", "SHOES"});
     private final JButton add = new JButton("Add Clothing");
     private final JLabel status = new JLabel("Loading...");
     private final WardrobeController controller;
@@ -31,6 +33,8 @@ public final class WardrobeView extends JPanel {
         toolbar.add(new JLabel("Wardrobe"));
         toolbar.add(new JLabel("Search:"));
         toolbar.add(search);
+        toolbar.add(new JLabel("Type:"));
+        toolbar.add(typeFilter);
         toolbar.add(add);
         add(toolbar, BorderLayout.NORTH);
 
@@ -41,6 +45,7 @@ public final class WardrobeView extends JPanel {
 
         add.addActionListener(e -> new AddClothingDialog(
                 SwingUtilities.getWindowAncestor(this), controller, model).setVisible(true));
+        typeFilter.addActionListener(e -> render());
         search.getDocument().addDocumentListener(new DocumentListener() {
             public void insertUpdate(DocumentEvent e) { render(); }
             public void removeUpdate(DocumentEvent e) { render(); }
@@ -74,7 +79,10 @@ public final class WardrobeView extends JPanel {
         WardrobeOutputData state = model.getState();
         if (state == null) return;
         String query = search.getText().trim().toLowerCase();
+        String selectedType = (String) typeFilter.getSelectedItem();
+        boolean allTypes = selectedType == null || selectedType.equals("All types");
         List<ClothingData> shown = state.clothing.stream()
+                .filter(c -> allTypes || c.category.equals(selectedType))
                 .filter(c -> query.isEmpty() || c.name.toLowerCase().contains(query))
                 .collect(Collectors.toList());
 
