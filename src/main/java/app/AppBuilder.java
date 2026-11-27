@@ -2,12 +2,19 @@ package app;
 
 import data_access.DataAccessObject;
 import interface_adapter.ViewManagerModel;
+import interface_adapter.create_teams.CreateTeamViewModel;
+import interface_adapter.create_teams.StartGameController;
+import interface_adapter.create_teams.StartGamePresenter;
 import interface_adapter.game_running.GameRunningViewModel;
 import interface_adapter.game_running.LoadQuestionController;
 import interface_adapter.game_running.LoadQuestionPresenter;
 import use_case.load_question.LoadQuestionInputBoundary;
 import use_case.load_question.LoadQuestionInteractor;
 import use_case.load_question.LoadQuestionOutputBoundary;
+import use_case.start_game.StartGameInputBoundary;
+import use_case.start_game.StartGameInteractor;
+import use_case.start_game.StartGameOutputBoundary;
+import view.CreateTeamView;
 import view.GameRunningView;
 import view.ViewManager;
 
@@ -25,6 +32,8 @@ public class AppBuilder {
     // add your stuff here :)
     private GameRunningView gameRunningView;
     private GameRunningViewModel gameRunningViewModel;
+    private CreateTeamView createTeamView;
+    private CreateTeamViewModel createTeamViewModel;
 
     public AppBuilder() {
         cardPanel.setLayout(cardLayout);
@@ -35,6 +44,13 @@ public class AppBuilder {
         gameRunningViewModel = new GameRunningViewModel();
         gameRunningView = new GameRunningView(gameRunningViewModel);
         cardPanel.add(gameRunningView, GameRunningViewModel.VIEW_NAME);
+        return this;
+    }
+
+    public AppBuilder addCreateTeamView() {
+        createTeamViewModel = new CreateTeamViewModel();
+        createTeamView = new CreateTeamView(createTeamViewModel);
+        cardPanel.add(createTeamView, CreateTeamViewModel.VIEW_NAME);
         return this;
     }
 
@@ -49,6 +65,16 @@ public class AppBuilder {
         return this;
     }
 
+    public AppBuilder addStartGameUseCase() {
+        final StartGameOutputBoundary startGameOutputBoundary = new StartGamePresenter(viewManagerModel, createTeamViewModel);
+        final StartGameInputBoundary startGameInteractor = new StartGameInteractor(dataAccessObject, startGameOutputBoundary);
+
+        StartGameController startGameController = new StartGameController(startGameInteractor);
+        createTeamView.setStartGameController(startGameController);
+
+        return this;
+    }
+
     public JFrame build() {
         final JFrame application = new JFrame("Family Feud");
         application.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
@@ -57,7 +83,7 @@ public class AppBuilder {
 
         application.add(cardPanel);
 
-        viewManagerModel.setState(GameRunningViewModel.VIEW_NAME);
+        viewManagerModel.setState(CreateTeamViewModel.VIEW_NAME);
         viewManagerModel.notifyViewChanged();
 
         return application;

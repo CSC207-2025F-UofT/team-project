@@ -8,9 +8,12 @@ public class Main {
         JFrame application = appBuilder
                 .addGameRunningView()
                 .addLoadQuestionUseCase()
+                .addCreateTeamView()
+                .addStartGameUseCase()
                 .build();
 
         application.setLocationRelativeTo(null);
         application.setVisible(true);
+
     }
 }
