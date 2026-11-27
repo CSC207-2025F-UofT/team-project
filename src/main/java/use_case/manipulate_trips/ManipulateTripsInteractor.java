@@ -107,6 +107,12 @@ public class ManipulateTripsInteractor implements ManipulateTripsInputBoundary {
         TripDetailsOutputData details;
         try {
             details = detailsOf(inputData.getTripId());
+
+            if (details == null) {
+                presenter.prepareTripDetailsFailView("Couldn't open trip: Trip not found");
+                return;
+            }
+
         } catch (TripAccessException | PhotoAccessException e) {
             presenter.prepareTripDetailsFailView("Couldn't open trip: " + e.getMessage());
             return;
@@ -125,9 +131,16 @@ public class ManipulateTripsInteractor implements ManipulateTripsInputBoundary {
         TripDetailsOutputData outputData;
         try {
             Trip trip = tripAccess.getTripById(inputData.getTripId());
+            if (trip == null) {
+                presenter.prepareRenameFailView("Couldn't rename trip: Trip not found");
+                return;
+            }
+
             trip.setName(newName);
             tripAccess.writeTrip(trip);
+
             outputData = detailsOf(trip.getId());
+
         } catch (TripAccessException | PhotoAccessException e) {
             presenter.prepareRenameFailView("Couldn't rename trip: " + e.getMessage());
             return;
@@ -138,7 +151,8 @@ public class ManipulateTripsInteractor implements ManipulateTripsInputBoundary {
     /** Reads one trip for the details screen. Used by view, split & merge. */
     private TripDetailsOutputData detailsOf(String tripId) {
         Trip trip = tripAccess.getTripById(tripId);
-        
+        if (trip == null) return null;
+
         List<PhotoDetails> photos = chronological(photoAccess.getPhotosByTripId(tripId)).stream()
                 .map(photo -> new PhotoDetails(photo.getId(), photo.getTime()))
                 .collect(Collectors.toList());
@@ -166,6 +180,12 @@ public class ManipulateTripsInteractor implements ManipulateTripsInputBoundary {
         SplitTripOutputData outputData;
         try {
             Trip original = tripAccess.getTripById(inputData.getTripId());
+
+            if (original == null) {
+                presenter.prepareSplitFailView("Couldn't split trip: Trip not found");
+                return;
+            }
+
             List<Photo> photos = chronological(photoAccess.getPhotosByTripId(original.getId()));
 
             int splitIndex = indexOf(photos, inputData.getFirstPhotoId());
@@ -195,6 +215,7 @@ public class ManipulateTripsInteractor implements ManipulateTripsInputBoundary {
 
             tripAccess.writeTrips(List.of(before, after));
             outputData = new SplitTripOutputData(detailsOf(before.getId()), after.getId(), after.getName());
+
         } catch (TripAccessException | PhotoAccessException e) {
             presenter.prepareSplitFailView("Couldn't split trip: " + e.getMessage());
             return;
@@ -226,8 +247,15 @@ public class ManipulateTripsInteractor implements ManipulateTripsInputBoundary {
         try {
             List<Trip> trips = new ArrayList<>();
             Map<String, Photo> photosById = new LinkedHashMap<>();
+
             for (String id : tripIds) {
-                trips.add(tripAccess.getTripById(id));
+                Trip trip = tripAccess.getTripById(id);
+                if (trip == null) {
+                    presenter.prepareMergeFailView("Couldn't merge trips: Trip not found");
+                    return;
+                }
+
+                trips.add(trip);
                 photoAccess.getPhotosByTripId(id).forEach(photo -> photosById.putIfAbsent(photo.getId(), photo));
             }
 
@@ -242,7 +270,15 @@ public class ManipulateTripsInteractor implements ManipulateTripsInputBoundary {
                     tripAccess.deleteTripById(trip.getId());
                 }
             }
-            outputData = new MergeTripsOutputData(detailsOf(merged.getId()), trips.size());
+
+            TripDetailsOutputData details = detailsOf(merged.getId());
+            if (details == null) {
+                presenter.prepareMergeFailView("Couldn't merge trips: Trip not found");
+                return;
+            }
+
+            outputData = new MergeTripsOutputData(details, trips.size());
+
         } catch (TripAccessException | PhotoAccessException e) {
             presenter.prepareMergeFailView("Couldn't merge trips: " + e.getMessage());
             return;
