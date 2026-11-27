@@ -22,6 +22,7 @@ import entity.ApplicationStatus;
 import use_case.review_applications.ReviewApplicationsDataAccessInterface;
 import use_case.submit_application.SubmitApplicationDataAccessInterface;
 import use_case.track_applications.TrackApplicationsDataAccessInterface;
+import use_case.update_application_status.UpdateApplicationDataAccessInterface;
 
 /**
  * DAO for applications, stored in a JSON file so they are kept between runs of the program.
@@ -29,7 +30,8 @@ import use_case.track_applications.TrackApplicationsDataAccessInterface;
  * are stored only when it is saved.
  */
 public class FileApplicationDataAccessObject implements SubmitApplicationDataAccessInterface,
-        TrackApplicationsDataAccessInterface, ReviewApplicationsDataAccessInterface {
+        TrackApplicationsDataAccessInterface, ReviewApplicationsDataAccessInterface,
+        UpdateApplicationDataAccessInterface {
 
     private final Path jsonPath;
     private final Map<String, Application> applications = new LinkedHashMap<>();

@@ -13,9 +13,9 @@ public class UpdateApplicationOutputData {
         this.adminNote = adminNote;
     }
 
-    String getApplicationId() {return applicationId;}
+    public String getApplicationId() {return applicationId;}
 
-    ApplicationStatus getApplicationStatus() {return applicationStatus;}
+    public ApplicationStatus getApplicationStatus() {return applicationStatus;}
 
-    String getAdminNote() {return adminNote;}
+    public String getAdminNote() {return adminNote;}
 }

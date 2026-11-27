@@ -24,13 +24,14 @@ import use_case.manage_pet.ManagePetDataAccessInterface;
 import use_case.review_applications.ReviewApplicationsPetDataAccessInterface;
 import use_case.submit_application.SubmitApplicationPetDataAccessInterface;
 import use_case.track_applications.TrackApplicationsPetDataAccessInterface;
+import use_case.update_application_status.UpdateApplicationPetDataAccessInterface;
 
 /**
  * Stores pet profiles in a local JSON file and supplies pet details to application submission.
  */
 public class FilePetDataAccessObject implements ManagePetDataAccessInterface, BrowsePetsDataAccessInterface,
         SubmitApplicationPetDataAccessInterface, TrackApplicationsPetDataAccessInterface,
-        ReviewApplicationsPetDataAccessInterface {
+        ReviewApplicationsPetDataAccessInterface, UpdateApplicationPetDataAccessInterface {
 
     private final Path jsonPath;
     private Map<String, Pet> pets;
