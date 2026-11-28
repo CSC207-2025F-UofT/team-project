@@ -61,6 +61,8 @@ public final class ReviewApplicationsView extends JPanel implements ReviewApplic
     private final JButton update = new JButton("update status");
     /** The ids of the applications in the table, in table order. */
     private List<String> shownIds = new ArrayList<>();
+    /** The statuses shown in the table, in table order. */
+    private List<String> shownStatuses = new ArrayList<>();
     /** True while the table is being refilled, so selection changes made by the view itself are ignored. */
     private boolean updatingTable;
 
@@ -182,6 +184,7 @@ public final class ReviewApplicationsView extends JPanel implements ReviewApplic
                     state.getSubmittedDates().get(i), state.getStatuses().get(i)});
             }
             shownIds = new ArrayList<>(state.getApplicationIds());
+
             updatingTable = false;
         }
         messageLabel.setText(textOrBlank(state.getMessage()));
@@ -195,6 +198,20 @@ public final class ReviewApplicationsView extends JPanel implements ReviewApplic
         }
         detailMessageLabel.setText(textOrBlank(state.getDetailMessage()));
         update.setEnabled(state.hasDetails());
+
+        // Refill the table when the list or any status changed. Opening an application changes neither,
+        // so its row stays selected.
+        if (!state.getApplicationIds().equals(shownIds) || !state.getStatuses().equals(shownStatuses)) {
+            updatingTable = true;
+            tableModel.setRowCount(0);
+            for (int i = 0; i < state.getApplicationCount(); i++) {
+                tableModel.addRow(new Object[] {state.getPetNames().get(i), state.getAdopterNames().get(i),
+                        state.getSubmittedDates().get(i), state.getStatuses().get(i)});
+            }
+            shownIds = new ArrayList<>(state.getApplicationIds());
+            shownStatuses = new ArrayList<>(state.getStatuses());
+            updatingTable = false;
+        }
     }
 
     private static String detailsText(ReviewApplicationsState state) {
