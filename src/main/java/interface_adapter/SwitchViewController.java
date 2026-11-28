@@ -21,7 +21,6 @@ public class SwitchViewController {
      * @param viewName the name the screen was registered under
      */
     public void switchTo(String viewName) {
-        viewManagerModel.setState(viewName);
-        viewManagerModel.notifyViewChanged();
+        viewManagerModel.setActiveView(viewName);
     }
 }

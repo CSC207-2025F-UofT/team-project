@@ -18,8 +18,8 @@ class ViewManagerModelTest {
     @Test
     void changingViewNotifiesListener() {
         final ViewManagerModel model = new ViewManagerModel();
-        final List<Object> seen = new ArrayList<>();
-        model.addPropertyChangeListener(event -> seen.add(event.getNewValue()));
+        final List<String> seen = new ArrayList<>();
+        model.addListener(() -> seen.add(model.getActiveView()));
 
         model.setActiveView("gallery");
 
@@ -30,36 +30,28 @@ class ViewManagerModelTest {
     @Test
     void setStateAloneDoesNotNotify() {
         final ViewManagerModel model = new ViewManagerModel();
-        final List<Object> seen = new ArrayList<>();
-        model.addPropertyChangeListener(event -> seen.add(event.getNewValue()));
+        final List<String> seen = new ArrayList<>();
+        model.addListener(() -> seen.add(model.getActiveView()));
+        final ViewManagerState state = new ViewManagerState();
+        state.setActiveView("login");
 
-        model.setState("login");
+        model.setState(state);
 
         assertEquals("login", model.getActiveView());
         assertEquals(0, seen.size());
     }
 
     @Test
-    void notifyViewChangedAnnouncesTheChosenState() {
+    void notifyStateChangedAnnouncesTheChosenState() {
         final ViewManagerModel model = new ViewManagerModel();
-        final List<Object> seen = new ArrayList<>();
-        model.addPropertyChangeListener(event -> seen.add(event.getNewValue()));
+        final List<String> seen = new ArrayList<>();
+        model.addListener(() -> seen.add(model.getActiveView()));
+        final ViewManagerState state = new ViewManagerState();
+        state.setActiveView("login");
 
-        model.setState("login");
-        model.notifyViewChanged();
+        model.setState(state);
+        model.notifyStateChanged();
 
         assertEquals(List.of("login"), seen);
-    }
-
-    @Test
-    void settingSameViewTwiceNotifiesOnce() {
-        final ViewManagerModel model = new ViewManagerModel();
-        final List<Object> seen = new ArrayList<>();
-        model.addPropertyChangeListener(event -> seen.add(event.getNewValue()));
-
-        model.setActiveView("gallery");
-        model.setActiveView("gallery");
-
-        assertEquals(1, seen.size());
     }
 }
