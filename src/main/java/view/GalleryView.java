@@ -9,8 +9,6 @@ import java.awt.GridLayout;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 import java.util.EnumMap;
 import java.util.EnumSet;
 import java.util.List;
@@ -34,13 +32,14 @@ import interface_adapter.browse_pets.AgeFilterOption;
 import interface_adapter.browse_pets.BrowsePetsController;
 import interface_adapter.browse_pets.FilterLabels;
 import interface_adapter.browse_pets.GalleryViewModel;
+import interface_adapter.browse_pets.GalleryViewModelListener;
 import interface_adapter.browse_pets.PetCardData;
 import interface_adapter.view_pet_details.ViewPetDetailsController;
 
 /**
  * The pet gallery screen: a filter panel on the left and a scrollable grid of pet cards.
  */
-public class GalleryView extends JPanel implements PropertyChangeListener {
+public class GalleryView extends JPanel implements GalleryViewModelListener {
     /** Name this screen is registered under in the view manager. */
     public static final String VIEW_NAME = GalleryViewModel.VIEW_NAME;
 
@@ -48,6 +47,7 @@ public class GalleryView extends JPanel implements PropertyChangeListener {
     private static final int GAP = 12;
 
     private final BrowsePetsController controller;
+    private final GalleryViewModel viewModel;
     private final ViewPetDetailsController detailsController;
     private final JPanel cardGrid = new JPanel(new GridLayout(0, COLUMNS, GAP, GAP));
     private final JComboBox<AgeFilterOption> ageBox = new JComboBox<>(AgeFilterOption.values());
@@ -67,7 +67,8 @@ public class GalleryView extends JPanel implements PropertyChangeListener {
         super(new BorderLayout());
         this.controller = controller;
         this.detailsController = detailsController;
-        viewModel.addPropertyChangeListener(this);
+        this.viewModel = viewModel;
+        viewModel.addListener(this);
         getAccessibleContext().setAccessibleName("Pet gallery");
 
         final JLabel title = new JLabel("Adoptable Cats");
@@ -155,12 +156,8 @@ public class GalleryView extends JPanel implements PropertyChangeListener {
     }
 
     @Override
-    public void propertyChange(PropertyChangeEvent event) {
-        if (GalleryViewModel.CARDS.equals(event.getPropertyName())) {
-            @SuppressWarnings("unchecked")
-            final List<PetCardData> cards = (List<PetCardData>) event.getNewValue();
-            showCards(cards);
-        }
+    public void stateChanged() {
+        showCards(viewModel.getState().getCards());
     }
 
     private void showCards(List<PetCardData> cards) {
