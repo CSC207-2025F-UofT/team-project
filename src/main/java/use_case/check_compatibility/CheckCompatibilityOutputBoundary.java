@@ -13,7 +13,12 @@ public interface CheckCompatibilityOutputBoundary {
     void presentCompatibility(CheckCompatibilityOutputData outputData);
 
     /**
-     * Tells the adopter to fill in their preferences first.
+     * Tells a visitor who is not logged in to log in first.
+     */
+    void presentLoginRequired();
+
+    /**
+     * Tells a logged-in adopter to fill in their preferences first.
      */
     void presentNoPreferences();
 

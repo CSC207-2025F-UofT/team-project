@@ -13,6 +13,7 @@ public class CompatibilityState {
     private List<Boolean> conflicts = new ArrayList<>();
     private String message = "";
     private boolean needsPreferences;
+    private boolean needsLogin;
 
     /**
      * Returns the one-sentence summary.
@@ -86,6 +87,24 @@ public class CompatibilityState {
      */
     public boolean needsPreferences() {
         return needsPreferences;
+    }
+
+    /**
+     * Returns whether the visitor must log in first.
+     *
+     * @return true if nobody is logged in
+     */
+    public boolean needsLogin() {
+        return needsLogin;
+    }
+
+    /**
+     * Sets whether the visitor must log in first.
+     *
+     * @param needsLogin true if nobody is logged in
+     */
+    public void setNeedsLogin(boolean needsLogin) {
+        this.needsLogin = needsLogin;
     }
 
     /**

@@ -40,8 +40,11 @@ public class CheckCompatibilityInteractor implements CheckCompatibilityInputBoun
             return;
         }
         final String adopterId = inputData.getAdopterId();
-        final Optional<AdopterPreferences> preferences = adopterId == null || adopterId.isBlank()
-                ? Optional.empty() : preferencesData.findByAdopterId(adopterId);
+        if (adopterId == null || adopterId.isBlank()) {
+            presenter.presentLoginRequired();
+            return;
+        }
+        final Optional<AdopterPreferences> preferences = preferencesData.findByAdopterId(adopterId);
         if (preferences.isEmpty()) {
             presenter.presentNoPreferences();
             return;

@@ -4,6 +4,7 @@ import java.awt.Font;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
+import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
@@ -16,6 +17,8 @@ import interface_adapter.check_compatibility.CompatibilityViewModelListener;
  */
 public class CompatibilityPanel extends JPanel implements CompatibilityViewModelListener {
     private final CompatibilityViewModel viewModel;
+    private Runnable logInAction = () -> { };
+    private Runnable profileAction = () -> { };
 
     /**
      * Creates the panel.
@@ -30,12 +33,36 @@ public class CompatibilityPanel extends JPanel implements CompatibilityViewModel
         getAccessibleContext().setAccessibleName("Compatibility with your home");
     }
 
+    /**
+     * Sets what the Log in button does.
+     *
+     * @param action opens the login screen
+     */
+    public void setLogInAction(Runnable action) {
+        this.logInAction = action;
+    }
+
+    /**
+     * Sets what the Fill in My profile button does.
+     *
+     * @param action opens My profile
+     */
+    public void setProfileAction(Runnable action) {
+        this.profileAction = action;
+    }
+
     @Override
     public void stateChanged() {
         final CompatibilityState state = viewModel.getState();
         removeAll();
         if (!state.getMessage().isEmpty()) {
             add(label(state.getMessage(), false));
+        }
+        if (state.needsLogin()) {
+            add(button("Log in", () -> logInAction.run()));
+        }
+        if (state.needsPreferences()) {
+            add(button("Open My profile", () -> profileAction.run()));
         }
         if (!state.getHeadline().isEmpty()) {
             final JLabel headline = label(state.getHeadline(), false);
@@ -49,8 +76,17 @@ public class CompatibilityPanel extends JPanel implements CompatibilityViewModel
         repaint();
     }
 
+    private JButton button(String text, Runnable action) {
+        final JButton button = new JButton(text);
+        button.getAccessibleContext().setAccessibleName(text);
+        button.setAlignmentX(LEFT_ALIGNMENT);
+        button.addActionListener(event -> action.run());
+        return button;
+    }
+
     private JLabel label(String text, boolean conflict) {
         final JLabel label = new JLabel();
+        label.setAlignmentX(LEFT_ALIGNMENT);
         label.putClientProperty("html.disable", true);
         label.setText(text);
         label.getAccessibleContext().setAccessibleName(text);
