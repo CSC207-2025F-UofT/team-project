@@ -107,4 +107,24 @@ class PetDetailViewTest {
         show("7", "Miso", "");
         assertTrue(applyButton().isVisible());
     }
+
+    @Test
+    void petShownHandlerIsCalledWithTheCatId() {
+        final List<String> shown = new ArrayList<>();
+        view.setPetShownHandler(shown::add);
+
+        show("p1", "Miso", "");
+
+        assertEquals(List.of("p1"), shown);
+    }
+
+    @Test
+    void petShownHandlerIsNotCalledWhenTheCatCannotBeShown() {
+        final List<String> shown = new ArrayList<>();
+        view.setPetShownHandler(shown::add);
+
+        show("", "", "This cat is no longer available.");
+
+        assertTrue(shown.isEmpty());
+    }
 }

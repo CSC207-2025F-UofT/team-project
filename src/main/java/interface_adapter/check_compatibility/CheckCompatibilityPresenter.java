@@ -45,7 +45,7 @@ public class CheckCompatibilityPresenter implements CheckCompatibilityOutputBoun
     public void presentNoPreferences() {
         final CompatibilityState state = new CompatibilityState();
         state.setNeedsPreferences(true);
-        state.setMessage("Fill in My profile to see how well this cat fits your home.");
+        state.setMessage("Log in and fill in My profile to see how well this cat fits your home.");
         publish(state);
     }
 

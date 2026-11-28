@@ -39,8 +39,9 @@ public class CheckCompatibilityInteractor implements CheckCompatibilityInputBoun
             presenter.presentNotFound("This cat could not be found.");
             return;
         }
-        final Optional<AdopterPreferences> preferences =
-                preferencesData.findByAdopterId(inputData.getAdopterId());
+        final String adopterId = inputData.getAdopterId();
+        final Optional<AdopterPreferences> preferences = adopterId == null || adopterId.isBlank()
+                ? Optional.empty() : preferencesData.findByAdopterId(adopterId);
         if (preferences.isEmpty()) {
             presenter.presentNoPreferences();
             return;

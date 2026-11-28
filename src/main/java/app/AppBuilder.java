@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.function.Supplier;
 import java.util.concurrent.ExecutionException;
 
 import javax.swing.JButton;
@@ -19,6 +20,7 @@ import javax.swing.WindowConstants;
 
 import data_access.CatApiBreedDataAccess;
 import data_access.FileApplicationDataAccessObject;
+import data_access.FileAdopterPreferencesDataAccessObject;
 import data_access.FilePetDataAccessObject;
 import data_access.FileUserDataAccessObject;
 import data_access.InMemoryPetDataAccess;
@@ -33,6 +35,12 @@ import interface_adapter.admin_signup.AdminSignupController;
 import interface_adapter.admin_signup.AdminSignupPresenter;
 import interface_adapter.admin_signup.AdminSignupViewModel;
 import interface_adapter.browse_pets.BrowsePetsController;
+import interface_adapter.check_compatibility.CheckCompatibilityController;
+import interface_adapter.check_compatibility.CheckCompatibilityPresenter;
+import interface_adapter.check_compatibility.CompatibilityViewModel;
+import interface_adapter.save_preferences.PreferencesViewModel;
+import interface_adapter.save_preferences.SavePreferencesController;
+import interface_adapter.save_preferences.SavePreferencesPresenter;
 import interface_adapter.browse_pets.BrowsePetsPresenter;
 import interface_adapter.browse_pets.GalleryViewModel;
 import interface_adapter.view_pet_details.PetDetailViewModel;
@@ -63,6 +71,11 @@ import interface_adapter.update_application_status.UpdateApplicationViewModel;
 import use_case.admin_signup.AdminSignupInteractor;
 import use_case.browse_pets.BrowsePetsDataAccessInterface;
 import use_case.browse_pets.BrowsePetsInteractor;
+import use_case.check_compatibility.AdopterPreferencesDataAccessInterface;
+import use_case.check_compatibility.CheckCompatibilityInteractor;
+import use_case.check_compatibility.CheckCompatibilityPetDataAccessInterface;
+import use_case.check_compatibility.CompatibilityEngine;
+import use_case.save_preferences.SavePreferencesInteractor;
 import use_case.view_pet_details.ViewPetDetailsDataAccessInterface;
 import use_case.view_pet_details.ViewPetDetailsInteractor;
 import use_case.login.LoginInteractor;
@@ -75,10 +88,12 @@ import use_case.submit_application.SubmitApplicationInteractor;
 import use_case.track_applications.TrackApplicationsInteractor;
 import use_case.update_application_status.UpdateApplicationInteractor;
 import view.AdminSignupView;
+import view.CompatibilityPanel;
 import view.GalleryView;
 import view.LoginView;
 import view.ManagePetView;
 import view.PetDetailView;
+import view.PreferencesView;
 import view.MyApplicationsView;
 import view.ReviewApplicationsView;
 import view.SignupView;
@@ -128,7 +143,10 @@ public final class AppBuilder {
         final RescueGroupsPetDataAccess rescueGroups = new RescueGroupsPetDataAccess(rescueGroupsKey);
         final PetCatalog catalog = new PetCatalog(pets, rescueGroups);
         final GalleryView gallery = builder.addGalleryView(catalog, catalog,
-                builder.navigationButton("Shelter login", LoginViewModel.VIEW_NAME));
+                builder.navigationButton("Shelter login", LoginViewModel.VIEW_NAME),
+                builder.navigationButton("My profile", PreferencesViewModel.VIEW_NAME));
+        builder.addCompatibilityViews(catalog,
+                new FileAdopterPreferencesDataAccessObject(dataDirectory.resolve("adopter_preferences.json")));
         if (rescueGroups.isConfigured()) {
             builder.petDetailView.setExternalPhotoLoader(rescueGroups::loadPhoto);
             loadRescueGroups(rescueGroups, gallery);
@@ -169,12 +187,13 @@ public final class AppBuilder {
      */
     public AppBuilder addGalleryView() {
         final InMemoryPetDataAccess sampleData = InMemoryPetDataAccess.withSampleData();
-        addGalleryView(sampleData, sampleData, null);
+        addGalleryView(sampleData, sampleData);
         return this;
     }
 
     private GalleryView addGalleryView(BrowsePetsDataAccessInterface petData,
-                                       ViewPetDetailsDataAccessInterface detailData, JButton shelterLogin) {
+                                       ViewPetDetailsDataAccessInterface detailData,
+                                       JButton... navigationButtons) {
         final PetDetailViewModel detailViewModel = new PetDetailViewModel();
         final ViewPetDetailsPresenter detailsPresenter =
                 new ViewPetDetailsPresenter(detailViewModel, viewManagerModel);
@@ -190,7 +209,8 @@ public final class AppBuilder {
         final BrowsePetsInteractor interactor = new BrowsePetsInteractor(petData, presenter);
         final BrowsePetsController controller = new BrowsePetsController(interactor);
         final GalleryView galleryView = new GalleryView(controller, galleryViewModel, detailsController);
-        final JPanel gallery = shelterLogin == null ? galleryView : withNavigation(galleryView, shelterLogin);
+        final JPanel gallery = navigationButtons.length == 0
+                ? galleryView : withNavigation(galleryView, navigationButtons);
         views.add(gallery, GalleryView.VIEW_NAME);
         viewManagerModel.addListener(() -> {
             if (GalleryView.VIEW_NAME.equals(viewManagerModel.getActiveView())) {
@@ -198,6 +218,28 @@ public final class AppBuilder {
             }
         });
         return galleryView;
+    }
+
+    /**
+     * Adds the My profile page and the compatibility panel on the detail page (Use Case 4).
+     * The adopter is whoever logged in last; nobody logged in means no saved profile.
+     */
+    private void addCompatibilityViews(CheckCompatibilityPetDataAccessInterface pets,
+                                       AdopterPreferencesDataAccessInterface preferences) {
+        final Supplier<String> adopterId = () -> submitViewModel.getState().getAdopterId();
+
+        final CompatibilityViewModel compatibilityViewModel = new CompatibilityViewModel();
+        final CheckCompatibilityController checkController = new CheckCompatibilityController(
+                new CheckCompatibilityInteractor(pets, preferences, CompatibilityEngine.withStandardRules(),
+                        new CheckCompatibilityPresenter(compatibilityViewModel)));
+        petDetailView.setCompatibilityPanel(new CompatibilityPanel(compatibilityViewModel));
+        petDetailView.setPetShownHandler(petId -> checkController.check(petId, adopterId.get()));
+
+        final PreferencesViewModel preferencesViewModel = new PreferencesViewModel();
+        final SavePreferencesController saveController = new SavePreferencesController(
+                new SavePreferencesInteractor(preferences, new SavePreferencesPresenter(preferencesViewModel)));
+        views.add(new PreferencesView(preferencesViewModel, saveController, adopterId,
+                new SwitchViewController(viewManagerModel), GalleryView.VIEW_NAME), PreferencesViewModel.VIEW_NAME);
     }
 
     private void connectApplyButton() {
