@@ -32,6 +32,7 @@ class ManagePetInteractorTest {
         assertEquals(PetStatus.AVAILABLE, saved.getStatus());
         assertEquals(0, saved.getAgeYears());
         assertEquals(new BigDecimal("85.50"), saved.getAdoptionFee());
+        assertEquals(saved.getId(), presenter.output.getPets().get(0).getId());
         assertTrue(presenter.output.getPets().get(0).isAvailable());
         assertEquals(List.of("SHY", "PLAYFUL"), presenter.output.getPets().get(0).getTemperamentTags());
         assertNull(presenter.error);
@@ -109,6 +110,73 @@ class ManagePetInteractorTest {
         assertTrue(pets.getPets().isEmpty());
     }
 
+    @Test
+    void rejectsMissingOrUnknownChoicesAndMissingNumbers() {
+        interactor.add(formWith(null, "FEMALE", List.of(), "1", "5"));
+        assertEquals("Choose a species.", presenter.error);
+
+        interactor.add(formWith("CAT", "DRAGON", List.of(), "1", "5"));
+        assertEquals("Choose the pet's sex.", presenter.error);
+
+        interactor.add(formWith("CAT", "FEMALE", List.of("GRUMPY"), "1", "5"));
+        assertEquals("Choose valid temperament tags.", presenter.error);
+
+        interactor.add(formWith("CAT", "FEMALE", List.of(), null, "5"));
+        assertEquals("Enter the age in whole years.", presenter.error);
+
+        interactor.add(formWith("CAT", "FEMALE", List.of(), "1", null));
+        assertTrue(presenter.error.contains("adoption fee"));
+
+        interactor.add(formWith("CAT", "FEMALE", List.of(), "1", "free"));
+        assertTrue(presenter.error.contains("adoption fee"));
+
+        assertTrue(pets.getPets().isEmpty());
+    }
+
+    @Test
+    void reportsAPetThatDisappearsDuringAnEdit() {
+        pets.add(pendingPet());
+        pets.updateFindsNothing = true;
+
+        interactor.edit("pet-1", form("Mochi", "5", "0"));
+
+        assertEquals("This pet listing no longer exists.", presenter.error);
+        assertNull(presenter.output);
+    }
+
+    @Test
+    void reportsStorageFailuresForEditAndRemove() {
+        pets.add(pendingPet());
+        pets.failWrites = true;
+
+        interactor.edit("pet-1", form("Mochi", "5", "0"));
+        assertEquals("The pet could not be updated. Please try again.", presenter.error);
+
+        interactor.remove("pet-1");
+        assertEquals("The pet could not be removed. Please try again.", presenter.error);
+
+        assertEquals("Original", pets.findById("pet-1").getName());
+        assertNull(presenter.output);
+    }
+
+    @Test
+    void reportsAListThatCannotBeLoaded() {
+        pets.failReads = true;
+
+        interactor.refresh();
+        assertEquals("The pet list could not be loaded. Please refresh.", presenter.error);
+
+        interactor.add(form("Mochi", "4", "85"));
+        assertEquals("Added Mochi. The pet list could not be loaded. Please refresh.", presenter.error);
+        assertNull(presenter.output);
+    }
+
+    private static ManagePetInputData formWith(String species, String sex, List<String> tags, String age,
+                                               String fee) {
+        return new ManagePetInputData("Mochi", species, "Domestic shorthair", age, sex, tags, "", false, true,
+                false, fee, "");
+    }
+
     private static ManagePetInputData form(String name, String age, String fee) {
         return new ManagePetInputData(name, "CAT", "Domestic shorthair", age, "FEMALE", List.of("SHY", "PLAYFUL"),
                 "Requires eye drops", true, true, false, fee, "");
@@ -139,9 +207,14 @@ class ManagePetInteractorTest {
     private static final class InMemoryPetStore implements ManagePetDataAccessInterface {
         private final Map<String, Pet> listings = new LinkedHashMap<>();
         private boolean failWrites;
+        private boolean failReads;
+        private boolean updateFindsNothing;
 
         @Override
         public List<Pet> getPets() {
+            if (failReads) {
+                throw new IllegalStateException("File read failed");
+            }
             return List.copyOf(listings.values());
         }
 
@@ -160,11 +233,20 @@ class ManagePetInteractorTest {
 
         @Override
         public boolean update(Pet pet) {
+            if (failWrites) {
+                throw new IllegalStateException("File write failed");
+            }
+            if (updateFindsNothing) {
+                return false;
+            }
             return listings.replace(pet.getId(), pet) != null;
         }
 
         @Override
         public boolean remove(String id) {
+            if (failWrites) {
+                throw new IllegalStateException("File write failed");
+            }
             return listings.remove(id) != null;
         }
     }

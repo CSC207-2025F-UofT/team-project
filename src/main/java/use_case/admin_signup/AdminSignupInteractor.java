@@ -1,14 +1,11 @@
 package use_case.admin_signup;
 
-import java.math.BigInteger;
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.regex.Pattern;
 
 import entity.User;
 import entity.User.Role;
 import entity.UserFactory;
+import use_case.PasswordHasher;
 
 /**
  * The Admin Signup Interactor.
@@ -52,7 +49,7 @@ public class AdminSignupInteractor implements AdminSignupInputBoundary {
         final User admin = userFactory.create(adminSignupInputData.getUsername(),
                                               adminSignupInputData.getId(),
                                               adminSignupInputData.getEmail(),
-                                              hashPassword(adminSignupInputData.getPassword()),
+                                              PasswordHasher.hash(adminSignupInputData.getPassword()),
                                               Role.ADMIN,
                                               null);
         userDataAccessObject.save(admin);
@@ -109,21 +106,6 @@ public class AdminSignupInteractor implements AdminSignupInputBoundary {
         return expectedInviteCode.equals(code);
     }
 
-    /**
-     * Hashes the raw password with SHA-256 and returns it as a lowercase hex string.
-     * Login must use the same algorithm to verify passwords.
-     */
-    private static String hashPassword(String rawPassword) {
-        try {
-            final byte[] hash = MessageDigest.getInstance("SHA-256")
-                    .digest(rawPassword.getBytes(StandardCharsets.UTF_8));
-            return String.format("%064x", new BigInteger(1, hash));
-        }
-        catch (NoSuchAlgorithmException ex) {
-            // Every Java platform is required to support SHA-256.
-            throw new IllegalStateException("SHA-256 not available", ex);
-        }
-    }
 
     private static boolean isEmpty(String value) {
         return value == null || value.isEmpty();

@@ -50,6 +50,22 @@ class ApplicationTest {
     }
 
     @Test
+    void missingDateOrStatusIsRejected() {
+        assertThrows(IllegalArgumentException.class, () -> new Application("a1", "adopter1", "pet1", "House",
+                "Had two cats", "2 adults", "me@example.com", "", null));
+        assertThrows(IllegalArgumentException.class, () -> new Application("a1", "adopter1", "pet1", "House",
+                "Had two cats", "2 adults", "me@example.com", "", LocalDate.of(2026, 11, 16), null, ""));
+    }
+
+    @Test
+    void updateStatusRequiresAStatus() {
+        final Application application = newApplication();
+
+        assertThrows(IllegalArgumentException.class, () -> application.updateStatus(null, "note"));
+        assertEquals(ApplicationStatus.PENDING, application.getStatus());
+    }
+
+    @Test
     void updateStatusRecordsNote() {
         final Application application = newApplication();
         application.updateStatus(ApplicationStatus.INTERVIEW, "Call us on Friday");
