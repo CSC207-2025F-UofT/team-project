@@ -28,6 +28,7 @@ class BrowsePetsPresenterTest {
         new BrowsePetsPresenter(viewModel).presentPets(new BrowsePetsOutputData(List.of(pet("Miso", 2))));
 
         final PetCardData card = viewModel.getCards().get(0);
+        assertEquals("1", card.getPetId());
         assertEquals("Miso", card.getName());
         assertEquals("Cat, Tabby, 2 years old", card.getSummary());
         assertEquals("Status: Available", card.getStatus());

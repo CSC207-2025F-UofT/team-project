@@ -236,9 +236,23 @@ preferredSpecies
 ## API Usage
 **API Name: TheCatAPI**
 **Documentation:** [ https://developers.thecatapi.com/ ]
-**How it is used in the program: When an admin picks a breed in the Add/Edit Pet form, 
-the program calls the API to fetch general breed information (typical temperament and a 
-reference photo).**
+**How it is used in the program:** When an admin picks a breed in the Add/Edit Pet form,
+the program calls the API to fetch general breed information (typical temperament and a
+reference photo).
+
+### Setting up the API key
+1. Get a free key at https://thecatapi.com/signup (it is emailed to you).
+2. Give the key to the program through the environment variable `THE_CAT_API_KEY`.
+   - IntelliJ: Run > Edit Configurations > select `Main` > Environment variables > `THE_CAT_API_KEY=<your key>`.
+   - Terminal: `export THE_CAT_API_KEY=<your key>` before running the program.
+3. Never put the key in code or commit it. `config.properties` is in `.gitignore` if you want to keep a local copy.
+
+Requests send the key in the `x-api-key` header. If the key is missing or rejected, the program shows an
+error message and the rest of the app keeps working. Tests use saved sample responses and never call the live API.
+
+### Planned data sources
+To show more real cats, the gallery will also read adoptable cats from rescue listings in Toronto
+(RescueGroups and Petfinder). Their keys will be set up the same way, through environment variables.
 
 ---
 ## Design Diagrams

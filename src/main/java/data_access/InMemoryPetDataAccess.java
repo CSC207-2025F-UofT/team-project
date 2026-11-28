@@ -3,6 +3,7 @@ package data_access;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import entity.Pet;
@@ -11,11 +12,12 @@ import entity.PetStatus;
 import entity.Species;
 import entity.Temperament;
 import use_case.browse_pets.BrowsePetsDataAccessInterface;
+import use_case.view_pet_details.ViewPetDetailsDataAccessInterface;
 
 /**
  * Keeps pets in memory. Used for tests and as sample data until the JSON source is ready.
  */
-public class InMemoryPetDataAccess implements BrowsePetsDataAccessInterface {
+public class InMemoryPetDataAccess implements BrowsePetsDataAccessInterface, ViewPetDetailsDataAccessInterface {
     private final List<Pet> pets;
 
     /**
@@ -59,5 +61,10 @@ public class InMemoryPetDataAccess implements BrowsePetsDataAccessInterface {
         return pets.stream()
                 .filter(pet -> pet.getStatus() == PetStatus.AVAILABLE)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public Optional<Pet> findById(String petId) {
+        return pets.stream().filter(pet -> pet.getId().equals(petId)).findFirst();
     }
 }
