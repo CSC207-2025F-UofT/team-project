@@ -216,7 +216,6 @@ so that the next person using the same computer cannot see or change my account.
 3. The system shows the public pet gallery with the log in option.
 
 **Extensions:**
-- 1a. The user has unsaved input on the current screen (for example, a half-filled application): the system asks the user to confirm; if the user cancels, nothing changes.
 - 2a. No user is logged in: the system shows the public pet gallery and nothing else changes.
 
 ---
