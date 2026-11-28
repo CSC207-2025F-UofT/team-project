@@ -25,6 +25,11 @@ public class LoginViewModel {
         listeners.add(listener);
     }
 
+    public void resetState() {
+        state = new LoginState();
+        notifyStateChanged();
+    }
+
     public void notifyStateChanged(){
         for (LoginViewModelListener listener : listeners){
             listener.stateChanged();

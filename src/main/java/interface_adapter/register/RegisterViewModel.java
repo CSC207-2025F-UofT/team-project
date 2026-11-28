@@ -13,6 +13,12 @@ public class RegisterViewModel {
         listeners.add(listener);
     }
 
+    public void notifyStateChanged(){
+        for(RegisterViewModelListener listener : listeners){
+            listener.stateChanged();
+        }
+    }
+
     public RegisterState getState(){
         return this.state;
     }

@@ -1,11 +1,24 @@
 package app;
 
 import interface_adapter.ViewManagerModel;
+import interface_adapter.login.LoginController;
+import interface_adapter.register.RegisterPresenter;
 import interface_adapter.register.RegisterViewModel;
-import view.RegisterView;
-import view.ViewManager;
-import view.LoginView;
 import interface_adapter.login.LoginViewModel;
+import interface_adapter.register.RegisterController;
+import interface_adapter.register.RegisterPresenter;
+import interface_adapter.login.LoginPresenter;
+
+import frameworks_and_drivers.RegisterView;
+import frameworks_and_drivers.ViewManager;
+import frameworks_and_drivers.LoginView;
+
+import use_case.login.LoginInputBoundary;
+import use_case.login.LoginInteractor;
+import use_case.register.RegisterInputBoundary;
+import use_case.register.RegisterInteractor;
+import use_case.register.RegisterOutputBoundary;
+import use_case.login.LoginOutputBoundary;
 
 import javax.swing.*;
 import java.awt.*;
@@ -21,6 +34,9 @@ public class AppBuilder{
     private LoginView loginView;
     private LoginViewModel loginViewModel;
 
+    private RegisterView registerView;
+    private RegisterViewModel registerViewModel;
+
     public AppBuilder(){
         mainPanel.setLayout(cardLayout);
     }
@@ -33,9 +49,26 @@ public class AppBuilder{
     }
 
     public AppBuilder addRegisterView(){
-        RegisterViewModel registerViewModel = new RegisterViewModel();
-        RegisterView registerView = new RegisterView(registerViewModel);
+        registerViewModel = new RegisterViewModel();
+        this.registerView = new RegisterView(registerViewModel);
         mainPanel.add(registerView, RegisterViewModel.VIEW_NAME);
+        return this;
+    }
+
+    public AppBuilder addLoginUseCase(){
+        final LoginOutputBoundary loginPresenter = new LoginPresenter(viewManagerModel, registerViewModel,  loginViewModel);
+        final LoginInputBoundary loginInteractor = new LoginInteractor(loginPresenter);
+
+        final LoginController loginController = new LoginController(loginInteractor);
+        loginView.setLoginController(loginController);
+        return this;
+    }
+
+    public AppBuilder addRegisterUseCase(){
+        final RegisterOutputBoundary registerPresenter = new RegisterPresenter(registerViewModel);
+        final RegisterInputBoundary registerInteractor = new RegisterInteractor(registerPresenter);
+        RegisterController registerController = new RegisterController(registerInteractor);
+        registerView.setRegisterController(registerController);
         return this;
     }
 

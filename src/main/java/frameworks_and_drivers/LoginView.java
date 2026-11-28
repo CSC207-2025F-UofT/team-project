@@ -1,14 +1,18 @@
-package view;
+package frameworks_and_drivers;
 
+import interface_adapter.ViewManagerModel;
+import interface_adapter.login.LoginController;
 import interface_adapter.login.LoginState;
 import interface_adapter.login.LoginViewModel;
 import interface_adapter.login.LoginViewModelListener;
+import interface_adapter.register.RegisterViewModel;
 
 import javax.swing.*;
 import java.awt.*;
 
 public class LoginView extends JPanel implements LoginViewModelListener {
     private final LoginViewModel loginViewModel;
+    private LoginController loginController = null;
 
     private final JLabel error = new JLabel("");
     private final JTextField usernameField = new JTextField(20);
@@ -48,6 +52,18 @@ public class LoginView extends JPanel implements LoginViewModelListener {
             components[i].setMaximumSize(components[i].getPreferredSize());
             ((JComponent) components[i]).setAlignmentX(Component.CENTER_ALIGNMENT);
         }
+
+        initializeListeners();
+    }
+
+    private void initializeListeners(){
+        registerButton.addActionListener(e -> {
+            loginController.switchToRegisterView();
+        });
+    }
+
+    public void setLoginController(LoginController loginController) {
+        this.loginController = loginController;
     }
 
     @Override

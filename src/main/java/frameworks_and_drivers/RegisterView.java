@@ -1,8 +1,8 @@
-package view;
+package frameworks_and_drivers;
 import javax.swing.*;
-import javax.swing.plaf.basic.BasicArrowButton;
 import java.awt.*;
 
+import interface_adapter.register.RegisterController;
 import interface_adapter.register.RegisterViewModel;
 import interface_adapter.register.RegisterViewModelListener;
 import interface_adapter.register.RegisterState;
@@ -21,9 +21,10 @@ public class RegisterView extends JPanel implements RegisterViewModelListener {
     private final JPasswordField confirmPasswordField = new JPasswordField(20);
     private final JTextField emailField = new JTextField(20);
 
+    private RegisterController registerController;
+
     public RegisterView(RegisterViewModel registerViewModel){
         this.registerViewModel = registerViewModel;
-        this.registerViewModel.addListener(this);
 
         JLabel title = new JLabel("Register");
         title.setAlignmentX(Component.CENTER_ALIGNMENT);
@@ -54,6 +55,20 @@ public class RegisterView extends JPanel implements RegisterViewModelListener {
             components[i].setMaximumSize(components[i].getPreferredSize());
             ((JComponent) components[i]).setAlignmentX(Component.CENTER_ALIGNMENT);
         }
+
+        initializeListeners();
+    }
+    private void initializeListeners(){
+        registerViewModel.addListener(this);
+
+        registerButton.addActionListener(e -> {
+            registerController.execute(emailField.getText(), usernameField.getText(), passwordField.getPassword(),
+                    confirmPasswordField.getPassword());
+        });
+
+        backButton.addActionListener(e -> {
+            registerController.switchToLoginView();
+        });
     }
 
     @Override
@@ -61,5 +76,9 @@ public class RegisterView extends JPanel implements RegisterViewModelListener {
         RegisterState registerState = registerViewModel.getState();
         errorLabel.setText(registerState.getErrorMessage());
         errorLabel.setVisible(!registerState.getErrorMessage().isEmpty());
+    }
+
+    public void setRegisterController(RegisterController registerController){
+        this.registerController = registerController;
     }
 }
