@@ -142,4 +142,9 @@ public class ReviewApplicationsInteractor implements ReviewApplicationsInputBoun
         }
         return name;
     }
+
+    @Override
+    public void switchToUpdateApplicationView() {
+        presenter.switchToUpdateApplicationView();
+    }
 }

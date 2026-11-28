@@ -1,5 +1,9 @@
 package interface_adapter.review_applications;
 
+import entity.ApplicationStatus;
+import interface_adapter.ViewManagerModel;
+import interface_adapter.update_application_status.UpdateApplicationState;
+import interface_adapter.update_application_status.UpdateApplicationViewModel;
 import use_case.review_applications.ApplicationDetailsOutputData;
 import use_case.review_applications.ReviewApplicationsOutputBoundary;
 import use_case.review_applications.ReviewApplicationsOutputData;
@@ -10,13 +14,19 @@ import use_case.review_applications.ReviewApplicationsOutputData;
 public class ReviewApplicationsPresenter implements ReviewApplicationsOutputBoundary {
 
     private final ReviewApplicationsViewModel reviewApplicationsViewModel;
+    private final UpdateApplicationViewModel updateApplicationViewModel;
+    private final ViewManagerModel viewManagerModel;
 
     /**
      * Creates the presenter.
      * @param reviewApplicationsViewModel the view model to update
      */
-    public ReviewApplicationsPresenter(ReviewApplicationsViewModel reviewApplicationsViewModel) {
+    public ReviewApplicationsPresenter(ReviewApplicationsViewModel reviewApplicationsViewModel,
+                                       UpdateApplicationViewModel updateApplicationViewModel,
+                                       ViewManagerModel viewManagerModel) {
         this.reviewApplicationsViewModel = reviewApplicationsViewModel;
+        this.updateApplicationViewModel = updateApplicationViewModel;
+        this.viewManagerModel = viewManagerModel;
     }
 
     @Override
@@ -76,5 +86,21 @@ public class ReviewApplicationsPresenter implements ReviewApplicationsOutputBoun
             return placeholder;
         }
         return text;
+    }
+
+    @Override
+    public void switchToUpdateApplicationView() {
+        final ReviewApplicationsState reviewApplicationsState = reviewApplicationsViewModel.getState();
+        final UpdateApplicationState updateApplicationState = updateApplicationViewModel.getState();
+
+        updateApplicationState.setApplicationId(reviewApplicationsState.getDetailApplicationId());
+        updateApplicationState.setAdopterName(reviewApplicationsState.getDetailAdopterName());
+        updateApplicationState.setPetName(reviewApplicationsState.getDetailPetName());
+        updateApplicationState.setAdminNote(reviewApplicationsState.getDetailAdminNote());
+        updateApplicationState.setUpdateError("");
+
+        updateApplicationViewModel.notifyStateChanged();
+        viewManagerModel.setActiveView(updateApplicationViewModel.VIEW_NAME);
+
     }
 }

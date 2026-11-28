@@ -42,6 +42,9 @@ import interface_adapter.login.LoginViewModel;
 import interface_adapter.manage_pet.ManagePetController;
 import interface_adapter.manage_pet.ManagePetPresenter;
 import interface_adapter.manage_pet.ManagePetViewModel;
+import interface_adapter.review_applications.ReviewApplicationsController;
+import interface_adapter.review_applications.ReviewApplicationsPresenter;
+import interface_adapter.review_applications.ReviewApplicationsViewModel;
 import interface_adapter.signup.SignupController;
 import interface_adapter.signup.SignupPresenter;
 import interface_adapter.signup.SignupViewModel;
@@ -51,6 +54,9 @@ import interface_adapter.submit_application.SubmitApplicationViewModel;
 import interface_adapter.track_applications.TrackApplicationsController;
 import interface_adapter.track_applications.TrackApplicationsPresenter;
 import interface_adapter.track_applications.TrackApplicationsViewModel;
+import interface_adapter.update_application_status.UpdateApplicationController;
+import interface_adapter.update_application_status.UpdateApplicationPresenter;
+import interface_adapter.update_application_status.UpdateApplicationViewModel;
 import use_case.admin_signup.AdminSignupInteractor;
 import use_case.browse_pets.BrowsePetsDataAccessInterface;
 import use_case.browse_pets.BrowsePetsInteractor;
@@ -60,17 +66,21 @@ import use_case.login.LoginInteractor;
 import use_case.manage_pet.BreedLookupInteractor;
 import use_case.manage_pet.ManagePetDataAccessInterface;
 import use_case.manage_pet.ManagePetInteractor;
+import use_case.review_applications.ReviewApplicationsInteractor;
 import use_case.signup.SignupInteractor;
 import use_case.submit_application.SubmitApplicationInteractor;
 import use_case.track_applications.TrackApplicationsInteractor;
+import use_case.update_application_status.UpdateApplicationInteractor;
 import view.AdminSignupView;
 import view.GalleryView;
 import view.LoginView;
 import view.ManagePetView;
 import view.PetDetailView;
 import view.MyApplicationsView;
+import view.ReviewApplicationsView;
 import view.SignupView;
 import view.SubmitApplicationView;
+import view.UpdateApplicationView;
 import view.ViewManager;
 
 /**
@@ -106,7 +116,7 @@ public final class AppBuilder {
         builder.addPetManagementView(pets, users);
         builder.addGalleryView(pets, new PetCatalog(pets),
                 builder.navigationButton("Shelter login", LoginViewModel.VIEW_NAME));
-        return builder.addApplicationViews(pets, applicationDirectory.resolve("applications.json"));
+        return builder.addApplicationViews(pets, users, applicationDirectory.resolve("applications.json"));
     }
 
     /**
@@ -203,7 +213,10 @@ public final class AppBuilder {
             users.setCurrentUserId(null);
             viewManagerModel.setActiveView(GalleryView.VIEW_NAME);
         });
-        views.add(withNavigation(buildPetManagement(pets), signOut), ManagePetViewModel.VIEW_NAME);
+        final JButton reviewApplications =
+                navigationButton("Review applications", ReviewApplicationsViewModel.VIEW_NAME);
+        views.add(withNavigation(buildPetManagement(pets), reviewApplications, signOut),
+                ManagePetViewModel.VIEW_NAME);
     }
 
     private JButton navigationButton(String label, String destination) {
@@ -231,10 +244,17 @@ public final class AppBuilder {
      * @return this builder
      */
     public AppBuilder addApplicationViews() {
-        return addApplicationViews(new FilePetDataAccessObject(Path.of("pets.json")), Path.of("applications.json"));
+        return addApplicationViews(new FilePetDataAccessObject(Path.of("pets.json")), null,
+                Path.of("applications.json"));
     }
 
-    private AppBuilder addApplicationViews(FilePetDataAccessObject petData, Path applicationFile) {
+    /**
+     * Adds the adopter's application screens and, when users are given, the admin's
+     * Review Applications and Update Application Status screens. All of them share one
+     * application store, so a change made on one screen is seen by the others.
+     */
+    private AppBuilder addApplicationViews(FilePetDataAccessObject petData, FileUserDataAccessObject users,
+                                           Path applicationFile) {
         final FileApplicationDataAccessObject applicationData =
                 new FileApplicationDataAccessObject(applicationFile.toString());
 
@@ -253,8 +273,46 @@ public final class AppBuilder {
         views.add(myApplicationsView, TrackApplicationsViewModel.VIEW_NAME);
 
         applicationNavigator = new ApplicationNavigator(viewManagerModel, submitViewModel, trackViewModel);
+        if (users != null) {
+            addReviewAndUpdateViews(petData, applicationData, users);
+        }
         connectApplyButton();
         return this;
+    }
+
+    /**
+     * Adds Review Applications (Use Case 7) and Update Application Status (Use Case 8) for the admin.
+     */
+    private void addReviewAndUpdateViews(FilePetDataAccessObject petData,
+                                         FileApplicationDataAccessObject applicationData,
+                                         FileUserDataAccessObject users) {
+        // Each presenter writes to both view models, so create the view models first.
+        final ReviewApplicationsViewModel reviewViewModel = new ReviewApplicationsViewModel();
+        final UpdateApplicationViewModel updateViewModel = new UpdateApplicationViewModel();
+
+        final ReviewApplicationsPresenter reviewPresenter =
+                new ReviewApplicationsPresenter(reviewViewModel, updateViewModel, viewManagerModel);
+        final ReviewApplicationsView reviewView = new ReviewApplicationsView(reviewViewModel);
+        reviewView.setReviewApplicationsController(new ReviewApplicationsController(
+                new ReviewApplicationsInteractor(applicationData, petData, users, reviewPresenter)));
+        views.add(withNavigation(reviewView, navigationButton("Manage pets", ManagePetViewModel.VIEW_NAME)),
+                ReviewApplicationsViewModel.VIEW_NAME);
+
+        final UpdateApplicationPresenter updatePresenter =
+                new UpdateApplicationPresenter(updateViewModel, viewManagerModel, reviewViewModel);
+        final UpdateApplicationView updateView = new UpdateApplicationView(updateViewModel);
+        updateView.setUpdateApplicationController(new UpdateApplicationController(
+                new UpdateApplicationInteractor(updatePresenter, petData, applicationData)));
+        views.add(updateView, UpdateApplicationViewModel.VIEW_NAME);
+
+        // The review view is wrapped in a navigation panel, so it does not get componentShown itself.
+        // Reload the list whenever its screen becomes active, for example after a status update.
+        viewManagerModel.addPropertyChangeListener(event -> {
+            if (ViewManagerModel.ACTIVE_VIEW.equals(event.getPropertyName())
+                    && ReviewApplicationsViewModel.VIEW_NAME.equals(event.getNewValue())) {
+                reviewView.refresh();
+            }
+        });
     }
 
     /**
@@ -298,6 +356,8 @@ public final class AppBuilder {
         viewManagerModel.addPropertyChangeListener(event -> {
             final Object activeView = event.getNewValue();
             menu.setEnabled(!ManagePetViewModel.VIEW_NAME.equals(activeView)
+                    && !ReviewApplicationsViewModel.VIEW_NAME.equals(activeView)
+                    && !UpdateApplicationViewModel.VIEW_NAME.equals(activeView)
                     && !AdminSignupViewModel.VIEW_NAME.equals(activeView)
                     && !SignupViewModel.VIEW_NAME.equals(activeView)
                     && !LoginViewModel.VIEW_NAME.equals(activeView));
@@ -326,4 +386,5 @@ public final class AppBuilder {
         viewManagerModel.setActiveView(GalleryView.VIEW_NAME);
         return views;
     }
+
 }

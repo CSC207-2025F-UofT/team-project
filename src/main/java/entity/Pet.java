@@ -22,7 +22,7 @@ public final class Pet {
     private final boolean spayedNeutered;
     private final BigDecimal adoptionFee;
     private final String photoPath;
-    private final PetStatus status;
+    private PetStatus status;
 
     /**
      * Creates a pet with a validated profile and an adoption status.
@@ -149,4 +149,6 @@ public final class Pet {
     public PetStatus getStatus() {
         return status;
     }
+
+    public void updatePetStatus(PetStatus status) {this.status = status;}
 }
