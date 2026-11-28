@@ -11,6 +11,8 @@ import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
 import java.util.List;
+import use_case.edit_planned_meal.LoadPlannedPortionsOutputData;
+import use_case.edit_planned_meal.PlannedPortionOption;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -144,6 +146,42 @@ class AddPlannedMealInteractorTest {
         assertEquals(1, originalMeal.getPortions().size());
     }
 
+    @Test
+    void loadsExistingPlannedPortion() {
+        FakeDataAccess dataAccess = new FakeDataAccess();
+        PlannedMeal meal = new PlannedMeal("meal-1", SLOT_ID);
+        meal.addPortion(FoodPortion.from(dataAccess.food, 125));
+        dataAccess.savedPlan.addMeal(meal);
+        FakePresenter presenter = new FakePresenter();
+
+        new AddPlannedMealInteractor(dataAccess, presenter)
+                .loadPortions(DATE, SLOT_ID);
+
+        assertNull(presenter.errorMessage);
+        assertNotNull(presenter.portionsOutputData);
+        assertEquals(1, presenter.portionsOutputData.getPortions().size());
+
+        PlannedPortionOption option =
+                presenter.portionsOutputData.getPortions().get(0);
+        assertEquals(0, option.getIndex());
+        assertEquals("Oats", option.getFoodName());
+        assertEquals(125, option.getGrams());
+        assertEquals(250, option.getCalories());
+    }
+
+    @Test
+    void loadsEmptyListForSlotWithoutPlannedMeal() {
+        FakeDataAccess dataAccess = new FakeDataAccess();
+        FakePresenter presenter = new FakePresenter();
+
+        new AddPlannedMealInteractor(dataAccess, presenter)
+                .loadPortions(DATE, SLOT_ID);
+
+        assertNull(presenter.errorMessage);
+        assertNotNull(presenter.portionsOutputData);
+        assertTrue(presenter.portionsOutputData.getPortions().isEmpty());
+    }
+
     private static class FakeDataAccess
             implements AddPlannedMealDataAccessInterface {
 
@@ -192,6 +230,14 @@ class AddPlannedMealInteractorTest {
 
     private static class FakePresenter
             implements AddPlannedMealOutputBoundary {
+
+        private LoadPlannedPortionsOutputData portionsOutputData;
+
+        @Override
+        public void preparePortionsView(
+                LoadPlannedPortionsOutputData outputData) {
+            this.portionsOutputData = outputData;
+        }
 
         @Override
         public void prepareOptionsView(

@@ -24,4 +24,8 @@ public class AddPlannedMealController {
         interactor.execute(new AddPlannedMealInputData(
                 date, mealSlotId, foodId, grams));
     }
+
+    public void loadPortions(LocalDate date, String mealSlotId) {
+        interactor.loadPortions(date, mealSlotId);
+    }
 }

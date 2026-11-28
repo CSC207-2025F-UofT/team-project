@@ -5,6 +5,8 @@ import data_access.InMemoryMealPlanDataAccessObject;
 import interface_adapter.add_food.AddFoodController;
 import interface_adapter.add_food.AddFoodPresenter;
 import interface_adapter.add_food.AddFoodViewModel;
+import interface_adapter.edit_planned_meal.ChangePlannedPortionController;
+import interface_adapter.edit_planned_meal.ChangePlannedPortionPresenter;
 import interface_adapter.meal_planning.AddPlannedMealController;
 import interface_adapter.meal_planning.AddPlannedMealPresenter;
 import interface_adapter.meal_planning.AddPlannedMealViewModel;
@@ -17,6 +19,9 @@ import interface_adapter.view_food_bank.ViewFoodBankViewModel;
 import use_case.add_food.AddFoodInputBoundary;
 import use_case.add_food.AddFoodInteractor;
 import use_case.add_food.AddFoodOutputBoundary;
+import use_case.edit_planned_meal.ChangePlannedPortionInputBoundary;
+import use_case.edit_planned_meal.ChangePlannedPortionInteractor;
+import use_case.edit_planned_meal.ChangePlannedPortionOutputBoundary;
 import use_case.meal_planning.AddPlannedMealInputBoundary;
 import use_case.meal_planning.AddPlannedMealInteractor;
 import use_case.meal_planning.AddPlannedMealOutputBoundary;
@@ -91,8 +96,16 @@ public class AppBuilder {
                         mealPlanDataAccess, presenter);
         AddPlannedMealController controller =
                 new AddPlannedMealController(interactor);
+        ChangePlannedPortionOutputBoundary changePresenter =
+                new ChangePlannedPortionPresenter(viewModel);
+        ChangePlannedPortionInputBoundary changeInteractor =
+                new ChangePlannedPortionInteractor(
+                        mealPlanDataAccess, changePresenter);
+        ChangePlannedPortionController changeController =
+                new ChangePlannedPortionController(changeInteractor);
 
-        return new AddPlannedMealView(controller, viewModel);
+        return new AddPlannedMealView(
+                controller, changeController, viewModel);
     }
 }
 

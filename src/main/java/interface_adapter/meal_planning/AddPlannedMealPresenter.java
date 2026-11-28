@@ -2,6 +2,8 @@ package interface_adapter.meal_planning;
 
 import use_case.meal_planning.AddPlannedMealOutputBoundary;
 import use_case.meal_planning.AddPlannedMealOutputData;
+import use_case.edit_planned_meal.LoadPlannedPortionsOutputData;
+import use_case.edit_planned_meal.PlannedPortionOption;
 
 import java.util.Locale;
 import java.util.Objects;
@@ -18,6 +20,24 @@ public class AddPlannedMealPresenter
     public AddPlannedMealPresenter(
             AddPlannedMealViewModel viewModel) {
         this.viewModel = Objects.requireNonNull(viewModel);
+    }
+
+    @Override
+    public void preparePortionsView(
+            LoadPlannedPortionsOutputData outputData) {
+        List<AddPlannedMealViewModel.PortionItem> items =
+                new ArrayList<>();
+
+        for (PlannedPortionOption portion :
+                outputData.getPortions()) {
+            items.add(new AddPlannedMealViewModel.PortionItem(
+                    portion.getIndex(),
+                    portion.getFoodName(),
+                    portion.getGrams(),
+                    portion.getCalories()));
+        }
+
+        viewModel.updatePortions(items);
     }
 
     @Override

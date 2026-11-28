@@ -6,6 +6,9 @@ import entity.FoodPortion;
 import entity.MealSchedule;
 import entity.NutritionTotals;
 import entity.PlannedMeal;
+import use_case.edit_planned_meal.LoadPlannedPortionsOutputData;
+import use_case.edit_planned_meal.PlannedPortionOption;
+
 import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.ArrayList;
@@ -23,6 +26,60 @@ public class AddPlannedMealInteractor implements AddPlannedMealInputBoundary {
             AddPlannedMealOutputBoundary presenter) {
         this.dataAccess = Objects.requireNonNull(dataAccess);
         this.presenter = Objects.requireNonNull(presenter);
+    }
+
+    @Override
+    public void loadPortions(LocalDate date, String mealSlotId) {
+        if (date == null) {
+            presenter.prepareFailView("Please select a date.");
+            return;
+        }
+        if (mealSlotId == null || mealSlotId.isBlank()) {
+            presenter.prepareFailView("Please select a meal slot.");
+            return;
+        }
+
+        try {
+            DailyMealPlan plan = dataAccess.findPlanByDate(date);
+            if (plan == null) {
+                presenter.prepareFailView(
+                        "No meal plan exists for this date.");
+                return;
+            }
+
+            MealSchedule schedule =
+                    dataAccess.findScheduleByPlanId(plan.getId());
+            if (schedule == null
+                    || schedule.getSlotById(mealSlotId) == null) {
+                presenter.prepareFailView(
+                        "The selected meal slot does not exist.");
+                return;
+            }
+
+            List<PlannedPortionOption> portions = new ArrayList<>();
+            PlannedMeal meal = plan.getMealBySlotId(mealSlotId);
+
+            if (meal != null) {
+                for (int index = 0;
+                     index < meal.getPortions().size(); index++) {
+                    FoodPortion portion =
+                            meal.getPortions().get(index);
+                    portions.add(new PlannedPortionOption(
+                            index,
+                            portion.getFoodName(),
+                            portion.getQuantityGrams(),
+                            portion.getNutrition().getCalories()));
+                }
+            }
+
+            presenter.preparePortionsView(
+                    new LoadPlannedPortionsOutputData(
+                            date, mealSlotId, portions));
+        }
+        catch (AddPlannedMealDataAccessException exception) {
+            presenter.prepareFailView(
+                    "Unable to load planned portions. Please try again.");
+        }
     }
 
 
