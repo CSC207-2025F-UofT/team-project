@@ -56,7 +56,35 @@ final class ListingPhoto {
         return ImageIO.read(Path.of(path).toFile());
     }
 
+    /**
+     * Shows a photo that fills the whole width x height box. The photo is scaled until it covers the box and
+     * the extra is cut off from the middle, so photos of any shape look the same size.
+     */
+    static void showFilled(JLabel label, String path, int width, int height) {
+        show(label, path, width, height, true);
+    }
+
     static void show(JLabel label, String path, int width, int height) {
+        show(label, path, width, height, false);
+    }
+
+    static BufferedImage fillBox(BufferedImage image, int width, int height) {
+        final double scale = Math.max((double) width / image.getWidth(), (double) height / image.getHeight());
+        final int scaledWidth = Math.max(width, (int) Math.ceil(image.getWidth() * scale));
+        final int scaledHeight = Math.max(height, (int) Math.ceil(image.getHeight() * scale));
+        final BufferedImage box = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+        final java.awt.Graphics2D graphics = box.createGraphics();
+        graphics.setRenderingHint(java.awt.RenderingHints.KEY_INTERPOLATION,
+                java.awt.RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+        graphics.setRenderingHint(java.awt.RenderingHints.KEY_RENDERING,
+                java.awt.RenderingHints.VALUE_RENDER_QUALITY);
+        graphics.drawImage(image, (width - scaledWidth) / 2, (height - scaledHeight) / 2,
+                scaledWidth, scaledHeight, null);
+        graphics.dispose();
+        return box;
+    }
+
+    private static void show(JLabel label, String path, int width, int height, boolean fill) {
         final Object request = new Object();
         label.putClientProperty(ListingPhoto.class, request);
         label.setIcon(null);
@@ -71,6 +99,9 @@ final class ListingPhoto {
                 final BufferedImage image = read(path);
                 if (image == null) {
                     return null;
+                }
+                if (fill) {
+                    return new ImageIcon(fillBox(image, width, height));
                 }
                 final double scale = Math.min((double) width / image.getWidth(), (double) height / image.getHeight());
                 final int fittedWidth = Math.max(1, (int) (image.getWidth() * scale));

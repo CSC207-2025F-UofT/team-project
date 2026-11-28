@@ -473,7 +473,7 @@ public final class AppBuilder {
         if (applicationNavigator != null) {
             frame.setJMenuBar(createMenuBar());
         }
-        frame.setSize(900, 600);
+        frame.setSize(1100, 720);
         frame.setLocationRelativeTo(null);
         return frame;
     }
