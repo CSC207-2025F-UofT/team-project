@@ -20,6 +20,7 @@ import entity.User.Role;
 import entity.UserFactory;
 import use_case.admin_signup.AdminSignupUserDataAccessInterface;
 import use_case.login.LoginUserDataAccessInterface;
+import use_case.logout.LogoutUserDataAccessInterface;
 import use_case.review_applications.ReviewApplicationsUserDataAccessInterface;
 import use_case.signup.SignupUserDataAccessInterface;
 
@@ -31,7 +32,8 @@ import use_case.signup.SignupUserDataAccessInterface;
 public class FileUserDataAccessObject implements SignupUserDataAccessInterface,
                                                  AdminSignupUserDataAccessInterface,
                                                  LoginUserDataAccessInterface,
-                                                 ReviewApplicationsUserDataAccessInterface {
+                                                 ReviewApplicationsUserDataAccessInterface,
+                                                 LogoutUserDataAccessInterface {
 
     private static final String PREFERENCE = "preference";
     private static final String PREFERRED_SPECIES = "preferredSpecies";
@@ -215,6 +217,11 @@ public class FileUserDataAccessObject implements SignupUserDataAccessInterface,
             return null;
         }
         return user.getName();
+    }
+
+    @Override
+    public synchronized String getCurrentUserId() {
+        return currentUserId;
     }
 
     @Override
