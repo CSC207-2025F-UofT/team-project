@@ -1,6 +1,6 @@
 package app;
 
-import data_access.InMemoryQuizResultDAO;
+import data_access.FirestoreQuizResultDAO;
 import entity.Library;
 import interface_adapter.save_result.SaveResultController;
 import interface_adapter.save_result.SaveResultPresenter;
@@ -10,17 +10,18 @@ import view.SaveResultView;
 
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
+import java.io.IOException;
 import java.util.List;
 
 /**
  * Composition root: builds every object, connects them, and shows the window.
  */
 public class Main {
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> {
-            // Blue (data access): swap for FirestoreQuizResultDAO later
-            InMemoryQuizResultDAO resultDAO = new InMemoryQuizResultDAO();
+    public static void main(String[] args) throws IOException {
+        // Blue (data access): Firestore, using the key file in the project root
+        FirestoreQuizResultDAO resultDAO = new FirestoreQuizResultDAO("serviceAccountKey.json");
 
+        SwingUtilities.invokeLater(() -> {
             // Save result use case
             SaveResultViewModel saveResultViewModel = new SaveResultViewModel();
             SaveResultPresenter saveResultPresenter = new SaveResultPresenter(saveResultViewModel);

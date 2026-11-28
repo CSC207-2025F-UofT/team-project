@@ -42,3 +42,4 @@ build/
 *serviceAccount*.json
 .idea/
 *.class
+serviceAccountKey.json
