@@ -244,7 +244,7 @@ public class SignupView extends JPanel implements ActionListener, SignupViewMode
 
     @Override
     public void actionPerformed(ActionEvent evt) {
-        JOptionPane.showMessageDialog(this, "Cancel not implemented yet.");
+        signupController.switchToLoginView();
     }
 
     @Override
