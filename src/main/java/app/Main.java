@@ -10,9 +10,12 @@ public class Main {
                 .addLoadQuestionUseCase()
                 .addGameSummaryView()
                 .addQuestionInputUseCase()
+                .addCreateTeamView()
+                .addStartGameUseCase()
                 .build();
 
         application.setLocationRelativeTo(null);
         application.setVisible(true);
+
     }
 }
