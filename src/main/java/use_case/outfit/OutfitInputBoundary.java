@@ -6,6 +6,7 @@ import java.util.List;
 public interface OutfitInputBoundary {
     void load(String tagId);
     void createOutfit(String name, List<String> clothingIds, List<String> tagIds);
+    void editOutfit(String outfitId, String name, List<String> clothingIds, List<String> tagIds);
     void createTag(String name);
     void deleteOutfit(String outfitId);
 }

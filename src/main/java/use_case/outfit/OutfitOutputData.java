@@ -27,12 +27,20 @@ public final class OutfitOutputData {
     public final List<OutfitData> outfits;
     public final String selectedTagId, message;
     public final boolean outfitCreated;
+    public final String updatedOutfitId;
 
     public OutfitOutputData(List<ClothingData> clothing, List<TagData> tags,
                             List<OutfitData> outfits, String selectedTagId,
                             String message, boolean outfitCreated) {
+        this(clothing, tags, outfits, selectedTagId, message, outfitCreated, null);
+    }
+
+    public OutfitOutputData(List<ClothingData> clothing, List<TagData> tags,
+                            List<OutfitData> outfits, String selectedTagId,
+                            String message, boolean outfitCreated, String updatedOutfitId) {
         this.clothing = List.copyOf(clothing); this.tags = List.copyOf(tags);
         this.outfits = List.copyOf(outfits); this.selectedTagId = selectedTagId;
         this.message = message; this.outfitCreated = outfitCreated;
+        this.updatedOutfitId = updatedOutfitId;
     }
 }

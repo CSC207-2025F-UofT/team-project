@@ -15,6 +15,10 @@ public final class OutfitController {
     public void load(String tagId) { submit(() -> input.load(tagId)); }
     public void createTag(String name) { submit(() -> input.createTag(name)); }
     public void deleteOutfit(String id) { submit(() -> input.deleteOutfit(id)); }
+    public void editOutfit(String id, String name, List<String> items, List<String> tags) {
+        List<String> itemSnapshot = List.copyOf(items), tagSnapshot = List.copyOf(tags);
+        submit(() -> input.editOutfit(id, name, itemSnapshot, tagSnapshot));
+    }
     public void createOutfit(String name, List<String> items, List<String> tags) {
         List<String> itemSnapshot = List.copyOf(items), tagSnapshot = List.copyOf(tags);
         submit(() -> input.createOutfit(name, itemSnapshot, tagSnapshot));

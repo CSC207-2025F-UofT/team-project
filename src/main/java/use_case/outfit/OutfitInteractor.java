@@ -38,6 +38,29 @@ public final class OutfitInteractor implements OutfitInputBoundary {
             publish("Outfit saved.", true);
         });
     }
+    @Override public void editOutfit(String outfitId, String name, List<String> clothingIds, List<String> tagIds) {
+        run(() -> {
+            Outfit existing = repository.getOutfits().stream()
+                    .filter(o -> o.getId().equals(outfitId)).findFirst()
+                    .orElseThrow(() -> new IllegalArgumentException("This outfit no longer exists."));
+            List<String> items = new ArrayList<>(new LinkedHashSet<>(clothingIds));
+            List<String> tags = new ArrayList<>(new LinkedHashSet<>(tagIds));
+            Set<String> existingTags = repository.getTags().stream()
+                    .map(Tag::getId).collect(Collectors.toSet());
+            Set<String> existingClothing = repository.getClothing().stream()
+                    .map(ClothingItem::getId).collect(Collectors.toSet());
+            if (!existingClothing.containsAll(items)) {
+                throw new IllegalArgumentException("A selected clothing item no longer exists. Reload and try again.");
+            }
+            if (!existingTags.containsAll(tags)) {
+                throw new IllegalArgumentException("A selected tag no longer exists. Reload and try again.");
+            }
+            // Preserve identity; replace the selected clothing, name and tags on the same outfit.
+            Outfit updated = new Outfit(existing.getId(), name, items, tags);
+            repository.saveOutfit(updated);
+            publish("Outfit updated.", false, updated.getId());
+        });
+    }
     @Override public void createTag(String name) {
         run(() -> {
             Tag tag = new Tag(UUID.randomUUID().toString(), name);
@@ -58,6 +81,9 @@ public final class OutfitInteractor implements OutfitInputBoundary {
         });
     }
     private void publish(String message, boolean created) {
+        publish(message, created, null);
+    }
+    private void publish(String message, boolean created, String updatedOutfitId) {
         List<OutfitOutputData.ClothingData> clothing = repository.getClothing().stream()
                 .map(c -> new OutfitOutputData.ClothingData(c.getId(), c.getName(),
                         c.getType().name(), c.getImagePath())).collect(Collectors.toList());
@@ -67,7 +93,8 @@ public final class OutfitInteractor implements OutfitInputBoundary {
                 .filter(o -> selectedTagId == null || o.getTagIds().contains(selectedTagId))
                 .map(o -> new OutfitOutputData.OutfitData(o.getId(), o.getName(),
                         o.getClothingIds(), o.getTagIds())).collect(Collectors.toList());
-        output.present(new OutfitOutputData(clothing, tags, outfits, selectedTagId, message, created));
+        output.present(new OutfitOutputData(clothing, tags, outfits, selectedTagId,
+                message, created, updatedOutfitId));
     }
     private void run(Runnable action) {
         try { action.run(); }

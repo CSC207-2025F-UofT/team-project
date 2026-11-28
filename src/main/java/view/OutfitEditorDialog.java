@@ -23,8 +23,19 @@ public final class OutfitEditorDialog extends JDialog {
     private final PropertyChangeListener listener;
 
     public OutfitEditorDialog(Window owner, OutfitController controller, OutfitViewModel model) {
-        super(owner, "Create outfit", ModalityType.APPLICATION_MODAL);
+        this(owner, controller, model, null);
+    }
+
+    /** An existing outfit opens with its name, clothing and tags preselected. */
+    public OutfitEditorDialog(Window owner, OutfitController controller, OutfitViewModel model,
+                              OutfitData existing) {
+        super(owner, existing == null ? "Create outfit" : "Edit outfit", ModalityType.APPLICATION_MODAL);
         this.model = model;
+        if (existing != null) {
+            name.setText(existing.name);
+            save.setText("Save changes");
+            status.setText("Edit name, clothing and tags.");
+        }
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         JPanel content = new JPanel(new BorderLayout(10, 10));
         content.setBorder(BorderFactory.createEmptyBorder(12, 12, 12, 12));
@@ -42,6 +53,9 @@ public final class OutfitEditorDialog extends JDialog {
             for (ClothingData item : state.clothing) {
                 if (!item.category.equals(category)) continue;
                 JCheckBox choice = new JCheckBox("Select");
+                if (existing != null) {
+                    choice.setSelected(existing.clothingIds.contains(item.id));
+                }
                 clothingChoices.put(item.id, choice);
                 JPanel card = new JPanel(new BorderLayout());
                 card.add(new ClothingCardPanel(item), BorderLayout.CENTER);
@@ -68,13 +82,22 @@ public final class OutfitEditorDialog extends JDialog {
         footer.add(buttons);
         content.add(footer, BorderLayout.SOUTH);
         refreshTags(state.tags);
+        if (existing != null) {
+            tagChoices.forEach((id, choice) -> choice.setSelected(existing.tagIds.contains(id)));
+        }
 
         newTag.addActionListener(e -> {
             String value = JOptionPane.showInputDialog(this, "New tag name:");
             if (value != null) controller.createTag(value);
         });
-        save.addActionListener(e -> controller.createOutfit(name.getText(),
-                selected(clothingChoices), selected(tagChoices)));
+        save.addActionListener(e -> {
+            if (existing == null) {
+                controller.createOutfit(name.getText(), selected(clothingChoices), selected(tagChoices));
+            } else {
+                controller.editOutfit(existing.id, name.getText(),
+                        selected(clothingChoices), selected(tagChoices));
+            }
+        });
         cancel.addActionListener(e -> dispose());
         listener = event -> {
             if (event.getPropertyName().equals("busy")) {
@@ -83,7 +106,8 @@ public final class OutfitEditorDialog extends JDialog {
                 setDefaultCloseOperation(enabled ? DISPOSE_ON_CLOSE : DO_NOTHING_ON_CLOSE);
             } else if (event.getPropertyName().equals("state")) {
                 OutfitOutputData next = model.getState();
-                if (next.outfitCreated) dispose();
+                if ((existing == null && next.outfitCreated)
+                        || (existing != null && existing.id.equals(next.updatedOutfitId))) dispose();
                 else { refreshTags(next.tags); status.setText(next.message); }
             }
         };
