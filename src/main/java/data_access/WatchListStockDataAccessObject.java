@@ -20,6 +20,10 @@ public class WatchListStockDataAccessObject implements WatchlistStockDataAccessI
 
     @Override
     public List<Double> getStockPrice(String stockWatcher, int count) throws IOException{
+        if (count <= 0){
+            return new ArrayList<>();
+        }
+
         NavigableMap<LocalDate, BigDecimal> prices = stockDataSource.getDailyClosingPrices(stockWatcher);
 
         List<Double> all = new ArrayList<>();
