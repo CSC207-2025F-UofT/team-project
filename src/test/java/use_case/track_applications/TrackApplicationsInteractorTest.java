@@ -45,6 +45,7 @@ class TrackApplicationsInteractorTest {
 
         final List<ApplicationSummary> summaries = presenter.success.getApplications();
         assertEquals(2, summaries.size());
+        assertEquals("a1", summaries.get(0).getApplicationId());
         assertEquals("Mochi", summaries.get(0).getPetName());
         assertEquals("INTERVIEW", summaries.get(0).getStatus());
         assertEquals("Call us on Friday", summaries.get(0).getAdminNote());

@@ -45,6 +45,20 @@ class PetTest {
                 () -> createPet("Mochi", 1, new BigDecimal("125.201"), List.of()));
     }
 
+    @Test
+    void rejectsMissingSpeciesSexStatusAndInvalidTags() {
+        assertThrows(IllegalArgumentException.class, () -> new Pet("pet1", "Mochi", null, "Tabby", 1,
+                PetSex.FEMALE, List.of(), "", false, true, true, BigDecimal.ZERO, "", PetStatus.AVAILABLE));
+        assertThrows(IllegalArgumentException.class, () -> new Pet("pet1", "Mochi", Species.CAT, "Tabby", 1,
+                null, List.of(), "", false, true, true, BigDecimal.ZERO, "", PetStatus.AVAILABLE));
+        assertThrows(IllegalArgumentException.class, () -> new Pet("pet1", "Mochi", Species.CAT, "Tabby", 1,
+                PetSex.FEMALE, List.of(), "", false, true, true, BigDecimal.ZERO, "", null));
+
+        final List<Temperament> tagsWithNull = new ArrayList<>();
+        tagsWithNull.add(null);
+        assertThrows(IllegalArgumentException.class, () -> createPet("Mochi", 1, BigDecimal.ZERO, tagsWithNull));
+    }
+
     private static Pet createPet(String name, int ageYears, BigDecimal fee, List<Temperament> tags) {
         return new Pet("pet1", name, Species.CAT, "Domestic shorthair", ageYears, PetSex.UNKNOWN, tags,
                 null, false, true, true, fee, " ", PetStatus.AVAILABLE);

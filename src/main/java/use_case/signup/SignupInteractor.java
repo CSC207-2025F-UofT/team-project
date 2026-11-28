@@ -1,14 +1,11 @@
 package use_case.signup;
 
-import java.math.BigInteger;
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.regex.Pattern;
 
 import entity.User;
 import entity.User.Role;
 import entity.UserFactory;
+import use_case.PasswordHasher;
 
 /**
  * The Signup Interactor for adopters (regular users).
@@ -42,7 +39,7 @@ public class SignupInteractor implements SignupInputBoundary {
         final User user = userFactory.create(signupInputData.getUsername(),
                                              signupInputData.getId(),
                                              signupInputData.getEmail(),
-                                             hashPassword(signupInputData.getPassword()),
+                                             PasswordHasher.hash(signupInputData.getPassword()),
                                              Role.ADOPTER,
                                              null);
         userDataAccessObject.save(user);
@@ -85,21 +82,6 @@ public class SignupInteractor implements SignupInputBoundary {
         return null;
     }
 
-    /**
-     * Hashes the raw password with SHA-256 and returns it as a lowercase hex string.
-     * Login must use the same algorithm to verify passwords.
-     */
-    private static String hashPassword(String rawPassword) {
-        try {
-            final byte[] hash = MessageDigest.getInstance("SHA-256")
-                    .digest(rawPassword.getBytes(StandardCharsets.UTF_8));
-            return String.format("%064x", new BigInteger(1, hash));
-        }
-        catch (NoSuchAlgorithmException ex) {
-            // Every Java platform is required to support SHA-256.
-            throw new IllegalStateException("SHA-256 not available", ex);
-        }
-    }
 
     private static boolean isEmpty(String value) {
         return value == null || value.isEmpty();

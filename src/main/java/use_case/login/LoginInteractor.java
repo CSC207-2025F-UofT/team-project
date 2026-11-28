@@ -1,11 +1,7 @@
 package use_case.login;
 
-import java.math.BigInteger;
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-
 import entity.User;
+import use_case.PasswordHasher;
 
 /**
  * The Login Interactor.
@@ -39,7 +35,7 @@ public class LoginInteractor implements LoginInputBoundary {
         // Same message for unknown email and wrong password,
         // so login cannot be used to probe which emails are registered.
         final User user = userDataAccessObject.getByEmail(email);
-        if (user == null || !hashPassword(password).equals(user.getPasswordHash())) {
+        if (user == null || !PasswordHasher.hash(password).equals(user.getPasswordHash())) {
             loginPresenter.prepareFailView(INVALID_CREDENTIALS);
             return;
         }
@@ -51,21 +47,6 @@ public class LoginInteractor implements LoginInputBoundary {
         loginPresenter.prepareSuccessView(loginOutputData);
     }
 
-    /**
-     * Hashes the raw password with SHA-256 and returns it as a lowercase hex string.
-     * Must stay identical to the hashing in SignupInteractor and AdminSignupInteractor.
-     */
-    private static String hashPassword(String rawPassword) {
-        try {
-            final byte[] hash = MessageDigest.getInstance("SHA-256")
-                    .digest(rawPassword.getBytes(StandardCharsets.UTF_8));
-            return String.format("%064x", new BigInteger(1, hash));
-        }
-        catch (NoSuchAlgorithmException ex) {
-            // Every Java platform is required to support SHA-256.
-            throw new IllegalStateException("SHA-256 not available", ex);
-        }
-    }
 
     private static boolean isEmpty(String value) {
         return value == null || value.isEmpty();
