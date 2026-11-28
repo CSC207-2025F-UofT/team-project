@@ -1,20 +1,51 @@
 package interface_adapter;
 
-import java.beans.PropertyChangeListener;
-import java.beans.PropertyChangeSupport;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
- * Remembers which screen is showing and tells listeners when it changes.
- * A presenter can either call {@link #setActiveView(String)}, or call {@link #setState(String)} followed by
- * {@link #notifyViewChanged()}.
+ * Remembers which screen is showing and tells listeners when it changes. Written the same way as the other
+ * view models: a state, {@link #setState(ViewManagerState)}, {@link #notifyStateChanged()} and listeners.
  */
 public class ViewManagerModel {
-    /** Name of the property fired when the active screen changes. */
-    public static final String ACTIVE_VIEW = "activeView";
+    private final List<ViewManagerModelListener> listeners = new ArrayList<>();
+    private ViewManagerState state = new ViewManagerState();
 
-    private final PropertyChangeSupport support = new PropertyChangeSupport(this);
-    private String activeView;
-    private String announcedView;
+    /**
+     * Returns the current state.
+     *
+     * @return the state
+     */
+    public ViewManagerState getState() {
+        return state;
+    }
+
+    /**
+     * Replaces the state. Call {@link #notifyStateChanged()} afterwards to tell the listeners.
+     *
+     * @param state the new state
+     */
+    public void setState(ViewManagerState state) {
+        this.state = state;
+    }
+
+    /**
+     * Registers a listener.
+     *
+     * @param listener the listener to notify
+     */
+    public void addListener(ViewManagerModelListener listener) {
+        listeners.add(listener);
+    }
+
+    /**
+     * Tells every listener the state changed.
+     */
+    public void notifyStateChanged() {
+        for (ViewManagerModelListener listener : listeners) {
+            listener.stateChanged();
+        }
+    }
 
     /**
      * Returns the name of the screen that should be showing.
@@ -22,43 +53,18 @@ public class ViewManagerModel {
      * @return the active view name, or null if none was chosen yet
      */
     public String getActiveView() {
-        return activeView;
+        return state.getActiveView();
     }
 
     /**
-     * Switches to another screen and notifies listeners.
+     * Shortcut for presenters and buttons: switches to a screen and notifies the listeners.
      *
      * @param viewName the name the screen was registered under
      */
     public void setActiveView(String viewName) {
-        setState(viewName);
-        notifyViewChanged();
-    }
-
-    /**
-     * Chooses the next screen without telling listeners yet.
-     *
-     * @param viewName the name the screen was registered under
-     */
-    public void setState(String viewName) {
-        this.activeView = viewName;
-    }
-
-    /**
-     * Tells listeners which screen is now active. Does nothing if it did not change.
-     */
-    public void notifyViewChanged() {
-        final String old = this.announcedView;
-        this.announcedView = activeView;
-        support.firePropertyChange(ACTIVE_VIEW, old, activeView);
-    }
-
-    /**
-     * Registers a listener for screen changes.
-     *
-     * @param listener the listener to notify
-     */
-    public void addPropertyChangeListener(PropertyChangeListener listener) {
-        support.addPropertyChangeListener(listener);
+        final ViewManagerState next = new ViewManagerState();
+        next.setActiveView(viewName);
+        setState(next);
+        notifyStateChanged();
     }
 }

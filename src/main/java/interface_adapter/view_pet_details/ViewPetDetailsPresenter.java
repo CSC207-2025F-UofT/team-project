@@ -52,8 +52,7 @@ public class ViewPetDetailsPresenter implements ViewPetDetailsOutputBoundary {
     }
 
     private void showDetailPage() {
-        viewManagerModel.setState(PetDetailViewModel.VIEW_NAME);
-        viewManagerModel.notifyViewChanged();
+        viewManagerModel.setActiveView(PetDetailViewModel.VIEW_NAME);
     }
 
     private String summary(Pet pet) {

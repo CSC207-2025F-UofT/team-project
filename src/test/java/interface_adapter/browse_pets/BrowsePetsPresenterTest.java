@@ -27,11 +27,22 @@ class BrowsePetsPresenterTest {
 
         new BrowsePetsPresenter(viewModel).presentPets(new BrowsePetsOutputData(List.of(pet("Miso", 2))));
 
-        final PetCardData card = viewModel.getCards().get(0);
+        final PetCardData card = viewModel.getState().getCards().get(0);
         assertEquals("1", card.getPetId());
         assertEquals("Miso", card.getName());
         assertEquals("Cat, Tabby, 2 years old", card.getSummary());
         assertEquals("Status: Available", card.getStatus());
+    }
+
+    @Test
+    void tellsTheViewTheStateChanged() {
+        final GalleryViewModel viewModel = new GalleryViewModel();
+        final int[] calls = {0};
+        viewModel.addListener(() -> calls[0]++);
+
+        new BrowsePetsPresenter(viewModel).presentPets(new BrowsePetsOutputData(List.of(pet("Miso", 2))));
+
+        assertEquals(1, calls[0]);
     }
 
     @Test
@@ -40,7 +51,7 @@ class BrowsePetsPresenterTest {
 
         new BrowsePetsPresenter(viewModel).presentPets(new BrowsePetsOutputData(List.of(pet("Kit", 1))));
 
-        assertEquals("Cat, Tabby, 1 year old", viewModel.getCards().get(0).getSummary());
+        assertEquals("Cat, Tabby, 1 year old", viewModel.getState().getCards().get(0).getSummary());
     }
 
     @Test
@@ -49,6 +60,6 @@ class BrowsePetsPresenterTest {
 
         new BrowsePetsPresenter(viewModel).presentPets(new BrowsePetsOutputData(List.of()));
 
-        assertTrue(viewModel.getCards().isEmpty());
+        assertTrue(viewModel.getState().getCards().isEmpty());
     }
 }

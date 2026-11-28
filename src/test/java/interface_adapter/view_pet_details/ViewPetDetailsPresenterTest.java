@@ -57,7 +57,7 @@ class ViewPetDetailsPresenterTest {
     void switchesToTheDetailPageAndNotifiesTheView() {
         final List<String> events = new ArrayList<>();
         viewModel.addListener(() -> events.add("state"));
-        viewManagerModel.addPropertyChangeListener(event -> events.add("view:" + event.getNewValue()));
+        viewManagerModel.addListener(() -> events.add("view:" + viewManagerModel.getActiveView()));
 
         presenter.presentPet(new ViewPetDetailsOutputData(pet("", List.of())));
 

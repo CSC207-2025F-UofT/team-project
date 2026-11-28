@@ -152,9 +152,8 @@ public final class AppBuilder {
         final GalleryView galleryView = new GalleryView(controller, galleryViewModel, detailsController);
         final JPanel gallery = shelterLogin == null ? galleryView : withNavigation(galleryView, shelterLogin);
         views.add(gallery, GalleryView.VIEW_NAME);
-        viewManagerModel.addPropertyChangeListener(event -> {
-            if (ViewManagerModel.ACTIVE_VIEW.equals(event.getPropertyName())
-                    && GalleryView.VIEW_NAME.equals(event.getNewValue())) {
+        viewManagerModel.addListener(() -> {
+            if (GalleryView.VIEW_NAME.equals(viewManagerModel.getActiveView())) {
                 galleryView.loadAll();
             }
         });
@@ -309,9 +308,8 @@ public final class AppBuilder {
 
         // The review view is wrapped in a navigation panel, so it does not get componentShown itself.
         // Reload the list whenever its screen becomes active, for example after a status update.
-        viewManagerModel.addPropertyChangeListener(event -> {
-            if (ViewManagerModel.ACTIVE_VIEW.equals(event.getPropertyName())
-                    && ReviewApplicationsViewModel.VIEW_NAME.equals(event.getNewValue())) {
+        viewManagerModel.addListener(() -> {
+            if (ReviewApplicationsViewModel.VIEW_NAME.equals(viewManagerModel.getActiveView())) {
                 reviewView.refresh();
             }
         });
@@ -355,8 +353,8 @@ public final class AppBuilder {
         menu.add(myApplications);
         final JMenuBar menuBar = new JMenuBar();
         menuBar.add(menu);
-        viewManagerModel.addPropertyChangeListener(event -> {
-            final Object activeView = event.getNewValue();
+        viewManagerModel.addListener(() -> {
+            final Object activeView = viewManagerModel.getActiveView();
             menu.setEnabled(!ManagePetViewModel.VIEW_NAME.equals(activeView)
                     && !ReviewApplicationsViewModel.VIEW_NAME.equals(activeView)
                     && !UpdateApplicationViewModel.VIEW_NAME.equals(activeView)

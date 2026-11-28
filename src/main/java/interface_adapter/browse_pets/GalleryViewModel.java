@@ -1,48 +1,51 @@
 package interface_adapter.browse_pets;
 
-import java.beans.PropertyChangeListener;
-import java.beans.PropertyChangeSupport;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
- * What the gallery screen shows. The view listens for changes to the cards.
+ * The view model of the gallery, written the same way as the other view models in the project.
  */
 public class GalleryViewModel {
     /** Name the gallery screen is registered under in the view manager. */
     public static final String VIEW_NAME = "gallery";
 
-    /** Name of the property fired when the list of cards changes. */
-    public static final String CARDS = "cards";
-
-    private final PropertyChangeSupport support = new PropertyChangeSupport(this);
-    private List<PetCardData> cards = List.of();
+    private final List<GalleryViewModelListener> listeners = new ArrayList<>();
+    private GalleryState state = new GalleryState();
 
     /**
-     * Returns the cards to show.
+     * Returns the current state.
      *
-     * @return the cards, empty if no pet matched
+     * @return the state
      */
-    public List<PetCardData> getCards() {
-        return cards;
+    public GalleryState getState() {
+        return state;
     }
 
     /**
-     * Replaces the cards and notifies listeners.
+     * Replaces the state. Call {@link #notifyStateChanged()} afterwards to tell the view.
      *
-     * @param cards the new cards
+     * @param state the new state
      */
-    public void setCards(List<PetCardData> cards) {
-        final List<PetCardData> old = this.cards;
-        this.cards = List.copyOf(cards);
-        support.firePropertyChange(CARDS, old, this.cards);
+    public void setState(GalleryState state) {
+        this.state = state;
     }
 
     /**
-     * Registers a listener for changes.
+     * Registers a listener.
      *
      * @param listener the listener to notify
      */
-    public void addPropertyChangeListener(PropertyChangeListener listener) {
-        support.addPropertyChangeListener(listener);
+    public void addListener(GalleryViewModelListener listener) {
+        listeners.add(listener);
+    }
+
+    /**
+     * Tells every listener the state changed.
+     */
+    public void notifyStateChanged() {
+        for (GalleryViewModelListener listener : listeners) {
+            listener.stateChanged();
+        }
     }
 }

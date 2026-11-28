@@ -28,7 +28,10 @@ public class BrowsePetsPresenter implements BrowsePetsOutputBoundary {
         final List<PetCardData> cards = outputData.getPets().stream()
                 .map(this::toCard)
                 .collect(Collectors.toList());
-        viewModel.setCards(cards);
+        final GalleryState state = new GalleryState();
+        state.setCards(cards);
+        viewModel.setState(state);
+        viewModel.notifyStateChanged();
     }
 
     private PetCardData toCard(Pet pet) {

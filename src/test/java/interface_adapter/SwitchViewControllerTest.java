@@ -13,7 +13,7 @@ class SwitchViewControllerTest {
     void switchToChangesTheActiveViewAndNotifies() {
         final ViewManagerModel model = new ViewManagerModel();
         final List<Object> seen = new ArrayList<>();
-        model.addPropertyChangeListener(event -> seen.add(event.getNewValue()));
+        model.addListener(() -> seen.add(model.getActiveView()));
 
         new SwitchViewController(model).switchTo("gallery");
 
