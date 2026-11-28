@@ -5,10 +5,19 @@ import java.util.Optional;
 
 /** Independent exit question gate; initialized questions are retained across attempts. */
 public final class TriviaLock extends Lock {
+    private final TriviaSpec spec;
     private Optional<Trivia> trivia;
 
     public TriviaLock(String id, String description, String successText, Optional<Trivia> trivia) {
+        this(id, description, successText, trivia, new TriviaSpec(trivia.isPresent()
+                ? TriviaSource.TEMPLATE : TriviaSource.API, Optional.empty(), Optional.empty()));
+    }
+
+    public TriviaSpec spec() { return spec; }
+
+    public TriviaLock(String id, String description, String successText, Optional<Trivia> trivia, TriviaSpec spec) {
         super(id, description, successText, LockKind.TRIVIA);
+        this.spec = Objects.requireNonNull(spec);
         this.trivia = Objects.requireNonNull(trivia, "trivia");
     }
 

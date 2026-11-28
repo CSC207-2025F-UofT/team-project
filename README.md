@@ -52,7 +52,7 @@ Every command outcome follows interactor → assembler → presenter → view mo
 6. Choose Next room. `Game.move()` checks both room locks, then enters the room identified by `nextRoomId`.
 7. Continue along the single room path. In the final room, `nextRoomId` is empty; choosing Escape under the same two-gate rule sets the game status to `ESCAPED`.
 
-**Status:** Project planning. Pending course staff approval. The repository contains design and documentation, with no Java game implementation yet.
+**Implementation status:** The Swing application includes a playable five-room laboratory story, new-game setup, item and object interactions, authored questions, and movement. Save/load and online Trivia await their feature packages.
 
 **Planned features:**
 
@@ -373,7 +373,18 @@ The eight UML views describe the same classes and contracts. PlantUML is the edi
 
 ## How to Run
 
-This repository currently contains the design and project plan. Application launch instructions will be added with the Java implementation.
+With Maven and a JDK 11 or newer, run these commands from the project root. The first command also runs the test suite.
+
+```sh
+mvn clean package
+java -jar target/escape-room-adventure.jar
+```
+
+Choose **Abandoned Laboratory** in the story picker and click **Start story**. Open the intake desk drawer to find the first access card and the session's four-digit intercom code. Later rooms use items retained from earlier rooms.
+
+The bundled story is in `src/main/resources/stories/laboratory.json`. Each `${key}` in story text refers to a named randomization rule. A new game draws each rule once. The JSON adapter also accepts a story directory through its path constructor. The validator checks item ownership, room order, and reachable combinations of items and object states before publishing a session.
+
+`app.AppBuilder` connects the existing controller and view to one game context and one serial dispatcher. It currently delegates movement, item checks, and authored answers to the domain. The Package 4 presenter, online question provider, and Package 5 save/load adapter can replace the temporary bindings there when those features land.
 
 To regenerate every SVG and PNG locally with a separately installed PlantUML JAR:
 

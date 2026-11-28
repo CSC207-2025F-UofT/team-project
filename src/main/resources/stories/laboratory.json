@@ -1,0 +1,431 @@
+{
+  "id": "laboratory",
+  "version": 1,
+  "title": "Abandoned Laboratory",
+  "background": "The night train leaves at dawn. Follow the maintenance route beneath the laboratory to reach the platform.",
+  "startingRoomId": "intake",
+  "rooms": [
+    {
+      "id": "intake",
+      "name": "Intake Office",
+      "description": "A paper wristband hangs from the visitor log. A desk drawer sits below it.",
+      "interactables": [
+        {
+          "id": "desk",
+          "name": "Intake desk",
+          "descriptionsByMode": {
+            "ready": "A paper wristband hangs from the visitor log. A desk drawer sits below it.",
+            "solved": "The drawer holds a striped access card and a note that reads ${code}."
+          },
+          "initialState": {
+            "mode": "ready"
+          },
+          "allowedStateValues": {
+            "mode": [
+              "ready",
+              "solved"
+            ]
+          },
+          "actions": [
+            {
+              "id": "inspect",
+              "label": "Open the drawer",
+              "requiredItemId": null,
+              "appearingItemIds": [
+                "card"
+              ],
+              "resultText": "The drawer holds a striped access card and a note that reads ${code}.",
+              "repeatable": false,
+              "preconditions": [
+                {
+                  "objectId": "desk",
+                  "key": "mode",
+                  "value": "ready"
+                }
+              ],
+              "effects": [
+                {
+                  "objectId": "desk",
+                  "key": "mode",
+                  "value": "solved"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "nextRoomId": "records",
+      "doorLock": {
+        "id": "intake-door",
+        "description": "Exit reader",
+        "successText": "The exit reader turns green.",
+        "requiredItemIds": [
+          "card",
+          "wristband"
+        ]
+      },
+      "exitChallenge": {
+        "id": "intake-question",
+        "description": "Security intercom",
+        "successText": "The intercom accepts your answer.",
+        "spec": {
+          "source": "TEMPLATE",
+          "category": null,
+          "difficulty": null
+        },
+        "initialTrivia": {
+          "prompt": "Which digits are on the note?",
+          "choices": [],
+          "expectedAnswer": "${code}"
+        }
+      }
+    },
+    {
+      "id": "records",
+      "name": "Records Vault",
+      "description": "Cold air slips through the archive shelves. The cabinet has a striped reader.",
+      "interactables": [
+        {
+          "id": "cabinet",
+          "name": "Archive cabinet",
+          "descriptionsByMode": {
+            "ready": "Cold air slips through the archive shelves. The cabinet has a striped reader.",
+            "solved": "Behind the folders, a brass key hangs on a hook marked MOTH."
+          },
+          "initialState": {
+            "mode": "ready"
+          },
+          "allowedStateValues": {
+            "mode": [
+              "ready",
+              "solved"
+            ]
+          },
+          "actions": [
+            {
+              "id": "inspect",
+              "label": "Swipe the cabinet reader",
+              "requiredItemId": "card",
+              "appearingItemIds": [
+                "key"
+              ],
+              "resultText": "Behind the folders, a brass key hangs on a hook marked MOTH.",
+              "repeatable": false,
+              "preconditions": [
+                {
+                  "objectId": "cabinet",
+                  "key": "mode",
+                  "value": "ready"
+                }
+              ],
+              "effects": [
+                {
+                  "objectId": "cabinet",
+                  "key": "mode",
+                  "value": "solved"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "nextRoomId": "pump",
+      "doorLock": {
+        "id": "records-door",
+        "description": "Exit reader",
+        "successText": "The exit reader turns green.",
+        "requiredItemIds": [
+          "key"
+        ]
+      },
+      "exitChallenge": {
+        "id": "records-question",
+        "description": "Security intercom",
+        "successText": "The intercom accepts your answer.",
+        "spec": {
+          "source": "TEMPLATE",
+          "category": null,
+          "difficulty": null
+        },
+        "initialTrivia": {
+          "prompt": "Which word is stamped on the hook?",
+          "choices": [],
+          "expectedAnswer": "MOTH"
+        }
+      }
+    },
+    {
+      "id": "pump",
+      "name": "Pump Room",
+      "description": "A brass keyhole seals the pump housing. A red lamp blinks above the door.",
+      "interactables": [
+        {
+          "id": "pump-case",
+          "name": "Pump housing",
+          "descriptionsByMode": {
+            "ready": "A brass keyhole seals the pump housing. A red lamp blinks above the door.",
+            "solved": "Under the cover is a ceramic fuse. The pressure gauge reads 42."
+          },
+          "initialState": {
+            "mode": "ready"
+          },
+          "allowedStateValues": {
+            "mode": [
+              "ready",
+              "solved"
+            ]
+          },
+          "actions": [
+            {
+              "id": "inspect",
+              "label": "Unlock the housing",
+              "requiredItemId": "key",
+              "appearingItemIds": [
+                "fuse"
+              ],
+              "resultText": "Under the cover is a ceramic fuse. The pressure gauge reads 42.",
+              "repeatable": false,
+              "preconditions": [
+                {
+                  "objectId": "pump-case",
+                  "key": "mode",
+                  "value": "ready"
+                }
+              ],
+              "effects": [
+                {
+                  "objectId": "pump-case",
+                  "key": "mode",
+                  "value": "solved"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "nextRoomId": "relay",
+      "doorLock": {
+        "id": "pump-door",
+        "description": "Exit reader",
+        "successText": "The exit reader turns green.",
+        "requiredItemIds": [
+          "fuse"
+        ]
+      },
+      "exitChallenge": {
+        "id": "pump-question",
+        "description": "Security intercom",
+        "successText": "The intercom accepts your answer.",
+        "spec": {
+          "source": "TEMPLATE",
+          "category": null,
+          "difficulty": null
+        },
+        "initialTrivia": {
+          "prompt": "What does the pressure gauge read?",
+          "choices": [],
+          "expectedAnswer": "42"
+        }
+      }
+    },
+    {
+      "id": "relay",
+      "name": "Relay Station",
+      "description": "An empty fuse socket sits beside a dark signal board.",
+      "interactables": [
+        {
+          "id": "board",
+          "name": "Signal board",
+          "descriptionsByMode": {
+            "ready": "An empty fuse socket sits beside a dark signal board.",
+            "solved": "The board prints a transit slip. Its destination reads EAST."
+          },
+          "initialState": {
+            "mode": "ready"
+          },
+          "allowedStateValues": {
+            "mode": [
+              "ready",
+              "solved"
+            ]
+          },
+          "actions": [
+            {
+              "id": "inspect",
+              "label": "Power the board",
+              "requiredItemId": "fuse",
+              "appearingItemIds": [
+                "slip"
+              ],
+              "resultText": "The board prints a transit slip. Its destination reads EAST.",
+              "repeatable": false,
+              "preconditions": [
+                {
+                  "objectId": "board",
+                  "key": "mode",
+                  "value": "ready"
+                }
+              ],
+              "effects": [
+                {
+                  "objectId": "board",
+                  "key": "mode",
+                  "value": "solved"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "nextRoomId": "platform",
+      "doorLock": {
+        "id": "relay-door",
+        "description": "Exit reader",
+        "successText": "The exit reader turns green.",
+        "requiredItemIds": [
+          "slip"
+        ]
+      },
+      "exitChallenge": {
+        "id": "relay-question",
+        "description": "Security intercom",
+        "successText": "The intercom accepts your answer.",
+        "spec": {
+          "source": "TEMPLATE",
+          "category": null,
+          "difficulty": null
+        },
+        "initialTrivia": {
+          "prompt": "Which direction is printed on the transit slip?",
+          "choices": [],
+          "expectedAnswer": "EAST"
+        }
+      }
+    },
+    {
+      "id": "platform",
+      "name": "Departure Platform",
+      "description": "A ticket punch stands between the tracks and the last emergency exit.",
+      "interactables": [
+        {
+          "id": "punch",
+          "name": "Ticket punch",
+          "descriptionsByMode": {
+            "ready": "A ticket punch stands between the tracks and the last emergency exit.",
+            "solved": "A metal exit token drops into the tray. The punch stamps DAWN on the slip."
+          },
+          "initialState": {
+            "mode": "ready"
+          },
+          "allowedStateValues": {
+            "mode": [
+              "ready",
+              "solved"
+            ]
+          },
+          "actions": [
+            {
+              "id": "inspect",
+              "label": "Insert the transit slip",
+              "requiredItemId": "slip",
+              "appearingItemIds": [
+                "token"
+              ],
+              "resultText": "A metal exit token drops into the tray. The punch stamps DAWN on the slip.",
+              "repeatable": false,
+              "preconditions": [
+                {
+                  "objectId": "punch",
+                  "key": "mode",
+                  "value": "ready"
+                }
+              ],
+              "effects": [
+                {
+                  "objectId": "punch",
+                  "key": "mode",
+                  "value": "solved"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "nextRoomId": null,
+      "doorLock": {
+        "id": "platform-door",
+        "description": "Exit reader",
+        "successText": "The exit reader turns green.",
+        "requiredItemIds": [
+          "token"
+        ]
+      },
+      "exitChallenge": {
+        "id": "platform-question",
+        "description": "Security intercom",
+        "successText": "The intercom accepts your answer.",
+        "spec": {
+          "source": "TEMPLATE",
+          "category": null,
+          "difficulty": null
+        },
+        "initialTrivia": {
+          "prompt": "Which word did the punch stamp?",
+          "choices": [],
+          "expectedAnswer": "DAWN"
+        }
+      }
+    }
+  ],
+  "items": [
+    {
+      "id": "wristband",
+      "name": "Visitor wristband",
+      "description": "A paper band marked VISITOR.",
+      "roomId": "intake",
+      "initiallyRevealed": true
+    },
+    {
+      "id": "card",
+      "name": "Striped access card",
+      "description": "Striped access card from the Intake Office.",
+      "roomId": "intake",
+      "initiallyRevealed": false
+    },
+    {
+      "id": "key",
+      "name": "Brass key",
+      "description": "Brass key from the Records Vault.",
+      "roomId": "records",
+      "initiallyRevealed": false
+    },
+    {
+      "id": "fuse",
+      "name": "Ceramic fuse",
+      "description": "Ceramic fuse from the Pump Room.",
+      "roomId": "pump",
+      "initiallyRevealed": false
+    },
+    {
+      "id": "slip",
+      "name": "Transit slip",
+      "description": "Transit slip from the Relay Station.",
+      "roomId": "relay",
+      "initiallyRevealed": false
+    },
+    {
+      "id": "token",
+      "name": "Exit token",
+      "description": "Exit token from the Departure Platform.",
+      "roomId": "platform",
+      "initiallyRevealed": false
+    }
+  ],
+  "randomizationRules": {
+    "code": {
+      "minInclusive": 0,
+      "maxExclusive": 10000,
+      "width": 4
+    }
+  }
+}

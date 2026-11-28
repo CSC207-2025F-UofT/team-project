@@ -12,6 +12,9 @@ import java.util.stream.Collectors;
 
 /** Domain command coordinator. Commands run serially through the application dispatcher. */
 public final class Game {
+    private final String templateId;
+    private final int templateVersion;
+    private final Map<String, String> generatedValues;
     private final String name;
     private final String background;
     private final Map<String, Room> rooms;
@@ -21,6 +24,14 @@ public final class Game {
 
     /** New-game construction enters the starting room before the game can be published. */
     public Game(String name, String background, Map<String, Room> rooms, String startingRoomId) {
+        this(name, background, rooms, startingRoomId, name, 1, Map.of());
+    }
+
+    public Game(String name, String background, Map<String, Room> rooms, String startingRoomId,
+                String templateId, int templateVersion, Map<String, String> generatedValues) {
+        this.templateId = templateId;
+        this.templateVersion = templateVersion;
+        this.generatedValues = Map.copyOf(generatedValues);
         if (name == null || name.isBlank() || background == null || background.isBlank()) {
             throw new IllegalArgumentException("Game name and background are required");
         }
@@ -31,6 +42,9 @@ public final class Game {
         enterRoom(startingRoomId);
     }
 
+    public String templateId() { return templateId; }
+    public int templateVersion() { return templateVersion; }
+    public Map<String, String> generatedValues() { return generatedValues; }
     public String name() { return name; }
     public String background() { return background; }
     public GameStatus status() { return status; }
