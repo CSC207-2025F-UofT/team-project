@@ -5,6 +5,7 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.event.KeyEvent;
 import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -32,7 +33,9 @@ public class PetDetailView extends JPanel implements PetDetailViewModelListener 
     private final JPanel linesPanel = new JPanel();
     private final JLabel errorLabel = new JLabel();
     private final JButton applyButton = new JButton("Apply to adopt");
+    private final JPanel compatibilityHolder = new JPanel(new BorderLayout());
     private BiConsumer<String, String> applyHandler;
+    private Consumer<String> petShownHandler;
 
     /**
      * Creates the detail page.
@@ -76,6 +79,7 @@ public class PetDetailView extends JPanel implements PetDetailViewModelListener 
         content.add(photoLabel);
         content.add(Box.createVerticalStrut(GAP));
         content.add(linesPanel);
+        content.add(compatibilityHolder);
         content.add(errorLabel);
         content.add(Box.createVerticalStrut(GAP));
         applyButton.setMnemonic(KeyEvent.VK_A);
@@ -97,6 +101,25 @@ public class PetDetailView extends JPanel implements PetDetailViewModelListener 
     public void setApplyHandler(BiConsumer<String, String> applyHandler) {
         this.applyHandler = applyHandler;
         showApplyButtonIfPossible();
+    }
+
+    /**
+     * Adds the panel that says how well the cat fits the adopter's home.
+     *
+     * @param panel the compatibility panel
+     */
+    public void setCompatibilityPanel(JPanel panel) {
+        compatibilityHolder.removeAll();
+        compatibilityHolder.add(panel, BorderLayout.CENTER);
+    }
+
+    /**
+     * Sets what happens each time a cat is shown, so its compatibility can be checked.
+     *
+     * @param handler receives the id of the cat now shown
+     */
+    public void setPetShownHandler(Consumer<String> handler) {
+        this.petShownHandler = handler;
     }
 
     private void apply() {
@@ -134,5 +157,9 @@ public class PetDetailView extends JPanel implements PetDetailViewModelListener 
         linesPanel.repaint();
         showApplyButtonIfPossible();
         applyButton.getAccessibleContext().setAccessibleName("Apply to adopt " + state.getName());
+        compatibilityHolder.setVisible(state.getErrorMessage().isEmpty());
+        if (petShownHandler != null && !state.getPetId().isEmpty() && state.getErrorMessage().isEmpty()) {
+            petShownHandler.accept(state.getPetId());
+        }
     }
 }

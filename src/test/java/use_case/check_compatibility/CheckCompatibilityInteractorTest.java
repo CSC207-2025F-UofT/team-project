@@ -74,6 +74,14 @@ class CheckCompatibilityInteractorTest {
     }
 
     @Test
+    void anAdopterWhoIsNotLoggedInIsAskedToFillInTheProfile() {
+        interactor(Map.of("", new AdopterPreferences(false, false, false, false, false, null)))
+                .execute(new CheckCompatibilityInputData("1", ""));
+
+        assertEquals(List.of("no preferences"), events);
+    }
+
+    @Test
     void savedPreferencesGiveOneResultPerRule() {
         final AdopterPreferences cannotTakeMedication = new AdopterPreferences(false, false, false, true, false, null);
 

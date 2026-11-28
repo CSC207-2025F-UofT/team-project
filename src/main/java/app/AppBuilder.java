@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.function.Supplier;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -17,6 +18,7 @@ import javax.swing.WindowConstants;
 
 import data_access.CatApiBreedDataAccess;
 import data_access.FileApplicationDataAccessObject;
+import data_access.FileAdopterPreferencesDataAccessObject;
 import data_access.FilePetDataAccessObject;
 import data_access.FileUserDataAccessObject;
 import data_access.InMemoryPetDataAccess;
@@ -30,6 +32,12 @@ import interface_adapter.admin_signup.AdminSignupController;
 import interface_adapter.admin_signup.AdminSignupPresenter;
 import interface_adapter.admin_signup.AdminSignupViewModel;
 import interface_adapter.browse_pets.BrowsePetsController;
+import interface_adapter.check_compatibility.CheckCompatibilityController;
+import interface_adapter.check_compatibility.CheckCompatibilityPresenter;
+import interface_adapter.check_compatibility.CompatibilityViewModel;
+import interface_adapter.save_preferences.PreferencesViewModel;
+import interface_adapter.save_preferences.SavePreferencesController;
+import interface_adapter.save_preferences.SavePreferencesPresenter;
 import interface_adapter.browse_pets.BrowsePetsPresenter;
 import interface_adapter.browse_pets.GalleryViewModel;
 import interface_adapter.view_pet_details.PetDetailViewModel;
@@ -60,6 +68,11 @@ import interface_adapter.update_application_status.UpdateApplicationViewModel;
 import use_case.admin_signup.AdminSignupInteractor;
 import use_case.browse_pets.BrowsePetsDataAccessInterface;
 import use_case.browse_pets.BrowsePetsInteractor;
+import use_case.check_compatibility.AdopterPreferencesDataAccessInterface;
+import use_case.check_compatibility.CheckCompatibilityInteractor;
+import use_case.check_compatibility.CheckCompatibilityPetDataAccessInterface;
+import use_case.check_compatibility.CompatibilityEngine;
+import use_case.save_preferences.SavePreferencesInteractor;
 import use_case.view_pet_details.ViewPetDetailsDataAccessInterface;
 import use_case.view_pet_details.ViewPetDetailsInteractor;
 import use_case.login.LoginInteractor;
@@ -71,11 +84,14 @@ import use_case.signup.SignupInteractor;
 import use_case.submit_application.SubmitApplicationInteractor;
 import use_case.track_applications.TrackApplicationsInteractor;
 import use_case.update_application_status.UpdateApplicationInteractor;
+import view.AccountBar;
 import view.AdminSignupView;
+import view.CompatibilityPanel;
 import view.GalleryView;
 import view.LoginView;
 import view.ManagePetView;
 import view.PetDetailView;
+import view.PreferencesView;
 import view.MyApplicationsView;
 import view.ReviewApplicationsView;
 import view.SignupView;
@@ -117,8 +133,10 @@ public final class AppBuilder {
         final AppBuilder builder = new AppBuilder();
         builder.addShelterLogin(users, userFactory, inviteCode);
         builder.addPetManagementView(pets, users);
-        builder.addGalleryView(pets, new PetCatalog(pets),
-                builder.navigationButton("Shelter login", LoginViewModel.VIEW_NAME));
+        final PetCatalog catalog = new PetCatalog(pets);
+        builder.addGalleryView(pets, catalog, builder.buildAccountBar(users));
+        builder.addCompatibilityViews(catalog,
+                new FileAdopterPreferencesDataAccessObject(dataDirectory.resolve("adopter_preferences.json")));
         return builder.addApplicationViews(pets, users, applicationDirectory.resolve("applications.json"));
     }
 
@@ -134,7 +152,7 @@ public final class AppBuilder {
     }
 
     private void addGalleryView(BrowsePetsDataAccessInterface petData, ViewPetDetailsDataAccessInterface detailData,
-                                JButton shelterLogin) {
+                                AccountBar accountBar) {
         final PetDetailViewModel detailViewModel = new PetDetailViewModel();
         final ViewPetDetailsPresenter detailsPresenter =
                 new ViewPetDetailsPresenter(detailViewModel, viewManagerModel);
@@ -150,7 +168,7 @@ public final class AppBuilder {
         final BrowsePetsInteractor interactor = new BrowsePetsInteractor(petData, presenter);
         final BrowsePetsController controller = new BrowsePetsController(interactor);
         final GalleryView galleryView = new GalleryView(controller, galleryViewModel, detailsController);
-        final JPanel gallery = shelterLogin == null ? galleryView : withNavigation(galleryView, shelterLogin);
+        final JPanel gallery = accountBar == null ? galleryView : withTopBar(accountBar, galleryView);
         views.add(gallery, GalleryView.VIEW_NAME);
         viewManagerModel.addListener(() -> {
             if (GalleryView.VIEW_NAME.equals(viewManagerModel.getActiveView())) {
@@ -159,10 +177,77 @@ public final class AppBuilder {
         });
     }
 
+    /**
+     * Adds the My profile page and the compatibility panel on the detail page (Use Case 4).
+     * The adopter is whoever logged in last; nobody logged in means no saved profile.
+     */
+    private void addCompatibilityViews(CheckCompatibilityPetDataAccessInterface pets,
+                                       AdopterPreferencesDataAccessInterface preferences) {
+        final Supplier<String> adopterId = () -> submitViewModel.getState().getAdopterId();
+
+        final CompatibilityViewModel compatibilityViewModel = new CompatibilityViewModel();
+        final CheckCompatibilityController checkController = new CheckCompatibilityController(
+                new CheckCompatibilityInteractor(pets, preferences, CompatibilityEngine.withStandardRules(),
+                        new CheckCompatibilityPresenter(compatibilityViewModel)));
+        petDetailView.setCompatibilityPanel(new CompatibilityPanel(compatibilityViewModel));
+        petDetailView.setPetShownHandler(petId -> checkController.check(petId, adopterId.get()));
+
+        final PreferencesViewModel preferencesViewModel = new PreferencesViewModel();
+        final SavePreferencesController saveController = new SavePreferencesController(
+                new SavePreferencesInteractor(preferences, new SavePreferencesPresenter(preferencesViewModel)));
+        views.add(new PreferencesView(preferencesViewModel, saveController, adopterId,
+                new SwitchViewController(viewManagerModel), GalleryView.VIEW_NAME), PreferencesViewModel.VIEW_NAME);
+    }
+
     private void connectApplyButton() {
         if (petDetailView != null && applicationNavigator != null) {
-            petDetailView.setApplyHandler(applicationNavigator::startApplication);
+            petDetailView.setApplyHandler((petId, petName) -> {
+                if (currentAdopterId().isEmpty()) {
+                    viewManagerModel.setActiveView(LoginViewModel.VIEW_NAME);
+                } else {
+                    applicationNavigator.startApplication(petId, petName);
+                }
+            });
         }
+    }
+
+    private String currentAdopterId() {
+        final String adopterId = submitViewModel.getState().getAdopterId();
+        return adopterId == null ? "" : adopterId;
+    }
+
+    /**
+     * Builds the strip at the top of the gallery. It shows Log in to a visitor, and the adopter's name with
+     * My profile, My applications and Sign out once someone is signed in. It is refreshed every time the gallery
+     * is shown.
+     */
+    private AccountBar buildAccountBar(FileUserDataAccessObject users) {
+        final AccountBar bar = new AccountBar(
+                () -> viewManagerModel.setActiveView(LoginViewModel.VIEW_NAME),
+                () -> viewManagerModel.setActiveView(PreferencesViewModel.VIEW_NAME),
+                () -> {
+                    if (applicationNavigator != null) {
+                        applicationNavigator.showMyApplications();
+                    }
+                },
+                () -> {
+                    users.setCurrentUserId(null);
+                    submitViewModel.getState().setAdopterId("");
+                    trackViewModel.getState().setAdopterId("");
+                    viewManagerModel.setActiveView(GalleryView.VIEW_NAME);
+                });
+        viewManagerModel.addListener(() -> {
+            if (GalleryView.VIEW_NAME.equals(viewManagerModel.getActiveView())) {
+                final String adopterId = currentAdopterId();
+                if (adopterId.isEmpty()) {
+                    bar.showGuest();
+                } else {
+                    final String name = users.getUserName(adopterId);
+                    bar.showSignedIn(name == null ? "your account" : name);
+                }
+            }
+        });
+        return bar;
     }
 
     private void addShelterLogin(FileUserDataAccessObject users, UserFactory userFactory, String inviteCode) {
@@ -226,6 +311,13 @@ public final class AppBuilder {
         final JButton button = new JButton(label);
         button.addActionListener(event -> viewManagerModel.setActiveView(destination));
         return button;
+    }
+
+    private static JPanel withTopBar(JPanel bar, JPanel screen) {
+        final JPanel panel = new JPanel(new BorderLayout());
+        panel.add(bar, BorderLayout.NORTH);
+        panel.add(screen, BorderLayout.CENTER);
+        return panel;
     }
 
     private static JPanel withNavigation(JPanel screen, JButton... buttons) {
@@ -346,6 +438,7 @@ public final class AppBuilder {
         final JMenuItem gallery = new JMenuItem("Pet Gallery");
         gallery.addActionListener(event -> viewManagerModel.setActiveView(GalleryView.VIEW_NAME));
         final JMenuItem myApplications = new JMenuItem("My Applications");
+        myApplications.setEnabled(false);
         myApplications.addActionListener(event -> applicationNavigator.showMyApplications());
 
         final JMenu menu = new JMenu("Go to");
@@ -355,6 +448,7 @@ public final class AppBuilder {
         menuBar.add(menu);
         viewManagerModel.addListener(() -> {
             final Object activeView = viewManagerModel.getActiveView();
+            myApplications.setEnabled(!currentAdopterId().isEmpty());
             menu.setEnabled(!ManagePetViewModel.VIEW_NAME.equals(activeView)
                     && !ReviewApplicationsViewModel.VIEW_NAME.equals(activeView)
                     && !UpdateApplicationViewModel.VIEW_NAME.equals(activeView)
