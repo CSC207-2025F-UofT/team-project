@@ -19,6 +19,6 @@ public class HealthNeedsFilter implements PetFilter {
 
     @Override
     public boolean matches(Pet pet) {
-        return pet.getExternalListing() == null && pet.needsMedication() == needsMedication;
+        return pet.needsMedication() == needsMedication;
     }
 }

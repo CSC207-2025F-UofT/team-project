@@ -7,7 +7,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.function.Supplier;
-import java.util.concurrent.ExecutionException;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -15,7 +14,6 @@ import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
-import javax.swing.SwingWorker;
 import javax.swing.WindowConstants;
 
 import data_access.CatApiBreedDataAccess;
@@ -25,7 +23,6 @@ import data_access.FilePetDataAccessObject;
 import data_access.FileUserDataAccessObject;
 import data_access.InMemoryPetDataAccess;
 import data_access.PetCatalog;
-import data_access.RescueGroupsPetDataAccess;
 import entity.Pet;
 import entity.UserFactory;
 import interface_adapter.ApplicationNavigator;
@@ -117,11 +114,6 @@ public final class AppBuilder {
 
     static AppBuilder forDataDirectory(Path dataDirectory, Path applicationDirectory, String inviteCode)
             throws IOException {
-        return forDataDirectory(dataDirectory, applicationDirectory, inviteCode, null);
-    }
-
-    static AppBuilder forDataDirectory(Path dataDirectory, Path applicationDirectory, String inviteCode,
-                                       String rescueGroupsKey) throws IOException {
         Files.createDirectories(dataDirectory);
         final Path petFile = dataDirectory.resolve("pets.json");
         final Path previousPetFile = applicationDirectory.resolve("pets.json");
@@ -140,44 +132,13 @@ public final class AppBuilder {
         final AppBuilder builder = new AppBuilder();
         builder.addShelterLogin(users, userFactory, inviteCode);
         builder.addPetManagementView(pets, users);
-        final RescueGroupsPetDataAccess rescueGroups = new RescueGroupsPetDataAccess(rescueGroupsKey);
-        final PetCatalog catalog = new PetCatalog(pets, rescueGroups);
-        final GalleryView gallery = builder.addGalleryView(catalog, catalog,
+        final PetCatalog catalog = new PetCatalog(pets);
+        builder.addGalleryView(pets, catalog,
                 builder.navigationButton("Shelter login", LoginViewModel.VIEW_NAME),
                 builder.navigationButton("My profile", PreferencesViewModel.VIEW_NAME));
         builder.addCompatibilityViews(catalog,
                 new FileAdopterPreferencesDataAccessObject(dataDirectory.resolve("adopter_preferences.json")));
-        if (rescueGroups.isConfigured()) {
-            builder.petDetailView.setExternalPhotoLoader(rescueGroups::loadPhoto);
-            loadRescueGroups(rescueGroups, gallery);
-        }
         return builder.addApplicationViews(pets, users, applicationDirectory.resolve("applications.json"));
-    }
-
-    private static void loadRescueGroups(RescueGroupsPetDataAccess rescueGroups, GalleryView gallery) {
-        gallery.showRescueStatus("Loading RescueGroups listings near Toronto…");
-        new SwingWorker<Void, Void>() {
-            @Override
-            protected Void doInBackground() throws IOException {
-                rescueGroups.refresh();
-                return null;
-            }
-
-            @Override
-            protected void done() {
-                try {
-                    get();
-                    gallery.loadAll();
-                    gallery.showRescueStatus(rescueGroups.getAvailablePets().isEmpty()
-                            ? "No RescueGroups listings found near Toronto." : "");
-                } catch (InterruptedException exception) {
-                    Thread.currentThread().interrupt();
-                    gallery.showRescueStatus("RescueGroups listings could not be loaded.");
-                } catch (ExecutionException exception) {
-                    gallery.showRescueStatus("RescueGroups listings could not be loaded. Local listings are shown.");
-                }
-            }
-        }.execute();
     }
 
     /**
@@ -191,9 +152,8 @@ public final class AppBuilder {
         return this;
     }
 
-    private GalleryView addGalleryView(BrowsePetsDataAccessInterface petData,
-                                       ViewPetDetailsDataAccessInterface detailData,
-                                       JButton... navigationButtons) {
+    private void addGalleryView(BrowsePetsDataAccessInterface petData, ViewPetDetailsDataAccessInterface detailData,
+                                JButton... navigationButtons) {
         final PetDetailViewModel detailViewModel = new PetDetailViewModel();
         final ViewPetDetailsPresenter detailsPresenter =
                 new ViewPetDetailsPresenter(detailViewModel, viewManagerModel);
@@ -217,7 +177,6 @@ public final class AppBuilder {
                 galleryView.loadAll();
             }
         });
-        return galleryView;
     }
 
     /**

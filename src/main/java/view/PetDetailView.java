@@ -3,25 +3,18 @@ package view;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Font;
-import java.awt.Image;
 import java.awt.event.KeyEvent;
-import java.awt.image.BufferedImage;
-import java.util.concurrent.ExecutionException;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
-import java.util.function.Function;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
-import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
-import javax.swing.SwingWorker;
 
-import interface_adapter.ExternalListingViewData;
 import interface_adapter.SwitchViewController;
 import interface_adapter.view_pet_details.PetDetailState;
 import interface_adapter.view_pet_details.PetDetailViewModel;
@@ -43,7 +36,6 @@ public class PetDetailView extends JPanel implements PetDetailViewModelListener 
     private final JPanel compatibilityHolder = new JPanel(new BorderLayout());
     private BiConsumer<String, String> applyHandler;
     private Consumer<String> petShownHandler;
-    private Function<String, BufferedImage> externalPhotoLoader = url -> null;
 
     /**
      * Creates the detail page.
@@ -72,8 +64,6 @@ public class PetDetailView extends JPanel implements PetDetailViewModelListener 
         content.setLayout(new BoxLayout(content, BoxLayout.Y_AXIS));
         content.setBorder(BorderFactory.createEmptyBorder(GAP, GAP, GAP, GAP));
 
-        nameLabel.putClientProperty("html.disable", true);
-        summaryLabel.putClientProperty("html.disable", true);
         nameLabel.setFont(nameLabel.getFont().deriveFont(Font.BOLD, 24f));
         nameLabel.getAccessibleContext().setAccessibleName("Cat name");
         summaryLabel.getAccessibleContext().setAccessibleName("Cat summary");
@@ -114,14 +104,6 @@ public class PetDetailView extends JPanel implements PetDetailViewModelListener 
     }
 
     /**
-     * Sets the loader used to retrieve a rescue listing photo in the background.
-     * @param loader reads a photo from its URL
-     */
-    public void setExternalPhotoLoader(Function<String, BufferedImage> loader) {
-        externalPhotoLoader = loader;
-    }
-
-    /**
      * Adds the panel that says how well the cat fits the adopter's home.
      *
      * @param panel the compatibility panel
@@ -142,20 +124,14 @@ public class PetDetailView extends JPanel implements PetDetailViewModelListener 
 
     private void apply() {
         final PetDetailState state = viewModel.getState();
-        final ExternalListingViewData external = state.getExternalListing();
-        if (external != null && !external.getAdoptionUrl().isEmpty()) {
-            ExternalLink.open(this, external.getAdoptionUrl());
-        } else if (external == null && applyHandler != null && state.getErrorMessage().isEmpty()) {
+        if (applyHandler != null && state.getErrorMessage().isEmpty()) {
             applyHandler.accept(state.getPetId(), state.getName());
         }
     }
 
     private void showApplyButtonIfPossible() {
         final PetDetailState state = viewModel.getState();
-        final ExternalListingViewData external = state.getExternalListing();
-        final boolean canApply = external == null ? applyHandler != null : !external.getAdoptionUrl().isEmpty();
-        applyButton.setText(external == null ? "Apply to adopt" : "Visit rescue listing");
-        applyButton.setVisible(canApply && !state.getPetId().isEmpty()
+        applyButton.setVisible(applyHandler != null && !state.getPetId().isEmpty()
                 && state.getErrorMessage().isEmpty());
     }
 
@@ -172,65 +148,18 @@ public class PetDetailView extends JPanel implements PetDetailViewModelListener 
         errorLabel.setText(state.getErrorMessage());
 
         linesPanel.removeAll();
-        final ExternalListingViewData external = state.getExternalListing();
-        if (external != null) {
-            linesPanel.add(ExternalLink.organization(external.getOrganizationName(), external.getOrganizationUrl()));
-        }
         for (String line : state.getDetailLines()) {
-            final JLabel label = new JLabel();
-            label.putClientProperty("html.disable", true);
-            label.setText(line);
+            final JLabel label = new JLabel(line);
             label.getAccessibleContext().setAccessibleName(line);
             linesPanel.add(label);
         }
         linesPanel.revalidate();
         linesPanel.repaint();
         showApplyButtonIfPossible();
-        applyButton.getAccessibleContext().setAccessibleName(applyButton.getText() + " for " + state.getName());
+        applyButton.getAccessibleContext().setAccessibleName("Apply to adopt " + state.getName());
         compatibilityHolder.setVisible(state.getErrorMessage().isEmpty());
         if (petShownHandler != null && !state.getPetId().isEmpty() && state.getErrorMessage().isEmpty()) {
             petShownHandler.accept(state.getPetId());
         }
-        photoLabel.setIcon(null);
-        photoLabel.setText("No photo yet");
-        if (external != null && !external.getPhotoUrl().isEmpty()) {
-            showExternalPhoto(state, external.getPhotoUrl());
-        }
-    }
-
-    private void showExternalPhoto(PetDetailState state, String url) {
-        photoLabel.setText("Loading photo…");
-        new SwingWorker<ImageIcon, Void>() {
-            @Override
-            protected ImageIcon doInBackground() {
-                final BufferedImage image = externalPhotoLoader.apply(url);
-                if (image == null) {
-                    return null;
-                }
-                final double scale = Math.min(232.0 / image.getWidth(), 152.0 / image.getHeight());
-                final int width = Math.max(1, (int) (image.getWidth() * scale));
-                final int height = Math.max(1, (int) (image.getHeight() * scale));
-                return new ImageIcon(image.getScaledInstance(width, height, Image.SCALE_SMOOTH));
-            }
-
-            @Override
-            protected void done() {
-                if (viewModel.getState() == state) {
-                    photoLabel.setText("Photo unavailable");
-                    try {
-                        final ImageIcon icon = get();
-                        if (icon != null) {
-                            photoLabel.setText("");
-                            photoLabel.setIcon(icon);
-                            photoLabel.getAccessibleContext().setAccessibleDescription("Photo of " + state.getName());
-                        }
-                    } catch (InterruptedException exception) {
-                        Thread.currentThread().interrupt();
-                    } catch (ExecutionException exception) {
-                        // Photo loading is optional.
-                    }
-                }
-            }
-        }.execute();
     }
 }
