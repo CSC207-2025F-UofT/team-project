@@ -59,8 +59,18 @@ class CheckCompatibilityPresenterTest {
         presenter.presentNoPreferences();
 
         assertTrue(viewModel.getState().needsPreferences());
-        assertTrue(viewModel.getState().getMessage().contains("My profile"));
+        assertTrue(viewModel.getState().getMessage().startsWith("Fill in My profile"));
+        assertFalse(viewModel.getState().needsLogin());
         assertTrue(viewModel.getState().getLines().isEmpty());
+    }
+
+    @Test
+    void aVisitorWhoIsNotLoggedInIsToldToLogIn() {
+        presenter.presentLoginRequired();
+
+        assertTrue(viewModel.getState().needsLogin());
+        assertFalse(viewModel.getState().needsPreferences());
+        assertTrue(viewModel.getState().getMessage().startsWith("Log in"));
     }
 
     @Test

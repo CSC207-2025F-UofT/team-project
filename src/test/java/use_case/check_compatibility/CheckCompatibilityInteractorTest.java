@@ -31,6 +31,11 @@ class CheckCompatibilityInteractorTest {
         }
 
         @Override
+        public void presentLoginRequired() {
+            events.add("login required");
+        }
+
+        @Override
         public void presentNoPreferences() {
             events.add("no preferences");
         }
@@ -74,11 +79,11 @@ class CheckCompatibilityInteractorTest {
     }
 
     @Test
-    void anAdopterWhoIsNotLoggedInIsAskedToFillInTheProfile() {
+    void aVisitorWhoIsNotLoggedInIsAskedToLogIn() {
         interactor(Map.of("", new AdopterPreferences(false, false, false, false, false, null)))
                 .execute(new CheckCompatibilityInputData("1", ""));
 
-        assertEquals(List.of("no preferences"), events);
+        assertEquals(List.of("login required"), events);
     }
 
     @Test

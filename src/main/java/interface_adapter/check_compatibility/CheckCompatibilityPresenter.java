@@ -42,10 +42,18 @@ public class CheckCompatibilityPresenter implements CheckCompatibilityOutputBoun
     }
 
     @Override
+    public void presentLoginRequired() {
+        final CompatibilityState state = new CompatibilityState();
+        state.setNeedsLogin(true);
+        state.setMessage("Log in to see how well this cat fits your home.");
+        publish(state);
+    }
+
+    @Override
     public void presentNoPreferences() {
         final CompatibilityState state = new CompatibilityState();
         state.setNeedsPreferences(true);
-        state.setMessage("Log in and fill in My profile to see how well this cat fits your home.");
+        state.setMessage("Fill in My profile to see how well this cat fits your home.");
         publish(state);
     }
 

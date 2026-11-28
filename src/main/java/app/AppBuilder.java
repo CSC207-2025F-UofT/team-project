@@ -189,7 +189,10 @@ public final class AppBuilder {
         final CheckCompatibilityController checkController = new CheckCompatibilityController(
                 new CheckCompatibilityInteractor(pets, preferences, CompatibilityEngine.withStandardRules(),
                         new CheckCompatibilityPresenter(compatibilityViewModel)));
-        petDetailView.setCompatibilityPanel(new CompatibilityPanel(compatibilityViewModel));
+        final CompatibilityPanel compatibilityPanel = new CompatibilityPanel(compatibilityViewModel);
+        compatibilityPanel.setLogInAction(() -> viewManagerModel.setActiveView(LoginViewModel.VIEW_NAME));
+        compatibilityPanel.setProfileAction(() -> viewManagerModel.setActiveView(PreferencesViewModel.VIEW_NAME));
+        petDetailView.setCompatibilityPanel(compatibilityPanel);
         petDetailView.setPetShownHandler(petId -> checkController.check(petId, adopterId.get()));
 
         final PreferencesViewModel preferencesViewModel = new PreferencesViewModel();
