@@ -1,0 +1,122 @@
+@startuml uc1-signup
+title UC1 Sign up / Admin Sign up: Clean Architecture classes
+
+skinparam classAttributeIconSize 0
+skinparam packageStyle rectangle
+skinparam linetype ortho
+skinparam nodesep 40
+skinparam ranksep 50
+hide empty members
+
+package "Interface Adapters" as IA #DDEBFF {
+  class SignupController {
+    + execute(username, id, email,\n  password1, password2) : void
+  }
+  class AdminSignupController {
+    + execute(username, id, email,\n  password1, password2, inviteCode) : void
+  }
+  class SignupPresenter
+  class AdminSignupPresenter
+  class SignupViewModel
+  class AdminSignupViewModel
+  class LoginViewModel
+}
+
+package "Application Business Rules" as ABR #FDE2E2 {
+  class SignupInputData {
+    username, id, email,
+    password, repeatPassword
+  }
+  class AdminSignupInputData {
+    username, id, email, password,
+    repeatPassword, inviteCode
+  }
+  interface SignupInputBoundary
+  interface AdminSignupInputBoundary
+  interface SignupOutputBoundary
+  interface AdminSignupOutputBoundary
+  class SignupInteractor {
+    + execute(inputData) : void
+  }
+  class AdminSignupInteractor {
+    - expectedInviteCode : String
+    + execute(inputData) : void
+  }
+  interface SignupUserDataAccessInterface {
+    + existsById(id) : boolean
+    + existsByEmail(email) : boolean
+    + save(user) : void
+  }
+  interface AdminSignupUserDataAccessInterface {
+    + existsById(id) : boolean
+    + existsByEmail(email) : boolean
+    + save(user) : void
+  }
+}
+
+package "Enterprise Business Rules" as EBR #FFF4D6 {
+  class UserFactory {
+    + create(...) : User
+  }
+  class User
+}
+
+package "Frameworks & Drivers: View" as FDV #E2F4E2 {
+  class SignupView
+  class AdminSignupView
+}
+
+package "Frameworks & Drivers: Data Access" as FDD #E2F4E2 {
+  class FileUserDataAccessObject
+}
+
+IA -[hidden]right- ABR
+ABR -[hidden]right- EBR
+IA -[hidden]down- FDV
+ABR -[hidden]down- FDD
+
+SignupController -[hidden]down- AdminSignupController
+AdminSignupController -[hidden]down- SignupPresenter
+SignupPresenter -down-> SignupViewModel
+AdminSignupPresenter -down-> AdminSignupViewModel
+SignupPresenter -down-> LoginViewModel : after sign up
+AdminSignupPresenter -down-> LoginViewModel : after sign up
+
+SignupInputData -[hidden]down- AdminSignupInputData
+AdminSignupInputData -[hidden]down- SignupInputBoundary
+SignupInputBoundary -[hidden]down- AdminSignupInputBoundary
+AdminSignupInputBoundary -[hidden]down- SignupOutputBoundary
+SignupOutputBoundary -[hidden]down- AdminSignupOutputBoundary
+
+SignupController -right-> SignupInputData : creates
+SignupController -right-> SignupInputBoundary
+AdminSignupController -right-> AdminSignupInputData : creates
+AdminSignupController -right-> AdminSignupInputBoundary
+SignupPresenter -right-|> SignupOutputBoundary
+AdminSignupPresenter -right-|> AdminSignupOutputBoundary
+
+SignupInteractor -left-|> SignupInputBoundary
+SignupInteractor -left-> SignupOutputBoundary
+AdminSignupInteractor -left-|> AdminSignupInputBoundary
+AdminSignupInteractor -left-> AdminSignupOutputBoundary
+SignupInteractor -down-> SignupUserDataAccessInterface
+AdminSignupInteractor -down-> AdminSignupUserDataAccessInterface
+SignupInteractor -right-> UserFactory
+AdminSignupInteractor -right-> UserFactory
+UserFactory .down.> User : creates
+
+SignupView -up-> SignupController : calls
+SignupView -up-> SignupViewModel : listens
+AdminSignupView -up-> AdminSignupController : calls
+AdminSignupView -up-> AdminSignupViewModel : listens
+
+FileUserDataAccessObject -up-|> SignupUserDataAccessInterface
+FileUserDataAccessObject -up-|> AdminSignupUserDataAccessInterface
+FileUserDataAccessObject .up.> User : saves / loads
+
+note bottom of SignupView
+  SignupView (adopter sign up) is not
+  added to the main window yet.
+end note
+
+@enduml

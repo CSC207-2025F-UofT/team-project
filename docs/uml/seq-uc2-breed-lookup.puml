@@ -1,0 +1,35 @@
+@startuml seq-uc2-breed-lookup
+title UC2 Look up a Breed with TheCatAPI: sequence
+
+skinparam sequenceMessageAlign left
+autonumber
+
+actor Admin
+participant "PetForm" as Form
+participant "ManagePetController" as Controller
+participant "BreedLookupInteractor\n<<BreedLookupInputBoundary>>" as Interactor
+participant "CatApiBreedDataAccess\n<<BreedReferenceDataAccessInterface>>" as DAO
+participant "TheCatAPI" as API
+
+Admin -> Form : types a breed, asks to look it up
+Form -> Form : start a background task\n(keeps the window responsive)
+Form -> Controller : lookupBreed("Siamese")
+Controller -> Interactor : lookup("Siamese")
+Interactor -> Interactor : check the name is 1 to 30 characters
+Interactor -> DAO : findByName("Siamese")
+DAO -> API : GET breeds/search?q=Siamese
+API --> DAO : matching breeds (JSON)
+DAO -> API : download the reference photo
+API --> DAO : photo
+DAO --> Interactor : BreedReference(name, temperament, photo)
+Interactor --> Controller : Optional<BreedReference>
+Controller --> Form : BreedReferenceViewData
+Form --> Admin : shows typical temperament and photo
+
+note over Form, API
+  No exact match: the form says so and the admin continues manually.
+  API key missing or the API cannot be reached: the form shows a warning
+  and the admin can still fill in the pet manually.
+end note
+
+@enduml

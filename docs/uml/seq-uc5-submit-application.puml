@@ -5,6 +5,7 @@ skinparam sequenceMessageAlign left
 autonumber
 
 actor Adopter
+participant "ApplicationNavigator" as Nav
 participant "SubmitApplicationView" as View
 participant "SubmitApplicationController" as Controller
 participant "SubmitApplicationInteractor\n<<SubmitApplicationInputBoundary>>" as Interactor
@@ -14,10 +15,12 @@ participant "Application" as App
 participant "SubmitApplicationPresenter\n<<SubmitApplicationOutputBoundary>>" as Presenter
 participant "SubmitApplicationViewModel" as VM
 
-Adopter -> View : fills in the form,\nclicks "Submit application"
+Adopter -> Nav : chooses to apply for a pet\n(after logging in)
+Nav -> VM : set adopter, pet id and pet name
+Nav -> View : open the application form\n(through ViewManagerModel)
+Adopter -> View : fills in the form, submits
 View -> Controller : execute(adopterId, petId, housingType,\npetExperience, householdMembers, contactInfo, note)
-Controller -> Controller : new SubmitApplicationInputData(...)
-Controller -> Interactor : execute(inputData)
+Controller -> Interactor : execute(new SubmitApplicationInputData(...))
 
 Interactor -> PetDAO : isAvailable(petId)
 PetDAO --> Interactor : true
@@ -39,7 +42,6 @@ note over Interactor, Presenter
   Failure paths call prepareFailView(message) instead:
   not logged in, pet not available, already applied,
   missing required field, pet name or save failed.
-  The view then shows the error in red.
 end note
 
 @enduml

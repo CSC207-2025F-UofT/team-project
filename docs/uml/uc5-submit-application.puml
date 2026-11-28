@@ -1,18 +1,12 @@
 @startuml uc5-submit-application
 title UC5 Submit an Application: Clean Architecture classes
 
-left to right direction
 skinparam classAttributeIconSize 0
 skinparam packageStyle rectangle
-skinparam nodesep 30
-skinparam ranksep 60
+skinparam linetype ortho
+skinparam nodesep 40
+skinparam ranksep 50
 hide empty members
-
-package "View\n(Frameworks & Drivers)" as FDView #E2F4E2 {
-  class SubmitApplicationView {
-    + stateChanged() : void
-  }
-}
 
 package "Interface Adapters" as IA #DDEBFF {
   class SubmitApplicationController {
@@ -27,24 +21,18 @@ package "Interface Adapters" as IA #DDEBFF {
     + notifyStateChanged() : void
   }
   class SubmitApplicationState {
-    adopterId, petId, petName
+    adopterId, petId, petName,
     error, successMessage
-  }
-  interface SubmitApplicationViewModelListener {
-    + stateChanged() : void
   }
 }
 
 package "Application Business Rules" as ABR #FDE2E2 {
-  interface SubmitApplicationInputBoundary {
-    + execute(inputData) : void
-  }
   class SubmitApplicationInputData {
     adopterId, petId, housingType,
     petExperience, householdMembers,
     contactInfo, note
   }
-  class SubmitApplicationInteractor {
+  interface SubmitApplicationInputBoundary {
     + execute(inputData) : void
   }
   interface SubmitApplicationOutputBoundary {
@@ -53,6 +41,9 @@ package "Application Business Rules" as ABR #FDE2E2 {
   }
   class SubmitApplicationOutputData {
     applicationId, petName
+  }
+  class SubmitApplicationInteractor {
+    + execute(inputData) : void
   }
   interface SubmitApplicationDataAccessInterface {
     + hasActiveApplication(adopterId, petId) : boolean
@@ -65,44 +56,56 @@ package "Application Business Rules" as ABR #FDE2E2 {
 }
 
 package "Enterprise Business Rules" as EBR #FFF4D6 {
-  class Application
+  class Application {
+    + isActive() : boolean
+  }
 }
 
-package "Data Access\n(Frameworks & Drivers)" as FDData #E2F4E2 {
+package "Frameworks & Drivers: View" as FDV #E2F4E2 {
+  class SubmitApplicationView {
+    + stateChanged() : void
+  }
+}
+
+package "Frameworks & Drivers: Data Access" as FDD #E2F4E2 {
   class FileApplicationDataAccessObject
-  class InMemoryApplicationDataAccessObject
   class FilePetDataAccessObject
 }
 
-' View and view model
-SubmitApplicationView --> SubmitApplicationController : calls
-SubmitApplicationView --> SubmitApplicationViewModel : reads
-SubmitApplicationView ..|> SubmitApplicationViewModelListener
-SubmitApplicationViewModel --> SubmitApplicationState
-SubmitApplicationViewModel --> SubmitApplicationViewModelListener : notifies
+' region layout like the CA engine
+IA -[hidden]right- ABR
+ABR -[hidden]right- EBR
+IA -[hidden]down- FDV
+ABR -[hidden]down- FDD
 
-' Input side
-SubmitApplicationController ..> SubmitApplicationInputData : creates
-SubmitApplicationController --> SubmitApplicationInputBoundary
-SubmitApplicationInputBoundary <|.. SubmitApplicationInteractor
+' interface adapters column
+SubmitApplicationController -[hidden]down- SubmitApplicationPresenter
+SubmitApplicationPresenter -down-> SubmitApplicationViewModel : updates
+SubmitApplicationViewModel -right-> SubmitApplicationState
 
-' Output side
-SubmitApplicationPresenter ..|> SubmitApplicationOutputBoundary
-SubmitApplicationPresenter --> SubmitApplicationViewModel : updates
-SubmitApplicationOutputBoundary <-- SubmitApplicationInteractor
-SubmitApplicationOutputData <.. SubmitApplicationInteractor : creates
+' use case column
+SubmitApplicationInputData -[hidden]down- SubmitApplicationInputBoundary
+SubmitApplicationInputBoundary -[hidden]down- SubmitApplicationOutputBoundary
+SubmitApplicationOutputBoundary -[hidden]down- SubmitApplicationOutputData
 
-' Data access side
-SubmitApplicationInteractor --> SubmitApplicationDataAccessInterface
-SubmitApplicationInteractor --> SubmitApplicationPetDataAccessInterface
-SubmitApplicationInteractor ..> Application : creates
-SubmitApplicationDataAccessInterface <|.. FileApplicationDataAccessObject
-SubmitApplicationDataAccessInterface <|.. InMemoryApplicationDataAccessObject
-SubmitApplicationPetDataAccessInterface <|.. FilePetDataAccessObject
-Application <.. FileApplicationDataAccessObject : saves / loads
+SubmitApplicationController -right-> SubmitApplicationInputData : creates
+SubmitApplicationController -right-> SubmitApplicationInputBoundary
+SubmitApplicationPresenter -right-|> SubmitApplicationOutputBoundary
+SubmitApplicationPresenter .right.> SubmitApplicationOutputData : reads
 
-note bottom of InMemoryApplicationDataAccessObject
-  Used in tests only.
-end note
+SubmitApplicationInteractor -left-|> SubmitApplicationInputBoundary
+SubmitApplicationInteractor .left.> SubmitApplicationInputData : reads
+SubmitApplicationInteractor -left-> SubmitApplicationOutputBoundary
+SubmitApplicationInteractor .left.> SubmitApplicationOutputData : creates
+SubmitApplicationInteractor -down-> SubmitApplicationDataAccessInterface
+SubmitApplicationInteractor -down-> SubmitApplicationPetDataAccessInterface
+SubmitApplicationInteractor -right-> Application : creates
+
+SubmitApplicationView -up-> SubmitApplicationController : calls
+SubmitApplicationView -up-> SubmitApplicationViewModel : listens
+
+FileApplicationDataAccessObject -up-|> SubmitApplicationDataAccessInterface
+FilePetDataAccessObject -up-|> SubmitApplicationPetDataAccessInterface
+FileApplicationDataAccessObject .up.> Application : saves / loads
 
 @enduml

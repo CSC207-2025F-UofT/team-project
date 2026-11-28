@@ -269,9 +269,13 @@ The diagrams are drawn with PlantUML. The source files are in [`docs/uml`](docs/
 
 ![Clean Architecture Layers](docs/uml/architecture.png)
 
-#### Use Case 1: Sign up / Log in
+#### Use Case 1: Log in
 
-![Use Case 1: Sign up / Log in](docs/uml/uc1-signup-login.png)
+![Use Case 1: Log in](docs/uml/uc1-login.png)
+
+#### Use Case 1: Sign up / Admin Sign up
+
+![Use Case 1: Sign up / Admin Sign up](docs/uml/uc1-signup.png)
 
 #### Use Case 2: Add / Edit / Remove a Pet
 
@@ -281,6 +285,10 @@ The diagrams are drawn with PlantUML. The source files are in [`docs/uml`](docs/
 
 ![Use Case 3: Browse and Filter Pets](docs/uml/uc3-browse-pets.png)
 
+#### Use Case 4: Check Pet Compatibility
+
+![Use Case 4: Check Pet Compatibility](docs/uml/uc4-check-compatibility.png)
+
 #### Use Case 5: Submit an Application
 
 ![Use Case 5: Submit an Application](docs/uml/uc5-submit-application.png)
@@ -289,15 +297,31 @@ The diagrams are drawn with PlantUML. The source files are in [`docs/uml`](docs/
 
 ![Use Case 6: Track My Applications](docs/uml/uc6-track-applications.png)
 
+#### Use Case 7: Review Applications
+
+_Diagram to be added when this use case is merged into `main`._
+
+#### Use Case 8: Update Application Status
+
+_Diagram to be added when this use case is merged into `main`._
+
 ### Sequence Diagrams
+
+#### Use Case 1: Log in
+
+![Use Case 1: Log in](docs/uml/seq-uc1-login.png)
 
 #### Use Case 2: Add a Pet
 
 ![Use Case 2: Add a Pet](docs/uml/seq-uc2-add-pet.png)
 
-#### Use Case 3: Browse Pets
+#### Use Case 2: Look up a Breed with TheCatAPI
 
-![Use Case 3: Browse Pets](docs/uml/seq-uc3-browse-pets.png)
+![Use Case 2: Look up a Breed with TheCatAPI](docs/uml/seq-uc2-breed-lookup.png)
+
+#### Use Case 3: Browse and Filter Pets
+
+![Use Case 3: Browse and Filter Pets](docs/uml/seq-uc3-browse-pets.png)
 
 #### Use Case 5: Submit an Application
 
@@ -306,6 +330,14 @@ The diagrams are drawn with PlantUML. The source files are in [`docs/uml`](docs/
 #### Use Case 6: Track My Applications
 
 ![Use Case 6: Track My Applications](docs/uml/seq-uc6-track-applications.png)
+
+#### Use Case 7: Review Applications
+
+_Diagram to be added when this use case is merged into `main`._
+
+#### Use Case 8: Update Application Status
+
+_Diagram to be added when this use case is merged into `main`._
 
 ---
 

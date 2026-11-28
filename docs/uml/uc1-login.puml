@@ -1,0 +1,107 @@
+@startuml uc1-login
+title UC1 Log in: Clean Architecture classes
+
+skinparam classAttributeIconSize 0
+skinparam packageStyle rectangle
+skinparam linetype ortho
+skinparam nodesep 40
+skinparam ranksep 50
+hide empty members
+
+package "Interface Adapters" as IA #DDEBFF {
+  class LoginController {
+    + execute(email, password) : void
+  }
+  class LoginPresenter {
+    + prepareSuccessView(outputData) : void
+    + prepareFailView(error) : void
+  }
+  class LoginViewModel {
+    + getState() : LoginState
+    + notifyStateChanged() : void
+  }
+  class LoginState {
+    email, password, loginError
+  }
+  class ViewManagerModel {
+    + setActiveView(viewName) : void
+  }
+}
+
+package "Application Business Rules" as ABR #FDE2E2 {
+  class LoginInputData {
+    email, password
+  }
+  interface LoginInputBoundary {
+    + execute(inputData) : void
+  }
+  interface LoginOutputBoundary {
+    + prepareSuccessView(outputData) : void
+    + prepareFailView(error) : void
+  }
+  class LoginOutputData {
+    username, id, role
+  }
+  class LoginInteractor {
+    + execute(inputData) : void
+  }
+  interface LoginUserDataAccessInterface {
+    + getByEmail(email) : User
+    + setCurrentUserId(id) : void
+  }
+}
+
+package "Enterprise Business Rules" as EBR #FFF4D6 {
+  class User
+  enum "User.Role" as Role {
+    ADOPTER
+    ADMIN
+  }
+}
+
+package "Frameworks & Drivers: View" as FDV #E2F4E2 {
+  class LoginView
+}
+
+package "Frameworks & Drivers: Data Access" as FDD #E2F4E2 {
+  class FileUserDataAccessObject {
+    users stored in a JSON file
+  }
+}
+
+IA -[hidden]right- ABR
+ABR -[hidden]right- EBR
+IA -[hidden]down- FDV
+ABR -[hidden]down- FDD
+
+LoginController -[hidden]down- LoginPresenter
+LoginPresenter -down-> LoginViewModel : updates
+LoginViewModel -right-> LoginState
+LoginPresenter -down-> ViewManagerModel : opens home screen
+
+LoginInputData -[hidden]down- LoginInputBoundary
+LoginInputBoundary -[hidden]down- LoginOutputBoundary
+LoginOutputBoundary -[hidden]down- LoginOutputData
+
+LoginController -right-> LoginInputData : creates
+LoginController -right-> LoginInputBoundary
+LoginPresenter -right-|> LoginOutputBoundary
+LoginPresenter .right.> LoginOutputData : reads
+
+LoginInteractor -left-|> LoginInputBoundary
+LoginInteractor .left.> LoginInputData : reads
+LoginInteractor -left-> LoginOutputBoundary
+LoginInteractor .left.> LoginOutputData : creates
+LoginInteractor -down-> LoginUserDataAccessInterface
+LoginInteractor -right-> User : checks password
+User -down-> Role
+
+LoginView -up-> LoginController : calls
+LoginView -up-> LoginViewModel : listens
+
+FileUserDataAccessObject -up-|> LoginUserDataAccessInterface
+FileUserDataAccessObject .up.> User : saves / loads
+
+LoginPresenter -[#red,dashed]right-> Role : skips use case layer
+
+@enduml

@@ -13,7 +13,7 @@ package "entity" #FFF4D6 {
     - email : String
     - passwordHash : String
     - role : Role
-    - preference : String
+    - preference : AdopterPreferences
   }
 
   enum "User.Role" as Role {
@@ -22,7 +22,7 @@ package "entity" #FFF4D6 {
   }
 
   class UserFactory {
-    + create(name, id, email, passwordHash, role, preference) : User
+    + create(name, id, email, passwordHash, role,\n  preference : AdopterPreferences) : User
   }
 
   class AdopterPreferences {
@@ -114,10 +114,10 @@ Application --> "1" ApplicationStatus
 Application ..> User : adopterId (stored as id)
 Application ..> Pet : petId (stored as id)
 
+User --> "0..1" AdopterPreferences : preference\n(adopters only)
+
 note bottom of User
   Getters are omitted in this diagram.
-  preference is still a String;
-  AdopterPreferences is not linked to User yet.
 end note
 
 @enduml

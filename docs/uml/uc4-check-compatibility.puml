@@ -1,0 +1,53 @@
+@startuml uc4-check-compatibility
+title UC4 Check Pet Compatibility: compatibility rules (use case layer on main)
+
+left to right direction
+skinparam classAttributeIconSize 0
+skinparam packageStyle rectangle
+skinparam nodesep 30
+skinparam ranksep 60
+hide empty members
+
+package "Application Business Rules" as ABR #FDE2E2 {
+  interface CompatibilityRule {
+    + evaluate(pet : Pet, preferences : AdopterPreferences) : RuleResult
+  }
+  class ChildrenRule
+  class OtherPetsRule
+  class MedicalNeedsRule
+  class RuleResult {
+    trait : String
+    status : Status
+    explanation : String
+  }
+  enum "RuleResult.Status" as Status {
+    MATCH
+    CONFLICT
+    NOT_APPLICABLE
+  }
+}
+
+package "Enterprise Business Rules" as EBR #FFF4D6 {
+  class Pet
+  class AdopterPreferences
+  enum Temperament
+}
+
+CompatibilityRule <|.. ChildrenRule
+CompatibilityRule <|.. OtherPetsRule
+CompatibilityRule <|.. MedicalNeedsRule
+CompatibilityRule ..> RuleResult : returns
+RuleResult --> Status
+CompatibilityRule ..> Pet
+CompatibilityRule ..> AdopterPreferences
+ChildrenRule ..> Temperament
+OtherPetsRule ..> Temperament
+
+note bottom of RuleResult
+  The interactor, controller, presenter and view
+  for UC4 are not on main yet. Each rule is a
+  separate class, so a new rule does not change
+  the existing ones.
+end note
+
+@enduml
