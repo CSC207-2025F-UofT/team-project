@@ -41,6 +41,7 @@ public final class SubmitApplicationView extends JPanel implements SubmitApplica
     private final JLabel errorLabel = new JLabel(BLANK);
     private final JLabel successLabel = new JLabel(BLANK);
     private final JButton submitButton = new JButton("Submit application");
+    private String shownDraftKey;
 
     /**
      * Creates the view.
@@ -99,13 +100,21 @@ public final class SubmitApplicationView extends JPanel implements SubmitApplica
         title.setText("Apply to adopt " + state.getPetName());
         errorLabel.setText(blankIfEmpty(state.getError()));
         successLabel.setText(blankIfEmpty(state.getSuccessMessage()));
-        if (!state.getSuccessMessage().isEmpty()) {
-            housingTypeBox.setSelectedIndex(0);
-            petExperienceField.setText("");
-            householdMembersField.setText("");
-            contactInfoField.setText("");
-            noteArea.setText("");
+        // A new adopter or a new pet starts a new application, so the answers are cleared.
+        // A failed check on the same application keeps them so the adopter can fix them.
+        final String draftKey = state.getAdopterId() + "\n" + state.getPetId();
+        if (!draftKey.equals(shownDraftKey) || !state.getSuccessMessage().isEmpty()) {
+            clearAnswers();
         }
+        shownDraftKey = draftKey;
+    }
+
+    private void clearAnswers() {
+        housingTypeBox.setSelectedIndex(0);
+        petExperienceField.setText("");
+        householdMembersField.setText("");
+        contactInfoField.setText("");
+        noteArea.setText("");
     }
 
     public String getViewName() {
