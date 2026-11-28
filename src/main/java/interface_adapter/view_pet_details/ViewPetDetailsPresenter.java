@@ -37,6 +37,7 @@ public class ViewPetDetailsPresenter implements ViewPetDetailsOutputBoundary {
         state.setName(pet.getName());
         state.setSummary(summary(pet));
         state.setDetailLines(detailLines(pet));
+        state.setPhotoPath(pet.getPhotoPath());
         viewModel.setState(state);
         viewModel.notifyStateChanged();
         showDetailPage();

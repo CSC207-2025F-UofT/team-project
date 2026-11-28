@@ -12,6 +12,7 @@ import java.awt.Image;
 import java.awt.Insets;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -64,6 +65,7 @@ final class PetForm extends JPanel {
     private final JTextField fee = new JTextField(8);
     private final JTextField photoPath = new JTextField(20);
     private final JTextArea error = new JTextArea(2, 1);
+    private byte[] pendingReference;
 
     PetForm(ManagePetController controller, ManagePetViewModel viewModel, PetViewData pet) {
         super(new GridBagLayout());
@@ -116,8 +118,18 @@ final class PetForm extends JPanel {
         content.add(footer, BorderLayout.SOUTH);
 
         save.addActionListener(event -> {
-            submit();
+            final Path savedReference;
+            try {
+                savedReference = pendingReference == null ? null : ListingPhoto.saveReference(pendingReference);
+            } catch (IOException exception) {
+                error.setText("Could not save the reference photo. Choose another photo or clear it and try again.");
+                return;
+            }
+            submit(savedReference == null ? photoPath.getText() : savedReference.toString());
             if (viewModel.hasError()) {
+                if (savedReference != null) {
+                    ListingPhoto.discard(savedReference);
+                }
                 error.setText(viewModel.getMessage());
             }
             else {
@@ -223,7 +235,18 @@ final class PetForm extends JPanel {
             }
         }
         result.add(photo, BorderLayout.CENTER);
-        JOptionPane.showMessageDialog(this, result, BREED_REFERENCE_TITLE, JOptionPane.PLAIN_MESSAGE);
+        if (photo.getIcon() == null) {
+            JOptionPane.showMessageDialog(this, result, BREED_REFERENCE_TITLE, JOptionPane.PLAIN_MESSAGE);
+        } else {
+            final String usePhoto = "Use as reference photo";
+            final Object[] options = {usePhoto, "Close"};
+            final int choice = JOptionPane.showOptionDialog(this, result, BREED_REFERENCE_TITLE,
+                    JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, options, options[1]);
+            if (choice == 0) {
+                showPhotoPath("Breed reference from TheCatAPI");
+                pendingReference = referencePhoto;
+            }
+        }
     }
 
     private JPanel createTemperamentOptions() {
@@ -302,12 +325,13 @@ final class PetForm extends JPanel {
     }
 
     private void showPhotoPath(String path) {
+        pendingReference = null;
         photoPath.setText(path);
         photoPath.setToolTipText(path.isEmpty() ? null : path);
         photoPath.setCaretPosition(0);
     }
 
-    private void submit() {
+    private void submit(String savedPhotoPath) {
         final List<String> tags = new ArrayList<>();
         for (JCheckBox tag : temperament) {
             if (tag.isSelected()) {
@@ -319,12 +343,12 @@ final class PetForm extends JPanel {
         if (pet == null) {
             controller.add(name.getText(), selectedSpecies, breed.getText(), age.getText(), selectedSex,
                     tags, healthNotes.getText(), needsMedication.isSelected(), vaccinated.isSelected(),
-                    spayedNeutered.isSelected(), fee.getText(), photoPath.getText());
+                    spayedNeutered.isSelected(), fee.getText(), savedPhotoPath);
         }
         else {
             controller.edit(pet.getId(), name.getText(), selectedSpecies, breed.getText(), age.getText(), selectedSex,
                     tags, healthNotes.getText(), needsMedication.isSelected(), vaccinated.isSelected(),
-                    spayedNeutered.isSelected(), fee.getText(), photoPath.getText());
+                    spayedNeutered.isSelected(), fee.getText(), savedPhotoPath);
         }
     }
 }
