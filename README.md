@@ -60,6 +60,10 @@ so that visitors always see up-to-date information about each animal.
 As a shelter admin, I want to review applications and update their status in one place,
 so that animals are matched with suitable adopters efficiently.
 
+### User Story 6 (Xiangyu Zhou)
+As a logged-in adopter or shelter admin, I want to log out when I am done,
+so that the next person using the same computer cannot see or change my account.
+
 ---
 ## Use Cases
 
@@ -199,6 +203,21 @@ so that animals are matched with suitable adopters efficiently.
 **Extensions:**
 - 2a. The new status is APPROVED: the system also marks the pet as ADOPTED.
 - 2b. The change cannot be saved: the system says so and nothing changes.
+
+### Use Case 9: Log Out (Xiangyu Zhou)
+**Primary actor:** Logged-in adopter or shelter admin  
+**Preconditions:** The user is logged in.  
+**Trigger:** The user asks to log out.  
+**Success outcome:** No user is logged in, and the system shows the public pet gallery.
+
+**Main success scenario:**
+1. The user asks to log out.
+2. The system ends the user's session, so no user is logged in.
+3. The system shows the public pet gallery with the log in option.
+
+**Extensions:**
+- 1a. The user has unsaved input on the current screen (for example, a half-filled application): the system asks the user to confirm; if the user cancels, nothing changes.
+- 2a. No user is logged in: the system shows the public pet gallery and nothing else changes.
 
 ---
 ## Minimal Viable Product (MVP)
