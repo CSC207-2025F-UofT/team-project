@@ -86,4 +86,56 @@ class BrowsePetsControllerTest {
 
         assertEquals(3, interactor.received.getFilters().size());
     }
+
+    private Pet pet(String breed, PetSex sex, boolean vaccinated, boolean spayedNeutered) {
+        return new Pet("1", "Miso", Species.CAT, breed, 2, sex, List.of(), "", false, vaccinated, spayedNeutered,
+                BigDecimal.TEN, "", PetStatus.AVAILABLE);
+    }
+
+    @Test
+    void breedTextBecomesABreedFilter() {
+        final CapturingInteractor interactor = new CapturingInteractor();
+        final BrowseChoices choices = new BrowseChoices();
+        choices.setBreed("tab");
+
+        new BrowsePetsController(interactor).browse(choices);
+
+        assertEquals(1, matchCount(interactor.received, pet("Tabby", PetSex.FEMALE, true, true)));
+        assertEquals(0, matchCount(interactor.received, pet("Siamese", PetSex.FEMALE, true, true)));
+    }
+
+    @Test
+    void sexChoiceBecomesASexFilter() {
+        final CapturingInteractor interactor = new CapturingInteractor();
+        final BrowseChoices choices = new BrowseChoices();
+        choices.setSex(SexFilterOption.MALE);
+
+        new BrowsePetsController(interactor).browse(choices);
+
+        assertEquals(1, matchCount(interactor.received, pet("Tabby", PetSex.MALE, true, true)));
+        assertEquals(0, matchCount(interactor.received, pet("Tabby", PetSex.FEMALE, true, true)));
+    }
+
+    @Test
+    void vaccinatedAndSpayedChoicesBecomeFilters() {
+        final CapturingInteractor interactor = new CapturingInteractor();
+        final BrowseChoices choices = new BrowseChoices();
+        choices.setVaccinatedOnly(true);
+        choices.setSpayedNeuteredOnly(true);
+
+        new BrowsePetsController(interactor).browse(choices);
+
+        assertEquals(2, interactor.received.getFilters().size());
+        assertEquals(2, matchCount(interactor.received, pet("Tabby", PetSex.MALE, true, true)));
+        assertEquals(1, matchCount(interactor.received, pet("Tabby", PetSex.MALE, true, false)));
+    }
+
+    @Test
+    void freshChoicesSendNoFilters() {
+        final CapturingInteractor interactor = new CapturingInteractor();
+
+        new BrowsePetsController(interactor).browse(new BrowseChoices());
+
+        assertTrue(interactor.received.getFilters().isEmpty());
+    }
 }
