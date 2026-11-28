@@ -9,6 +9,8 @@ import use_case.browse_pets.AgeRangeFilter;
 import use_case.browse_pets.BreedFilter;
 import use_case.browse_pets.BrowsePetsInputBoundary;
 import use_case.browse_pets.BrowsePetsInputData;
+import use_case.browse_pets.ColorFilter;
+import use_case.browse_pets.HairLengthFilter;
 import use_case.browse_pets.HealthNeedsFilter;
 import use_case.browse_pets.PetFilter;
 import use_case.browse_pets.SexFilter;
@@ -62,6 +64,12 @@ public class BrowsePetsController {
         }
         if (!choices.getBreed().isBlank()) {
             filters.add(new BreedFilter(choices.getBreed()));
+        }
+        if (!choices.getColor().isBlank()) {
+            filters.add(new ColorFilter(choices.getColor()));
+        }
+        if (!choices.getHairLength().isBlank()) {
+            filters.add(new HairLengthFilter(choices.getHairLength()));
         }
         if (!choices.getTemperaments().isEmpty()) {
             filters.add(new TemperamentFilter(choices.getTemperaments()));

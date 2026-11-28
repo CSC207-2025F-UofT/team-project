@@ -65,7 +65,7 @@ public final class ManagePetOutputData {
             this.needsMedication = pet.needsMedication();
             this.vaccinated = pet.isVaccinated();
             this.spayedNeutered = pet.isSpayedNeutered();
-            this.adoptionFee = pet.getAdoptionFee().toPlainString();
+            this.adoptionFee = pet.getAdoptionFee() == null ? "" : pet.getAdoptionFee().toPlainString();
             this.photoPath = pet.getPhotoPath();
             this.status = pet.getStatus().name();
             this.available = pet.getStatus() == PetStatus.AVAILABLE;

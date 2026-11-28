@@ -12,7 +12,7 @@ import javax.swing.SwingUtilities;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
-import data_access.InMemoryPetDataAccess;
+import data_access.StarterPetCatalog;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -22,7 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class ListingPhotoTest {
     @Test
     void eachDefaultAvailableCatHasAReadableBundledPhoto() throws Exception {
-        for (var cat : InMemoryPetDataAccess.withSampleData().getAvailablePets()) {
+        for (var cat : StarterPetCatalog.createPets()) {
             assertNotNull(ListingPhoto.read(cat.getPhotoPath()), cat.getName());
         }
     }

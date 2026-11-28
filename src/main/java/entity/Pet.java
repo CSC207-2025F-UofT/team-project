@@ -22,6 +22,7 @@ public final class Pet {
     private final boolean spayedNeutered;
     private final BigDecimal adoptionFee;
     private final String photoPath;
+    private final PetProfileDetails profileDetails;
     private PetStatus status;
 
     /**
@@ -45,6 +46,15 @@ public final class Pet {
     public Pet(String id, String name, Species species, String breed, int ageYears, PetSex sex,
                List<Temperament> temperamentTags, String healthNotes, boolean needsMedication, boolean vaccinated,
                boolean spayedNeutered, BigDecimal adoptionFee, String photoPath, PetStatus status) {
+        this(id, name, species, breed, ageYears, sex, temperamentTags, healthNotes, needsMedication, vaccinated,
+                spayedNeutered, requireFee(adoptionFee), photoPath, status, PetProfileDetails.UNLISTED);
+    }
+
+    /** Creates a profile with additional listing details and a fee that may be unlisted. */
+    public Pet(String id, String name, Species species, String breed, int ageYears, PetSex sex,
+               List<Temperament> temperamentTags, String healthNotes, boolean needsMedication, boolean vaccinated,
+               boolean spayedNeutered, BigDecimal adoptionFee, String photoPath, PetStatus status,
+               PetProfileDetails profileDetails) {
         this.id = requireText(id, "Pet ID");
         this.name = requireText(name, "Name");
         this.breed = requireText(breed, "Breed");
@@ -60,10 +70,10 @@ public final class Pet {
         if (temperamentTags != null && temperamentTags.stream().anyMatch(Objects::isNull)) {
             throw new IllegalArgumentException("Each temperament tag must be valid.");
         }
-        if (adoptionFee == null || adoptionFee.signum() < 0) {
+        if (adoptionFee != null && adoptionFee.signum() < 0) {
             throw new IllegalArgumentException("Adoption fee must be zero or more.");
         }
-        if (adoptionFee.scale() > 2 && adoptionFee.stripTrailingZeros().scale() > 2) {
+        if (adoptionFee != null && adoptionFee.scale() > 2 && adoptionFee.stripTrailingZeros().scale() > 2) {
             throw new IllegalArgumentException("Adoption fee must be in whole cents.");
         }
         if (status == null) {
@@ -80,7 +90,15 @@ public final class Pet {
         this.spayedNeutered = spayedNeutered;
         this.adoptionFee = adoptionFee;
         this.photoPath = photoPath == null || photoPath.isBlank() ? "" : photoPath;
+        this.profileDetails = Objects.requireNonNull(profileDetails);
         this.status = status;
+    }
+
+    private static BigDecimal requireFee(BigDecimal fee) {
+        if (fee == null) {
+            throw new IllegalArgumentException("Adoption fee must be zero or more.");
+        }
+        return fee;
     }
 
     private static String requireText(String value, String fieldName) {
@@ -138,12 +156,17 @@ public final class Pet {
         return spayedNeutered;
     }
 
+    /** Returns the adoption fee, or null when the listing does not give an amount. */
     public BigDecimal getAdoptionFee() {
         return adoptionFee;
     }
 
     public String getPhotoPath() {
         return photoPath;
+    }
+
+    public PetProfileDetails getProfileDetails() {
+        return profileDetails;
     }
 
     public PetStatus getStatus() {

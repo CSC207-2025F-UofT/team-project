@@ -11,17 +11,12 @@ import java.awt.event.ComponentEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.util.EnumMap;
-import java.util.EnumSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
-import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
@@ -32,11 +27,9 @@ import javax.swing.ScrollPaneConstants;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
-import entity.Temperament;
 import interface_adapter.browse_pets.AgeFilterOption;
 import interface_adapter.browse_pets.BrowseChoices;
 import interface_adapter.browse_pets.BrowsePetsController;
-import interface_adapter.browse_pets.FilterLabels;
 import interface_adapter.browse_pets.GalleryViewModel;
 import interface_adapter.browse_pets.GalleryViewModelListener;
 import interface_adapter.browse_pets.PetCardData;
@@ -62,12 +55,11 @@ public class GalleryView extends JPanel implements GalleryViewModelListener {
     private final ViewPetDetailsController detailsController;
     private final JPanel cardGrid = new JPanel(new GridLayout(0, COLUMNS, GAP, GAP));
     private final JComboBox<AgeFilterOption> ageBox = new JComboBox<>(AgeFilterOption.values());
-    private final Map<Temperament, JCheckBox> temperamentBoxes = new EnumMap<>(Temperament.class);
     private final JComboBox<SexFilterOption> sexBox = new JComboBox<>(SexFilterOption.values());
     private final JTextField breedField = new JTextField(12);
-    private final JCheckBox noMedicalNeedsBox = new JCheckBox("Only cats with no medical needs");
-    private final JCheckBox vaccinatedBox = new JCheckBox("Only vaccinated cats");
-    private final JCheckBox spayedNeuteredBox = new JCheckBox("Only spayed or neutered cats");
+    private final JTextField colorField = new JTextField(12);
+    private final JComboBox<String> hairLengthBox =
+            new JComboBox<>(new String[]{"Any length", "Short", "Medium", "Long", "Hairless"});
     private boolean updating;
     private int columns = COLUMNS;
     private boolean showingCards;
@@ -134,32 +126,15 @@ public class GalleryView extends JPanel implements GalleryViewModelListener {
         panel.setBorder(BorderFactory.createEmptyBorder(GAP, GAP, GAP, GAP));
         panel.getAccessibleContext().setAccessibleName("Filters");
 
-        final JLabel ageLabel = new JLabel("Age");
-        ageLabel.setLabelFor(ageBox);
-        ageLabel.setDisplayedMnemonic(KeyEvent.VK_A);
-        ageBox.getAccessibleContext().setAccessibleName("Age filter");
+        addFilter(panel, "Breed", KeyEvent.VK_B, breedField);
+        addFilter(panel, "Age", KeyEvent.VK_A, ageBox);
+        addFilter(panel, "Sex", KeyEvent.VK_S, sexBox);
+        addFilter(panel, "Color", KeyEvent.VK_O, colorField);
+        addFilter(panel, "Hair length", KeyEvent.VK_H, hairLengthBox);
         ageBox.addActionListener(event -> applyFilters());
-        ageBox.setMaximumSize(new Dimension(Integer.MAX_VALUE, ageBox.getPreferredSize().height));
-        panel.add(ageLabel);
-        panel.add(ageBox);
-
-        panel.add(Box.createVerticalStrut(GAP));
-        final JLabel sexLabel = new JLabel("Sex");
-        sexLabel.setLabelFor(sexBox);
-        sexLabel.setDisplayedMnemonic(KeyEvent.VK_S);
-        sexBox.getAccessibleContext().setAccessibleName("Sex filter");
         sexBox.addActionListener(event -> applyFilters());
-        sexBox.setMaximumSize(new Dimension(Integer.MAX_VALUE, sexBox.getPreferredSize().height));
-        panel.add(sexLabel);
-        panel.add(sexBox);
-
-        panel.add(Box.createVerticalStrut(GAP));
-        final JLabel breedLabel = new JLabel("Breed (part of the name)");
-        breedLabel.setLabelFor(breedField);
-        breedLabel.setDisplayedMnemonic(KeyEvent.VK_B);
-        breedField.getAccessibleContext().setAccessibleName("Breed filter");
-        breedField.setMaximumSize(new Dimension(Integer.MAX_VALUE, breedField.getPreferredSize().height));
-        breedField.getDocument().addDocumentListener(new DocumentListener() {
+        hairLengthBox.addActionListener(event -> applyFilters());
+        final DocumentListener textFilterListener = new DocumentListener() {
             @Override
             public void insertUpdate(DocumentEvent event) {
                 applyFilters();
@@ -174,36 +149,10 @@ public class GalleryView extends JPanel implements GalleryViewModelListener {
             public void changedUpdate(DocumentEvent event) {
                 applyFilters();
             }
-        });
-        panel.add(breedLabel);
-        panel.add(breedField);
+        };
+        breedField.getDocument().addDocumentListener(textFilterListener);
+        colorField.getDocument().addDocumentListener(textFilterListener);
 
-        panel.add(Box.createVerticalStrut(GAP));
-        final JLabel temperamentLabel = new JLabel("Temperament (must have all)");
-        panel.add(temperamentLabel);
-        for (Temperament temperament : Temperament.values()) {
-            final JCheckBox box = new JCheckBox(FilterLabels.temperament(temperament));
-            box.getAccessibleContext().setAccessibleName("Temperament: " + FilterLabels.temperament(temperament));
-            box.addActionListener(event -> applyFilters());
-            temperamentBoxes.put(temperament, box);
-            panel.add(box);
-        }
-
-        panel.add(Box.createVerticalStrut(GAP));
-        noMedicalNeedsBox.setMnemonic(KeyEvent.VK_M);
-        noMedicalNeedsBox.getAccessibleContext().setAccessibleName("Only cats with no medical needs");
-        noMedicalNeedsBox.addActionListener(event -> applyFilters());
-        panel.add(noMedicalNeedsBox);
-        vaccinatedBox.setMnemonic(KeyEvent.VK_V);
-        vaccinatedBox.getAccessibleContext().setAccessibleName("Only vaccinated cats");
-        vaccinatedBox.addActionListener(event -> applyFilters());
-        panel.add(vaccinatedBox);
-        spayedNeuteredBox.setMnemonic(KeyEvent.VK_N);
-        spayedNeuteredBox.getAccessibleContext().setAccessibleName("Only spayed or neutered cats");
-        spayedNeuteredBox.addActionListener(event -> applyFilters());
-        panel.add(spayedNeuteredBox);
-
-        panel.add(Box.createVerticalStrut(GAP));
         final JButton clearButton = new JButton("Clear filters");
         clearButton.setMnemonic(KeyEvent.VK_C);
         clearButton.getAccessibleContext().setAccessibleName("Clear filters");
@@ -215,24 +164,29 @@ public class GalleryView extends JPanel implements GalleryViewModelListener {
         return panel;
     }
 
+    private static void addFilter(JPanel panel, String name, int mnemonic, JComponent control) {
+        final JLabel label = new JLabel(name);
+        label.setLabelFor(control);
+        label.setDisplayedMnemonic(mnemonic);
+        control.getAccessibleContext().setAccessibleName(name + " filter");
+        control.setMaximumSize(new Dimension(Integer.MAX_VALUE, control.getPreferredSize().height));
+        panel.add(label);
+        panel.add(control);
+        panel.add(Box.createVerticalStrut(GAP));
+    }
+
     private void applyFilters() {
         if (updating) {
             return;
-        }
-        final Set<Temperament> chosen = EnumSet.noneOf(Temperament.class);
-        for (Map.Entry<Temperament, JCheckBox> entry : temperamentBoxes.entrySet()) {
-            if (entry.getValue().isSelected()) {
-                chosen.add(entry.getKey());
-            }
         }
         final BrowseChoices choices = new BrowseChoices();
         choices.setAge((AgeFilterOption) ageBox.getSelectedItem());
         choices.setSex((SexFilterOption) sexBox.getSelectedItem());
         choices.setBreed(breedField.getText());
-        choices.setTemperaments(chosen);
-        choices.setNoMedicalNeedsOnly(noMedicalNeedsBox.isSelected());
-        choices.setVaccinatedOnly(vaccinatedBox.isSelected());
-        choices.setSpayedNeuteredOnly(spayedNeuteredBox.isSelected());
+        choices.setColor(colorField.getText());
+        if (hairLengthBox.getSelectedIndex() > 0) {
+            choices.setHairLength((String) hairLengthBox.getSelectedItem());
+        }
         controller.browse(choices);
     }
 
@@ -241,12 +195,8 @@ public class GalleryView extends JPanel implements GalleryViewModelListener {
         ageBox.setSelectedItem(AgeFilterOption.ANY);
         sexBox.setSelectedItem(SexFilterOption.ANY);
         breedField.setText("");
-        for (JCheckBox box : temperamentBoxes.values()) {
-            box.setSelected(false);
-        }
-        noMedicalNeedsBox.setSelected(false);
-        vaccinatedBox.setSelected(false);
-        spayedNeuteredBox.setSelected(false);
+        colorField.setText("");
+        hairLengthBox.setSelectedIndex(0);
         updating = false;
         applyFilters();
     }

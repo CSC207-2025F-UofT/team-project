@@ -199,7 +199,7 @@ public final class ManagePetView extends JPanel {
                 "Needs medication  " + yesOrNo(pet.needsMedication()),
                 "Vaccinated  " + yesOrNo(pet.isVaccinated()),
                 "Spayed/neutered  " + yesOrNo(pet.isSpayedNeutered()),
-                "Adoption fee  $" + pet.getAdoptionFee());
+                "Adoption fee  " + (pet.getAdoptionFee().isEmpty() ? "Not listed" : "$" + pet.getAdoptionFee()));
     }
 
     private static String readable(String value) {

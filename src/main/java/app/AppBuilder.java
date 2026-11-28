@@ -23,6 +23,7 @@ import data_access.FilePetDataAccessObject;
 import data_access.FileUserDataAccessObject;
 import data_access.InMemoryPetDataAccess;
 import data_access.PetCatalog;
+import data_access.StarterPetCatalog;
 import entity.Pet;
 import entity.UserFactory;
 import interface_adapter.ApplicationNavigator;
@@ -128,7 +129,7 @@ public final class AppBuilder {
         } else if (Files.exists(previousPetFile)) {
             initialPets = new FilePetDataAccessObject(previousPetFile).getPets();
         } else {
-            initialPets = InMemoryPetDataAccess.withSampleData().getAvailablePets();
+            initialPets = StarterPetCatalog.createPets();
         }
         final FilePetDataAccessObject pets = new FilePetDataAccessObject(petFile, initialPets);
         final UserFactory userFactory = new UserFactory();
@@ -150,8 +151,8 @@ public final class AppBuilder {
      * @return this builder
      */
     public AppBuilder addGalleryView() {
-        final InMemoryPetDataAccess sampleData = InMemoryPetDataAccess.withSampleData();
-        addGalleryView(sampleData, sampleData, null);
+        final InMemoryPetDataAccess starterData = new InMemoryPetDataAccess(StarterPetCatalog.createPets());
+        addGalleryView(starterData, starterData, null);
         return this;
     }
 

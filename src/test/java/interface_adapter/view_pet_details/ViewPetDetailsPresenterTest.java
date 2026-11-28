@@ -9,6 +9,7 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
+import data_access.StarterPetCatalog;
 import entity.Pet;
 import entity.PetSex;
 import entity.PetStatus;
@@ -37,10 +38,10 @@ class ViewPetDetailsPresenterTest {
         assertEquals("Miso", state.getName());
         assertEquals("Cat, Tabby, 2 years old", state.getSummary());
         assertTrue(state.getDetailLines().contains("Temperament: Calm, Good with kids"));
-        assertTrue(state.getDetailLines().contains("Health notes: Eats special food"));
-        assertTrue(state.getDetailLines().contains("Needs daily medication: Yes"));
-        assertTrue(state.getDetailLines().contains("Vaccinated: Yes"));
-        assertTrue(state.getDetailLines().contains("Spayed or neutered: No"));
+        assertTrue(state.getHealthLines().contains("Health notes: Eats special food"));
+        assertTrue(state.getHealthLines().contains("Needs daily medication: Yes"));
+        assertTrue(state.getHealthLines().contains("Vaccinated: Yes"));
+        assertTrue(state.getHealthLines().contains("Spayed or neutered: No"));
         assertTrue(state.getDetailLines().contains("Adoption fee: $150.00"));
         assertTrue(state.getDetailLines().contains("Status: Available"));
     }
@@ -50,7 +51,21 @@ class ViewPetDetailsPresenterTest {
         presenter.presentPet(new ViewPetDetailsOutputData(pet("", List.of())));
 
         assertTrue(viewModel.getState().getDetailLines().contains("Temperament: None listed"));
-        assertTrue(viewModel.getState().getDetailLines().contains("Health notes: None"));
+        assertTrue(viewModel.getState().getHealthLines().contains("Health notes: None"));
+    }
+
+    @Test
+    void starterProfileDisplaysTheVerifiedDetails() {
+        presenter.presentPet(new ViewPetDetailsOutputData(StarterPetCatalog.createPets().get(0)));
+
+        final PetDetailState state = viewModel.getState();
+        assertEquals("Piggy- CP", state.getName());
+        assertEquals(List.of("Breed: Snowshoe", "Age: Senior", "Sex: Female", "Color: Brown or Chocolate (Mostly)",
+                "Hair length: Short"), state.getBasicInfo());
+        assertTrue(state.getDetailLines().contains("Microchipped: Yes"));
+        assertTrue(state.getDetailLines().contains("Adoption fee: Not listed"));
+        assertTrue(state.getHealthLines().contains("Vaccinated: Yes"));
+        assertTrue(state.getHealthLines().contains("Spayed or neutered: Yes"));
     }
 
     @Test

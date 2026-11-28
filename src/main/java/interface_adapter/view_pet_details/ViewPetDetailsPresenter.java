@@ -1,12 +1,15 @@
 package interface_adapter.view_pet_details;
 
-import java.util.ArrayList;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import entity.Pet;
+import entity.PetProfileDetails;
 import entity.Temperament;
 import interface_adapter.ViewManagerModel;
+import interface_adapter.browse_pets.AgeFilterOption;
 import interface_adapter.browse_pets.FilterLabels;
 import use_case.view_pet_details.ViewPetDetailsOutputBoundary;
 import use_case.view_pet_details.ViewPetDetailsOutputData;
@@ -36,7 +39,9 @@ public class ViewPetDetailsPresenter implements ViewPetDetailsOutputBoundary {
         state.setPetId(pet.getId());
         state.setName(pet.getName());
         state.setSummary(summary(pet));
+        state.setBasicInfo(basicInfo(pet));
         state.setDetailLines(detailLines(pet));
+        state.setHealthLines(healthLines(pet));
         state.setPhotoPath(pet.getPhotoPath());
         viewModel.setState(state);
         viewModel.notifyStateChanged();
@@ -61,17 +66,33 @@ public class ViewPetDetailsPresenter implements ViewPetDetailsOutputBoundary {
         return capitalize(pet.getSpecies().name()) + ", " + pet.getBreed() + ", " + age;
     }
 
+    private List<String> basicInfo(Pet pet) {
+        final PetProfileDetails profile = pet.getProfileDetails();
+        return List.of("Breed: " + pet.getBreed(),
+                "Age: " + AgeFilterOption.forAge(pet.getAgeYears()).getLabel(),
+                "Sex: " + capitalize(pet.getSex().name()),
+                "Color: " + listedOrUnknown(profile.getColor()),
+                "Hair length: " + listedOrUnknown(profile.getHairLength()));
+    }
+
     private List<String> detailLines(Pet pet) {
-        final List<String> lines = new ArrayList<>();
-        lines.add("Sex: " + capitalize(pet.getSex().name()));
-        lines.add("Temperament: " + temperaments(pet));
-        lines.add("Health notes: " + (pet.getHealthNotes().isEmpty() ? "None" : pet.getHealthNotes()));
-        lines.add("Needs daily medication: " + yesNo(pet.needsMedication()));
-        lines.add("Vaccinated: " + yesNo(pet.isVaccinated()));
-        lines.add("Spayed or neutered: " + yesNo(pet.isSpayedNeutered()));
-        lines.add("Adoption fee: $" + pet.getAdoptionFee().setScale(2, java.math.RoundingMode.HALF_UP));
-        lines.add("Status: " + capitalize(pet.getStatus().name()));
-        return lines;
+        final Boolean microchipped = pet.getProfileDetails().getMicrochipped();
+        final BigDecimal fee = pet.getAdoptionFee();
+        return List.of("Microchipped: " + (microchipped == null ? "Not listed" : yesNo(microchipped)),
+                "Temperament: " + temperaments(pet),
+                "Adoption fee: " + (fee == null ? "Not listed" : "$" + fee.setScale(2, RoundingMode.HALF_UP)),
+                "Status: " + capitalize(pet.getStatus().name()));
+    }
+
+    private List<String> healthLines(Pet pet) {
+        return List.of("Vaccinated: " + yesNo(pet.isVaccinated()),
+                "Spayed or neutered: " + yesNo(pet.isSpayedNeutered()),
+                "Needs daily medication: " + yesNo(pet.needsMedication()),
+                "Health notes: " + (pet.getHealthNotes().isEmpty() ? "None" : pet.getHealthNotes()));
+    }
+
+    private static String listedOrUnknown(String value) {
+        return value.isEmpty() ? "Not listed" : value;
     }
 
     private String temperaments(Pet pet) {

@@ -12,6 +12,8 @@ public class BrowseChoices {
     private AgeFilterOption age = AgeFilterOption.ANY;
     private SexFilterOption sex = SexFilterOption.ANY;
     private String breed = "";
+    private String color = "";
+    private String hairLength = "";
     private Set<Temperament> temperaments = EnumSet.noneOf(Temperament.class);
     private boolean noMedicalNeedsOnly;
     private boolean vaccinatedOnly;
@@ -69,6 +71,22 @@ public class BrowseChoices {
      */
     public void setBreed(String breed) {
         this.breed = breed == null ? "" : breed;
+    }
+
+    public String getColor() {
+        return color;
+    }
+
+    public void setColor(String color) {
+        this.color = color;
+    }
+
+    public String getHairLength() {
+        return hairLength;
+    }
+
+    public void setHairLength(String hairLength) {
+        this.hairLength = hairLength;
     }
 
     /**

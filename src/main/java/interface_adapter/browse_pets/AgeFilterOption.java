@@ -7,13 +7,13 @@ public enum AgeFilterOption {
     /** No age filter. */
     ANY("Any age", null, null),
     /** Kittens under one year old. */
-    UNDER_ONE("Under 1 year", 0, 0),
+    UNDER_ONE("Kitten", 0, 0),
     /** One to three years old. */
-    ONE_TO_THREE("1 to 3 years", 1, 3),
+    ONE_TO_THREE("Young", 1, 3),
     /** Four to seven years old. */
-    FOUR_TO_SEVEN("4 to 7 years", 4, 7),
+    FOUR_TO_SEVEN("Adult", 4, 7),
     /** Eight years or older. */
-    EIGHT_PLUS("8 years or older", 8, 40);
+    EIGHT_PLUS("Senior", 8, Integer.MAX_VALUE);
 
     private final String label;
     private final Integer minYears;
@@ -23,6 +23,16 @@ public enum AgeFilterOption {
         this.label = label;
         this.minYears = minYears;
         this.maxYears = maxYears;
+    }
+
+    /** Returns the life stage for an age in whole years. */
+    public static AgeFilterOption forAge(int years) {
+        for (AgeFilterOption option : values()) {
+            if (option.minYears != null && years >= option.minYears && years <= option.maxYears) {
+                return option;
+            }
+        }
+        throw new IllegalArgumentException("Age cannot be negative.");
     }
 
     /**

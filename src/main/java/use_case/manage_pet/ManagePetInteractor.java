@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.UUID;
 
 import entity.Pet;
+import entity.PetProfileDetails;
 import entity.PetSex;
 import entity.PetStatus;
 import entity.Species;
@@ -37,7 +38,8 @@ public final class ManagePetInteractor implements ManagePetInputBoundary {
     public void add(ManagePetInputData inputData) {
         final Pet pet;
         try {
-            pet = createPet(UUID.randomUUID().toString(), inputData, PetStatus.AVAILABLE);
+            pet = createPet(UUID.randomUUID().toString(), inputData, PetStatus.AVAILABLE,
+                    PetProfileDetails.UNLISTED, parseFee(inputData.getAdoptionFee()));
             dataAccess.add(pet);
         }
         catch (IllegalArgumentException exception) {
@@ -60,7 +62,10 @@ public final class ManagePetInteractor implements ManagePetInputBoundary {
                 presenter.prepareFailView(PET_MISSING);
                 return;
             }
-            revised = createPet(existing.getId(), inputData, existing.getStatus());
+            final String enteredFee = inputData.getAdoptionFee();
+            final BigDecimal fee = existing.getAdoptionFee() == null && enteredFee != null && enteredFee.isBlank()
+                    ? null : parseFee(enteredFee);
+            revised = createPet(existing.getId(), inputData, existing.getStatus(), existing.getProfileDetails(), fee);
             if (!dataAccess.update(revised)) {
                 presenter.prepareFailView(PET_MISSING);
                 return;
@@ -104,7 +109,8 @@ public final class ManagePetInteractor implements ManagePetInputBoundary {
         presenter.prepareSuccessView(new ManagePetOutputData(pets, message));
     }
 
-    private static Pet createPet(String petId, ManagePetInputData inputData, PetStatus status) {
+    private static Pet createPet(String petId, ManagePetInputData inputData, PetStatus status,
+                                 PetProfileDetails profileDetails, BigDecimal adoptionFee) {
         final Species species = parseChoice(Species.class, inputData.getSpecies(), "Choose a species.");
         final PetSex sex = parseChoice(PetSex.class, inputData.getSex(), "Choose the pet's sex.");
         final List<Temperament> temperamentTags = new ArrayList<>();
@@ -113,8 +119,8 @@ public final class ManagePetInteractor implements ManagePetInputBoundary {
         }
         return new Pet(petId, inputData.getName(), species, inputData.getBreed(), parseAge(inputData.getAgeYears()),
                 sex, temperamentTags, inputData.getHealthNotes(), inputData.needsMedication(),
-                inputData.isVaccinated(), inputData.isSpayedNeutered(), parseFee(inputData.getAdoptionFee()),
-                inputData.getPhotoPath(), status);
+                inputData.isVaccinated(), inputData.isSpayedNeutered(), adoptionFee,
+                inputData.getPhotoPath(), status, profileDetails);
     }
 
     private static int parseAge(String age) {

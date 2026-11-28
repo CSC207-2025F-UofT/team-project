@@ -6,13 +6,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.JButton;
-import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
+import javax.swing.JComponent;
 import javax.swing.JTextField;
 
 import org.junit.jupiter.api.Test;
 
 import data_access.InMemoryPetDataAccess;
+import data_access.StarterPetCatalog;
 import interface_adapter.ViewManagerModel;
 import interface_adapter.browse_pets.BrowsePetsController;
 import interface_adapter.browse_pets.BrowsePetsPresenter;
@@ -28,7 +29,7 @@ class GalleryViewFiltersTest {
     private final GalleryView view = buildView();
 
     private GalleryView buildView() {
-        final InMemoryPetDataAccess data = InMemoryPetDataAccess.withSampleData();
+        final InMemoryPetDataAccess data = new InMemoryPetDataAccess(StarterPetCatalog.createPets());
         final GalleryViewModel viewModel = new GalleryViewModel();
         final BrowsePetsController controller = new BrowsePetsController(
                 new BrowsePetsInteractor(data, new BrowsePetsPresenter(viewModel)));
@@ -54,18 +55,9 @@ class GalleryViewFiltersTest {
         return (int) all(view, JButton.class).stream().filter(b -> b.getText().equals("View details")).count();
     }
 
-    @SuppressWarnings("unchecked")
-    private JComboBox<SexFilterOption> sexBox() {
-        for (JComboBox<?> box : all(view, JComboBox.class)) {
-            if ("Sex filter".equals(box.getAccessibleContext().getAccessibleName())) {
-                return (JComboBox<SexFilterOption>) box;
-            }
-        }
-        throw new AssertionError("No sex box");
-    }
-
-    private JCheckBox box(String text) {
-        return all(view, JCheckBox.class).stream().filter(b -> b.getText().equals(text)).findFirst().orElseThrow();
+    private <T extends JComponent> T filter(Class<T> type, String name) {
+        return all(view, type).stream().filter(field -> name.equals(field.getAccessibleContext().getAccessibleName()))
+                .findFirst().orElseThrow();
     }
 
     @Test
@@ -73,42 +65,47 @@ class GalleryViewFiltersTest {
         view.loadAll();
         final int all = cardCount();
 
-        sexBox().setSelectedItem(SexFilterOption.MALE);
+        filter(JComboBox.class, "Sex filter").setSelectedItem(SexFilterOption.MALE);
 
-        assertEquals(2, cardCount());
-        assertEquals(4, all);
+        assertEquals(0, cardCount());
+        assertEquals(1, all);
     }
 
     @Test
     void breedTextNarrowsTheCards() {
         view.loadAll();
 
-        all(view, JTextField.class).get(0).setText("siam");
-
+        final JTextField breed = filter(JTextField.class, "Breed filter");
+        breed.setText("siam");
+        assertEquals(0, cardCount());
+        breed.setText("snow");
         assertEquals(1, cardCount());
     }
 
     @Test
     void clearFiltersBringsEveryCatBack() {
         view.loadAll();
-        sexBox().setSelectedItem(SexFilterOption.MALE);
-        all(view, JTextField.class).get(0).setText("siam");
-        box("Only vaccinated cats").setSelected(true);
+        filter(JComboBox.class, "Sex filter").setSelectedItem(SexFilterOption.MALE);
+        filter(JTextField.class, "Breed filter").setText("siam");
+        filter(JTextField.class, "Color filter").setText("black");
+        filter(JComboBox.class, "Hair length filter").setSelectedItem("Long");
 
         all(view, JButton.class).stream().filter(b -> b.getText().equals("Clear filters"))
                 .findFirst().orElseThrow().doClick();
 
-        assertEquals(4, cardCount());
-        assertEquals("", all(view, JTextField.class).get(0).getText());
+        assertEquals(1, cardCount());
+        assertEquals("", filter(JTextField.class, "Breed filter").getText());
     }
 
     @Test
-    void vaccinatedBoxKeepsOnlyVaccinatedCats() {
-        // Every sample cat is vaccinated, so ticking the box keeps all of them.
+    void colorAndHairLengthWorkTogether() {
         view.loadAll();
 
-        box("Only vaccinated cats").doClick();
-
-        assertEquals(4, cardCount());
+        filter(JTextField.class, "Color filter").setText("CHOCOLATE");
+        final JComboBox<?> hair = filter(JComboBox.class, "Hair length filter");
+        hair.setSelectedItem("Long");
+        assertEquals(0, cardCount());
+        hair.setSelectedItem("Short");
+        assertEquals(1, cardCount());
     }
 }

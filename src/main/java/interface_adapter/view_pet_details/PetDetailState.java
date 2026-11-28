@@ -10,6 +10,8 @@ public class PetDetailState {
     private String petId = "";
     private String name = "";
     private String summary = "";
+    private List<String> basicInfo = List.of();
+    private List<String> healthLines = List.of();
     private List<String> detailLines = new ArrayList<>();
     private String errorMessage = "";
     private String photoPath = "";
@@ -76,8 +78,24 @@ public class PetDetailState {
         this.summary = summary;
     }
 
+    public List<String> getBasicInfo() {
+        return basicInfo;
+    }
+
+    public void setBasicInfo(List<String> basicInfo) {
+        this.basicInfo = List.copyOf(basicInfo);
+    }
+
+    public List<String> getHealthLines() {
+        return healthLines;
+    }
+
+    public void setHealthLines(List<String> healthLines) {
+        this.healthLines = List.copyOf(healthLines);
+    }
+
     /**
-     * Returns the profile lines, each like "Vaccinated: Yes".
+     * Returns the lines in the Details section.
      *
      * @return the lines in display order
      */

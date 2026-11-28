@@ -18,7 +18,8 @@ import javax.swing.SwingWorker;
 final class ListingPhoto {
     private static final Path DIRECTORY = Path.of(System.getProperty("user.home"), ".pawportal", "breed-photos");
     private static final String REFERENCE_LABEL = "TheCatAPI reference";
-    private static final String DEMO_PREFIX = "classpath:/demo-cats/";
+    private static final String RESOURCE_PREFIX = "classpath:";
+    private static final String DEMO_PREFIX = RESOURCE_PREFIX + "/demo-cats/";
 
     private ListingPhoto() {
     }
@@ -48,8 +49,9 @@ final class ListingPhoto {
     }
 
     static BufferedImage read(String path) throws IOException {
-        if (path.startsWith(DEMO_PREFIX)) {
-            try (InputStream resource = ListingPhoto.class.getResourceAsStream(path.substring("classpath:".length()))) {
+        if (path.startsWith(RESOURCE_PREFIX)) {
+            try (InputStream resource = ListingPhoto.class.getResourceAsStream(
+                    path.substring(RESOURCE_PREFIX.length()))) {
                 return resource == null ? null : ImageIO.read(resource);
             }
         }

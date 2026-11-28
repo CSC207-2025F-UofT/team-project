@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.event.KeyEvent;
+import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
@@ -21,7 +22,7 @@ import interface_adapter.view_pet_details.PetDetailViewModel;
 import interface_adapter.view_pet_details.PetDetailViewModelListener;
 
 /**
- * The page for one cat: name, summary, photo placeholder, the full profile, and a Back button.
+ * Shows one cat's photo, profile sections, and adoption actions.
  */
 public class PetDetailView extends JPanel implements PetDetailViewModelListener {
     private static final int GAP = 12;
@@ -164,17 +165,14 @@ public class PetDetailView extends JPanel implements PetDetailViewModelListener 
         photoLabel.getAccessibleContext().setAccessibleName("Cat photo");
         photoLabel.setHorizontalTextPosition(SwingConstants.CENTER);
         photoLabel.setVerticalTextPosition(SwingConstants.BOTTOM);
-        ListingPhoto.showFilled(photoLabel, state.getPhotoPath(), PHOTO_WIDTH - 2, PHOTO_HEIGHT);
+        ListingPhoto.show(photoLabel, state.getPhotoPath(), PHOTO_WIDTH - 2, PHOTO_HEIGHT);
         photoLabel.setVisible(state.getErrorMessage().isEmpty());
         errorLabel.setText(state.getErrorMessage());
 
         linesPanel.removeAll();
-        for (String line : state.getDetailLines()) {
-            final JLabel label = new JLabel(line);
-            label.setFont(label.getFont().deriveFont(15f));
-            label.getAccessibleContext().setAccessibleName(line);
-            linesPanel.add(label);
-        }
+        addSection("Basic info", state.getBasicInfo());
+        addSection("Details", state.getDetailLines());
+        addSection("Health", state.getHealthLines());
         linesPanel.revalidate();
         linesPanel.repaint();
         showApplyButtonIfPossible();
@@ -183,5 +181,24 @@ public class PetDetailView extends JPanel implements PetDetailViewModelListener 
         if (petShownHandler != null && !state.getPetId().isEmpty() && state.getErrorMessage().isEmpty()) {
             petShownHandler.accept(state.getPetId());
         }
+    }
+
+    private void addSection(String title, List<String> lines) {
+        if (lines.isEmpty()) {
+            return;
+        }
+        final JLabel heading = new JLabel(title);
+        heading.setFont(heading.getFont().deriveFont(Font.BOLD, 18f));
+        heading.setAlignmentX(LEFT_ALIGNMENT);
+        linesPanel.add(heading);
+        linesPanel.add(Box.createVerticalStrut(4));
+        for (String line : lines) {
+            final JLabel label = new JLabel(line);
+            label.setFont(label.getFont().deriveFont(15f));
+            label.getAccessibleContext().setAccessibleName(line);
+            label.setAlignmentX(LEFT_ALIGNMENT);
+            linesPanel.add(label);
+        }
+        linesPanel.add(Box.createVerticalStrut(GAP));
     }
 }

@@ -54,6 +54,20 @@ class FilePetDataAccessObjectTest {
     }
 
     @Test
+    void starterProfileSurvivesReloadWithAnUnlistedFee() {
+        final Path path = folder.resolve("pets.json");
+        final Pet piggy = StarterPetCatalog.createPets().get(0);
+        new FilePetDataAccessObject(path).add(piggy);
+
+        final Pet loaded = new FilePetDataAccessObject(path).findById(piggy.getId());
+        assertEquals("Brown or Chocolate (Mostly)", loaded.getProfileDetails().getColor());
+        assertEquals("Short", loaded.getProfileDetails().getHairLength());
+        assertEquals(Boolean.TRUE, loaded.getProfileDetails().getMicrochipped());
+        assertEquals(piggy.getPhotoPath(), loaded.getPhotoPath());
+        assertNull(loaded.getAdoptionFee());
+    }
+
+    @Test
     void namesPetsForTrackApplications() {
         final FilePetDataAccessObject pets = new FilePetDataAccessObject(folder.resolve("pets.json"));
         pets.add(pet("Mochi", PetStatus.AVAILABLE));

@@ -1,6 +1,7 @@
 package data_access;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
@@ -15,6 +16,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import entity.Pet;
+import entity.PetProfileDetails;
 import entity.PetSex;
 import entity.PetStatus;
 import entity.Species;
@@ -144,11 +146,14 @@ public class FilePetDataAccessObject implements ManagePetDataAccessInterface, Br
         for (int i = 0; i < tags.length(); i++) {
             temperament.add(Temperament.valueOf(tags.getString(i)));
         }
+        final BigDecimal fee = json.isNull("adoptionFee") ? null : json.getBigDecimal("adoptionFee");
         return new Pet(json.getString("id"), json.getString("name"), Species.valueOf(json.getString("species")),
                 json.getString("breed"), json.getInt("ageYears"), PetSex.valueOf(json.getString("sex")), temperament,
                 json.getString("healthNotes"), json.getBoolean("needsMedication"), json.getBoolean("vaccinated"),
-                json.getBoolean("spayedNeutered"), json.getBigDecimal("adoptionFee"), json.getString("photoPath"),
-                PetStatus.valueOf(json.getString("status")));
+                json.getBoolean("spayedNeutered"), fee, json.getString("photoPath"),
+                PetStatus.valueOf(json.getString("status")),
+                new PetProfileDetails(json.optString("color"), json.optString("hairLength"),
+                        json.isNull("microchipped") ? null : json.getBoolean("microchipped")));
     }
 
     private JSONObject writePet(Pet pet) {
@@ -168,9 +173,13 @@ public class FilePetDataAccessObject implements ManagePetDataAccessInterface, Br
         json.put("needsMedication", pet.needsMedication());
         json.put("vaccinated", pet.isVaccinated());
         json.put("spayedNeutered", pet.isSpayedNeutered());
-        json.put("adoptionFee", pet.getAdoptionFee().toString());
+        json.put("adoptionFee", pet.getAdoptionFee() == null ? JSONObject.NULL : pet.getAdoptionFee().toPlainString());
         json.put("photoPath", pet.getPhotoPath());
         json.put("status", pet.getStatus().name());
+        final PetProfileDetails details = pet.getProfileDetails();
+        json.put("color", details.getColor());
+        json.put("hairLength", details.getHairLength());
+        json.put("microchipped", details.getMicrochipped());
         return json;
     }
 
