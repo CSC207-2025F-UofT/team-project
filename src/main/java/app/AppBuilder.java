@@ -117,6 +117,19 @@ public final class AppBuilder {
     private ApplicationNavigator applicationNavigator;
     private PetDetailView petDetailView;
 
+    /**
+     * Returns the applications file in the data folder, next to users, pets and preferences.
+     * Older versions kept applications in the folder the program was started from; if only that
+     * file exists, it is copied into the data folder once so no application is lost.
+     */
+    static Path applicationFileIn(Path dataDirectory, Path previousFile) throws IOException {
+        final Path applicationFile = dataDirectory.resolve("applications.json");
+        if (!Files.exists(applicationFile) && Files.exists(previousFile)) {
+            Files.copy(previousFile, applicationFile);
+        }
+        return applicationFile;
+    }
+
     static AppBuilder forDataDirectory(Path dataDirectory, Path applicationDirectory, String inviteCode)
             throws IOException {
         Files.createDirectories(dataDirectory);
@@ -141,7 +154,8 @@ public final class AppBuilder {
         builder.addGalleryView(pets, catalog, builder.buildAccountBar(users));
         builder.addCompatibilityViews(catalog,
                 new FileAdopterPreferencesDataAccessObject(dataDirectory.resolve("adopter_preferences.json")));
-        return builder.addApplicationViews(pets, users, applicationDirectory.resolve("applications.json"));
+        return builder.addApplicationViews(pets, users,
+                applicationFileIn(dataDirectory, applicationDirectory.resolve("applications.json")));
     }
 
     /**
