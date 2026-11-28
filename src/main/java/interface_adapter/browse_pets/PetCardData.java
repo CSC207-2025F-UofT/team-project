@@ -8,6 +8,7 @@ public class PetCardData {
     private final String name;
     private final String summary;
     private final String status;
+    private final String photoPath;
 
     /**
      * Creates the card text.
@@ -18,10 +19,27 @@ public class PetCardData {
      * @param status the adoption status written out in words
      */
     public PetCardData(String petId, String name, String summary, String status) {
+        this(petId, name, summary, status, "");
+    }
+
+    /**
+     * Creates the card with its optional saved photo.
+     * @param petId the pet's id
+     * @param name the pet's name
+     * @param summary the short description
+     * @param status the adoption status
+     * @param photoPath the saved photo path
+     */
+    public PetCardData(String petId, String name, String summary, String status, String photoPath) {
         this.petId = petId;
         this.name = name;
         this.summary = summary;
         this.status = status;
+        this.photoPath = photoPath;
+    }
+
+    public String getPhotoPath() {
+        return photoPath;
     }
 
     /**

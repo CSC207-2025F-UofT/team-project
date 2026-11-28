@@ -183,7 +183,13 @@ public class GalleryView extends JPanel implements GalleryViewModelListener {
         card.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(Color.GRAY),
                 BorderFactory.createEmptyBorder(10, 10, 10, 10)));
-        card.setPreferredSize(new Dimension(180, 140));
+        card.setPreferredSize(new Dimension(180, 205));
+        final JLabel photo = new JLabel();
+        photo.setHorizontalTextPosition(JLabel.CENTER);
+        photo.setVerticalTextPosition(JLabel.BOTTOM);
+        photo.getAccessibleContext().setAccessibleName("Cat photo");
+        ListingPhoto.show(photo, data.getPhotoPath(), 140, 85);
+        card.add(photo);
         card.add(new JLabel(data.getName()));
         card.add(new JLabel(data.getSummary()));
         card.add(new JLabel(data.getStatus()));

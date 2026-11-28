@@ -117,10 +117,10 @@ public class PetDetailView extends JPanel implements PetDetailViewModelListener 
         final PetDetailState state = viewModel.getState();
         nameLabel.setText(state.getName());
         summaryLabel.setText(state.getSummary());
-        final String photoDescription = state.getName().isEmpty()
-                ? "No photo" : "Photo of " + state.getName() + " is not available yet";
         photoLabel.getAccessibleContext().setAccessibleName("Cat photo");
-        photoLabel.getAccessibleContext().setAccessibleDescription(photoDescription);
+        photoLabel.setHorizontalTextPosition(SwingConstants.CENTER);
+        photoLabel.setVerticalTextPosition(SwingConstants.BOTTOM);
+        ListingPhoto.show(photoLabel, state.getPhotoPath(), 230, 130);
         photoLabel.setVisible(state.getErrorMessage().isEmpty());
         errorLabel.setText(state.getErrorMessage());
 

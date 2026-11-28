@@ -12,6 +12,15 @@ public class PetDetailState {
     private String summary = "";
     private List<String> detailLines = new ArrayList<>();
     private String errorMessage = "";
+    private String photoPath = "";
+
+    public String getPhotoPath() {
+        return photoPath;
+    }
+
+    public void setPhotoPath(String photoPath) {
+        this.photoPath = photoPath;
+    }
 
     /**
      * Returns the id of the cat on show.
