@@ -20,6 +20,7 @@ class LogoutPresenterTest {
         loginViewModel.getState().setLoginError("Wrong password");
         final SubmitApplicationViewModel submitViewModel = new SubmitApplicationViewModel();
         submitViewModel.getState().setAdopterId("u1");
+        submitViewModel.getState().setPetId("p1");
         final TrackApplicationsViewModel trackViewModel = new TrackApplicationsViewModel();
         trackViewModel.getState().setAdopterId("u1");
         viewManagerModel.setActiveView("manage pets");
@@ -28,6 +29,7 @@ class LogoutPresenterTest {
                 .prepareSuccessView(new LogoutOutputData(true));
 
         assertEquals("", submitViewModel.getState().getAdopterId());
+        assertEquals("", submitViewModel.getState().getPetId());
         assertEquals("", trackViewModel.getState().getAdopterId());
         assertNull(loginViewModel.getState().getLoginError());
         assertEquals(GalleryViewModel.VIEW_NAME, viewManagerModel.getActiveView());

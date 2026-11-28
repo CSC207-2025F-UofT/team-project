@@ -4,7 +4,9 @@ import interface_adapter.ViewManagerModel;
 import interface_adapter.browse_pets.GalleryViewModel;
 import interface_adapter.login.LoginState;
 import interface_adapter.login.LoginViewModel;
+import interface_adapter.submit_application.SubmitApplicationState;
 import interface_adapter.submit_application.SubmitApplicationViewModel;
+import interface_adapter.track_applications.TrackApplicationsState;
 import interface_adapter.track_applications.TrackApplicationsViewModel;
 import use_case.logout.LogoutOutputBoundary;
 import use_case.logout.LogoutOutputData;
@@ -41,8 +43,16 @@ public class LogoutPresenter implements LogoutOutputBoundary {
         loginViewModel.setState(new LoginState());
         loginViewModel.notifyStateChanged();
 
-        submitApplicationViewModel.getState().setAdopterId("");
-        trackApplicationsViewModel.getState().setAdopterId("");
+        final SubmitApplicationState submitState = submitApplicationViewModel.getState();
+        submitState.setAdopterId("");
+        submitState.setPetId("");
+        submitState.setPetName("");
+        submitState.setError("");
+        submitState.setSuccessMessage("");
+        submitApplicationViewModel.notifyStateChanged();
+
+        trackApplicationsViewModel.setState(new TrackApplicationsState());
+        trackApplicationsViewModel.notifyStateChanged();
 
         viewManagerModel.setActiveView(GalleryViewModel.VIEW_NAME);
     }
