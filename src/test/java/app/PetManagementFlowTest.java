@@ -49,12 +49,12 @@ class PetManagementFlowTest {
         SwingUtilities.invokeAndWait(() -> {
             final JPanel views = builder.buildViews();
             assertScreen(views, GalleryView.class);
-            click(activeCard(views), "Shelter login");
+            click(activeCard(views), "Log in");
             assertScreen(views, LoginView.class);
             login(views, ADOPTER_EMAIL, PASSWORD);
             assertScreen(views, GalleryView.class);
 
-            click(activeCard(views), "Shelter login");
+            click(activeCard(views), "Log in");
             click(activeCard(views), "Create shelter account");
             assertScreen(views, AdminSignupView.class);
             fill(activeCard(views), "Admin", "admin-1", ADMIN_EMAIL, PASSWORD, PASSWORD, INVITE);
@@ -66,7 +66,7 @@ class PetManagementFlowTest {
             assertScreen(views, ManagePetView.class);
             click(activeCard(views), "Sign out");
             assertScreen(views, GalleryView.class);
-            click(activeCard(views), "Shelter login");
+            click(activeCard(views), "Log in");
             assertTrue(findAll(activeCard(views), JTextField.class).stream()
                     .allMatch(field -> field.getDocument().getLength() == 0));
         });

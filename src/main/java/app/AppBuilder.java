@@ -84,6 +84,7 @@ import use_case.signup.SignupInteractor;
 import use_case.submit_application.SubmitApplicationInteractor;
 import use_case.track_applications.TrackApplicationsInteractor;
 import use_case.update_application_status.UpdateApplicationInteractor;
+import view.AccountBar;
 import view.AdminSignupView;
 import view.CompatibilityPanel;
 import view.GalleryView;
@@ -133,9 +134,7 @@ public final class AppBuilder {
         builder.addShelterLogin(users, userFactory, inviteCode);
         builder.addPetManagementView(pets, users);
         final PetCatalog catalog = new PetCatalog(pets);
-        builder.addGalleryView(pets, catalog,
-                builder.navigationButton("Shelter login", LoginViewModel.VIEW_NAME),
-                builder.navigationButton("My profile", PreferencesViewModel.VIEW_NAME));
+        builder.addGalleryView(pets, catalog, builder.buildAccountBar(users));
         builder.addCompatibilityViews(catalog,
                 new FileAdopterPreferencesDataAccessObject(dataDirectory.resolve("adopter_preferences.json")));
         return builder.addApplicationViews(pets, users, applicationDirectory.resolve("applications.json"));
@@ -148,12 +147,12 @@ public final class AppBuilder {
      */
     public AppBuilder addGalleryView() {
         final InMemoryPetDataAccess sampleData = InMemoryPetDataAccess.withSampleData();
-        addGalleryView(sampleData, sampleData);
+        addGalleryView(sampleData, sampleData, null);
         return this;
     }
 
     private void addGalleryView(BrowsePetsDataAccessInterface petData, ViewPetDetailsDataAccessInterface detailData,
-                                JButton... navigationButtons) {
+                                AccountBar accountBar) {
         final PetDetailViewModel detailViewModel = new PetDetailViewModel();
         final ViewPetDetailsPresenter detailsPresenter =
                 new ViewPetDetailsPresenter(detailViewModel, viewManagerModel);
@@ -169,8 +168,7 @@ public final class AppBuilder {
         final BrowsePetsInteractor interactor = new BrowsePetsInteractor(petData, presenter);
         final BrowsePetsController controller = new BrowsePetsController(interactor);
         final GalleryView galleryView = new GalleryView(controller, galleryViewModel, detailsController);
-        final JPanel gallery = navigationButtons.length == 0
-                ? galleryView : withNavigation(galleryView, navigationButtons);
+        final JPanel gallery = accountBar == null ? galleryView : withTopBar(accountBar, galleryView);
         views.add(gallery, GalleryView.VIEW_NAME);
         viewManagerModel.addListener(() -> {
             if (GalleryView.VIEW_NAME.equals(viewManagerModel.getActiveView())) {
@@ -203,8 +201,53 @@ public final class AppBuilder {
 
     private void connectApplyButton() {
         if (petDetailView != null && applicationNavigator != null) {
-            petDetailView.setApplyHandler(applicationNavigator::startApplication);
+            petDetailView.setApplyHandler((petId, petName) -> {
+                if (currentAdopterId().isEmpty()) {
+                    viewManagerModel.setActiveView(LoginViewModel.VIEW_NAME);
+                } else {
+                    applicationNavigator.startApplication(petId, petName);
+                }
+            });
         }
+    }
+
+    private String currentAdopterId() {
+        final String adopterId = submitViewModel.getState().getAdopterId();
+        return adopterId == null ? "" : adopterId;
+    }
+
+    /**
+     * Builds the strip at the top of the gallery. It shows Log in to a visitor, and the adopter's name with
+     * My profile, My applications and Sign out once someone is signed in. It is refreshed every time the gallery
+     * is shown.
+     */
+    private AccountBar buildAccountBar(FileUserDataAccessObject users) {
+        final AccountBar bar = new AccountBar(
+                () -> viewManagerModel.setActiveView(LoginViewModel.VIEW_NAME),
+                () -> viewManagerModel.setActiveView(PreferencesViewModel.VIEW_NAME),
+                () -> {
+                    if (applicationNavigator != null) {
+                        applicationNavigator.showMyApplications();
+                    }
+                },
+                () -> {
+                    users.setCurrentUserId(null);
+                    submitViewModel.getState().setAdopterId("");
+                    trackViewModel.getState().setAdopterId("");
+                    viewManagerModel.setActiveView(GalleryView.VIEW_NAME);
+                });
+        viewManagerModel.addListener(() -> {
+            if (GalleryView.VIEW_NAME.equals(viewManagerModel.getActiveView())) {
+                final String adopterId = currentAdopterId();
+                if (adopterId.isEmpty()) {
+                    bar.showGuest();
+                } else {
+                    final String name = users.getUserName(adopterId);
+                    bar.showSignedIn(name == null ? "your account" : name);
+                }
+            }
+        });
+        return bar;
     }
 
     private void addShelterLogin(FileUserDataAccessObject users, UserFactory userFactory, String inviteCode) {
@@ -268,6 +311,13 @@ public final class AppBuilder {
         final JButton button = new JButton(label);
         button.addActionListener(event -> viewManagerModel.setActiveView(destination));
         return button;
+    }
+
+    private static JPanel withTopBar(JPanel bar, JPanel screen) {
+        final JPanel panel = new JPanel(new BorderLayout());
+        panel.add(bar, BorderLayout.NORTH);
+        panel.add(screen, BorderLayout.CENTER);
+        return panel;
     }
 
     private static JPanel withNavigation(JPanel screen, JButton... buttons) {
@@ -388,6 +438,7 @@ public final class AppBuilder {
         final JMenuItem gallery = new JMenuItem("Pet Gallery");
         gallery.addActionListener(event -> viewManagerModel.setActiveView(GalleryView.VIEW_NAME));
         final JMenuItem myApplications = new JMenuItem("My Applications");
+        myApplications.setEnabled(false);
         myApplications.addActionListener(event -> applicationNavigator.showMyApplications());
 
         final JMenu menu = new JMenu("Go to");
@@ -397,6 +448,7 @@ public final class AppBuilder {
         menuBar.add(menu);
         viewManagerModel.addListener(() -> {
             final Object activeView = viewManagerModel.getActiveView();
+            myApplications.setEnabled(!currentAdopterId().isEmpty());
             menu.setEnabled(!ManagePetViewModel.VIEW_NAME.equals(activeView)
                     && !ReviewApplicationsViewModel.VIEW_NAME.equals(activeView)
                     && !UpdateApplicationViewModel.VIEW_NAME.equals(activeView)
