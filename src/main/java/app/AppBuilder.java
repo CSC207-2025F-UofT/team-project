@@ -94,6 +94,9 @@ public final class AppBuilder {
     private final JPanel views = new JPanel(cardLayout);
     private final ViewManagerModel viewManagerModel = new ViewManagerModel();
     private final ViewManager viewManager = new ViewManager(views, cardLayout, viewManagerModel);
+    // Created up front because login (added first) tells these screens who the adopter is.
+    private final SubmitApplicationViewModel submitViewModel = new SubmitApplicationViewModel();
+    private final TrackApplicationsViewModel trackViewModel = new TrackApplicationsViewModel();
     private ApplicationNavigator applicationNavigator;
     private PetDetailView petDetailView;
 
@@ -206,7 +209,8 @@ public final class AppBuilder {
 
     private void addShelterLogin(FileUserDataAccessObject users, UserFactory userFactory, String inviteCode) {
         final LoginViewModel loginViewModel = new LoginViewModel();
-        final LoginPresenter loginPresenter = new LoginPresenter(viewManagerModel, loginViewModel);
+        final LoginPresenter loginPresenter =
+                new LoginPresenter(viewManagerModel, loginViewModel, submitViewModel, trackViewModel);
         final LoginView loginView = new LoginView(loginViewModel, () -> {
             loginViewModel.setState(new LoginState());
             loginViewModel.notifyStateChanged();
@@ -299,14 +303,12 @@ public final class AppBuilder {
         final FileApplicationDataAccessObject applicationData =
                 new FileApplicationDataAccessObject(applicationFile.toString());
 
-        final SubmitApplicationViewModel submitViewModel = new SubmitApplicationViewModel();
         final SubmitApplicationView submitView = new SubmitApplicationView(submitViewModel);
         submitView.setSubmitApplicationController(new SubmitApplicationController(
                 new SubmitApplicationInteractor(applicationData, petData,
                         new SubmitApplicationPresenter(submitViewModel))));
         views.add(submitView, SubmitApplicationViewModel.VIEW_NAME);
 
-        final TrackApplicationsViewModel trackViewModel = new TrackApplicationsViewModel();
         final MyApplicationsView myApplicationsView = new MyApplicationsView(trackViewModel);
         myApplicationsView.setTrackApplicationsController(new TrackApplicationsController(
                 new TrackApplicationsInteractor(applicationData, petData,
