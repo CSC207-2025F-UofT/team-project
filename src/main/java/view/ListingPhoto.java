@@ -3,6 +3,7 @@ package view;
 import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.UUID;
@@ -13,10 +14,11 @@ import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.SwingWorker;
 
-/** Saves selected reference photos and displays listing photos from disk. */
+/** Saves reference photos and displays local or bundled listing photos. */
 final class ListingPhoto {
     private static final Path DIRECTORY = Path.of(System.getProperty("user.home"), ".pawportal", "breed-photos");
-    private static final String REFERENCE_LABEL = "Breed reference from TheCatAPI";
+    private static final String REFERENCE_LABEL = "TheCatAPI reference";
+    private static final String DEMO_PREFIX = "classpath:/demo-cats/";
 
     private ListingPhoto() {
     }
@@ -45,6 +47,15 @@ final class ListingPhoto {
         return !path.isBlank() && path.startsWith(DIRECTORY.toString() + java.io.File.separator);
     }
 
+    static BufferedImage read(String path) throws IOException {
+        if (path.startsWith(DEMO_PREFIX)) {
+            try (InputStream resource = ListingPhoto.class.getResourceAsStream(path.substring("classpath:".length()))) {
+                return resource == null ? null : ImageIO.read(resource);
+            }
+        }
+        return ImageIO.read(Path.of(path).toFile());
+    }
+
     static void show(JLabel label, String path, int width, int height) {
         final Object request = new Object();
         label.putClientProperty(ListingPhoto.class, request);
@@ -57,7 +68,7 @@ final class ListingPhoto {
         new SwingWorker<ImageIcon, Void>() {
             @Override
             protected ImageIcon doInBackground() throws IOException {
-                final BufferedImage image = ImageIO.read(Path.of(path).toFile());
+                final BufferedImage image = read(path);
                 if (image == null) {
                     return null;
                 }
@@ -76,7 +87,8 @@ final class ListingPhoto {
                 try {
                     final ImageIcon icon = get();
                     if (icon != null) {
-                        final String caption = isReference(path) ? REFERENCE_LABEL : "";
+                        final String caption = path.startsWith(DEMO_PREFIX) ? "Demo photo"
+                                : isReference(path) ? REFERENCE_LABEL : "";
                         label.setText(caption);
                         label.setIcon(icon);
                         label.getAccessibleContext().setAccessibleDescription(caption);
