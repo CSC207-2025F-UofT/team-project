@@ -47,6 +47,8 @@ import interface_adapter.login.LoginController;
 import interface_adapter.login.LoginPresenter;
 import interface_adapter.login.LoginState;
 import interface_adapter.login.LoginViewModel;
+import interface_adapter.logout.LogoutController;
+import interface_adapter.logout.LogoutPresenter;
 import interface_adapter.manage_pet.ManagePetController;
 import interface_adapter.manage_pet.ManagePetPresenter;
 import interface_adapter.manage_pet.ManagePetViewModel;
@@ -76,6 +78,7 @@ import use_case.save_preferences.SavePreferencesInteractor;
 import use_case.view_pet_details.ViewPetDetailsDataAccessInterface;
 import use_case.view_pet_details.ViewPetDetailsInteractor;
 import use_case.login.LoginInteractor;
+import use_case.logout.LogoutInteractor;
 import use_case.manage_pet.BreedLookupInteractor;
 import use_case.manage_pet.ManagePetDataAccessInterface;
 import use_case.manage_pet.ManagePetInteractor;
@@ -110,6 +113,7 @@ public final class AppBuilder {
     // Created up front because login (added first) tells these screens who the adopter is.
     private final SubmitApplicationViewModel submitViewModel = new SubmitApplicationViewModel();
     private final TrackApplicationsViewModel trackViewModel = new TrackApplicationsViewModel();
+    private LogoutController logoutController;
     private ApplicationNavigator applicationNavigator;
     private PetDetailView petDetailView;
 
@@ -132,7 +136,7 @@ public final class AppBuilder {
                 userFactory);
         final AppBuilder builder = new AppBuilder();
         builder.addShelterLogin(users, userFactory, inviteCode);
-        builder.addPetManagementView(pets, users);
+        builder.addPetManagementView(pets);
         final PetCatalog catalog = new PetCatalog(pets);
         builder.addGalleryView(pets, catalog, builder.buildAccountBar(users));
         builder.addCompatibilityViews(catalog,
@@ -233,12 +237,7 @@ public final class AppBuilder {
                         applicationNavigator.showMyApplications();
                     }
                 },
-                () -> {
-                    users.setCurrentUserId(null);
-                    submitViewModel.getState().setAdopterId("");
-                    trackViewModel.getState().setAdopterId("");
-                    viewManagerModel.setActiveView(GalleryView.VIEW_NAME);
-                });
+                () -> logoutController.execute());
         viewManagerModel.addListener(() -> {
             if (GalleryView.VIEW_NAME.equals(viewManagerModel.getActiveView())) {
                 final String adopterId = currentAdopterId();
@@ -263,6 +262,9 @@ public final class AppBuilder {
             viewManagerModel.setActiveView(GalleryView.VIEW_NAME);
         });
         loginView.setLoginController(new LoginController(new LoginInteractor(users, loginPresenter)));
+        final LogoutPresenter logoutPresenter =
+                new LogoutPresenter(viewManagerModel, loginViewModel, submitViewModel, trackViewModel);
+        logoutController = new LogoutController(new LogoutInteractor(users, logoutPresenter));
         final JButton signup = addSignupView(users, userFactory, loginViewModel);
         if (inviteCode == null || inviteCode.isBlank()) {
             views.add(withNavigation(loginView, signup), LoginViewModel.VIEW_NAME);
@@ -298,12 +300,9 @@ public final class AppBuilder {
         return navigationButton("Create account", SignupViewModel.VIEW_NAME);
     }
 
-    private void addPetManagementView(ManagePetDataAccessInterface pets, FileUserDataAccessObject users) {
+    private void addPetManagementView(ManagePetDataAccessInterface pets) {
         final JButton signOut = new JButton("Sign out");
-        signOut.addActionListener(event -> {
-            users.setCurrentUserId(null);
-            viewManagerModel.setActiveView(GalleryView.VIEW_NAME);
-        });
+        signOut.addActionListener(event -> logoutController.execute());
         final JButton reviewApplications =
                 navigationButton("Review applications", ReviewApplicationsViewModel.VIEW_NAME);
         views.add(withNavigation(buildPetManagement(pets), reviewApplications, signOut),
