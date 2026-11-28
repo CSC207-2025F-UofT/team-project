@@ -6,6 +6,8 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridLayout;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -50,6 +52,10 @@ public class GalleryView extends JPanel implements GalleryViewModelListener {
 
     private static final int COLUMNS = 3;
     private static final int GAP = 12;
+    private static final int PHOTO_WIDTH = 200;
+    private static final int PHOTO_HEIGHT = 150;
+    private static final int PHOTO_CAPTION_HEIGHT = 20;
+    private static final int CARD_WIDTH = 236;
 
     private final BrowsePetsController controller;
     private final GalleryViewModel viewModel;
@@ -63,6 +69,8 @@ public class GalleryView extends JPanel implements GalleryViewModelListener {
     private final JCheckBox vaccinatedBox = new JCheckBox("Only vaccinated cats");
     private final JCheckBox spayedNeuteredBox = new JCheckBox("Only spayed or neutered cats");
     private boolean updating;
+    private int columns = COLUMNS;
+    private boolean showingCards;
 
     /**
      * Creates the gallery screen.
@@ -97,6 +105,27 @@ public class GalleryView extends JPanel implements GalleryViewModelListener {
         final JScrollPane scrollPane = new JScrollPane(gridHolder);
         scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
         add(scrollPane, BorderLayout.CENTER);
+        scrollPane.getViewport().addComponentListener(new ComponentAdapter() {
+            @Override
+            public void componentResized(ComponentEvent event) {
+                updateColumns(scrollPane.getViewport().getWidth());
+            }
+        });
+    }
+
+    /**
+     * Fits as many cards per row as the width allows, so the cards keep their size when the window changes.
+     */
+    private void updateColumns(int width) {
+        final int fitted = Math.max(1, (width - 2 * GAP) / (CARD_WIDTH + GAP));
+        if (fitted != columns) {
+            columns = fitted;
+            if (showingCards) {
+                cardGrid.setLayout(new GridLayout(0, columns, GAP, GAP));
+                cardGrid.revalidate();
+                cardGrid.repaint();
+            }
+        }
     }
 
     private JPanel buildFilterPanel() {
@@ -230,12 +259,14 @@ public class GalleryView extends JPanel implements GalleryViewModelListener {
     private void showCards(List<PetCardData> cards) {
         cardGrid.removeAll();
         if (cards.isEmpty()) {
+            showingCards = false;
             cardGrid.setLayout(new GridLayout(1, 1));
             final JLabel empty = new JLabel("No cats match your filters. Try clearing some filters.");
             empty.getAccessibleContext().setAccessibleName("No results");
             cardGrid.add(empty);
         } else {
-            cardGrid.setLayout(new GridLayout(0, COLUMNS, GAP, GAP));
+            showingCards = true;
+            cardGrid.setLayout(new GridLayout(0, columns, GAP, GAP));
             for (PetCardData card : cards) {
                 cardGrid.add(buildCard(card));
             }
@@ -250,14 +281,22 @@ public class GalleryView extends JPanel implements GalleryViewModelListener {
         card.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(Color.GRAY),
                 BorderFactory.createEmptyBorder(10, 10, 10, 10)));
-        card.setPreferredSize(new Dimension(180, 205));
+        card.setPreferredSize(new Dimension(CARD_WIDTH, 300));
         final JLabel photo = new JLabel();
+        photo.setHorizontalAlignment(JLabel.CENTER);
         photo.setHorizontalTextPosition(JLabel.CENTER);
         photo.setVerticalTextPosition(JLabel.BOTTOM);
+        final Dimension photoSize = new Dimension(PHOTO_WIDTH, PHOTO_HEIGHT + PHOTO_CAPTION_HEIGHT);
+        photo.setPreferredSize(photoSize);
+        photo.setMinimumSize(photoSize);
+        photo.setMaximumSize(photoSize);
         photo.getAccessibleContext().setAccessibleName("Cat photo");
-        ListingPhoto.show(photo, data.getPhotoPath(), 140, 85);
+        ListingPhoto.showFilled(photo, data.getPhotoPath(), PHOTO_WIDTH, PHOTO_HEIGHT);
+        final JLabel name = new JLabel(data.getName());
+        name.setFont(name.getFont().deriveFont(Font.BOLD, 15f));
         card.add(photo);
-        card.add(new JLabel(data.getName()));
+        card.add(Box.createVerticalStrut(6));
+        card.add(name);
         card.add(new JLabel(data.getSummary()));
         card.add(new JLabel(data.getStatus()));
         final JButton detailsButton = new JButton("View details");
@@ -265,6 +304,9 @@ public class GalleryView extends JPanel implements GalleryViewModelListener {
         detailsButton.addActionListener(event -> detailsController.show(data.getPetId()));
         card.add(Box.createVerticalStrut(6));
         card.add(detailsButton);
+        for (Component component : card.getComponents()) {
+            ((JComponent) component).setAlignmentX(Component.LEFT_ALIGNMENT);
+        }
         card.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent event) {

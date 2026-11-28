@@ -25,6 +25,9 @@ import interface_adapter.view_pet_details.PetDetailViewModelListener;
  */
 public class PetDetailView extends JPanel implements PetDetailViewModelListener {
     private static final int GAP = 12;
+    private static final int PHOTO_WIDTH = 340;
+    private static final int PHOTO_HEIGHT = 300;
+    private static final int PHOTO_CAPTION_HEIGHT = 20;
 
     private final PetDetailViewModel viewModel;
     private final JLabel nameLabel = new JLabel();
@@ -33,7 +36,12 @@ public class PetDetailView extends JPanel implements PetDetailViewModelListener 
     private final JPanel linesPanel = new JPanel();
     private final JLabel errorLabel = new JLabel();
     private final JButton applyButton = new JButton("Apply to adopt");
-    private final JPanel compatibilityHolder = new JPanel(new BorderLayout());
+    private final JPanel compatibilityHolder = new JPanel(new BorderLayout()) {
+        @Override
+        public Dimension getMaximumSize() {
+            return new Dimension(Integer.MAX_VALUE, getPreferredSize().height);
+        }
+    };
     private BiConsumer<String, String> applyHandler;
     private Consumer<String> petShownHandler;
 
@@ -60,37 +68,50 @@ public class PetDetailView extends JPanel implements PetDetailViewModelListener 
         top.add(backButton, BorderLayout.WEST);
         add(top, BorderLayout.NORTH);
 
-        final JPanel content = new JPanel();
-        content.setLayout(new BoxLayout(content, BoxLayout.Y_AXIS));
-        content.setBorder(BorderFactory.createEmptyBorder(GAP, GAP, GAP, GAP));
+        // Photo on the left, everything else on the right, so the page uses its whole width.
+        final JPanel details = new JPanel();
+        details.setLayout(new BoxLayout(details, BoxLayout.Y_AXIS));
 
-        nameLabel.setFont(nameLabel.getFont().deriveFont(Font.BOLD, 24f));
+        nameLabel.setFont(nameLabel.getFont().deriveFont(Font.BOLD, 28f));
         nameLabel.getAccessibleContext().setAccessibleName("Cat name");
+        summaryLabel.setFont(summaryLabel.getFont().deriveFont(15f));
         summaryLabel.getAccessibleContext().setAccessibleName("Cat summary");
-        photoLabel.setPreferredSize(new Dimension(240, 160));
-        photoLabel.setMaximumSize(new Dimension(240, 160));
+        final Dimension photoSize = new Dimension(PHOTO_WIDTH, PHOTO_HEIGHT + PHOTO_CAPTION_HEIGHT);
+        photoLabel.setPreferredSize(photoSize);
+        photoLabel.setMinimumSize(photoSize);
+        photoLabel.setMaximumSize(photoSize);
+        photoLabel.setHorizontalTextPosition(SwingConstants.CENTER);
+        photoLabel.setVerticalTextPosition(SwingConstants.BOTTOM);
         photoLabel.setBorder(BorderFactory.createLineBorder(java.awt.Color.GRAY));
         linesPanel.setLayout(new BoxLayout(linesPanel, BoxLayout.Y_AXIS));
         errorLabel.getAccessibleContext().setAccessibleName("Error");
 
-        content.add(nameLabel);
-        content.add(summaryLabel);
-        content.add(Box.createVerticalStrut(GAP));
-        content.add(photoLabel);
-        content.add(Box.createVerticalStrut(GAP));
-        content.add(linesPanel);
-        content.add(compatibilityHolder);
-        content.add(errorLabel);
-        content.add(Box.createVerticalStrut(GAP));
+        details.add(nameLabel);
+        details.add(summaryLabel);
+        details.add(Box.createVerticalStrut(GAP));
+        details.add(linesPanel);
+        details.add(Box.createVerticalStrut(GAP));
+        details.add(compatibilityHolder);
+        details.add(errorLabel);
+        details.add(Box.createVerticalStrut(GAP));
         applyButton.setMnemonic(KeyEvent.VK_A);
         applyButton.getAccessibleContext().setAccessibleName("Apply to adopt this cat");
         applyButton.addActionListener(event -> apply());
         applyButton.setVisible(false);
-        content.add(applyButton);
-        for (java.awt.Component component : content.getComponents()) {
+        details.add(applyButton);
+        for (java.awt.Component component : details.getComponents()) {
             ((javax.swing.JComponent) component).setAlignmentX(LEFT_ALIGNMENT);
         }
-        add(content, BorderLayout.CENTER);
+
+        final JPanel photoColumn = new JPanel(new BorderLayout());
+        photoColumn.add(photoLabel, BorderLayout.NORTH);
+        final JPanel content = new JPanel(new BorderLayout(GAP * 2, 0));
+        content.setBorder(BorderFactory.createEmptyBorder(GAP, GAP, GAP, GAP));
+        content.add(photoColumn, BorderLayout.WEST);
+        content.add(details, BorderLayout.CENTER);
+        final javax.swing.JScrollPane scroll = new javax.swing.JScrollPane(content);
+        scroll.setBorder(BorderFactory.createEmptyBorder());
+        add(scroll, BorderLayout.CENTER);
     }
 
     /**
@@ -143,13 +164,14 @@ public class PetDetailView extends JPanel implements PetDetailViewModelListener 
         photoLabel.getAccessibleContext().setAccessibleName("Cat photo");
         photoLabel.setHorizontalTextPosition(SwingConstants.CENTER);
         photoLabel.setVerticalTextPosition(SwingConstants.BOTTOM);
-        ListingPhoto.show(photoLabel, state.getPhotoPath(), 230, 130);
+        ListingPhoto.showFilled(photoLabel, state.getPhotoPath(), PHOTO_WIDTH - 2, PHOTO_HEIGHT);
         photoLabel.setVisible(state.getErrorMessage().isEmpty());
         errorLabel.setText(state.getErrorMessage());
 
         linesPanel.removeAll();
         for (String line : state.getDetailLines()) {
             final JLabel label = new JLabel(line);
+            label.setFont(label.getFont().deriveFont(15f));
             label.getAccessibleContext().setAccessibleName(line);
             linesPanel.add(label);
         }
