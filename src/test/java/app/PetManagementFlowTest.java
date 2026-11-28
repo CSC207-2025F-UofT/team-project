@@ -2,6 +2,7 @@ package app;
 
 import java.awt.Component;
 import java.awt.Container;
+import java.math.BigDecimal;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -17,7 +18,10 @@ import org.junit.jupiter.api.io.TempDir;
 
 import data_access.FilePetDataAccessObject;
 import data_access.FileUserDataAccessObject;
-import data_access.InMemoryPetDataAccess;
+import entity.Pet;
+import entity.PetSex;
+import entity.PetStatus;
+import entity.Species;
 import entity.User.Role;
 import entity.UserFactory;
 import view.AdminSignupView;
@@ -75,7 +79,8 @@ class PetManagementFlowTest {
     @Test
     void mainGalleryLoadsPersistedListingsIncludingAnEmptyCatalog() throws Exception {
         final FilePetDataAccessObject previousPets = new FilePetDataAccessObject(dataDirectory.resolve("pets.json"));
-        previousPets.add(InMemoryPetDataAccess.withSampleData().getAvailablePets().get(0));
+        previousPets.add(new Pet("saved-cat", "Maple", Species.CAT, "Tabby", 2, PetSex.FEMALE, List.of(),
+                "", false, true, true, BigDecimal.ZERO, "", PetStatus.AVAILABLE));
         final Path profile = dataDirectory.resolve("profile");
         final AppBuilder populated = AppBuilder.forDataDirectory(profile, dataDirectory, null);
         final FilePetDataAccessObject savedPets =
@@ -83,7 +88,7 @@ class PetManagementFlowTest {
         savedPets.remove(savedPets.getPets().get(0).getId());
         final AppBuilder empty = AppBuilder.forDataDirectory(profile, dataDirectory, null);
         SwingUtilities.invokeAndWait(() -> {
-            assertEquals(List.of("Pet card: Miso"), cardNames(populated.buildViews()));
+            assertEquals(List.of("Pet card: Maple"), cardNames(populated.buildViews()));
             assertEquals(List.of(), cardNames(empty.buildViews()));
         });
     }

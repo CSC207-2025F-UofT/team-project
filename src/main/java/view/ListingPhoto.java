@@ -19,7 +19,6 @@ final class ListingPhoto {
     private static final Path DIRECTORY = Path.of(System.getProperty("user.home"), ".pawportal", "breed-photos");
     private static final String REFERENCE_LABEL = "TheCatAPI reference";
     private static final String RESOURCE_PREFIX = "classpath:";
-    private static final String DEMO_PREFIX = RESOURCE_PREFIX + "/demo-cats/";
 
     private ListingPhoto() {
     }
@@ -120,8 +119,7 @@ final class ListingPhoto {
                 try {
                     final ImageIcon icon = get();
                     if (icon != null) {
-                        final String caption = path.startsWith(DEMO_PREFIX) ? "Demo photo"
-                                : isReference(path) ? REFERENCE_LABEL : "";
+                        final String caption = isReference(path) ? REFERENCE_LABEL : "";
                         label.setText(caption);
                         label.setIcon(icon);
                         label.getAccessibleContext().setAccessibleDescription(caption);
