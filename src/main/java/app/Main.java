@@ -22,7 +22,9 @@ public class Main {
             final Path dataDirectory = Path.of(System.getProperty("user.home"), ".pawportal");
             try {
                 final String inviteCode = System.getenv("PAWPORTAL_ADMIN_INVITE_CODE");
-                final JFrame frame = AppBuilder.forDataDirectory(dataDirectory, Path.of("."), inviteCode).build();
+                final String rescueGroupsKey = System.getenv("RESCUEGROUPS_API_KEY");
+                final JFrame frame =
+                        AppBuilder.forDataDirectory(dataDirectory, Path.of("."), inviteCode, rescueGroupsKey).build();
                 frame.setVisible(true);
             } catch (IOException | IllegalStateException exception) {
                 JOptionPane.showMessageDialog(null, "Could not open PawPortal data in " + dataDirectory + ".",

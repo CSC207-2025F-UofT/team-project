@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 
 import entity.Pet;
 import entity.Temperament;
+import interface_adapter.ExternalListingViewData;
 import interface_adapter.ViewManagerModel;
 import interface_adapter.browse_pets.FilterLabels;
 import use_case.view_pet_details.ViewPetDetailsOutputBoundary;
@@ -37,6 +38,9 @@ public class ViewPetDetailsPresenter implements ViewPetDetailsOutputBoundary {
         state.setName(pet.getName());
         state.setSummary(summary(pet));
         state.setDetailLines(detailLines(pet));
+        if (pet.getExternalListing() != null) {
+            state.setExternalListing(new ExternalListingViewData(pet));
+        }
         viewModel.setState(state);
         viewModel.notifyStateChanged();
         showDetailPage();
@@ -57,7 +61,10 @@ public class ViewPetDetailsPresenter implements ViewPetDetailsOutputBoundary {
     }
 
     private String summary(Pet pet) {
-        final String age = pet.getAgeYears() == 1 ? "1 year old" : pet.getAgeYears() + " years old";
+        String age = pet.getAgeYears() == 1 ? "1 year old" : pet.getAgeYears() + " years old";
+        if (pet.getExternalListing() != null) {
+            age = pet.getExternalListing().getAgeLabel();
+        }
         return capitalize(pet.getSpecies().name()) + ", " + pet.getBreed() + ", " + age;
     }
 
@@ -65,11 +72,15 @@ public class ViewPetDetailsPresenter implements ViewPetDetailsOutputBoundary {
         final List<String> lines = new ArrayList<>();
         lines.add("Sex: " + capitalize(pet.getSex().name()));
         lines.add("Temperament: " + temperaments(pet));
-        lines.add("Health notes: " + (pet.getHealthNotes().isEmpty() ? "None" : pet.getHealthNotes()));
-        lines.add("Needs daily medication: " + yesNo(pet.needsMedication()));
-        lines.add("Vaccinated: " + yesNo(pet.isVaccinated()));
-        lines.add("Spayed or neutered: " + yesNo(pet.isSpayedNeutered()));
-        lines.add("Adoption fee: $" + pet.getAdoptionFee().setScale(2, java.math.RoundingMode.HALF_UP));
+        if (pet.getExternalListing() == null) {
+            lines.add("Health notes: " + (pet.getHealthNotes().isEmpty() ? "None" : pet.getHealthNotes()));
+            lines.add("Needs daily medication: " + yesNo(pet.needsMedication()));
+            lines.add("Vaccinated: " + yesNo(pet.isVaccinated()));
+            lines.add("Spayed or neutered: " + yesNo(pet.isSpayedNeutered()));
+            lines.add("Adoption fee: $" + pet.getAdoptionFee().setScale(2, java.math.RoundingMode.HALF_UP));
+        } else {
+            lines.add("Health notes: " + (pet.getHealthNotes().isEmpty() ? "Not reported" : pet.getHealthNotes()));
+        }
         lines.add("Status: " + capitalize(pet.getStatus().name()));
         return lines;
     }

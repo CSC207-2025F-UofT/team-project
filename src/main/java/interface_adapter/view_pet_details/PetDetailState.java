@@ -3,6 +3,8 @@ package interface_adapter.view_pet_details;
 import java.util.ArrayList;
 import java.util.List;
 
+import interface_adapter.ExternalListingViewData;
+
 /**
  * What the pet detail page shows, already written out as text.
  */
@@ -12,6 +14,15 @@ public class PetDetailState {
     private String summary = "";
     private List<String> detailLines = new ArrayList<>();
     private String errorMessage = "";
+    private ExternalListingViewData externalListing;
+
+    public ExternalListingViewData getExternalListing() {
+        return externalListing;
+    }
+
+    public void setExternalListing(ExternalListingViewData externalListing) {
+        this.externalListing = externalListing;
+    }
 
     /**
      * Returns the id of the cat on show.

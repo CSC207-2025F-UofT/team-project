@@ -53,6 +53,7 @@ public class GalleryView extends JPanel implements PropertyChangeListener {
     private final JComboBox<AgeFilterOption> ageBox = new JComboBox<>(AgeFilterOption.values());
     private final Map<Temperament, JCheckBox> temperamentBoxes = new EnumMap<>(Temperament.class);
     private final JCheckBox noMedicalNeedsBox = new JCheckBox("Only cats with no medical needs");
+    private final JLabel rescueStatus = new JLabel();
     private boolean updating;
 
     /**
@@ -84,6 +85,8 @@ public class GalleryView extends JPanel implements PropertyChangeListener {
         final JScrollPane scrollPane = new JScrollPane(gridHolder);
         scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
         add(scrollPane, BorderLayout.CENTER);
+        rescueStatus.setVisible(false);
+        add(rescueStatus, BorderLayout.SOUTH);
     }
 
     private JPanel buildFilterPanel() {
@@ -187,9 +190,19 @@ public class GalleryView extends JPanel implements PropertyChangeListener {
                 BorderFactory.createLineBorder(Color.GRAY),
                 BorderFactory.createEmptyBorder(10, 10, 10, 10)));
         card.setPreferredSize(new Dimension(180, 140));
-        card.add(new JLabel(data.getName()));
-        card.add(new JLabel(data.getSummary()));
+        final JLabel name = new JLabel();
+        name.putClientProperty("html.disable", true);
+        name.setText(data.getName());
+        card.add(name);
+        final JLabel summary = new JLabel();
+        summary.putClientProperty("html.disable", true);
+        summary.setText(data.getSummary());
+        card.add(summary);
         card.add(new JLabel(data.getStatus()));
+        if (data.getExternalListing() != null) {
+            card.add(ExternalLink.organization(data.getExternalListing().getOrganizationName(),
+                    data.getExternalListing().getOrganizationUrl()));
+        }
         final JButton detailsButton = new JButton("View details");
         detailsButton.getAccessibleContext().setAccessibleName("View details for " + data.getName());
         detailsButton.addActionListener(event -> detailsController.show(data.getPetId()));
@@ -211,5 +224,14 @@ public class GalleryView extends JPanel implements PropertyChangeListener {
      */
     public void loadAll() {
         applyFilters();
+    }
+
+    /**
+     * Shows the status of the optional RescueGroups feed.
+     * @param text the status or an empty string to hide it
+     */
+    public void showRescueStatus(String text) {
+        rescueStatus.setText(text);
+        rescueStatus.setVisible(!text.isEmpty());
     }
 }
