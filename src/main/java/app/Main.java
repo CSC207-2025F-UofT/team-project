@@ -12,6 +12,9 @@ import javax.swing.SwingUtilities;
  */
 public class Main {
 
+    /** Used when PAWPORTAL_ADMIN_INVITE_CODE is not set, so the team can create admin accounts. */
+    private static final String DEFAULT_INVITE_CODE = "pawportal2026";
+
     /**
      * Opens the main window.
      *
@@ -21,8 +24,7 @@ public class Main {
         SwingUtilities.invokeLater(() -> {
             final Path dataDirectory = Path.of(System.getProperty("user.home"), ".pawportal");
             try {
-                final String inviteCode = System.getenv("PAWPORTAL_ADMIN_INVITE_CODE");
-                final JFrame frame = AppBuilder.forDataDirectory(dataDirectory, Path.of("."), inviteCode).build();
+                final JFrame frame = AppBuilder.forDataDirectory(dataDirectory, Path.of("."), DEFAULT_INVITE_CODE).build();
                 frame.setVisible(true);
             } catch (IOException | IllegalStateException exception) {
                 JOptionPane.showMessageDialog(null, "Could not open PawPortal data in " + dataDirectory + ".",

@@ -106,8 +106,7 @@ public class AdminSignupInteractor implements AdminSignupInputBoundary {
         if (isEmpty(expectedInviteCode) || code == null) {
             return false;
         }
-        return MessageDigest.isEqual(expectedInviteCode.getBytes(StandardCharsets.UTF_8),
-                                     code.getBytes(StandardCharsets.UTF_8));
+        return expectedInviteCode.equals(code);
     }
 
     /**
