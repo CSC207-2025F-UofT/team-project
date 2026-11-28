@@ -1,80 +1,204 @@
 {
   "id": "laboratory",
-  "version": 1,
+  "version": 2,
   "title": "Abandoned Laboratory",
   "background": "The night train leaves at dawn. Follow the maintenance route beneath the laboratory to reach the platform.",
-  "startingRoomId": "intake",
+  "startingRoomId": "lounge",
   "rooms": [
     {
-      "id": "intake",
-      "name": "Intake Office",
-      "description": "A paper wristband hangs from the visitor log. A desk drawer sits below it.",
+      "id": "lounge",
+      "name": "Staff Lounge",
+      "description": "In the dark you can make out a sofa, a window, and the outline of a floor lamp.",
       "interactables": [
         {
-          "id": "desk",
-          "name": "Intake desk",
+          "id": "lamp",
+          "name": "Lamp",
           "descriptionsByMode": {
-            "ready": "A paper wristband hangs from the visitor log. A desk drawer sits below it.",
-            "solved": "The drawer holds a striped access card and a note that reads ${code}."
+            "off": "Your hand brushes a pull chain.",
+            "on": "The lamp throws a pool of light across the floor."
           },
           "initialState": {
-            "mode": "ready"
+            "mode": "off"
           },
           "allowedStateValues": {
             "mode": [
-              "ready",
-              "solved"
+              "off",
+              "on"
             ]
           },
           "actions": [
             {
-              "id": "inspect",
-              "label": "Open the drawer",
+              "id": "switch-on",
+              "label": "Switch on the lamp",
               "requiredItemId": null,
-              "appearingItemIds": [
-                "card"
-              ],
-              "resultText": "The drawer holds a striped access card and a note that reads ${code}.",
+              "appearingItemIds": [],
+              "resultText": "The bulb flickers on. Light reaches beneath the sofa.",
               "repeatable": false,
               "preconditions": [
                 {
-                  "objectId": "desk",
+                  "objectId": "lamp",
                   "key": "mode",
-                  "value": "ready"
+                  "value": "off"
                 }
               ],
               "effects": [
                 {
-                  "objectId": "desk",
+                  "objectId": "lamp",
                   "key": "mode",
-                  "value": "solved"
+                  "value": "on"
                 }
               ]
+            }
+          ]
+        },
+        {
+          "id": "sofa",
+          "name": "Sofa",
+          "descriptionsByMode": {
+            "unsearched": "A wool blanket lies on one cushion.",
+            "searched": "There is a key-shaped dent in the dust. You read the tag on the key again: ${code}."
+          },
+          "initialState": {
+            "mode": "unsearched"
+          },
+          "allowedStateValues": {
+            "mode": [
+              "unsearched",
+              "searched"
+            ]
+          },
+          "actions": [
+            {
+              "id": "search",
+              "label": "Search the sofa cushions",
+              "requiredItemId": null,
+              "appearingItemIds": [],
+              "resultText": "In the blanket you find a laundry tag. Someone has drawn a sleepy cat on it.",
+              "repeatable": true,
+              "preconditions": [],
+              "effects": []
+            },
+            {
+              "id": "lift-dark",
+              "label": "Lift the sofa",
+              "requiredItemId": null,
+              "appearingItemIds": [],
+              "resultText": "You lift one end, but it is too dark to see underneath. You lower it again.",
+              "repeatable": true,
+              "preconditions": [
+                {
+                  "objectId": "lamp",
+                  "key": "mode",
+                  "value": "off"
+                }
+              ],
+              "effects": []
+            },
+            {
+              "id": "lift-lit",
+              "label": "Lift the sofa",
+              "requiredItemId": null,
+              "appearingItemIds": [
+                "key"
+              ],
+              "resultText": "In the lamplight you spot a brass key underneath. Its tag reads ${code}.",
+              "repeatable": false,
+              "preconditions": [
+                {
+                  "objectId": "lamp",
+                  "key": "mode",
+                  "value": "on"
+                },
+                {
+                  "objectId": "sofa",
+                  "key": "mode",
+                  "value": "unsearched"
+                }
+              ],
+              "effects": [
+                {
+                  "objectId": "sofa",
+                  "key": "mode",
+                  "value": "searched"
+                }
+              ]
+            },
+            {
+              "id": "lift-empty",
+              "label": "Lift the sofa",
+              "requiredItemId": null,
+              "appearingItemIds": [],
+              "resultText": "Only dust remains under the sofa.",
+              "repeatable": true,
+              "preconditions": [
+                {
+                  "objectId": "sofa",
+                  "key": "mode",
+                  "value": "searched"
+                }
+              ],
+              "effects": []
+            }
+          ]
+        },
+        {
+          "id": "window",
+          "name": "Window",
+          "descriptionsByMode": {
+            "latched": "Rain runs down the outside of the wired glass."
+          },
+          "initialState": {
+            "mode": "latched"
+          },
+          "allowedStateValues": {
+            "mode": [
+              "latched"
+            ]
+          },
+          "actions": [
+            {
+              "id": "look",
+              "label": "Look outside",
+              "requiredItemId": null,
+              "appearingItemIds": [],
+              "resultText": "Through the rain you see an empty platform under the station clock.",
+              "repeatable": true,
+              "preconditions": [],
+              "effects": []
+            },
+            {
+              "id": "open",
+              "label": "Try the latch",
+              "requiredItemId": null,
+              "appearingItemIds": [],
+              "resultText": "The latch lifts, but the frame is painted shut.",
+              "repeatable": true,
+              "preconditions": [],
+              "effects": []
             }
           ]
         }
       ],
       "nextRoomId": "records",
       "doorLock": {
-        "id": "intake-door",
-        "description": "Exit reader",
-        "successText": "The exit reader turns green.",
+        "id": "lounge-door",
+        "description": "Exit lock",
+        "successText": "The bolt slides back.",
         "requiredItemIds": [
-          "card",
-          "wristband"
+          "key"
         ]
       },
       "exitChallenge": {
-        "id": "intake-question",
-        "description": "Security intercom",
-        "successText": "The intercom accepts your answer.",
+        "id": "lounge-question",
+        "description": "Station intercom",
+        "successText": "The intercom buzzes you through.",
         "spec": {
           "source": "TEMPLATE",
           "category": null,
           "difficulty": null
         },
         "initialTrivia": {
-          "prompt": "Which digits are on the note?",
+          "prompt": "Which four digits are stamped on the brass key tag?",
           "choices": [],
           "expectedAnswer": "${code}"
         }
@@ -82,195 +206,88 @@
     },
     {
       "id": "records",
-      "name": "Records Vault",
-      "description": "Cold air slips through the archive shelves. The cabinet has a striped reader.",
+      "name": "Map Room",
+      "description": "An old route map hangs beside a locked cabinet. The gate at the far end has a card reader.",
       "interactables": [
         {
           "id": "cabinet",
-          "name": "Archive cabinet",
+          "name": "Map cabinet",
           "descriptionsByMode": {
-            "ready": "Cold air slips through the archive shelves. The cabinet has a striped reader.",
-            "solved": "Behind the folders, a brass key hangs on a hook marked MOTH."
+            "closed": "A brass lock holds the glass doors shut.",
+            "open": "A transit punch card rests where the map of the east line used to be."
           },
           "initialState": {
-            "mode": "ready"
+            "mode": "closed"
           },
           "allowedStateValues": {
             "mode": [
-              "ready",
-              "solved"
+              "closed",
+              "open"
             ]
           },
           "actions": [
             {
-              "id": "inspect",
-              "label": "Swipe the cabinet reader",
-              "requiredItemId": "card",
-              "appearingItemIds": [
-                "key"
-              ],
-              "resultText": "Behind the folders, a brass key hangs on a hook marked MOTH.",
-              "repeatable": false,
-              "preconditions": [
-                {
-                  "objectId": "cabinet",
-                  "key": "mode",
-                  "value": "ready"
-                }
-              ],
-              "effects": [
-                {
-                  "objectId": "cabinet",
-                  "key": "mode",
-                  "value": "solved"
-                }
-              ]
-            }
-          ]
-        }
-      ],
-      "nextRoomId": "pump",
-      "doorLock": {
-        "id": "records-door",
-        "description": "Exit reader",
-        "successText": "The exit reader turns green.",
-        "requiredItemIds": [
-          "key"
-        ]
-      },
-      "exitChallenge": {
-        "id": "records-question",
-        "description": "Security intercom",
-        "successText": "The intercom accepts your answer.",
-        "spec": {
-          "source": "TEMPLATE",
-          "category": null,
-          "difficulty": null
-        },
-        "initialTrivia": {
-          "prompt": "Which word is stamped on the hook?",
-          "choices": [],
-          "expectedAnswer": "MOTH"
-        }
-      }
-    },
-    {
-      "id": "pump",
-      "name": "Pump Room",
-      "description": "A brass keyhole seals the pump housing. A red lamp blinks above the door.",
-      "interactables": [
-        {
-          "id": "pump-case",
-          "name": "Pump housing",
-          "descriptionsByMode": {
-            "ready": "A brass keyhole seals the pump housing. A red lamp blinks above the door.",
-            "solved": "Under the cover is a ceramic fuse. The pressure gauge reads 42."
-          },
-          "initialState": {
-            "mode": "ready"
-          },
-          "allowedStateValues": {
-            "mode": [
-              "ready",
-              "solved"
-            ]
-          },
-          "actions": [
-            {
-              "id": "inspect",
-              "label": "Unlock the housing",
+              "id": "unlock",
+              "label": "Unlock the cabinet",
               "requiredItemId": "key",
               "appearingItemIds": [
-                "fuse"
+                "card"
               ],
-              "resultText": "Under the cover is a ceramic fuse. The pressure gauge reads 42.",
+              "resultText": "The brass key turns. Behind the glass is a transit punch card.",
               "repeatable": false,
               "preconditions": [
                 {
-                  "objectId": "pump-case",
+                  "objectId": "cabinet",
                   "key": "mode",
-                  "value": "ready"
+                  "value": "closed"
                 }
               ],
               "effects": [
                 {
-                  "objectId": "pump-case",
+                  "objectId": "cabinet",
                   "key": "mode",
-                  "value": "solved"
+                  "value": "open"
                 }
               ]
             }
           ]
-        }
-      ],
-      "nextRoomId": "relay",
-      "doorLock": {
-        "id": "pump-door",
-        "description": "Exit reader",
-        "successText": "The exit reader turns green.",
-        "requiredItemIds": [
-          "fuse"
-        ]
-      },
-      "exitChallenge": {
-        "id": "pump-question",
-        "description": "Security intercom",
-        "successText": "The intercom accepts your answer.",
-        "spec": {
-          "source": "TEMPLATE",
-          "category": null,
-          "difficulty": null
         },
-        "initialTrivia": {
-          "prompt": "What does the pressure gauge read?",
-          "choices": [],
-          "expectedAnswer": "42"
-        }
-      }
-    },
-    {
-      "id": "relay",
-      "name": "Relay Station",
-      "description": "An empty fuse socket sits beside a dark signal board.",
-      "interactables": [
         {
-          "id": "board",
-          "name": "Signal board",
+          "id": "map",
+          "name": "Route map",
           "descriptionsByMode": {
-            "ready": "An empty fuse socket sits beside a dark signal board.",
-            "solved": "The board prints a transit slip. Its destination reads EAST."
+            "folded": "One corner of the paper map has curled over the last station.",
+            "flat": "The abandoned laboratory is the last stop on the EAST line."
           },
           "initialState": {
-            "mode": "ready"
+            "mode": "folded"
           },
           "allowedStateValues": {
             "mode": [
-              "ready",
-              "solved"
+              "folded",
+              "flat"
             ]
           },
           "actions": [
             {
-              "id": "inspect",
-              "label": "Power the board",
-              "requiredItemId": "fuse",
-              "appearingItemIds": [
-                "slip"
-              ],
-              "resultText": "The board prints a transit slip. Its destination reads EAST.",
+              "id": "flatten",
+              "label": "Smooth the map flat",
+              "requiredItemId": null,
+              "appearingItemIds": [],
+              "resultText": "Under the curled corner you read: laboratory service — EAST line.",
               "repeatable": false,
               "preconditions": [
                 {
-                  "objectId": "board",
+                  "objectId": "map",
                   "key": "mode",
-                  "value": "ready"
+                  "value": "folded"
                 }
               ],
               "effects": [
                 {
-                  "objectId": "board",
+                  "objectId": "map",
                   "key": "mode",
-                  "value": "solved"
+                  "value": "flat"
                 }
               ]
             }
@@ -279,24 +296,24 @@
       ],
       "nextRoomId": "platform",
       "doorLock": {
-        "id": "relay-door",
-        "description": "Exit reader",
-        "successText": "The exit reader turns green.",
+        "id": "records-door",
+        "description": "Exit lock",
+        "successText": "The bolt slides back.",
         "requiredItemIds": [
-          "slip"
+          "card"
         ]
       },
       "exitChallenge": {
-        "id": "relay-question",
-        "description": "Security intercom",
-        "successText": "The intercom accepts your answer.",
+        "id": "records-question",
+        "description": "Station intercom",
+        "successText": "The intercom buzzes you through.",
         "spec": {
           "source": "TEMPLATE",
           "category": null,
           "difficulty": null
         },
         "initialTrivia": {
-          "prompt": "Which direction is printed on the transit slip?",
+          "prompt": "Which line serves the abandoned laboratory?",
           "choices": [],
           "expectedAnswer": "EAST"
         }
@@ -305,48 +322,115 @@
     {
       "id": "platform",
       "name": "Departure Platform",
-      "description": "A ticket punch stands between the tracks and the last emergency exit.",
+      "description": "The last gate takes a token. A ticket press and a porter’s bell stand beside it.",
       "interactables": [
         {
-          "id": "punch",
-          "name": "Ticket punch",
+          "id": "press",
+          "name": "Ticket press",
           "descriptionsByMode": {
-            "ready": "A ticket punch stands between the tracks and the last emergency exit.",
-            "solved": "A metal exit token drops into the tray. The punch stamps DAWN on the slip."
+            "empty": "A narrow slot leads to a brass stamping wheel.",
+            "loaded": "A card sits squarely under the stamping wheel.",
+            "used": "The card now bears the word DAWN."
+          },
+          "initialState": {
+            "mode": "empty"
+          },
+          "allowedStateValues": {
+            "mode": [
+              "empty",
+              "loaded",
+              "used"
+            ]
+          },
+          "actions": [
+            {
+              "id": "push-empty",
+              "label": "Pull the handle",
+              "requiredItemId": null,
+              "appearingItemIds": [],
+              "resultText": "The wheel clicks against bare metal. There is no card in the slot.",
+              "repeatable": true,
+              "preconditions": [
+                {
+                  "objectId": "press",
+                  "key": "mode",
+                  "value": "empty"
+                }
+              ],
+              "effects": []
+            },
+            {
+              "id": "insert",
+              "label": "Insert the transit card",
+              "requiredItemId": "card",
+              "appearingItemIds": [],
+              "resultText": "The card slides into place.",
+              "repeatable": false,
+              "preconditions": [
+                {
+                  "objectId": "press",
+                  "key": "mode",
+                  "value": "empty"
+                }
+              ],
+              "effects": [
+                {
+                  "objectId": "press",
+                  "key": "mode",
+                  "value": "loaded"
+                }
+              ]
+            },
+            {
+              "id": "stamp",
+              "label": "Pull the handle",
+              "requiredItemId": null,
+              "appearingItemIds": [
+                "token"
+              ],
+              "resultText": "The wheel stamps DAWN on the card. An exit token drops into the change tray.",
+              "repeatable": false,
+              "preconditions": [
+                {
+                  "objectId": "press",
+                  "key": "mode",
+                  "value": "loaded"
+                }
+              ],
+              "effects": [
+                {
+                  "objectId": "press",
+                  "key": "mode",
+                  "value": "used"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "bell",
+          "name": "Porter’s bell",
+          "descriptionsByMode": {
+            "ready": "A little silver bell sits beside the gate."
           },
           "initialState": {
             "mode": "ready"
           },
           "allowedStateValues": {
             "mode": [
-              "ready",
-              "solved"
+              "ready"
             ]
           },
           "actions": [
             {
-              "id": "inspect",
-              "label": "Insert the transit slip",
-              "requiredItemId": "slip",
-              "appearingItemIds": [
-                "token"
-              ],
-              "resultText": "A metal exit token drops into the tray. The punch stamps DAWN on the slip.",
-              "repeatable": false,
-              "preconditions": [
-                {
-                  "objectId": "punch",
-                  "key": "mode",
-                  "value": "ready"
-                }
-              ],
-              "effects": [
-                {
-                  "objectId": "punch",
-                  "key": "mode",
-                  "value": "solved"
-                }
-              ]
+              "id": "ring",
+              "label": "Ring the bell",
+              "requiredItemId": null,
+              "appearingItemIds": [],
+              "resultText": "One clear note echoes down the empty platform. Nobody comes.",
+              "repeatable": true,
+              "preconditions": [],
+              "effects": []
             }
           ]
         }
@@ -354,23 +438,23 @@
       "nextRoomId": null,
       "doorLock": {
         "id": "platform-door",
-        "description": "Exit reader",
-        "successText": "The exit reader turns green.",
+        "description": "Exit lock",
+        "successText": "The bolt slides back.",
         "requiredItemIds": [
           "token"
         ]
       },
       "exitChallenge": {
         "id": "platform-question",
-        "description": "Security intercom",
-        "successText": "The intercom accepts your answer.",
+        "description": "Station intercom",
+        "successText": "The intercom buzzes you through.",
         "spec": {
           "source": "TEMPLATE",
           "category": null,
           "difficulty": null
         },
         "initialTrivia": {
-          "prompt": "Which word did the punch stamp?",
+          "prompt": "Which word did the press stamp on the card?",
           "choices": [],
           "expectedAnswer": "DAWN"
         }
@@ -381,42 +465,28 @@
     {
       "id": "wristband",
       "name": "Visitor wristband",
-      "description": "A paper band marked VISITOR.",
-      "roomId": "intake",
+      "description": "A faded paper band.",
+      "roomId": "lounge",
       "initiallyRevealed": true
-    },
-    {
-      "id": "card",
-      "name": "Striped access card",
-      "description": "Striped access card from the Intake Office.",
-      "roomId": "intake",
-      "initiallyRevealed": false
     },
     {
       "id": "key",
       "name": "Brass key",
-      "description": "Brass key from the Records Vault.",
+      "description": "The tag reads ${code}.",
+      "roomId": "lounge",
+      "initiallyRevealed": false
+    },
+    {
+      "id": "card",
+      "name": "Transit punch card",
+      "description": "A stiff card with one corner clipped.",
       "roomId": "records",
-      "initiallyRevealed": false
-    },
-    {
-      "id": "fuse",
-      "name": "Ceramic fuse",
-      "description": "Ceramic fuse from the Pump Room.",
-      "roomId": "pump",
-      "initiallyRevealed": false
-    },
-    {
-      "id": "slip",
-      "name": "Transit slip",
-      "description": "Transit slip from the Relay Station.",
-      "roomId": "relay",
       "initiallyRevealed": false
     },
     {
       "id": "token",
       "name": "Exit token",
-      "description": "Exit token from the Departure Platform.",
+      "description": "Good for one passage through the platform gate.",
       "roomId": "platform",
       "initiallyRevealed": false
     }

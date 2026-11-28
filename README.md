@@ -44,19 +44,15 @@ Every command outcome follows interactor → assembler → presenter → view mo
 
 ### Example Playthrough
 
-1. Select the Abandoned Laboratory story. Its starting room is entered, initially visible items enter the inventory, and their names appear with the first room description.
-2. Choose the drawer's action. Its access card enters the inventory automatically, and the result includes “Obtained: Laboratory access card.”
-3. Find the security badge through another object action. Repeating an allowed action does not add or announce an item already held.
-4. Choose the door-unlock option. The game checks that both required IDs are held, unlocks the door, and keeps both items in the inventory.
-5. Pass the mandatory exit Trivia. This can also be done before steps 2–4.
-6. Choose Next room. `Game.move()` checks both room locks, then enters the room identified by `nextRoomId`.
-7. Continue along the single room path. In the final room, `nextRoomId` is empty; choosing Escape under the same two-gate rule sets the game status to `ESCAPED`.
+1. In the Staff Lounge, select an object to see its actions. Lift the sofa in the dark, return to the room, and try the lamp. With the lamp on, lifting the sofa reveals a brass key with a four-digit tag. The window and cushions can also be explored.
+2. Use the key and its tag code to leave. In the Map Room, select the key as the tool for the map cabinet. It holds a transit card. Smooth the wall map to read the line name for the intercom.
+3. On the Departure Platform, insert the transit card into the ticket press before pulling the handle. Use the resulting token and stamped word at the final gate, then choose **Escape**.
 
-**Implementation status:** The Swing application includes a playable five-room laboratory story, new-game setup, item and object interactions, authored questions, and movement. Save/load and online Trivia await their feature packages.
+**Implementation status:** The Swing application includes a playable three-room laboratory story, new-game setup, item and object interactions, authored questions, and movement. Save/load and online Trivia await their feature packages.
 
 **Planned features:**
 
-- Selectable JSON story templates, with an initial five-room escape story on one forward path.
+- Selectable JSON story templates, with an initial three-room escape story on one forward path.
 - Text descriptions, option buttons, and answer entry through Swing.
 - Stateful object actions, optional held-tool requirements, and automatic acquisition of appearing items.
 - Automatic acquisition of initially visible items on first room entry, with names shown in the command result.
@@ -380,7 +376,7 @@ mvn clean package
 java -jar target/escape-room-adventure.jar
 ```
 
-Choose **Abandoned Laboratory** in the story picker and click **Start story**. Open the intake desk drawer to find the first access card and the session's four-digit intercom code. Later rooms use items retained from earlier rooms.
+Choose **Abandoned Laboratory** in the story picker and click **Start story**. Select an object in the Staff Lounge, try an action, and use **Back to room** to investigate another object. Later rooms use items retained from earlier rooms.
 
 The bundled story is in `src/main/resources/stories/laboratory.json`. Each `${key}` in story text refers to a named randomization rule. A new game draws each rule once. The JSON adapter also accepts a story directory through its path constructor. The validator checks item ownership, room order, and reachable combinations of items and object states before publishing a session.
 

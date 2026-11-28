@@ -34,22 +34,39 @@ class Package1Test {
         assertNotSame(first.currentRoom(), other.currentRoom());
         String code = first.generatedValues().get("code");
         assertTrue(code.matches("[0-9]{4}"));
-        List<String> answers = List.of(code, "MOTH", "42", "EAST", "DAWN");
-        for (int i = 0; i < answers.size(); i++) {
-            Room room = first.currentRoom();
-            Interactable obj = room.interactables().get(0);
-            Action action = obj.actions().get(0);
-            DomainResult result = first.interact(obj.id(), action.id(), action.requiredItemId());
-            assertTrue(result.changed(), result.resultText());
-            if (i == 0) assertTrue(result.resultText().contains(code));
-            assertTrue(first.submitAnswer(room.exitChallenge().id(), answers.get(i)).changed());
-            assertTrue(first.useItems(room.doorLock().id()).changed());
-            assertTrue(first.move().changed());
-        }
+        assertEquals(3, template.rooms.size());
+        assertEquals("lounge", first.currentRoom().id());
+        assertTrue(first.interact("window", "open", Optional.empty()).resultText().contains("painted shut"));
+        assertTrue(first.interact("sofa", "search", Optional.empty()).resultText().contains("laundry tag"));
+        assertTrue(first.interact("sofa", "lift-dark", Optional.empty()).resultText().contains("too dark"));
+        assertEquals(1, first.inventoryItems().size());
+        assertFalse(first.useItems("lounge-door").changed());
+        assertTrue(first.interact("lamp", "switch-on", Optional.empty()).changed());
+        assertTrue(first.interact("sofa", "lift-lit", Optional.empty()).resultText().contains(code));
+        assertFalse(first.interact("sofa", "lift-empty", Optional.empty()).changed());
+        leaveRoom(first, code);
+
+        assertEquals("records", first.currentRoom().id());
+        assertTrue(first.interact("cabinet", "unlock", Optional.of("key")).changed());
+        assertTrue(first.interact("map", "flatten", Optional.empty()).resultText().contains("EAST"));
+        leaveRoom(first, "EAST");
+
+        assertEquals("platform", first.currentRoom().id());
+        assertFalse(first.interact("press", "push-empty", Optional.empty()).changed());
+        assertTrue(first.interact("press", "insert", Optional.of("card")).changed());
+        assertTrue(first.interact("press", "stamp", Optional.empty()).resultText().contains("DAWN"));
+        leaveRoom(first, "DAWN");
         assertEquals(GameStatus.ESCAPED, first.status());
-        assertEquals("intake", other.currentRoom().id());
+        assertEquals("lounge", other.currentRoom().id());
         assertEquals(1, other.inventoryItems().size());
-        assertFalse(other.currentRoom().interactables().get(0).isActionCompleted("inspect"));
+        assertTrue(other.interact("sofa", "lift-dark", Optional.empty()).resultText().contains("too dark"));
+    }
+
+    private static void leaveRoom(Game game, String answer) {
+        Room room = game.currentRoom();
+        assertTrue(game.submitAnswer(room.exitChallenge().id(), answer).changed());
+        assertTrue(game.useItems(room.doorLock().id()).changed());
+        assertTrue(game.move().changed());
     }
 
     @ParameterizedTest
@@ -61,16 +78,16 @@ class Package1Test {
         ObjectNode room = (ObjectNode) story.at("/rooms/0");
         ObjectNode action = (ObjectNode) room.at("/interactables/0/actions/0");
         switch (defect) {
-            case "cycle": room.put("nextRoomId", "intake"); break;
+            case "cycle": room.put("nextRoomId", "lounge"); break;
             case "short chain": room.putNull("nextRoomId"); break;
             case "unknown room": room.put("nextRoomId", "missing"); break;
-            case "duplicate": ((ObjectNode) story.at("/items/0")).put("id", "desk"); break;
+            case "duplicate": ((ObjectNode) story.at("/items/0")).put("id", "sofa"); break;
             case "bad effect": ((ObjectNode) action.at("/effects/0")).put("key", "broken"); break;
-            case "foreign item": action.putArray("appearingItemIds").add("fuse"); break;
+            case "foreign item": action.putArray("appearingItemIds").add("card"); break;
             case "missing items": ((ObjectNode) room.get("doorLock")).putArray("requiredItemIds"); break;
-            case "future tool": action.put("requiredItemId", "fuse"); break;
-            case "self prerequisite": action.put("requiredItemId", "card"); break;
-            case "future door": ((ObjectNode) room.get("doorLock")).putArray("requiredItemIds").add("fuse"); break;
+            case "future tool": action.put("requiredItemId", "card"); break;
+            case "self prerequisite": action.put("requiredItemId", "key"); break;
+            case "future door": ((ObjectNode) room.get("doorLock")).putArray("requiredItemIds").add("card"); break;
             case "bad clue": action.put("resultText", "${missing}"); break;
             case "bad trivia": ((ObjectNode) room.at("/exitChallenge/spec")).put("source", "API"); break;
             default: fail(defect);
@@ -95,13 +112,28 @@ class Package1Test {
                 return null;
             });
             await(() -> ((JTextArea) named(app.view(), "narrative")).getText().contains("Obtained: Visitor wristband."));
-            await(() -> ((JButton) named(app.view(), "action:desk:inspect")).isEnabled());
-            edt(() -> { ((JButton) named(app.view(), "action:desk:inspect")).doClick(0); return null; });
-            await(() -> ((JButton) named(app.view(), "unlock:intake-door")).isEnabled());
+            click(app, "object:sofa");
+            click(app, "action:sofa:lift-dark");
+            await(() -> ((JTextArea) named(app.view(), "narrative")).getText().contains("too dark"));
+            click(app, "backToRoom");
+            click(app, "object:lamp");
+            click(app, "action:lamp:switch-on");
+            click(app, "backToRoom");
+            click(app, "object:sofa");
+            click(app, "action:sofa:lift-lit");
+            await(() -> ((JButton) named(app.view(), "unlock:lounge-door")).isEnabled());
             String narrative = edt(() -> ((JTextArea) named(app.view(), "narrative")).getText());
-            assertTrue(narrative.contains("Obtained: Striped access card."));
+            assertTrue(narrative.contains("Obtained: Brass key."));
             assertFalse(narrative.contains("Obtained: Visitor wristband."));
         }
+    }
+
+    private static void click(AppBuilder app, String id) throws Exception {
+        await(() -> {
+            Component button = named(app.view(), id);
+            return button != null && button.isEnabled();
+        });
+        edt(() -> { ((JButton) named(app.view(), id)).doClick(0); return null; });
     }
 
     private static Component named(Container parent, String name) {

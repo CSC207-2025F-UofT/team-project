@@ -45,6 +45,7 @@ public final class GameView extends JPanel {
     private String selectedChoiceValue;
     private String selectedChoiceFieldValue;
     private GameOutputData renderedData;
+    private String selectedObject;
     private boolean listening;
 
     public GameView(GameController controller, GameViewModel viewModel) {
@@ -112,6 +113,7 @@ public final class GameView extends JPanel {
         String previousAnswer = sameOutput ? answerField.getText() : "";
         Optional<String> previousChoice = sameOutput && answerChoices != null
                 ? Optional.ofNullable((String) answerChoices.getSelectedItem()) : Optional.empty();
+        if (renderedData == null || !renderedData.roomId().equals(data.roomId())) selectedObject = null;
         renderedData = data;
         optionsPanel.removeAll();
         textArea.setText(narrative(data, state.busy()));
@@ -172,6 +174,16 @@ public final class GameView extends JPanel {
 
     private void addActionControls(GameOutputData data, boolean busy, Optional<String> selectedId) {
         boolean active = !busy && !data.escaped();
+        if (data.objectDescriptions().size() > 1) {
+            if (selectedObject == null) {
+                tools = null;
+                data.objectDescriptions().forEach((id, description) ->
+                        optionsPanel.add(row(button(description.lines().findFirst().orElse(id), "object:" + id,
+                                active, () -> selectObject(id)))));
+                return;
+            }
+            optionsPanel.add(row(button("Back to room", "backToRoom", !busy, () -> selectObject(null))));
+        }
         List<ToolChoice> choices = new ArrayList<>();
         choices.add(new ToolChoice(Optional.empty(), "Choose a held tool"));
         for (ItemData item : data.inventory()) {
@@ -190,6 +202,7 @@ public final class GameView extends JPanel {
         optionsPanel.add(row(toolLabel, tools));
         List<JButton> toolActions = new ArrayList<>();
         for (ActionData action : data.actions()) {
+            if (selectedObject != null && !selectedObject.equals(action.objectId())) continue;
             JButton actionButton = button(action.label(), "action:" + action.objectId() + ":" + action.actionId(),
                     active && (!action.requiresItem() || selectedTool().isPresent()),
                     () -> controller.interact(action.objectId(), action.actionId(),
@@ -201,6 +214,11 @@ public final class GameView extends JPanel {
         tools.addActionListener(event -> {
             for (JButton action : toolActions) action.setEnabled(active && selectedTool().isPresent());
         });
+    }
+
+    private void selectObject(String id) {
+        selectedObject = id;
+        render(viewModel.getState());
     }
 
     private Optional<String> selectedTool() {
