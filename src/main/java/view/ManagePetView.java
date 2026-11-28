@@ -3,18 +3,12 @@ package view;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.Image;
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
 import java.util.List;
 import java.util.Locale;
 
-import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.DefaultListModel;
-import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JList;
@@ -182,12 +176,16 @@ public final class ManagePetView extends JPanel {
         photo.setText("");
         photo.setVisible(false);
         if (pet == null) {
+            ListingPhoto.show(photo, "", 245, 130);
             details.setText("No pets are currently available.");
         }
         else {
             details.setText(describe(pet));
             details.setCaretPosition(0);
-            showPhoto(pet.getPhotoPath());
+            photo.setVisible(!pet.getPhotoPath().isBlank());
+            photo.setHorizontalTextPosition(JLabel.CENTER);
+            photo.setVerticalTextPosition(JLabel.BOTTOM);
+            ListingPhoto.show(photo, pet.getPhotoPath(), 245, 130);
         }
     }
 
@@ -202,27 +200,6 @@ public final class ManagePetView extends JPanel {
                 "Vaccinated  " + yesOrNo(pet.isVaccinated()),
                 "Spayed/neutered  " + yesOrNo(pet.isSpayedNeutered()),
                 "Adoption fee  $" + pet.getAdoptionFee());
-    }
-
-    private void showPhoto(String photoPath) {
-        if (!photoPath.isBlank()) {
-            photo.setVisible(true);
-            try {
-                final BufferedImage image = ImageIO.read(new File(photoPath));
-                if (image != null) {
-                    final double scale = Math.min(1.0, Math.min(245.0 / image.getWidth(), 150.0 / image.getHeight()));
-                    final int width = Math.max(1, (int) (image.getWidth() * scale));
-                    final int height = Math.max(1, (int) (image.getHeight() * scale));
-                    photo.setIcon(new ImageIcon(image.getScaledInstance(width, height, Image.SCALE_SMOOTH)));
-                }
-                else {
-                    photo.setText("Photo unavailable");
-                }
-            }
-            catch (IOException exception) {
-                photo.setText("Photo unavailable");
-            }
-        }
     }
 
     private static String readable(String value) {

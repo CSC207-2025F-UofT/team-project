@@ -12,11 +12,21 @@ import javax.swing.SwingUtilities;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
+import data_access.InMemoryPetDataAccess;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class ListingPhotoTest {
+    @Test
+    void eachDefaultAvailableCatHasAReadableBundledPhoto() throws Exception {
+        for (var cat : InMemoryPetDataAccess.withSampleData().getAvailablePets()) {
+            assertNotNull(ListingPhoto.read(cat.getPhotoPath()), cat.getName());
+        }
+    }
+
     @Test
     void rendersSavedPhotoAndClearsItForAnEmptyListing(@TempDir Path directory) throws Exception {
         final Path path = directory.resolve("cat.png");
