@@ -22,6 +22,7 @@ public final class Pet {
     private final boolean spayedNeutered;
     private final BigDecimal adoptionFee;
     private final String photoPath;
+    private final ExternalPetListing externalListing;
     private PetStatus status;
 
     /**
@@ -45,6 +46,32 @@ public final class Pet {
     public Pet(String id, String name, Species species, String breed, int ageYears, PetSex sex,
                List<Temperament> temperamentTags, String healthNotes, boolean needsMedication, boolean vaccinated,
                boolean spayedNeutered, BigDecimal adoptionFee, String photoPath, PetStatus status) {
+        this(id, name, species, breed, ageYears, sex, temperamentTags, healthNotes, needsMedication, vaccinated,
+                spayedNeutered, adoptionFee, photoPath, status, null);
+    }
+
+    /**
+     * Creates a profile with source details for a read-only listing.
+     * @param id the stable pet identifier
+     * @param name the pet's name
+     * @param species the kind of animal
+     * @param breed the reported breed
+     * @param ageYears the age in whole years if known
+     * @param sex the shelter's recorded sex
+     * @param temperamentTags the reported traits
+     * @param healthNotes the reported health notes
+     * @param needsMedication whether daily medication was reported
+     * @param vaccinated whether vaccination was reported
+     * @param spayedNeutered whether alteration was reported
+     * @param adoptionFee the adoption fee if known
+     * @param photoPath the local path or external photo URL
+     * @param status the current adoption status
+     * @param externalListing the external source details, or null for local listings
+     */
+    public Pet(String id, String name, Species species, String breed, int ageYears, PetSex sex,
+               List<Temperament> temperamentTags, String healthNotes, boolean needsMedication, boolean vaccinated,
+               boolean spayedNeutered, BigDecimal adoptionFee, String photoPath, PetStatus status,
+               ExternalPetListing externalListing) {
         this.id = requireText(id, "Pet ID");
         this.name = requireText(name, "Name");
         this.breed = requireText(breed, "Breed");
@@ -81,6 +108,7 @@ public final class Pet {
         this.adoptionFee = adoptionFee;
         this.photoPath = photoPath == null || photoPath.isBlank() ? "" : photoPath;
         this.status = status;
+        this.externalListing = externalListing;
     }
 
     private static String requireText(String value, String fieldName) {
@@ -144,6 +172,10 @@ public final class Pet {
 
     public String getPhotoPath() {
         return photoPath;
+    }
+
+    public ExternalPetListing getExternalListing() {
+        return externalListing;
     }
 
     public PetStatus getStatus() {

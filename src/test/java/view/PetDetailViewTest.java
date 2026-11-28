@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -11,6 +12,12 @@ import javax.swing.JButton;
 
 import org.junit.jupiter.api.Test;
 
+import entity.ExternalPetListing;
+import entity.Pet;
+import entity.PetSex;
+import entity.PetStatus;
+import entity.Species;
+import interface_adapter.ExternalListingViewData;
 import interface_adapter.SwitchViewController;
 import interface_adapter.ViewManagerModel;
 import interface_adapter.view_pet_details.PetDetailState;
@@ -22,12 +29,16 @@ class PetDetailViewTest {
             new PetDetailView(viewModel, new SwitchViewController(new ViewManagerModel()), "gallery");
 
     private JButton applyButton() {
+        return buttonStartingWith("Apply");
+    }
+
+    private JButton buttonStartingWith(String label) {
         for (java.awt.Component component : allComponents(view)) {
-            if (component instanceof JButton && ((JButton) component).getText().startsWith("Apply")) {
+            if (component instanceof JButton && ((JButton) component).getText().startsWith(label)) {
                 return (JButton) component;
             }
         }
-        throw new AssertionError("Apply button not found");
+        throw new AssertionError("Button not found: " + label);
     }
 
     private List<java.awt.Component> allComponents(java.awt.Container container) {
@@ -75,5 +86,25 @@ class PetDetailViewTest {
         show("", "", "This cat is no longer available.");
 
         assertFalse(applyButton().isVisible());
+    }
+
+    @Test
+    void externalListingsShowTheRescueActionAndLocalCatsStillUseApply() {
+        view.setApplyHandler((id, name) -> { });
+        final Pet cat = new Pet("rescuegroups:7", "Maple", Species.CAT, "Unknown", 0, PetSex.UNKNOWN,
+                List.of(), "", false, false, false, BigDecimal.ZERO, "", PetStatus.AVAILABLE,
+                new ExternalPetListing("Example Rescue", "https://example.org/", "https://example.org/maple",
+                        "Adult", false));
+        final PetDetailState state = new PetDetailState();
+        state.setPetId(cat.getId());
+        state.setName(cat.getName());
+        state.setExternalListing(new ExternalListingViewData(cat));
+        viewModel.setState(state);
+        viewModel.notifyStateChanged();
+
+        assertTrue(buttonStartingWith("Example Rescue").isVisible());
+        assertTrue(buttonStartingWith("Visit rescue listing").isVisible());
+        show("7", "Miso", "");
+        assertTrue(applyButton().isVisible());
     }
 }

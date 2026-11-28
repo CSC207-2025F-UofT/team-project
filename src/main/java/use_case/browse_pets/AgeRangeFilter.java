@@ -26,6 +26,7 @@ public class AgeRangeFilter implements PetFilter {
 
     @Override
     public boolean matches(Pet pet) {
-        return pet.getAgeYears() >= minYears && pet.getAgeYears() <= maxYears;
+        return (pet.getExternalListing() == null || pet.getExternalListing().hasKnownAge())
+                && pet.getAgeYears() >= minYears && pet.getAgeYears() <= maxYears;
     }
 }

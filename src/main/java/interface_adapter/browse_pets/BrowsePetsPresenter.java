@@ -5,6 +5,7 @@ import java.util.stream.Collectors;
 
 import entity.Pet;
 import entity.PetStatus;
+import interface_adapter.ExternalListingViewData;
 import use_case.browse_pets.BrowsePetsOutputBoundary;
 import use_case.browse_pets.BrowsePetsOutputData;
 
@@ -35,9 +36,17 @@ public class BrowsePetsPresenter implements BrowsePetsOutputBoundary {
     }
 
     private PetCardData toCard(Pet pet) {
-        final String age = pet.getAgeYears() == 1 ? "1 year old" : pet.getAgeYears() + " years old";
+        final String age;
+        final ExternalListingViewData externalListing;
+        if (pet.getExternalListing() == null) {
+            age = pet.getAgeYears() == 1 ? "1 year old" : pet.getAgeYears() + " years old";
+            externalListing = null;
+        } else {
+            age = pet.getExternalListing().getAgeLabel();
+            externalListing = new ExternalListingViewData(pet);
+        }
         final String summary = capitalize(pet.getSpecies().name()) + ", " + pet.getBreed() + ", " + age;
-        return new PetCardData(pet.getId(), pet.getName(), summary, statusText(pet.getStatus()));
+        return new PetCardData(pet.getId(), pet.getName(), summary, statusText(pet.getStatus()), externalListing);
     }
 
     private String statusText(PetStatus status) {

@@ -1,5 +1,7 @@
 package interface_adapter.browse_pets;
 
+import interface_adapter.ExternalListingViewData;
+
 /**
  * Text for one pet card, already formatted for display.
  */
@@ -8,6 +10,7 @@ public class PetCardData {
     private final String name;
     private final String summary;
     private final String status;
+    private final ExternalListingViewData externalListing;
 
     /**
      * Creates the card text.
@@ -18,10 +21,24 @@ public class PetCardData {
      * @param status the adoption status written out in words
      */
     public PetCardData(String petId, String name, String summary, String status) {
+        this(petId, name, summary, status, null);
+    }
+
+    /**
+     * Creates card text with attribution for an external listing.
+     * @param petId the pet's id
+     * @param name the pet's name
+     * @param summary a short description
+     * @param status the adoption status
+     * @param externalListing the organization and its links
+     */
+    public PetCardData(String petId, String name, String summary, String status,
+                       ExternalListingViewData externalListing) {
         this.petId = petId;
         this.name = name;
         this.summary = summary;
         this.status = status;
+        this.externalListing = externalListing;
     }
 
     /**
@@ -58,5 +75,9 @@ public class PetCardData {
      */
     public String getStatus() {
         return status;
+    }
+
+    public ExternalListingViewData getExternalListing() {
+        return externalListing;
     }
 }
