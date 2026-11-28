@@ -1,0 +1,87 @@
+package entity;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.time.LocalDate;
+
+import org.junit.jupiter.api.Test;
+
+class ApplicationTest {
+
+    private Application newApplication() {
+        return new Application("a1", "adopter1", "pet1", "House", "Had two cats", "2 adults",
+                "me@example.com", "", LocalDate.of(2026, 11, 16));
+    }
+
+    @Test
+    void newApplicationIsPendingAndActive() {
+        final Application application = newApplication();
+        assertEquals(ApplicationStatus.PENDING, application.getStatus());
+        assertTrue(application.isActive());
+    }
+
+    @Test
+    void missingRequiredFieldIsRejected() {
+        assertThrows(IllegalArgumentException.class, () -> {
+            new Application("a1", "adopter1", "pet1", " ",
+                "Had two cats", "2 adults", "me@example.com", "", LocalDate.of(2026, 11, 16));
+        });
+    }
+
+    @Test
+    void idsAreKeptExactlyAsGiven() {
+        final Application application = new Application(" a1 ", "bob ", " pet1", "House", "Had two cats",
+                "2 adults", "me@example.com", "", LocalDate.of(2026, 11, 16));
+        assertEquals(" a1 ", application.getId());
+        assertEquals("bob ", application.getAdopterId());
+        assertEquals(" pet1", application.getPetId());
+    }
+
+    @Test
+    void withdrawOnlyWhilePending() {
+        final Application application = newApplication();
+        application.withdraw();
+        assertEquals(ApplicationStatus.WITHDRAWN, application.getStatus());
+        assertFalse(application.isActive());
+        assertThrows(IllegalStateException.class, application::withdraw);
+    }
+
+    @Test
+    void missingDateOrStatusIsRejected() {
+        assertThrows(IllegalArgumentException.class, () -> new Application("a1", "adopter1", "pet1", "House",
+                "Had two cats", "2 adults", "me@example.com", "", null));
+        assertThrows(IllegalArgumentException.class, () -> new Application("a1", "adopter1", "pet1", "House",
+                "Had two cats", "2 adults", "me@example.com", "", LocalDate.of(2026, 11, 16), null, ""));
+    }
+
+    @Test
+    void updateStatusRequiresAStatus() {
+        final Application application = newApplication();
+
+        assertThrows(IllegalArgumentException.class, () -> application.updateStatus(null, "note"));
+        assertEquals(ApplicationStatus.PENDING, application.getStatus());
+    }
+
+    @Test
+    void updateStatusRecordsNote() {
+        final Application application = newApplication();
+        application.updateStatus(ApplicationStatus.INTERVIEW, "Call us on Friday");
+        assertTrue(application.isActive());
+        assertEquals("Call us on Friday", application.getAdminNote());
+        application.updateStatus(ApplicationStatus.REJECTED, null);
+        assertFalse(application.isActive());
+        assertEquals("", application.getAdminNote());
+    }
+
+    @Test
+    void changingCopyDoesNotChangeOriginal() {
+        final Application application = newApplication();
+        final Application copy = application.copy();
+        copy.withdraw();
+        assertEquals(application.getId(), copy.getId());
+        assertEquals(ApplicationStatus.PENDING, application.getStatus());
+    }
+}

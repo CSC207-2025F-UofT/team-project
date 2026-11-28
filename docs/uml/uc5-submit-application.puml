@@ -1,0 +1,111 @@
+@startuml uc5-submit-application
+title UC5 Submit an Application: Clean Architecture classes
+
+skinparam classAttributeIconSize 0
+skinparam packageStyle rectangle
+skinparam linetype ortho
+skinparam nodesep 40
+skinparam ranksep 50
+hide empty members
+
+package "Interface Adapters" as IA #DDEBFF {
+  class SubmitApplicationController {
+    + execute(adopterId, petId, housingType,\n  petExperience, householdMembers,\n  contactInfo, note) : void
+  }
+  class SubmitApplicationPresenter {
+    + prepareSuccessView(outputData) : void
+    + prepareFailView(errorMessage) : void
+  }
+  class SubmitApplicationViewModel {
+    + getState() : SubmitApplicationState
+    + notifyStateChanged() : void
+  }
+  class SubmitApplicationState {
+    adopterId, petId, petName,
+    error, successMessage
+  }
+}
+
+package "Application Business Rules" as ABR #FDE2E2 {
+  class SubmitApplicationInputData {
+    adopterId, petId, housingType,
+    petExperience, householdMembers,
+    contactInfo, note
+  }
+  interface SubmitApplicationInputBoundary {
+    + execute(inputData) : void
+  }
+  interface SubmitApplicationOutputBoundary {
+    + prepareSuccessView(outputData) : void
+    + prepareFailView(errorMessage) : void
+  }
+  class SubmitApplicationOutputData {
+    applicationId, petName
+  }
+  class SubmitApplicationInteractor {
+    + execute(inputData) : void
+  }
+  interface SubmitApplicationDataAccessInterface {
+    + hasActiveApplication(adopterId, petId) : boolean
+    + save(application) : void
+  }
+  interface SubmitApplicationPetDataAccessInterface {
+    + isAvailable(petId) : boolean
+    + getPetName(petId) : String
+  }
+}
+
+package "Enterprise Business Rules" as EBR #FFF4D6 {
+  class Application {
+    + isActive() : boolean
+  }
+}
+
+package "Frameworks & Drivers: View" as FDV #E2F4E2 {
+  class SubmitApplicationView {
+    + stateChanged() : void
+  }
+}
+
+package "Frameworks & Drivers: Data Access" as FDD #E2F4E2 {
+  class FileApplicationDataAccessObject
+  class FilePetDataAccessObject
+}
+
+' region layout like the CA engine
+IA -[hidden]right- ABR
+ABR -[hidden]right- EBR
+IA -[hidden]down- FDV
+ABR -[hidden]down- FDD
+
+' interface adapters column
+SubmitApplicationController -[hidden]down- SubmitApplicationPresenter
+SubmitApplicationPresenter -down-> SubmitApplicationViewModel : updates
+SubmitApplicationViewModel -right-> SubmitApplicationState
+
+' use case column
+SubmitApplicationInputData -[hidden]down- SubmitApplicationInputBoundary
+SubmitApplicationInputBoundary -[hidden]down- SubmitApplicationOutputBoundary
+SubmitApplicationOutputBoundary -[hidden]down- SubmitApplicationOutputData
+
+SubmitApplicationController -right-> SubmitApplicationInputData : creates
+SubmitApplicationController -right-> SubmitApplicationInputBoundary
+SubmitApplicationPresenter -right-|> SubmitApplicationOutputBoundary
+SubmitApplicationPresenter .right.> SubmitApplicationOutputData : reads
+
+SubmitApplicationInteractor -left-|> SubmitApplicationInputBoundary
+SubmitApplicationInteractor .left.> SubmitApplicationInputData : reads
+SubmitApplicationInteractor -left-> SubmitApplicationOutputBoundary
+SubmitApplicationInteractor .left.> SubmitApplicationOutputData : creates
+SubmitApplicationInteractor -down-> SubmitApplicationDataAccessInterface
+SubmitApplicationInteractor -down-> SubmitApplicationPetDataAccessInterface
+SubmitApplicationInteractor -right-> Application : creates
+
+SubmitApplicationView -up-> SubmitApplicationController : calls
+SubmitApplicationView -up-> SubmitApplicationViewModel : listens
+
+FileApplicationDataAccessObject -up-|> SubmitApplicationDataAccessInterface
+FilePetDataAccessObject -up-|> SubmitApplicationPetDataAccessInterface
+FileApplicationDataAccessObject .up.> Application : saves / loads
+
+@enduml

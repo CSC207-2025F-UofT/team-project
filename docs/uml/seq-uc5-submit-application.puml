@@ -1,0 +1,47 @@
+@startuml seq-uc5-submit-application
+title UC5 Submit an Application: sequence (success path)
+
+skinparam sequenceMessageAlign left
+autonumber
+
+actor Adopter
+participant "ApplicationNavigator" as Nav
+participant "SubmitApplicationView" as View
+participant "SubmitApplicationController" as Controller
+participant "SubmitApplicationInteractor\n<<SubmitApplicationInputBoundary>>" as Interactor
+participant "FilePetDataAccessObject\n<<SubmitApplicationPetDataAccessInterface>>" as PetDAO
+participant "FileApplicationDataAccessObject\n<<SubmitApplicationDataAccessInterface>>" as AppDAO
+participant "Application" as App
+participant "SubmitApplicationPresenter\n<<SubmitApplicationOutputBoundary>>" as Presenter
+participant "SubmitApplicationViewModel" as VM
+
+Adopter -> Nav : chooses to apply for a pet\n(after logging in)
+Nav -> VM : set adopter, pet id and pet name
+Nav -> View : open the application form\n(through ViewManagerModel)
+Adopter -> View : fills in the form, submits
+View -> Controller : execute(adopterId, petId, housingType,\npetExperience, householdMembers, contactInfo, note)
+Controller -> Interactor : execute(new SubmitApplicationInputData(...))
+
+Interactor -> PetDAO : isAvailable(petId)
+PetDAO --> Interactor : true
+Interactor -> AppDAO : hasActiveApplication(adopterId, petId)
+AppDAO --> Interactor : false
+Interactor -> PetDAO : getPetName(petId)
+PetDAO --> Interactor : "Mochi"
+create App
+Interactor -> App : new Application(..., status = PENDING)
+Interactor -> AppDAO : save(application)
+AppDAO -> AppDAO : write applications JSON file
+
+Interactor -> Presenter : prepareSuccessView(\nnew SubmitApplicationOutputData(id, "Mochi"))
+Presenter -> VM : state.setSuccessMessage(...)\nnotifyStateChanged()
+VM -> View : stateChanged()
+View --> Adopter : "Your application for Mochi was submitted."
+
+note over Interactor, Presenter
+  Failure paths call prepareFailView(message) instead:
+  not logged in, pet not available, already applied,
+  missing required field, pet name or save failed.
+end note
+
+@enduml

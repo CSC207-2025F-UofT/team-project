@@ -1,0 +1,43 @@
+@startuml seq-uc2-add-pet
+title UC2 Add a Pet: sequence (success path)
+
+skinparam sequenceMessageAlign left
+autonumber
+
+actor Admin
+participant "PetForm" as Form
+participant "ManagePetView" as View
+participant "ManagePetController" as Controller
+participant "ManagePetInteractor\n<<ManagePetInputBoundary>>" as Interactor
+participant "Pet" as Pet
+participant "FilePetDataAccessObject\n<<ManagePetDataAccessInterface>>" as DAO
+participant "ManagePetPresenter\n<<ManagePetOutputBoundary>>" as Presenter
+participant "ManagePetViewModel" as VM
+
+Admin -> Form : fills in the pet form, clicks Save
+Form -> Controller : add(name, species, breed, ageYears, sex,\ntemperamentTags, healthNotes, ..., adoptionFee, photoPath)
+Controller -> Interactor : add(new ManagePetInputData(...))
+
+Interactor -> Interactor : createPet(...): parse species, sex,\nage, fee and temperament tags
+create Pet
+Interactor -> Pet : new Pet(..., status = AVAILABLE)
+Interactor -> DAO : add(pet)
+DAO -> DAO : write pets JSON file
+
+Interactor -> DAO : getPets()
+DAO --> Interactor : List<Pet>
+Interactor -> Presenter : prepareSuccessView(\nnew ManagePetOutputData(pets, "Added Miso."))
+Presenter -> VM : showListings(listings, availablePets, message)
+VM -> View : property change "listings"
+View -> View : update(): refresh both lists and message
+Form -> VM : hasError()
+VM --> Form : false
+Form --> Admin : closes the form
+
+note over Interactor, VM
+  Invalid input: the interactor calls prepareFailView(message),
+  the view model fires "error", and the form stays open
+  showing the message.
+end note
+
+@enduml

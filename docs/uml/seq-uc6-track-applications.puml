@@ -1,0 +1,49 @@
+@startuml seq-uc6-track-applications
+title UC6 Track My Applications: sequence (success path)
+
+skinparam sequenceMessageAlign left
+autonumber
+
+actor Adopter
+participant "Menu\n(AppBuilder)" as Menu
+participant "ApplicationNavigator" as Nav
+participant "MyApplicationsView" as View
+participant "TrackApplicationsController" as Controller
+participant "TrackApplicationsInteractor\n<<TrackApplicationsInputBoundary>>" as Interactor
+participant "FileApplicationDataAccessObject\n<<TrackApplicationsDataAccessInterface>>" as AppDAO
+participant "FilePetDataAccessObject\n<<TrackApplicationsPetDataAccessInterface>>" as PetDAO
+participant "TrackApplicationsPresenter\n<<TrackApplicationsOutputBoundary>>" as Presenter
+participant "TrackApplicationsViewModel" as VM
+
+Adopter -> Menu : Go to > My Applications
+Menu -> Nav : showMyApplications()
+Nav -> View : show the screen\n(through ViewManagerModel)
+View -> View : screen shown: refresh()
+View -> Controller : execute(adopterId)
+Controller -> Interactor : execute(new TrackApplicationsInputData(adopterId))
+
+Interactor -> AppDAO : getApplicationsByAdopter(adopterId)
+AppDAO --> Interactor : List<Application>
+loop for each application
+  Interactor -> PetDAO : getPetName(petId)
+  PetDAO --> Interactor : pet name\n(or "(pet no longer listed)" if it fails)
+  Interactor -> Interactor : new ApplicationSummary(id, petName,\nsubmittedAt, status, adminNote)
+end
+
+Interactor -> Presenter : prepareSuccessView(\nnew TrackApplicationsOutputData(summaries))
+loop for each summary
+  Presenter -> Presenter : new ApplicationRow(petName, date,\nstatus, note or "(no note from the shelter yet)")
+end
+Presenter -> VM : state.setRows(rows), state.setMessage(...)\nnotifyStateChanged()
+VM -> View : stateChanged()
+View --> Adopter : table with pet, date submitted and status
+
+Adopter -> View : selects a row
+View --> Adopter : shows the shelter's note\n(read from the view model, no use case call)
+
+note over Interactor, Presenter
+  Not logged in or the applications cannot be loaded:
+  the interactor calls prepareFailView(message).
+end note
+
+@enduml

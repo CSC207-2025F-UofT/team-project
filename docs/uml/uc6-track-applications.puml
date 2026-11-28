@@ -1,0 +1,120 @@
+@startuml uc6-track-applications
+title UC6 Track My Applications: Clean Architecture classes
+
+skinparam classAttributeIconSize 0
+skinparam packageStyle rectangle
+skinparam linetype ortho
+skinparam nodesep 40
+skinparam ranksep 50
+hide empty members
+
+package "Interface Adapters" as IA #DDEBFF {
+  class TrackApplicationsController {
+    + execute(adopterId) : void
+  }
+  class TrackApplicationsPresenter {
+    + prepareSuccessView(outputData) : void
+    + prepareFailView(errorMessage) : void
+  }
+  class TrackApplicationsViewModel {
+    + getState() : TrackApplicationsState
+    + notifyStateChanged() : void
+  }
+  class TrackApplicationsState {
+    adopterId, message,
+    rows : List<ApplicationRow>
+  }
+  class ApplicationRow {
+    petName, submittedAt,
+    status, adminNote
+  }
+  class ApplicationNavigator {
+    + setAdopter(adopterId) : void
+    + showMyApplications() : void
+  }
+}
+
+package "Application Business Rules" as ABR #FDE2E2 {
+  class TrackApplicationsInputData {
+    adopterId
+  }
+  interface TrackApplicationsInputBoundary {
+    + execute(inputData) : void
+  }
+  interface TrackApplicationsOutputBoundary {
+    + prepareSuccessView(outputData) : void
+    + prepareFailView(errorMessage) : void
+  }
+  class TrackApplicationsOutputData {
+    applications : List<ApplicationSummary>
+  }
+  class ApplicationSummary {
+    applicationId, petName,
+    submittedAt, status, adminNote
+  }
+  class TrackApplicationsInteractor {
+    + execute(inputData) : void
+  }
+  interface TrackApplicationsDataAccessInterface {
+    + getApplicationsByAdopter(adopterId) : List<Application>
+  }
+  interface TrackApplicationsPetDataAccessInterface {
+    + getPetName(petId) : String
+  }
+}
+
+package "Enterprise Business Rules" as EBR #FFF4D6 {
+  class Application
+}
+
+package "Frameworks & Drivers: View" as FDV #E2F4E2 {
+  class MyApplicationsView {
+    + refresh() : void
+    + stateChanged() : void
+  }
+}
+
+package "Frameworks & Drivers: Data Access" as FDD #E2F4E2 {
+  class FileApplicationDataAccessObject
+  class FilePetDataAccessObject
+}
+
+IA -[hidden]right- ABR
+ABR -[hidden]right- EBR
+IA -[hidden]down- FDV
+ABR -[hidden]down- FDD
+
+TrackApplicationsController -[hidden]down- TrackApplicationsPresenter
+TrackApplicationsPresenter -down-> TrackApplicationsViewModel : updates
+TrackApplicationsViewModel -right-> TrackApplicationsState
+TrackApplicationsState -down-> "0..*" ApplicationRow
+TrackApplicationsPresenter .right.> ApplicationRow : creates
+ApplicationNavigator -[hidden]down- TrackApplicationsController
+ApplicationNavigator .down.> TrackApplicationsViewModel : sets adopter
+
+TrackApplicationsInputData -[hidden]down- TrackApplicationsInputBoundary
+TrackApplicationsInputBoundary -[hidden]down- TrackApplicationsOutputBoundary
+TrackApplicationsOutputBoundary -[hidden]down- TrackApplicationsOutputData
+
+TrackApplicationsController -right-> TrackApplicationsInputData : creates
+TrackApplicationsController -right-> TrackApplicationsInputBoundary
+TrackApplicationsPresenter -right-|> TrackApplicationsOutputBoundary
+TrackApplicationsPresenter .right.> TrackApplicationsOutputData : reads
+
+TrackApplicationsInteractor -left-|> TrackApplicationsInputBoundary
+TrackApplicationsInteractor .left.> TrackApplicationsInputData : reads
+TrackApplicationsInteractor -left-> TrackApplicationsOutputBoundary
+TrackApplicationsInteractor .left.> TrackApplicationsOutputData : creates
+TrackApplicationsOutputData -down-> "0..*" ApplicationSummary
+TrackApplicationsInteractor -down-> TrackApplicationsDataAccessInterface
+TrackApplicationsInteractor -down-> TrackApplicationsPetDataAccessInterface
+TrackApplicationsInteractor .right.> Application : reads
+
+MyApplicationsView -up-> TrackApplicationsController : calls
+MyApplicationsView -up-> TrackApplicationsViewModel : listens
+
+FileApplicationDataAccessObject -up-|> TrackApplicationsDataAccessInterface
+FilePetDataAccessObject -up-|> TrackApplicationsPetDataAccessInterface
+FileApplicationDataAccessObject .up.> Application : saves / loads
+
+@enduml

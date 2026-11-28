@@ -1,0 +1,35 @@
+@startuml architecture
+title PawPortal: Clean Architecture layers (packages on main)
+
+skinparam rectangle {
+  RoundCorner 8
+}
+skinparam defaultTextAlignment left
+
+rectangle "**view**  //(Frameworks & Drivers)//\nViewManager\nLoginView, SignupView, AdminSignupView\nGalleryView\nManagePetView, PetForm\nSubmitApplicationView\nMyApplicationsView" as view #E2F4E2
+rectangle "**app**  //(Frameworks & Drivers)//\nMain\nAppBuilder" as app #E2F4E2
+rectangle "**data_access**  //(Frameworks & Drivers)//\nFileUserDataAccessObject\nFilePetDataAccessObject\nInMemoryPetDataAccess\nCatApiBreedDataAccess (TheCatAPI)\nFileApplicationDataAccessObject\nInMemoryApplicationDataAccessObject" as da #E2F4E2
+
+rectangle "**interface_adapter**  //(Interface Adapters)//\nViewManagerModel, ApplicationNavigator\nsignup, admin_signup, login\nbrowse_pets\nmanage_pet\nsubmit_application\ntrack_applications\n(controllers, presenters, view models)" as ia #DDEBFF
+
+rectangle "**use_case**  //(Application Business Rules)//\nsignup, admin_signup, login\nmanage_pet (including breed lookup)\nbrowse_pets (including filters)\ncheck_compatibility (rules)\nsubmit_application\ntrack_applications\n(boundaries, input/output data, interactors,\ndata access interfaces)" as uc #FDE2E2
+
+rectangle "**entity**  //(Enterprise Business Rules)//\nUser, UserFactory, AdopterPreferences\nPet, Species, PetSex, PetStatus, Temperament\nApplication, ApplicationStatus" as ent #FFF4D6
+
+app -right-> view : creates
+app -left-> da : creates
+view -down-> ia : calls controllers,\nlistens to view models
+ia -down-> uc : calls input boundaries,\nimplements output boundaries
+da -down-> uc : implements data access\ninterfaces
+uc -down-> ent : uses
+da -down-> ent : creates and saves
+ia -[#red,dashed]-> ent : BrowsePetsPresenter, BrowsePetsController,\nManagePetViewModel, LoginPresenter use entities
+view -[#red,dashed]-> ent : GalleryView uses Temperament
+
+note right of ia
+  All arrows point inwards (towards entity).
+  The red arrows skip the use case layer:
+  fix them or explain them in the presentation.
+end note
+
+@enduml
